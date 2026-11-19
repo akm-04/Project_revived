@@ -24,6 +24,7 @@ import (
 	d "gxb.local/backend/v2/internal/domain/petcampaign"
 	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 	"sync"
 	"testing"
 	"time"
@@ -371,6 +372,7 @@ func TestI9_5CEliteAndPetMaterialOrigins(t *testing.T) {
 		t.Fatal(e)
 	}
 	requireFloorArrays(t, result["info"].(map[string]any)["super"].(map[string]any), "buy_info", "sweep_info")
+	replyconformance.Check(t, 820, result)
 	for i := 0; i < 3; i++ {
 		call := op()
 		sweepOut, e := s.EliteSweep(ctx, a, 230001, call)
@@ -378,6 +380,7 @@ func TestI9_5CEliteAndPetMaterialOrigins(t *testing.T) {
 			t.Fatal("raid", i, e)
 		}
 		requireFloorArrays(t, sweepOut, "sweep_info")
+		replyconformance.Check(t, 824, sweepOut)
 		if _, e := s.EliteSweep(ctx, a, 230001, call); e != nil {
 			t.Fatal("exact elite retry", e)
 		}
@@ -391,6 +394,7 @@ func TestI9_5CEliteAndPetMaterialOrigins(t *testing.T) {
 		t.Fatal("buy3", e)
 	}
 	requireFloorArrays(t, buyOut, "buy_info", "sweep_info")
+	replyconformance.Check(t, 825, buyOut)
 	if _, e := s.BuyElite(ctx, a, 1, buy); e != nil {
 		t.Fatal("exact buy retry", e)
 	}
@@ -405,6 +409,7 @@ func TestI9_5CEliteAndPetMaterialOrigins(t *testing.T) {
 		t.Fatal(reloaded, e)
 	}
 	requireFloorArrays(t, reloaded["super"].(map[string]any), "buy_info", "sweep_info")
+	replyconformance.Check(t, 816, reloaded)
 
 	// Stage1 equipment is an explicit prior-crafting fixture, not a claim that this test earned30 fragments.
 	// The new source producer above earns real fragments; the final challenge below must use real Cloud START/RESULT.

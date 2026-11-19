@@ -216,6 +216,12 @@
    "mid": 117,
    "path": "items[].item_num",
    "reason": "SweepWindow holds items as one row per sweep run and then iterates each row (SweepWindow.lua:661-681); the generator collapses both list levels into items[].item_id, so a nested per-run array cannot satisfy the leaf while items and items[] still hold."
+  },
+  {
+   "client": "app/model/PetCampaign.lua:51",
+   "mid": 816,
+   "path": "super.awards[]",
+   "reason": "onLoadPetCampaign reads and iterates super.awards only inside `if arg_4_1.super.awards then` (PetCampaign.lua:51-59); a Load reply carries no unclaimed elite award, so the guarded list is legitimately absent."
   }
  ]
 }
