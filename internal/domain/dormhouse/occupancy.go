@@ -44,7 +44,11 @@ func (c Catalog) PlanResidents(rooms map[int64]Room, target int64, desired []int
 	}
 	owner := map[int64]int64{}
 	for id, r := range rooms {
-		if r.ID != id || r.ID <= 0 || now.Before(r.UpdatedAt) {
+		observedAt := now
+		if r.UpdatedAt.After(observedAt) {
+			observedAt = r.UpdatedAt
+		}
+		if r.ID != id || r.ID <= 0 || observedAt.Before(r.UpdatedAt) {
 			return out, ErrStaleTime
 		}
 		copy := r

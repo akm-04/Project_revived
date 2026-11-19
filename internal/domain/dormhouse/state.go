@@ -39,7 +39,11 @@ func (f HeroFacts) Validate() error {
 // NewRoom checks the source gallery's six slots per class and the visible floor
 // frontier. Floor/position are scoped to the particular key's room class.
 func (c Catalog) NewRoom(root Root, rooms map[int64]Room, tableID, floor, pos int64, revision string, now time.Time) (Root, Room, error) {
-	if root.Validate() != nil || !ValidRevision(revision) || now.IsZero() || now.Before(root.UpdatedAt) {
+	observedAt := now
+	if root.UpdatedAt.After(observedAt) {
+		observedAt = root.UpdatedAt
+	}
+	if root.Validate() != nil || !ValidRevision(revision) || now.IsZero() || observedAt.Before(root.UpdatedAt) {
 		return Root{}, Room{}, ErrInvalidFacts
 	}
 	rule, ok := c.Rooms[tableID]
@@ -77,6 +81,6 @@ func (c Catalog) NewRoom(root Root, rooms map[int64]Room, tableID, floor, pos in
 	}
 	root.NextHouseID++
 	root.StateVersion++
-	root.UpdatedAt = now.UTC()
+	root.UpdatedAt = observedAt.UTC()
 	return root, room, nil
 }
