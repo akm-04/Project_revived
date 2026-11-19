@@ -506,6 +506,24 @@ func TestValidGuildNameUsesStockWeightedLength(t *testing.T) {
 	}
 }
 
+func TestValidBulletinUsesStockWeightedLength(t *testing.T) {
+	st := newMemStore()
+	svc, _ := serviceFixture(t, st, levelPort{level: 50}, &combinedPort{level: 50})
+	for _, test := range []struct {
+		name  string
+		valid bool
+	}{
+		{name: strings.Repeat("a", 80), valid: true},
+		{name: strings.Repeat("a", 81)},
+		{name: strings.Repeat("界", 40), valid: true},
+		{name: strings.Repeat("界", 41)},
+	} {
+		if got := svc.Policy.Policy.ValidBulletin(test.name); got != test.valid {
+			t.Errorf("ValidBulletin(%q)=%v want %v", test.name, got, test.valid)
+		}
+	}
+}
+
 func TestCreateAndRenameRejectGuildNamesOverStockLength(t *testing.T) {
 	st := newMemStore()
 	actor := actorFixture(t, 100001)
