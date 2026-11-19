@@ -2,6 +2,7 @@ package illusion
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -15,7 +16,6 @@ import (
 	"gxb.local/backend/v2/internal/domain/logicalserver"
 	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/domain/objective"
-	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -285,10 +285,10 @@ func (s Mode) personalPlace(c context.Context, q tx.Queryer, occurrence d.Occurr
 	return hurt, rank, nil
 }
 
-// MemberTeam answers 1364 with the member's frozen formation and current roster
-// rows, which the stock rank window populates as heroes. The target must belong
-// to the actor's logical server, and the formation is the attempt of the current
-// ranked occurrence.
+// MemberTeam answers 1364 with the member's frozen formation and the heroes and
+// pet frozen in that attempt's combat snapshot, which the stock rank window
+// populates as cards. The target must belong to the actor's logical server, and
+// the formation is the attempt of the current ranked occurrence.
 func (s Mode) MemberTeam(c context.Context, a identity.ActorContext, memberID identity.PlayerID, _ operation.Context) (map[string]any, error) {
 	if !s.ready() {
 		return nil, d.ErrUnavailable
@@ -329,27 +329,16 @@ func (s Mode) MemberTeam(c context.Context, a identity.ActorContext, memberID id
 	if len(formation) == 0 {
 		return out, nil
 	}
-	detail := map[string]any{}
-	if err = s.Heroes.OverlayMID1(c, s.Fresh, identity.ActorContext{PlayerID: memberID}, false, at, detail); err != nil {
-		return nil, err
+	snapshot, err := s.Combat.SnapshotTx(c, s.Fresh, current.Attempt.ID)
+	if err != nil {
+		return out, nil
 	}
-	body, _ := detail["49"].(map[string]any)
-	roster, _ := body["heros"].(map[string]any)
-	heroes := make([]map[string]any, 0, len(formation))
-	for _, id := range formation {
-		row, owned := roster[fmt.Sprint(id)].(map[string]any)
-		if !owned {
-			continue
-		}
-		heroes = append(heroes, row)
+	heroes, pet := frozenMemberTeam(snapshot, memberID, formation)
+	out["heros"] = heroes
+	for _, row := range heroes {
 		if shelf, ok := numeric(row["book_shelf_lev"]); ok && shelf > 0 {
 			out["book_shelf_lev"] = shelf
 		}
-	}
-	out["heros"] = heroes
-	pet, err := s.frozenPet(c, current.Attempt.ID, memberID, at)
-	if err != nil {
-		return nil, err
 	}
 	if pet != nil {
 		out["pet"] = pet
@@ -357,29 +346,33 @@ func (s Mode) MemberTeam(c context.Context, a identity.ActorContext, memberID id
 	return out, nil
 }
 
-// frozenPet re-projects the pet the attempt froze into its combat snapshot.
-// shortcut: an unreadable snapshot omits the pet; the rank detail still renders.
-func (s Mode) frozenPet(c context.Context, attemptID ids.UUID, memberID identity.PlayerID, at time.Time) (map[string]any, error) {
-	if s.Pets == nil {
-		return nil, nil
-	}
-	snapshot, err := s.Combat.SnapshotTx(c, s.Fresh, attemptID)
-	if err != nil {
-		return nil, nil
-	}
-	petID := int64(0)
-	for _, actor := range snapshot.Battle.PetsA {
-		if int64(memberID) == actor.Player && actor.Kind == cd.PetActor && actor.Origin == cd.OwnedSelf {
-			petID = actor.Identity
+// frozenMemberTeam projects the attempt's own hero and pet rows from the frozen
+// combat snapshot; live roster rows never reach the rank detail (C11).
+// shortcut: an unreadable frozen row is omitted, and an unreadable snapshot
+// omits the whole team, so the rank popup still renders.
+func frozenMemberTeam(snapshot cd.Snapshot, memberID identity.PlayerID, formation []int64) ([]map[string]any, map[string]any) {
+	heroes := make([]map[string]any, 0, len(formation))
+	for _, formationID := range formation {
+		for _, actor := range snapshot.Battle.TeamA {
+			if actor.Kind != cd.HeroActor || actor.Origin != cd.OwnedSelf || actor.Player != int64(memberID) || actor.Identity != formationID {
+				continue
+			}
+			row := map[string]any{}
+			if json.Unmarshal(actor.Params, &row) != nil {
+				continue
+			}
+			heroes = append(heroes, row)
 			break
 		}
 	}
-	if petID <= 0 {
-		return nil, nil
+	for _, actor := range snapshot.Battle.PetsA {
+		if actor.Kind != cd.PetActor || actor.Origin != cd.OwnedSelf || actor.Player != int64(memberID) {
+			continue
+		}
+		row := map[string]any{}
+		if json.Unmarshal(actor.Params, &row) == nil {
+			return heroes, row
+		}
 	}
-	pets, err := s.petRows(c, s.Fresh, memberID, at)
-	if err != nil {
-		return nil, err
-	}
-	return pets[fmt.Sprint(petID)], nil
+	return heroes, nil
 }
