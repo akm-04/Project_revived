@@ -1643,6 +1643,12 @@
    "adventure": [
     "*ObserveBattleTx"
    ],
+   "arena": [
+    "*ObserveBattleTx"
+   ],
+   "championsleague": [
+    "*ObserveBattleTx"
+   ],
    "combat": [
     "*PlayerCollectionInputsTx"
    ],
@@ -1655,6 +1661,9 @@
    "occult": [
     "*ObserveBattleTx"
    ],
+   "oneonone": [
+    "*ObserveBattleTx"
+   ],
    "playerdisplay": [
     "*TitleProgressTx"
    ],
@@ -1664,6 +1673,9 @@
    "publicstats": [
     "*HeroLibraryInputsTx",
     "*PlayerCollectionInputsTx"
+   ],
+   "topfloor": [
+    "*ObserveBattleTx"
    ],
    "workplace": [
     "*ObserveBattleTx"
@@ -2496,6 +2508,9 @@
    "interface:arena.Roster": [
     "*OverlayMID1"
    ],
+   "librarylocal": [
+    "*ObserveBattleTx"
+   ],
    "playerroot": [
     "CanonicalPlayerIDs",
     "Validate"
@@ -2733,6 +2748,9 @@
    ],
    "interface:championsleague.Roster": [
     "*OverlayMID1"
+   ],
+   "librarylocal": [
+    "*ObserveBattleTx"
    ],
    "playerdisplay": [
     "*ReceiveOriginTx",
@@ -5094,6 +5112,9 @@
    "interface:oneonone.Roster": [
     "*OverlayMID1"
    ],
+   "librarylocal": [
+    "*ObserveBattleTx"
+   ],
    "store:contentstore": [
     "*ActiveRevision",
     "*OneOnOneCatalogTx",
@@ -6120,6 +6141,9 @@
    ],
    "interface:topfloor.Roster": [
     "*OverlayMID1"
+   ],
+   "librarylocal": [
+    "*ObserveBattleTx"
    ],
    "playerdisplay": [
     "*ReadEffectivePlayerDisplayTx"

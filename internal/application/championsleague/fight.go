@@ -317,7 +317,17 @@ func (s Service) terminal(c context.Context, id ids.UUID, parent operation.Conte
 		old = root.Version
 		root.Version++
 		root.UpdatedAt = at
-		return s.Store.PutRootTx(c, sc.Tx, root, old)
+		if e = s.Store.PutRootTx(c, sc.Tx, root, old); e != nil {
+			return e
+		}
+		// A void or closed match applies no result; only a real terminal counts.
+		if void {
+			return nil
+		}
+		if e = s.BattleCounts.ObserveBattleTx(c, sc.Tx, m.Attacker, m.Attack.Heroes, at); e != nil {
+			return e
+		}
+		return s.BattleCounts.ObserveBattleTx(c, sc.Tx, m.Defender, m.Defense.Heroes, at)
 	})
 	return e
 }

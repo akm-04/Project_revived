@@ -103,6 +103,12 @@ type Entitlements interface {
 	ReadDisplayEntitlementsTx(context.Context, tx.Queryer, identity.PlayerID, string) ([]appdisplay.Origin, error)
 }
 
+// BattleCounts is the Girls Log producer port (I9_11_GIRLS_LOG_V1 G2): one
+// settled battle raises the player's per-hero battle counts.
+type BattleCounts interface {
+	ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error
+}
+
 type Service struct {
 	Timed        gen.TimedRunner
 	Fresh        tx.Queryer
@@ -122,9 +128,11 @@ type Service struct {
 	Entitlements Entitlements
 	Receipts     receipt.Store
 	ReceiptRead  receipt.Reader
+	BattleCounts BattleCounts
 }
 
 func (s Service) ready() bool {
 	return s.Timed.Runner.DB != nil && s.Timed.Binder.Time != nil && s.Fresh != nil && s.Store != nil && s.Content != nil && s.Fence != nil && s.Privileges != nil && s.Costs != nil &&
-		s.Mail != nil && s.Achievements != nil && s.Facts != nil && s.Combat != nil && s.Heroes != nil && s.Pets != nil && s.Directory != nil && s.Entitlements != nil && s.Receipts != nil && s.ReceiptRead != nil
+		s.Mail != nil && s.Achievements != nil && s.Facts != nil && s.Combat != nil && s.Heroes != nil && s.Pets != nil && s.Directory != nil && s.Entitlements != nil && s.Receipts != nil && s.ReceiptRead != nil &&
+		s.BattleCounts != nil
 }

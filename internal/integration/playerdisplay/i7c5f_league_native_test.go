@@ -51,7 +51,7 @@ func leagueService(t *testing.T, p *pg.Pool, clock gen.TimeAuthority) app.Servic
 	content := contentstore.Store{Queryer: p}
 	runner := tx.Runner{DB: p}
 	grants := i5.Service{Runner: runner, Store: values, Content: content, Privileges: i5.BaselinePrivilegeProvider{}, Functions: i5.PetStarterFunctionAnnouncements{}, Directory: i4store.DirectoryLevelProjection{}, Backpack: values, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, RedeemSecret: []byte("i7c5f-league-native-fixture-secret")}
-	return app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: clock}, Runner: runner}, Fresh: p, Store: leaguestore.Store{}, Content: content, Fence: values, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Progression: values, Combat: fight, Grants: grants, Mail: i5.SettlementMail{Store: values}, Achievements: ach.Service{Store: achievementstore.Store{}, Content: content, Population: libraryService(p, p)}, Players: i4store.PlayerRootLocker{}, Recipient: display.Service{Store: values, Content: content}, Entitlements: values, Facts: i5.ObjectiveFacts{Owner: compositeI5(p), Open: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+	return app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: clock}, Runner: runner}, Fresh: p, Store: leaguestore.Store{}, Content: content, Fence: values, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Progression: values, Combat: fight, Grants: grants, Mail: i5.SettlementMail{Store: values}, Achievements: ach.Service{Store: achievementstore.Store{}, Content: content, Population: libraryService(p, p)}, Players: i4store.PlayerRootLocker{}, Recipient: display.Service{Store: values, Content: content}, Entitlements: values, Facts: i5.ObjectiveFacts{Owner: compositeI5(p), Open: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, BattleCounts: libraryService(p, p)}
 }
 func leagueReset(t *testing.T, p *pg.Pool) {
 	t.Helper()
@@ -133,7 +133,7 @@ func leagueScalar(t *testing.T, p *pg.Pool, sql string, args ...any) int64 {
 }
 func TestI7C5FLeagueGenuineFightReplayAndClockNative(t *testing.T) {
 	p := pool(t)
-	s, clock, cat, a, b, ha, _ := leagueActors(t, p)
+	s, clock, cat, a, b, ha, hb := leagueActors(t, p)
 	facts := countPVPFights(s.Facts.(i5.ObjectiveFacts))
 	s.Facts = facts
 	// A projection-only level cannot establish admission.
@@ -184,6 +184,12 @@ func TestI7C5FLeagueGenuineFightReplayAndClockNative(t *testing.T) {
 	}
 	if facts.of(a.PlayerID) != 1 {
 		t.Fatal("a Champion League fight and its replays are one PVP_FIGHT fact", facts.of(a.PlayerID))
+	}
+	if got := battleCountRows(t, p, a.PlayerID)[ha]; got != 1 {
+		t.Fatalf("attacker battle count %d, want one; retry must not count", got)
+	}
+	if got := battleCountRows(t, p, b.PlayerID)[hb]; got != 1 {
+		t.Fatalf("defender battle count %d, want one", got)
 	}
 	players, e := s.Store.PlayersTx(ctx, p, false)
 	if e != nil {

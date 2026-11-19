@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"reflect"
 	"slices"
 	"strconv"
 	"strings"
@@ -48,7 +49,7 @@ func oneOnOneService(t *testing.T, p *pg.Pool) app.Service {
 	return app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}}, Fresh: p, Store: oneononestore.Store{}, Content: content,
 		Fence: values, Privileges: i5.BaselinePrivilegeProvider{}, Costs: i5.MaterialCostDebiter{Store: values, Content: content}, FrameStacks: values, Mail: i5.SettlementMail{Store: values},
 		Achievements: ach.Service{Store: achievementstore.Store{}, Content: content, Population: libraryService(p, p)}, Combat: fight, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets,
-		Directory: i4store.PlayerDirectoryReader{}, Entitlements: values, Facts: i5.ObjectiveFacts{Owner: compositeI5(p), Open: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+		Directory: i4store.PlayerDirectoryReader{}, Entitlements: values, Facts: i5.ObjectiveFacts{Owner: compositeI5(p), Open: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, BattleCounts: libraryService(p, p)}
 }
 
 // oneOnOnePlayer is a genuine combat owner with level 60, 15 owned girls and an Achievement root.
@@ -383,6 +384,20 @@ func TestI7C5COneOnOneEntryMatchSettlementNative(t *testing.T) {
 	replay, err := startSettled(s, a, command)
 	if err != nil || replay.Win != result.Win || strings.Join(replay.ReportKeys, ",") != strings.Join(result.ReportKeys, ",") {
 		t.Fatal("identical START must return the recorded match", err)
+	}
+	for _, side := range []struct {
+		player identity.PlayerID
+		teams  []d.Team
+	}{{a.PlayerID, teamsOf(heroesA, len(result.Wins))}, {b.PlayerID, teamsOf(heroesB, len(result.Wins))}} {
+		want := map[int64]int64{}
+		for _, team := range side.teams {
+			for _, hero := range team.Heroes {
+				want[hero]++
+			}
+		}
+		if got := battleCountRows(t, pool, side.player); !reflect.DeepEqual(got, want) {
+			t.Fatalf("player %d battle counts %v, want one per own hero that fought %v", side.player, got, want)
+		}
 	}
 	if _, err = s.Start(ctx, a, app.StartCommand{Formations: teamsOf(heroesA[3:], 3), Enemy: b.PlayerID}, op()); err == nil {
 		t.Fatal("junior cooldown must refuse the next START")

@@ -127,7 +127,14 @@ func startChoiceService(at time.Time, room d.TournamentRoom, combat *startChoice
 		Servers:      startChoiceServers{},
 		Receipts:     startChoiceReceipts{},
 		ReceiptRead:  startChoiceReceiptRead{},
+		BattleCounts: startChoiceBattleCounts{},
 	}
+}
+
+type startChoiceBattleCounts struct{}
+
+func (startChoiceBattleCounts) ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error {
+	return nil
 }
 
 // startChoiceCombat records each StartManyTx call the mode builder produced.

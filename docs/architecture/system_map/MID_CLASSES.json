@@ -29757,7 +29757,7 @@
     },
     {
      "file": "internal/application/topfloor/fight.go",
-     "line": 539,
+     "line": 544,
      "value": "repeatable_read"
     },
     {
@@ -29790,7 +29790,7 @@
     },
     {
      "file": "internal/application/topfloor/fight.go",
-     "line": 539,
+     "line": 544,
      "value": "false"
     },
     {
@@ -29826,7 +29826,7 @@
     },
     {
      "file": "internal/application/topfloor/fight.go",
-     "line": 539,
+     "line": 544,
      "value": "6"
     },
     {
@@ -29861,6 +29861,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/topfloorstore/store.go:158",
     "internal/adapters/postgres/topfloorstore/store.go:332",
     "internal/adapters/postgres/topfloorstore/store.go:456",
@@ -29908,7 +29910,7 @@
      "file": "internal/application/topfloor/fight.go",
      "function": "Service.close",
      "isolation": "repeatable_read",
-     "line": 539,
+     "line": 544,
      "read_only": "false",
      "retry": "6"
     },
@@ -31344,7 +31346,7 @@
     },
     {
      "file": "internal/application/topfloor/task_battle.go",
-     "line": 416,
+     "line": 421,
      "value": "repeatable_read"
     },
     {
@@ -31382,7 +31384,7 @@
     },
     {
      "file": "internal/application/topfloor/task_battle.go",
-     "line": 416,
+     "line": 421,
      "value": "false"
     },
     {
@@ -31423,7 +31425,7 @@
     },
     {
      "file": "internal/application/topfloor/task_battle.go",
-     "line": 416,
+     "line": 421,
      "value": "6"
     },
     {
@@ -31456,6 +31458,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/topfloorstore/task_fight.go:114",
     "internal/adapters/postgres/topfloorstore/task_fight.go:171",
     "internal/adapters/postgres/topfloorstore/task_fight.go:68",
@@ -31513,7 +31517,7 @@
      "file": "internal/application/topfloor/task_battle.go",
      "function": "Service.closeTask",
      "isolation": "repeatable_read",
-     "line": 416,
+     "line": 421,
      "read_only": "false",
      "retry": "6"
     },
@@ -31906,6 +31910,11 @@
      "file": "internal/adapters/postgres/leaguestore/store.go",
      "line": 182,
      "statement": "SELECT payload::text,payload_version FROM league_settlements WHERE kind=$1 AND number=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
     },
     {
      "file": "internal/adapters/postgres/sharedroomstore/store.go",
@@ -47724,7 +47733,7 @@
     },
     {
      "file": "internal/application/arena/fight.go",
-     "line": 680,
+     "line": 714,
      "value": "repeatable_read"
     },
     {
@@ -47757,7 +47766,7 @@
     },
     {
      "file": "internal/application/arena/fight.go",
-     "line": 680,
+     "line": 714,
      "value": "false"
     },
     {
@@ -47794,7 +47803,7 @@
     },
     {
      "file": "internal/application/arena/fight.go",
-     "line": 680,
+     "line": 714,
      "value": "6"
     },
     {
@@ -47846,6 +47855,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "arena",
@@ -47870,7 +47881,7 @@
      "file": "internal/application/arena/fight.go",
      "function": "Service.close",
      "isolation": "repeatable_read",
-     "line": 680,
+     "line": 714,
      "read_only": "false",
      "retry": "6"
     },
@@ -48170,7 +48181,7 @@
     },
     {
      "file": "internal/application/arena/fight.go",
-     "line": 680,
+     "line": 714,
      "value": "repeatable_read"
     },
     {
@@ -48208,7 +48219,7 @@
     },
     {
      "file": "internal/application/arena/fight.go",
-     "line": 680,
+     "line": 714,
      "value": "false"
     },
     {
@@ -48250,7 +48261,7 @@
     },
     {
      "file": "internal/application/arena/fight.go",
-     "line": 680,
+     "line": 714,
      "value": "6"
     },
     {
@@ -48310,6 +48321,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "arena",
@@ -48342,7 +48355,7 @@
      "file": "internal/application/arena/fight.go",
      "function": "Service.close",
      "isolation": "repeatable_read",
-     "line": 680,
+     "line": 714,
      "read_only": "false",
      "retry": "6"
     },
@@ -49115,6 +49128,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "arena",
@@ -119154,7 +119169,7 @@
     },
     {
      "file": "internal/application/oneonone/match.go",
-     "line": 505,
+     "line": 524,
      "value": "repeatable_read"
     }
    ],
@@ -119187,7 +119202,7 @@
     },
     {
      "file": "internal/application/oneonone/match.go",
-     "line": 505,
+     "line": 524,
      "value": "false"
     }
    ],
@@ -119223,7 +119238,7 @@
     },
     {
      "file": "internal/application/oneonone/match.go",
-     "line": 505,
+     "line": 524,
      "value": "6"
     }
    ],
@@ -119253,6 +119268,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/oneononestore/store.go:234",
     "internal/adapters/postgres/oneononestore/store.go:351",
     "internal/adapters/postgres/oneononestore/store.go:379",
@@ -119307,7 +119324,7 @@
      "file": "internal/application/oneonone/match.go",
      "function": "Service.close",
      "isolation": "repeatable_read",
-     "line": 505,
+     "line": 524,
      "read_only": "false",
      "retry": "6"
     }
@@ -135737,6 +135754,8 @@
     "internal/adapters/postgres/leaguestore/store.go:187",
     "internal/adapters/postgres/leaguestore/store.go:201",
     "internal/adapters/postgres/leaguestore/store.go:89",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "championsleague",
@@ -136384,6 +136403,8 @@
     "internal/adapters/postgres/leaguestore/store.go:187",
     "internal/adapters/postgres/leaguestore/store.go:201",
     "internal/adapters/postgres/leaguestore/store.go:89",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "championsleague",
@@ -137031,6 +137052,8 @@
     "internal/adapters/postgres/leaguestore/store.go:187",
     "internal/adapters/postgres/leaguestore/store.go:201",
     "internal/adapters/postgres/leaguestore/store.go:89",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "championsleague",
@@ -137678,6 +137701,8 @@
     "internal/adapters/postgres/leaguestore/store.go:187",
     "internal/adapters/postgres/leaguestore/store.go:201",
     "internal/adapters/postgres/leaguestore/store.go:89",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "championsleague",
@@ -138325,6 +138350,8 @@
     "internal/adapters/postgres/leaguestore/store.go:187",
     "internal/adapters/postgres/leaguestore/store.go:201",
     "internal/adapters/postgres/leaguestore/store.go:89",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "championsleague",
@@ -138972,6 +138999,8 @@
     "internal/adapters/postgres/leaguestore/store.go:187",
     "internal/adapters/postgres/leaguestore/store.go:201",
     "internal/adapters/postgres/leaguestore/store.go:89",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "championsleague",
@@ -139619,6 +139648,8 @@
     "internal/adapters/postgres/leaguestore/store.go:187",
     "internal/adapters/postgres/leaguestore/store.go:201",
     "internal/adapters/postgres/leaguestore/store.go:89",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "championsleague",
@@ -140266,6 +140297,8 @@
     "internal/adapters/postgres/leaguestore/store.go:187",
     "internal/adapters/postgres/leaguestore/store.go:201",
     "internal/adapters/postgres/leaguestore/store.go:89",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "championsleague",

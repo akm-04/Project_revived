@@ -147,6 +147,12 @@ type Servers interface {
 	ServerNameTx(context.Context, tx.Queryer, identity.LogicalServerID) (string, error)
 }
 
+// BattleCounts is the Girls Log producer port (I9_11_GIRLS_LOG_V1 G2): one
+// settled battle raises the player's per-hero battle counts.
+type BattleCounts interface {
+	ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error
+}
+
 type Service struct {
 	Players      playerroot.TxLocker
 	Friendships  socialrelation.FriendFightPrivacyReader
@@ -170,10 +176,11 @@ type Service struct {
 	Servers      Servers
 	Receipts     receipt.Store
 	ReceiptRead  receipt.Reader
+	BattleCounts BattleCounts
 }
 
 func (s Service) ready() bool {
 	return s.Timed.Runner.DB != nil && s.Timed.Binder.Time != nil && s.Fresh != nil && s.Store != nil && s.Content != nil && s.Fence != nil && s.Costs != nil && s.Grants != nil &&
 		s.Values != nil && s.Mail != nil && s.Achievements != nil && s.Facts != nil && s.Combat != nil && s.Heroes != nil && s.Pets != nil && s.OwnedHeroes != nil && s.Directory != nil && s.Guilds != nil && s.Servers != nil &&
-		s.Receipts != nil && s.ReceiptRead != nil
+		s.Receipts != nil && s.ReceiptRead != nil && s.BattleCounts != nil
 }
