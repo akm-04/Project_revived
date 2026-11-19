@@ -76,9 +76,6 @@ func (s Service) rootInputsTx(ctx context.Context, q tx.Queryer, scope InputScop
 	if e != nil {
 		return out, e
 	}
-	if gen.EffectiveObservation(scope.ObservedAt, r.UpdatedAt).Before(r.UpdatedAt) {
-		return out, ErrStale
-	}
 	c, e := s.Content.CourseCatalogTx(ctx, q, scope.ContentRevision)
 	if e != nil {
 		return out, e
@@ -152,9 +149,6 @@ func (s Service) CompletedCourseCountTx(ctx context.Context, q tx.Queryer, scope
 		if !ok {
 			return 0, course.ErrUnqualified
 		}
-		if gen.EffectiveObservation(scope.ObservedAt, f.UpdatedAt).Before(f.UpdatedAt) {
-			return 0, ErrStale
-		}
 		if e = f.Facts.Validate(v.Catalog); e != nil {
 			return 0, e
 		}
@@ -192,9 +186,6 @@ func (s Service) HeroCourseInputsTx(ctx context.Context, q tx.Queryer, scope Inp
 	f, e := s.Owner.ReadHeroTx(ctx, q, scope.Player, partner)
 	if e != nil {
 		return out, e
-	}
-	if gen.EffectiveObservation(scope.ObservedAt, f.UpdatedAt).Before(f.UpdatedAt) {
-		return out, ErrStale
 	}
 	if e = f.Facts.Validate(v.Catalog); e != nil {
 		return out, e

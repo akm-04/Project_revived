@@ -52,9 +52,6 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	if e != nil {
 		return nil, e
 	}
-	if at.Before(gen.EffectiveObservation(at, r.UpdatedAt)) || at.Before(gen.EffectiveObservation(at, f.UpdatedAt)) {
-		return nil, ErrStale
-	}
 	c, e := s.Content.CourseCatalogTx(ctx, t, d.ContentRevision)
 	if e != nil {
 		return nil, e
@@ -308,7 +305,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 		old := r.Version
 		r.Version++
 		r.Facts = st
-		r.UpdatedAt = at
+		r.UpdatedAt = gen.EffectiveObservation(at, r.UpdatedAt, r.CreatedAt)
 		if e = s.Owner.SaveRootTx(ctx, t, r, old); e != nil {
 			return nil, e
 		}
@@ -317,7 +314,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 		old := f.Version
 		f.Version++
 		f.Facts = facts
-		f.UpdatedAt = at
+		f.UpdatedAt = gen.EffectiveObservation(at, f.UpdatedAt, f.CreatedAt)
 		if e = s.Owner.SaveHeroTx(ctx, t, f, old); e != nil {
 			return nil, e
 		}
