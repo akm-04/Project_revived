@@ -14,7 +14,7 @@ import (
 var EmbeddedMID1Records = [...]uint16{
 	17, 780, 49, 81, 112, 115, 2561, 229, 289, 336, 352, 384, 2485,
 	1408, 368, 56, 624, 612, 822, 530, 1056, 1152, 1808, 1304, 1856,
-	836, 2137, 2139, 2416, 2501, 2560, 2984, 3101,
+	836, 2137, 2139, 2416, 2560, 2984, 3101,
 }
 
 type BootstrapView struct {
@@ -201,9 +201,6 @@ func baseline(mid uint16, v BootstrapView) (any, bool) {
 		return map[string]any{"adventure_list": map[string]any{"list": zeroMap()}}, true
 	case 2485:
 		return map[string]any{"records": zeroList()}, true
-	case 2501:
-		// Current HeroRecommend stores the response itself as the keyed score map.
-		return zeroMap(), true
 	case 2560:
 		return zeroMap(), true
 	case 2561:

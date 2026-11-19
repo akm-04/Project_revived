@@ -60,7 +60,9 @@
   "row_locks": [],
   "unresolved_methods": []
  },
- "login": [],
+ "login": [
+  "BootstrapProjection"
+ ],
  "mids": [
   {
    "handler": {
@@ -119,6 +121,7 @@
    "guild_memberships",
    "guilds",
    "gxb_content_activation",
+   "gxb_content_hero_templates",
    "gxb_content_revisions",
    "hero_recommend_snapshots",
    "logical_servers",
@@ -133,6 +136,7 @@
  },
  "tests": {
   "integration": [
+   "logincapacity",
    "playerdisplay"
   ],
   "scenarios_naming": [],
