@@ -109,7 +109,7 @@ func decode(r receipt.Receipt, a Authority, q Import, fp [32]byte) (Result, erro
 		return Result{}, d.ErrConflict
 	}
 	var extra any
-	if dec.Decode(&extra) != io.EOF || out.Schema != resultSchema || out.Authority != a || out.Request != q || out.State.Validate() != nil || out.State.PlayerID != q.PlayerID || out.State.LogicalServerID != q.LogicalServerID || out.State.Charge != q.Charge || out.DecisionAt.IsZero() || !d.RevisionValid(out.ContentRevision) || out.State.UpdatedAt.After(gen.EffectiveObservation(out.DecisionAt, out.State.UpdatedAt)) {
+	if dec.Decode(&extra) != io.EOF || out.Schema != resultSchema || out.Authority != a || out.Request != q || out.State.Validate() != nil || out.State.PlayerID != q.PlayerID || out.State.LogicalServerID != q.LogicalServerID || out.State.Charge != q.Charge || out.DecisionAt.IsZero() || !d.RevisionValid(out.ContentRevision) {
 		return Result{}, d.ErrConflict
 	}
 	pin, ok := r.OperationPolicyRefs.Get("content")

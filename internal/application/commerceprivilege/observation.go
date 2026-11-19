@@ -60,7 +60,7 @@ func (p Provider) snapshot(c context.Context, q tx.Queryer, pid identity.PlayerI
 		return out, ok, e
 	}
 	observedAt := generation.EffectiveObservation(at, s.UpdatedAt)
-	if s.Validate() != nil || s.PlayerID != pid || s.UpdatedAt.After(observedAt) {
+	if s.Validate() != nil || s.PlayerID != pid {
 		return out, true, d.ErrConflict
 	}
 	catalog, tuning, tuned, e := tunedPrivilegeCatalog(c, p.Store, p.Content, q, s.ContentRevision)
@@ -93,8 +93,8 @@ func (p Provider) snapshot(c context.Context, q tx.Queryer, pid identity.PlayerI
 	if revision == "" {
 		revision = s.ContentRevision
 	}
-	out = d.Snapshot{State: s, ObservationRevision: revision, ObservedAt: at.UTC(), SkillPointCap: cap, MonthCardActive: cards.MonthCardEnd > at.Unix(), PrivilegeCardActive: privilegeActive, ProviderRevision: d.ManualPolicy + "/" + s.ContentRevision}
-	return out, true, out.Validate(pid, revision, at)
+	out = d.Snapshot{State: s, ObservationRevision: revision, ObservedAt: observedAt.UTC(), SkillPointCap: cap, MonthCardActive: cards.MonthCardEnd > at.Unix(), PrivilegeCardActive: privilegeActive, ProviderRevision: d.ManualPolicy + "/" + s.ContentRevision}
+	return out, true, out.Validate(pid, revision, observedAt)
 }
 func (p Provider) ReadCosmeticPrivilegeTx(c context.Context, q tx.Queryer, pid identity.PlayerID, revision string, at time.Time) (d.Snapshot, error) {
 	if p.Store == nil || p.Content == nil || q == nil || !pid.Valid() || at.IsZero() || !d.RevisionValid(revision) {
