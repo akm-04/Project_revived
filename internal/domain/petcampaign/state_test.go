@@ -1,7 +1,38 @@
 package petcampaign
 
-import "testing"
+import (
+	"encoding/json"
+	"strings"
+	"testing"
+)
 
+func TestEliteCountsAreFloorOrderedArrays(t *testing.T) {
+	s := New(10, 100)
+	s.EliteBuys[1] = 2
+	s.EliteUsed[1] = 1
+	elite := s.Elite(Catalog{Raids: 3})
+	buys, ok := elite["buy_info"].([]int64)
+	if !ok || len(buys) != 20 {
+		t.Fatalf("buy_info is not a 20-element array: %#v", elite["buy_info"])
+	}
+	if buys[0] != 2 || buys[1] != 0 || buys[19] != 0 {
+		t.Fatalf("buy_info floor order: %v", buys)
+	}
+	remaining, ok := elite["sweep_info"].([]int64)
+	if !ok || len(remaining) != 20 {
+		t.Fatalf("sweep_info is not a 20-element array: %#v", elite["sweep_info"])
+	}
+	if remaining[0] != 3*(1+2)-1 {
+		t.Fatalf("sweep_info floor 1 remaining: %v", remaining)
+	}
+	raw, e := json.Marshal(elite)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if !strings.Contains(string(raw), `"buy_info":[`) || !strings.Contains(string(raw), `"sweep_info":[`) {
+		t.Fatalf("JSON is not an array: %s", raw)
+	}
+}
 func TestSweepStopsAtPersonalBestAndSurvivesDay(t *testing.T) {
 	s := New(10, 100)
 	s.Max = 77
