@@ -226,9 +226,6 @@ func (s Service) Materialize(c context.Context, id ids.UUID) (gi.TargetProof, er
 			}
 			out.State = gi.Suppressed
 			if current, ok := plan.Existing(); ok {
-				if at.Before(gen.EffectiveObservation(at, current.UpdatedAt)) {
-					return gi.ErrEvidence
-				}
 				out.RootVersion = current.StateVersion
 			}
 			if eligible {
