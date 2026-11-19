@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	gen "gxb.local/backend/v2/internal/application/generation"
 	"sort"
 	"strconv"
 	"strings"
@@ -428,7 +427,7 @@ func (f *freezer) player(ctx context.Context, player identity.PlayerID) error {
 	}
 	books := map[string]int64{}
 	for _, stack := range stacks {
-		if stack.Validate() != nil || stack.PlayerID != player || scope.ObservedAt.Before(gen.EffectiveObservation(scope.ObservedAt, stack.UpdatedAt)) {
+		if stack.Validate() != nil || stack.PlayerID != player {
 			return unavailable("stacks", d.ErrStale)
 		}
 		if stack.ItemID >= d.ExclusiveBookFirst && stack.ItemID <= d.ExclusiveBookLast && stack.Quantity > 0 {
