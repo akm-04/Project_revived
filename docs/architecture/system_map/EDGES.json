@@ -899,6 +899,7 @@
    ],
    "publicprofile": [
     "DecisionAt",
+    "EffectiveObservation",
     "NewTimedOperation",
     "Operation",
     "Run"
@@ -5472,6 +5473,7 @@
    ],
    "generation": [
     "DecisionAt",
+    "EffectiveObservation",
     "NewTimedOperation",
     "Operation",
     "Run"

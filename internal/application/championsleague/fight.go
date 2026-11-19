@@ -220,11 +220,6 @@ func (s Service) terminal(c context.Context, id ids.UUID, parent operation.Conte
 		if due(cat, root, at) {
 			return d.ErrDue
 		}
-		// KEEP (A-123): a terminal decision bound before a newer accepted root
-		// write is overtaken, not conflicting state, and refuses as stale.
-		if at.Before(root.UpdatedAt) {
-			return d.ErrStaleTime
-		}
 		m, ok, e := s.Store.MatchTx(c, sc.Tx, id)
 		if e != nil || !ok {
 			return errors.Join(e, d.ErrConflict)

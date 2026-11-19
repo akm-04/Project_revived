@@ -3,6 +3,7 @@ package publicprofile
 import (
 	"context"
 	"errors"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/playerroot"
 	"gxb.local/backend/v2/internal/domain/profile"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -82,11 +83,11 @@ func (s RootService) apply(c context.Context, t tx.Tx, p PreparedRoot, prefs pro
 	r.Preferences = prefs
 	r.UpdatedAt = at.UTC()
 	if p.present {
-		// KEPT: a decision bound before the stored root write is stale and is
-		// refused; this is an application ordering guard, not a future read.
-		if r.StateVersion == math.MaxInt64 || at.Before(p.root.UpdatedAt) {
+		if r.StateVersion == math.MaxInt64 {
 			return Root{}, ErrInvalidState
 		}
+		// K3: keep timestamps monotone instead of refusing a stored forward fact.
+		r.UpdatedAt = gen.EffectiveObservation(at, p.root.UpdatedAt, p.root.CreatedAt)
 		r.StateVersion++
 		if e := r.Validate(); e != nil {
 			return Root{}, e

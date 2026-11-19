@@ -227,11 +227,6 @@ func (s Service) Execute(c context.Context, a identity.ActorContext, cmd Command
 		if due(cat, root, at) {
 			return d.ErrDue
 		}
-		// KEEP (A-123): an INFO/ENEMY decision bound before a newer accepted
-		// root write is overtaken and refuses as stale, not a server defect.
-		if at.Before(root.UpdatedAt) {
-			return d.ErrStaleTime
-		}
 		players, e := s.Store.PlayersTx(c, sc.Tx, true)
 		if e != nil {
 			return e
