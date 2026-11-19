@@ -13,6 +13,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/guildcampaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
+	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	ca "gxb.local/backend/v2/internal/application/characterasset"
 	"gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -90,7 +91,7 @@ func playtestGuildLogMode(p *pg.Pool) app.Mode {
 		Settings: app.Settings{RetentionDays: 30},
 		Combat:   playtestCampaignCombat{}, Grants: playtestCampaignGrants{}, Facts: playtestCampaignFacts{},
 		Directory: i4store.PlayerDirectoryReader{Queryer: p}, Mail: playtestCampaignMail{},
-		Fresh: p, Revisions: playtestCampaignContent{},
+		Fresh: p, Revisions: playtestCampaignContent{}, Receipts: kernelstore.Store{},
 	}
 }
 
