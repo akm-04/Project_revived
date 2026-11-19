@@ -15,10 +15,12 @@ import (
 )
 
 type arenaFake struct {
-	fight      app.FightCommand
-	unresolved bool
-	fightErr   error
-	calls      int
+	fight          app.FightCommand
+	unresolved     bool
+	fightErr       error
+	partnerErr     error
+	partnerSubject identity.PlayerID
+	calls          int
 }
 
 var arenaPlayer = d.Player{PlayerID: 100001, Season: 33, Star: 12, Point: 0, TotalFight: 4, WinTimes: 3, KeepWin: 2, DailyFights: 4, Defense: d.Lineup{Heroes: []int64{1, 2, 3, 4, 5}, Pet: 9},
@@ -28,7 +30,11 @@ func (f *arenaFake) Info(context.Context, identity.ActorContext, operation.Conte
 	f.calls++
 	return d.InfoView{Player: arenaPlayer, Season: d.Season{Number: 33, OpensAt: time.Unix(1700000000, 0)}, Rank: 7, Total: 20, KingCoin: 640, At: time.Unix(1700000000+2*86400, 0)}, nil
 }
-func (f *arenaFake) Partners(context.Context, identity.ActorContext, operation.Context) (d.PartnersView, error) {
+func (f *arenaFake) Partners(_ context.Context, _ identity.ActorContext, subject identity.PlayerID, _ operation.Context) (d.PartnersView, error) {
+	f.partnerSubject = subject
+	if f.partnerErr != nil {
+		return d.PartnersView{}, f.partnerErr
+	}
 	return d.PartnersView{Player: arenaPlayer, Usage: []d.Usage{{TableID: 11001, Fights: 2, Wins: 1, Kills: 3, Harms: "1200.500000"}}}, nil
 }
 func (f *arenaFake) ModifyDefence(_ context.Context, _ identity.ActorContext, heroes []int64, pet int64, _ operation.Context) (d.Player, error) {
@@ -144,6 +150,33 @@ func TestI7C5DArenaWireShapes(t *testing.T) {
 	}
 	if f.calls != before {
 		t.Fatal("invalid request reached the owner")
+	}
+}
+
+func TestArenaPartnersReadsTheRequestedSubject(t *testing.T) {
+	f := &arenaFake{}
+	dispatcher := ArenaDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: f}
+	number := func(v string) json.Number { return json.Number(v) }
+	call := func(params map[string]any) httpedge.Response {
+		return dispatcher.Dispatch(context.Background(), heroReq(t, 769, params))
+	}
+	if r := call(map[string]any{}); r.HTTPStatus != 200 || f.partnerSubject != 100001 {
+		t.Fatal("own History without player_id", r, f.partnerSubject)
+	}
+	if r := call(map[string]any{"player_id": number("100001")}); r.HTTPStatus != 200 || f.partnerSubject != 100001 {
+		t.Fatal("own History with player_id", r, f.partnerSubject)
+	}
+	if r := call(map[string]any{"player_id": number("200007")}); r.HTTPStatus != 200 || f.partnerSubject != 200007 {
+		t.Fatal("another player's History", r, f.partnerSubject)
+	}
+	f.partnerErr = d.ErrRefused
+	if r := call(map[string]any{"player_id": number("200008")}); r.HTTPStatus != 409 || r.Body["error_code"] != unprovenRefusalCode {
+		t.Fatal("unknown subject is not the arena refusal", r)
+	}
+	f.partnerErr = nil
+	before := f.calls
+	if r := call(map[string]any{"player_id": number("200007"), "other": number("1")}); r.HTTPStatus != 400 || f.calls != before {
+		t.Fatal("a foreign request key reached the owner", r)
 	}
 }
 

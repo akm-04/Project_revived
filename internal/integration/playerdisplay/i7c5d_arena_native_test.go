@@ -197,7 +197,7 @@ func TestI7C5DArenaEntryFightSettlementNative(t *testing.T) {
 	if report, found, err := s.Report(ctx, records[0].ReportKey, op()); err != nil || !found || len(report) == 0 {
 		t.Fatal("record report", err)
 	}
-	partners, err := s.Partners(ctx, a, op())
+	partners, err := s.Partners(ctx, a, a.PlayerID, op())
 	if err != nil || len(partners.Usage) != 5 || partners.Player.TotalFight != 1 {
 		t.Fatal("partners", err)
 	}
