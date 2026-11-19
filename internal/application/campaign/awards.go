@@ -72,20 +72,29 @@ func (s Mode) grantAwards(c context.Context, sc gen.TimedScope, a identity.Actor
 
 func (s Mode) ChapterAward(c context.Context, a identity.ActorContext, chapter int64, op operation.Context) (map[string]any, error) {
 	return s.purchase(c, a, "chapter-award", chapter, op, func(c context.Context, sc gen.TimedScope, v view, r d.Record, _ int64, _ i5.PrivilegeSnapshot) (map[string]any, error) {
-		next, items, err := v.catalog.ClaimChapter(r.Progress, chapter)
-		if err != nil {
-			return nil, err
-		}
-		awards, err := s.grantAwards(c, sc, a, "chapter-award", itemLines(items))
-		if err != nil {
-			return nil, err
-		}
-		r.Progress = next
-		if err = s.Store.SaveTx(c, sc.Tx, a.PlayerID, r, nil, sc.Operation.DecisionAt()); err != nil {
-			return nil, err
-		}
-		return map[string]any{"awards": awardWire(awards), "chapter_event": v.catalog.ChapterEvent(next, chapter)}, nil
+		return s.chapterAward(c, sc, a, v, r, chapter)
 	})
+}
+
+func (s Mode) chapterAward(c context.Context, sc gen.TimedScope, a identity.ActorContext, v view, r d.Record, chapter int64) (map[string]any, error) {
+	next, items, err := v.catalog.ClaimChapter(r.Progress, chapter)
+	if err != nil {
+		return nil, err
+	}
+	awards, err := s.grantAwards(c, sc, a, "chapter-award", itemLines(items))
+	if err != nil {
+		return nil, err
+	}
+	// A gift whose every line overflowed to mail has no stock-representable row;
+	// refuse before saving so the transaction rolls back the grant, mail and claim.
+	if len(items) > 0 && len(awards) == 0 {
+		return nil, d.ErrRefused
+	}
+	r.Progress = next
+	if err = s.Store.SaveTx(c, sc.Tx, a.PlayerID, r, nil, sc.Operation.DecisionAt()); err != nil {
+		return nil, err
+	}
+	return map[string]any{"awards": awardWire(awards), "chapter_event": v.catalog.ChapterEvent(next, chapter)}, nil
 }
 
 func (s Mode) StoryAward(c context.Context, a identity.ActorContext, q StoryChoice, op operation.Context) (map[string]any, error) {
@@ -93,64 +102,93 @@ func (s Mode) StoryAward(c context.Context, a identity.ActorContext, q StoryChoi
 		return nil, d.ErrUnavailable
 	}
 	return s.purchase(c, a, "story-award", q, op, func(c context.Context, sc gen.TimedScope, v view, r d.Record, _ int64, _ i5.PrivilegeSnapshot) (map[string]any, error) {
-		n, found := v.catalog.Node(q.CampaignID)
-		if !found || n.Type != d.Normal || q.Type != d.Normal {
-			return nil, d.ErrInvalid
+		return s.storyAward(c, sc, a, v, r, q)
+	})
+}
+
+func (s Mode) storyAward(c context.Context, sc gen.TimedScope, a identity.ActorContext, v view, r d.Record, q StoryChoice) (map[string]any, error) {
+	n, found := v.catalog.Node(q.CampaignID)
+	if !found || n.Type != d.Normal || q.Type != d.Normal {
+		return nil, d.ErrInvalid
+	}
+	valid := false
+	for _, id := range n.StoryPartners {
+		valid = valid || id == q.Partner
+	}
+	if !valid {
+		return nil, d.ErrInvalid
+	}
+	if prior := r.Progress.StoryClaims[n.ID]; len(prior) > 0 {
+		var saved storyClaim
+		err := json.Unmarshal(prior, &saved)
+		if err == nil && saved.Body == nil {
+			err = d.ErrUnavailable
 		}
-		valid := false
-		for _, id := range n.StoryPartners {
-			valid = valid || id == q.Partner
-		}
-		if !valid {
-			return nil, d.ErrInvalid
-		}
-		if prior := r.Progress.StoryClaims[n.ID]; len(prior) > 0 {
-			var saved storyClaim
-			err := json.Unmarshal(prior, &saved)
-			if err == nil && saved.Body == nil {
-				err = d.ErrUnavailable
-			}
-			return saved.Body, err
-		}
-		battle, ok := s.Combat.(liveBattle)
-		if !ok {
-			return nil, d.ErrUnavailable
-		}
-		live, err := battle.LiveGenerationTx(c, sc.Tx, locator(a), a.PlayerID, generation(q.Type, q.CampaignID), sc.Operation.DecisionAt())
-		if err != nil {
-			return nil, err
-		}
-		if !live || r.PendingGeneration != generation(q.Type, q.CampaignID) || r.Progress.State(n.ID).PartnerDrop {
-			return nil, d.ErrRefused
-		}
-		h, admission, err := s.StoryHeroes.AwardStoryPartnerTx(c, sc.Tx, a.PlayerID, q.Partner, v.revision, sc.Operation.Operation())
-		if err != nil {
-			return nil, err
-		}
+		return saved.Body, err
+	}
+	battle, ok := s.Combat.(liveBattle)
+	if !ok {
+		return nil, d.ErrUnavailable
+	}
+	live, err := battle.LiveGenerationTx(c, sc.Tx, locator(a), a.PlayerID, generation(q.Type, q.CampaignID), sc.Operation.DecisionAt())
+	if err != nil {
+		return nil, err
+	}
+	if !live || r.PendingGeneration != generation(q.Type, q.CampaignID) || r.Progress.State(n.ID).PartnerDrop {
+		return nil, d.ErrRefused
+	}
+	h, admission, err := s.StoryHeroes.AwardStoryPartnerTx(c, sc.Tx, a.PlayerID, q.Partner, v.revision, sc.Operation.Operation())
+	if err != nil {
+		return nil, err
+	}
+	body, err := s.storyAwardBody(c, sc, a, v, h, admission, q.Partner)
+	if err != nil {
+		return nil, err
+	}
+	raw, err := json.Marshal(storyClaim{Body: body, Admission: admission})
+	if err != nil {
+		return nil, err
+	}
+	claims := make(map[int64]json.RawMessage, len(r.Progress.StoryClaims)+1)
+	for id, row := range r.Progress.StoryClaims {
+		claims[id] = row
+	}
+	claims[n.ID] = raw
+	r.Progress.StoryClaims = claims
+	state := r.Progress.State(n.ID)
+	state.PartnerDrop = true
+	r.Progress = r.Progress.WithNode(state)
+	if err = s.Store.SaveTx(c, sc.Tx, a.PlayerID, r, []int64{n.ID}, sc.Operation.DecisionAt()); err != nil {
+		return nil, err
+	}
+	return body, nil
+}
+
+// storyAwardBody answers a fresh acquisition with the hero row; an owned origin
+// (nil admission) converts to its summon stone, as the sibling owners do.
+func (s Mode) storyAwardBody(c context.Context, sc gen.TimedScope, a identity.ActorContext, v view, h character.Hero, admission *character.CollectionAdmissionProof, partner int64) (map[string]any, error) {
+	if admission != nil {
 		award, err := s.StoryWire(h)
 		if err != nil {
 			return nil, err
 		}
 		award["is_partner"] = true
-		body := map[string]any{"story_drop_awards": []any{award}}
-		raw, err := json.Marshal(storyClaim{Body: body, Admission: admission})
-		if err != nil {
-			return nil, err
-		}
-		claims := make(map[int64]json.RawMessage, len(r.Progress.StoryClaims)+1)
-		for id, row := range r.Progress.StoryClaims {
-			claims[id] = row
-		}
-		claims[n.ID] = raw
-		r.Progress.StoryClaims = claims
-		state := r.Progress.State(n.ID)
-		state.PartnerDrop = true
-		r.Progress = r.Progress.WithNode(state)
-		if err = s.Store.SaveTx(c, sc.Tx, a.PlayerID, r, []int64{n.ID}, sc.Operation.DecisionAt()); err != nil {
-			return nil, err
-		}
-		return body, nil
-	})
+		return map[string]any{"story_drop_awards": []any{award}}, nil
+	}
+	catalog, err := s.Content.SummonCatalogTx(c, sc.Tx, v.revision)
+	if err != nil {
+		return nil, err
+	}
+	fragments, err := catalog.Fragments(partner)
+	if err != nil || fragments[0] <= 0 || fragments[1] <= 0 {
+		return nil, d.ErrRefused
+	}
+	lines := []grant.Line{{Kind: grant.StackItem, ItemID: fragments[0], Amount: fragments[1]}}
+	if _, err = s.grantAwards(c, sc, a, "story-award-fragments", lines); err != nil {
+		return nil, err
+	}
+	row := map[string]any{"table_id": fragments[0], "item_num": fragments[1], "to_stone": true}
+	return map[string]any{"story_drop_awards": []any{row}}, nil
 }
 
 func (s Mode) Caps(c context.Context, a identity.ActorContext, op operation.Context) (map[string]any, error) {
