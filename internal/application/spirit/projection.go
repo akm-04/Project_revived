@@ -3,7 +3,6 @@ package spirit
 import (
 	"context"
 	"gxb.local/backend/v2/internal/application/characterasset"
-	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/spirit"
@@ -56,14 +55,6 @@ func (s Service) inventoryTx(ctx context.Context, q tx.Queryer, scope InputScope
 	if e != nil {
 		return r, c, nil, nil, e
 	}
-	if gen.EffectiveObservation(scope.ObservedAt, r.UpdatedAt).Before(r.UpdatedAt) {
-		return r, c, nil, nil, ErrStale
-	}
-	for _, f := range fs {
-		if gen.EffectiveObservation(scope.ObservedAt, f.UpdatedAt).Before(f.UpdatedAt) {
-			return r, c, nil, nil, ErrStale
-		}
-	}
 	return r, c, fs, owners, nil
 }
 func (s Service) InventoryTx(ctx context.Context, q tx.Queryer, scope InputScope) ([]map[string]any, error) {
@@ -98,9 +89,6 @@ func (s Service) HeroSpiritInputsTx(ctx context.Context, q tx.Queryer, scope Inp
 	pop, e := s.Heroes.ReadRootTx(ctx, q, scope.Player)
 	if e != nil {
 		return out, e
-	}
-	if gen.EffectiveObservation(scope.ObservedAt, pop.UpdatedAt).Before(pop.UpdatedAt) {
-		return out, ErrStale
 	}
 	h, e := s.Heroes.ReadHeroByPartnerIDTx(ctx, q, scope.Player, id)
 	if e != nil {

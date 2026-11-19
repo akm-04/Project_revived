@@ -20,9 +20,6 @@ func (s Service) eligible(ctx context.Context, q tx.Queryer, p identity.PlayerID
 	if e = level.Validate(); e != nil {
 		return false, e
 	}
-	if at.Before(gen.EffectiveObservation(at, level.UpdatedAt)) {
-		return false, ErrStale
-	}
 	rule, e := s.Content.ResolveProgressionPolicyTx(ctx, q, rev)
 	if e != nil {
 		return false, e
@@ -69,9 +66,6 @@ func (s Service) liveHero(ctx context.Context, q tx.Queryer, p identity.PlayerID
 	if e = h.ValidatePersistent(); e != nil {
 		return e
 	}
-	if at.Before(gen.EffectiveObservation(at, h.UpdatedAt)) {
-		return ErrStale
-	}
 	k, e := s.Content.HeroKindTx(ctx, q, rev, h.TableID)
 	if e != nil {
 		return e
@@ -85,9 +79,6 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, ad
 	root, e := s.Owner.ReadRootTx(ctx, t, a.PlayerID)
 	if e != nil {
 		return nil, e
-	}
-	if ad.DecisionAt.Before(gen.EffectiveObservation(ad.DecisionAt, root.UpdatedAt)) {
-		return nil, ErrStale
 	}
 	cat, e := s.Content.SpiritCatalogTx(ctx, t, ad.ContentRevision)
 	if e != nil {
@@ -117,9 +108,6 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, ad
 	indexes := map[int64]int{}
 	for i, f := range fs {
 		indexes[f.PartnerID] = i
-		if ad.DecisionAt.Before(gen.EffectiveObservation(ad.DecisionAt, f.UpdatedAt)) {
-			return nil, ErrStale
-		}
 	}
 	if cmd.PartnerID > 0 {
 		if e = s.liveHero(ctx, t, a.PlayerID, cmd.PartnerID, ad.ContentRevision, ad.DecisionAt); e != nil {
@@ -282,7 +270,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, ad
 		f := fs[indexes[id]]
 		old := f.Version
 		f.Version++
-		f.UpdatedAt = ad.DecisionAt
+		f.UpdatedAt = gen.EffectiveObservation(ad.DecisionAt, f.UpdatedAt, f.CreatedAt)
 		if e = s.Owner.SaveHeroTx(ctx, t, f, old); e != nil {
 			return nil, e
 		}
@@ -290,7 +278,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, ad
 	old := root.Version
 	root.Facts = state
 	root.Version++
-	root.UpdatedAt = ad.DecisionAt
+	root.UpdatedAt = gen.EffectiveObservation(ad.DecisionAt, root.UpdatedAt, root.CreatedAt)
 	if e = s.Owner.SaveRootTx(ctx, t, root, old); e != nil {
 		return nil, e
 	}

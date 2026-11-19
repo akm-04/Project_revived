@@ -2,7 +2,6 @@ package spirit
 
 import (
 	"context"
-	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -34,11 +33,6 @@ func (s Service) BackpackSnapshot(ctx context.Context, a identity.ActorContext, 
 		stacks, e := s.Values.ListStacksTx(ctx, sc.Tx, a.PlayerID)
 		if e != nil {
 			return e
-		}
-		for _, x := range stacks {
-			if bound.DecisionAt().Before(gen.EffectiveObservation(bound.DecisionAt(), x.UpdatedAt)) {
-				return ErrStale
-			}
 		}
 		spirits, e := s.InventoryTx(ctx, sc.Tx, InputScope{a.PlayerID, rev, bound.DecisionAt()})
 		if e != nil {
