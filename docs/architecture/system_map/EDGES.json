@@ -684,6 +684,7 @@
    "bookskill": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "campaign": [
@@ -708,6 +709,7 @@
    ],
    "commerceprivilege": [
     "DecisionAt",
+    "EffectiveObservation",
     "Operation",
     "Run"
    ],
@@ -719,6 +721,7 @@
    "course": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "dodgeball": [
@@ -729,11 +732,13 @@
    "dormhouse": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "elementequipment": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "eventcentre": [
@@ -798,6 +803,7 @@
    "heroevolution": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "heroforce": [
@@ -811,6 +817,7 @@
    "i5": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Operation",
     "Run",
     "Validate"
@@ -823,6 +830,7 @@
    "inscription": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "itemsenergy": [
@@ -837,6 +845,7 @@
    "librarylocal": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "NewTimedOperation",
     "Run"
    ],
@@ -868,6 +877,9 @@
     "DecisionAt",
     "Operation",
     "Run"
+   ],
+   "playerdisplay": [
+    "EffectiveObservation"
    ],
    "profilefeedback": [
     "Bind",
@@ -945,6 +957,7 @@
    "spirit": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "summon": [
@@ -2614,6 +2627,7 @@
    "generation": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "i5": [
@@ -3302,6 +3316,7 @@
   "commerceprivilege": {
    "generation": [
     "DecisionAt",
+    "EffectiveObservation",
     "Operation",
     "Run"
    ],
@@ -3429,6 +3444,7 @@
    "generation": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "i5": [
@@ -3554,6 +3570,7 @@
    "generation": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "i5": [
@@ -3652,6 +3669,7 @@
    "generation": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "i5": [
@@ -4349,6 +4367,7 @@
    "generation": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "i5": [
@@ -4500,6 +4519,7 @@
    "generation": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Operation",
     "Run",
     "Validate"
@@ -4667,6 +4687,7 @@
    "generation": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "i5": [
@@ -4804,6 +4825,7 @@
    "generation": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "NewTimedOperation",
     "Run"
    ],
@@ -5264,6 +5286,9 @@
    ],
    "dormhouse": [
     "*TitleProgressTx"
+   ],
+   "generation": [
+    "EffectiveObservation"
    ],
    "i5": [
     "*ApplyDisplayValueTx",
@@ -6070,6 +6095,7 @@
    "generation": [
     "Bind",
     "DecisionAt",
+    "EffectiveObservation",
     "Run"
    ],
    "i5": [

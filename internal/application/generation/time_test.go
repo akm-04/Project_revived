@@ -109,3 +109,28 @@ func TestTimedOperationDoesNotInventMonotonicClampForBackwardDatabaseClock(t *te
 		t.Fatalf("fixture no longer exercises backward-clock discontinuity: decision=%v started=%v", got.DecisionAt(), got.Operation().StartedAt)
 	}
 }
+
+func TestEffectiveObservationUsesLatestStoredTime(t *testing.T) {
+	now := time.Date(2026, 11, 19, 1, 18, 0, 0, time.UTC)
+	earlier := now.Add(-8 * time.Hour)
+	later := now.Add(8 * time.Hour)
+	cases := []struct {
+		name   string
+		stored []time.Time
+		want   time.Time
+	}{
+		{"no stored facts keeps now", nil, now},
+		{"old facts keep now", []time.Time{earlier, earlier}, now},
+		{"a future fact moves the observation", []time.Time{earlier, later}, later},
+		{"zero facts are ignored", []time.Time{{}, later.Add(time.Hour)}, later.Add(time.Hour)},
+	}
+	for _, test := range cases {
+		if got := EffectiveObservation(now, test.stored...); !got.Equal(test.want) {
+			t.Fatalf("%s: got %v want %v", test.name, got, test.want)
+		}
+	}
+	zero := EffectiveObservation(time.Time{}, earlier)
+	if !zero.Equal(earlier) {
+		t.Fatalf("zero now with one fact: got %v", zero)
+	}
+}

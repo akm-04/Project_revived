@@ -1132,7 +1132,7 @@
   },
   {
    "callees": 5,
-   "callers": 63,
+   "callers": 64,
    "mids": 0,
    "name": "generation",
    "path": "internal/application/generation",
@@ -1410,7 +1410,7 @@
    "tables": 1
   },
   {
-   "callees": 17,
+   "callees": 18,
    "callers": 7,
    "mids": 9,
    "name": "playerdisplay",
