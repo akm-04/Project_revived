@@ -62,7 +62,7 @@ func canonicalAchievements(p *postgres.Pool, r tx.Runner, content contentstore.S
 		Memoir:        appmemoir.Mode{Store: memoirstore.Store{}},
 		Occult:        appoccult.Mode{Store: occultstore.Store{}, Content: content},
 	}
-	runtime := &appachievement.Runtime{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Active: content, Counts: counts, Fence: i5db, Grants: i5svc, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, Directory: i4store.PlayerDirectoryReader{}, Servers: i4store.ServerNames{}}
+	runtime := &appachievement.Runtime{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Active: content, Counts: counts, Fence: i5db, Grants: i5svc, Stacks: i5db, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, Directory: i4store.PlayerDirectoryReader{}, Servers: i4store.ServerNames{}}
 	return appachievement.Service{Store: achievementstore.Store{Metrics: metrics}, Content: content, Population: population, Runtime: runtime}
 }
 

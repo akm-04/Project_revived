@@ -79644,7 +79644,7 @@
    "isolation": [
     {
      "file": "internal/application/achievement/catalog.go",
-     "line": 187,
+     "line": 194,
      "value": "serializable"
     }
    ],
@@ -79652,7 +79652,7 @@
    "read_only": [
     {
      "file": "internal/application/achievement/catalog.go",
-     "line": 187,
+     "line": 194,
      "value": "false"
     }
    ],
@@ -79660,7 +79660,7 @@
    "retry": [
     {
      "file": "internal/application/achievement/catalog.go",
-     "line": 187,
+     "line": 194,
      "value": "6"
     }
    ],
@@ -79676,7 +79676,7 @@
      "file": "internal/application/achievement/catalog.go",
      "function": "Service.Load",
      "isolation": "serializable",
-     "line": 187,
+     "line": 194,
      "read_only": "false",
      "retry": "6"
     }
@@ -79875,7 +79875,7 @@
    "isolation": [
     {
      "file": "internal/application/achievement/catalog.go",
-     "line": 360,
+     "line": 367,
      "value": "serializable"
     }
    ],
@@ -79883,18 +79883,18 @@
    "read_only": [
     {
      "file": "internal/application/achievement/catalog.go",
-     "line": 360,
+     "line": 367,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/achievement/catalog.go:427",
+    "internal/application/achievement/catalog.go:449",
     "internal/application/i5/service.go:719"
    ],
    "retry": [
     {
      "file": "internal/application/achievement/catalog.go",
-     "line": 360,
+     "line": 367,
      "value": "6"
     }
    ],
@@ -79922,7 +79922,7 @@
      "file": "internal/application/achievement/catalog.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 360,
+     "line": 367,
      "read_only": "false",
      "retry": "6"
     }
