@@ -79,9 +79,6 @@ func (s Service) boardFactsTx(ctx context.Context, t tx.Tx, a identity.ActorCont
 			return Root{}, Catalog{}, appbook.Inputs{}, ErrUnavailable
 		}
 	}
-	if at.Before(gen.EffectiveObservation(at, root.UpdatedAt)) {
-		return Root{}, Catalog{}, appbook.Inputs{}, ErrStale
-	}
 	catalog, err := s.Content.WorkshopInputsTx(ctx, t, revision)
 	if err != nil {
 		return Root{}, Catalog{}, appbook.Inputs{}, err
@@ -347,7 +344,7 @@ func (s Service) BoardInfo(ctx context.Context, a identity.ActorContext, op oper
 			root.Facts = state
 			previous := root.Version
 			root.Version++
-			root.UpdatedAt = at
+			root.UpdatedAt = gen.EffectiveObservation(at, root.UpdatedAt, root.CreatedAt)
 			if err = s.Owner.SaveRootTx(ctx, sc.Tx, root, previous); err != nil {
 				return err
 			}
@@ -421,7 +418,7 @@ func (s Service) BoardInfo(ctx context.Context, a identity.ActorContext, op oper
 		root.Facts = state
 		previous := root.Version
 		root.Version++
-		root.UpdatedAt = at
+		root.UpdatedAt = gen.EffectiveObservation(at, root.UpdatedAt, root.CreatedAt)
 		if err = s.Owner.SaveRootTx(ctx, sc.Tx, root, previous); err != nil {
 			return err
 		}

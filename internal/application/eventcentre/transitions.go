@@ -39,9 +39,6 @@ func (s Service) apply(ctx context.Context, sc tx.Scope, a identity.ActorContext
 			return nil, ErrUnavailable
 		}
 	}
-	if at.Before(gen.EffectiveObservation(at, root.UpdatedAt)) {
-		return nil, ErrStale
-	}
 	catalog, err := s.Content.WorkshopInputsTx(ctx, t, d.ContentRevision)
 	if err != nil {
 		return nil, err
@@ -85,7 +82,7 @@ func (s Service) apply(ctx context.Context, sc tx.Scope, a identity.ActorContext
 		previous := root.Version
 		root.Version++
 		root.Facts = state
-		root.UpdatedAt = at
+		root.UpdatedAt = gen.EffectiveObservation(at, root.UpdatedAt, root.CreatedAt)
 		if err = s.Owner.SaveRootTx(ctx, t, root, previous); err != nil {
 			return nil, err
 		}
