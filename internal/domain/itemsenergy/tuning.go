@@ -37,6 +37,10 @@ var errTuning = errors.New("items-energy: operator tuning")
 // Tune returns the catalog with t applied. Any validation failure leaves the
 // source catalog in force.
 func (c Catalog) Tune(t Tuning) (Catalog, error) {
+	if t.BuyEnergyNum < 0 || t.EnergyMaxLimit < 0 || t.MidasBase < 0 || t.MidasLevelIncrease < 0 ||
+		t.MidasFloatUpBasisPoints < 0 || t.MidasFloatDownBasisPoints < 0 {
+		return c, errTuning
+	}
 	applied := c
 	applied.Misc = c.Misc
 	if t.BuyEnergyNum > 0 {

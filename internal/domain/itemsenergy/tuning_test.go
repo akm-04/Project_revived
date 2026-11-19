@@ -51,10 +51,24 @@ func TestTuneRejectsInvalidOverlay(t *testing.T) {
 		"vip gate value": {VipSkillBuy: map[string]int64{"2": 2}},
 		"vip gate level": {VipSkillBuy: map[string]int64{"x": 1}},
 		"item negative":  {SkillPointItemAmount: -1},
+		"negative cap":   {EnergyMaxLimit: -1},
+		"negative grant": {BuyEnergyNum: -1},
+		"mixed invalid":  {EnergyMaxLimit: -1, BuyEnergyNum: 240},
 	} {
 		if _, err := catalog.Tune(tuning); !errors.Is(err, errTuning) {
 			t.Fatalf("%s: %v", name, err)
 		}
+	}
+}
+
+func TestTuneInvalidOverlayFallsBackAsAUnit(t *testing.T) {
+	catalog := tuneTestCatalog()
+	tuned, err := catalog.Tune(Tuning{EnergyMaxLimit: -1, BuyEnergyNum: 240})
+	if !errors.Is(err, errTuning) {
+		t.Fatalf("mixed overlay: %v", err)
+	}
+	if tuned.Misc.BuyEnergyNum != catalog.Misc.BuyEnergyNum || tuned.Misc.EnergyMaxLimit != catalog.Misc.EnergyMaxLimit {
+		t.Fatalf("invalid overlay kept a valid field: %+v", tuned.Misc)
 	}
 }
 
