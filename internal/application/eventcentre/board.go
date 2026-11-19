@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	"math"
 	"reflect"
 	"sort"
@@ -78,7 +79,7 @@ func (s Service) boardFactsTx(ctx context.Context, t tx.Tx, a identity.ActorCont
 			return Root{}, Catalog{}, appbook.Inputs{}, ErrUnavailable
 		}
 	}
-	if at.Before(root.UpdatedAt) {
+	if at.Before(gen.EffectiveObservation(at, root.UpdatedAt)) {
 		return Root{}, Catalog{}, appbook.Inputs{}, ErrStale
 	}
 	catalog, err := s.Content.WorkshopInputsTx(ctx, t, revision)

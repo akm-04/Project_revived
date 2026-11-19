@@ -3,6 +3,7 @@ package eventcentre
 import (
 	"context"
 	"encoding/binary"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	"math/big"
 	"reflect"
 	"sort"
@@ -38,7 +39,7 @@ func (s Service) apply(ctx context.Context, sc tx.Scope, a identity.ActorContext
 			return nil, ErrUnavailable
 		}
 	}
-	if at.Before(root.UpdatedAt) {
+	if at.Before(gen.EffectiveObservation(at, root.UpdatedAt)) {
 		return nil, ErrStale
 	}
 	catalog, err := s.Content.WorkshopInputsTx(ctx, t, d.ContentRevision)
