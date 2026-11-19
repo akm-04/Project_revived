@@ -43,4 +43,18 @@ func TestC13BReadOnlyArenaPlayoffsNative(t *testing.T) {
 	if !ok || info["have_dec_flag"] != int64(0) {
 		t.Fatalf("1283 player_info.have_dec_flag = %#v", response.Body["player_info"])
 	}
+	status, ok := response.Body["battle_status"].(map[string]any)
+	if !ok {
+		t.Fatalf("1283 battle_status = %#v", response.Body["battle_status"])
+	}
+	if rows, ok := status["3"].([]int64); !ok || len(rows) != 0 {
+		t.Fatalf("1283 undecided qualifiers = %#v", status["3"])
+	}
+	group := dispatcher.Dispatch(context.Background(), nativeDispatch(actor, 1286, map[string]any{"index": int64(1)}, op()))
+	if group.HTTPStatus != 200 {
+		t.Fatalf("1286 status %d body %+v", group.HTTPStatus, group.Body)
+	}
+	if _, ok := group.Body["0"]; ok {
+		t.Fatalf("1286 served a BYE row without a locked group: %+v", group.Body)
+	}
 }

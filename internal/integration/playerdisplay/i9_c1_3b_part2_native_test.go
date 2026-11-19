@@ -4,6 +4,7 @@ package playerdisplay_test
 
 import (
 	"context"
+	"errors"
 	"reflect"
 	"testing"
 	"time"
@@ -18,6 +19,7 @@ import (
 	appidentity "gxb.local/backend/v2/internal/application/identitylifecycle"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	appworldboss "gxb.local/backend/v2/internal/application/worldboss"
+	d "gxb.local/backend/v2/internal/domain/arena"
 	"gxb.local/backend/v2/internal/domain/guild"
 	"gxb.local/backend/v2/internal/domain/identity"
 	di "gxb.local/backend/v2/internal/domain/illusion"
@@ -110,18 +112,30 @@ func TestC13BPart2ArenaPartners769Native(t *testing.T) {
 	if _, err := service.Info(ctx, a, op()); err != nil {
 		t.Fatal("arena entry", err)
 	}
+	other, _ := oneOnOnePlayer(t, database, rankingServer(t, database))
+	if _, err := service.Info(ctx, other, op()); err != nil {
+		t.Fatal("subject arena entry", err)
+	}
+	exec(t, database, `UPDATE arena_players SET point=$2 WHERE player_id=$1`, int64(other.PlayerID), 42)
+	subject, err := service.Partners(ctx, a, other.PlayerID, op())
+	if err != nil || subject.Player.PlayerID != other.PlayerID || subject.Player.Point != 42 {
+		t.Fatalf("769 subject read: %+v %v", subject.Player, err)
+	}
+	if _, err := service.Partners(ctx, a, identity.PlayerID(9), op()); !errors.Is(err, d.ErrRefused) {
+		t.Fatalf("769 unknown subject err = %v", err)
+	}
 	before := scalar(t, database, `SELECT point FROM arena_players WHERE player_id=$1`, int64(a.PlayerID))
 	gate := newSnapshotGate(database)
 	service.Timed.Runner.DB = gate
 	var partners = struct {
 		view struct{ Player struct{ Point int64 } }
 	}{}
-	err := runReadUnderWrite(t, gate,
+	err = runReadUnderWrite(t, gate,
 		func(c context.Context) error {
 			return commitConcurrentWrite(t, database, `UPDATE arena_players SET point=point+100 WHERE player_id=$1`, int64(a.PlayerID))
 		},
 		func(c context.Context) error {
-			view, readErr := service.Partners(c, a, op())
+			view, readErr := service.Partners(c, a, a.PlayerID, op())
 			partners.view.Player.Point = view.Player.Point
 			return readErr
 		})

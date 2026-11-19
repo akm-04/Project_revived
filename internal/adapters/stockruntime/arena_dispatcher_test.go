@@ -12,13 +12,16 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 )
 
 type arenaFake struct {
-	fight      app.FightCommand
-	unresolved bool
-	fightErr   error
-	calls      int
+	fight          app.FightCommand
+	unresolved     bool
+	fightErr       error
+	partnerErr     error
+	partnerSubject identity.PlayerID
+	calls          int
 }
 
 var arenaPlayer = d.Player{PlayerID: 100001, Season: 33, Star: 12, Point: 0, TotalFight: 4, WinTimes: 3, KeepWin: 2, DailyFights: 4, Defense: d.Lineup{Heroes: []int64{1, 2, 3, 4, 5}, Pet: 9},
@@ -28,7 +31,11 @@ func (f *arenaFake) Info(context.Context, identity.ActorContext, operation.Conte
 	f.calls++
 	return d.InfoView{Player: arenaPlayer, Season: d.Season{Number: 33, OpensAt: time.Unix(1700000000, 0)}, Rank: 7, Total: 20, KingCoin: 640, At: time.Unix(1700000000+2*86400, 0)}, nil
 }
-func (f *arenaFake) Partners(context.Context, identity.ActorContext, operation.Context) (d.PartnersView, error) {
+func (f *arenaFake) Partners(_ context.Context, _ identity.ActorContext, subject identity.PlayerID, _ operation.Context) (d.PartnersView, error) {
+	f.partnerSubject = subject
+	if f.partnerErr != nil {
+		return d.PartnersView{}, f.partnerErr
+	}
 	return d.PartnersView{Player: arenaPlayer, Usage: []d.Usage{{TableID: 11001, Fights: 2, Wins: 1, Kills: 3, Harms: "1200.500000"}}}, nil
 }
 func (f *arenaFake) ModifyDefence(_ context.Context, _ identity.ActorContext, heroes []int64, pet int64, _ operation.Context) (d.Player, error) {
@@ -95,12 +102,16 @@ func TestI7C5DArenaWireShapes(t *testing.T) {
 	}
 	if partners := call(769, map[string]any{}); partners["partner_info"].([]map[string]any)[0]["total_damage"] != int64(1200) {
 		t.Fatal("GET_REARENA_PARTNERS", partners)
+	} else {
+		replyconformance.Check(t, 769, partners)
 	}
 	if saved := call(770, map[string]any{"heros": []any{n("1"), n("2"), n("3"), n("4"), n("5")}, "pet_id": n("9")}); saved["pet_id"] != int64(9) {
 		t.Fatal("REARENA_MODIFY_DEFENCE", saved)
 	}
 	if enemy := call(771, map[string]any{"is_practice": n("1")}); enemy["player_id"] != int64(200007) || enemy["region_name"] != "S2" || enemy["self_region_name"] != "S1" || enemy["total_fight"] != int64(5) {
 		t.Fatal("REARENA_MATCH_ENEMY", enemy)
+	} else {
+		replyconformance.Check(t, 771, enemy)
 	}
 	if call(772, map[string]any{})["is_back_battle"] != int64(1) {
 		t.Fatal("REARENA_START_FIGHT answers a server battle")
@@ -144,6 +155,33 @@ func TestI7C5DArenaWireShapes(t *testing.T) {
 	}
 	if f.calls != before {
 		t.Fatal("invalid request reached the owner")
+	}
+}
+
+func TestArenaPartnersReadsTheRequestedSubject(t *testing.T) {
+	f := &arenaFake{}
+	dispatcher := ArenaDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: f}
+	number := func(v string) json.Number { return json.Number(v) }
+	call := func(params map[string]any) httpedge.Response {
+		return dispatcher.Dispatch(context.Background(), heroReq(t, 769, params))
+	}
+	if r := call(map[string]any{}); r.HTTPStatus != 200 || f.partnerSubject != 100001 {
+		t.Fatal("own History without player_id", r, f.partnerSubject)
+	}
+	if r := call(map[string]any{"player_id": number("100001")}); r.HTTPStatus != 200 || f.partnerSubject != 100001 {
+		t.Fatal("own History with player_id", r, f.partnerSubject)
+	}
+	if r := call(map[string]any{"player_id": number("200007")}); r.HTTPStatus != 200 || f.partnerSubject != 200007 {
+		t.Fatal("another player's History", r, f.partnerSubject)
+	}
+	f.partnerErr = d.ErrRefused
+	if r := call(map[string]any{"player_id": number("200008")}); r.HTTPStatus != 409 || r.Body["error_code"] != unprovenRefusalCode {
+		t.Fatal("unknown subject is not the arena refusal", r)
+	}
+	f.partnerErr = nil
+	before := f.calls
+	if r := call(map[string]any{"player_id": number("200007"), "other": number("1")}); r.HTTPStatus != 400 || f.calls != before {
+		t.Fatal("a foreign request key reached the owner", r)
 	}
 }
 

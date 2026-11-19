@@ -4,6 +4,7 @@
 package arena
 
 import (
+	"maps"
 	"strconv"
 
 	d "gxb.local/backend/v2/internal/domain/arena"
@@ -87,7 +88,13 @@ func Enemy(v d.EnemyView) map[string]any {
 		"total_fight": v.Standing.TotalFight, "player_name": v.Face.Name, "region_name": v.Face.ServerName, "guild_name": v.Face.GuildName, "player_id": int64(v.Face.Player),
 		"self_region_name": v.SelfServerName, "region": int64(v.Face.Server)}
 	if v.Pet != nil {
-		body["pet_id"], body["pet_info"] = v.Pet["pet_id"], v.Pet
+		// SelectTeamRearenaWindow builds its preview from pet_info.pet_star and
+		// falls back to the table's initial star without it.
+		pet := maps.Clone(v.Pet)
+		if star, present := pet["star"]; present {
+			pet["pet_star"] = star
+		}
+		body["pet_id"], body["pet_info"] = v.Pet["pet_id"], pet
 	}
 	return body
 }

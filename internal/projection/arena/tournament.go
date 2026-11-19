@@ -2,6 +2,7 @@ package arena
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -79,6 +80,13 @@ func PlayoffsInfo(view d.TournamentView) map[string]any {
 		}
 	}
 	status := map[string]any{"2": []int64{}, "3": []int64{}, "4": []int64{}, "5": []int64{}, "6": []int64{}, "7": []int64{}}
+	if qualifiers := view.Period.Qualifiers(); len(qualifiers) > 0 {
+		rows := make([]int64, 0, len(qualifiers))
+		for _, player := range qualifiers {
+			rows = append(rows, int64(player))
+		}
+		status["3"] = rows
+	}
 	if view.Period.RosterLocked && !view.Period.Cancelled {
 		roster := []int64{}
 		for _, group := range view.Period.Groups {
@@ -128,6 +136,14 @@ func PlayoffsGroup(view d.TournamentView, group int) map[string]any {
 			key := strconv.FormatInt(int64(entrant.PlayerID), 10)
 			rows[key] = info[key]
 		}
+	}
+	// The stock group popup indexes all four cached seats, so a sparse group
+	// needs the same display-only zero card 1283 serves.
+	if group < 1 || group > d.TournamentGroupCount || !view.Period.RosterLocked || view.Period.Cancelled {
+		return rows
+	}
+	if slices.Contains(view.Period.Groups[group-1][:], identity.PlayerID(0)) {
+		rows["0"] = info["0"]
 	}
 	return rows
 }

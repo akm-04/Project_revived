@@ -112,6 +112,39 @@ func (period TournamentPeriod) hasStage(stage int) bool {
 	return slices.ContainsFunc(period.Contests, func(contest TournamentContest) bool { return contest.Stage == stage })
 }
 
+// Qualifiers lists the quarterfinalists the bracket itself derives from a
+// decided group play: real seats in group and standing order, never BYEs. It is
+// empty while group play is undecided.
+func (period TournamentPeriod) Qualifiers() []identity.PlayerID {
+	qualified := []identity.PlayerID{}
+	if !period.RosterLocked || period.Cancelled {
+		return qualified
+	}
+	if _, complete := period.stageContests(3); !complete {
+		return qualified
+	}
+	for _, seats := range period.Groups {
+		standings := []TournamentGroupStanding{}
+		for _, player := range seats {
+			if player == 0 {
+				continue
+			}
+			entrant, found := period.Entrant(player)
+			if !found {
+				continue
+			}
+			standings = append(standings, TournamentGroupStanding{Enrollment: entrant.TournamentEnrollment, Wins: entrant.GroupWins})
+		}
+		for index, standing := range OrderTournamentGroup(standings) {
+			if index >= 2 {
+				break
+			}
+			qualified = append(qualified, standing.Enrollment.PlayerID)
+		}
+	}
+	return qualified
+}
+
 // AdvanceBracket never treats a missing room result as a win or an elapsed deadline as a battle result.
 func (period *TournamentPeriod) AdvanceBracket(stage int) error {
 	if !period.RosterLocked || period.Cancelled || stage < 4 || period.Settled {

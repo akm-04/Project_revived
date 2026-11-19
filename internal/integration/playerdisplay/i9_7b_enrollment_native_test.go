@@ -121,6 +121,10 @@ func TestI97BEnrollmentUsesImmutableSettlementNative(t *testing.T) {
 	if _, err := service.EnrollTournament(ctx, first, op()); err == nil {
 		t.Fatal("registration reopened at preparation")
 	}
+	group := projection.PlayoffsGroup(d.TournamentView{Period: locked}, 1)
+	if bye, ok := group["0"].(map[string]any); !ok || bye["fans"] != int64(0) || bye["win_times"] != int64(0) {
+		t.Fatalf("sparse group BYE row = %#v", group["0"])
+	}
 	if _, err := service.SupportTournament(ctx, first, second.PlayerID, op()); err != nil {
 		t.Fatal(err)
 	}
@@ -200,6 +204,21 @@ func TestI97BEnrollmentUsesImmutableSettlementNative(t *testing.T) {
 		if count := scalar(t, database, `SELECT count(*) FROM mail_records WHERE recipient_player_id=$1 AND source_kind='ARENA_PLAYOFFS_REWARD'`, int64(entrant.PlayerID)); count != 1 {
 			t.Fatalf("tournament reward count %d", count)
 		}
+	}
+	finalView, err := service.PlayoffsView(ctx, first, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	qualified := map[int64]bool{}
+	rows, ok := projection.PlayoffsInfo(finalView)["battle_status"].(map[string]any)["3"].([]int64)
+	if !ok || len(rows) != 2 {
+		t.Fatalf("decided qualifiers = %#v", rows)
+	}
+	for _, player := range rows {
+		qualified[player] = true
+	}
+	if !qualified[int64(first.PlayerID)] || !qualified[int64(second.PlayerID)] {
+		t.Fatalf("qualifiers lost a real quarterfinalist: %#v", rows)
 	}
 	if _, err := service.AdvanceTournament(ctx, season, op()); err != nil {
 		t.Fatal(err)

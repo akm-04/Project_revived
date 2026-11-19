@@ -47489,7 +47489,7 @@
    "isolation": [
     {
      "file": "internal/application/arena/reads.go",
-     "line": 38,
+     "line": 39,
      "value": "repeatable_read"
     }
    ],
@@ -47497,7 +47497,7 @@
    "read_only": [
     {
      "file": "internal/application/arena/reads.go",
-     "line": 38,
+     "line": 39,
      "value": "true"
     }
    ],
@@ -47505,7 +47505,7 @@
    "retry": [
     {
      "file": "internal/application/arena/reads.go",
-     "line": 38,
+     "line": 39,
      "value": "1"
     }
    ],
@@ -47516,7 +47516,7 @@
      "file": "internal/application/arena/reads.go",
      "function": "Service.Partners",
      "isolation": "repeatable_read",
-     "line": 38,
+     "line": 39,
      "read_only": "true",
      "retry": "1"
     }
@@ -49019,7 +49019,7 @@
    "isolation": [
     {
      "file": "internal/application/arena/reads.go",
-     "line": 56,
+     "line": 64,
      "value": "repeatable_read"
     }
    ],
@@ -49027,7 +49027,7 @@
    "read_only": [
     {
      "file": "internal/application/arena/reads.go",
-     "line": 56,
+     "line": 64,
      "value": "true"
     }
    ],
@@ -49035,7 +49035,7 @@
    "retry": [
     {
      "file": "internal/application/arena/reads.go",
-     "line": 56,
+     "line": 64,
      "value": "1"
     }
    ],
@@ -49046,7 +49046,7 @@
      "file": "internal/application/arena/reads.go",
      "function": "Service.Records",
      "isolation": "repeatable_read",
-     "line": 56,
+     "line": 64,
      "read_only": "true",
      "retry": "1"
     }
@@ -49090,7 +49090,7 @@
    "isolation": [
     {
      "file": "internal/application/arena/reads.go",
-     "line": 102,
+     "line": 110,
      "value": "repeatable_read"
     }
    ],
@@ -49098,7 +49098,7 @@
    "read_only": [
     {
      "file": "internal/application/arena/reads.go",
-     "line": 102,
+     "line": 110,
      "value": "true"
     }
    ],
@@ -49106,7 +49106,7 @@
    "retry": [
     {
      "file": "internal/application/arena/reads.go",
-     "line": 102,
+     "line": 110,
      "value": "1"
     }
    ],
@@ -49117,7 +49117,7 @@
      "file": "internal/application/arena/reads.go",
      "function": "Service.Report",
      "isolation": "repeatable_read",
-     "line": 102,
+     "line": 110,
      "read_only": "true",
      "retry": "1"
     }

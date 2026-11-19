@@ -132,7 +132,7 @@ func TestI9_11ArenaHeroPicksNative(t *testing.T) {
 	if !awardFound {
 		t.Fatal("girl award row missing")
 	}
-	partners, err := s.Partners(ctx, a, op())
+	partners, err := s.Partners(ctx, a, a.PlayerID, op())
 	if err != nil {
 		t.Fatal(err)
 	}

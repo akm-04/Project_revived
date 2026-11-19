@@ -32,15 +32,12 @@ func (s Service) current(c context.Context, q tx.Queryer, pid identity.PlayerID,
 	return catalog, catalog.Rolled(p, now), nil
 }
 
-// Partners answers GET_REARENA_PARTNERS: season statistics and girl usage.
-func (s Service) Partners(c context.Context, a identity.ActorContext, op operation.Context) (d.PartnersView, error) {
+// Partners answers GET_REARENA_PARTNERS: the requested player's season
+// statistics and girl usage, read without mutation.
+func (s Service) Partners(c context.Context, a identity.ActorContext, subject identity.PlayerID, op operation.Context) (d.PartnersView, error) {
 	var out d.PartnersView
 	_, _, err := s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, readRetry(), nil, func(c context.Context, sc gen.TimedScope) error {
-		_, p, err := s.current(c, sc.Tx, a.PlayerID, sc.Operation.DecisionAt())
-		if err != nil {
-			return err
-		}
-		usage, err := s.Store.UsageTx(c, sc.Tx, a.PlayerID, p.Season)
+		p, usage, err := s.partnersSubject(c, sc.Tx, subject, sc.Operation.DecisionAt())
 		if err != nil {
 			return err
 		}
@@ -48,6 +45,17 @@ func (s Service) Partners(c context.Context, a identity.ActorContext, op operati
 		return nil
 	})
 	return out, err
+}
+
+// partnersSubject is the Arena-owned subject read of one player's statistics.
+// An unknown subject is ErrRefused, which the dispatcher answers 409.
+func (s Service) partnersSubject(c context.Context, q tx.Queryer, subject identity.PlayerID, at time.Time) (d.Player, []d.Usage, error) {
+	_, p, err := s.current(c, q, subject, at)
+	if err != nil {
+		return d.Player{}, nil, err
+	}
+	usage, err := s.Store.UsageTx(c, q, subject, p.Season)
+	return p, usage, err
 }
 
 // Records lists the retained ranked fights, newest first.

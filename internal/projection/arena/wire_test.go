@@ -25,6 +25,20 @@ func TestAwardRowsCarryZeroRegionArenaTimes(t *testing.T) {
 	}
 }
 
+func TestEnemyCopiesPetStarForTheStockSelector(t *testing.T) {
+	pet := map[string]any{"pet_id": int64(40001001), "table_id": int64(40001001), "star": int64(3)}
+	info := Enemy(d.EnemyView{Pet: pet})["pet_info"].(map[string]any)
+	if info["pet_star"] != int64(3) || info["star"] != int64(3) {
+		t.Fatalf("pet_info = %#v", info)
+	}
+	if _, leaked := pet["pet_star"]; leaked {
+		t.Fatal("Enemy mutated the shared pet projection")
+	}
+	if _, present := Enemy(d.EnemyView{})["pet_info"]; present {
+		t.Fatal("no pet served a pet_info key")
+	}
+}
+
 func TestInfoKeepsTheDefenceFormationAnArray(t *testing.T) {
 	body := Info(d.InfoView{Player: d.Player{Defense: d.Lineup{Heroes: nil}}})
 	defence, ok := body["defence_formation"].([]int64)

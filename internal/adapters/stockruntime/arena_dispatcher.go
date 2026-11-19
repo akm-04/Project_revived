@@ -22,7 +22,7 @@ var ArenaMIDs = []uint16{666, 768, 769, 770, 771, 772, 773, 774, 775, 776, 777, 
 
 type ArenaPort interface {
 	Info(context.Context, identity.ActorContext, operation.Context) (d.InfoView, error)
-	Partners(context.Context, identity.ActorContext, operation.Context) (d.PartnersView, error)
+	Partners(context.Context, identity.ActorContext, identity.PlayerID, operation.Context) (d.PartnersView, error)
 	ModifyDefence(context.Context, identity.ActorContext, []int64, int64, operation.Context) (d.Player, error)
 	Match(context.Context, identity.ActorContext, bool, operation.Context) (d.EnemyView, error)
 	Start(context.Context, identity.ActorContext, operation.Context) error
@@ -61,10 +61,20 @@ func (o ArenaDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 		}
 		return okI5(projection.Info(v))
 	case 769:
-		if !onlyStockGameplayParams(p) {
+		// The stock player popup carries the selected player_id even for the
+		// caller's own History; absent keeps the actor read.
+		subject := a.PlayerID
+		if _, present := p["player_id"]; present {
+			requested, ok := topFloorInteger(p, "player_id", true)
+			if !ok {
+				return bad
+			}
+			subject = identity.PlayerID(requested)
+		}
+		if !onlyStockGameplayParams(p, "player_id") {
 			return bad
 		}
-		v, err := o.Service.Partners(ctx, a, op)
+		v, err := o.Service.Partners(ctx, a, subject, op)
 		if err != nil {
 			return failArena(err)
 		}

@@ -5,6 +5,7 @@ import (
 	d "gxb.local/backend/v2/internal/domain/arena"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -47,6 +48,54 @@ func TestReadyNoticeUsesStockPreparedFieldNames(t *testing.T) {
 	}
 	if _, exists := body["A_is_prepared"]; exists {
 		t.Fatal("non-source prepared alias")
+	}
+}
+
+func TestPlayoffsInfoListsOnlyDecidedRealQualifiers(t *testing.T) {
+	period := d.TournamentPeriod{RosterLocked: true, Contests: []d.TournamentContest{{Stage: 3, Complete: true, Winner: 11}}}
+	period.Groups[0] = [4]identity.PlayerID{11, 22, 0, 0}
+	period.Groups[1] = [4]identity.PlayerID{33, 0, 0, 0}
+	period.Entrants = []d.TournamentEntrant{
+		{TournamentEnrollment: d.TournamentEnrollment{PlayerID: 11, PreviousSeasonRank: 1, RegistrationSequence: 1}, Group: 1},
+		{TournamentEnrollment: d.TournamentEnrollment{PlayerID: 22, PreviousSeasonRank: 2, RegistrationSequence: 2}, Group: 1},
+		{TournamentEnrollment: d.TournamentEnrollment{PlayerID: 33, PreviousSeasonRank: 3, RegistrationSequence: 3}, Group: 2},
+	}
+	status := PlayoffsInfo(d.TournamentView{Period: period})["battle_status"].(map[string]any)
+	if rows, ok := status["3"].([]int64); !ok || !reflect.DeepEqual(rows, []int64{11, 22, 33}) {
+		t.Fatalf("qualified quarterfinalists = %#v", status["3"])
+	}
+	period.Contests = append(period.Contests, d.TournamentContest{Stage: 3})
+	status = PlayoffsInfo(d.TournamentView{Period: period})["battle_status"].(map[string]any)
+	if rows, ok := status["3"].([]int64); !ok || len(rows) != 0 {
+		t.Fatalf("undecided group play listed qualifiers: %#v", status["3"])
+	}
+}
+
+func TestPlayoffsGroupAddsTheDisplayOnlyByeRow(t *testing.T) {
+	period := d.TournamentPeriod{RosterLocked: true}
+	period.Groups[0] = [4]identity.PlayerID{11, 22, 0, 0}
+	period.Entrants = []d.TournamentEntrant{
+		{TournamentEnrollment: d.TournamentEnrollment{PlayerID: 11}, Group: 1},
+		{TournamentEnrollment: d.TournamentEnrollment{PlayerID: 22}, Group: 1},
+	}
+	group := PlayoffsGroup(d.TournamentView{Period: period}, 1)
+	bye, ok := group["0"].(map[string]any)
+	if !ok || bye["player_id"] != int64(0) || bye["fans"] != int64(0) || bye["win_times"] != int64(0) {
+		t.Fatalf("sparse group BYE row = %#v", group["0"])
+	}
+	if group["11"] == nil || group["22"] == nil {
+		t.Fatalf("sparse group lost its real seats: %#v", group)
+	}
+
+	full := d.TournamentPeriod{RosterLocked: true}
+	full.Groups[0] = [4]identity.PlayerID{11, 22, 33, 44}
+	if _, present := PlayoffsGroup(d.TournamentView{Period: full}, 1)["0"]; present {
+		t.Fatal("full group served a BYE row")
+	}
+	unlocked := d.TournamentPeriod{}
+	unlocked.Groups[0] = [4]identity.PlayerID{11, 22, 0, 0}
+	if _, present := PlayoffsGroup(d.TournamentView{Period: unlocked}, 1)["0"]; present {
+		t.Fatal("unlocked group served a BYE row")
 	}
 }
 

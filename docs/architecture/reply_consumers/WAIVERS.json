@@ -240,6 +240,12 @@
    "mid": 34,
    "path": "hot_hero",
    "reason": "onShopRefresh_ passes the refresh reply to onShopInfo_, which caches hot_hero, and checkShowDialog truth-tests it (ShopWindow.lua:1715-1726); shop type 8 serves no featured stock while 1396 is I10, so the refresh reply omits the key (I9_11_T34_REPAIRS_V1 S8)."
+  },
+  {
+   "client": "app/windows/SelectTeamRearenaWindow.lua:66",
+   "mid": 771,
+   "path": "pet_info",
+   "reason": "SelectTeamRearenaWindow reads arg_1_2.pet_info only under `if arg_1_2.pet_id ~= 0` (SelectTeamRearenaWindow.lua:66); the arena match reply omits pet_info and sends pet_id 0 for a defender with no pet."
   }
  ]
 }
