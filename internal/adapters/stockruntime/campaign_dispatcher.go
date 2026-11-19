@@ -239,5 +239,5 @@ func campaignSweep(p map[string]any) (app.Sweep, bool) {
 	_, compose := topFloorInteger(p, "itemComposeID", false)
 	_, need := topFloorInteger(p, "needItemComposeNum", false)
 	allowed := onlyStockGameplayParams(p, "campaign_id", "campaign_type", "sweep_num", "sweep_type", "awake_mission", "itemComposeID", "needItemComposeNum")
-	return app.Sweep{CampaignID: id, Type: kind, Count: count, Kind: method}, a && b && c && e && awake && compose && need && allowed && (kind == d.Normal || kind == d.Super) && count >= 1 && count <= 10 && (method == 1 || method == 2)
+	return app.Sweep{CampaignID: id, Type: kind, Count: count, Kind: method}, a && b && c && e && awake && compose && need && allowed && kind != d.Challenge && count >= 1 && count <= 10 && (method == 1 || method == 2)
 }

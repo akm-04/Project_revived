@@ -13,17 +13,17 @@ func TestSweepAndResetSourceRules(t *testing.T) {
 	c := loadCatalog(t)
 	p := Progress{Nodes: map[int64]NodeState{100001: {CampaignID: 100001, Star: 3}, 100019: {CampaignID: 100019, Star: 3}}}
 	n, _ := c.Node(100001)
-	if _, err := c.Sweep(p, n, 10, 1, 100, 0, false); !errors.Is(err, ErrRefused) {
+	if _, err := c.Sweep(p, n, 10, 1, 100, 0, 0, false); !errors.Is(err, ErrRefused) {
 		t.Fatal("VIP0 multi", err)
 	}
-	if _, err := c.Sweep(p, n, 10, 2, 100, 0, true); err != nil {
+	if _, err := c.Sweep(p, n, 10, 2, 100, 0, 0, true); err != nil {
 		t.Fatal("monthly multi", err)
 	}
-	if _, err := c.Sweep(p, n, 1, 1, 100, 0, false); err != nil {
+	if _, err := c.Sweep(p, n, 1, 1, 100, 0, 0, false); err != nil {
 		t.Fatal("VIP0 single", err)
 	}
 	for _, count := range []int64{-1, 0, 11, 1 << 62} {
-		if _, err := c.Sweep(p, n, count, 1, 100, 15, false); err == nil {
+		if _, err := c.Sweep(p, n, count, 1, 100, 0, 15, false); err == nil {
 			t.Fatal("invalid count", count)
 		}
 	}
@@ -31,11 +31,11 @@ func TestSweepAndResetSourceRules(t *testing.T) {
 	if _, _, err := c.Reset(p, elite.ID, 45, 100, 15, true, false); !errors.Is(err, ErrRefused) {
 		t.Fatal("reset initial unexhausted", err)
 	}
-	spent, err := c.Sweep(p, elite, 3, 1, 100, 15, false)
+	spent, err := c.Sweep(p, elite, 3, 1, 100, 0, 15, false)
 	if err != nil || c.Remaining(spent, elite, 100) != 0 {
 		t.Fatal("super use", spent, err)
 	}
-	if _, err = c.Sweep(spent, elite, 1, 1, 100, 15, false); !errors.Is(err, ErrRefused) {
+	if _, err = c.Sweep(spent, elite, 1, 1, 100, 0, 15, false); !errors.Is(err, ErrRefused) {
 		t.Fatal("overspend", err)
 	}
 	if _, _, err = c.Reset(spent, elite.ID, 45, 100, 0, true, false); !errors.Is(err, ErrRefused) {
@@ -87,24 +87,61 @@ func TestClearCountTracksWinsAndSweepRunsAcrossDailyReset(t *testing.T) {
 	if err != nil || lost.Progress.State(n.ID).ClearCountFloor != 1 {
 		t.Fatal("loss changed clear count", err)
 	}
-	swept, err := c.Sweep(won.Progress, n, 3, 1, 101, 15, false)
+	swept, err := c.Sweep(won.Progress, n, 3, 1, 101, 0, 15, false)
 	if err != nil || swept.State(n.ID).ClearCountFloor != 4 || won.Progress.State(n.ID).ClearCountFloor != 1 {
 		t.Fatalf("sweep count/input mutation: %+v %v", swept.State(n.ID), err)
 	}
-	if refused, err := c.Sweep(swept, n, 11, 1, 101, 15, false); err == nil || refused.State(n.ID).ClearCountFloor != 4 {
+	if refused, err := c.Sweep(swept, n, 11, 1, 101, 0, 15, false); err == nil || refused.State(n.ID).ClearCountFloor != 4 {
 		t.Fatal("refused sweep changed count", err)
 	}
 	legacy := won.Progress.State(n.ID)
 	legacy.ClearCountExact = false
-	upgraded, err := c.Sweep(won.Progress.with(legacy), n, 1, 1, 102, 0, false)
+	upgraded, err := c.Sweep(won.Progress.with(legacy), n, 1, 1, 102, 0, 0, false)
 	if err != nil || upgraded.State(n.ID).ClearCountExact || upgraded.State(n.ID).ClearCountFloor != 2 {
 		t.Fatal("unproven historical count became exact", err)
 	}
 	legacy.ClearCountFloor = math.MaxInt64
-	if _, err := c.Sweep(won.Progress.with(legacy), n, 1, 1, 102, 0, false); err == nil {
+	if _, err := c.Sweep(won.Progress.with(legacy), n, 1, 1, 102, 0, 0, false); err == nil {
 		t.Fatal("clear count overflow accepted")
 	}
 	if _, err := c.Settle(won.Progress.with(legacy), n, 3, 102, false); err == nil {
 		t.Fatal("settlement overflow accepted")
+	}
+}
+
+func TestTrialSweepAdmissionAndUses(t *testing.T) {
+	c := loadCatalog(t)
+	g, ok := c.Group(16)
+	if !ok {
+		t.Fatal("trial group 16")
+	}
+	n, ok := c.Node(g.Nodes[0])
+	if !ok {
+		t.Fatal("first node")
+	}
+	played := func(star, used int64) Progress {
+		return Progress{
+			TrialWins: map[int64]modes.Counter{16: {Period: 100, Used: used}},
+			Nodes:     map[int64]NodeState{n.ID: {CampaignID: n.ID, Star: star}},
+		}
+	}
+	if _, err := c.Sweep(played(2, 0), n, 1, 1, 100, 0, 15, false); !errors.Is(err, ErrRefused) {
+		t.Fatal("star 2 sweep", err)
+	}
+	if _, err := c.Sweep(played(3, g.DailyLimit), n, 1, 1, 100, 0, 15, false); !errors.Is(err, ErrRefused) {
+		t.Fatal("zero uses", err)
+	}
+	if _, err := c.Sweep(played(3, 1), n, 2, 1, 100, 0, 15, false); !errors.Is(err, ErrRefused) {
+		t.Fatal("count above uses", err)
+	}
+	spent, err := c.Sweep(played(3, 0), n, 2, 1, 100, 0, 15, false)
+	if err != nil || spent.TrialWins[16].In(100).Used != 2 || spent.State(n.ID).ClearCountFloor != 2 {
+		t.Fatalf("two-use sweep %+v %v", spent, err)
+	}
+	if _, err := c.Sweep(played(3, 0), Node{ID: n.ID, Type: 7}, 1, 1, 100, 0, 15, false); !errors.Is(err, ErrInvalid) {
+		t.Fatal("unknown type", err)
+	}
+	if _, err := c.Sweep(played(3, 0), Node{ID: n.ID, Type: Challenge}, 1, 1, 100, 0, 15, false); !errors.Is(err, ErrInvalid) {
+		t.Fatal("challenge sweep", err)
 	}
 }

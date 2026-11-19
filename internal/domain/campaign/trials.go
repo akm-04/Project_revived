@@ -99,6 +99,13 @@ func (c Catalog) AllowFaction(kind, tableID int64) bool {
 }
 
 func (p Progress) withTrialWin(kind, day int64) (Progress, error) {
+	return p.withTrialWins(kind, day, 1)
+}
+
+func (p Progress) withTrialWins(kind, day, count int64) (Progress, error) {
+	if count < 1 {
+		return p, ErrRefused
+	}
 	old := p.TrialWins[kind]
 	if old.Period > day {
 		return p, ErrRefused
@@ -108,7 +115,7 @@ func (p Progress) withTrialWin(kind, day int64) (Progress, error) {
 		wins[k] = v
 	}
 	counter := old.In(day)
-	counter.Used++
+	counter.Used += count
 	wins[kind] = counter
 	p.TrialWins = wins
 	return p, nil
