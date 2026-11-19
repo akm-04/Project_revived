@@ -42,5 +42,37 @@ def build_dorm(blobs, parse_table, pipe_ints, hero_templates, partner_keys, part
         equipment_ids.update(ids);templates.append(dict(template_id=core['table_id'],items=ids))
     by_item={int(r['id']):r for r in items}
     equipment=[dict(item_id=i,required_level=int(by_item[i]['level']))for i in sorted(equipment_ids)]
+    furniture_recipes,blueprint_recipes=build_furniture_recipes(furniture,by_item,pipe_ints,error)
     if (len(rooms),len(types),len(keys),len(expansions),len(furniture),len(templates))!=(16,4,18,3,267,568):raise error('Dorm selected source count drift')
-    return dict(schema_version=2,lounge_policy_id='C2C_LOUNGE_EXP_V1',random_key_policy_id='C2C_RANDOM_KEY_V1',original_server_policy_recovered=False,glue=glue,exchange_keys=exchange,rooms=sorted(rooms,key=lambda x:x['table_id']),types=types,keys=keys,expansions=expansions,furniture=sorted(furniture,key=lambda x:x['item_id']),hero_equipment=templates,equipment_items=equipment)
+    if (len(furniture_recipes),len(blueprint_recipes))!=(53,53):raise error('Dorm furniture recipe count drift')
+    return dict(schema_version=3,lounge_policy_id='C2C_LOUNGE_EXP_V1',random_key_policy_id='C2C_RANDOM_KEY_V1',original_server_policy_recovered=False,glue=glue,exchange_keys=exchange,rooms=sorted(rooms,key=lambda x:x['table_id']),types=types,keys=keys,expansions=expansions,furniture=sorted(furniture,key=lambda x:x['item_id']),hero_equipment=templates,equipment_items=equipment,furniture_recipes=dict(furniture=furniture_recipes,blueprints=blueprint_recipes))
+
+
+def build_furniture_recipes(furniture,by_item,pipe_ints,error):
+    def positive(values,label):
+        if not values or any(x<=0 for x in values):raise error(f'Dorm furniture recipe {label} missing')
+        return values
+    def item_field(item_id,name):
+        row=by_item.get(item_id)
+        if row is None:raise error(f'Dorm furniture item {item_id} is absent from item.lua')
+        return row.get(name) or '0'
+    recipes=[];blueprints=[]
+    for f in sorted(furniture,key=lambda x:x['item_id']):
+        item_id,paper=f['item_id'],f['paper_item']
+        if paper==0:continue
+        if int(item_field(item_id,'formula'))!=paper:raise error(f'Dorm furniture {item_id} formula contradicts paper {paper}')
+        materials=positive(pipe_ints(item_field(item_id,'compose')),f'materials {item_id}')
+        counts=positive(pipe_ints(item_field(item_id,'compose_num')),f'counts {item_id}')
+        if len(materials)!=len(counts):raise error(f'Dorm furniture {item_id} material shape drift')
+        glue=int(item_field(item_id,'glue'))
+        if glue<0:raise error(f'Dorm furniture {item_id} negative glue')
+        pieces=positive(pipe_ints(item_field(paper,'compose')),f'pieces {paper}')
+        piece_counts=positive(pipe_ints(item_field(paper,'compose_num')),f'piece counts {paper}')
+        if len(pieces)!=len(piece_counts):raise error(f'Dorm blueprint {paper} piece shape drift')
+        level=int(item_field(paper,'level'))
+        if level<=0:raise error(f'Dorm blueprint {paper} missing level')
+        recipes.append(dict(item_id=item_id,materials=materials,counts=counts,glue=glue,blueprint_item=paper))
+        blueprints.append(dict(item_id=paper,pieces=pieces,counts=piece_counts,level=level))
+    if len({r['item_id'] for r in blueprints})!=len(blueprints) or len({r['blueprint_item'] for r in recipes})!=len(recipes):
+        raise error('Dorm furniture blueprint is not one-to-one')
+    return recipes,sorted(blueprints,key=lambda x:x['item_id'])

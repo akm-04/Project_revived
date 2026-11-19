@@ -230,6 +230,7 @@ type Service struct {
 	EXP            CharacterEXPOwner
 	Exchange       i5.TxMaterialExchange
 	Receipts       receipt.Store
+	ReceiptRead    receipt.Reader
 	GluePurchases  GluePurchaseOwner
 	GlueValues     i5.TxGluePurchase
 	GluePrivileges GluePrivilegeReader

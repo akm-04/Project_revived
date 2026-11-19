@@ -327,6 +327,7 @@
    "i9_10c_dorm_social.json"
   ],
   "unit": [
+   "compose_test.go",
    "social_native_test.go"
   ]
  }

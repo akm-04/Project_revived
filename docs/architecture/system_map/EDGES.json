@@ -729,6 +729,7 @@
    "dormhouse": [
     "Bind",
     "DecisionAt",
+    "Operation",
     "Run"
    ],
    "elementequipment": [
@@ -3555,6 +3556,7 @@
    "generation": [
     "Bind",
     "DecisionAt",
+    "Operation",
     "Run"
    ],
    "i5": [

@@ -613,7 +613,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -944,7 +944,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -1316,7 +1316,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -1796,7 +1796,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -2038,7 +2038,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -2837,7 +2837,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -3086,7 +3086,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -3341,7 +3341,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -3718,7 +3718,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -4150,7 +4150,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -4456,7 +4456,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -4646,7 +4646,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -4819,7 +4819,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -5079,7 +5079,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -5560,7 +5560,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -5852,7 +5852,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -6387,7 +6387,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -6699,7 +6699,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -6863,6 +6863,16 @@
      "file": "internal/application/characterhero/equipment_compose.go",
      "line": 128,
      "value": "serializable"
+    },
+    {
+     "file": "internal/application/dormhouse/compose.go",
+     "line": 46,
+     "value": "repeatable_read"
+    },
+    {
+     "file": "internal/application/dormhouse/compose.go",
+     "line": 171,
+     "value": "serializable"
     }
    ],
    "mid": 83,
@@ -6895,6 +6905,16 @@
     {
      "file": "internal/application/characterhero/equipment_compose.go",
      "line": 128,
+     "value": "false"
+    },
+    {
+     "file": "internal/application/dormhouse/compose.go",
+     "line": 46,
+     "value": "false"
+    },
+    {
+     "file": "internal/application/dormhouse/compose.go",
+     "line": 171,
      "value": "false"
     }
    ],
@@ -6931,6 +6951,16 @@
     {
      "file": "internal/application/characterhero/equipment_compose.go",
      "line": 128,
+     "value": "3"
+    },
+    {
+     "file": "internal/application/dormhouse/compose.go",
+     "line": 46,
+     "value": "1"
+    },
+    {
+     "file": "internal/application/dormhouse/compose.go",
+     "line": 171,
      "value": "3"
     }
    ],
@@ -7003,6 +7033,22 @@
      "line": 128,
      "read_only": "false",
      "retry": "3"
+    },
+    {
+     "file": "internal/application/dormhouse/compose.go",
+     "function": "Service.OwnsFurnitureComposeItem",
+     "isolation": "repeatable_read",
+     "line": 46,
+     "read_only": "false",
+     "retry": "1"
+    },
+    {
+     "file": "internal/application/dormhouse/compose.go",
+     "function": "Service.ComposeFurnitureItem",
+     "isolation": "serializable",
+     "line": 171,
+     "read_only": "false",
+     "retry": "3"
     }
    ],
    "unbounded_read": [
@@ -7033,7 +7079,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -7314,7 +7360,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -7531,7 +7577,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -7918,7 +7964,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -8170,7 +8216,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -8414,7 +8460,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -8703,7 +8749,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -8965,7 +9011,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -9254,7 +9300,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -9675,7 +9721,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -10070,7 +10116,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -10407,7 +10453,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -10614,7 +10660,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -10862,7 +10908,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -11166,7 +11212,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -11705,7 +11751,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -11997,7 +12043,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -12289,7 +12335,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -12581,7 +12627,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -12873,7 +12919,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -13165,7 +13211,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -13457,7 +13503,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -13749,7 +13795,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -14041,7 +14087,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -14333,7 +14379,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -15055,7 +15101,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -15382,7 +15428,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -15674,7 +15720,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -15966,7 +16012,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -16258,7 +16304,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -16550,7 +16596,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -16842,7 +16888,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -17139,7 +17185,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -17409,7 +17455,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -17674,7 +17720,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -18135,7 +18181,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -18734,7 +18780,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -19333,7 +19379,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -19932,7 +19978,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -20531,7 +20577,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -21130,7 +21176,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -21729,7 +21775,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -22328,7 +22374,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -22927,7 +22973,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -23526,7 +23572,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -24125,7 +24171,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -24724,7 +24770,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -25323,7 +25369,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -25922,7 +25968,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -26521,7 +26567,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -26896,7 +26942,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -27498,7 +27544,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -27989,7 +28035,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -28405,7 +28451,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -30096,7 +30142,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -30473,7 +30519,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -31693,7 +31739,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -32124,7 +32170,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -32308,7 +32354,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -33692,7 +33738,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -34797,7 +34843,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -35132,7 +35178,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -36456,7 +36502,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -36919,7 +36965,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -37341,7 +37387,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -37772,7 +37818,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -38257,7 +38303,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -38620,7 +38666,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -38848,7 +38894,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -39358,7 +39404,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -40383,7 +40429,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -40830,7 +40876,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -41501,7 +41547,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -43103,7 +43149,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -43914,7 +43960,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -44703,7 +44749,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -45655,7 +45701,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -45902,7 +45948,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -46694,7 +46740,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -46944,7 +46990,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -47179,7 +47225,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -48089,7 +48135,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -48613,7 +48659,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -49315,7 +49361,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -49726,7 +49772,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -49855,7 +49901,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -50059,7 +50105,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -50292,7 +50338,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -50682,7 +50728,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -50945,7 +50991,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -51551,7 +51597,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -51985,7 +52031,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -52361,7 +52407,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -52850,7 +52896,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -53097,7 +53143,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -53328,7 +53374,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -53706,7 +53752,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -54433,7 +54479,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -54830,7 +54876,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -55227,7 +55273,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -55624,7 +55670,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -56021,7 +56067,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -56418,7 +56464,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -56815,7 +56861,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -57212,7 +57258,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -57609,7 +57655,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -58006,7 +58052,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -58403,7 +58449,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -58800,7 +58846,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -59197,7 +59243,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -59481,7 +59527,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -59668,7 +59714,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -60009,7 +60055,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -60406,7 +60452,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -60803,7 +60849,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -61200,7 +61246,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -61597,7 +61643,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -61994,7 +62040,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -62391,7 +62437,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -62762,7 +62808,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -63730,7 +63776,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -64078,7 +64124,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -64426,7 +64472,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -64774,7 +64820,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -65122,7 +65168,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -65470,7 +65516,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -65971,7 +66017,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -66637,7 +66683,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -67303,7 +67349,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -67969,7 +68015,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -68635,7 +68681,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -69148,7 +69194,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -69496,7 +69542,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -69844,7 +69890,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -70192,7 +70238,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -70693,7 +70739,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -71359,7 +71405,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -72025,7 +72071,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -72691,7 +72737,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -73357,7 +73403,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -74023,7 +74069,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -74689,7 +74735,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -75355,7 +75401,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -76021,7 +76067,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -76687,7 +76733,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -77353,7 +77399,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -79904,7 +79950,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -80714,7 +80760,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -80961,7 +81007,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -82846,7 +82892,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -83916,7 +83962,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -84243,7 +84289,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -84570,7 +84616,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -84897,7 +84943,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -85224,7 +85270,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -85551,7 +85597,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -85878,7 +85924,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -86205,7 +86251,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -87158,7 +87204,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -87530,7 +87576,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -88360,7 +88406,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -88602,7 +88648,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -92556,22 +92602,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "serializable"
     },
     {
@@ -92589,22 +92635,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "false"
     },
     {
@@ -92614,7 +92660,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:322",
+    "internal/application/dormhouse/service.go:323",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -92625,22 +92671,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "8"
     },
     {
@@ -92695,7 +92741,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 382,
+     "line": 383,
      "read_only": "false",
      "retry": "1"
     },
@@ -92703,7 +92749,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 441,
+     "line": 442,
      "read_only": "false",
      "retry": "8"
     },
@@ -92711,7 +92757,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 516,
+     "line": 517,
      "read_only": "false",
      "retry": "8"
     },
@@ -92719,7 +92765,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 574,
+     "line": 575,
      "read_only": "false",
      "retry": "8"
     },
@@ -92750,7 +92796,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -92922,7 +92968,7 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:20",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:361",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
     "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
@@ -93578,7 +93624,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -93808,7 +93854,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -94627,7 +94673,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -95640,7 +95686,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -96034,7 +96080,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -96428,7 +96474,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -96822,7 +96868,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -97216,7 +97262,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -97610,7 +97656,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -98004,7 +98050,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -98398,7 +98444,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -98792,7 +98838,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -99186,7 +99232,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -99580,7 +99626,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -99974,7 +100020,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -100368,7 +100414,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -100762,7 +100808,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -101156,7 +101202,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -102156,7 +102202,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -102800,7 +102846,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -103469,7 +103515,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -103844,7 +103890,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -104302,7 +104348,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -104513,7 +104559,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -104811,7 +104857,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -105130,7 +105176,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -107443,7 +107489,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -107935,7 +107981,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -108485,7 +108531,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -109040,7 +109086,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -109698,7 +109744,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -110253,7 +110299,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -110808,7 +110854,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -111363,7 +111409,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -112208,7 +112254,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -112873,7 +112919,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -113588,7 +113634,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -114028,7 +114074,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -114558,7 +114604,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -115019,7 +115065,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -115453,7 +115499,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -115815,7 +115861,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -116115,7 +116161,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -117206,7 +117252,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -117749,7 +117795,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -118185,7 +118231,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -119647,7 +119693,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -120093,7 +120139,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -120297,7 +120343,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -120577,7 +120623,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -120909,7 +120955,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -121241,7 +121287,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -121573,7 +121619,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -123519,7 +123565,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -123696,22 +123742,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "serializable"
     },
     {
@@ -123729,22 +123775,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "false"
     },
     {
@@ -123754,7 +123800,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:322",
+    "internal/application/dormhouse/service.go:323",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -123765,22 +123811,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "8"
     },
     {
@@ -123835,7 +123881,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 382,
+     "line": 383,
      "read_only": "false",
      "retry": "1"
     },
@@ -123843,7 +123889,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 441,
+     "line": 442,
      "read_only": "false",
      "retry": "8"
     },
@@ -123851,7 +123897,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 516,
+     "line": 517,
      "read_only": "false",
      "retry": "8"
     },
@@ -123859,7 +123905,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 574,
+     "line": 575,
      "read_only": "false",
      "retry": "8"
     },
@@ -123890,7 +123936,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -124062,7 +124108,7 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:20",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:361",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
     "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
@@ -124080,22 +124126,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "serializable"
     },
     {
@@ -124113,22 +124159,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "false"
     },
     {
@@ -124138,7 +124184,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:322",
+    "internal/application/dormhouse/service.go:323",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -124149,22 +124195,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "8"
     },
     {
@@ -124219,7 +124265,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 382,
+     "line": 383,
      "read_only": "false",
      "retry": "1"
     },
@@ -124227,7 +124273,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 441,
+     "line": 442,
      "read_only": "false",
      "retry": "8"
     },
@@ -124235,7 +124281,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 516,
+     "line": 517,
      "read_only": "false",
      "retry": "8"
     },
@@ -124243,7 +124289,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 574,
+     "line": 575,
      "read_only": "false",
      "retry": "8"
     },
@@ -124274,7 +124320,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -124446,7 +124492,7 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:20",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:361",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
     "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
@@ -124464,22 +124510,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "serializable"
     },
     {
@@ -124497,22 +124543,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "false"
     },
     {
@@ -124522,7 +124568,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:322",
+    "internal/application/dormhouse/service.go:323",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -124533,22 +124579,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "8"
     },
     {
@@ -124603,7 +124649,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 382,
+     "line": 383,
      "read_only": "false",
      "retry": "1"
     },
@@ -124611,7 +124657,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 441,
+     "line": 442,
      "read_only": "false",
      "retry": "8"
     },
@@ -124619,7 +124665,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 516,
+     "line": 517,
      "read_only": "false",
      "retry": "8"
     },
@@ -124627,7 +124673,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 574,
+     "line": 575,
      "read_only": "false",
      "retry": "8"
     },
@@ -124658,7 +124704,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -124830,7 +124876,7 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:20",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:361",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
     "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
@@ -124848,22 +124894,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "serializable"
     },
     {
@@ -124881,22 +124927,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "false"
     },
     {
@@ -124906,7 +124952,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:322",
+    "internal/application/dormhouse/service.go:323",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -124917,22 +124963,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "8"
     },
     {
@@ -124987,7 +125033,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 382,
+     "line": 383,
      "read_only": "false",
      "retry": "1"
     },
@@ -124995,7 +125041,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 441,
+     "line": 442,
      "read_only": "false",
      "retry": "8"
     },
@@ -125003,7 +125049,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 516,
+     "line": 517,
      "read_only": "false",
      "retry": "8"
     },
@@ -125011,7 +125057,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 574,
+     "line": 575,
      "read_only": "false",
      "retry": "8"
     },
@@ -125042,7 +125088,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -125214,7 +125260,7 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:20",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:361",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
     "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
@@ -125232,22 +125278,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "serializable"
     },
     {
@@ -125265,22 +125311,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "false"
     },
     {
@@ -125290,7 +125336,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:322",
+    "internal/application/dormhouse/service.go:323",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -125301,22 +125347,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "8"
     },
     {
@@ -125371,7 +125417,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 382,
+     "line": 383,
      "read_only": "false",
      "retry": "1"
     },
@@ -125379,7 +125425,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 441,
+     "line": 442,
      "read_only": "false",
      "retry": "8"
     },
@@ -125387,7 +125433,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 516,
+     "line": 517,
      "read_only": "false",
      "retry": "8"
     },
@@ -125395,7 +125441,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 574,
+     "line": 575,
      "read_only": "false",
      "retry": "8"
     },
@@ -125426,7 +125472,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -125598,7 +125644,7 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:20",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:361",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
     "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
@@ -125616,22 +125662,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "serializable"
     },
     {
@@ -125649,22 +125695,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "false"
     },
     {
@@ -125674,7 +125720,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:322",
+    "internal/application/dormhouse/service.go:323",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -125685,22 +125731,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "8"
     },
     {
@@ -125755,7 +125801,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 382,
+     "line": 383,
      "read_only": "false",
      "retry": "1"
     },
@@ -125763,7 +125809,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 441,
+     "line": 442,
      "read_only": "false",
      "retry": "8"
     },
@@ -125771,7 +125817,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 516,
+     "line": 517,
      "read_only": "false",
      "retry": "8"
     },
@@ -125779,7 +125825,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 574,
+     "line": 575,
      "read_only": "false",
      "retry": "8"
     },
@@ -125810,7 +125856,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -125982,7 +126028,7 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:20",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:361",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
     "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
@@ -126000,22 +126046,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "serializable"
     },
     {
@@ -126033,22 +126079,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "false"
     },
     {
@@ -126058,7 +126104,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:322",
+    "internal/application/dormhouse/service.go:323",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -126069,22 +126115,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "8"
     },
     {
@@ -126139,7 +126185,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 382,
+     "line": 383,
      "read_only": "false",
      "retry": "1"
     },
@@ -126147,7 +126193,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 441,
+     "line": 442,
      "read_only": "false",
      "retry": "8"
     },
@@ -126155,7 +126201,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 516,
+     "line": 517,
      "read_only": "false",
      "retry": "8"
     },
@@ -126163,7 +126209,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 574,
+     "line": 575,
      "read_only": "false",
      "retry": "8"
     },
@@ -126194,7 +126240,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -126366,7 +126412,7 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:20",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:361",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
     "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
@@ -126384,22 +126430,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "serializable"
     },
     {
@@ -126417,22 +126463,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "false"
     },
     {
@@ -126442,7 +126488,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:322",
+    "internal/application/dormhouse/service.go:323",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -126453,22 +126499,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "8"
     },
     {
@@ -126523,7 +126569,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 382,
+     "line": 383,
      "read_only": "false",
      "retry": "1"
     },
@@ -126531,7 +126577,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 441,
+     "line": 442,
      "read_only": "false",
      "retry": "8"
     },
@@ -126539,7 +126585,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 516,
+     "line": 517,
      "read_only": "false",
      "retry": "8"
     },
@@ -126547,7 +126593,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 574,
+     "line": 575,
      "read_only": "false",
      "retry": "8"
     },
@@ -126578,7 +126624,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -126750,7 +126796,7 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:20",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:361",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
     "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
@@ -126768,22 +126814,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "serializable"
     },
     {
@@ -126801,22 +126847,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "false"
     },
     {
@@ -126826,7 +126872,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:322",
+    "internal/application/dormhouse/service.go:323",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -126837,22 +126883,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "8"
     },
     {
@@ -126907,7 +126953,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 382,
+     "line": 383,
      "read_only": "false",
      "retry": "1"
     },
@@ -126915,7 +126961,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 441,
+     "line": 442,
      "read_only": "false",
      "retry": "8"
     },
@@ -126923,7 +126969,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 516,
+     "line": 517,
      "read_only": "false",
      "retry": "8"
     },
@@ -126931,7 +126977,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 574,
+     "line": 575,
      "read_only": "false",
      "retry": "8"
     },
@@ -126962,7 +127008,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -127134,7 +127180,7 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:20",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:361",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
     "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
@@ -127152,22 +127198,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "serializable"
     },
     {
@@ -127185,22 +127231,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "false"
     },
     {
@@ -127210,7 +127256,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:322",
+    "internal/application/dormhouse/service.go:323",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -127221,22 +127267,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "8"
     },
     {
@@ -127291,7 +127337,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 382,
+     "line": 383,
      "read_only": "false",
      "retry": "1"
     },
@@ -127299,7 +127345,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 441,
+     "line": 442,
      "read_only": "false",
      "retry": "8"
     },
@@ -127307,7 +127353,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 516,
+     "line": 517,
      "read_only": "false",
      "retry": "8"
     },
@@ -127315,7 +127361,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 574,
+     "line": 575,
      "read_only": "false",
      "retry": "8"
     },
@@ -127346,7 +127392,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -127518,7 +127564,7 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:20",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:361",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
     "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
@@ -127536,22 +127582,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "serializable"
     },
     {
@@ -127569,22 +127615,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "false"
     },
     {
@@ -127594,7 +127640,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:322",
+    "internal/application/dormhouse/service.go:323",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -127605,22 +127651,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "8"
     },
     {
@@ -127675,7 +127721,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 382,
+     "line": 383,
      "read_only": "false",
      "retry": "1"
     },
@@ -127683,7 +127729,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 441,
+     "line": 442,
      "read_only": "false",
      "retry": "8"
     },
@@ -127691,7 +127737,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 516,
+     "line": 517,
      "read_only": "false",
      "retry": "8"
     },
@@ -127699,7 +127745,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 574,
+     "line": 575,
      "read_only": "false",
      "retry": "8"
     },
@@ -127730,7 +127776,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -127902,7 +127948,7 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:20",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:361",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
     "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
@@ -127920,22 +127966,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "serializable"
     },
     {
@@ -127953,22 +127999,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "false"
     },
     {
@@ -127978,7 +128024,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:322",
+    "internal/application/dormhouse/service.go:323",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -127989,22 +128035,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "8"
     },
     {
@@ -128059,7 +128105,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 382,
+     "line": 383,
      "read_only": "false",
      "retry": "1"
     },
@@ -128067,7 +128113,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 441,
+     "line": 442,
      "read_only": "false",
      "retry": "8"
     },
@@ -128075,7 +128121,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 516,
+     "line": 517,
      "read_only": "false",
      "retry": "8"
     },
@@ -128083,7 +128129,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 574,
+     "line": 575,
      "read_only": "false",
      "retry": "8"
     },
@@ -128114,7 +128160,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -128286,7 +128332,7 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:20",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:361",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
     "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
@@ -128304,22 +128350,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "serializable"
     },
     {
@@ -128337,22 +128383,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "false"
     },
     {
@@ -128362,7 +128408,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:322",
+    "internal/application/dormhouse/service.go:323",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -128373,22 +128419,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "8"
     },
     {
@@ -128443,7 +128489,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 382,
+     "line": 383,
      "read_only": "false",
      "retry": "1"
     },
@@ -128451,7 +128497,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 441,
+     "line": 442,
      "read_only": "false",
      "retry": "8"
     },
@@ -128459,7 +128505,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 516,
+     "line": 517,
      "read_only": "false",
      "retry": "8"
     },
@@ -128467,7 +128513,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 574,
+     "line": 575,
      "read_only": "false",
      "retry": "8"
     },
@@ -128498,7 +128544,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -128670,7 +128716,7 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:20",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:361",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
     "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
@@ -128688,22 +128734,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "serializable"
     },
     {
@@ -128721,22 +128767,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "false"
     },
     {
@@ -128746,7 +128792,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:322",
+    "internal/application/dormhouse/service.go:323",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -128757,22 +128803,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "8"
     },
     {
@@ -128827,7 +128873,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 382,
+     "line": 383,
      "read_only": "false",
      "retry": "1"
     },
@@ -128835,7 +128881,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 441,
+     "line": 442,
      "read_only": "false",
      "retry": "8"
     },
@@ -128843,7 +128889,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 516,
+     "line": 517,
      "read_only": "false",
      "retry": "8"
     },
@@ -128851,7 +128897,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 574,
+     "line": 575,
      "read_only": "false",
      "retry": "8"
     },
@@ -128882,7 +128928,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -129054,7 +129100,7 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:20",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:361",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
     "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
@@ -129072,22 +129118,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "serializable"
     },
     {
@@ -129105,22 +129151,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "false"
     },
     {
@@ -129130,7 +129176,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:322",
+    "internal/application/dormhouse/service.go:323",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -129141,22 +129187,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "8"
     },
     {
@@ -129211,7 +129257,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 382,
+     "line": 383,
      "read_only": "false",
      "retry": "1"
     },
@@ -129219,7 +129265,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 441,
+     "line": 442,
      "read_only": "false",
      "retry": "8"
     },
@@ -129227,7 +129273,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 516,
+     "line": 517,
      "read_only": "false",
      "retry": "8"
     },
@@ -129235,7 +129281,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 574,
+     "line": 575,
      "read_only": "false",
      "retry": "8"
     },
@@ -129266,7 +129312,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -129438,7 +129484,7 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:20",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:361",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
     "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
@@ -129966,7 +130012,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -130820,7 +130866,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -131358,7 +131404,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -131604,7 +131650,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -132294,22 +132340,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "serializable"
     },
     {
@@ -132327,22 +132373,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "false"
     },
     {
@@ -132352,7 +132398,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:322",
+    "internal/application/dormhouse/service.go:323",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -132363,22 +132409,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "8"
     },
     {
@@ -132433,7 +132479,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 382,
+     "line": 383,
      "read_only": "false",
      "retry": "1"
     },
@@ -132441,7 +132487,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 441,
+     "line": 442,
      "read_only": "false",
      "retry": "8"
     },
@@ -132449,7 +132495,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 516,
+     "line": 517,
      "read_only": "false",
      "retry": "8"
     },
@@ -132457,7 +132503,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 574,
+     "line": 575,
      "read_only": "false",
      "retry": "8"
     },
@@ -132488,7 +132534,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -132660,7 +132706,7 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:20",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:361",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
     "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
@@ -132678,22 +132724,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "serializable"
     },
     {
@@ -132711,22 +132757,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "false"
     },
     {
@@ -132736,7 +132782,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:322",
+    "internal/application/dormhouse/service.go:323",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -132747,22 +132793,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "8"
     },
     {
@@ -132817,7 +132863,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 382,
+     "line": 383,
      "read_only": "false",
      "retry": "1"
     },
@@ -132825,7 +132871,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 441,
+     "line": 442,
      "read_only": "false",
      "retry": "8"
     },
@@ -132833,7 +132879,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 516,
+     "line": 517,
      "read_only": "false",
      "retry": "8"
     },
@@ -132841,7 +132887,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 574,
+     "line": 575,
      "read_only": "false",
      "retry": "8"
     },
@@ -132872,7 +132918,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -133044,7 +133090,7 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:20",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:361",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
     "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
@@ -133062,22 +133108,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "serializable"
     },
     {
@@ -133095,22 +133141,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "false"
     },
     {
@@ -133120,7 +133166,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:322",
+    "internal/application/dormhouse/service.go:323",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
@@ -133131,22 +133177,22 @@
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 382,
+     "line": 383,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 441,
+     "line": 442,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 516,
+     "line": 517,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 574,
+     "line": 575,
      "value": "8"
     },
     {
@@ -133201,7 +133247,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 382,
+     "line": 383,
      "read_only": "false",
      "retry": "1"
     },
@@ -133209,7 +133255,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 441,
+     "line": 442,
      "read_only": "false",
      "retry": "8"
     },
@@ -133217,7 +133263,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 516,
+     "line": 517,
      "read_only": "false",
      "retry": "8"
     },
@@ -133225,7 +133271,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 574,
+     "line": 575,
      "read_only": "false",
      "retry": "8"
     },
@@ -133256,7 +133302,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -133428,7 +133474,7 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:20",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:361",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
     "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
@@ -134059,7 +134105,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -134351,7 +134397,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -135099,7 +135145,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -135496,7 +135542,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -135754,7 +135800,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -136134,7 +136180,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -136783,7 +136829,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -137432,7 +137478,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -138081,7 +138127,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -138730,7 +138776,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -139379,7 +139425,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -140028,7 +140074,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -140677,7 +140723,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -141631,7 +141677,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -141968,7 +142014,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -142305,7 +142351,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -142642,7 +142688,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -142979,7 +143025,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -144279,7 +144325,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -144516,7 +144562,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -144877,7 +144923,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -145399,7 +145445,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -146644,7 +146690,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -146896,7 +146942,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -147148,7 +147194,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -147409,7 +147455,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -147791,7 +147837,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -148100,7 +148146,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -148352,7 +148398,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -148810,7 +148856,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -149388,7 +149434,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -149640,7 +149686,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -149892,7 +149938,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {
@@ -150352,7 +150398,7 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
-     "line": 160,
+     "line": 170,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
     },
     {

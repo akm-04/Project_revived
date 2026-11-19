@@ -126,6 +126,16 @@ func dormCatalogDomain(d builtin.DormInputCatalog) (dorm.Catalog, error) {
 		}
 		out.Glue = &glue
 	}
+	if d.FurnitureRecipes != nil {
+		out.FurnitureRecipes = make(map[int64]dorm.FurnitureRecipe, len(d.FurnitureRecipes.Furniture))
+		out.BlueprintRecipes = make(map[int64]dorm.BlueprintRecipe, len(d.FurnitureRecipes.Blueprints))
+		for _, r := range d.FurnitureRecipes.Furniture {
+			out.FurnitureRecipes[r.ItemID] = dorm.FurnitureRecipe{ItemID: r.ItemID, Materials: append([]int64(nil), r.Materials...), Counts: append([]int64(nil), r.Counts...), Glue: r.Glue, BlueprintItem: r.BlueprintItem}
+		}
+		for _, r := range d.FurnitureRecipes.Blueprints {
+			out.BlueprintRecipes[r.ItemID] = dorm.BlueprintRecipe{ItemID: r.ItemID, Pieces: append([]int64(nil), r.Pieces...), Counts: append([]int64(nil), r.Counts...), Level: r.Level}
+		}
+	}
 	return out, nil
 }
 
