@@ -1229,7 +1229,7 @@ def owed(system: str) -> None:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source-archive", type=Path)
-    action = parser.add_mutually_exclusive_group(required=True)
+    action = parser.add_mutually_exclusive_group()
     action.add_argument("--write", action="store_true")
     action.add_argument("--check", action="store_true")
     parser.add_argument("words", nargs="*")
