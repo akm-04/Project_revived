@@ -2,6 +2,7 @@ package characterpet
 
 import (
 	"context"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/objective"
@@ -53,7 +54,7 @@ func (s Service) LockAwakeningPetsTx(c context.Context, t tx.Tx, p identity.Play
 }
 
 func (s Service) FinishAwakeningPetLockedTx(c context.Context, t tx.Tx, pet character.Pet, d objective.AwakeDefinition, revision string, op operation.Context, at time.Time) error {
-	if s.Awakening == nil || s.Equipment == nil || t == nil || d.Type != 3 || d.Stage != 2 || d.Before != pet.TableID || pet.ValidatePersistent() != nil || op.ID.IsZero() || at.Before(pet.UpdatedAt) {
+	if s.Awakening == nil || s.Equipment == nil || t == nil || d.Type != 3 || d.Stage != 2 || d.Before != pet.TableID || pet.ValidatePersistent() != nil || op.ID.IsZero() || at.Before(gen.EffectiveObservation(at, pet.UpdatedAt)) {
 		return objective.ErrAwakeningRefused
 	}
 	awakened, e := s.Equipment.PetTemplateAwakenedTx(c, t, revision, d.After)
