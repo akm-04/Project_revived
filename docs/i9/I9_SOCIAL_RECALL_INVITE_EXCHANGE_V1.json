@@ -60,5 +60,5 @@
   "research/I9_10E/REWARD_PROGRESS_IMPLEMENTATION_BOUNDARY.md"
  ],
  "transaction_correction": "191 must use existing I5 MaterialExchange Prepare/Apply closed lock union; never debit scalar then acquire a fresh grant union.",
- "mid_176_friend_row_notice_type": "Every MID 176 friend_list[] row carries notice_type (int). 0 means no attached notice; the stock client reads it only to group guild-invite rows (SocialSystemWindow.lua:271-273), and the C-7 reply oracle requires the key. Never invent a notice kind for a plain friend row. Built at 22b22552 (I9-11 fix wave, socialview/view.go), recorded 2026-11-19."
+ "mid_176_friend_row_notice_type": "Each friend_list[] row in MID 176 carries notice_type (int). 0 means no attached notice; the stock client reads it only to group guild-invite rows (SocialSystemWindow.lua:271-273), and the C-7 reply oracle requires the key. Never invent a notice kind for a plain friend row. Built at 22b22552 (I9-11 fix wave, socialview/view.go), recorded 2026-11-19."
 }
