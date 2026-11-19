@@ -340,22 +340,28 @@ type ResultReceipts interface {
 // reset and departure paths; Mode adds claim, fight, settle, awards and reads.
 type Mode struct {
 	Service
-	ModeStore  ModeStore
-	Content    Content
-	Tables     map[int64]ChapterInfo
-	Settings   Settings
-	Combat     ModeCombat
-	Grants     Grants
-	Facts      Facts
-	Directory  Directory
-	Roster     Roster
-	Awakenings Awakenings
-	Mail       Mailer
-	Notifier   Notifier
-	Timed      gen.TimedRunner
-	Fresh      tx.Queryer
-	Revisions  ContentRevisions
-	Receipts   ResultReceipts
+	ModeStore    ModeStore
+	Content      Content
+	Tables       map[int64]ChapterInfo
+	Settings     Settings
+	Combat       ModeCombat
+	Grants       Grants
+	Facts        Facts
+	Directory    Directory
+	Roster       Roster
+	Awakenings   Awakenings
+	Mail         Mailer
+	Notifier     Notifier
+	Timed        gen.TimedRunner
+	Fresh        tx.Queryer
+	Revisions    ContentRevisions
+	Receipts     ResultReceipts
+	BattleCounts BattleCountObserver
+}
+
+// BattleCountObserver records the Girls Log count of one first settled battle.
+type BattleCountObserver interface {
+	ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error
 }
 
 // ContentRevisions names the installed content a live request binds.

@@ -454,7 +454,10 @@ func (m Mode) Settle(c context.Context, a identity.ActorContext, request Result,
 			return err
 		}
 		out = result
-		return m.recordResultAnswer(c, sc.Tx, sc.Operation, a, prefix, fingerprint, result.Body)
+		if err = m.recordResultAnswer(c, sc.Tx, sc.Operation, a, prefix, fingerprint, result.Body); err != nil {
+			return err
+		}
+		return m.BattleCounts.ObserveBattleTx(c, sc.Tx, a.PlayerID, formation, at)
 	})
 	if err != nil {
 		return Settled{}, err

@@ -54,25 +54,31 @@ type Facts interface {
 	RecordTx(context.Context, tx.Tx, operation.Context, ...objective.Fact) error
 }
 type Mode struct {
-	Directory   RankDirectory
-	Timed       gen.TimedRunner
-	Fresh       tx.Queryer
-	Store       Store
-	Content     Content
-	Fence       Fence
-	Functions   Functions
-	Heroes      Heroes
-	HeroLocks   HeroLocks
-	Pets        Pets
-	Combat      Combat
-	Rules       cb.Rules
-	Values      Values
-	Costs       i5.TxMaterialCostDebiter
-	Privileges  i5.PrivilegeSnapshotProvider
-	Facts       Facts
-	Awakening   i5.AwakeningPetMaterialPort
-	Receipts    receipt.Store
-	ReceiptRead receipt.Reader
+	Directory    RankDirectory
+	Timed        gen.TimedRunner
+	Fresh        tx.Queryer
+	Store        Store
+	Content      Content
+	Fence        Fence
+	Functions    Functions
+	Heroes       Heroes
+	HeroLocks    HeroLocks
+	Pets         Pets
+	Combat       Combat
+	Rules        cb.Rules
+	Values       Values
+	Costs        i5.TxMaterialCostDebiter
+	Privileges   i5.PrivilegeSnapshotProvider
+	Facts        Facts
+	Awakening    i5.AwakeningPetMaterialPort
+	Receipts     receipt.Store
+	ReceiptRead  receipt.Reader
+	BattleCounts BattleCountObserver
+}
+
+// BattleCountObserver records the Girls Log count of one first settled battle.
+type BattleCountObserver interface {
+	ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error
 }
 type Fight struct {
 	Campaign  int64

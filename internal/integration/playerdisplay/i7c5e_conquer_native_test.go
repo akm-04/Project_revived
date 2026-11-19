@@ -35,7 +35,7 @@ func conquerMode(t *testing.T, p *pg.Pool) app.Mode {
 		Backpack: values, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, RedeemSecret: []byte("i7c5e-conquer-native-fixture-secret0")}
 	mode := app.Mode{Facts: conquerService(p), Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner}, Fresh: p, Store: conquerstore.Store{}, Content: content,
 		Fence: values, Functions: values, Privileges: i5.BaselinePrivilegeProvider{}, Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Grants: grants, Mail: i5.SettlementMail{Store: values},
-		Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Combat: fight, Directory: i4store.PlayerDirectoryReader{}, Projection: i4store.DirectoryLevelProjection{}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, Broadcast: pg.BroadcastEmitter{}}
+		Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Combat: fight, Directory: i4store.PlayerDirectoryReader{}, Projection: i4store.DirectoryLevelProjection{}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, Broadcast: pg.BroadcastEmitter{}, BattleCounts: battleCountObserver(p)}
 	return mode
 }
 
@@ -94,6 +94,13 @@ func TestI7C5EConquerProgressionNative(t *testing.T) {
 	if err != nil || lost.Promoted || lost.Info.Mode.Buff != 1 || lost.Info.Mode.LeftTimes != 9 {
 		t.Fatalf("loss %+v %v", lost, err)
 	}
+	// A settled loss counts each fighting girl once.
+	if got := battleCount(t, pool, a.PlayerID, girls[0]); got != 1 {
+		t.Fatalf("Girls Log count for partner %d after loss = %d, want 1", girls[0], got)
+	}
+	if got := battleCount(t, pool, a.PlayerID, girls[1]); got != 1 {
+		t.Fatalf("Girls Log count for partner %d after loss = %d, want 1", girls[1], got)
+	}
 	if _, err = s.Result(ctx, a, d.Result{CampaignID: 10001, TeamID: 1, Formation: girls[:2], Win: true}, json.RawMessage(`{}`), op()); !errors.Is(err, d.ErrRefused) {
 		t.Fatal("result without an open attempt", err)
 	}
@@ -102,6 +109,16 @@ func TestI7C5EConquerProgressionNative(t *testing.T) {
 	won := conquerWin(t, s, a, 10001, 1, girls[:2], 2, 5000)
 	if !won.Promoted || won.Progress != (d.Progress{Level: 1, Loop: 1}) || won.Info.Run.CurrentID != 10002 || won.Info.Mode.Buff != 0 || won.Info.Mode.LeftTimes != 10 {
 		t.Fatalf("promotion %+v", won)
+	}
+	// A second settlement counts again; a drained replay counts nothing.
+	if got := battleCount(t, pool, a.PlayerID, girls[0]); got != 2 {
+		t.Fatalf("Girls Log count for partner %d after win = %d, want 2", girls[0], got)
+	}
+	if _, err = s.Result(ctx, a, d.Result{CampaignID: 10001, TeamID: 1, Win: true, Formation: girls[:2], Alive: 2, Damage: 5000}, json.RawMessage(`{"fighter":{}}`), op()); !errors.Is(err, d.ErrRefused) {
+		t.Fatalf("settled result replay: %v", err)
+	}
+	if got := battleCount(t, pool, a.PlayerID, girls[0]); got != 2 {
+		t.Fatalf("Girls Log count for partner %d after replay = %d, want 2", girls[0], got)
 	}
 	if scalar(t, pool, `SELECT quantity FROM player_item_stacks WHERE player_id=$1 AND item_id=20001157`, int64(a.PlayerID)) < 1 ||
 		scalar(t, pool, `SELECT conquer_lev FROM player_directory_profiles WHERE player_id=$1`, int64(a.PlayerID)) != 1 ||

@@ -196,6 +196,9 @@ func (s Mode) Result(c context.Context, a identity.ActorContext, q Result, op op
 				return nil, e
 			}
 		}
+		if e = s.BattleCounts.ObserveBattleTx(c, sc.Tx, a.PlayerID, p.Formation, sc.Operation.DecisionAt()); e != nil {
+			return nil, e
+		}
 		r.LastResult = out
 		r.LastFight = p
 		r.LastStar = q.Star

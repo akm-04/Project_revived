@@ -35,25 +35,31 @@ import (
 // row, Combat 609, I5 mail 610 and values 700+, directory 740. START and
 // RESULT bind a Combat CLIENT_SUMMARY_ATTESTED attempt (I8-5D).
 type Mode struct {
-	Facts       Service
-	Timed       gen.TimedRunner
-	Fresh       tx.Queryer
-	Store       ModeStore
-	Content     ModeContent
-	Fence       Fence
-	Functions   Functions
-	Privileges  i5.PrivilegeSnapshotProvider
-	Costs       i5.TxMaterialCostDebiter
-	Grants      Grants
-	Mail        Mail
-	Heroes      Roster
-	Pets        Roster
-	Combat      Combat
-	Directory   Directory
-	Projection  Projection
-	Receipts    receipt.Store
-	ReceiptRead receipt.Reader
-	Broadcast   broadcast.Emitter
+	Facts        Service
+	Timed        gen.TimedRunner
+	Fresh        tx.Queryer
+	Store        ModeStore
+	Content      ModeContent
+	Fence        Fence
+	Functions    Functions
+	Privileges   i5.PrivilegeSnapshotProvider
+	Costs        i5.TxMaterialCostDebiter
+	Grants       Grants
+	Mail         Mail
+	Heroes       Roster
+	Pets         Roster
+	Combat       Combat
+	Directory    Directory
+	Projection   Projection
+	Receipts     receipt.Store
+	ReceiptRead  receipt.Reader
+	Broadcast    broadcast.Emitter
+	BattleCounts BattleCountObserver
+}
+
+// BattleCountObserver records the Girls Log count of one first settled battle.
+type BattleCountObserver interface {
+	ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error
 }
 
 type ModeStore interface {
@@ -492,6 +498,9 @@ func (s Mode) Result(c context.Context, a identity.ActorContext, result d.Result
 			message := broadcast.Message{MID: broadcast.SystemMID, MsgType: broadcast.ConquerSchool, Server: a.LogicalServerID, Player: a.PlayerID,
 				Fields: broadcast.Fields{Region: settled.Region, ConquerLoopID: settled.Attempt.Loop, ConquerLev: settled.Progress.Level}}
 			err = s.Broadcast.EmitTx(c, sc.Tx, message)
+		}
+		if err == nil {
+			err = s.BattleCounts.ObserveBattleTx(c, sc.Tx, a.PlayerID, settled.Attempt.Formation, at)
 		}
 		return view, err
 	})

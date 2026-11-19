@@ -1646,22 +1646,46 @@
    "arena": [
     "*ObserveBattleTx"
    ],
+   "awakeningbattle": [
+    "*ObserveBattleTx"
+   ],
+   "campaign": [
+    "*ObserveBattleTx"
+   ],
    "championsleague": [
     "*ObserveBattleTx"
    ],
    "combat": [
     "*PlayerCollectionInputsTx"
    ],
+   "conquerschool": [
+    "*ObserveBattleTx"
+   ],
    "eventcentre": [
     "*ObserveBattleTx"
    ],
+   "godstrial": [
+    "*ObserveBattleTx"
+   ],
+   "guildcampaign": [
+    "*ObserveBattleTx"
+   ],
    "illusion": [
+    "*ObserveBattleTx"
+   ],
+   "march": [
+    "*ObserveBattleTx"
+   ],
+   "memoir": [
     "*ObserveBattleTx"
    ],
    "occult": [
     "*ObserveBattleTx"
    ],
    "oneonone": [
+    "*ObserveBattleTx"
+   ],
+   "petcampaign": [
     "*ObserveBattleTx"
    ],
    "playerdisplay": [
@@ -1678,6 +1702,9 @@
     "*ObserveBattleTx"
    ],
    "workplace": [
+    "*ObserveBattleTx"
+   ],
+   "worldboss": [
     "*ObserveBattleTx"
    ]
   },
@@ -2568,6 +2595,9 @@
     "*FreezeAwakeningBloodTx",
     "DefaultProfile"
    ],
+   "librarylocal": [
+    "*ObserveBattleTx"
+   ],
    "store:contentstore": [
     "*ActiveRevision"
    ],
@@ -2696,6 +2726,9 @@
    "interface:campaign.Heroes": [
     "*ListHeroesTx",
     "*LockHeroByPartnerIDTx"
+   ],
+   "librarylocal": [
+    "*ObserveBattleTx"
    ],
    "store:contentstore": [
     "*ActiveRevision",
@@ -3354,6 +3387,9 @@
    "interface:conquerschool.Roster": [
     "*OverlayMID1"
    ],
+   "librarylocal": [
+    "*ObserveBattleTx"
+   ],
    "store:conquerstore": [
     "*InsertLegacyUnknownTx",
     "*InsertModeTx",
@@ -3857,6 +3893,9 @@
    "interface:godstrial.HeroLocks": [
     "*LockHeroByPartnerIDTx"
    ],
+   "librarylocal": [
+    "*ObserveBattleTx"
+   ],
    "spirit": [
     "*LockTrialInventoryTx",
     "*ProviderRevision"
@@ -3935,6 +3974,9 @@
    ],
    "interface:guildcampaign.Roster": [
     "*ListHeroesTx"
+   ],
+   "librarylocal": [
+    "*ObserveBattleTx"
    ],
    "store:characterstore": [
     "*ListRawAwakeningsTx"
@@ -4871,6 +4913,9 @@
    "interface:march.Roster": [
     "*OverlayMID1"
    ],
+   "librarylocal": [
+    "*ObserveBattleTx"
+   ],
    "publicstats": [
     "*FreezeHeroTx",
     "Base",
@@ -4929,6 +4974,9 @@
    ],
    "interface:memoir.Roster": [
     "*OverlayMID1"
+   ],
+   "librarylocal": [
+    "*ObserveBattleTx"
    ],
    "store:contentstore": [
     "*ActiveRevision",
@@ -5169,6 +5217,9 @@
    ],
    "interface:petcampaign.HeroLocks": [
     "*LockHeroByPartnerIDTx"
+   ],
+   "librarylocal": [
+    "*ObserveBattleTx"
    ],
    "store:contentstore": [
     "*ActiveRevision",
@@ -6263,6 +6314,9 @@
    ],
    "interface:worldboss.Heroes": [
     "*OverlayMID1"
+   ],
+   "librarylocal": [
+    "*ObserveBattleTx"
    ],
    "store:contentstore": [
     "*ActiveRevision",

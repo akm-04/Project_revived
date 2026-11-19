@@ -9391,7 +9391,7 @@
    "isolation": [
     {
      "file": "internal/application/campaign/mode.go",
-     "line": 282,
+     "line": 288,
      "value": "repeatable_read"
     }
    ],
@@ -9399,7 +9399,7 @@
    "read_only": [
     {
      "file": "internal/application/campaign/mode.go",
-     "line": 282,
+     "line": 288,
      "value": "true"
     }
    ],
@@ -9407,7 +9407,7 @@
    "retry": [
     {
      "file": "internal/application/campaign/mode.go",
-     "line": 282,
+     "line": 288,
      "value": "6"
     }
    ],
@@ -9418,7 +9418,7 @@
      "file": "internal/application/campaign/mode.go",
      "function": "Mode.Load",
      "isolation": "repeatable_read",
-     "line": 282,
+     "line": 288,
      "read_only": "true",
      "retry": "6"
     }
@@ -9472,7 +9472,7 @@
    "isolation": [
     {
      "file": "internal/application/campaign/mode.go",
-     "line": 389,
+     "line": 395,
      "value": "repeatable_read"
     }
    ],
@@ -9480,7 +9480,7 @@
    "read_only": [
     {
      "file": "internal/application/campaign/mode.go",
-     "line": 389,
+     "line": 395,
      "value": "false"
     }
    ],
@@ -9491,7 +9491,7 @@
    "retry": [
     {
      "file": "internal/application/campaign/mode.go",
-     "line": 389,
+     "line": 395,
      "value": "6"
     }
    ],
@@ -9524,7 +9524,7 @@
      "file": "internal/application/campaign/mode.go",
      "function": "Mode.Fight",
      "isolation": "repeatable_read",
-     "line": 389,
+     "line": 395,
      "read_only": "false",
      "retry": "6"
     }
@@ -9877,7 +9877,7 @@
     }
    ],
    "unknown": [
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/campaign/mode.go:298",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/campaign/mode.go:304",
     "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:328",
     "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:375",
     "UNRESOLVED build at internal/application/combat/service.go:243",
@@ -9893,7 +9893,7 @@
    "isolation": [
     {
      "file": "internal/application/campaign/mode.go",
-     "line": 593,
+     "line": 599,
      "value": "repeatable_read"
     }
    ],
@@ -9901,12 +9901,12 @@
    "read_only": [
     {
      "file": "internal/application/campaign/mode.go",
-     "line": 593,
+     "line": 599,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/campaign/mode.go:608",
+    "internal/application/campaign/mode.go:614",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717"
@@ -9914,7 +9914,7 @@
    "retry": [
     {
      "file": "internal/application/campaign/mode.go",
-     "line": 593,
+     "line": 599,
      "value": "6"
     }
    ],
@@ -9949,6 +9949,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "campaign",
@@ -9957,7 +9959,7 @@
      "file": "internal/application/campaign/mode.go",
      "function": "Mode.Result",
      "isolation": "repeatable_read",
-     "line": 593,
+     "line": 599,
      "read_only": "false",
      "retry": "6"
     }
@@ -10182,11 +10184,16 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 61,
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
     }
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/campaign/mode.go:298",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/campaign/mode.go:304",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:20",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
@@ -35924,6 +35931,8 @@
     "internal/adapters/postgres/i5store/missions.go:57",
     "internal/adapters/postgres/i5store/missions.go:65",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/marchstore/store.go:32",
     "internal/adapters/postgres/marchstore/store.go:39"
    ],
@@ -36253,6 +36262,11 @@
      "file": "internal/adapters/postgres/leaguestore/store.go",
      "line": 182,
      "statement": "SELECT payload::text,payload_version FROM league_settlements WHERE kind=$1 AND number=$2"
+    },
+    {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
     },
     {
      "file": "internal/adapters/postgres/topfloorstore/store.go",
@@ -44518,7 +44532,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/guildcampaign/commands.go:544",
+    "internal/application/guildcampaign/commands.go:547",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717"
@@ -44563,6 +44577,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "guildcampaign",
@@ -44801,6 +44817,11 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 61,
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
     }
    ],
    "unknown": [
@@ -46114,6 +46135,8 @@
     "internal/adapters/postgres/i5store/store.go:249",
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/worldbossstore/store.go:101",
     "internal/adapters/postgres/worldbossstore/store.go:108",
     "internal/adapters/postgres/worldbossstore/store.go:142",
@@ -46213,6 +46236,11 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 61,
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
     },
     {
      "file": "internal/adapters/postgres/worldbossstore/store.go",
@@ -52205,6 +52233,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/petcampaignstore/store.go:32",
     "internal/adapters/postgres/petcampaignstore/store.go:39",
     "internal/adapters/postgres/spiritstore/store.go:43"
@@ -52415,6 +52445,11 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 61,
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
     }
    ],
    "unknown": [
@@ -62516,7 +62551,7 @@
    "isolation": [
     {
      "file": "internal/application/awakeningbattle/mode.go",
-     "line": 74,
+     "line": 80,
      "value": "serializable"
     }
    ],
@@ -62524,7 +62559,7 @@
    "read_only": [
     {
      "file": "internal/application/awakeningbattle/mode.go",
-     "line": 74,
+     "line": 80,
      "value": "false"
     }
    ],
@@ -62535,7 +62570,7 @@
    "retry": [
     {
      "file": "internal/application/awakeningbattle/mode.go",
-     "line": 74,
+     "line": 80,
      "value": "3"
     }
    ],
@@ -62566,7 +62601,7 @@
      "file": "internal/application/awakeningbattle/mode.go",
      "function": "Mode.Start",
      "isolation": "serializable",
-     "line": 74,
+     "line": 80,
      "read_only": "false",
      "retry": "3"
     }
@@ -62925,7 +62960,7 @@
    "isolation": [
     {
      "file": "internal/application/awakeningbattle/mode.go",
-     "line": 140,
+     "line": 146,
      "value": "serializable"
     }
    ],
@@ -62933,17 +62968,17 @@
    "read_only": [
     {
      "file": "internal/application/awakeningbattle/mode.go",
-     "line": 140,
+     "line": 146,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/awakeningbattle/mode.go:180"
+    "internal/application/awakeningbattle/mode.go:186"
    ],
    "retry": [
     {
      "file": "internal/application/awakeningbattle/mode.go",
-     "line": 140,
+     "line": 146,
      "value": "3"
     }
    ],
@@ -62952,7 +62987,9 @@
     "internal/adapters/postgres/combatstore/store.go:26",
     "internal/adapters/postgres/combatstore/store.go:285",
     "internal/adapters/postgres/i5store/awakening.go:18",
-    "internal/adapters/postgres/i5store/awakening.go:61"
+    "internal/adapters/postgres/i5store/awakening.go:61",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32"
    ],
    "system": "awakeningbattle",
    "transactions": [
@@ -62960,7 +62997,7 @@
      "file": "internal/application/awakeningbattle/mode.go",
      "function": "Mode.Result",
      "isolation": "serializable",
-     "line": 140,
+     "line": 146,
      "read_only": "false",
      "retry": "3"
     }
@@ -63050,6 +63087,11 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 61,
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
     }
    ],
    "unknown": [
@@ -86743,7 +86785,7 @@
    "isolation": [
     {
      "file": "internal/application/conquerschool/mode.go",
-     "line": 255,
+     "line": 261,
      "value": "repeatable_read"
     }
    ],
@@ -86751,7 +86793,7 @@
    "read_only": [
     {
      "file": "internal/application/conquerschool/mode.go",
-     "line": 255,
+     "line": 261,
      "value": "false"
     }
    ],
@@ -86759,7 +86801,7 @@
    "retry": [
     {
      "file": "internal/application/conquerschool/mode.go",
-     "line": 255,
+     "line": 261,
      "value": "6"
     }
    ],
@@ -86774,7 +86816,7 @@
      "file": "internal/application/conquerschool/mode.go",
      "function": "Mode.change",
      "isolation": "repeatable_read",
-     "line": 255,
+     "line": 261,
      "read_only": "false",
      "retry": "6"
     }
@@ -86832,7 +86874,7 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED apply at internal/application/conquerschool/mode.go:260",
+    "UNRESOLVED apply at internal/application/conquerschool/mode.go:266",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
@@ -86842,7 +86884,7 @@
    "isolation": [
     {
      "file": "internal/application/conquerschool/mode.go",
-     "line": 255,
+     "line": 261,
      "value": "repeatable_read"
     }
    ],
@@ -86850,7 +86892,7 @@
    "read_only": [
     {
      "file": "internal/application/conquerschool/mode.go",
-     "line": 255,
+     "line": 261,
      "value": "false"
     }
    ],
@@ -86861,7 +86903,7 @@
    "retry": [
     {
      "file": "internal/application/conquerschool/mode.go",
-     "line": 255,
+     "line": 261,
      "value": "6"
     }
    ],
@@ -86895,7 +86937,7 @@
      "file": "internal/application/conquerschool/mode.go",
      "function": "Mode.change",
      "isolation": "repeatable_read",
-     "line": 255,
+     "line": 261,
      "read_only": "false",
      "retry": "6"
     }
@@ -87240,9 +87282,9 @@
    "unknown": [
     "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:328",
     "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:375",
-    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/conquerschool/mode.go:343",
-    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/conquerschool/mode.go:353",
-    "UNRESOLVED apply at internal/application/conquerschool/mode.go:260",
+    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/conquerschool/mode.go:349",
+    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/conquerschool/mode.go:359",
+    "UNRESOLVED apply at internal/application/conquerschool/mode.go:266",
     "UNRESOLVED build at internal/application/combat/service.go:243",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
@@ -87256,7 +87298,7 @@
    "isolation": [
     {
      "file": "internal/application/conquerschool/mode.go",
-     "line": 386,
+     "line": 392,
      "value": "repeatable_read"
     }
    ],
@@ -87264,18 +87306,18 @@
    "read_only": [
     {
      "file": "internal/application/conquerschool/mode.go",
-     "line": 386,
+     "line": 392,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/conquerschool/mode.go:401",
+    "internal/application/conquerschool/mode.go:407",
     "internal/application/i5/service.go:717"
    ],
    "retry": [
     {
      "file": "internal/application/conquerschool/mode.go",
-     "line": 386,
+     "line": 392,
      "value": "6"
     }
    ],
@@ -87302,6 +87344,8 @@
     "internal/adapters/postgres/i5store/store.go:483",
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "conquerschool",
@@ -87310,7 +87354,7 @@
      "file": "internal/application/conquerschool/mode.go",
      "function": "Mode.receipted",
      "isolation": "repeatable_read",
-     "line": 386,
+     "line": 392,
      "read_only": "false",
      "retry": "6"
     }
@@ -87485,13 +87529,18 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 61,
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
     }
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/conquerschool/mode.go:343",
-    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/conquerschool/mode.go:353",
-    "UNRESOLVED apply at internal/application/conquerschool/mode.go:387",
+    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/conquerschool/mode.go:349",
+    "FANOUT OverlayMID1 has 28 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/conquerschool/mode.go:359",
+    "UNRESOLVED apply at internal/application/conquerschool/mode.go:393",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
@@ -87501,7 +87550,7 @@
    "isolation": [
     {
      "file": "internal/application/conquerschool/mode.go",
-     "line": 553,
+     "line": 562,
      "value": "repeatable_read"
     }
    ],
@@ -87509,7 +87558,7 @@
    "read_only": [
     {
      "file": "internal/application/conquerschool/mode.go",
-     "line": 553,
+     "line": 562,
      "value": "true"
     }
    ],
@@ -87517,7 +87566,7 @@
    "retry": [
     {
      "file": "internal/application/conquerschool/mode.go",
-     "line": 553,
+     "line": 562,
      "value": "1"
     }
    ],
@@ -87528,7 +87577,7 @@
      "file": "internal/application/conquerschool/mode.go",
      "function": "Mode.Reports",
      "isolation": "repeatable_read",
-     "line": 553,
+     "line": 562,
      "read_only": "true",
      "retry": "1"
     }
@@ -87592,7 +87641,7 @@
    "isolation": [
     {
      "file": "internal/application/conquerschool/mode.go",
-     "line": 582,
+     "line": 591,
      "value": "repeatable_read"
     }
    ],
@@ -87600,7 +87649,7 @@
    "read_only": [
     {
      "file": "internal/application/conquerschool/mode.go",
-     "line": 582,
+     "line": 591,
      "value": "false"
     }
    ],
@@ -87608,7 +87657,7 @@
    "retry": [
     {
      "file": "internal/application/conquerschool/mode.go",
-     "line": 582,
+     "line": 591,
      "value": "6"
     }
    ],
@@ -87625,7 +87674,7 @@
      "file": "internal/application/conquerschool/mode.go",
      "function": "Mode.Report",
      "isolation": "repeatable_read",
-     "line": 582,
+     "line": 591,
      "read_only": "false",
      "retry": "6"
     }
@@ -87689,7 +87738,7 @@
    "isolation": [
     {
      "file": "internal/application/conquerschool/mode.go",
-     "line": 255,
+     "line": 261,
      "value": "repeatable_read"
     }
    ],
@@ -87697,7 +87746,7 @@
    "read_only": [
     {
      "file": "internal/application/conquerschool/mode.go",
-     "line": 255,
+     "line": 261,
      "value": "false"
     }
    ],
@@ -87705,7 +87754,7 @@
    "retry": [
     {
      "file": "internal/application/conquerschool/mode.go",
-     "line": 255,
+     "line": 261,
      "value": "6"
     }
    ],
@@ -87722,7 +87771,7 @@
      "file": "internal/application/conquerschool/mode.go",
      "function": "Mode.change",
      "isolation": "repeatable_read",
-     "line": 255,
+     "line": 261,
      "read_only": "false",
      "retry": "6"
     }
@@ -87800,7 +87849,7 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED apply at internal/application/conquerschool/mode.go:260",
+    "UNRESOLVED apply at internal/application/conquerschool/mode.go:266",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
@@ -101903,6 +101952,8 @@
     "internal/adapters/postgres/i5store/store.go:483",
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/memoirstore/store.go:31",
     "internal/adapters/postgres/memoirstore/store.go:38",
     "internal/adapters/postgres/spiritstore/store.go:43"
@@ -102104,6 +102155,11 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 61,
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
     }
    ],
    "unknown": [
@@ -103235,6 +103291,8 @@
     "internal/adapters/postgres/i5store/store.go:483",
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/memoirstore/store.go:31",
     "internal/adapters/postgres/memoirstore/store.go:38",
     "internal/adapters/postgres/spiritstore/store.go:43"
@@ -103410,6 +103468,11 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 61,
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
     }
    ],
    "unknown": [
@@ -103517,6 +103580,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/memoirstore/store.go:31",
     "internal/adapters/postgres/memoirstore/store.go:38",
     "internal/adapters/postgres/spiritstore/store.go:43"
@@ -103925,6 +103990,11 @@
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
     },
     {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
+    },
+    {
      "file": "internal/adapters/postgres/sharedroomstore/store.go",
      "line": 42,
      "statement": "SELECT room_id,logical_server_id,family,slot,owner_player,status,capacity,expires_at,state_version,notice_version,payload::text,created_at,updated_at,closed_at FROM shared_rooms WHERE room_id=$1 FOR UPDATE"
@@ -104028,6 +104098,8 @@
     "internal/adapters/postgres/i5store/store.go:483",
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/memoirstore/store.go:31",
     "internal/adapters/postgres/memoirstore/store.go:38",
     "internal/adapters/postgres/spiritstore/store.go:43"
@@ -104229,6 +104301,11 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 61,
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
     }
    ],
    "unknown": [
@@ -135474,7 +135551,7 @@
    "isolation": [
     {
      "file": "internal/application/conquerschool/mode.go",
-     "line": 386,
+     "line": 392,
      "value": "repeatable_read"
     }
    ],
@@ -135482,17 +135559,17 @@
    "read_only": [
     {
      "file": "internal/application/conquerschool/mode.go",
-     "line": 386,
+     "line": 392,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/conquerschool/mode.go:401"
+    "internal/application/conquerschool/mode.go:407"
    ],
    "retry": [
     {
      "file": "internal/application/conquerschool/mode.go",
-     "line": 386,
+     "line": 392,
      "value": "6"
     }
    ],
@@ -135511,7 +135588,7 @@
      "file": "internal/application/conquerschool/mode.go",
      "function": "Mode.receipted",
      "isolation": "repeatable_read",
-     "line": 386,
+     "line": 392,
      "read_only": "false",
      "retry": "6"
     }
@@ -135619,7 +135696,7 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED apply at internal/application/conquerschool/mode.go:387",
+    "UNRESOLVED apply at internal/application/conquerschool/mode.go:393",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
@@ -147470,6 +147547,8 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/i5store/store.go:736",
+    "internal/adapters/postgres/librarystore/battle_counts.go:15",
+    "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "godstrial",
@@ -147678,6 +147757,11 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 61,
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/realtime_wakeup_core.go",
+     "line": 22,
+     "statement": "SELECT pg_notify($1,$2)"
     }
    ],
    "unknown": [

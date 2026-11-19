@@ -86,22 +86,28 @@ type Mail interface {
 }
 
 type Mode struct {
-	Timed       gen.TimedRunner
-	Fresh       tx.Queryer
-	Store       Store
-	Content     Content
-	Fence       Fence
-	Players     Players
-	Directory   Directory
-	Population  Population
-	Heroes      Heroes
-	Guilds      Guilds
-	Combat      Combat
-	Privileges  i5.PrivilegeSnapshotProvider
-	Costs       Costs
-	Mail        Mail
-	Receipts    receipt.Store
-	ReceiptRead receipt.Reader
+	Timed        gen.TimedRunner
+	Fresh        tx.Queryer
+	Store        Store
+	Content      Content
+	Fence        Fence
+	Players      Players
+	Directory    Directory
+	Population   Population
+	Heroes       Heroes
+	Guilds       Guilds
+	Combat       Combat
+	Privileges   i5.PrivilegeSnapshotProvider
+	Costs        Costs
+	Mail         Mail
+	Receipts     receipt.Store
+	ReceiptRead  receipt.Reader
+	BattleCounts BattleCountObserver
+}
+
+// BattleCountObserver records the Girls Log count of one first settled battle.
+type BattleCountObserver interface {
+	ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error
 }
 
 func (s Mode) ready() bool {

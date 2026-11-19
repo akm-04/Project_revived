@@ -227,10 +227,18 @@ func (s Mode) Settle(c context.Context, a identity.ActorContext, request ResultR
 			return Response{}, err
 		}
 		body, err := s.terminalBody(c, sc, board, a.PlayerID, accepted)
-		if err != nil || !current {
+		if err != nil {
 			return Response{Body: body}, err
 		}
-		return Response{Body: body}, s.settleDefeats(c, sc, st, catalog, at)
+		if current {
+			if err = s.settleDefeats(c, sc, st, catalog, at); err != nil {
+				return Response{Body: body}, err
+			}
+		}
+		if err = s.BattleCounts.ObserveBattleTx(c, sc.Tx, a.PlayerID, request.Formation, at); err != nil {
+			return Response{}, err
+		}
+		return Response{Body: body}, nil
 	})
 }
 

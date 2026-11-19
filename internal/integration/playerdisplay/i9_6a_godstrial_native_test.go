@@ -28,7 +28,7 @@ func godsTrialMode(t *testing.T, p *pg.Pool, clock *workplaceTime) app.Mode {
 	owner.Spirits = spiritService(p, p)
 	fight := combatService(t, p)
 	values := i5store.Store{Queryer: p}
-	s := app.Mode{Spirit: spiritService(p, p), Progression: values, Mail: values, Energy: owner, Timed: m.Timed, Fresh: p, Store: godstrialstore.Store{}, Content: contentstore.Store{Queryer: p}, Fence: m.Fence, Functions: m.Functions, Heroes: m.Heroes, HeroLocks: characterstore.GodsTrialHeroPort{Store: characterstore.Store{Queryer: p}}, Pets: pet.Service{Store: characterstore.Store{Queryer: p}}, Combat: fight, Rules: fight.Rules, Values: owner, Facts: i5.ObjectiveFacts{Owner: owner, Open: values}, Receipts: m.Receipts, ReceiptRead: m.ReceiptRead}
+	s := app.Mode{Spirit: spiritService(p, p), Progression: values, Mail: values, Energy: owner, Timed: m.Timed, Fresh: p, Store: godstrialstore.Store{}, Content: contentstore.Store{Queryer: p}, Fence: m.Fence, Functions: m.Functions, Heroes: m.Heroes, HeroLocks: characterstore.GodsTrialHeroPort{Store: characterstore.Store{Queryer: p}}, Pets: pet.Service{Store: characterstore.Store{Queryer: p}}, Combat: fight, Rules: fight.Rules, Values: owner, Facts: i5.ObjectiveFacts{Owner: owner, Open: values}, Receipts: m.Receipts, ReceiptRead: m.ReceiptRead, BattleCounts: battleCountObserver(p)}
 	s.Timed.Binder.Time = clock
 	return s
 }
@@ -131,6 +131,10 @@ func TestI9_6AGodsTrialNative(t *testing.T) {
 	if e != nil || fmt.Sprint(retry["error_code"]) != "30005" || balance() != after {
 		t.Fatal("terminal replay", retry, e)
 	}
+	// The first settlement counts once; its receipt and drain replays count nothing.
+	if got := battleCount(t, p, a.PlayerID, 1); got != 1 {
+		t.Fatalf("Girls Log count after RESULT and replays = %d, want 1", got)
+	}
 	root, e = (spiritstore.Store{}).ReadRootTx(ctx, p, a.PlayerID)
 	if e != nil || len(root.Facts.Instances) != minted {
 		t.Fatal("retry reminted", root, e)
@@ -142,6 +146,9 @@ func TestI9_6AGodsTrialNative(t *testing.T) {
 	}
 	if _, e = s.Result(ctx, a, loss, op()); e != nil || balance() != 158 {
 		t.Fatal("loss cost", balance(), e)
+	}
+	if got := battleCount(t, p, a.PlayerID, 1); got != 2 {
+		t.Fatalf("Girls Log count after a settled loss = %d, want 2", got)
 	}
 	r, _, _ = (godstrialstore.Store{}).ReadTx(ctx, p, a.PlayerID)
 	if r.Wins[cid] != 1 {
