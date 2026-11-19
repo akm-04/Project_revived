@@ -48,7 +48,7 @@ func (s Mode) listBody(c context.Context, q tx.Queryer, a identity.ActorContext,
 	}
 	listed := make(map[int64]d.Occurrence, len(eventTypes))
 	for _, occurrence := range occurrences {
-		if !occurrence.Active(at) {
+		if !occurrence.Servable(at) {
 			continue
 		}
 		if _, seen := listed[occurrence.EventType]; !seen {
@@ -102,6 +102,9 @@ func (s Mode) Info(c context.Context, a identity.ActorContext, tableID int64, op
 	occurrence, err := s.activeOccurrence(c, s.Fresh, a.PlayerID, tableID, at)
 	if err != nil {
 		return nil, err
+	}
+	if !occurrence.Servable(at) {
+		return nil, d.ErrExpired
 	}
 	detail, err := s.detail(c, a, catalog, occurrence, at, op)
 	if err != nil {

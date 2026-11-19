@@ -270,6 +270,7 @@
   "internal/adapters/postgres/guildstore",
   "internal/adapters/postgres/i4store",
   "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/librarystore",
   "internal/adapters/postgres/sharedroomstore"
  ],
  "tables": {
@@ -289,6 +290,7 @@
    "gxb_content_revisions",
    "player_directory_profiles",
    "player_function_eligibility",
+   "player_library_heroes",
    "shared_room_seats",
    "shared_rooms"
   ],

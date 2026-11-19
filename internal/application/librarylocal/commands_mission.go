@@ -81,10 +81,12 @@ func (s Service) prepareFacts(ctx context.Context, t tx.Tx, player identity.Play
 }
 
 // recordIntimacy emits fact 124 once per settling command that raised favor.
-// A missing port refuses the command so its transaction rolls back the value.
-func (s Service) recordIntimacy(ctx context.Context, t tx.Tx, op operation.Context, player identity.PlayerID) error {
+// The value is the favored partner id, which Adventure 10002 uses as its
+// special_data (C4). A missing port refuses the command so its transaction
+// rolls back the value.
+func (s Service) recordIntimacy(ctx context.Context, t tx.Tx, op operation.Context, player identity.PlayerID, partnerID int64) error {
 	if s.Facts == nil {
 		return ErrUnavailable
 	}
-	return s.Facts.RecordTx(ctx, t, op, objective.Fact{PlayerID: player, SourceDomain: "library", SourceBusinessKey: op.ID.String(), Kind: objective.IntimacyImprovedKind, Delta: 1})
+	return s.Facts.RecordTx(ctx, t, op, objective.Fact{PlayerID: player, SourceDomain: "library", SourceBusinessKey: op.ID.String(), Kind: objective.IntimacyImprovedKind, Delta: 1, Value: partnerID})
 }

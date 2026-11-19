@@ -2516,6 +2516,9 @@
    "store:i4store": [
     "*ProfileTx"
    ],
+   "store:librarystore": [
+    "*FavorOccurrenceTx"
+   ],
    "workplace": [
     "*Now"
    ]

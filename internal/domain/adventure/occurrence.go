@@ -24,8 +24,9 @@ type Occurrence struct {
 }
 
 // NewOccurrence fixes the event lifetime (C3) and picks the event's
-// server-owned special_data: a shop row, a card row, or the Fantasy boss.
-func NewOccurrence(factKey string, player identity.PlayerID, event Event, at time.Time) (Occurrence, error) {
+// server-owned special_data: a shop row, a card row, the Fantasy boss, or the
+// fact's source value (the Favor partner id).
+func NewOccurrence(factKey string, player identity.PlayerID, event Event, at time.Time, sourceValue int64) (Occurrence, error) {
 	if strings.TrimSpace(factKey) == "" || !player.Valid() || at.IsZero() || event.TimeLimitSeconds <= 0 {
 		return Occurrence{}, ErrInvalid
 	}
@@ -39,12 +40,12 @@ func NewOccurrence(factKey string, player identity.PlayerID, event Event, at tim
 		EventType:       event.ID,
 		OccurredAt:      occurred,
 		EndTime:         occurred.Add(time.Duration(event.TimeLimitSeconds) * time.Second),
-		SpecialData:     specialDataFor(factKey, event.ID),
+		SpecialData:     specialDataFor(factKey, event.ID, sourceValue),
 		SourceKey:       factKey,
 	}, nil
 }
 
-func specialDataFor(factKey string, eventType int64) int64 {
+func specialDataFor(factKey string, eventType int64, sourceValue int64) int64 {
 	sum := sha256.Sum256([]byte(factKey))
 	choice := binary.BigEndian.Uint64(sum[:8])
 	switch eventType {
@@ -54,6 +55,8 @@ func specialDataFor(factKey string, eventType int64) int64 {
 		return 100001 + int64(choice%72)
 	case EventIllusion:
 		return IllusionHiddenBoss
+	case EventFavor:
+		return sourceValue
 	default:
 		return 0
 	}
@@ -84,6 +87,15 @@ func (o Occurrence) Active(at time.Time) bool {
 }
 
 func (o Occurrence) Finished() bool { return o.FinishedAt != nil }
+
+// Servable reports whether a read may serve the occurrence. A Favor occurrence
+// without a partner id is a retired row (C4).
+func (o Occurrence) Servable(at time.Time) bool {
+	if !o.Active(at) {
+		return false
+	}
+	return o.EventType != EventFavor || o.SpecialData != 0
+}
 
 // Finish marks the occurrence closed once; a second call reports no change.
 func (o *Occurrence) Finish(at time.Time) bool {

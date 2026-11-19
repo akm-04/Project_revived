@@ -6298,8 +6298,8 @@
     "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
-    "internal/adapters/postgres/librarystore/store.go:219",
-    "internal/adapters/postgres/librarystore/store.go:251",
+    "internal/adapters/postgres/librarystore/store.go:236",
+    "internal/adapters/postgres/librarystore/store.go:268",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "librarylocal",
@@ -54396,8 +54396,8 @@
     "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
-    "internal/adapters/postgres/librarystore/store.go:219",
-    "internal/adapters/postgres/librarystore/store.go:251",
+    "internal/adapters/postgres/librarystore/store.go:236",
+    "internal/adapters/postgres/librarystore/store.go:268",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "librarylocal",
@@ -54794,8 +54794,8 @@
     "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
-    "internal/adapters/postgres/librarystore/store.go:219",
-    "internal/adapters/postgres/librarystore/store.go:251",
+    "internal/adapters/postgres/librarystore/store.go:236",
+    "internal/adapters/postgres/librarystore/store.go:268",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "librarylocal",
@@ -55192,8 +55192,8 @@
     "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
-    "internal/adapters/postgres/librarystore/store.go:219",
-    "internal/adapters/postgres/librarystore/store.go:251",
+    "internal/adapters/postgres/librarystore/store.go:236",
+    "internal/adapters/postgres/librarystore/store.go:268",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "librarylocal",
@@ -55590,8 +55590,8 @@
     "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
-    "internal/adapters/postgres/librarystore/store.go:219",
-    "internal/adapters/postgres/librarystore/store.go:251",
+    "internal/adapters/postgres/librarystore/store.go:236",
+    "internal/adapters/postgres/librarystore/store.go:268",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "librarylocal",
@@ -55988,8 +55988,8 @@
     "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
-    "internal/adapters/postgres/librarystore/store.go:219",
-    "internal/adapters/postgres/librarystore/store.go:251",
+    "internal/adapters/postgres/librarystore/store.go:236",
+    "internal/adapters/postgres/librarystore/store.go:268",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "librarylocal",
@@ -56386,8 +56386,8 @@
     "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
-    "internal/adapters/postgres/librarystore/store.go:219",
-    "internal/adapters/postgres/librarystore/store.go:251",
+    "internal/adapters/postgres/librarystore/store.go:236",
+    "internal/adapters/postgres/librarystore/store.go:268",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "librarylocal",
@@ -56784,8 +56784,8 @@
     "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
-    "internal/adapters/postgres/librarystore/store.go:219",
-    "internal/adapters/postgres/librarystore/store.go:251",
+    "internal/adapters/postgres/librarystore/store.go:236",
+    "internal/adapters/postgres/librarystore/store.go:268",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "librarylocal",
@@ -57182,8 +57182,8 @@
     "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
-    "internal/adapters/postgres/librarystore/store.go:219",
-    "internal/adapters/postgres/librarystore/store.go:251",
+    "internal/adapters/postgres/librarystore/store.go:236",
+    "internal/adapters/postgres/librarystore/store.go:268",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "librarylocal",
@@ -57580,8 +57580,8 @@
     "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
-    "internal/adapters/postgres/librarystore/store.go:219",
-    "internal/adapters/postgres/librarystore/store.go:251",
+    "internal/adapters/postgres/librarystore/store.go:236",
+    "internal/adapters/postgres/librarystore/store.go:268",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "librarylocal",
@@ -57978,8 +57978,8 @@
     "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
-    "internal/adapters/postgres/librarystore/store.go:219",
-    "internal/adapters/postgres/librarystore/store.go:251",
+    "internal/adapters/postgres/librarystore/store.go:236",
+    "internal/adapters/postgres/librarystore/store.go:268",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "librarylocal",
@@ -58376,8 +58376,8 @@
     "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
-    "internal/adapters/postgres/librarystore/store.go:219",
-    "internal/adapters/postgres/librarystore/store.go:251",
+    "internal/adapters/postgres/librarystore/store.go:236",
+    "internal/adapters/postgres/librarystore/store.go:268",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "librarylocal",
@@ -58774,8 +58774,8 @@
     "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
-    "internal/adapters/postgres/librarystore/store.go:219",
-    "internal/adapters/postgres/librarystore/store.go:251",
+    "internal/adapters/postgres/librarystore/store.go:236",
+    "internal/adapters/postgres/librarystore/store.go:268",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "librarylocal",
@@ -59172,8 +59172,8 @@
     "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
-    "internal/adapters/postgres/librarystore/store.go:219",
-    "internal/adapters/postgres/librarystore/store.go:251",
+    "internal/adapters/postgres/librarystore/store.go:236",
+    "internal/adapters/postgres/librarystore/store.go:268",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "librarylocal",
@@ -59985,8 +59985,8 @@
     "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
-    "internal/adapters/postgres/librarystore/store.go:219",
-    "internal/adapters/postgres/librarystore/store.go:251",
+    "internal/adapters/postgres/librarystore/store.go:236",
+    "internal/adapters/postgres/librarystore/store.go:268",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "librarylocal",
@@ -60383,8 +60383,8 @@
     "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
-    "internal/adapters/postgres/librarystore/store.go:219",
-    "internal/adapters/postgres/librarystore/store.go:251",
+    "internal/adapters/postgres/librarystore/store.go:236",
+    "internal/adapters/postgres/librarystore/store.go:268",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "librarylocal",
@@ -60781,8 +60781,8 @@
     "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
-    "internal/adapters/postgres/librarystore/store.go:219",
-    "internal/adapters/postgres/librarystore/store.go:251",
+    "internal/adapters/postgres/librarystore/store.go:236",
+    "internal/adapters/postgres/librarystore/store.go:268",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "librarylocal",
@@ -61179,8 +61179,8 @@
     "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
-    "internal/adapters/postgres/librarystore/store.go:219",
-    "internal/adapters/postgres/librarystore/store.go:251",
+    "internal/adapters/postgres/librarystore/store.go:236",
+    "internal/adapters/postgres/librarystore/store.go:268",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "librarylocal",
@@ -61577,8 +61577,8 @@
     "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
-    "internal/adapters/postgres/librarystore/store.go:219",
-    "internal/adapters/postgres/librarystore/store.go:251",
+    "internal/adapters/postgres/librarystore/store.go:236",
+    "internal/adapters/postgres/librarystore/store.go:268",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "librarylocal",
@@ -61975,8 +61975,8 @@
     "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
-    "internal/adapters/postgres/librarystore/store.go:219",
-    "internal/adapters/postgres/librarystore/store.go:251",
+    "internal/adapters/postgres/librarystore/store.go:236",
+    "internal/adapters/postgres/librarystore/store.go:268",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "librarylocal",
@@ -62373,8 +62373,8 @@
     "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
-    "internal/adapters/postgres/librarystore/store.go:219",
-    "internal/adapters/postgres/librarystore/store.go:251",
+    "internal/adapters/postgres/librarystore/store.go:236",
+    "internal/adapters/postgres/librarystore/store.go:268",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "librarylocal",
@@ -82260,6 +82260,9 @@
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('seat_index',seat_index,'player_id',player_id,'stage',stage,'ready',ready,'joined_at',joined_at) ORDER BY seat_index,player_id),'[]'::jsonb)::text FROM shared_room_seats WHERE room_id=$1"
     }
    ],
+   "unknown": [
+    "UNRESOLVED mutate at internal/application/sharedroom/commands.go:280"
+   ],
    "writes": "state"
   },
   {
@@ -82333,6 +82336,9 @@
      "line": 156,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('seat_index',seat_index,'player_id',player_id,'stage',stage,'ready',ready,'joined_at',joined_at) ORDER BY seat_index,player_id),'[]'::jsonb)::text FROM shared_room_seats WHERE room_id=$1"
     }
+   ],
+   "unknown": [
+    "UNRESOLVED mutate at internal/application/sharedroom/commands.go:233"
    ],
    "writes": "state"
   },
@@ -106362,6 +106368,7 @@
     "UNRESOLVED command at internal/application/occult/service.go:223",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
+    "UNRESOLVED mutate at internal/application/sharedroom/commands.go:233",
     "UNRESOLVED skinDef at internal/application/characterasset/appearance_projection.go:153"
    ],
    "writes": "state"
@@ -106786,7 +106793,8 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED command at internal/application/occult/service.go:223"
+    "UNRESOLVED command at internal/application/occult/service.go:223",
+    "UNRESOLVED mutate at internal/application/sharedroom/commands.go:233"
    ],
    "writes": "state"
   },
@@ -107097,6 +107105,7 @@
     "UNRESOLVED command at internal/application/occult/service.go:223",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
+    "UNRESOLVED mutate at internal/application/sharedroom/commands.go:280",
     "UNRESOLVED skinDef at internal/application/characterasset/appearance_projection.go:153"
    ],
    "writes": "state"
@@ -107408,6 +107417,7 @@
     "UNRESOLVED command at internal/application/occult/service.go:223",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
+    "UNRESOLVED mutate at internal/application/sharedroom/commands.go:280",
     "UNRESOLVED skinDef at internal/application/characterasset/appearance_projection.go:153"
    ],
    "writes": "state"
@@ -116700,6 +116710,9 @@
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('seat_index',seat_index,'player_id',player_id,'stage',stage,'ready',ready,'joined_at',joined_at) ORDER BY seat_index,player_id),'[]'::jsonb)::text FROM shared_room_seats WHERE room_id=$1"
     }
    ],
+   "unknown": [
+    "UNRESOLVED mutate at internal/application/sharedroom/commands.go:280"
+   ],
    "writes": "state"
   },
   {
@@ -117111,6 +117124,9 @@
      "line": 156,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('seat_index',seat_index,'player_id',player_id,'stage',stage,'ready',ready,'joined_at',joined_at) ORDER BY seat_index,player_id),'[]'::jsonb)::text FROM shared_room_seats WHERE room_id=$1"
     }
+   ],
+   "unknown": [
+    "UNRESOLVED mutate at internal/application/sharedroom/commands.go:233"
    ],
    "writes": "state"
   },
@@ -135227,8 +135243,8 @@
     "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
-    "internal/adapters/postgres/librarystore/store.go:219",
-    "internal/adapters/postgres/librarystore/store.go:251",
+    "internal/adapters/postgres/librarystore/store.go:236",
+    "internal/adapters/postgres/librarystore/store.go:268",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "librarylocal",
@@ -135625,8 +135641,8 @@
     "internal/adapters/postgres/librarystore/facets.go:95",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
-    "internal/adapters/postgres/librarystore/store.go:219",
-    "internal/adapters/postgres/librarystore/store.go:251",
+    "internal/adapters/postgres/librarystore/store.go:236",
+    "internal/adapters/postgres/librarystore/store.go:268",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "librarylocal",

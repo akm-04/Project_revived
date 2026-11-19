@@ -786,7 +786,7 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 						return e
 					}
 				}
-				if e = s.recordIntimacy(ctx, sc.Tx, d.Operation, a.PlayerID); e != nil {
+				if e = s.recordIntimacy(ctx, sc.Tx, d.Operation, a.PlayerID, d.Command.PartnerID); e != nil {
 					return e
 				}
 			}

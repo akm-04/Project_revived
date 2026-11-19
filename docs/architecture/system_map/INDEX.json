@@ -873,7 +873,7 @@
    "tables": 0
   },
   {
-   "callees": 15,
+   "callees": 16,
    "callers": 1,
    "mids": 20,
    "name": "adventure",
