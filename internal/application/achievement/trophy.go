@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	gen "gxb.local/backend/v2/internal/application/generation"
 
 	ca "gxb.local/backend/v2/internal/application/characterasset"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
@@ -40,7 +41,7 @@ func (s Service) TrophyCountTx(c context.Context, sc ca.CoherentReadScope, p ide
 	if e != nil {
 		return TrophyCount{}, e
 	}
-	if root.UpdatedAt.After(sc.ObservedAt) {
+	if root.UpdatedAt.After(gen.EffectiveObservation(sc.ObservedAt, root.UpdatedAt)) {
 		return TrophyCount{}, d.ErrConflict
 	}
 	recorded := [][2]int64{}

@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	ca "gxb.local/backend/v2/internal/application/characterasset"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	lib "gxb.local/backend/v2/internal/application/librarylocal"
 	d "gxb.local/backend/v2/internal/domain/achievement"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -113,7 +114,7 @@ func (s Service) PrepareMarriageTx(c context.Context, t tx.Tx, e lib.MarriageEve
 	if err != nil {
 		return nil, err
 	}
-	if ok && (r.Validate() != nil || r.UpdatedAt.After(e.DecisionAt)) {
+	if ok && (r.Validate() != nil || r.UpdatedAt.After(gen.EffectiveObservation(e.DecisionAt, r.UpdatedAt))) {
 		return nil, d.ErrConflict
 	}
 	if !ok {
@@ -222,7 +223,7 @@ func (s Service) ReadTierFactsTx(c context.Context, sc ca.CoherentReadScope, q R
 	if !found {
 		return out, d.ErrUnavailable
 	}
-	if r.PlayerID != q.Player || r.Validate() != nil || r.UpdatedAt.After(sc.ObservedAt) {
+	if r.PlayerID != q.Player || r.Validate() != nil || r.UpdatedAt.After(gen.EffectiveObservation(sc.ObservedAt, r.UpdatedAt)) {
 		return out, d.ErrConflict
 	}
 	if _, e = s.Content.AchievementCatalogTx(c, sc.Queryer(), r.ContentRevision); e != nil {
