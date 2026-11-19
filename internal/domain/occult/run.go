@@ -192,8 +192,11 @@ func (s *RunState) Enter(campaignID int64, index int, playerID int64) error {
 	if err != nil {
 		return err
 	}
-	if stage.HP <= 0 || stage.InBattle != 0 || s.fighting(playerID) {
+	if stage.HP <= 0 || s.fighting(playerID) {
 		return ErrRefused
+	}
+	if stage.InBattle != 0 {
+		return ErrStageHeld
 	}
 	stage.InBattle = playerID
 	return nil

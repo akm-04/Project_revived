@@ -6,6 +6,7 @@ import (
 	"time"
 
 	app "gxb.local/backend/v2/internal/application/illusion"
+	sr "gxb.local/backend/v2/internal/application/sharedroom"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/illusion"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -106,6 +107,29 @@ type illusionRoomStub struct {
 
 func (s illusionRoomStub) SetPartner(context.Context, identity.ActorContext, app.PartnerRequest, operation.Context) (map[string]any, error) {
 	return nil, s.err
+}
+
+func (s illusionRoomStub) EnterRoom(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error) {
+	return nil, s.err
+}
+
+func TestIllusionEnterRoomRefusalsCarryStockCodes(t *testing.T) {
+	now := time.Unix(100, 0).UTC()
+	cases := []struct {
+		name    string
+		refusal error
+		code    int64
+	}{
+		{"level band", sr.ErrLevelBand, illusionLevelBandCode},
+		{"room unavailable", sr.ErrJoinUnavailable, illusionRoomUnavailableCode},
+	}
+	for _, c := range cases {
+		dispatcher := IllusionRoomDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: illusionRoomStub{err: c.refusal}}
+		got := dispatcher.Dispatch(context.Background(), illusionRequest(1352, map[string]any{"room_id": int64(9)}, now))
+		if got.HTTPStatus != 409 || got.Body["error_code"] != c.code || got.Cause == nil {
+			t.Fatalf("%s: %d %#v", c.name, got.HTTPStatus, got.Body)
+		}
+	}
 }
 
 func TestIllusionOutOfTurnPickIsConflict(t *testing.T) {

@@ -2,6 +2,7 @@ package occult
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -74,7 +75,7 @@ func (s Mode) JoinRoom(c context.Context, a identity.ActorContext, roomID int64,
 		return nil, err
 	}
 	if !found || room.Family != RoomFamily || room.Slot != RoomSlot || room.Status != sharedroom.StatusOpen {
-		return nil, fmt.Errorf("%w: room unavailable", d.ErrRefused)
+		return nil, fmt.Errorf("%w: room unavailable", d.ErrRoomUnavailable)
 	}
 	state, err := d.LoadRunState(room.Payload)
 	if err != nil {
@@ -82,7 +83,7 @@ func (s Mode) JoinRoom(c context.Context, a identity.ActorContext, roomID int64,
 	}
 	at := loaded.at.Unix()
 	if state.CampaignType != d.MultiCampaignType || state.RoomExpired(at) || !state.MayJoin(int64(a.PlayerID), at) {
-		return nil, fmt.Errorf("%w: room cannot be joined", d.ErrRefused)
+		return nil, fmt.Errorf("%w: room cannot be joined", d.ErrRoomUnavailable)
 	}
 	if err = s.requireBand(c, s.Fresh, loaded.catalog, room.Owner, a.PlayerID); err != nil {
 		return nil, err
@@ -91,7 +92,7 @@ func (s Mode) JoinRoom(c context.Context, a identity.ActorContext, roomID int64,
 	// refusing the join, upgrade when a gate needs force.
 	forces, _ := s.bestForces(c, []identity.PlayerID{a.PlayerID}, loaded.at)
 	if _, err = s.Rooms.Join(c, a, sr.JoinRequest{Family: RoomFamilyRef(), RoomID: roomID}, op); err != nil {
-		return nil, err
+		return nil, joinRefusal(err)
 	}
 	// Freeze it for the prepare and invite windows, the same shape Adventure
 	// uses to keep Hero-stat reads out of room projections.
@@ -105,6 +106,15 @@ func (s Mode) JoinRoom(c context.Context, a identity.ActorContext, roomID int64,
 	return s.roomChange(c, a, op)
 }
 
+// joinRefusal reports a seat the room core refused as a missing, expired, closed
+// or full room, the stock join refusal the client renders.
+func joinRefusal(err error) error {
+	if errors.Is(err, sharedroom.ErrFull) || errors.Is(err, sharedroom.ErrExpired) || errors.Is(err, sharedroom.ErrClosed) || errors.Is(err, sr.ErrNotFound) {
+		return fmt.Errorf("%w: %w", d.ErrRoomUnavailable, err)
+	}
+	return err
+}
+
 // requireBand refuses a player outside the room's level band or below the gate.
 func (s Mode) requireBand(c context.Context, q tx.Queryer, catalog d.Catalog, owner, candidate identity.PlayerID) error {
 	ownerProfile, ownerFound, err := s.Directory.ProfileTx(c, q, owner)
@@ -116,7 +126,7 @@ func (s Mode) requireBand(c context.Context, q tx.Queryer, catalog d.Catalog, ow
 		return err
 	}
 	if !ownerFound || !candidateFound || candidateProfile.Level < catalog.OpenAcademyLevel || !d.WithinLevelBand(ownerProfile.Level, candidateProfile.Level, catalog.LevelBand) {
-		return fmt.Errorf("%w: level band", d.ErrRefused)
+		return fmt.Errorf("%w: level band", d.ErrLevelBand)
 	}
 	return nil
 }

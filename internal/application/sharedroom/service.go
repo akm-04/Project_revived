@@ -20,6 +20,11 @@ var (
 	ErrAlreadyInRoom = errors.New("shared room: player already has an active room")
 	ErrConflict      = errors.New("shared room: room changed during the command")
 	ErrInvalidFamily = errors.New("shared room: invalid family")
+	// ErrLevelBand refuses a join outside the owner's level band (stock 35022).
+	ErrLevelBand = errors.New("shared room: level band refused")
+	// ErrJoinUnavailable refuses a join of a missing, started, closed or full
+	// room (stock 35023).
+	ErrJoinUnavailable = errors.New("shared room: join room unavailable")
 )
 
 // Family identifies one family slot and the realtime wakeup route its read MID

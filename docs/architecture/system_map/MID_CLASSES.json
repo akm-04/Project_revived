@@ -39807,7 +39807,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -39820,7 +39820,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -39833,7 +39833,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -39856,7 +39856,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -81522,7 +81522,7 @@
    "isolation": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -81530,7 +81530,7 @@
    "read_only": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -81538,7 +81538,7 @@
    "retry": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -81553,7 +81553,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -81782,8 +81782,8 @@
    ],
    "unknown": [
     "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/heroforce/best.go:34",
-    "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/team.go:507",
-    "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/team.go:526",
+    "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/team.go:517",
+    "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/team.go:536",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED skinDef at internal/application/characterasset/appearance_projection.go:153"
@@ -81823,8 +81823,8 @@
     }
    ],
    "unknown": [
-    "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/team.go:507",
-    "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/team.go:526"
+    "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/team.go:517",
+    "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/team.go:536"
    ],
    "writes": "UNKNOWN"
   },
@@ -81833,7 +81833,7 @@
    "isolation": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -81841,7 +81841,7 @@
    "read_only": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -81849,7 +81849,7 @@
    "retry": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -81863,7 +81863,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -81916,8 +81916,8 @@
     }
    ],
    "unknown": [
-    "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/team.go:507",
-    "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/team.go:526"
+    "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/team.go:517",
+    "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/team.go:536"
    ],
    "writes": "state"
   },
@@ -81926,7 +81926,7 @@
    "isolation": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -81934,7 +81934,7 @@
    "read_only": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -81942,7 +81942,7 @@
    "retry": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -81956,7 +81956,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -82180,8 +82180,8 @@
    ],
    "unknown": [
     "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/heroforce/best.go:34",
-    "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/team.go:507",
-    "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/team.go:526",
+    "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/team.go:517",
+    "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/team.go:536",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED skinDef at internal/application/characterasset/appearance_projection.go:153"
@@ -82193,7 +82193,7 @@
    "isolation": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -82201,7 +82201,7 @@
    "read_only": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -82209,7 +82209,7 @@
    "retry": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -82223,7 +82223,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -82267,7 +82267,7 @@
    "isolation": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -82275,7 +82275,7 @@
    "read_only": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -82283,7 +82283,7 @@
    "retry": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -82297,7 +82297,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -82356,7 +82356,7 @@
    "isolation": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -82364,7 +82364,7 @@
    "read_only": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -82372,7 +82372,7 @@
    "retry": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -82386,7 +82386,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -82605,8 +82605,8 @@
    ],
    "unknown": [
     "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/heroforce/best.go:34",
-    "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/team.go:507",
-    "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/team.go:526",
+    "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/team.go:517",
+    "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/team.go:536",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED skinDef at internal/application/characterasset/appearance_projection.go:153"
@@ -82618,7 +82618,7 @@
    "isolation": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -82626,7 +82626,7 @@
    "read_only": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -82634,7 +82634,7 @@
    "retry": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -82648,7 +82648,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -82702,7 +82702,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -82720,7 +82720,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -82741,7 +82741,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -82800,7 +82800,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -83180,8 +83180,8 @@
    "unknown": [
     "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:328",
     "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/combat/freeze.go:375",
-    "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/team.go:507",
-    "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/team.go:526",
+    "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/team.go:517",
+    "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/illusion/team.go:536",
     "UNRESOLVED build at internal/application/combat/service.go:243",
     "UNRESOLVED liveDef at internal/application/characterasset/appearance_projection.go:200",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
@@ -83215,7 +83215,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -83228,7 +83228,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -83241,7 +83241,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -83268,7 +83268,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -83406,7 +83406,7 @@
    "isolation": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -83414,7 +83414,7 @@
    "read_only": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -83422,7 +83422,7 @@
    "retry": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -83436,7 +83436,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -105681,7 +105681,7 @@
    "isolation": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -105689,7 +105689,7 @@
    "read_only": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -105697,7 +105697,7 @@
    "retry": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -105714,7 +105714,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -105798,7 +105798,7 @@
    "isolation": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -105806,7 +105806,7 @@
    "read_only": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -105814,7 +105814,7 @@
    "retry": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -105831,7 +105831,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -106063,12 +106063,12 @@
    "isolation": [
     {
      "file": "internal/application/occult/team.go",
-     "line": 190,
+     "line": 200,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -106076,12 +106076,12 @@
    "read_only": [
     {
      "file": "internal/application/occult/team.go",
-     "line": 190,
+     "line": 200,
      "value": "true"
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -106089,12 +106089,12 @@
    "retry": [
     {
      "file": "internal/application/occult/team.go",
-     "line": 190,
+     "line": 200,
      "value": "8"
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -106112,7 +106112,7 @@
      "file": "internal/application/occult/team.go",
      "function": "Mode.bestForces",
      "isolation": "repeatable_read",
-     "line": 190,
+     "line": 200,
      "read_only": "true",
      "retry": "8"
     },
@@ -106120,7 +106120,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -106371,12 +106371,12 @@
    "isolation": [
     {
      "file": "internal/application/occult/team.go",
-     "line": 190,
+     "line": 200,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -106384,12 +106384,12 @@
    "read_only": [
     {
      "file": "internal/application/occult/team.go",
-     "line": 190,
+     "line": 200,
      "value": "true"
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -106397,12 +106397,12 @@
    "retry": [
     {
      "file": "internal/application/occult/team.go",
-     "line": 190,
+     "line": 200,
      "value": "8"
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -106417,7 +106417,7 @@
      "file": "internal/application/occult/team.go",
      "function": "Mode.bestForces",
      "isolation": "repeatable_read",
-     "line": 190,
+     "line": 200,
      "read_only": "true",
      "retry": "8"
     },
@@ -106425,7 +106425,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -106681,7 +106681,7 @@
    "isolation": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -106689,7 +106689,7 @@
    "read_only": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -106697,7 +106697,7 @@
    "retry": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -106713,7 +106713,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -106800,7 +106800,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -106813,7 +106813,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -106826,7 +106826,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -106854,7 +106854,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -107111,7 +107111,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -107124,7 +107124,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -107137,7 +107137,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -107165,7 +107165,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -107427,7 +107427,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -107445,7 +107445,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -107467,7 +107467,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -107537,7 +107537,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -107972,7 +107972,7 @@
    "isolation": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -107980,7 +107980,7 @@
    "read_only": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -107992,7 +107992,7 @@
    "retry": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -108044,7 +108044,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -108469,7 +108469,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -108487,7 +108487,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -108509,7 +108509,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -108579,7 +108579,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -109024,7 +109024,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -109042,7 +109042,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -109064,7 +109064,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -109134,7 +109134,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -109569,7 +109569,7 @@
    "isolation": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -109577,7 +109577,7 @@
    "read_only": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -109585,7 +109585,7 @@
    "retry": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -109600,7 +109600,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -109682,7 +109682,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -109700,7 +109700,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -109722,7 +109722,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -109792,7 +109792,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -110237,7 +110237,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -110255,7 +110255,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -110277,7 +110277,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -110347,7 +110347,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -110792,7 +110792,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -110810,7 +110810,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -110832,7 +110832,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -110902,7 +110902,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -111347,7 +111347,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -111365,7 +111365,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -111387,7 +111387,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -111457,7 +111457,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -111892,7 +111892,7 @@
    "isolation": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -111900,7 +111900,7 @@
    "read_only": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -111908,7 +111908,7 @@
    "retry": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -111925,7 +111925,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -112125,7 +112125,7 @@
    "isolation": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -112133,7 +112133,7 @@
    "read_only": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -112141,7 +112141,7 @@
    "retry": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -112156,7 +112156,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -112229,7 +112229,7 @@
    "isolation": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -112237,7 +112237,7 @@
    "read_only": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -112245,7 +112245,7 @@
    "retry": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -112260,7 +112260,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -112716,7 +112716,7 @@
    "isolation": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -112724,7 +112724,7 @@
    "read_only": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -112732,7 +112732,7 @@
    "retry": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -112751,7 +112751,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -112870,7 +112870,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -112888,7 +112888,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -112909,7 +112909,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -112967,7 +112967,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -113356,7 +113356,7 @@
    "isolation": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -113364,7 +113364,7 @@
    "read_only": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -113372,7 +113372,7 @@
    "retry": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -113386,7 +113386,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -113458,7 +113458,7 @@
    "isolation": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -113466,7 +113466,7 @@
    "read_only": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -113474,7 +113474,7 @@
    "retry": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -113488,7 +113488,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -113651,7 +113651,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -113669,7 +113669,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -113689,7 +113689,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -113737,7 +113737,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -114091,7 +114091,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -114109,7 +114109,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -114129,7 +114129,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -114177,7 +114177,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -115082,7 +115082,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -115100,7 +115100,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -115120,7 +115120,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -115168,7 +115168,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -116178,7 +116178,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -116196,7 +116196,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -116216,7 +116216,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -116264,7 +116264,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -116608,7 +116608,7 @@
    "isolation": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -116616,7 +116616,7 @@
    "read_only": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -116624,7 +116624,7 @@
    "retry": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -116638,7 +116638,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -116712,7 +116712,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -116725,7 +116725,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -116738,7 +116738,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -116760,7 +116760,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -117020,7 +117020,7 @@
    "isolation": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -117028,7 +117028,7 @@
    "read_only": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -117036,7 +117036,7 @@
    "retry": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -117050,7 +117050,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -117124,7 +117124,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -117137,7 +117137,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -117150,7 +117150,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -117177,7 +117177,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -117269,7 +117269,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -117287,7 +117287,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -117307,7 +117307,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -117355,7 +117355,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -117699,7 +117699,7 @@
    "isolation": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -117707,7 +117707,7 @@
    "read_only": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -117715,7 +117715,7 @@
    "retry": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -117729,7 +117729,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -117812,7 +117812,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -117830,7 +117830,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -117850,7 +117850,7 @@
     },
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -117898,7 +117898,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }
@@ -118242,7 +118242,7 @@
    "isolation": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "serializable"
     }
    ],
@@ -118250,7 +118250,7 @@
    "read_only": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "false"
     }
    ],
@@ -118261,7 +118261,7 @@
    "retry": [
     {
      "file": "internal/application/sharedroom/service.go",
-     "line": 65,
+     "line": 70,
      "value": "8"
     }
    ],
@@ -118294,7 +118294,7 @@
      "file": "internal/application/sharedroom/service.go",
      "function": "Service.run",
      "isolation": "serializable",
-     "line": 65,
+     "line": 70,
      "read_only": "false",
      "retry": "8"
     }

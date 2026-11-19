@@ -212,7 +212,7 @@ func (s Mode) pickHero(c context.Context, q tx.Queryer, view *roomView, team *d.
 		return err
 	}
 	if used[tableIDOf(row, request.PartnerID)] {
-		return fmt.Errorf("%w: duplicate hero", d.ErrRefused)
+		return fmt.Errorf("%w: duplicate hero", d.ErrDuplicateGirl)
 	}
 	if err = view.state.CanField(int64(player), request.PartnerID, int(request.Position), team.Pick(int64(player)).Heroes); err != nil {
 		return err

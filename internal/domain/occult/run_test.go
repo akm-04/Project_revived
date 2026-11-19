@@ -136,7 +136,7 @@ func TestStagesInBattleArePlayerIDs(t *testing.T) {
 	if run.Stages["20003"][0].InBattle != 11 {
 		t.Fatal("in_battle holds the player id")
 	}
-	if !errors.Is(run.Enter(20003, 0, 12), ErrRefused) || !errors.Is(run.Enter(20003, 1, 11), ErrRefused) {
+	if !errors.Is(run.Enter(20003, 0, 12), ErrStageHeld) || !errors.Is(run.Enter(20003, 1, 11), ErrRefused) {
 		t.Fatal("occupied stage and double fight refused")
 	}
 	run.Release(11)
