@@ -42,7 +42,7 @@ func TestTeamFightWindowsAndRestart(t *testing.T) {
 	if again, err := state.OpenTeamFight(campaign, 0, 1, 1001); err != nil || again {
 		t.Fatalf("same stage again: %v %v", again, err)
 	}
-	if _, err = state.OpenTeamFight(campaign, 0, 2, 1002); !errors.Is(err, ErrRefused) {
+	if _, err = state.OpenTeamFight(campaign, 0, 2, 1002); !errors.Is(err, ErrStageHeld) {
 		t.Fatalf("another member must wait: %v", err)
 	}
 	if state.Team.Accept(1, 3, 1003) || state.Team.Accept(2, 3, 1004) {

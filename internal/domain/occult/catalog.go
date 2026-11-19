@@ -46,6 +46,18 @@ var (
 	ErrInvalid     = errors.New("occult invalid request")
 	ErrRefused     = errors.New("occult refused")
 	ErrUnavailable = errors.New("occult unavailable")
+	// ErrRoomUnavailable refuses a join of a missing, expired, closed or full
+	// room (stock 35004).
+	ErrRoomUnavailable = errors.New("occult room unavailable")
+	// ErrLevelBand refuses a teammate outside the room's level band (stock
+	// 35005).
+	ErrLevelBand = errors.New("occult level band refused")
+	// ErrDuplicateGirl refuses a girl already picked elsewhere in the team
+	// (stock 35009).
+	ErrDuplicateGirl = errors.New("occult duplicate girl")
+	// ErrStageHeld refuses a stage a teammate is already challenging (stock
+	// 35001).
+	ErrStageHeld = errors.New("occult stage held by a teammate")
 )
 
 type Chapter struct {

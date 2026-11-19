@@ -135,6 +135,8 @@ func TestPart3CIllusionRoomFailureRows(t *testing.T) {
 		{"room changed", failIllusionRoom(sr.ErrConflict), http.StatusConflict, staleConflictCode, ""},
 		{"room full", failIllusionRoom(room.ErrFull), http.StatusConflict, unprovenRefusalCode, ""},
 		{"join throttled", failIllusionRoom(room.ErrJoinThrottled), http.StatusConflict, unprovenRefusalCode, ""},
+		{"level band", failIllusionRoom(sr.ErrLevelBand), http.StatusConflict, illusionLevelBandCode, ""},
+		{"join unavailable", failIllusionRoom(sr.ErrJoinUnavailable), http.StatusConflict, illusionRoomUnavailableCode, ""},
 		{"unavailable", failIllusionRoom(illusion.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }
@@ -184,6 +186,10 @@ func TestPart3COccultFailureRows(t *testing.T) {
 		{"not in room", failOccult(sr.ErrNotInRoom), http.StatusConflict, occultRoomRefusedCode, ""},
 		{"room full", failOccult(room.ErrFull), http.StatusConflict, occultRoomRefusedCode, ""},
 		{"join throttled", failOccult(room.ErrJoinThrottled), http.StatusConflict, occultRoomRefusedCode, ""},
+		{"stage held", failOccult(occult.ErrStageHeld), http.StatusConflict, occultTeammateHeldCode, ""},
+		{"join unavailable", failOccult(occult.ErrRoomUnavailable), http.StatusConflict, occultRoomMissingCode, ""},
+		{"level band", failOccult(occult.ErrLevelBand), http.StatusConflict, occultLevelBandCode, ""},
+		{"duplicate girl", failOccult(occult.ErrDuplicateGirl), http.StatusConflict, occultDuplicateGirlCode, ""},
 		{"unavailable", failOccult(occult.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }

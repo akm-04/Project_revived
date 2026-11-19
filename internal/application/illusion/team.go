@@ -3,6 +3,7 @@ package illusion
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"slices"
 	"strconv"
@@ -202,10 +203,10 @@ func (s Mode) EnterRoom(c context.Context, a identity.ActorContext, roomID int64
 		return nil, err
 	}
 	if !found || room.Family != RoomFamily || room.Slot != RoomSlot || room.Status != sharedroom.StatusOpen {
-		return nil, fmt.Errorf("%w: room unavailable", d.ErrRefused)
+		return nil, fmt.Errorf("%w: room unavailable", sr.ErrJoinUnavailable)
 	}
 	if !seatedIn(room, a.PlayerID) && len(room.Members()) >= int(room.Capacity) {
-		return nil, fmt.Errorf("%w: room full", d.ErrRefused)
+		return nil, fmt.Errorf("%w: room full", sr.ErrJoinUnavailable)
 	}
 	state, err := d.LoadRoomState(room.Payload)
 	if err != nil {
@@ -216,7 +217,7 @@ func (s Mode) EnterRoom(c context.Context, a identity.ActorContext, roomID int64
 		return nil, err
 	}
 	if !found || profile.Level < d.OpenLevel || abs(profile.Level-state.MasterLevel) > d.TeamLevelBand {
-		return nil, fmt.Errorf("%w: level band", d.ErrRefused)
+		return nil, fmt.Errorf("%w: level band", sr.ErrLevelBand)
 	}
 	var info map[string]any
 	_, err = s.Rooms.Join(c, a, sr.JoinRequest{Family: RoomFamilyRef(), RoomID: roomID,
@@ -235,9 +236,18 @@ func (s Mode) EnterRoom(c context.Context, a identity.ActorContext, roomID int64
 			return s.storeTeamInfo(sc, room, state, info)
 		}}, op)
 	if err != nil {
-		return nil, err
+		return nil, enterRefusal(err)
 	}
 	return info, nil
+}
+
+// enterRefusal reports a seat the room core refused as a room that is full,
+// started or gone, the stock 1352 join refusal the client renders.
+func enterRefusal(err error) error {
+	if errors.Is(err, sharedroom.ErrFull) || errors.Is(err, sharedroom.ErrClosed) || errors.Is(err, sharedroom.ErrExpired) || errors.Is(err, sr.ErrNotFound) {
+		return fmt.Errorf("%w: %w", sr.ErrJoinUnavailable, err)
+	}
+	return err
 }
 
 // RemovePlayer answers 1353; the target's 518 room_id 0 comes from its KICKED

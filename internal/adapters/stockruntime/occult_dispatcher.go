@@ -305,6 +305,10 @@ func occultMonsterStatus(raw any) (map[int64]int64, bool) {
 
 var occultFailureRows = []failureRow{
 	{match: d.ErrInvalid, class: failureMalformed, detail: "occult_invalid_parameter"},
+	{match: d.ErrStageHeld, class: failureRefusal, code: occultTeammateHeldCode},
+	{match: d.ErrRoomUnavailable, class: failureRefusal, code: occultRoomMissingCode},
+	{match: d.ErrLevelBand, class: failureRefusal, code: occultLevelBandCode},
+	{match: d.ErrDuplicateGirl, class: failureRefusal, code: occultDuplicateGirlCode},
 	{match: d.ErrRefused, class: failureRefusal, code: occultRoomRefusedCode},
 	{match: economy.ErrInsufficientBalance, class: failureRefusal, code: occultNoScrollsCode},
 	{match: sr.ErrNotInRoom, class: failureRefusal, code: occultRoomRefusedCode},
@@ -326,6 +330,10 @@ func failOccult(err error) httpedge.Response {
 // Stock room-system messages the client renders from error_code; code 1 has no
 // message row, so a bare refusal is silent on the phone.
 const (
-	occultRoomRefusedCode = 35002
-	occultNoScrollsCode   = 35003
+	occultRoomRefusedCode   = 35002
+	occultNoScrollsCode     = 35003
+	occultTeammateHeldCode  = 35001
+	occultRoomMissingCode   = 35004
+	occultLevelBandCode     = 35005
+	occultDuplicateGirlCode = 35009
 )

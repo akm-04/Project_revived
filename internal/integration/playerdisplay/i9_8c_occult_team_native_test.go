@@ -105,10 +105,10 @@ func TestI9_8COccultTeamRoomPolicyNative(t *testing.T) {
 	if _, err = s.CreateTeam(ctx, a, 2, op()); err != nil {
 		t.Fatal("a repeated create of the held chapter answers the room", err)
 	}
-	if _, err = s.Invite(ctx, a, low.PlayerID, op()); !errors.Is(err, d.ErrRefused) {
+	if _, err = s.Invite(ctx, a, low.PlayerID, op()); !errors.Is(err, d.ErrLevelBand) {
 		t.Fatal("level 84 invite", err)
 	}
-	if _, err = s.Invite(ctx, a, far.PlayerID, op()); !errors.Is(err, d.ErrRefused) {
+	if _, err = s.Invite(ctx, a, far.PlayerID, op()); !errors.Is(err, d.ErrLevelBand) {
 		t.Fatal("outside-band invite", err)
 	}
 	if _, err = s.Invite(ctx, a, b.PlayerID, op()); err != nil {
@@ -121,6 +121,9 @@ func TestI9_8COccultTeamRoomPolicyNative(t *testing.T) {
 	}
 	if _, err = s.JoinRoom(ctx, low, roomID, op()); !errors.Is(err, d.ErrRefused) {
 		t.Fatal("level 84 join", err)
+	}
+	if _, err = s.JoinRoom(ctx, far, roomID, op()); !errors.Is(err, d.ErrLevelBand) {
+		t.Fatal("outside-band join", err)
 	}
 	if _, err = s.Kick(ctx, a, c.PlayerID, op()); err != nil {
 		t.Fatal("kick", err)
@@ -169,7 +172,7 @@ func TestI9_8COccultReentryWaitNative(t *testing.T) {
 		t.Fatalf("left_at not recorded with the removal %#v", state.LeftAt)
 	}
 	clock.Set(leftAt.Add(d.ReentrySeconds*time.Second - time.Second))
-	if _, err = s.JoinRoom(ctx, b, roomID, op()); !errors.Is(err, d.ErrRefused) {
+	if _, err = s.JoinRoom(ctx, b, roomID, op()); !errors.Is(err, d.ErrRoomUnavailable) {
 		t.Fatalf("rejoined at 119 s: %v", err)
 	}
 	clock.Set(leftAt.Add(d.ReentrySeconds * time.Second))
@@ -588,7 +591,7 @@ func TestI9_8COccultTeamRoomExpiryNative(t *testing.T) {
 	if status := scalar(t, p, `SELECT count(*) FROM shared_rooms WHERE room_id=$1 AND status='CLOSED'`, roomID); status != 1 {
 		t.Fatal("expired room stayed open")
 	}
-	if _, err = s.JoinRoom(ctx, visitor, roomID, op()); !errors.Is(err, d.ErrRefused) {
+	if _, err = s.JoinRoom(ctx, visitor, roomID, op()); !errors.Is(err, d.ErrRoomUnavailable) {
 		t.Fatal("closed room accepted a join", err)
 	}
 }

@@ -159,7 +159,7 @@ func TestTeamRoomBandAndGate(t *testing.T) {
 	}{{"within five", 2, 1, true}, {"six apart", 3, 1, false}, {"below the gate", 4, 5, false}, {"unknown player", 9, 1, false}}
 	for _, c := range cases {
 		err := mode.requireBand(context.Background(), nil, catalog, c.owner, c.candidate)
-		if c.want != (err == nil) || (!c.want && !errors.Is(err, d.ErrRefused)) {
+		if c.want != (err == nil) || (!c.want && !errors.Is(err, d.ErrLevelBand)) {
 			t.Fatalf("%s: %v", c.name, err)
 		}
 	}

@@ -217,9 +217,18 @@ func illusionReportID(params map[string]any) (string, bool) {
 	return strconv.FormatInt(value, 10), true
 }
 
+// Stock Illusion join refusals: 35022 is the level-band gap, 35023 a room that
+// is full, started or gone (message.lua:616-626).
+const (
+	illusionLevelBandCode       int64 = 35022
+	illusionRoomUnavailableCode int64 = 35023
+)
+
 var illusionRoomFailureRows = []failureRow{
 	{match: d.ErrInvalid, class: failureMalformed, detail: "illusion_invalid_parameter"},
 	{match: sharedroom.ErrInvalid, class: failureMalformed, detail: "illusion_invalid_parameter"},
+	{match: sr.ErrLevelBand, class: failureRefusal, code: illusionLevelBandCode},
+	{match: sr.ErrJoinUnavailable, class: failureRefusal, code: illusionRoomUnavailableCode},
 	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
 	{match: sr.ErrNotInRoom, class: failureRefusal, code: unprovenRefusalCode},
 	{match: sr.ErrAlreadyInRoom, class: failureRefusal, code: unprovenRefusalCode},
