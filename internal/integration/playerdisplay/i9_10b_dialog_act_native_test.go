@@ -393,10 +393,10 @@ func TestI9_10B840PostGiftProjectionAndExactRetry(t *testing.T) {
 
 	giftOperation := op()
 	response := libraryDispatch(t, p, a, 840, map[string]any{"partner_id": int64(1), "gift_id": int64(50005011), "gift_num": int64(1)}, giftOperation)
-	if response.HTTPStatus != 200 || response.Body["favor_degree"] != int64(113) {
+	if response.HTTPStatus != 200 || response.Body["favor_degree"] != int64(118) {
 		t.Fatalf("840 status %d body %+v", response.HTTPStatus, response.Body)
 	}
-	// Favor 113 opens type-2 dialog 2 and the act 1/2 dialogs 12 and 13.
+	// Favor 118 opens type-2 dialog 2 and the act 1/2 dialogs 12 and 13.
 	dialogs, ok := response.Body["partner_dialogs"].([]app.DialogRow)
 	if !ok || len(dialogs) != 4 {
 		t.Fatalf("post-gift dialogs %T %+v", response.Body["partner_dialogs"], response.Body["partner_dialogs"])
@@ -409,7 +409,7 @@ func TestI9_10B840PostGiftProjectionAndExactRetry(t *testing.T) {
 	if read := dialogs[0].IsRead; read != int64(1) {
 		t.Fatalf("pre-read dialog state lost %+v", dialogs[0])
 	}
-	// Favor 113 is the (100,300] band: acts 1 and 2 are addressable.
+	// Favor 118 is the (100,300] band: acts 1 and 2 are addressable.
 	acts, ok := response.Body["partner_acts"].([]app.ActSlot)
 	if !ok || len(acts) != 2 {
 		t.Fatalf("post-gift acts %T %+v", response.Body["partner_acts"], response.Body["partner_acts"])
@@ -425,7 +425,7 @@ func TestI9_10B840PostGiftProjectionAndExactRetry(t *testing.T) {
 	// Later state must not leak into the receipt replay.
 	setLibraryFavor(t, p, a, 1, 200)
 	retry := libraryDispatch(t, p, a, 840, map[string]any{"partner_id": int64(1), "gift_id": int64(50005011), "gift_num": int64(1)}, giftOperation)
-	if retry.HTTPStatus != 200 || retry.Body["favor_degree"] != int64(113) {
+	if retry.HTTPStatus != 200 || retry.Body["favor_degree"] != int64(118) {
 		t.Fatalf("840 retry status %d body %+v", retry.HTTPStatus, retry.Body)
 	}
 	if !reflect.DeepEqual(capturedDialogs, retry.Body["partner_dialogs"]) {

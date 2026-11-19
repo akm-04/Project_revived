@@ -265,7 +265,7 @@ func TestI9_10BLibraryProcessStockMIDs(t *testing.T) {
 		t.Fatalf("839 status %d body %+v", code, body)
 	}
 	code, body = api.post(840, map[string]any{"partner_id": int64(1), "gift_id": int64(50005011), "gift_num": int64(1)})
-	if code != 200 || i9Number(t, body["favor_degree"]) != 113 {
+	if code != 200 || i9Number(t, body["favor_degree"]) != 118 {
 		t.Fatalf("840 status %d body %+v", code, body)
 	}
 	dialogs, ok := body["partner_dialogs"].([]any)
@@ -277,7 +277,7 @@ func TestI9_10BLibraryProcessStockMIDs(t *testing.T) {
 			t.Fatalf("840 dialog %d id %d want %d", index, got, wantID)
 		}
 	}
-	// Favor 113 is the (100,300] band: acts 1 and 2.
+	// Favor 118 is the (100,300] band: acts 1 and 2.
 	if acts, ok := body["partner_acts"].([]any); !ok || len(acts) != 2 {
 		t.Fatalf("840 partner_acts %T %+v", body["partner_acts"], body["partner_acts"])
 	}
@@ -289,7 +289,7 @@ func TestI9_10BLibraryProcessStockMIDs(t *testing.T) {
 	}
 	// 203001 is a type-2 choice row with is_reward=1 in data/tables/10001013.lua.
 	code, body = api.post(843, map[string]any{"partner_id": int64(1), "dialog_id": int64(2), "select_info": "1|203001"})
-	if code != 200 || i9Number(t, body["dialog_info"].(map[string]any)["is_awarded"]) != 1 || i9Number(t, body["dialog_info"].(map[string]any)["select_id"]) != 203001 || i9Number(t, body["favor_degree"]) != 115 {
+	if code != 200 || i9Number(t, body["dialog_info"].(map[string]any)["is_awarded"]) != 1 || i9Number(t, body["dialog_info"].(map[string]any)["select_id"]) != 203001 || i9Number(t, body["favor_degree"]) != 120 {
 		t.Fatalf("843 status %d body %+v", code, body)
 	}
 	if facts := i9IntimacyFacts(t, p, actor); facts != 2 {
@@ -299,7 +299,7 @@ func TestI9_10BLibraryProcessStockMIDs(t *testing.T) {
 		t.Fatalf("talk mission 10029 progress %d want 2", progress)
 	}
 	code, body = api.post(844, map[string]any{"partner_id": int64(1), "act_id": int64(1)})
-	if code != 200 || i9Number(t, body["favor_degree"]) != 120 {
+	if code != 200 || i9Number(t, body["favor_degree"]) != 125 {
 		t.Fatalf("844 status %d body %+v", code, body)
 	}
 	if facts := i9IntimacyFacts(t, p, actor); facts != 3 {

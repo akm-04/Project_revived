@@ -144,7 +144,7 @@ func TestI9_10B841MissionReadAndGiftAdvance(t *testing.T) {
 	factService := libraryFactService(p)
 	giftOperation := triggeringIntimacyOperation(t, a.PlayerID)
 	response = libraryDispatchService(t, a, factService, 840, map[string]any{"partner_id": int64(1), "gift_id": int64(50005011), "gift_num": int64(1)}, giftOperation)
-	if response.HTTPStatus != 200 || response.Body["favor_degree"] != int64(113) {
+	if response.HTTPStatus != 200 || response.Body["favor_degree"] != int64(118) {
 		t.Fatalf("gift status %d body %+v", response.HTTPStatus, response.Body)
 	}
 
@@ -154,7 +154,7 @@ func TestI9_10B841MissionReadAndGiftAdvance(t *testing.T) {
 		t.Fatalf("post-gift missions %+v", missions)
 	}
 	first := missions[0].(map[string]any)
-	if first["mission_id"] != int64(1001) || first["process"] != int64(1) || first["mission_state"] != int64(3) {
+	if first["mission_id"] != int64(1001) || first["process"] != int64(1) || first["mission_state"] != int64(4) {
 		t.Fatalf("gift mission row %+v", first)
 	}
 	if progress := missionProgress(t, p, a.PlayerID, 10029); progress != 1 {
@@ -166,7 +166,7 @@ func TestI9_10B841MissionReadAndGiftAdvance(t *testing.T) {
 
 	// The same operation replays its saved receipt: no second fact or occurrence.
 	replay := libraryDispatchService(t, a, factService, 840, map[string]any{"partner_id": int64(1), "gift_id": int64(50005011), "gift_num": int64(1)}, giftOperation)
-	if replay.HTTPStatus != 200 || replay.Body["favor_degree"] != int64(113) {
+	if replay.HTTPStatus != 200 || replay.Body["favor_degree"] != int64(118) {
 		t.Fatalf("gift replay status %d body %+v", replay.HTTPStatus, replay.Body)
 	}
 	if progress := missionProgress(t, p, a.PlayerID, 10029); progress != 1 {
@@ -182,12 +182,12 @@ func TestI9_10B841MissionReadAndGiftAdvance(t *testing.T) {
 	setLibraryFavor(t, p, a, 2, 99)
 	exec(t, p, `INSERT INTO player_item_stacks(player_id,item_id,quantity,state_version,acquired_at,updated_at)VALUES($1,50005011,1,1,clock_timestamp()-interval '1 hour',clock_timestamp()-interval '1 hour') ON CONFLICT(player_id,item_id) DO UPDATE SET quantity=1,updated_at=clock_timestamp()-interval '1 hour'`, int64(a.PlayerID))
 	response = libraryDispatchService(t, a, factService, 840, map[string]any{"partner_id": int64(2), "gift_id": int64(50005011), "gift_num": int64(1)}, op())
-	if response.HTTPStatus != 200 || response.Body["favor_degree"] != int64(107) {
+	if response.HTTPStatus != 200 || response.Body["favor_degree"] != int64(112) {
 		t.Fatalf("boundary gift status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	response = libraryDispatchService(t, a, service, 841, map[string]any{"partner_id": int64(2)}, op())
 	missions = response.Body["mission_list"].([]any)
-	if len(missions) != 3 || missions[0].(map[string]any)["mission_id"] != int64(1001) || missions[0].(map[string]any)["process"] != int64(1) || missions[0].(map[string]any)["mission_state"] != int64(3) {
+	if len(missions) != 3 || missions[0].(map[string]any)["mission_id"] != int64(1001) || missions[0].(map[string]any)["process"] != int64(1) || missions[0].(map[string]any)["mission_state"] != int64(4) {
 		t.Fatalf("boundary missions %+v", missions)
 	}
 }

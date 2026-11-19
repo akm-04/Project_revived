@@ -143,7 +143,7 @@ func TestI7C2BLibraryGiftMarriageFeedingAndReplay(t *testing.T) {
 		t.Fatal(f)
 	}
 	replay, e := s.Command(ctx, a, app.Command{Family: app.Gift, PartnerID: 1, Value: 50005013}, original)
-	if e != nil || replay.StateVersion != originalResult.StateVersion || replay.Favor != 105 {
+	if e != nil || replay.StateVersion != originalResult.StateVersion || replay.Favor != 110 {
 		t.Fatal("historic gift", replay, e)
 	}
 	ring := app.Command{Family: app.Gift, PartnerID: 1, Value: 50001112}

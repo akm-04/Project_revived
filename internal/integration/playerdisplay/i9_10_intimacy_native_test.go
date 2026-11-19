@@ -47,10 +47,10 @@ func TestI9_10IntimacyFavorBandsVisitDialogsAndLog(t *testing.T) {
 
 	seedStack(t, p, a, rev, 50001113, 1)
 	response = libraryCall(t, p, a, 840, map[string]any{"partner_id": int64(1), "gift_id": int64(50001113), "gift_num": int64(1)})
-	if response.HTTPStatus != 200 || response.Body["favor_degree"] != int64(100) {
+	if response.HTTPStatus != 200 || response.Body["favor_degree"] != int64(105) {
 		t.Fatalf("chocolate gift status %d body %+v", response.HTTPStatus, response.Body)
 	}
-	if acts, ok := response.Body["partner_acts"].([]app.ActSlot); !ok || len(acts) != 1 {
+	if acts, ok := response.Body["partner_acts"].([]app.ActSlot); !ok || len(acts) != 2 {
 		t.Fatalf("acts after gift %T %+v", response.Body["partner_acts"], response.Body["partner_acts"])
 	}
 

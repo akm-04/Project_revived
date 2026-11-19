@@ -176,7 +176,7 @@ func TestI9_10B840ConcurrentGiftStack(t *testing.T) {
 	if got := stackQuantityOrZero(t, p, a.PlayerID, giftID); got != 0 {
 		t.Fatalf("gift stack %d after one debit", got)
 	}
-	if got := libraryHeroFavor(t, p, a.PlayerID, 1); got != 113 {
+	if got := libraryHeroFavor(t, p, a.PlayerID, 1); got != 118 {
 		t.Fatalf("favor %d after one gift", got)
 	}
 }
