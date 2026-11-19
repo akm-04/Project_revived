@@ -324,13 +324,16 @@ func TestRecallTargetRejectsScopeWithoutRequiredCoherence(t *testing.T) {
 }
 
 func TestRecallTargetRejectsMalformedOwnerFacts(t *testing.T) {
+	// K2 (I9_11_CLOCK_ROLLBACK_V1): stored forward facts are observed at that
+	// fact, not refused after a backwards clock step.
+	forwardFacts := map[string]bool{"future-progression": true, "future-privilege": true}
 	cases := []struct {
 		name    string
 		mutate  func(*targetFixture)
 		wantErr error
 	}{
 		{"foreign-progression", func(f *targetFixture) { f.progression.value.PlayerID = 100003 }, socialrecall.ErrStartFacts},
-		{"future-progression", func(f *targetFixture) { f.progression.value.UpdatedAt = targetAt.Add(time.Minute) }, socialrecall.ErrStartFacts},
+		{"future-progression", func(f *targetFixture) { f.progression.value.UpdatedAt = targetAt.Add(time.Minute) }, nil},
 		{"invalid-progression", func(f *targetFixture) { f.progression.value.Level = 0 }, socialrecall.ErrStartFacts},
 		{"missing-progression", func(f *targetFixture) { f.progression.err = errors.New("no progression row") }, nil},
 		{"foreign-roster", func(f *targetFixture) { f.roster.value.PlayerID = 100003 }, socialrecall.ErrStartFacts},
@@ -343,7 +346,7 @@ func TestRecallTargetRejectsMalformedOwnerFacts(t *testing.T) {
 		{"wrong-roster-family", func(f *targetFixture) { f.roster.value.Family = "Pet" }, socialrecall.ErrStartFacts},
 		{"unavailable-charge", func(f *targetFixture) { f.privilege.err = privilege.ErrUnavailable }, privilege.ErrUnavailable},
 		{"foreign-privilege", func(f *targetFixture) { f.privilege.value.State.PlayerID = 100003 }, socialrecall.ErrStartFacts},
-		{"future-privilege", func(f *targetFixture) { f.privilege.value.State.UpdatedAt = targetAt.Add(time.Minute) }, socialrecall.ErrStartFacts},
+		{"future-privilege", func(f *targetFixture) { f.privilege.value.State.UpdatedAt = targetAt.Add(time.Minute) }, nil},
 		{"negative-charge", func(f *targetFixture) { f.privilege.value.State.Charge = -1 }, socialrecall.ErrStartFacts},
 		{"foreign-relation", func(f *targetFixture) {
 			f.relations.value = []socialrelation.CandidateState{{PlayerID: 100003, Friend: true}}
@@ -361,6 +364,12 @@ func TestRecallTargetRejectsMalformedOwnerFacts(t *testing.T) {
 			fixture := newTargetFixture(t)
 			testCase.mutate(fixture)
 			snapshot, err := fixture.read()
+			if forwardFacts[testCase.name] {
+				if err != nil {
+					t.Fatalf("stored forward fact refused: %v", err)
+				}
+				return
+			}
 			if err == nil {
 				t.Fatal("malformed facts accepted", snapshot)
 			}

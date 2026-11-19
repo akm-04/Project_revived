@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/hex"
 	"errors"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	"math"
 	"strings"
 	"time"
@@ -113,7 +114,7 @@ func (store Store) PrepareStartStateTx(ctx context.Context, transaction tx.Tx, c
 	if err != nil {
 		return application.StartState{}, err
 	}
-	if reserved && at.Before(previous.UpdatedAt) {
+	if reserved && at.Before(gen.EffectiveObservation(at, previous.UpdatedAt)) {
 		return application.StartState{}, application.ErrLoginFacts
 	}
 	if reserved && !at.Before(previous.Task.ExpiresAt) {
