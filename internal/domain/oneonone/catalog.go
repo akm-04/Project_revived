@@ -39,7 +39,7 @@ var (
 	ErrConflict    = errors.New("oneonone: conflicting state")
 	ErrInvalid     = errors.New("oneonone: invalid request")
 	ErrRefused     = errors.New("oneonone: refused by rule")
-	// ErrClosedHours is answered in-band as source message 30002.
+	// ErrClosedHours is source message 30002, refused 409 by the dispatcher.
 	ErrClosedHours = errors.New("oneonone: outside 08:00-22:00")
 	// ErrOfferStale is source message 35026: the issued target list moved.
 	ErrOfferStale = errors.New("oneonone: offered rank changed")
