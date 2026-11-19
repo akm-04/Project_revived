@@ -18,19 +18,19 @@ import (
 // rankRows is the number of 301 rank_types 6 rows (C5D policy, as 5C).
 const rankRows = 50
 
-func (s Service) current(c context.Context, q tx.Queryer, pid identity.PlayerID, now time.Time) (d.Catalog, d.Player, error) {
+func (s Service) current(c context.Context, q tx.Queryer, pid identity.PlayerID, now time.Time) (string, d.Catalog, d.Player, error) {
 	if !s.ready() {
-		return d.Catalog{}, d.Player{}, d.ErrUnavailable
+		return "", d.Catalog{}, d.Player{}, d.ErrUnavailable
 	}
-	_, catalog, err := s.catalogTx(c, q)
+	revision, catalog, err := s.catalogTx(c, q)
 	if err != nil {
-		return d.Catalog{}, d.Player{}, err
+		return "", d.Catalog{}, d.Player{}, err
 	}
 	p, found, err := s.Store.ReadPlayerTx(c, q, pid, false)
 	if err != nil || !found {
-		return d.Catalog{}, d.Player{}, errors.Join(err, d.ErrRefused)
+		return revision, d.Catalog{}, d.Player{}, errors.Join(err, d.ErrRefused)
 	}
-	return catalog, catalog.Rolled(p, now), nil
+	return revision, catalog, catalog.Rolled(p, now), nil
 }
 
 // Partners answers GET_REARENA_PARTNERS: the requested player's season
@@ -51,7 +51,7 @@ func (s Service) Partners(c context.Context, a identity.ActorContext, subject id
 // partnersSubject is the Arena-owned subject read of one player's statistics.
 // An unknown subject is ErrRefused, which the dispatcher answers 409.
 func (s Service) partnersSubject(c context.Context, q tx.Queryer, subject identity.PlayerID, at time.Time) (d.Player, []d.Usage, error) {
-	_, p, err := s.current(c, q, subject, at)
+	revision, _, p, err := s.current(c, q, subject, at)
 	if err != nil {
 		return d.Player{}, nil, err
 	}
@@ -59,7 +59,7 @@ func (s Service) partnersSubject(c context.Context, q tx.Queryer, subject identi
 	if err != nil {
 		return d.Player{}, nil, err
 	}
-	if err = s.fillPartnerStars(c, q, subject, usage); err != nil {
+	if err = s.fillPartnerStars(c, q, revision, subject, usage); err != nil {
 		return d.Player{}, nil, err
 	}
 	return p, usage, nil
@@ -67,11 +67,11 @@ func (s Service) partnersSubject(c context.Context, q tx.Queryer, subject identi
 
 // fillPartnerStars adds each usage girl's current star from the subject's owned
 // heroes; a girl the subject no longer owns keeps no star.
-func (s Service) fillPartnerStars(c context.Context, q tx.Queryer, subject identity.PlayerID, usage []d.Usage) error {
+func (s Service) fillPartnerStars(c context.Context, q tx.Queryer, revision string, subject identity.PlayerID, usage []d.Usage) error {
 	if len(usage) == 0 {
 		return nil
 	}
-	templates, err := s.templates(c, q)
+	templates, err := s.Content.ArenaTemplatesTx(c, q, revision)
 	if err != nil {
 		return err
 	}
