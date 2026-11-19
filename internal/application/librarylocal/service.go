@@ -242,6 +242,7 @@ type LibraryPort interface {
 	UnlockBackgroundTx(context.Context, tx.Tx, lib.BackgroundFact) (bool, error)
 	ListHeroLogsTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.HeroLogFact, error)
 	InsertHeroLogTx(context.Context, tx.Tx, lib.HeroLogFact) (bool, error)
+	BumpHeroBattleCountTx(context.Context, tx.Tx, identity.PlayerID, int64) (int64, error)
 }
 type ContentPort interface {
 	LibraryInputsActive(context.Context) (string, bool, error)

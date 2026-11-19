@@ -342,6 +342,7 @@
  ],
  "tables": {
   "owned": [
+   "library_hero_battle_counts",
    "player_library_act_awards",
    "player_library_admissions",
    "player_library_backgrounds",
@@ -379,6 +380,7 @@
   ],
   "written": [
    "gxb_operation_receipts",
+   "library_hero_battle_counts",
    "player_library_act_awards",
    "player_library_admissions",
    "player_library_backgrounds",
@@ -399,6 +401,7 @@
    "i9_10b_library.json"
   ],
   "unit": [
+   "battle_count_native_test.go",
    "command_reward_test.go",
    "commands_log_test.go",
    "inputs_test.go",

@@ -4767,6 +4767,7 @@
    ],
    "store:librarystore": [
     "*BackfillMissingHeroTx",
+    "*BumpHeroBattleCountTx",
     "*EnsureMissionTx",
     "*EnsurePlayerRootTx",
     "*InsertActAwardTx",
