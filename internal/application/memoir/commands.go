@@ -235,7 +235,9 @@ func (mode Mode) FinalAward(ctx context.Context, actor identity.ActorContext, po
 		state.Abandon()
 		response := projection(*state)
 		response["drops_info"] = dropProjection(drops)
-		response["awards"] = awards
+		if len(awards) > 0 {
+			response["awards"] = awards
+		}
 		return response, nil
 	})
 }

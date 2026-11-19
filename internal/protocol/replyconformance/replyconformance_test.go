@@ -192,6 +192,19 @@ func (r *recordingReporter) Fatalf(format string, args ...any) {
 	r.failures = append(r.failures, format)
 }
 
+// TestCheckerAcceptsAMemoirFinalAwardWithoutAwards covers the waived MID 2313
+// path: the client's handleRewards runs its callback on a nil awards list
+// (SelfPlayer.lua:4324-4330), so the all-mailed or empty draw reply omits it.
+func TestCheckerAcceptsAMemoirFinalAwardWithoutAwards(t *testing.T) {
+	body := map[string]any{
+		"base_info":  map[string]any{"hero_id": int64(1), "is_game_start": int64(0), "now_floor": int64(1), "revive_times": int64(0), "start_pos": int64(1)},
+		"drops_info": []any{},
+	}
+	if violations := (Checker{}).Check(2313, body); len(violations) != 0 {
+		t.Fatalf("absent awards produced %#v", violations)
+	}
+}
+
 func TestCheckFailsOnAMissingRequiredPath(t *testing.T) {
 	reporter := &recordingReporter{}
 	Check(reporter, 18, map[string]any{"regions": []any{map[string]any{"name": "Server 1"}}})

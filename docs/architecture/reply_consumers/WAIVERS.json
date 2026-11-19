@@ -216,6 +216,12 @@
    "mid": 117,
    "path": "items[].item_num",
    "reason": "SweepWindow holds items as one row per sweep run and then iterates each row (SweepWindow.lua:661-681); the generator collapses both list levels into items[].item_id, so a nested per-run array cannot satisfy the leaf while items and items[] still hold."
+  },
+  {
+   "client": "app/windows/MemoriesOfSchoolFinalRewardWindow.lua:49",
+   "mid": 2313,
+   "path": "awards",
+   "reason": "handleRewards(arg_6_1.awards, callback) takes its nil branch when awards is absent (SelfPlayer.lua:4324-4330) and runs the close/refresh callback; the server omits awards when the grant has no representable row (an empty draw or a fully mailed reward)."
   }
  ]
 }
