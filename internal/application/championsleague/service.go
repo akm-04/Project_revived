@@ -227,9 +227,6 @@ func (s Service) Execute(c context.Context, a identity.ActorContext, cmd Command
 		if due(cat, root, at) {
 			return d.ErrDue
 		}
-		if at.Before(gen.EffectiveObservation(at, root.UpdatedAt)) {
-			return d.ErrStaleTime
-		}
 		players, e := s.Store.PlayersTx(c, sc.Tx, true)
 		if e != nil {
 			return e
@@ -423,7 +420,7 @@ func (s Service) Execute(c context.Context, a identity.ActorContext, cmd Command
 		}
 		old := root.Version
 		root.Version++
-		root.UpdatedAt = at
+		root.UpdatedAt = gen.EffectiveObservation(at, root.UpdatedAt, root.CreatedAt)
 		if len(cat.LegacyTitles) > 0 && root.LegacyTitlesSince.IsZero() {
 			root.LegacyTitlesSince = at
 		}
