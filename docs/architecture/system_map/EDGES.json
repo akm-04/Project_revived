@@ -383,6 +383,8 @@
    ],
    "awakeningbattle": [
     "*AttestSummaryTx",
+    "*CloseTx",
+    "*StartEvidenceTx",
     "*StartTx"
    ],
    "campaign": [
@@ -2602,6 +2604,8 @@
    ],
    "combat": [
     "*AttestSummaryTx",
+    "*CloseTx",
+    "*StartEvidenceTx",
     "*StartTx"
    ],
    "generation": [

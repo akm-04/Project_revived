@@ -62655,7 +62655,7 @@
    "isolation": [
     {
      "file": "internal/application/awakeningbattle/mode.go",
-     "line": 80,
+     "line": 82,
      "value": "serializable"
     }
    ],
@@ -62663,7 +62663,7 @@
    "read_only": [
     {
      "file": "internal/application/awakeningbattle/mode.go",
-     "line": 80,
+     "line": 82,
      "value": "false"
     }
    ],
@@ -62674,7 +62674,7 @@
    "retry": [
     {
      "file": "internal/application/awakeningbattle/mode.go",
-     "line": 80,
+     "line": 82,
      "value": "3"
     }
    ],
@@ -62705,7 +62705,7 @@
      "file": "internal/application/awakeningbattle/mode.go",
      "function": "Mode.Start",
      "isolation": "serializable",
-     "line": 80,
+     "line": 82,
      "read_only": "false",
      "retry": "3"
     }
@@ -62720,6 +62720,11 @@
      "file": "internal/adapters/postgres/combatstore/store.go",
      "line": 72,
      "statement": "SELECT attempt_id::text,domain_kind,authority_scope,domain_locator,actor_player_id,gameplay_context_id::text,generation_ref,start_fingerprint,snapshot_hash,rules_corpus_version,entropy_key_version,resolver_status,COALESCE(resolver_failure,''),state,started_at,result_deadline,state_version,COALESCE(resolution_hash,''),COALESCE(terminal_kind,''),terminal_at,COALESCE(semantic_receipt_id,''),trust_profile_id,trust_profile_version,replay_response,replay_error_code,COALESCE(supersedes_attempt_id::text,'') FROM combat_attempts WHERE domain_kind=$1 AND authority_scope=$2 AND domain_locator=$3 AND state<>'TERMINAL'"
+    },
+    {
+     "file": "internal/adapters/postgres/combatstore/store.go",
+     "line": 129,
+     "statement": "SELECT attempt_id::text,domain_kind,authority_scope,domain_locator,actor_player_id,gameplay_context_id::text,generation_ref,start_fingerprint,snapshot_hash,rules_corpus_version,entropy_key_version,resolver_status,COALESCE(resolver_failure,''),state,started_at,result_deadline,state_version,COALESCE(resolution_hash,''),COALESCE(terminal_kind,''),terminal_at,COALESCE(semantic_receipt_id,''),trust_profile_id,trust_profile_version,replay_response,replay_error_code,COALESCE(supersedes_attempt_id::text,'') FROM combat_attempts WHERE domain_kind=$1 AND authority_scope=$2 AND domain_locator=$3 AND state='TERMINAL' AND semantic_receipt_id=$4"
     },
     {
      "file": "internal/adapters/postgres/combatstore/store.go",
@@ -63064,7 +63069,7 @@
    "isolation": [
     {
      "file": "internal/application/awakeningbattle/mode.go",
-     "line": 146,
+     "line": 161,
      "value": "serializable"
     }
    ],
@@ -63072,17 +63077,17 @@
    "read_only": [
     {
      "file": "internal/application/awakeningbattle/mode.go",
-     "line": 146,
+     "line": 161,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/awakeningbattle/mode.go:186"
+    "internal/application/awakeningbattle/mode.go:201"
    ],
    "retry": [
     {
      "file": "internal/application/awakeningbattle/mode.go",
-     "line": 146,
+     "line": 161,
      "value": "3"
     }
    ],
@@ -63101,7 +63106,7 @@
      "file": "internal/application/awakeningbattle/mode.go",
      "function": "Mode.Result",
      "isolation": "serializable",
-     "line": 146,
+     "line": 161,
      "read_only": "false",
      "retry": "3"
     }
