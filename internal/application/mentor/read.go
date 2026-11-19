@@ -199,15 +199,17 @@ func missionListWire(rows []domain.MissionState) []any {
 func cardWire(projection playerpresentation.Projected, at time.Time) map[string]any {
 	last := lastSeenUnix(projection, at)
 	return map[string]any{
-		"player_id":       int64(projection.Minimal.PlayerID),
-		"player_name":     projection.Minimal.Name,
-		"avatar_id":       projection.Minimal.AvatarID,
-		"avatar_frame_id": projection.Minimal.AvatarFrameID,
-		"lev":             projection.Minimal.Level,
-		"conquer_lev":     projection.Minimal.ConquerLevel,
-		"conquer_loop_id": projection.Minimal.ConquerLoopID,
-		"is_online":       onlineFlag(projection, at),
-		"last_time":       last,
+		"player_id":        int64(projection.Minimal.PlayerID),
+		"player_name":      projection.Minimal.Name,
+		"avatar_id":        projection.Minimal.AvatarID,
+		"avatar_frame_id":  projection.Minimal.AvatarFrameID,
+		"lev":              projection.Minimal.Level,
+		"conquer_lev":      projection.Minimal.ConquerLevel,
+		"conquer_loop_id":  projection.Minimal.ConquerLoopID,
+		"is_online":        onlineFlag(projection, at),
+		"last_time":        last,
+		"is_sent":          false,
+		"recalling_friend": int64(0),
 	}
 }
 
@@ -463,6 +465,33 @@ func parsePlayerID(value string) int64 {
 		}
 	}
 	return out
+}
+
+// ClassRelationActive is the typed Mentor-owned observation the Social
+// dispatcher applies before a friend delete or blacklist: it reports whether an
+// active class relation still binds the actor to the other player.
+func (service Service) ClassRelationActive(ctx context.Context, actor identity.ActorContext, other identity.PlayerID, op operation.Context) (bool, error) {
+	if !service.validForRead() || !other.Valid() || other == actor.PlayerID {
+		return false, ErrInvalid
+	}
+	active := false
+	err := service.run(ctx, actor, op, false, func(ctx context.Context, t tx.Tx, _ time.Time) error {
+		relations, err := service.Store.ReadRelationshipsTx(ctx, t, actor.PlayerID, actor.LogicalServerID)
+		if err != nil {
+			return err
+		}
+		for _, relation := range relations {
+			if relation.Mentor == other || relation.Student == other {
+				active = true
+				return nil
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return false, err
+	}
+	return active, nil
 }
 
 // ProjectClassInfo builds the login-embedded 1856 record from real state using

@@ -39,6 +39,14 @@ import (
 func (f *fixture) dismiss() socialdismiss.Service {
 	return socialdismiss.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: f.p}}, Runner: tx.Runner{DB: f.p}}, PlayerRoots: i4store.PlayerRootLocker{}, Roots: socialrelationstore.Store{}, Inbox: socialinboxstore.Store{}}
 }
+
+// noClassRelation keeps these Social dispatcher routes on the no-class path;
+// the mentor-owned observation is exercised by the i9_10f natives.
+type noClassRelation struct{}
+
+func (noClassRelation) ClassRelationActive(context.Context, identity.ActorContext, identity.PlayerID, operation.Context) (bool, error) {
+	return false, nil
+}
 func (f *fixture) reloader() socialreload.Service {
 	return socialreload.Service{Runner: tx.Runner{DB: f.p}, Relations: socialrelationstore.Store{}, Inbox: socialinboxstore.Store{}, Observer: socialpresentation.TransactionReader{}}
 }
@@ -206,7 +214,7 @@ func (f *fixture) authority() i4store.RealtimeAuthority {
 }
 func (f *fixture) httpServer() *httptest.Server {
 	r := httpedge.NewRouter()
-	d := stockruntime.SocialDispatcher{Authority: f.authority(), Relations: f.s, Projection: f.v, Dismissal: f.dismiss(), Emitter: postgres.SocialWakeupEmitter{Pool: f.p}}
+	d := stockruntime.SocialDispatcher{Authority: f.authority(), Relations: f.s, Projection: f.v, Dismissal: f.dismiss(), Mentor: noClassRelation{}, Emitter: postgres.SocialWakeupEmitter{Pool: f.p}}
 	if e := stockruntime.RegisterSocialRoutes(r, d); e != nil {
 		f.t.Fatal(e)
 	}
@@ -392,7 +400,7 @@ func TestD09PostCommitOutputOnlyAndBootCorrelation(t *testing.T) {
 	t.Cleanup(func() { tracker.Close() })
 	emitter := &checkEmitter{f: f}
 	router := httpedge.NewRouter()
-	d := stockruntime.SocialDispatcher{Authority: f.authority(), Relations: f.s, Projection: f.v, Dismissal: f.dismiss(), Tracker: tracker, Emitter: emitter}
+	d := stockruntime.SocialDispatcher{Authority: f.authority(), Relations: f.s, Projection: f.v, Dismissal: f.dismiss(), Mentor: noClassRelation{}, Tracker: tracker, Emitter: emitter}
 	if e := stockruntime.RegisterSocialRoutes(router, d); e != nil {
 		t.Fatal(e)
 	}

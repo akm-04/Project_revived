@@ -20,13 +20,20 @@ type discardReloads struct{}
 
 func (discardReloads) Emit(context.Context, []sr.ReloadReference) {}
 
+// noClassRelation is the observation of a pair with no active class relation.
+type noClassRelation struct{}
+
+func (noClassRelation) ClassRelationActive(context.Context, identity.ActorContext, identity.PlayerID, operation.Context) (bool, error) {
+	return false, nil
+}
+
 func (p relationMutationProbe) Execute(context.Context, identity.ActorContext, sr.Command, operation.Context) (sr.Result, error) {
 	return p.result, nil
 }
 
 func mutationResponse(t *testing.T, mid uint16, result sr.Result) map[string]any {
 	t.Helper()
-	dispatcher := SocialDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Relations: relationMutationProbe{result: result}, Emitter: discardReloads{}}
+	dispatcher := SocialDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Relations: relationMutationProbe{result: result}, Mentor: noClassRelation{}, Emitter: discardReloads{}}
 	response := dispatcher.Dispatch(context.Background(), heroReq(t, mid, map[string]any{"player_id": int64(200001)}))
 	if response.HTTPStatus != 200 {
 		t.Fatalf("mid %d status %d %#v", mid, response.HTTPStatus, response.Body)
