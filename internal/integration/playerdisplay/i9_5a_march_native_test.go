@@ -45,7 +45,7 @@ func marchModeWithCombat(t *testing.T, p *pg.Pool) (app.Mode, combat.Service) {
 	owner.MissionFresh = p
 	owner.MissionTime = pg.AuthoritativeTime{Queryer: p}
 	owner.Missions = &i5.MissionMaterializer{Store: values, Catalog: content, Activity: content, Observations: missioninputs.Reader{Spending: values, Heroes: characterstore.Store{Queryer: p}, Progression: values, Campaigns: campaignstore.Store{}, Privileges: privilegeProvider(p), Books: bookService(p, p)}}
-	return app.Mode{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}}, Fresh: p, Store: marchstore.Store{}, Content: content, Fence: values, Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: ownerSummoner(p), HeroLocks: characterstore.MarchHeroPort{Store: characterstore.Store{Queryer: p}}, Roster: fight.Inputs.Heroes, HeroWire: heroproj.StockHero, Opponents: topFloorService(t, p), Combat: fight, Stats: fight.Inputs.Stats, Facts: i5.ObjectiveFacts{Owner: owner, Open: values}, Grants: owner, Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}, fight
+	return app.Mode{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}}, Fresh: p, Store: marchstore.Store{}, Content: content, Fence: values, Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: ownerSummoner(p), HeroLocks: characterstore.MarchHeroPort{Store: characterstore.Store{Queryer: p}}, Roster: fight.Inputs.Heroes, HeroWire: heroproj.StockHero, Opponents: topFloorService(t, p), Combat: fight, Stats: fight.Inputs.Stats, Facts: i5.ObjectiveFacts{Owner: owner, Open: values}, Grants: owner, Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, BattleCounts: battleCountObserver(p)}, fight
 }
 func marchRecord(t *testing.T, p *pg.Pool, a identity.ActorContext) d.Run {
 	t.Helper()
@@ -121,6 +121,9 @@ func TestI9_5AMarchNativeRunCarryChestAndReset(t *testing.T) {
 	if _, err = s.Result(ctx, a, q, op()); err != nil {
 		t.Fatal("loss", err)
 	}
+	if got := battleCount(t, p, a.PlayerID, 1); got != 1 {
+		t.Fatalf("Girls Log count after a settled loss = %d, want 1", got)
+	}
 	r = marchRecord(t, p, a)
 	if r.Heroes["1"].HP != 1 || r.Heroes["1"].MP != 345 || r.Won {
 		t.Fatal("HP/SP not carried", r)
@@ -135,6 +138,9 @@ func TestI9_5AMarchNativeRunCarryChestAndReset(t *testing.T) {
 	q = marchReport(r, int64(a.PlayerID), team, true)
 	if _, err = s.Result(ctx, a, q, op()); err != nil {
 		t.Fatal("win", err)
+	}
+	if got := battleCount(t, p, a.PlayerID, 1); got != 2 {
+		t.Fatalf("Girls Log count after a settled win = %d, want 2", got)
 	}
 	if _, err = s.Chest(ctx, a, 2, op()); !errors.Is(err, d.ErrRefused) {
 		t.Fatal("future chest", err)

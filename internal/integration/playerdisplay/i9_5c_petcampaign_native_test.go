@@ -36,7 +36,7 @@ func petCampaignMode(t *testing.T, p *pg.Pool, clock *workplaceTime) app.Mode {
 	owner.Awakening = awake.Awakening
 	owner.Missions.Awakening = i5store.Store{Queryer: p}
 	fight := combatService(t, p)
-	mode := app.Mode{Directory: i4store.PlayerDirectoryReader{}, Timed: m.Timed, Fresh: p, Store: petcampaignstore.Store{}, Content: contentstore.Store{Queryer: p}, Fence: m.Fence, Functions: m.Functions, Heroes: m.Heroes, HeroLocks: m.HeroLocks, Pets: pet.Service{Store: characterstore.Store{Queryer: p}}, Combat: fight, Rules: fight.Rules, Values: owner, Costs: m.Costs, Privileges: owner.Privileges, Facts: i5.ObjectiveFacts{Owner: owner, Open: i5store.Store{Queryer: p}}, Awakening: owner, Receipts: m.Receipts, ReceiptRead: m.ReceiptRead}
+	mode := app.Mode{Directory: i4store.PlayerDirectoryReader{}, Timed: m.Timed, Fresh: p, Store: petcampaignstore.Store{}, Content: contentstore.Store{Queryer: p}, Fence: m.Fence, Functions: m.Functions, Heroes: m.Heroes, HeroLocks: m.HeroLocks, Pets: pet.Service{Store: characterstore.Store{Queryer: p}}, Combat: fight, Rules: fight.Rules, Values: owner, Costs: m.Costs, Privileges: owner.Privileges, Facts: i5.ObjectiveFacts{Owner: owner, Open: i5store.Store{Queryer: p}}, Awakening: owner, Receipts: m.Receipts, ReceiptRead: m.ReceiptRead, BattleCounts: battleCountObserver(p)}
 	mode.Timed.Binder.Time = clock
 	return mode
 }
@@ -97,6 +97,10 @@ func TestI9_5CTowerNativeProgressAndTimedSweep(t *testing.T) {
 				t.Fatal("exact result replay", e)
 			}
 		}
+	}
+	// Every one of the 77 first settlements counts once; the exact replay counts nothing.
+	if got := battleCount(t, p, a.PlayerID, 1); got != 77 {
+		t.Fatalf("Girls Log count after 77 settled floors = %d, want 77", got)
 	}
 	r := petCampaignRecord(t, p, a)
 	if r.Current != 77 || r.Max != 77 {
@@ -396,6 +400,7 @@ func TestI9_5CEliteAndPetMaterialOrigins(t *testing.T) {
 	cloud := campaignMode(t, p)
 	cloud.Awakening = owner
 	cloud.PetAwakening = owner
+	cloudCounts := battleCount(t, p, a.PlayerID, 1)
 	cc, e := content.CampaignCatalogTx(ctx, p, rev)
 	if e != nil {
 		t.Fatal(e)
@@ -424,6 +429,10 @@ func TestI9_5CEliteAndPetMaterialOrigins(t *testing.T) {
 		if _, e := cloud.Result(ctx, a, campaign.Result{CampaignID: id, Type: 41, Star: 1, PetAwakeMission: marker}, op()); e != nil {
 			t.Fatal("Cloud accepted pet goal", id, e)
 		}
+	}
+	// The cloud branch carries no own formation, so it counts no battle.
+	if got := battleCount(t, p, a.PlayerID, 1); got != cloudCounts {
+		t.Fatalf("cloud campaigns counted %d battles, want 0", got-cloudCounts)
 	}
 	root, e := (i5store.Store{}).ReadAwakeningTx(ctx, p, a.PlayerID)
 	if e != nil || !root.Active[2].Complete {

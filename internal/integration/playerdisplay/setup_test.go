@@ -11,9 +11,11 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
 	"gxb.local/backend/v2/internal/adapters/postgres/nativebirth"
 	"gxb.local/backend/v2/internal/application/directorysync"
 	"gxb.local/backend/v2/internal/application/i5"
+	applibrary "gxb.local/backend/v2/internal/application/librarylocal"
 	app "gxb.local/backend/v2/internal/application/playerdisplay"
 	"gxb.local/backend/v2/internal/content/registry"
 	"gxb.local/backend/v2/internal/domain/character"
@@ -152,6 +154,21 @@ func bornHeroCard(t *testing.T, p *pg.Pool, a identity.ActorContext, rev string,
 		t.Fatal(e)
 	}
 	return h
+}
+
+// battleCountObserver is the production Girls Log counter over the test pool.
+func battleCountObserver(p *pg.Pool) applibrary.Service {
+	return applibrary.Service{Library: librarystore.Store{}, Heroes: characterstore.LibraryHeroPort{Store: characterstore.Store{Queryer: p}}}
+}
+
+// battleCount reads one hero's durable Girls Log battle count, 0 when absent.
+func battleCount(t *testing.T, p *pg.Pool, player identity.PlayerID, partner int64) int64 {
+	t.Helper()
+	var count int64
+	if e := p.Raw().QueryRow(ctx, `SELECT COALESCE((SELECT count FROM library_hero_battle_counts WHERE player_id=$1 AND partner_id=$2),0)`, int64(player), partner).Scan(&count); e != nil {
+		t.Fatal(e)
+	}
+	return count
 }
 
 func playerRoot(t *testing.T, p *pg.Pool, server identity.LogicalServerID) (identity.ActorContext, ids.UUID) {

@@ -41,7 +41,7 @@ func campaignMode(t *testing.T, p *pg.Pool) app.Mode {
 		StoryWire: heroproj.StockHero, StoryHeroes: hero.Service{AcquisitionStore: heroes, Acquisition: content, CollectionAdmission: hero.CatalogCollectionAdmission{Content: content}, FreshFacets: characterbirth.FreshHeroFacets()},
 		Pets: pet.Service{Store: heroes, Progression: content}, MaxColor: i5.CurrentMaxHeroColorProvider{},
 		Privileges: privilegeProvider(p), Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Progression: values,
-		Combat: combatService(t, p), Energy: owner, Grants: owner, Stages: owner, Facts: i5.ObjectiveFacts{Owner: owner, Open: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+		Combat: combatService(t, p), Energy: owner, Grants: owner, Stages: owner, Facts: i5.ObjectiveFacts{Owner: owner, Open: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, BattleCounts: battleCountObserver(p)}
 }
 
 func campaignRow(t *testing.T, rows any, id int64) map[string]any {
@@ -99,6 +99,13 @@ func TestI9_3ACampaignNormalAndSuperNative(t *testing.T) {
 	if err != nil || !duplicate.Duplicate || economy["energy"] == nil || economy["mana"] == nil || economy["crystal"] == nil {
 		t.Fatalf("duplicate result %+v %v", duplicate, err)
 	}
+	// A first settlement counts each fighting girl once; its replay counts nothing.
+	if got := battleCount(t, pool, a.PlayerID, 1); got != 1 {
+		t.Fatalf("Girls Log count for partner 1 = %d, want 1", got)
+	}
+	if got := battleCount(t, pool, a.PlayerID, 2); got != 1 {
+		t.Fatalf("Girls Log count for partner 2 = %d, want 1", got)
+	}
 	if _, err = s.Result(ctx, a, app.Result{CampaignID: 100002, Type: d.Normal, Star: 3, Formation: team}, op()); !errors.Is(err, d.ErrRefused) {
 		t.Fatalf("result without a fight: %v", err)
 	}
@@ -109,6 +116,13 @@ func TestI9_3ACampaignNormalAndSuperNative(t *testing.T) {
 	lost, err := s.Result(ctx, a, app.Result{CampaignID: 100002, Type: d.Normal, Star: 0, Formation: team}, op())
 	if err != nil || lost.Body["is_win"] != 0 || fmt.Sprint(campaignRow(t, lost.Body["campaigns"], 100002)["star"]) != "0" || lost.Body["exps"] != nil {
 		t.Fatalf("loss %+v %v", lost, err)
+	}
+	// A settled loss counts too.
+	if got := battleCount(t, pool, a.PlayerID, 1); got != 2 {
+		t.Fatalf("Girls Log count for partner 1 after loss = %d, want 2", got)
+	}
+	if got := battleCount(t, pool, a.PlayerID, 2); got != 2 {
+		t.Fatalf("Girls Log count for partner 2 after loss = %d, want 2", got)
 	}
 
 	exec(t, pool, `INSERT INTO player_function_eligibility(player_id,function_id,content_revision,source_fact_key,eligible_at)VALUES($1,31,$2,'function.lua:31:1|11',clock_timestamp()-interval '1 minute')`, int64(a.PlayerID), revision)

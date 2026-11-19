@@ -37,7 +37,7 @@ func worldBossService(t *testing.T, p *pg.Pool, clock gen.TimeAuthority) app.Mod
 	return app.Mode{Timed: gen.TimedRunner{Binder: gen.Binder{Time: clock}, Runner: tx.Runner{DB: p}}, Fresh: p, Store: worldbossstore.Store{}, Content: content,
 		Fence: values, Players: i4store.PlayerRootLocker{}, Directory: i4store.PlayerDirectoryReader{}, Population: i4store.PlayerDirectoryReader{},
 		Heroes: fight.Inputs.Heroes, Guilds: guildstore.Store{}, Combat: fight, Privileges: i5.BaselinePrivilegeProvider{}, Costs: i5.MaterialCostDebiter{Store: values, Content: content},
-		Mail: i5.SettlementMail{Store: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+		Mail: i5.SettlementMail{Store: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, BattleCounts: battleCountObserver(p)}
 }
 
 // worldBossActor is a genuine combat owner at the world boss open level with a purple hero.
@@ -197,6 +197,10 @@ func TestI9_8AWorldBossSettleNative(t *testing.T) {
 	if total := scalar(t, p, `SELECT hurt FROM worldboss_player_totals WHERE logical_server_id=$1 AND generation=1 AND player_id=$2`, int64(server), int64(a.PlayerID)); total != 500 {
 		t.Fatal("duplicate settle was applied twice", total)
 	}
+	// The first settlement counts the fighting girl once; its replay counts nothing.
+	if got := battleCount(t, p, a.PlayerID, partner); got != 1 {
+		t.Fatalf("Girls Log count after settle and replay = %d, want 1", got)
+	}
 	if n := scalar(t, p, `SELECT count(*) FROM worldboss_attempt_settlements WHERE player_id=$1`, int64(a.PlayerID)); n != 1 {
 		t.Fatal("settlement rows", n)
 	}
@@ -221,6 +225,9 @@ func TestI9_8AWorldBossSettleNative(t *testing.T) {
 	}
 	if n := scalar(t, p, `SELECT COALESCE(sum(damage),0) FROM worldboss_attempt_settlements WHERE player_id=$1`, int64(a.PlayerID)); n != 503 {
 		t.Fatal("clamped settled damage", n)
+	}
+	if got := battleCount(t, p, a.PlayerID, partner); got != 2 {
+		t.Fatalf("Girls Log count after a second settled battle = %d, want 2", got)
 	}
 }
 

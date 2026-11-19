@@ -106,7 +106,7 @@ func TestI9_4DBloodRealCombatAttemptAndTerminal(t *testing.T) {
 	stats.Owned = owned
 	fight.Inputs.Stats = stats
 	fight.Inputs.Heroes = characterstore.HeroBootstrapProjection{Content: content, Awakening: heroes, AwakeningPositions: heroes.AwakeningPositions, Library: libraryService(p, p), Dorm: dormService(p, p), Book: bookService(p, p), Course: courseService(p, p), Inscription: inscriptionService(p, p), Element: elementService(p, p), Spirit: spiritService(p, p), Evolution: evolutionService(p, p)}
-	mode := awakeningbattle.Mode{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner}, Fresh: p, Content: content, Fence: values, Heroes: heroes, Missions: owner, Combat: fight, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+	mode := awakeningbattle.Mode{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner}, Fresh: p, Content: content, Fence: values, Heroes: heroes, Missions: owner, Combat: fight, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, BattleCounts: battleCountObserver(p)}
 	absent, e := mode.Result(ctx, actor, 2001002, 20, op())
 	if !errors.Is(e, objective.ErrAwakeningRefused) || absent["error_code"] != int64(1) {
 		t.Fatal("unstarted result", absent, e)
@@ -148,11 +148,17 @@ func TestI9_4DBloodRealCombatAttemptAndTerminal(t *testing.T) {
 	if exps, ok := body["exps"].([]any); !ok || len(exps) != 0 || body["old_num"] != float64(0) || body["add_exp"] != float64(0) {
 		t.Fatalf("Blood result win-window fields: exps=%#v old_num=%#v add_exp=%#v", body["exps"], body["old_num"], body["add_exp"])
 	}
+	if got := battleCount(t, p, actor.PlayerID, ref.PartnerID); got != 1 {
+		t.Fatalf("Girls Log awakening count = %d, want 1", got)
+	}
 	if _, e = mode.Result(ctx, actor, 2001002, 20, terminal); e != nil {
 		t.Fatal("exact result replay", e)
 	}
 	if _, e = mode.Result(ctx, actor, 2001002, 20, op()); e != nil {
 		t.Fatal("terminal drain", e)
+	}
+	if got := battleCount(t, p, actor.PlayerID, ref.PartnerID); got != 1 {
+		t.Fatalf("Girls Log awakening count after replay and drain = %d, want 1", got)
 	}
 	drained := dispatcher.Dispatch(ctx, playtestRequest(actor, 867, map[string]any{"twice_awake_mission": json.Number("2001002"), "incubus_id": json.Number("2001002"), "num": json.Number("20"), "npc_ids": map[string]any{}}))
 	if exps, ok := drained.Body["exps"].([]any); drained.HTTPStatus != 200 || !ok || len(exps) != 0 || fmt.Sprint(drained.Body["old_num"]) != "0" || fmt.Sprint(drained.Body["add_exp"]) != "0" {

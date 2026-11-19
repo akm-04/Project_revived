@@ -103,7 +103,7 @@ func newCampaignFixture(t *testing.T) campaignFixture {
 		Directory: i4store.PlayerDirectoryReader{}, Mail: mail,
 		Roster: characterstore.Store{Queryer: p}, Awakenings: characterstore.RawAwakeningStore{},
 		Timed: gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}}, Fresh: p,
-		Receipts: kernelstore.Store{},
+		Receipts: kernelstore.Store{}, BattleCounts: battleCountObserver(p),
 	}
 	f.leaderHero = bornHero(t, p, f.leader, f.rev, genuineHeroTable, 1).PartnerID
 	f.secondHero = bornHero(t, p, f.second, f.rev, 10001002, 1).PartnerID
@@ -253,6 +253,9 @@ func TestI9_9CFightClaimCarryAttemptsLateAndDuplicate(t *testing.T) {
 	if clears := f.memberClears(t, f.third, chapterID); clears != 0 {
 		t.Fatalf("loss consumed a clear: %d", clears)
 	}
+	if got := battleCount(t, f.pool, f.third.PlayerID, heroThird); got != 1 {
+		t.Fatalf("Girls Log count for third member = %d, want 1", got)
+	}
 	detail, err := f.mode.MapDetail(ctx, f.third, copyID, f.op())
 	if err != nil {
 		t.Fatal("detail", err)
@@ -298,6 +301,10 @@ func TestI9_9CFightClaimCarryAttemptsLateAndDuplicate(t *testing.T) {
 	if goldAfter := f.balance(t, f.third, "mana"); goldAfter != thirdGoldBefore {
 		t.Fatalf("retry while held paid again: %d -> %d", thirdGoldBefore, goldAfter)
 	}
+	// Receipt and held replays never count.
+	if got := battleCount(t, f.pool, f.third.PlayerID, heroThird); got != 1 {
+		t.Fatalf("Girls Log count for third member after replays = %d, want 1", got)
+	}
 	win := f.waveEnemies(t, second, 3, 5000, 0)
 	win.Formation = strconv.FormatInt(heroSecond, 10)
 	settled, err := f.mode.Settle(ctx, f.second, win, f.op())
@@ -307,9 +314,15 @@ func TestI9_9CFightClaimCarryAttemptsLateAndDuplicate(t *testing.T) {
 	if clears := f.memberClears(t, f.second, chapterID); clears != 1 {
 		t.Fatalf("clear not consumed: %d", clears)
 	}
+	if got := battleCount(t, f.pool, f.second.PlayerID, heroSecond); got != 1 {
+		t.Fatalf("Girls Log count for second member = %d, want 1", got)
+	}
 	win.Formation = strconv.FormatInt(heroSecond, 10)
 	if duplicate, err := f.mode.Settle(ctx, f.second, win, f.op()); err != nil || !duplicate.Duplicate || duplicate.Body["error_code"] != int64(30005) {
 		t.Fatalf("duplicate replay %+v err=%v", duplicate, err)
+	}
+	if got := battleCount(t, f.pool, f.second.PlayerID, heroSecond); got != 1 {
+		t.Fatalf("Girls Log count for second member after replay = %d, want 1", got)
 	}
 	// A late result after the holder window writes nothing.
 	if _, err := f.mode.Claim(ctx, f.second, copyID, f.op()); err != nil {

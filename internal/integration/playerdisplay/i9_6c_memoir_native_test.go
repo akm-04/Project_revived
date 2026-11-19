@@ -32,7 +32,7 @@ func memoirMode(t *testing.T, pool *postgres.Pool, clock *workplaceTime) applica
 	base := marchMode(t, pool)
 	fight := combatService(t, pool)
 	owner := base.Grants.(i5.Service)
-	mode := application.Mode{Timed: base.Timed, Fresh: pool, Store: memoirstore.Store{}, Content: contentstore.Store{Queryer: pool}, Fence: base.Fence, Functions: base.Functions, Heroes: base.Heroes, HeroLocks: base.HeroLocks, Roster: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Opponents: base.Opponents, Combat: fight, Grants: owner, Costs: base.Costs, Energy: owner, Exchange: owner, Receipts: base.Receipts, ReceiptRead: base.ReceiptRead}
+	mode := application.Mode{Timed: base.Timed, Fresh: pool, Store: memoirstore.Store{}, Content: contentstore.Store{Queryer: pool}, Fence: base.Fence, Functions: base.Functions, Heroes: base.Heroes, HeroLocks: base.HeroLocks, Roster: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Opponents: base.Opponents, Combat: fight, Grants: owner, Costs: base.Costs, Energy: owner, Exchange: owner, Receipts: base.Receipts, ReceiptRead: base.ReceiptRead, BattleCounts: battleCountObserver(pool)}
 	mode.Timed.Binder.Time = clock
 	return mode
 }
@@ -271,6 +271,10 @@ func TestI9_6CMemoirNativeLifecycle(t *testing.T) {
 			}
 		}
 	}
+	// Three first settlements count the fighting girl once each; replays and splits add nothing.
+	if got := battleCount(t, pool, actor.PlayerID, 1); got != 3 {
+		t.Fatalf("Girls Log monster count after three floors = %d, want 3", got)
+	}
 	finalOperation := op()
 	final, err := mode.FinalAward(ctx, actor, memoir.FinalPosition, catalog.FinalGifts[0], finalOperation)
 	if err != nil {
@@ -437,6 +441,9 @@ func TestI9_6CMemoirNativePlayerServerResolution(t *testing.T) {
 	if _, formations := battle["library_mission_formations"].(map[string]any); !formations {
 		t.Fatal("stock SelectTeamNewWindow indexes battle_info.library_mission_formations", response)
 	}
+	if got := battleCount(t, pool, actor.PlayerID, 1); got != 1 {
+		t.Fatalf("Girls Log player-battle count = %d, want 1", got)
+	}
 	after := memoirRecord(t, pool, actor)
 	copied, err := combat.CanonicalJSON(after.Opponents)
 	if err != nil || string(before) != string(copied) {
@@ -453,6 +460,9 @@ func TestI9_6CMemoirNativePlayerServerResolution(t *testing.T) {
 	right, _ := combat.CanonicalJSON(repeated)
 	if string(left) != string(right) {
 		t.Fatal("server replay changed")
+	}
+	if got := battleCount(t, pool, actor.PlayerID, 1); got != 1 {
+		t.Fatalf("Girls Log player-battle count after replay = %d, want 1", got)
 	}
 	if _, err = mode.Abandon(ctx, actor, op()); err != nil {
 		t.Fatal(err)
