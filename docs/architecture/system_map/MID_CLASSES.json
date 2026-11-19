@@ -33864,7 +33864,7 @@
    "isolation": [
     {
      "file": "internal/application/topfloor/task_reads.go",
-     "line": 261,
+     "line": 262,
      "value": "repeatable_read"
     }
    ],
@@ -33872,7 +33872,7 @@
    "read_only": [
     {
      "file": "internal/application/topfloor/task_reads.go",
-     "line": 261,
+     "line": 262,
      "value": "true"
     }
    ],
@@ -33880,7 +33880,7 @@
    "retry": [
     {
      "file": "internal/application/topfloor/task_reads.go",
-     "line": 261,
+     "line": 262,
      "value": "1"
     }
    ],
@@ -33891,7 +33891,7 @@
      "file": "internal/application/topfloor/task_reads.go",
      "function": "Service.TaskReport",
      "isolation": "repeatable_read",
-     "line": 261,
+     "line": 262,
      "read_only": "true",
      "retry": "1"
     }
