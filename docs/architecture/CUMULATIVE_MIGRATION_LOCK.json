@@ -1,5 +1,5 @@
 {
-  "highest_migration": "00172_i9_11_achievement_owned_state_ids.sql",
+  "highest_migration": "00180_i9_11_guild_copy_settled_drop.sql",
   "migrations": {
     "00001_kernel_receipts.sql": "fab5b35f4ca5eee53c62b0b924ec448327e1aa31205015c22e24ee0f2b710fd8",
     "00002_identity_logicalserver_bootstrap.sql": "adff86d27dd1c02e4da0dec6b1aa21f33aaafd4d410849abc76bfeec58a5cd5f",
@@ -154,9 +154,17 @@
     "00169_r5d_retire_mode_attempts.sql": "872885dd98cafc26cc414639b10730949c88e199e97f220ba3914798b0fb6de6",
     "00170_l3b_operator_audit_events.sql": "2c2b9e3da909ec3bc221e4f74053056e2f8ef9a9b1e3776b54498cf72ecf7d04",
     "00171_l3b_restore_epochs.sql": "3ac0b8364c592a01094b415d7e1acd8533758fcd3a7955a75d893f26fe269bbd",
-    "00172_i9_11_achievement_owned_state_ids.sql": "a923c4e5ea3be1e8e5629dd0b27fec0e90324eea034e8df7f55549bf99100644"
+    "00172_i9_11_achievement_owned_state_ids.sql": "a923c4e5ea3be1e8e5629dd0b27fec0e90324eea034e8df7f55549bf99100644",
+    "00173_i9_11_backpack_sort_type.sql": "80df2017b6d078b936aaee4e759beb7befffc7e0a3dfdaa458ba3e0603e3b8d6",
+    "00174_i9_11b_daily_buy_inputs.sql": "096bfbc2ef2416e3cf34cb5f8f03b326b4d8344b2006c9150d3b5183e423815d",
+    "00175_i9_11c_core_shops.sql": "7574d740883d6890db1c561785cb1d15a0dc7382aca09ff389672c5908c16b33",
+    "00176_i9_11d_compat_preferences.sql": "84357c605ff35886b6d005c396c61b5c7b8a63286eb717a2a4a93879decea41a",
+    "00177_i9_11e_achievement_facts.sql": "376ecbf55d23dc9f69eee3fb9ef36a3a3b5eaef3544055946cdaa412cb9a7122",
+    "00178_i9_11_catalog_payload_version.sql": "1c2f0bee98b451b151e9e7d73b9efc34735b1640eafc796bf8f797e687d60b6d",
+    "00179_i9_11g2a_hero_battle_counts.sql": "00691aaf8b888e04c81ad336b0b70fc81ed214deb561333f5fbc0af1edf0b3ba",
+    "00180_i9_11_guild_copy_settled_drop.sql": "db34f9429a61d08bddd590be511802f0a66e3d5a1e67c7a7e8a9ca92476367a0"
   },
   "rule": "All listed migration bytes are immutable for this cumulative candidate. Historical phase validators remain snapshot-specific; forward schema changes require a new migration. I7A-4A allocates forward-only 00033 for SocialRelation/SocialInbox durable foundations and an I4-owned non-unique discovery index; it performs no Social backfill and activates no stock routes.",
   "schema_version": 1,
-  "status": "CUMULATIVE_MIGRATION_LOCK_I9_10_WORKING"
+  "status": "CUMULATIVE_MIGRATION_LOCK_I9_11_WORKING"
 }
