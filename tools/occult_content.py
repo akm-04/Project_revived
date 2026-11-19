@@ -123,6 +123,7 @@ def build_occult(blobs, parse):
             start_point=int(row['is_start_point']) != 0,
             unlock_ids=_pipe_ints(row['unlock_id']),
             fight_ids=fight_ids,
+            special_reward=int(row['special_reward']),
             stage_total_hp=[stage_total_hp(fight_id) for fight_id in fight_ids],
             event_id=int(row['event_id']),
             event_condition=int(row['event_condition']),
@@ -138,6 +139,14 @@ def build_occult(blobs, parse):
         raise ValueError('occult campaign census drift')
     if len({campaign['id'] for campaign in campaigns}) != len(campaigns) or any(campaign['chapter_id'] not in CHAPTER_IDS for campaign in campaigns):
         raise ValueError('occult campaign shape drift')
+    special = {}
+    for campaign in campaigns:
+        if campaign['special_reward'] != 0:
+            key = (campaign['chapter_id'], campaign['campaign_type'])
+            special[key] = special.get(key, 0) + 1
+    expected = {(chapter_id, campaign_type) for chapter_id in CHAPTER_IDS for campaign_type in (MULTI_CAMPAIGN_TYPE, SINGLE_CAMPAIGN_TYPE)}
+    if set(special) != expected or any(count != 1 for count in special.values()):
+        raise ValueError('occult final challenge census drift')
     campaign_ids = {campaign['id'] for campaign in campaigns}
     dangling = {(campaign['id'], next_id) for campaign in campaigns for next_id in campaign['unlock_ids'] if next_id not in campaign_ids}
     if dangling != KNOWN_DANGLING_UNLOCKS:

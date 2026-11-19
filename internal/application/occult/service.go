@@ -216,11 +216,19 @@ func (s Mode) updateRoom(c context.Context, a identity.ActorContext, op operatio
 			if !allowExpired && view.state.RoomExpired(view.at.Unix()) {
 				return fmt.Errorf("%w: room expired", d.ErrRefused)
 			}
+			noticeBoundary := int64(1)
+			if length := len(view.state.Notices); length > 0 {
+				noticeBoundary = view.state.Notices[length-1].Sequence + 1
+			}
 			body, err = command(c, sc, view)
 			if err != nil {
 				return err
 			}
 			*room = view.room
+			closing := view.state.ClearSettled && room.Status == sharedroom.StatusOpen
+			if closing {
+				view.state.ClosingNoticeSequence = noticeBoundary
+			}
 			encoded, err := view.state.Encode()
 			if err != nil {
 				return err
@@ -230,7 +238,7 @@ func (s Mode) updateRoom(c context.Context, a identity.ActorContext, op operatio
 			}
 			// A cleared chapter ends the run; the client's sub-map close reads
 			// the next 2362 as no held room instead of looping on progress 1.
-			if view.state.ClearSettled {
+			if closing {
 				room.Close(view.at)
 			}
 			return nil

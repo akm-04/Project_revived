@@ -70,6 +70,9 @@ type Campaign struct {
 	StartPoint   bool    `json:"start_point"`
 	UnlockIDs    []int64 `json:"unlock_ids"`
 	FightIDs     []int64 `json:"fight_ids"`
+	// SpecialReward is the source creats_campaign column that marks the one
+	// chapter fight whose clear settles the chapter.
+	SpecialReward int64 `json:"special_reward"`
 	// StageTotalHP is the maximum aggregate monster HP of each fight. Absolute
 	// HP, compiled from the campaign's battle data.
 	StageTotalHP   []int64 `json:"stage_total_hp"`
@@ -148,6 +151,7 @@ func (c Catalog) Validate() error {
 			return ErrUnavailable
 		}
 	}
+	finals := map[[2]int64]int{}
 	for _, campaign := range c.Campaigns {
 		if _, ok := c.Chapter(campaign.ChapterID); !ok || (campaign.CampaignType != MultiCampaignType && campaign.CampaignType != SingleCampaignType) {
 			return ErrUnavailable
@@ -160,6 +164,16 @@ func (c Catalog) Validate() error {
 		}
 		for index, total := range campaign.StageTotalHP {
 			if campaign.FightIDs[index] > 0 && total <= 0 {
+				return ErrUnavailable
+			}
+		}
+		if campaign.SpecialReward != 0 {
+			finals[[2]int64{campaign.ChapterID, campaign.CampaignType}]++
+		}
+	}
+	for _, chapter := range c.Chapters {
+		for _, campaignType := range []int64{MultiCampaignType, SingleCampaignType} {
+			if finals[[2]int64{chapter.ID, campaignType}] != 1 {
 				return ErrUnavailable
 			}
 		}

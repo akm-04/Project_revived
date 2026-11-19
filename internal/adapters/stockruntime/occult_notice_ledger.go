@@ -107,6 +107,24 @@ func (l *RoomNoticeLedger) changedOnline(room int64, states map[identity.PlayerI
 	return changed
 }
 
+// terminalPushes returns the closing write's pushes even on the first sight of
+// the room: that wakeup is the only carrier of the final report. Sequences
+// already sent are skipped, so a repeated read does not repeat them.
+func (l *RoomNoticeLedger) terminalPushes(room int64, pushes []app.RoomPush) []app.RoomPush {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	seen, _ := l.observe(room)
+	seen.pushSeen = true
+	var fresh []app.RoomPush
+	for _, push := range pushes {
+		if push.Sequence > seen.pushes {
+			fresh = append(fresh, push)
+		}
+		seen.pushes = max(seen.pushes, push.Sequence)
+	}
+	return fresh
+}
+
 // newPushes returns the room pushes not yet sent; the first sight of a room only
 // records the newest sequence.
 func (l *RoomNoticeLedger) newPushes(room int64, pushes []app.RoomPush) []app.RoomPush {

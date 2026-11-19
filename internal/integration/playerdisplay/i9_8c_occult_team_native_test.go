@@ -286,6 +286,36 @@ func TestI9_8COccultTeamFightNative(t *testing.T) {
 	if _, err = s.TeamInvite(ctx, a, 20002, 1, op()); err != nil {
 		t.Fatal("invite fight", err)
 	}
+	// A-178: TEAM_INVITE reaches the starter too, because the stock handler's
+	// teamInviteInfos is the team-selection window's initializer. A-180: the
+	// live FIGHT_STATUS carries the 2362 map projection.
+	live := occultReadNotice(t, p, roomID)
+	starterInvited := false
+	var statusBody map[string]any
+	for _, push := range live.Pushes {
+		switch push.Function {
+		case d.NoticeTeamInvite:
+			for _, body := range push.Bodies {
+				starterInvited = starterInvited || body.Player == a.PlayerID
+			}
+		case d.NoticeFightStatus:
+			for _, body := range push.Bodies {
+				if body.Player == b.PlayerID {
+					statusBody = body.Body
+				}
+			}
+		}
+	}
+	if !starterInvited {
+		t.Fatal("the starter missed its TEAM_INVITE initializer")
+	}
+	info, err := s.Info(ctx, b, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if statusBody == nil || !reflect.DeepEqual(statusBody["open_campaigns"], info["open_campaigns"]) {
+		t.Fatalf("FIGHT_STATUS map %#v, 2362 %#v", statusBody, info["open_campaigns"])
+	}
 	for _, member := range []identity.ActorContext{b, c} {
 		if _, err = s.TeamAccept(ctx, member, 20002, 1, true, op()); err != nil {
 			t.Fatal("accept", err)

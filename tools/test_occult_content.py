@@ -72,6 +72,17 @@ class OccultCompilerTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             build_occult(self.blobs, self.parse_with('creats_campaign', rows))
 
+    def test_final_challenge_census_refused(self):
+        rows = copy.deepcopy(gen.parse_generated_lua_table(self.blobs['data/tables/creats_campaign.lua'].data))
+        next(row for row in rows if row['campaign_id'] == '10013')['special_reward'] = '0'
+        with self.assertRaises(ValueError):
+            build_occult(self.blobs, self.parse_with('creats_campaign', rows))
+
+        rows = copy.deepcopy(gen.parse_generated_lua_table(self.blobs['data/tables/creats_campaign.lua'].data))
+        next(row for row in rows if row['campaign_id'] == '10002')['special_reward'] = '230001099'
+        with self.assertRaises(ValueError):
+            build_occult(self.blobs, self.parse_with('creats_campaign', rows))
+
         misc = copy.deepcopy(gen.parse_generated_lua_table(self.blobs['data/tables/misc.lua'].data))
         next(row for row in misc if row['key'] == 'creats_ticket_get')['value'] = '2000'
         with self.assertRaises(ValueError):

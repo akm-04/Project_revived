@@ -70,7 +70,10 @@ type RunState struct {
 	Team         *TeamFight                 `json:"team,omitempty"`
 	TeamRounds   int64                      `json:"team_rounds,omitempty"`
 	Notices      []NoticeRecord             `json:"notices,omitempty"`
-	Forces       map[string]int64           `json:"forces,omitempty"`
+	// ClosingNoticeSequence is the first notice the clear-settling command
+	// recorded; the closed room's wakeup delivers them, and only them, once.
+	ClosingNoticeSequence int64            `json:"closing_notice_sequence,omitempty"`
+	Forces                map[string]int64 `json:"forces,omitempty"`
 }
 
 func NewRun(chapterID, campaignType int64) RunState {

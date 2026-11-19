@@ -96,6 +96,21 @@ func TestOccultRemovalIsOneShotAndAReseatedPlayerCanBeRemovedAgain(t *testing.T)
 	}
 }
 
+// TestOccultTerminalPushesReachTheClosedRoomOnTheFirstSight is A-179: the
+// closing write's wakeup is the only carrier of the final report, so it is
+// delivered even when the ledger never saw the room open, and only once.
+func TestOccultTerminalPushesReachTheClosedRoomOnTheFirstSight(t *testing.T) {
+	ledger := NewRoomNoticeLedger()
+	log := []app.RoomPush{{Sequence: 5, Function: 7, Bodies: []app.PlayerBody{{Player: 2}, {Player: 3}}}}
+	fresh := ledger.terminalPushes(7, log)
+	if len(fresh) != 1 || fresh[0].Sequence != 5 || len(fresh[0].Bodies) != 2 {
+		t.Fatalf("first sight terminal push %+v", fresh)
+	}
+	if again := ledger.terminalPushes(7, log); len(again) != 0 {
+		t.Fatalf("a terminal push repeated %+v", again)
+	}
+}
+
 func TestOccultTeamPushesAreSentOnceInServerOrder(t *testing.T) {
 	ledger := NewRoomNoticeLedger()
 	log := []app.RoomPush{{Sequence: 1, Function: 2}, {Sequence: 2, Function: 3}}

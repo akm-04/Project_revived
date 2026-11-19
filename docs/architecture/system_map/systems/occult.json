@@ -331,6 +331,7 @@
    "i9_8c_occult.json"
   ],
   "unit": [
+   "notice_test.go",
    "service_test.go",
    "start_choice_conformance_test.go"
   ]

@@ -109,6 +109,11 @@ func (h OccultRoomNoticeHandler) ReloadAndDeliver(c context.Context, reference s
 	}
 	h.Delivered.reseat(view.RoomID, occultRoomNoticeKey, seated)
 	steps := []func(context.Context, app.RoomNotice, []identity.PlayerID) error{h.deliverRemovals, h.deliverRoomChanges, h.deliverEvents, h.deliverPushes, h.deliverPositions, h.deliverOnline}
+	if view.Closed {
+		// The final report must open the team window before the no-room removal
+		// closes it, and the closing write's notices are the only pushes left.
+		steps = []func(context.Context, app.RoomNotice, []identity.PlayerID) error{h.deliverPushes, h.deliverRemovals}
+	}
 	for _, step := range steps {
 		if err = step(c, view, seated); err != nil {
 			return err
@@ -180,7 +185,13 @@ func (h OccultRoomNoticeHandler) deliverEvents(c context.Context, view app.RoomN
 
 // deliverPushes sends each recorded team or fight-status push once, in server order.
 func (h OccultRoomNoticeHandler) deliverPushes(c context.Context, view app.RoomNotice, _ []identity.PlayerID) error {
-	for _, push := range h.Delivered.newPushes(view.RoomID, view.Pushes) {
+	var fresh []app.RoomPush
+	if view.Closed {
+		fresh = h.Delivered.terminalPushes(view.RoomID, view.Pushes)
+	} else {
+		fresh = h.Delivered.newPushes(view.RoomID, view.Pushes)
+	}
+	for _, push := range fresh {
 		for _, body := range push.Bodies {
 			frame, err := occultRoomFrame(push.Function, body.Body)
 			if err = h.send(c, body.Player, frame, err); err != nil {
