@@ -3,6 +3,7 @@ package i5
 import (
 	"context"
 	"errors"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -70,7 +71,7 @@ func (s DisplayValueOwner) PrepareDisplayValueTx(c context.Context, t tx.Tx, a i
 	if !ok {
 		return nil, economy.ErrUnknownResource
 	}
-	if at.Before(b.UpdatedAt) {
+	if at.Before(gen.EffectiveObservation(at, b.UpdatedAt)) {
 		return nil, player.ErrDisplay
 	}
 	if _, e = b.Debit(out.amount, at); e != nil {

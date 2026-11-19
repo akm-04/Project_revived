@@ -351,7 +351,7 @@ func (s Service) settleGrantTx(ctx context.Context, t tx.Tx, actor identity.Acto
 			if err != nil {
 				return GrantResult{}, err
 			}
-			if exists && (op.StartedAt.Before(balance.UpdatedAt) || balance.StateVersion == math.MaxInt64) {
+			if exists && (op.StartedAt.Before(gen.EffectiveObservation(op.StartedAt, balance.UpdatedAt)) || balance.StateVersion == math.MaxInt64) {
 				return GrantResult{}, errors.New("SocialGift scalar clock/version regression")
 			}
 		}
