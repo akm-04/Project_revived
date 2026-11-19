@@ -77,6 +77,12 @@ func (d GuildDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 		return okGuild(map[string]any{"guild_infos": guildproj.InfoList(rows)})
 	case 579: // LOAD_TEAM_BY_ID: canonical self Guild/member roster
 		info, members, err := d.View.Members(ctx, actor)
+		if errors.Is(err, guildview.ErrForbidden) {
+			// DormWindow.lua:96-109 and its siblings open the guild visit with
+			// no guild precondition; a guildless caller owes OK plus a zero
+			// roster (SelfGuild.lua:32-63 takes its own not-in-a-guild branch).
+			return okGuild(guildproj.Roster(guildview.GuildInfo{}, nil))
+		}
 		if err != nil {
 			return failGuild(err)
 		}
@@ -126,7 +132,9 @@ func (d GuildDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 			return failGuild(err)
 		}
 		if !found {
-			return failureReply(refusal(unprovenRefusalCode))
+			// 30015 is message.lua's "Can't find the guild" row, the same code
+			// failGuild already uses for ErrGuildNotFound (A-191).
+			return failureReply(refusal(guildNotFoundCode))
 		}
 		return okGuild(guildproj.Detail2565(info))
 	}

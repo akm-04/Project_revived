@@ -11,6 +11,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/guild"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 )
 
 type fakeGuildCore struct {
@@ -73,6 +74,9 @@ func (f fakeGuildView) Other(context.Context, identity.ActorContext, guild.ID) (
 	return f.self, f.self.GuildInfo.GuildID != 0, nil
 }
 func (f fakeGuildView) Members(context.Context, identity.ActorContext) (guildview.GuildInfo, []guildview.Member, error) {
+	if f.self.GuildInfo.GuildID == 0 {
+		return guildview.GuildInfo{}, nil, guildview.ErrForbidden
+	}
 	return f.self.GuildInfo, []guildview.Member{{PlayerID: 100001, Role: 1, LastTime: 0, SevenVitality: 0, CopyChallengeTime: 0}}, nil
 }
 func (f fakeGuildView) Guilds(context.Context, identity.ActorContext, int) ([]guildview.GuildInfo, error) {
@@ -107,6 +111,32 @@ func TestGuildDispatcherMID612AndDirectArrayShapes(t *testing.T) {
 	r = d.Dispatch(context.Background(), env(579, nil, now))
 	if r.HTTPStatus != 200 || r.Body["guild_id"] != int64(1000001) {
 		t.Fatalf("579=%+v", r)
+	}
+}
+
+func TestI9_11T34GuildlessRosterAndMissingGuildDetail(t *testing.T) {
+	// DormWindow.lua:96-109, GardenWindow.lua:279-293 and
+	// FifthAnniPartyGiftWindow.lua:252-266 open the guild visit with no guild
+	// precondition and expect OK plus a zero roster (SelfGuild.lua:32-63 then
+	// takes its own "not in a guild" branch).
+	actor := actorForHTTP(t)
+	d := GuildDispatcher{Authority: httpAuthority{actor}, Core: &fakeGuildCore{}, View: fakeGuildView{}}
+	now := time.Unix(100, 0).UTC()
+
+	guildless := d.Dispatch(context.Background(), env(579, nil, now))
+	if guildless.HTTPStatus != 200 || guildless.Body["guild_id"] != int64(0) {
+		t.Fatalf("579 guildless=%+v", guildless)
+	}
+	if members, ok := guildless.Body["members"].([]any); !ok || len(members) != 0 {
+		t.Fatalf("579 guildless members=%+v", guildless.Body["members"])
+	}
+	replyconformance.Check(t, 579, guildless.Body)
+
+	detail := env(2565, nil, now)
+	detail.Envelope.Params["player_id"] = int64(100001)
+	missing := d.Dispatch(context.Background(), detail)
+	if missing.HTTPStatus != 409 || missing.Body["error_code"] != int64(30015) {
+		t.Fatalf("2565 missing guild=%+v", missing)
 	}
 }
 
