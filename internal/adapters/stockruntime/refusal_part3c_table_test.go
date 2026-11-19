@@ -148,6 +148,10 @@ func TestPart3CMarchFailureRows(t *testing.T) {
 		{"loan refused", marchFailure(combat.ErrLoanRefused), http.StatusConflict, unprovenRefusalCode, ""},
 		{"refused", marchFailure(march.ErrRefused), http.StatusConflict, unprovenRefusalCode, ""},
 		{"start conflict", marchFailure(combat.ErrStartConflict), http.StatusConflict, unprovenRefusalCode, ""},
+		{"balance diamonds", marchFailure(economy.InsufficientBalance("crystal")), http.StatusConflict, insufficientDiamondCode, ""},
+		{"balance coins", marchFailure(economy.InsufficientBalance("mana")), http.StatusConflict, insufficientCoinCode, ""},
+		{"balance stamina", marchFailure(economy.InsufficientBalance("energy")), http.StatusConflict, insufficientStaminaCode, ""},
+		{"balance other", marchFailure(economy.InsufficientBalance("guild_coin")), http.StatusConflict, unprovenRefusalCode, ""},
 		{"unavailable", marchFailure(march.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }

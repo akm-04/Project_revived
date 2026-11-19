@@ -10,6 +10,7 @@ import (
 	app "gxb.local/backend/v2/internal/application/march"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
 	cd "gxb.local/backend/v2/internal/domain/combat"
+	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/march"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -186,6 +187,7 @@ func marchNumber(raw any) (float64, bool) {
 }
 
 var marchFailureRows = []failureRow{
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
 	{match: d.ErrInvalid, class: failureMalformed, detail: "march_invalid_parameter"},
 	{match: cd.ErrLoanRefused, class: failureRefusal, code: unprovenRefusalCode},
 	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},

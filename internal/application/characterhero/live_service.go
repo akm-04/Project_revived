@@ -189,7 +189,7 @@ func (s Service) debitLIVEUnlockTx(ctx context.Context, t tx.Tx, actor identity.
 		Scalars: []appi5.ScalarMaterialCost{{ResourceKey: "crystal", Amount: def.CrystalCost}},
 		Stacks:  []appi5.StackMaterialCost{{ItemID: def.ActivationItemID, Amount: def.ActivationItemCount}},
 	}, op)
-	if errors.Is(err, economy.ErrInsufficientBalance) || errors.Is(err, economy.ErrUnknownResource) {
+	if errors.Is(err, economy.ErrUnknownResource) {
 		return ErrHeroAppearanceUnavailable
 	}
 	return err

@@ -8518,7 +8518,7 @@
  "soft_refusals": [
   {
    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-   "line": 393,
+   "line": 394,
    "code": 30001,
    "kind": "stock_code"
   },
@@ -8542,19 +8542,19 @@
   },
   {
    "file": "internal/application/march/settle.go",
-   "line": 32,
+   "line": 30,
    "code": 1,
    "kind": "code_1"
   },
   {
    "file": "internal/application/march/settle.go",
-   "line": 57,
+   "line": 55,
    "code": 1,
    "kind": "code_1"
   },
   {
    "file": "internal/application/march/settle.go",
-   "line": 62,
+   "line": 60,
    "code": 1,
    "kind": "code_1"
   },

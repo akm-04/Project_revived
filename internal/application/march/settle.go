@@ -3,13 +3,11 @@ package march
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	appcombat "gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	cd "gxb.local/backend/v2/internal/domain/combat"
-	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/march"
@@ -172,9 +170,6 @@ func (s Mode) Extra(c context.Context, a identity.ActorContext, op operation.Con
 			return nil, err
 		}
 		_, err = s.Costs.DebitMaterialCostTx(c, sc.Tx, a.PlayerID, i5.MaterialCost{Scalars: []i5.ScalarMaterialCost{{ResourceKey: "crystal", Amount: 50}}}, sc.Operation.Operation())
-		if errors.Is(err, economy.ErrInsufficientBalance) {
-			return nil, d.ErrRefused
-		}
 		if err != nil {
 			return nil, err
 		}

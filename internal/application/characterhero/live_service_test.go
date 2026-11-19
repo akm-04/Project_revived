@@ -175,10 +175,16 @@ func TestCA74MID68FreshOwnedRepeatNoDebitPreservesShowFalseAndSortsProjection(t 
 
 func TestCA74MID68InsufficientResourcesAndQualificationFailuresDoNotWrite(t *testing.T) {
 	svc, st, mat, _ := ca74Service(ca74Hero(), nil)
-	mat.err = economy.ErrInsufficientBalance
+	mat.err = economy.InsufficientBalance("crystal")
 	_, err := svc.UnlockLIVE(context.Background(), testActor(t), 11, 40001074, testOp(t, "c3030303-0303-4303-8303-030303030303"))
-	if !errors.Is(err, ErrHeroAppearanceUnavailable) || st.saves != 0 {
+	var balance *economy.InsufficientBalanceError
+	if !errors.Is(err, economy.ErrInsufficientBalance) || !errors.As(err, &balance) || balance.ResourceKey != "crystal" || st.saves != 0 {
 		t.Fatalf("insufficient err=%v saves=%d", err, st.saves)
+	}
+	mat.err = economy.ErrUnknownResource
+	_, err = svc.UnlockLIVE(context.Background(), testActor(t), 11, 40001074, testOp(t, "c6061616-1616-4616-8616-161616161616"))
+	if !errors.Is(err, ErrHeroAppearanceUnavailable) || st.saves != 0 {
+		t.Fatalf("unknown resource err=%v saves=%d", err, st.saves)
 	}
 	mat.err = nil
 	_, err = svc.UnlockLIVE(context.Background(), testActor(t), 11, 40009999, testOp(t, "c4040404-0404-4404-8404-040404040404"))
