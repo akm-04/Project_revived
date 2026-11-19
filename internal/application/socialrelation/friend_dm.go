@@ -2,6 +2,7 @@ package socialrelation
 
 import (
 	"context"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/lockkey"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -100,7 +101,7 @@ func (p FriendDMPrivacyProvider) PrepareFriendDMPrivacyTx(c context.Context, t t
 				return FriendDMPrivacyPlan{}, ErrInvalidState
 			}
 			v.RecipientBlockVersion = bl.StateVersion
-			if bl.UpdatedAt.After(v.LatestRelationAt) {
+			if bl.UpdatedAt.After(gen.EffectiveObservation(v.LatestRelationAt, bl.UpdatedAt)) {
 				v.LatestRelationAt = bl.UpdatedAt
 			}
 			v.Eligible = v.Eligible && !bl.Active
