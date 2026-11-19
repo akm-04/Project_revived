@@ -147,13 +147,11 @@ func TestGreatCustomerOvertakenTimeIsTyped(t *testing.T) {
 	if s, _, err = s.ObserveDailyCount(c, 1, at); err != nil {
 		t.Fatal(err)
 	}
-	// K2: a backwards clock step observes at the stored fact; it is not an
-	// overtaking error, and the written timestamps never move backwards.
-	next, changed, err := s.ObserveDailyCount(c, 2, at.Add(-time.Second))
-	if err != nil || !changed || next.UpdatedAt.Before(s.UpdatedAt) || next.UpdatedAt.Before(next.CreatedAt) {
-		t.Fatalf("backwards observation = %+v %v %v", next, changed, err)
+	// A-140: an observation older than the stored row is overtaken by a newer
+	// accepted fact and refuses as a typed stale fact, not a clamp.
+	if _, _, err = s.ObserveDailyCount(c, 2, at.Add(-time.Second)); !errors.Is(err, ErrOvertaken) {
+		t.Fatalf("older observation = %v, want ErrOvertaken", err)
 	}
-	s = next
 	broken := s
 	broken.ContentRevision = "short"
 	if _, _, err = broken.ObserveDailyCount(c, 3, at.Add(time.Second)); !errors.Is(err, ErrConflict) {

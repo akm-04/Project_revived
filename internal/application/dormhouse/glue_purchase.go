@@ -39,7 +39,12 @@ func (service Service) buyGlueTx(ctx context.Context, transaction tx.Tx, actor i
 	if err != nil {
 		return nil, err
 	}
-	if err = privileges.Validate(actor.PlayerID, admission.ContentRevision, at); err != nil {
+	// KEEP: a retained admission captured before a newer canonical privilege fact
+	// is stale and is retired, not silently used with the older observation.
+	if privileges.ObservedAt.After(at) {
+		return nil, ErrStale
+	}
+	if err = privileges.Validate(actor.PlayerID, admission.ContentRevision, privileges.ObservedAt); err != nil {
 		return nil, err
 	}
 	stored, exists, err := service.GluePurchases.ReadGluePurchasesTx(ctx, transaction, actor.PlayerID)
