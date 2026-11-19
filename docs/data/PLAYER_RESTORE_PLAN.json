@@ -226,16 +226,6 @@
      ]
     },
     {
-     "constraint": "guild_campaign_copies_settled_by_fkey",
-     "table": "guild_campaign_copies",
-     "columns": [
-      "settled_by"
-     ],
-     "references": [
-      "player_id"
-     ]
-    },
-    {
      "constraint": "guild_campaign_distributions_player_id_fkey",
      "table": "guild_campaign_distributions",
      "columns": [

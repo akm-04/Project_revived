@@ -1488,19 +1488,6 @@
   },
   {
    "table": "guild_campaign_copies",
-   "column": "settled_body",
-   "scope": "guild",
-   "decode": "none",
-   "decode_type": "",
-   "decode_sites": [],
-   "writers": [],
-   "sql_paths": [],
-   "digest": false,
-   "digest_sites": [],
-   "batch": 14
-  },
-  {
-   "table": "guild_campaign_copies",
    "column": "waves",
    "scope": "guild",
    "decode": "raw",

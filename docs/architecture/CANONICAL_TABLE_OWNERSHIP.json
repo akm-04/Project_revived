@@ -9191,8 +9191,7 @@
         "kind": "state",
         "backup": false,
         "references": [
-          "holder_id",
-          "settled_by"
+          "holder_id"
         ],
         "retention": null
       }
