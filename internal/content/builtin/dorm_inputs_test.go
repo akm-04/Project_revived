@@ -22,6 +22,7 @@ func loadDormV1(t *testing.T) DormInputCatalog {
 		t.Fatal(err)
 	}
 	delete(legacyFields, "glue")
+	delete(legacyFields, "furniture_recipes")
 	legacyFields["schema_version"] = json.RawMessage("1")
 	legacyRaw, err := json.Marshal(legacyFields)
 	if err != nil {
@@ -69,6 +70,9 @@ func TestDormQualifiedPayloadAndEquipmentReuse(t *testing.T) {
 	}
 	if len(d.Rooms) != 16 || len(d.Furniture) != 267 || d.OriginalServerPolicyRecovered {
 		t.Fatal("wrong profile")
+	}
+	if d.SchemaVersion != 3 || d.FurnitureRecipes == nil || len(d.FurnitureRecipes.Furniture) != 53 || len(d.FurnitureRecipes.Blueprints) != 53 {
+		t.Fatalf("furniture recipes = version %d %+v", d.SchemaVersion, d.FurnitureRecipes)
 	}
 	primitives := map[int64]int64{}
 	for _, r := range c.EquipmentPrimitives.Items {
@@ -138,7 +142,7 @@ func TestDormInputCatalogRejectsUnqualifiedGlue(t *testing.T) {
 		mutate func(*DormInputCatalog)
 	}{
 		{name: "schema 1 carrying glue", mutate: func(c *DormInputCatalog) { c.SchemaVersion = 1 }},
-		{name: "schema 3", mutate: func(c *DormInputCatalog) { c.SchemaVersion = 3 }},
+		{name: "schema 3 without recipes", mutate: func(c *DormInputCatalog) { c.SchemaVersion = 3 }},
 		{name: "schema 2 without glue", mutate: func(c *DormInputCatalog) { c.Glue = nil }},
 		{name: "empty vip caps", mutate: func(c *DormInputCatalog) { c.Glue.VIPDailyCaps = nil }},
 		{name: "empty purchase costs", mutate: func(c *DormInputCatalog) { c.Glue.PurchaseCosts = nil }},
@@ -176,6 +180,77 @@ func TestDormInputCatalogRejectsUnqualifiedGlue(t *testing.T) {
 			testCase.mutate(&catalog)
 			if err := catalog.Validate(); err == nil {
 				t.Fatal("unqualified glue accepted")
+			}
+		})
+	}
+}
+
+func TestDormInputCatalogAcceptsStrictV3RoundTrip(t *testing.T) {
+	loaded, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	raw, err := json.Marshal(loaded.DormInputs)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var decoded DormInputCatalog
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&decoded); err != nil {
+		t.Fatalf("v3 round trip rejected: %v", err)
+	}
+	if err := decoded.Validate(); err != nil {
+		t.Fatalf("v3 round trip rejected: %v", err)
+	}
+	if decoded.SchemaVersion != 3 || decoded.FurnitureRecipes == nil || len(decoded.FurnitureRecipes.Furniture) != 53 || len(decoded.FurnitureRecipes.Blueprints) != 53 {
+		t.Fatalf("v3 round trip lost recipes: %+v", decoded.FurnitureRecipes)
+	}
+}
+
+func TestDormInputCatalogRejectsV2CarryingRecipes(t *testing.T) {
+	loaded, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	catalog := validDormV2(t)
+	catalog.FurnitureRecipes = loaded.DormInputs.FurnitureRecipes
+	if err := catalog.Validate(); err == nil {
+		t.Fatal("schema 2 carrying recipes accepted")
+	}
+}
+
+func TestDormInputCatalogRejectsUnqualifiedRecipes(t *testing.T) {
+	loaded, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	cases := []struct {
+		name   string
+		mutate func(*DormFurnitureRecipes)
+	}{
+		{name: "missing blueprint target", mutate: func(r *DormFurnitureRecipes) { r.Blueprints = r.Blueprints[1:] }},
+		{name: "wrong paper", mutate: func(r *DormFurnitureRecipes) { r.Furniture[0].BlueprintItem = 50020079 }},
+		{name: "duplicate furniture", mutate: func(r *DormFurnitureRecipes) { r.Furniture[1].ItemID = r.Furniture[0].ItemID }},
+		{name: "material count shape", mutate: func(r *DormFurnitureRecipes) { r.Furniture[0].Counts = r.Furniture[0].Counts[:1] }},
+		{name: "zero glue", mutate: func(r *DormFurnitureRecipes) { r.Furniture[0].Glue = -1 }},
+		{name: "zero level", mutate: func(r *DormFurnitureRecipes) { r.Blueprints[0].Level = 0 }},
+		{name: "duplicate piece", mutate: func(r *DormFurnitureRecipes) { r.Blueprints[0].Pieces[0] = -1 }},
+	}
+	for _, testCase := range cases {
+		t.Run(testCase.name, func(t *testing.T) {
+			catalog := loaded.DormInputs
+			recipes := *catalog.FurnitureRecipes
+			recipes.Furniture = append([]DormFurnitureRecipe(nil), recipes.Furniture...)
+			recipes.Blueprints = append([]DormBlueprintRecipe(nil), recipes.Blueprints...)
+			recipes.Furniture[0].Materials = append([]int64(nil), recipes.Furniture[0].Materials...)
+			recipes.Furniture[0].Counts = append([]int64(nil), recipes.Furniture[0].Counts...)
+			recipes.Blueprints[0].Pieces = append([]int64(nil), recipes.Blueprints[0].Pieces...)
+			recipes.Blueprints[0].Counts = append([]int64(nil), recipes.Blueprints[0].Counts...)
+			catalog.FurnitureRecipes = &recipes
+			testCase.mutate(catalog.FurnitureRecipes)
+			if err := catalog.Validate(); err == nil {
+				t.Fatal("unqualified furniture recipe accepted")
 			}
 		})
 	}

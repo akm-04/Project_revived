@@ -26,6 +26,7 @@ func decodeDormV1(t *testing.T, bundle registry.Bundle) builtin.DormInputCatalog
 		t.Fatal(err)
 	}
 	delete(legacyFields, "glue")
+	delete(legacyFields, "furniture_recipes")
 	legacyFields["schema_version"] = json.RawMessage("1")
 	legacyRaw, err := json.Marshal(legacyFields)
 	if err != nil {
@@ -148,6 +149,33 @@ func TestDormCatalogReadsV2Glue(t *testing.T) {
 	}
 	if _, ok := catalog.Glue.PurchaseCost(3); ok {
 		t.Fatal("unknown ordinal returned a guessed cost")
+	}
+}
+
+func TestDormCatalogReadsV3FurnitureRecipes(t *testing.T) {
+	bundle, err := registry.LoadBuiltinBundle()
+	if err != nil {
+		t.Fatal(err)
+	}
+	payload := bundle.DormInputsJSON()
+	revision := dormTestRevision("dorm v3 furniture recipes")
+	catalog, err := loadDormFixture(t, revision, dormFixtureManifest(t, bundle, revision, payload), payload)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(catalog.FurnitureRecipes) != 53 || len(catalog.BlueprintRecipes) != 53 {
+		t.Fatalf("furniture recipes = %d, blueprints = %d", len(catalog.FurnitureRecipes), len(catalog.BlueprintRecipes))
+	}
+	recipe, ok := catalog.FurnitureRecipes[50031013]
+	if !ok {
+		t.Fatal("Princess Bed recipe absent")
+	}
+	if recipe.BlueprintItem != 50020013 || recipe.Glue != 54 || len(recipe.Materials) != 2 || recipe.Counts[1] != 30 {
+		t.Fatalf("Princess Bed recipe = %+v", recipe)
+	}
+	blueprint, ok := catalog.BlueprintRecipes[50020013]
+	if !ok || blueprint.Level != 100 || len(blueprint.Pieces) != 1 || blueprint.Counts[0] != 50 {
+		t.Fatalf("Princess Bed blueprint = %+v, ok=%v", blueprint, ok)
 	}
 }
 
