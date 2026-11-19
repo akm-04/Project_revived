@@ -352,10 +352,11 @@ func TestSignInNativeCrystalAwardWireAndCustody(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, award := range month.Awards {
+		op := runtimeOperation(t, clock.at)
 		var body map[string]any
 		var err error
 		response := stockruntime.Decorated{Next: httpedge.DispatcherFunc(func(ctx context.Context, _ httpedge.DispatchRequest) httpedge.Response {
-			body, err = s.ClaimSignIn(ctx, a, runtimeOperation(t, clock.at))
+			body, err = s.ClaimSignIn(ctx, a, op)
 			return httpedge.Response{HTTPStatus: 200, Body: body}
 		})}.Dispatch(ctx, httpedge.DispatchRequest{})
 		if err != nil {
@@ -364,8 +365,16 @@ func TestSignInNativeCrystalAwardWireAndCustody(t *testing.T) {
 		body = response.Body
 		if award.Crystal > 0 {
 			wire := body["award"].(map[string]any)
-			if wire["table_id"] != int64(-1) || wire["item_num"] != award.Crystal || wire["to_stone"] != false {
+			if wire["table_id"] != int64(-1) || wire["item_num"] != award.Crystal || wire["to_stone"] != false || wire["crystal"] != award.Crystal {
 				t.Fatal("Crystal wire", body)
+			}
+			replay, replayErr := s.ClaimSignIn(ctx, a, op)
+			if replayErr != nil {
+				t.Fatal(replayErr)
+			}
+			// A stored receipt round-trips through JSON, so its numbers decode as float64.
+			if replayedAward := replay["award"].(map[string]any); replayedAward["crystal"] != float64(award.Crystal) {
+				t.Fatal("Crystal replay wire", replay)
 			}
 			var after int64
 			if err = p.QueryRow(ctx, `SELECT amount FROM player_currency_balances WHERE player_id=$1 AND resource_key='crystal'`, int64(a.PlayerID)).Scan(&after); err != nil || after-before != award.Crystal {

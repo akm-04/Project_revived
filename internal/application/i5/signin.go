@@ -173,6 +173,7 @@ func (s Service) ClaimSignIn(ctx context.Context, actor identity.ActorContext, o
 		if award.Crystal > 0 {
 			wire["table_id"] = int64(-1)
 			wire["item_num"] = award.Crystal
+			wire["crystal"] = award.Crystal
 			lines = append(lines, grant.Line{Kind: grant.ScalarCurrency, ResourceKey: "crystal", Amount: award.Crystal})
 		} else if award.ItemID >= 10000000 && award.ItemID < 20000000 {
 			if award.ItemNum != 1 || s.SignIn.Heroes == nil || s.SignIn.HeroWire == nil {
