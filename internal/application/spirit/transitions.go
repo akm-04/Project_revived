@@ -2,6 +2,7 @@ package spirit
 
 import (
 	"context"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -19,7 +20,7 @@ func (s Service) eligible(ctx context.Context, q tx.Queryer, p identity.PlayerID
 	if e = level.Validate(); e != nil {
 		return false, e
 	}
-	if at.Before(level.UpdatedAt) {
+	if at.Before(gen.EffectiveObservation(at, level.UpdatedAt)) {
 		return false, ErrStale
 	}
 	rule, e := s.Content.ResolveProgressionPolicyTx(ctx, q, rev)
@@ -68,7 +69,7 @@ func (s Service) liveHero(ctx context.Context, q tx.Queryer, p identity.PlayerID
 	if e = h.ValidatePersistent(); e != nil {
 		return e
 	}
-	if at.Before(h.UpdatedAt) {
+	if at.Before(gen.EffectiveObservation(at, h.UpdatedAt)) {
 		return ErrStale
 	}
 	k, e := s.Content.HeroKindTx(ctx, q, rev, h.TableID)
@@ -85,7 +86,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, ad
 	if e != nil {
 		return nil, e
 	}
-	if ad.DecisionAt.Before(root.UpdatedAt) {
+	if ad.DecisionAt.Before(gen.EffectiveObservation(ad.DecisionAt, root.UpdatedAt)) {
 		return nil, ErrStale
 	}
 	cat, e := s.Content.SpiritCatalogTx(ctx, t, ad.ContentRevision)
@@ -116,7 +117,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, ad
 	indexes := map[int64]int{}
 	for i, f := range fs {
 		indexes[f.PartnerID] = i
-		if ad.DecisionAt.Before(f.UpdatedAt) {
+		if ad.DecisionAt.Before(gen.EffectiveObservation(ad.DecisionAt, f.UpdatedAt)) {
 			return nil, ErrStale
 		}
 	}
