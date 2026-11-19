@@ -2,6 +2,7 @@ package inscription
 
 import (
 	"context"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	i5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/grant"
@@ -27,7 +28,7 @@ func (s Service) eligible(ctx context.Context, q tx.Queryer, p identity.PlayerID
 	if err != nil {
 		return false, err
 	}
-	if at.Before(h.UpdatedAt) || at.Before(pop.UpdatedAt) {
+	if at.Before(gen.EffectiveObservation(at, h.UpdatedAt)) || at.Before(gen.EffectiveObservation(at, pop.UpdatedAt)) {
 		return false, ErrStale
 	}
 	kind, err := s.Content.HeroKindTx(ctx, q, rev, h.TableID)
@@ -61,7 +62,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	if e != nil {
 		return nil, e
 	}
-	if at.Before(r.UpdatedAt) {
+	if at.Before(gen.EffectiveObservation(at, r.UpdatedAt)) {
 		return nil, ErrStale
 	}
 	c, e := s.Content.InscriptionCatalogTx(ctx, t, d.ContentRevision)
@@ -79,7 +80,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 		if e != nil {
 			return nil, e
 		}
-		if at.Before(f.UpdatedAt) {
+		if at.Before(gen.EffectiveObservation(at, f.UpdatedAt)) {
 			return nil, ErrStale
 		}
 		if e = f.Facts.Validate(c); e != nil {

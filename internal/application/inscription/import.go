@@ -99,7 +99,7 @@ func (s Service) RunImport(ctx context.Context, input VerifiedImport, values Cer
 		if e != nil {
 			return e
 		}
-		if at.Before(r.UpdatedAt) {
+		if at.Before(gen.EffectiveObservation(at, r.UpdatedAt)) {
 			return ErrStale
 		}
 		digest, found, e := owner.ReadImportProofTx(ctx, sc.Tx, v.Player)
@@ -134,7 +134,7 @@ func (s Service) RunImport(ctx context.Context, input VerifiedImport, values Cer
 			if e != nil {
 				return e
 			}
-			if f.Version != 1 || f.Facts != ins.SeedHero() || at.Before(f.UpdatedAt) {
+			if f.Version != 1 || f.Facts != ins.SeedHero() || at.Before(gen.EffectiveObservation(at, f.UpdatedAt)) {
 				return ins.ErrInvalid
 			}
 			f.Facts = h.Facts
