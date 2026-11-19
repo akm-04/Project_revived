@@ -115,9 +115,6 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	if e != nil {
 		return nil, e
 	}
-	if at.Before(gen.EffectiveObservation(at, root.UpdatedAt)) {
-		return nil, ErrStale
-	}
 	c, e := s.Content.BookCatalogTx(ctx, t, d.ContentRevision)
 	if e != nil {
 		return nil, e
@@ -351,7 +348,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 		old := root.Version
 		root.Version++
 		root.Facts = st
-		root.UpdatedAt = at
+		root.UpdatedAt = gen.EffectiveObservation(at, root.UpdatedAt, root.CreatedAt)
 		if e = s.Owner.SaveRootTx(ctx, t, root, old); e != nil {
 			return nil, e
 		}
