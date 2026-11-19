@@ -39,6 +39,17 @@ func TestEnemyCopiesPetStarForTheStockSelector(t *testing.T) {
 	}
 }
 
+func TestPartnersCarriesTheSubjectStarAndOmitsAnUnownedGirl(t *testing.T) {
+	three := int64(3)
+	rows := Partners(d.PartnersView{Usage: []d.Usage{{TableID: 10001001, Star: &three}, {TableID: 10001002}}})["partner_info"].([]map[string]any)
+	if rows[0]["star"] != int64(3) {
+		t.Fatalf("owned girl row = %#v, want star 3", rows[0])
+	}
+	if _, present := rows[1]["star"]; present {
+		t.Fatalf("unowned girl row = %#v, want no star key", rows[1])
+	}
+}
+
 func TestInfoKeepsTheDefenceFormationAnArray(t *testing.T) {
 	body := Info(d.InfoView{Player: d.Player{Defense: d.Lineup{Heroes: nil}}})
 	defence, ok := body["defence_formation"].([]int64)
