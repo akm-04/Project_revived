@@ -1769,6 +1769,16 @@
    "inbound": []
   },
   {
+   "table": "library_hero_battle_counts",
+   "action": "restore",
+   "select": "SELECT * FROM \"library_hero_battle_counts\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
+   },
+   "inbound": []
+  },
+  {
    "table": "mail_records",
    "action": "restore",
    "select": "SELECT * FROM \"mail_records\" WHERE \"recipient_player_id\" = $1::bigint",
@@ -3156,6 +3166,16 @@
    "versioned": {
     "state_version": false,
     "updated_at": false
+   },
+   "inbound": []
+  },
+  {
+   "table": "shop_players",
+   "action": "restore",
+   "select": "SELECT * FROM \"shop_players\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": true,
+    "updated_at": true
    },
    "inbound": []
   },
