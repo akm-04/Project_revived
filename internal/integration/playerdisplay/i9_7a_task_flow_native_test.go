@@ -213,6 +213,7 @@ func TestI97ATaskBattleRecoveryNative(t *testing.T) {
 	exec(t, database, `UPDATE top_floor_task_players SET payload=jsonb_set(payload,'{player,ContentRevision}',to_jsonb($3::text)) WHERE logical_server_id=$1 AND period_number=$2`, int64(server), view.Rotation.Number, historicalRevision)
 	normalRecords := scalar(t, database, `SELECT count(*) FROM top_floor_records WHERE owner_player_id=$1`, int64(actor.PlayerID))
 	command := application.TaskStartCommand{StartCommand: application.StartCommand{Formation: defense.Heroes, Enemy: view.Enemies[0].Occupant.TableID()}, Leader: defense.Leader}
+	countsBefore := battleCountRows(t, database, actor.PlayerID)[hero.PartnerID]
 	result, err := service.StartTask(ctx, actor, command, op())
 	if err != nil || len(result.Report) == 0 {
 		t.Fatalf("special battle: %v report=%d", err, len(result.Report))
@@ -220,6 +221,9 @@ func TestI97ATaskBattleRecoveryNative(t *testing.T) {
 	retry, err := service.StartTask(ctx, actor, command, op())
 	if err != nil || string(retry.Report) != string(result.Report) {
 		t.Fatal("frozen retry", err)
+	}
+	if count := battleCountRows(t, database, actor.PlayerID)[hero.PartnerID]; count != countsBefore+1 {
+		t.Fatalf("task battle count %d, want one more than %d; a retry must not count", count, countsBefore)
 	}
 	lastFight, present, err := store.LatestTaskFightTx(ctx, database, actor.PlayerID)
 	if err != nil || !present {

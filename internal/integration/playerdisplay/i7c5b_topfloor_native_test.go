@@ -47,7 +47,7 @@ func topFloorService(t *testing.T, p *pg.Pool) app.Service {
 	return app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}}, Fresh: p, Store: topfloorstore.Store{}, Content: content,
 		Fence: values, Functions: values, Privileges: i5.BaselinePrivilegeProvider{}, Costs: i5.MaterialCostDebiter{Store: values, Content: content}, FrameStacks: values, Mail: i5.SettlementMail{Store: values},
 		Achievements: ach.Service{Store: achievementstore.Store{}, Content: content, Population: libraryService(p, p)}, Combat: fight, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, HeroPower: rawBirthStats(p), OwnedHeroes: characterstore.Store{Queryer: p},
-		Directory: i4store.PlayerDirectoryReader{}, PlayerDisplay: service(p, p), Guilds: guildstore.Store{}, Facts: i5.ObjectiveFacts{Owner: compositeI5(p), Open: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, Broadcast: pg.BroadcastEmitter{}}
+		Directory: i4store.PlayerDirectoryReader{}, PlayerDisplay: service(p, p), Guilds: guildstore.Store{}, Facts: i5.ObjectiveFacts{Owner: compositeI5(p), Open: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, Broadcast: pg.BroadcastEmitter{}, BattleCounts: libraryService(p, p)}
 }
 
 type blockedFrameClaimStore struct {
@@ -196,6 +196,7 @@ func TestI7C5BTopFloorLadderFightSettlementNative(t *testing.T) {
 	// The replay window is one minute; a loaded gate machine can take longer than that between the two STARTs.
 	authoritative := s.Timed.Binder.Time
 	s.Timed.Binder.Time = &workplaceTime{at: time.Now().UTC()}
+	countsBefore := battleCountRows(t, pool, a.PlayerID)
 	fight, err := s.Start(ctx, a, command, op())
 	if err != nil {
 		t.Fatal(err)
@@ -206,6 +207,9 @@ func TestI7C5BTopFloorLadderFightSettlementNative(t *testing.T) {
 	replay, err := s.Start(ctx, a, command, op())
 	if err != nil || string(replay.Report) != string(fight.Report) || replay.Win != fight.Win {
 		t.Fatal("identical START must replay the recorded result", err)
+	}
+	if count := battleCountRows(t, pool, a.PlayerID)[refA.PartnerID]; count != countsBefore[refA.PartnerID]+1 {
+		t.Fatalf("settled robot battle counted %d, want one; replay must not count", count)
 	}
 	s.Timed.Binder.Time = authoritative
 	rankA := scalar(t, pool, `SELECT rank FROM top_floor_ranks WHERE player_id=$1`, int64(a.PlayerID))
@@ -265,6 +269,7 @@ func TestI7C5BTopFloorLadderFightSettlementNative(t *testing.T) {
 		t.Fatal(err)
 	}
 	before := map[identity.PlayerID]int64{a.PlayerID: scalar(t, pool, `SELECT rank FROM top_floor_ranks WHERE player_id=$1`, int64(a.PlayerID)), b.PlayerID: scalar(t, pool, `SELECT rank FROM top_floor_ranks WHERE player_id=$1`, int64(b.PlayerID))}
+	defenderCounts := battleCountRows(t, pool, a.PlayerID)
 	pvp, err := s.Start(ctx, b, app.StartCommand{Formation: []int64{refB.PartnerID}, Enemy: int64(a.PlayerID) % d.RegionStride}, op())
 	if err != nil {
 		t.Fatal(err)
@@ -272,6 +277,12 @@ func TestI7C5BTopFloorLadderFightSettlementNative(t *testing.T) {
 	after := scalar(t, pool, `SELECT rank FROM top_floor_ranks WHERE player_id=$1`, int64(b.PlayerID))
 	if pvp.Enemy.Occupant.Player != a.PlayerID || (pvp.Win && before[a.PlayerID] < before[b.PlayerID]) != (after == before[a.PlayerID]) {
 		t.Fatalf("pvp swap win=%v before=%v after=%d", pvp.Win, before, after)
+	}
+	if count := battleCountRows(t, pool, b.PlayerID)[refB.PartnerID]; count != 1 {
+		t.Fatalf("settled PvP battle counted %d for the challenger, want one", count)
+	}
+	if got := battleCountRows(t, pool, a.PlayerID); !reflect.DeepEqual(got, defenderCounts) {
+		t.Fatalf("defender has no stored own roster, counts changed: %v", got)
 	}
 	defense, err := s.Records(ctx, a)
 	if err != nil || len(defense) != 2 || defense[0].Record.Attack || defense[0].Record.Win == pvp.Win {

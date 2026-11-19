@@ -45,7 +45,7 @@ func arenaService(t *testing.T, p *pg.Pool) app.Service {
 	return app.Service{Players: i4store.PlayerRootLocker{}, Friendships: socialrelation.FriendFightPrivacyProvider{Store: socialrelationstore.Store{}}, Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner}, Fresh: p, Store: arenastore.Store{}, Content: content,
 		Fence: values, Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Grants: grants, Values: values, Mail: i5.SettlementMail{Store: values},
 		Achievements: ach.Service{Store: achievementstore.Store{}, Content: content, Population: libraryService(p, p)}, Combat: fight, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, OwnedHeroes: characterstore.Store{Queryer: p},
-		Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Servers: i4store.ServerNames{}, Facts: i5.ObjectiveFacts{Owner: compositeI5(p), Open: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+		Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Servers: i4store.ServerNames{}, Facts: i5.ObjectiveFacts{Owner: compositeI5(p), Open: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, BattleCounts: libraryService(p, p)}
 }
 
 func arenaCatalog(t *testing.T, p *pg.Pool) d.Catalog {
@@ -174,6 +174,12 @@ func TestI7C5DArenaEntryFightSettlementNative(t *testing.T) {
 	if err != nil || replay.Win != result.Win || string(replay.Report) != string(result.Report) {
 		t.Fatal("identical FIGHT must return the recorded battle", err)
 	}
+	for _, player := range []identity.PlayerID{a.PlayerID, b.PlayerID} {
+		rows := battleCountRows(t, pool, player)
+		if total := battleCountSum(t, pool, player); total != 5 || len(rows) != 5 {
+			t.Fatalf("player %d battle counts %v, want one per own fighting hero", player, rows)
+		}
+	}
 	if scalar(t, pool, `SELECT count(*) FROM arena_records WHERE owner_player_id IN ($1,$2)`, int64(a.PlayerID), int64(b.PlayerID)) != 2 || scalar(t, pool, `SELECT count(*) FROM arena_partner_usage WHERE player_id=$1`, int64(a.PlayerID)) != 5 ||
 		scalar(t, pool, `SELECT count(*) FROM combat_attempts c JOIN arena_matches m ON m.attempt_id=c.attempt_id WHERE c.state='TERMINAL' AND m.attacker_id=$1`, int64(a.PlayerID)) != 1 {
 		t.Fatal("records, usage and terminal attempt")
@@ -205,6 +211,12 @@ func TestI7C5DArenaEntryFightSettlementNative(t *testing.T) {
 	if practice.Player.Star != 12 || practice.Player.TotalFight != 1 || len(practice.Report) == 0 || scalar(t, pool, `SELECT count(*) FROM arena_records WHERE owner_player_id IN ($1,$2)`, int64(a.PlayerID), int64(b.PlayerID)) != 2 {
 		t.Fatalf("practice %+v", practice.Player)
 	}
+	if got := battleCountSum(t, pool, a.PlayerID); got != 10 {
+		t.Fatalf("practice battle counted the attacker's heroes once: %d, want 10", got)
+	}
+	if got := battleCountSum(t, pool, b.PlayerID); got != 5 {
+		t.Fatalf("practice has no settled defender result: %d, want 5", got)
+	}
 	if facts.of(a.PlayerID) != 1 {
 		t.Fatal("an arena practice fight counted as a PVP_FIGHT fact")
 	}
@@ -234,6 +246,9 @@ func TestI7C5DArenaEntryFightSettlementNative(t *testing.T) {
 	}
 	if scalar(t, pool, `SELECT star FROM arena_players WHERE player_id=$1`, int64(a.PlayerID)) != 10 || scalar(t, pool, `SELECT count(*) FROM arena_matches WHERE attacker_id=$1 AND status IN ('STARTED','FIGHTING')`, int64(a.PlayerID)) != 0 {
 		t.Fatal("abandoned START settles as a loss")
+	}
+	if got := battleCountSum(t, pool, a.PlayerID); got != 10 {
+		t.Fatalf("a forfeit or abandoned START counted a battle: %d, want 10", got)
 	}
 
 	// D08: missions claim king_coin, give up empties a slot; exchanges cost king_coin per season.
