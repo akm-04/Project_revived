@@ -144,6 +144,25 @@ func i911aExpect(t *testing.T, response httpedge.Response, status int, code int6
 	}
 }
 
+// i911aCommittedState fingerprints every row a refused skill-level request must
+// leave byte-identical: the mission root, the hero, the balances and the receipts.
+func i911aCommittedState(t *testing.T, p *postgres.Pool, a identity.ActorContext, partner int64) string {
+	t.Helper()
+	var state string
+	err := p.QueryRow(ctx, `
+SELECT
+ COALESCE((SELECT row_to_json(r)::text FROM player_mission_roots r WHERE r.player_id=$1),'root:absent')
+ || '|' || COALESCE((SELECT row_to_json(h)::text FROM player_heroes h WHERE h.player_id=$1 AND h.partner_id=$2),'hero:absent')
+ || '|' || COALESCE((SELECT jsonb_agg(to_jsonb(b) ORDER BY b.resource_key)::text FROM player_currency_balances b WHERE b.player_id=$1),'[]')
+ || '|' || COALESCE((SELECT jsonb_agg(to_jsonb(r) ORDER BY r.resource_key)::text FROM player_temporal_resources r WHERE r.player_id=$1),'[]')
+ || '|' || COALESCE((SELECT jsonb_agg(to_jsonb(x) ORDER BY x.receipt_id)::text FROM gxb_operation_receipts x WHERE x.owner_key=$1::text),'[]')`,
+		int64(a.PlayerID), partner).Scan(&state)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return state
+}
+
 func TestI9I11ANativeNewPlayerStartsAtSkillCap(t *testing.T) {
 	database := pool(t)
 	revision := installed(t, database)
@@ -532,5 +551,47 @@ func TestI9I11ANativeSkillUpgradeRefusalBodyAndFact107(t *testing.T) {
 	// 10 is the VIP0 natural cap, so the materialized regen anchor is paused (0).
 	if noChange.Body["skills"] != "150|1|1|1|1|1" || noChange.Body["is_success"] != int64(0) || noChange.Body["skill_point"] != int64(10) || noChange.Body["skill_time"] != int64(0) {
 		t.Fatalf("no-change refusal body %#v", noChange.Body)
+	}
+}
+
+func TestI9I11ANativeSkillUpgradeRefusalLeavesCommittedState(t *testing.T) {
+	database := pool(t)
+	revision := installed(t, database)
+	cases := []struct {
+		name       string
+		mid        uint16
+		mana       int64
+		points     int64
+		anchor     time.Time
+		params     map[string]any
+		code       int64
+		pointValue int64
+	}{
+		{name: "MID39_insufficient_mana", mid: 39, mana: 0, points: 10, anchor: time.Now().UTC().Add(-time.Hour), params: map[string]any{"partner_id": int64(1), "skill_colors": "1", "skill_counts": "1"}, code: 20006, pointValue: 10},
+		{name: "MID53_insufficient_points", mid: 53, mana: 1000000, points: 0, anchor: time.Now().UTC(), params: map[string]any{"partner_id": int64(1), "skill_index": int64(1)}, code: unproven, pointValue: 0},
+	}
+	for _, testCase := range cases {
+		t.Run(testCase.name, func(t *testing.T) {
+			actor := heroSkillLevelFixture(t, database, revision, testCase.mana, testCase.points, testCase.anchor)
+			dispatcher := stockruntime.HeroDispatcher{Authority: playtestAuthority{actor}, Service: i911aHeroService(database), SkillLevels: i911aHeroSkillService(database, i911aMissionFacts(database))}
+			// A root from the previous game day makes the first mission materialization roll over.
+			now := time.Now().UTC()
+			exec(t, database, `INSERT INTO player_mission_roots(player_id,day,week)VALUES($1,$2,$3) ON CONFLICT(player_id) DO UPDATE SET day=excluded.day,week=excluded.week`, int64(actor.PlayerID), modes.Day(now)-1, modes.WeekStart(now))
+			before := i911aCommittedState(t, database, actor, 1)
+			response := i911aDispatch(t, dispatcher, actor, testCase.mid, testCase.params, op())
+			i911aExpect(t, response, http.StatusConflict, testCase.code)
+			if response.Body["skill_point"] != testCase.pointValue {
+				t.Fatalf("refusal body %#v", response.Body)
+			}
+			if _, ok := response.Body["skill_time"]; !ok {
+				t.Fatalf("refusal body lacks committed skill_time %#v", response.Body)
+			}
+			if testCase.mid == 39 && (response.Body["is_success"] != int64(0) || response.Body["skills"] == nil) {
+				t.Fatalf("MID 39 refusal body %#v", response.Body)
+			}
+			if after := i911aCommittedState(t, database, actor, 1); after != before {
+				t.Fatalf("refusal changed committed state\nbefore %s\nafter  %s", before, after)
+			}
+		})
 	}
 }

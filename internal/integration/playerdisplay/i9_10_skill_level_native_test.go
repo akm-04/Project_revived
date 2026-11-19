@@ -3,6 +3,7 @@
 package playerdisplay_test
 
 import (
+	"errors"
 	"testing"
 	"time"
 
@@ -125,14 +126,16 @@ func TestI9I10NativeHeroSkillLevelMIDsRegenerateReplayRefuseAndRefresh(t *testin
 	capActor := heroSkillLevelFixture(t, database, revision, 1000000, 10, time.Now().UTC())
 	exec(t, database, `UPDATE player_heroes SET raw_skill_1=150,state_version=2,updated_at=clock_timestamp()-interval '1 second' WHERE player_id=$1 AND partner_id=1`, int64(capActor.PlayerID))
 	capped, err := service.SetSkillLevel(ctx, capActor, 1, 1, op())
-	if err != nil || capped.Success || capped.SkillLevels[0] != 150 || capped.SkillPoint != 10 || skillRead(t, database, capActor, 1).StateVersion != 2 {
+	var cappedRefusal apphero.HeroSkillLevelRefusalError
+	if !errors.As(err, &cappedRefusal) || cappedRefusal.Reason != apphero.HeroSkillLevelRefusalNoChange || capped.Success || skillRead(t, database, capActor, 1).StateVersion != 2 {
 		t.Fatal("skill cap refusal", capped, err)
 	}
 
 	resourceOperation := op()
 	resourceActor := heroSkillLevelFixture(t, database, revision, 1000000, 0, resourceOperation.StartedAt)
 	refused, err := service.SetAllSkillLevels(ctx, resourceActor, 1, []apphero.HeroSkillLevelChange{{Slot: 1, Count: 1}}, resourceOperation)
-	if err != nil || refused.Success || refused.SkillPoint != 0 || skillRead(t, database, resourceActor, 1).StateVersion != 1 {
+	var pointRefusal apphero.HeroSkillLevelRefusalError
+	if !errors.As(err, &pointRefusal) || pointRefusal.Reason != apphero.HeroSkillLevelRefusalInsufficientPoints || refused.Success || skillRead(t, database, resourceActor, 1).StateVersion != 1 {
 		t.Fatal("skill-point refusal", refused, err)
 	}
 }
