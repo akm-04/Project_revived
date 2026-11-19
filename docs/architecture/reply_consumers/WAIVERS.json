@@ -258,6 +258,1134 @@
    "mid": 2800,
    "path": "rank_info.ori_rank",
    "reason": "the client reads `rankInfo.ori_rank or rankInfo.rank` (ChampionsLeagueWinodw.lua:802-803), so it accepts the field being absent until a final or prior placement exists; emitting 0 would win the Lua `or` and display rank 0."
+  },
+  {
+   "client": "app/windows/SelectTeamNewWindow.lua:6819",
+   "mid": 604,
+   "path": "enemy_status[].health",
+   "reason": "the reply is an array of waves of rows and the client iterates the wave array before the row (SelectTeamNewWindow.lua:6819-6825); the extractor models one list level, so the row leaf is not at enemy_status[]"
+  },
+  {
+   "client": "app/windows/SelectTeamNewWindow.lua:6819",
+   "mid": 604,
+   "path": "enemy_status[].hp",
+   "reason": "the reply is an array of waves of rows and the client iterates the wave array before the row (SelectTeamNewWindow.lua:6819-6825); the extractor models one list level, so the row leaf is not at enemy_status[]"
+  },
+  {
+   "client": "app/windows/SelectTeamNewWindow.lua:6819",
+   "mid": 604,
+   "path": "enemy_status[].is_reborn",
+   "reason": "the reply is an array of waves of rows and the client iterates the wave array before the row (SelectTeamNewWindow.lua:6819-6825); the extractor models one list level, so the row leaf is not at enemy_status[]"
+  },
+  {
+   "client": "app/windows/GuildMapDetailWindow.lua:249",
+   "mid": 613,
+   "path": "monster_status[].color",
+   "reason": "the reply is an array of waves of rows and the client iterates the wave array before the row (GuildMapDetailWindow.lua:216-281); the extractor models one list level, so the row leaf is not at monster_status[]"
+  },
+  {
+   "client": "app/windows/GuildMapDetailWindow.lua:249",
+   "mid": 613,
+   "path": "monster_status[].health",
+   "reason": "the reply is an array of waves of rows and the client iterates the wave array before the row (GuildMapDetailWindow.lua:216-281); the extractor models one list level, so the row leaf is not at monster_status[]"
+  },
+  {
+   "client": "app/windows/GuildMapDetailWindow.lua:249",
+   "mid": 613,
+   "path": "monster_status[].hp",
+   "reason": "the reply is an array of waves of rows and the client iterates the wave array before the row (GuildMapDetailWindow.lua:216-281); the extractor models one list level, so the row leaf is not at monster_status[]"
+  },
+  {
+   "client": "app/windows/GuildMapDetailWindow.lua:249",
+   "mid": 613,
+   "path": "monster_status[].lev",
+   "reason": "the reply is an array of waves of rows and the client iterates the wave array before the row (GuildMapDetailWindow.lua:216-281); the extractor models one list level, so the row leaf is not at monster_status[]"
+  },
+  {
+   "client": "app/windows/GuildMapDetailWindow.lua:249",
+   "mid": 613,
+   "path": "monster_status[].table_id",
+   "reason": "the reply is an array of waves of rows and the client iterates the wave array before the row (GuildMapDetailWindow.lua:216-281); the extractor models one list level, so the row leaf is not at monster_status[]"
+  },
+  {
+   "client": "app/windows/MapWindow.lua:1121",
+   "mid": 613,
+   "path": "fight_info",
+   "reason": "MapWindow.lua:1121 reads fight_info only when current_fight_player > 0 and last_fight_time > 0; the detail reply omits it with no live holder"
+  },
+  {
+   "client": "app/windows/MapWindow.lua:1121",
+   "mid": 613,
+   "path": "fight_info.avatar_id",
+   "reason": "MapWindow.lua:1121 reads fight_info only when current_fight_player > 0 and last_fight_time > 0; the detail reply omits it with no live holder"
+  },
+  {
+   "client": "app/windows/MapWindow.lua:1121",
+   "mid": 613,
+   "path": "fight_info.conquer_lev",
+   "reason": "MapWindow.lua:1121 reads fight_info only when current_fight_player > 0 and last_fight_time > 0; the detail reply omits it with no live holder"
+  },
+  {
+   "client": "app/windows/MapWindow.lua:1121",
+   "mid": 613,
+   "path": "fight_info.lev",
+   "reason": "MapWindow.lua:1121 reads fight_info only when current_fight_player > 0 and last_fight_time > 0; the detail reply omits it with no live holder"
+  },
+  {
+   "client": "app/windows/MapWindow.lua:1121",
+   "mid": 613,
+   "path": "fight_info.player_name",
+   "reason": "MapWindow.lua:1121 reads fight_info only when current_fight_player > 0 and last_fight_time > 0; the detail reply omits it with no live holder"
+  },
+  {
+   "client": "app/windows/AllServerDamageWindow.lua:112",
+   "mid": 608,
+   "path": "boss_killer",
+   "reason": "AllServerDamageWindow.lua:112 guards the boss killer projection with `if var_5_1 then`; the reply omits boss_killer before the first kill"
+  },
+  {
+   "client": "app/windows/AllServerDamageWindow.lua:112",
+   "mid": 608,
+   "path": "boss_killer.avatar_frame_id",
+   "reason": "AllServerDamageWindow.lua:112 guards the boss killer projection with `if var_5_1 then`; the reply omits boss_killer before the first kill"
+  },
+  {
+   "client": "app/windows/AllServerDamageWindow.lua:112",
+   "mid": 608,
+   "path": "boss_killer.avatar_id",
+   "reason": "AllServerDamageWindow.lua:112 guards the boss killer projection with `if var_5_1 then`; the reply omits boss_killer before the first kill"
+  },
+  {
+   "client": "app/windows/AllServerDamageWindow.lua:112",
+   "mid": 608,
+   "path": "boss_killer.conquer_loop_id",
+   "reason": "AllServerDamageWindow.lua:112 guards the boss killer projection with `if var_5_1 then`; the reply omits boss_killer before the first kill"
+  },
+  {
+   "client": "app/windows/AllServerDamageWindow.lua:112",
+   "mid": 608,
+   "path": "boss_killer.guild_name",
+   "reason": "AllServerDamageWindow.lua:112 guards the boss killer projection with `if var_5_1 then`; the reply omits boss_killer before the first kill"
+  },
+  {
+   "client": "app/windows/AllServerDamageWindow.lua:112",
+   "mid": 608,
+   "path": "boss_killer.lev",
+   "reason": "AllServerDamageWindow.lua:112 guards the boss killer projection with `if var_5_1 then`; the reply omits boss_killer before the first kill"
+  },
+  {
+   "client": "app/windows/AllServerDamageWindow.lua:112",
+   "mid": 608,
+   "path": "boss_killer.player_name",
+   "reason": "AllServerDamageWindow.lua:112 guards the boss killer projection with `if var_5_1 then`; the reply omits boss_killer before the first kill"
+  },
+  {
+   "client": "app/windows/AllServerDamageWindow.lua:112",
+   "mid": 608,
+   "path": "boss_killer.time",
+   "reason": "AllServerDamageWindow.lua:112 guards the boss killer projection with `if var_5_1 then`; the reply omits boss_killer before the first kill"
+  },
+  {
+   "client": "app/windows/AllServerDamageWindow.lua:66",
+   "mid": 608,
+   "path": "fast_boss_killer",
+   "reason": "AllServerDamageWindow.lua:66 guards the fast killer projection with `if var_5_0 then`; the reply omits fast_boss_killer before the first kill"
+  },
+  {
+   "client": "app/windows/AllServerDamageWindow.lua:66",
+   "mid": 608,
+   "path": "fast_boss_killer.cost_time",
+   "reason": "AllServerDamageWindow.lua:66 guards the fast killer projection with `if var_5_0 then`; the reply omits fast_boss_killer before the first kill"
+  },
+  {
+   "client": "app/windows/AllServerDamageWindow.lua:66",
+   "mid": 608,
+   "path": "fast_boss_killer.guild_id",
+   "reason": "AllServerDamageWindow.lua:66 guards the fast killer projection with `if var_5_0 then`; the reply omits fast_boss_killer before the first kill"
+  },
+  {
+   "client": "app/windows/AllServerDamageWindow.lua:66",
+   "mid": 608,
+   "path": "fast_boss_killer.icon",
+   "reason": "AllServerDamageWindow.lua:66 guards the fast killer projection with `if var_5_0 then`; the reply omits fast_boss_killer before the first kill"
+  },
+  {
+   "client": "app/windows/AllServerDamageWindow.lua:66",
+   "mid": 608,
+   "path": "fast_boss_killer.name",
+   "reason": "AllServerDamageWindow.lua:66 guards the fast killer projection with `if var_5_0 then`; the reply omits fast_boss_killer before the first kill"
+  },
+  {
+   "client": "app/model/SelfGuild.lua:237",
+   "mid": 609,
+   "path": "time",
+   "reason": "the extractor attributes the .time of a guild_log element to the reply; SelfGuild.lua:237 reads it inside a table.sort comparator, not from GET_DATA_TEAM"
+  },
+  {
+   "client": "app/windows/TeamDataWindow.lua:251",
+   "mid": 609,
+   "path": "guild_log[].huoyue[]",
+   "reason": "TeamDataWindow.lua:251 reads huoyue as a scalar on the ExchangeDrink branch; no list is indexed"
+  },
+  {
+   "client": "app/model/SelfGuild.lua:754",
+   "mid": 614,
+   "path": "start_fight_time",
+   "reason": "SelfGuild.lua:752-755 reads start_fight_time only on the stage == 2 branch; a stage-1 claim omits it"
+  },
+  {
+   "client": "app/windows/HireHeroWindow.lua:274",
+   "mid": 620,
+   "path": "rent_list[].partner_id",
+   "reason": "HireHeroWindow.lua:274 reads partner_id only on the RENT_HERO branch; a pet recall row carries pet_id instead"
+  },
+  {
+   "client": "app/model/SelfGuild.lua:1359",
+   "mid": 1808,
+   "path": "gift_list",
+   "reason": "SelfGuild.lua:1359 reads guild_wish_flag, gift_list and wish_list only under `if not is_self`; the self request body carries only self_wish_info"
+  },
+  {
+   "client": "app/model/SelfGuild.lua:1359",
+   "mid": 1808,
+   "path": "gift_list[].avatar_frame_id",
+   "reason": "SelfGuild.lua:1359 reads guild_wish_flag, gift_list and wish_list only under `if not is_self`; the self request body carries only self_wish_info"
+  },
+  {
+   "client": "app/model/SelfGuild.lua:1359",
+   "mid": 1808,
+   "path": "gift_list[].avatar_id",
+   "reason": "SelfGuild.lua:1359 reads guild_wish_flag, gift_list and wish_list only under `if not is_self`; the self request body carries only self_wish_info"
+  },
+  {
+   "client": "app/model/SelfGuild.lua:1359",
+   "mid": 1808,
+   "path": "gift_list[].conquer_loop_id",
+   "reason": "SelfGuild.lua:1359 reads guild_wish_flag, gift_list and wish_list only under `if not is_self`; the self request body carries only self_wish_info"
+  },
+  {
+   "client": "app/model/SelfGuild.lua:1359",
+   "mid": 1808,
+   "path": "gift_list[].lev",
+   "reason": "SelfGuild.lua:1359 reads guild_wish_flag, gift_list and wish_list only under `if not is_self`; the self request body carries only self_wish_info"
+  },
+  {
+   "client": "app/model/SelfGuild.lua:1359",
+   "mid": 1808,
+   "path": "gift_list[].player_id",
+   "reason": "SelfGuild.lua:1359 reads guild_wish_flag, gift_list and wish_list only under `if not is_self`; the self request body carries only self_wish_info"
+  },
+  {
+   "client": "app/model/SelfGuild.lua:1359",
+   "mid": 1808,
+   "path": "gift_list[].player_name",
+   "reason": "SelfGuild.lua:1359 reads guild_wish_flag, gift_list and wish_list only under `if not is_self`; the self request body carries only self_wish_info"
+  },
+  {
+   "client": "app/model/SelfGuild.lua:1359",
+   "mid": 1808,
+   "path": "guild_wish_flag",
+   "reason": "SelfGuild.lua:1359 reads guild_wish_flag, gift_list and wish_list only under `if not is_self`; the self request body carries only self_wish_info"
+  },
+  {
+   "client": "app/model/SelfGuild.lua:1359",
+   "mid": 1808,
+   "path": "wish_list",
+   "reason": "SelfGuild.lua:1359 reads guild_wish_flag, gift_list and wish_list only under `if not is_self`; the self request body carries only self_wish_info"
+  },
+  {
+   "client": "app/model/SelfGuild.lua:1359",
+   "mid": 1808,
+   "path": "wish_list[]",
+   "reason": "SelfGuild.lua:1359 reads guild_wish_flag, gift_list and wish_list only under `if not is_self`; the self request body carries only self_wish_info"
+  },
+  {
+   "client": "app/model/SelfGuild.lua:1359",
+   "mid": 1808,
+   "path": "wish_list[].player_info",
+   "reason": "SelfGuild.lua:1359 reads guild_wish_flag, gift_list and wish_list only under `if not is_self`; the self request body carries only self_wish_info"
+  },
+  {
+   "client": "app/model/SelfGuild.lua:1359",
+   "mid": 1808,
+   "path": "wish_list[].player_info.avatar_frame_id",
+   "reason": "SelfGuild.lua:1359 reads guild_wish_flag, gift_list and wish_list only under `if not is_self`; the self request body carries only self_wish_info"
+  },
+  {
+   "client": "app/model/SelfGuild.lua:1359",
+   "mid": 1808,
+   "path": "wish_list[].player_info.avatar_id",
+   "reason": "SelfGuild.lua:1359 reads guild_wish_flag, gift_list and wish_list only under `if not is_self`; the self request body carries only self_wish_info"
+  },
+  {
+   "client": "app/model/SelfGuild.lua:1359",
+   "mid": 1808,
+   "path": "wish_list[].player_info.conquer_loop_id",
+   "reason": "SelfGuild.lua:1359 reads guild_wish_flag, gift_list and wish_list only under `if not is_self`; the self request body carries only self_wish_info"
+  },
+  {
+   "client": "app/model/SelfGuild.lua:1359",
+   "mid": 1808,
+   "path": "wish_list[].player_info.guild_job",
+   "reason": "SelfGuild.lua:1359 reads guild_wish_flag, gift_list and wish_list only under `if not is_self`; the self request body carries only self_wish_info"
+  },
+  {
+   "client": "app/model/SelfGuild.lua:1359",
+   "mid": 1808,
+   "path": "wish_list[].player_info.lev",
+   "reason": "SelfGuild.lua:1359 reads guild_wish_flag, gift_list and wish_list only under `if not is_self`; the self request body carries only self_wish_info"
+  },
+  {
+   "client": "app/model/SelfGuild.lua:1359",
+   "mid": 1808,
+   "path": "wish_list[].player_info.player_id",
+   "reason": "SelfGuild.lua:1359 reads guild_wish_flag, gift_list and wish_list only under `if not is_self`; the self request body carries only self_wish_info"
+  },
+  {
+   "client": "app/model/SelfGuild.lua:1359",
+   "mid": 1808,
+   "path": "wish_list[].player_info.player_name",
+   "reason": "SelfGuild.lua:1359 reads guild_wish_flag, gift_list and wish_list only under `if not is_self`; the self request body carries only self_wish_info"
+  },
+  {
+   "client": "app/model/SelfGuild.lua:1359",
+   "mid": 1808,
+   "path": "wish_list[].wish_info",
+   "reason": "SelfGuild.lua:1359 reads guild_wish_flag, gift_list and wish_list only under `if not is_self`; the self request body carries only self_wish_info"
+  },
+  {
+   "client": "app/model/SelfGuild.lua:1359",
+   "mid": 1808,
+   "path": "wish_list[].wish_info.current_num",
+   "reason": "SelfGuild.lua:1359 reads guild_wish_flag, gift_list and wish_list only under `if not is_self`; the self request body carries only self_wish_info"
+  },
+  {
+   "client": "app/model/SelfGuild.lua:1359",
+   "mid": 1808,
+   "path": "wish_list[].wish_info.item_id",
+   "reason": "SelfGuild.lua:1359 reads guild_wish_flag, gift_list and wish_list only under `if not is_self`; the self request body carries only self_wish_info"
+  },
+  {
+   "client": "app/model/SelfGuild.lua:1359",
+   "mid": 1808,
+   "path": "wish_list[].wish_info.need_num",
+   "reason": "SelfGuild.lua:1359 reads guild_wish_flag, gift_list and wish_list only under `if not is_self`; the self request body carries only self_wish_info"
+  },
+  {
+   "client": "app/model/SocialSystem.lua:452",
+   "mid": 183,
+   "path": "master_info",
+   "reason": "SocialSystem.lua:452 guards master_info with `if arg_35_1 and arg_35_1.master_info`; a non-class gift pair omits it"
+  },
+  {
+   "client": "app/model/SocialSystem.lua:452",
+   "mid": 183,
+   "path": "master_info.accept_time",
+   "reason": "SocialSystem.lua:452 guards master_info with `if arg_35_1 and arg_35_1.master_info`; a non-class gift pair omits it"
+  },
+  {
+   "client": "app/model/SocialSystem.lua:452",
+   "mid": 183,
+   "path": "master_info.accept_time[]",
+   "reason": "SocialSystem.lua:452 guards master_info with `if arg_35_1 and arg_35_1.master_info`; a non-class gift pair omits it"
+  },
+  {
+   "client": "app/model/SocialSystem.lua:452",
+   "mid": 183,
+   "path": "master_info.broke_time",
+   "reason": "SocialSystem.lua:452 guards master_info with `if arg_35_1 and arg_35_1.master_info`; a non-class gift pair omits it"
+  },
+  {
+   "client": "app/model/SocialSystem.lua:452",
+   "mid": 183,
+   "path": "master_info.broke_time[]",
+   "reason": "SocialSystem.lua:452 guards master_info with `if arg_35_1 and arg_35_1.master_info`; a non-class gift pair omits it"
+  },
+  {
+   "client": "app/model/SocialSystem.lua:452",
+   "mid": 183,
+   "path": "master_info.daily_apply_times",
+   "reason": "SocialSystem.lua:452 guards master_info with `if arg_35_1 and arg_35_1.master_info`; a non-class gift pair omits it"
+  },
+  {
+   "client": "app/model/SocialSystem.lua:452",
+   "mid": 183,
+   "path": "master_info.daily_apply_times[]",
+   "reason": "SocialSystem.lua:452 guards master_info with `if arg_35_1 and arg_35_1.master_info`; a non-class gift pair omits it"
+  },
+  {
+   "client": "app/model/SocialSystem.lua:452",
+   "mid": 183,
+   "path": "master_info.daily_intimacy_add",
+   "reason": "SocialSystem.lua:452 guards master_info with `if arg_35_1 and arg_35_1.master_info`; a non-class gift pair omits it"
+  },
+  {
+   "client": "app/model/SocialSystem.lua:452",
+   "mid": 183,
+   "path": "master_info.daily_intimacy_add[]",
+   "reason": "SocialSystem.lua:452 guards master_info with `if arg_35_1 and arg_35_1.master_info`; a non-class gift pair omits it"
+  },
+  {
+   "client": "app/model/SocialSystem.lua:452",
+   "mid": 183,
+   "path": "master_info.intimacies",
+   "reason": "SocialSystem.lua:452 guards master_info with `if arg_35_1 and arg_35_1.master_info`; a non-class gift pair omits it"
+  },
+  {
+   "client": "app/model/SocialSystem.lua:452",
+   "mid": 183,
+   "path": "master_info.intimacies[]",
+   "reason": "SocialSystem.lua:452 guards master_info with `if arg_35_1 and arg_35_1.master_info`; a non-class gift pair omits it"
+  },
+  {
+   "client": "app/model/SocialSystem.lua:452",
+   "mid": 183,
+   "path": "master_info.relations",
+   "reason": "SocialSystem.lua:452 guards master_info with `if arg_35_1 and arg_35_1.master_info`; a non-class gift pair omits it"
+  },
+  {
+   "client": "app/model/SocialSystem.lua:452",
+   "mid": 183,
+   "path": "master_info.relations[]",
+   "reason": "SocialSystem.lua:452 guards master_info with `if arg_35_1 and arg_35_1.master_info`; a non-class gift pair omits it"
+  },
+  {
+   "client": "app/model/RankList.lua:194",
+   "mid": 301,
+   "path": "rank_list[].rank_info.my_rank.my_floor",
+   "reason": "RankList.lua:194-197 reads my_floor only for SKYCITY_SUB_RANK(_2); every other rank type, including illusion 301, omits it"
+  },
+  {
+   "client": "app/model/Occult.lua:568",
+   "mid": 2374,
+   "path": "sub_campaign_info",
+   "reason": "Occult.lua:568 reads team_fight_infos only inside `if subCampaignInfo.team_fight_infos`; a campaign detail without a formed team omits sub_campaign_info"
+  },
+  {
+   "client": "app/model/Occult.lua:568",
+   "mid": 2374,
+   "path": "sub_campaign_info.team_fight_infos[]",
+   "reason": "Occult.lua:568 reads team_fight_infos only inside `if subCampaignInfo.team_fight_infos`; a campaign detail without a formed team omits sub_campaign_info"
+  },
+  {
+   "client": "app/model/Occult.lua:568",
+   "mid": 2374,
+   "path": "sub_campaign_info.team_fight_infos[].formation",
+   "reason": "Occult.lua:568 reads team_fight_infos only inside `if subCampaignInfo.team_fight_infos`; a campaign detail without a formed team omits sub_campaign_info"
+  },
+  {
+   "client": "app/model/Occult.lua:568",
+   "mid": 2374,
+   "path": "sub_campaign_info.team_fight_infos[].formation[]",
+   "reason": "Occult.lua:568 reads team_fight_infos only inside `if subCampaignInfo.team_fight_infos`; a campaign detail without a formed team omits sub_campaign_info"
+  },
+  {
+   "client": "app/model/Occult.lua:568",
+   "mid": 2374,
+   "path": "sub_campaign_info.team_fight_infos[].formation[].table_id",
+   "reason": "Occult.lua:568 reads team_fight_infos only inside `if subCampaignInfo.team_fight_infos`; a campaign detail without a formed team omits sub_campaign_info"
+  },
+  {
+   "client": "app/model/Occult.lua:568",
+   "mid": 2374,
+   "path": "sub_campaign_info.team_fight_infos[].is_prepare",
+   "reason": "Occult.lua:568 reads team_fight_infos only inside `if subCampaignInfo.team_fight_infos`; a campaign detail without a formed team omits sub_campaign_info"
+  },
+  {
+   "client": "app/model/Occult.lua:568",
+   "mid": 2374,
+   "path": "sub_campaign_info.team_fight_infos[].pet",
+   "reason": "Occult.lua:568 reads team_fight_infos only inside `if subCampaignInfo.team_fight_infos`; a campaign detail without a formed team omits sub_campaign_info"
+  },
+  {
+   "client": "app/model/Occult.lua:568",
+   "mid": 2374,
+   "path": "sub_campaign_info.team_fight_infos[].pet.table_id",
+   "reason": "Occult.lua:568 reads team_fight_infos only inside `if subCampaignInfo.team_fight_infos`; a campaign detail without a formed team omits sub_campaign_info"
+  },
+  {
+   "client": "app/windows/OccultSelectTeamWindow.lua:810",
+   "mid": 2379,
+   "path": "sub_monster_infos",
+   "reason": "OccultSelectTeamWindow.lua:810 guards sub_monster_infos with `if arg_38_1.sub_monster_infos`; a start reply may omit it"
+  },
+  {
+   "client": "app/windows/OccultSelectTeamWindow.lua:810",
+   "mid": 2379,
+   "path": "sub_monster_infos[]",
+   "reason": "OccultSelectTeamWindow.lua:810 guards sub_monster_infos with `if arg_38_1.sub_monster_infos`; a start reply may omit it"
+  },
+  {
+   "client": "app/windows/OccultSelectTeamWindow.lua:810",
+   "mid": 2379,
+   "path": "sub_monster_infos[].monster_id",
+   "reason": "OccultSelectTeamWindow.lua:810 guards sub_monster_infos with `if arg_38_1.sub_monster_infos`; a start reply may omit it"
+  },
+  {
+   "client": "app/windows/OccultSelectTeamWindow.lua:810",
+   "mid": 2379,
+   "path": "sub_monster_infos[].partner_id",
+   "reason": "OccultSelectTeamWindow.lua:810 guards sub_monster_infos with `if arg_38_1.sub_monster_infos`; a start reply may omit it"
+  },
+  {
+   "client": "app/windows/PersonDisplayWindow.lua:768",
+   "mid": 1829,
+   "path": "avatar_id",
+   "reason": "PersonDisplayWindow.lua:768-774 reads the hero card name/lev/avatar/loop from getBasicInfo().player_info; the reply carries them only inside player_info, never at the top level"
+  },
+  {
+   "client": "app/windows/PersonDisplayWindow.lua:768",
+   "mid": 1829,
+   "path": "avatar_frame_id",
+   "reason": "PersonDisplayWindow.lua:768-774 reads the hero card name/lev/avatar/loop from getBasicInfo().player_info; the reply carries them only inside player_info, never at the top level"
+  },
+  {
+   "client": "app/windows/PersonDisplayWindow.lua:768",
+   "mid": 1829,
+   "path": "lev",
+   "reason": "PersonDisplayWindow.lua:768-774 reads the hero card name/lev/avatar/loop from getBasicInfo().player_info; the reply carries them only inside player_info, never at the top level"
+  },
+  {
+   "client": "app/windows/PersonDisplayWindow.lua:768",
+   "mid": 1829,
+   "path": "player_name",
+   "reason": "PersonDisplayWindow.lua:768-774 reads the hero card name/lev/avatar/loop from getBasicInfo().player_info; the reply carries them only inside player_info, never at the top level"
+  },
+  {
+   "client": "app/windows/PersonDisplayWindow.lua:768",
+   "mid": 1829,
+   "path": "conquer_loop_id",
+   "reason": "PersonDisplayWindow.lua:768-774 reads the hero card name/lev/avatar/loop from getBasicInfo().player_info; the reply carries them only inside player_info, never at the top level"
+  },
+  {
+   "client": "app/windows/PersonDisplayWindow.lua:418",
+   "mid": 1829,
+   "path": "player_info.name",
+   "reason": "the client reads player_info.player_name or player_info.name; the server writes the canonical player_name only"
+  },
+  {
+   "client": "app/windows/PersonDisplayWindow.lua:408",
+   "mid": 1829,
+   "path": "player_info.player_lev",
+   "reason": "the client reads player_info.lev or player_info.level or player_info.player_lev; the server writes the canonical lev only"
+  },
+  {
+   "client": "app/model/PersonDisplay.lua:106",
+   "mid": 1829,
+   "path": "isRobot",
+   "reason": "updateBasicInfo reads isRobot with `or false`; the server writes no robot flag"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "award_info",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "award_info.awards",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "award_info.awards[]",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "award_info.awards[].is_partner",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "award_info.awards[].item_num",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "award_info.awards[].table_id",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "award_info.awards[].to_stone",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "campaign_id",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "campaign_info",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "campaign_info.in_battle",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "campaign_info.in_battle[]",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "campaign_info.is_win",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "campaign_info.is_win[]",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "dispatch_limit",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "event_id",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "event_id[]",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "function_type",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:773",
+   "mid": 2362,
+   "path": "hero_stat[]",
+   "reason": "handleInfos reads hero_stat only inside `if arg_73_1.hero_stat then`; an Info reply without that state omits it (Occult.lua:773)"
+  },
+  {
+   "client": "app/model/Occult.lua:773",
+   "mid": 2362,
+   "path": "hero_stat[].hero_stat",
+   "reason": "handleInfos reads hero_stat only inside `if arg_73_1.hero_stat then`; an Info reply without that state omits it (Occult.lua:773)"
+  },
+  {
+   "client": "app/model/Occult.lua:773",
+   "mid": 2362,
+   "path": "hero_stat[].hero_stat.stay_pos",
+   "reason": "handleInfos reads hero_stat only inside `if arg_73_1.hero_stat then`; an Info reply without that state omits it (Occult.lua:773)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "hero_status[]",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.award_info",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.award_info.awards",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.award_info.awards[]",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.award_info.awards[].is_partner",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.award_info.awards[].item_num",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.award_info.awards[].table_id",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.award_info.awards[].to_stone",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.base_info.chapter_id",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.base_info.cost_energy",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.base_info.dispatch_limit",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.base_info.max_points[]",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.base_info.room_id",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.campaign_info",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.campaign_info.in_battle",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.campaign_info.in_battle[]",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.campaign_info.is_win",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.campaign_info.is_win[]",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.hero_stat[]",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.hero_stat[].hero_stat",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.hero_stat[].hero_stat.stay_pos",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.hero_status[]",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.open_campaigns",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.open_campaigns[]",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.open_campaigns[].in_battle",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.open_campaigns[].in_battle[]",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.open_campaigns[].is_win",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.open_campaigns[].is_win[]",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.progress",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.room_info",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.room_info.is_close",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.room_info.members",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.room_info.members[]",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.room_info.start_time",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.self_dispatch",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.self_dispatch[]",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.self_dispatch[].hp",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.sub_campaign_info",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.sub_campaign_info.team_fight_infos[]",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.sub_campaign_info.team_fight_infos[].formation",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.sub_campaign_info.team_fight_infos[].formation[]",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.sub_campaign_info.team_fight_infos[].formation[].table_id",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.sub_campaign_info.team_fight_infos[].is_prepare",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.sub_campaign_info.team_fight_infos[].pet",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:481",
+   "mid": 2362,
+   "path": "info.sub_campaign_info.team_fight_infos[].pet.table_id",
+   "reason": "the client reads the ROOM_NOTICE push body only under `if info then`; the HTTP GET_INFO reply is the flat branch (Occult.lua:481-486)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "is_online",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:777",
+   "mid": 2362,
+   "path": "open_campaigns",
+   "reason": "handleInfos reads open_campaigns only inside `if arg_73_1.open_campaigns then`; an Info reply without that state omits it (Occult.lua:777)"
+  },
+  {
+   "client": "app/model/Occult.lua:777",
+   "mid": 2362,
+   "path": "open_campaigns[]",
+   "reason": "handleInfos reads open_campaigns only inside `if arg_73_1.open_campaigns then`; an Info reply without that state omits it (Occult.lua:777)"
+  },
+  {
+   "client": "app/model/Occult.lua:777",
+   "mid": 2362,
+   "path": "open_campaigns[].in_battle",
+   "reason": "handleInfos reads open_campaigns only inside `if arg_73_1.open_campaigns then`; an Info reply without that state omits it (Occult.lua:777)"
+  },
+  {
+   "client": "app/model/Occult.lua:777",
+   "mid": 2362,
+   "path": "open_campaigns[].in_battle[]",
+   "reason": "handleInfos reads open_campaigns only inside `if arg_73_1.open_campaigns then`; an Info reply without that state omits it (Occult.lua:777)"
+  },
+  {
+   "client": "app/model/Occult.lua:777",
+   "mid": 2362,
+   "path": "open_campaigns[].is_win",
+   "reason": "handleInfos reads open_campaigns only inside `if arg_73_1.open_campaigns then`; an Info reply without that state omits it (Occult.lua:777)"
+  },
+  {
+   "client": "app/model/Occult.lua:777",
+   "mid": 2362,
+   "path": "open_campaigns[].is_win[]",
+   "reason": "handleInfos reads open_campaigns only inside `if arg_73_1.open_campaigns then`; an Info reply without that state omits it (Occult.lua:777)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "player_id",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "player_name",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "report_key",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:769",
+   "mid": 2362,
+   "path": "room_info",
+   "reason": "handleInfos reads room_info only inside `if arg_73_1.room_info then`; an Info reply without that state omits it (Occult.lua:769)"
+  },
+  {
+   "client": "app/model/Occult.lua:769",
+   "mid": 2362,
+   "path": "room_info.is_close",
+   "reason": "handleInfos reads room_info only inside `if arg_73_1.room_info then`; an Info reply without that state omits it (Occult.lua:769)"
+  },
+  {
+   "client": "app/model/Occult.lua:769",
+   "mid": 2362,
+   "path": "room_info.members",
+   "reason": "handleInfos reads room_info only inside `if arg_73_1.room_info then`; an Info reply without that state omits it (Occult.lua:769)"
+  },
+  {
+   "client": "app/model/Occult.lua:769",
+   "mid": 2362,
+   "path": "room_info.members[]",
+   "reason": "handleInfos reads room_info only inside `if arg_73_1.room_info then`; an Info reply without that state omits it (Occult.lua:769)"
+  },
+  {
+   "client": "app/model/Occult.lua:769",
+   "mid": 2362,
+   "path": "room_info.start_time",
+   "reason": "handleInfos reads room_info only inside `if arg_73_1.room_info then`; an Info reply without that state omits it (Occult.lua:769)"
+  },
+  {
+   "client": "app/model/Occult.lua:785",
+   "mid": 2362,
+   "path": "self_dispatch",
+   "reason": "handleInfos reads self_dispatch only inside `if arg_73_1.self_dispatch then`; an Info reply without that state omits it (Occult.lua:785)"
+  },
+  {
+   "client": "app/model/Occult.lua:785",
+   "mid": 2362,
+   "path": "self_dispatch[]",
+   "reason": "handleInfos reads self_dispatch only inside `if arg_73_1.self_dispatch then`; an Info reply without that state omits it (Occult.lua:785)"
+  },
+  {
+   "client": "app/model/Occult.lua:785",
+   "mid": 2362,
+   "path": "self_dispatch[].hp",
+   "reason": "handleInfos reads self_dispatch only inside `if arg_73_1.self_dispatch then`; an Info reply without that state omits it (Occult.lua:785)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "start_player",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "stay_pos",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:795",
+   "mid": 2362,
+   "path": "sub_campaign_info",
+   "reason": "handleInfos reads sub_campaign_info only inside `if arg_73_1.sub_campaign_info then`; an Info reply without that state omits it (Occult.lua:795)"
+  },
+  {
+   "client": "app/model/Occult.lua:795",
+   "mid": 2362,
+   "path": "sub_campaign_info.team_fight_infos[]",
+   "reason": "handleInfos reads sub_campaign_info only inside `if arg_73_1.sub_campaign_info then`; an Info reply without that state omits it (Occult.lua:795)"
+  },
+  {
+   "client": "app/model/Occult.lua:795",
+   "mid": 2362,
+   "path": "sub_campaign_info.team_fight_infos[].formation",
+   "reason": "handleInfos reads sub_campaign_info only inside `if arg_73_1.sub_campaign_info then`; an Info reply without that state omits it (Occult.lua:795)"
+  },
+  {
+   "client": "app/model/Occult.lua:795",
+   "mid": 2362,
+   "path": "sub_campaign_info.team_fight_infos[].formation[]",
+   "reason": "handleInfos reads sub_campaign_info only inside `if arg_73_1.sub_campaign_info then`; an Info reply without that state omits it (Occult.lua:795)"
+  },
+  {
+   "client": "app/model/Occult.lua:795",
+   "mid": 2362,
+   "path": "sub_campaign_info.team_fight_infos[].formation[].table_id",
+   "reason": "handleInfos reads sub_campaign_info only inside `if arg_73_1.sub_campaign_info then`; an Info reply without that state omits it (Occult.lua:795)"
+  },
+  {
+   "client": "app/model/Occult.lua:795",
+   "mid": 2362,
+   "path": "sub_campaign_info.team_fight_infos[].is_prepare",
+   "reason": "handleInfos reads sub_campaign_info only inside `if arg_73_1.sub_campaign_info then`; an Info reply without that state omits it (Occult.lua:795)"
+  },
+  {
+   "client": "app/model/Occult.lua:795",
+   "mid": 2362,
+   "path": "sub_campaign_info.team_fight_infos[].pet",
+   "reason": "handleInfos reads sub_campaign_info only inside `if arg_73_1.sub_campaign_info then`; an Info reply without that state omits it (Occult.lua:795)"
+  },
+  {
+   "client": "app/model/Occult.lua:795",
+   "mid": 2362,
+   "path": "sub_campaign_info.team_fight_infos[].pet.table_id",
+   "reason": "handleInfos reads sub_campaign_info only inside `if arg_73_1.sub_campaign_info then`; an Info reply without that state omits it (Occult.lua:795)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "sub_id",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "team_fight_info",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "team_fight_info.formation",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "team_fight_info.formation[]",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "team_fight_info.formation[].table_id",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "team_fight_info.is_prepare",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "team_fight_info.pet",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/model/Occult.lua:757",
+   "mid": 2362,
+   "path": "team_fight_info.pet.table_id",
+   "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
   }
  ]
 }

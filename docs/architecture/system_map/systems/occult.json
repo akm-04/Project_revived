@@ -13,6 +13,10 @@
    "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
   },
   {
+   "count": 3,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
    "count": 1,
    "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
   },
