@@ -248,7 +248,8 @@ func (service Service) TaskRecordInfo(requestContext context.Context, actor iden
 		}
 		info.Opponent = display
 		info.AvengeType = catalog.AvengeType(rank, display.Rank)
-		info.CanAvenge = !record.Record.Attack && !record.Record.Win && !record.Record.Opponent.IsRobot() && info.AvengeType == 0
+		// The stock record popup routes its Revenge button through Normal 291/294/280,
+		// so a Special record must not advertise it; Special 286 revenge stays server-side (A-164).
 	}
 	return info, nil
 }

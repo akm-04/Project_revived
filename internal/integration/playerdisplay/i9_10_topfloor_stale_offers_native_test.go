@@ -390,6 +390,17 @@ func TestI9_10TopFloorTaskStaleOffersAndRevengeNative(t *testing.T) {
 	if err = transaction.Commit(ctx); err != nil {
 		t.Fatal(err)
 	}
+	retained, err := taskStore.TaskRecordsTx(ctx, database, actor.PlayerID)
+	if err != nil || len(retained) == 0 {
+		t.Fatalf("re-read task record: %v records=%d", err, len(retained))
+	}
+	info, err := service.TaskRecordInfo(ctx, actor, retained[0].Record.ID)
+	if err != nil {
+		t.Fatalf("task record info: %v", err)
+	}
+	if info.CanAvenge || info.AvengeType != 0 {
+		t.Fatalf("Special record popup must not advertise a Normal revenge: can_avenge=%t avenge_type=%d", info.CanAvenge, info.AvengeType)
+	}
 	exec(t, database, `DELETE FROM top_floor_offer_snapshots WHERE player_id=$1 AND scope=$2`, int64(actor.PlayerID), d.OfferScopeSpecial)
 	clock.at = clock.at.Add(time.Duration(catalog.CooldownSeconds+1) * time.Second)
 	revengeCommand := application.TaskStartCommand{StartCommand: application.StartCommand{
