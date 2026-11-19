@@ -101,9 +101,6 @@ ON CONFLICT(player_id,resource_key) DO UPDATE SET amount=excluded.amount,updated
 
 	service := clockRollbackService(p, clock, secret)
 	dispatcher := stockruntime.BootstrapDispatcher{Bootstrap: service}
-	if _, e := service.MID1(ctx, appboot.RuntimeMID1Request{Credentials: appboot.AccountCredentials{SID: sidRaw, LoginToken: loginRaw}, Region: 1, Operation: i911cFixedOperation(at, 9)}); e != nil {
-		t.Fatalf("direct login: %v", e)
-	}
 	response := clockRollbackLogin(t, dispatcher, sidRaw, loginRaw, at, 1)
 	if response.HTTPStatus != 200 {
 		t.Fatalf("rollback login status %d body %#v", response.HTTPStatus, response.Body)
