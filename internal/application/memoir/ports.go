@@ -23,6 +23,7 @@ type Store interface {
 	ReadTx(context.Context, tx.Queryer, identity.PlayerID) (memoir.State, bool, error)
 	LockTx(context.Context, tx.Tx, identity.PlayerID, time.Time) (memoir.State, error)
 	SaveTx(context.Context, tx.Tx, identity.PlayerID, memoir.State, time.Time) error
+	TuningTx(context.Context, tx.Queryer) (memoir.Tuning, bool, error)
 }
 type Content interface {
 	ActiveRevision(context.Context, tx.Queryer) (string, error)

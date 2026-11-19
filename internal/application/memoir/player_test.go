@@ -93,9 +93,16 @@ func (content memoirRevisionContent) ActiveRevision(context.Context, tx.Queryer)
 func (content memoirRevisionContent) MemoirCatalogTx(context.Context, tx.Queryer, string) (domain.Catalog, error) {
 	return content.catalog, nil
 }
+
+type memoirRevisionStore struct{ Store }
+
+func (memoirRevisionStore) TuningTx(context.Context, tx.Queryer) (domain.Tuning, bool, error) {
+	return domain.Tuning{}, false, nil
+}
+
 func TestMemoirNewStartsRefuseChangedRunCatalog(t *testing.T) {
 	pinned := domain.Catalog{SourceArchive: "source", BigKey: 50001400}
-	mode := Mode{Content: memoirRevisionContent{catalog: pinned}}
+	mode := Mode{Content: memoirRevisionContent{catalog: pinned}, Store: memoirRevisionStore{}}
 	revision, err := mode.startRevision(context.Background(), scope{revision: "old", catalog: pinned})
 	if err != nil || revision != "new" {
 		t.Fatal("compatible stat revision", revision, err)

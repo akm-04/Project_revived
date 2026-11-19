@@ -115,7 +115,7 @@ func (mode Mode) run(ctx context.Context, actor identity.ActorContext, name stri
 		if state.Active() {
 			current.revision = state.Revision
 		}
-		current.catalog, err = mode.Content.MemoirCatalogTx(ctx, timed.Tx, current.revision)
+		current.catalog, err = mode.catalog(ctx, timed.Tx, current.revision)
 		if err != nil {
 			return err
 		}

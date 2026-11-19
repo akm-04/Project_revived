@@ -704,6 +704,7 @@
    "logical_servers": "bootstrap",
    "march_players": "march",
    "memoir_players": "memoir",
+   "memoir_tuning": "memoir",
    "mentor_applications": "mentor",
    "mentor_exam_receipts": "mentor",
    "mentor_mission_progress": "mentor",
@@ -1345,7 +1346,7 @@
    "name": "memoir",
    "path": "internal/application/memoir",
    "purpose": "",
-   "tables": 1
+   "tables": 2
   },
   {
    "callees": 8,

@@ -1972,6 +1972,22 @@
    "batch": 17
   },
   {
+   "table": "memoir_tuning",
+   "column": "payload",
+   "scope": "content",
+   "decode": "struct",
+   "decode_type": "memoir.Tuning",
+   "decode_sites": [
+    "internal/adapters/postgres/memoirstore/store.go:43 payload::text",
+    "internal/adapters/postgres/memoirstore/store.go:51 payload.Decode into Tuning"
+   ],
+   "writers": [],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 19
+  },
+  {
    "table": "mentor_exam_receipts",
    "column": "items",
    "scope": "player",

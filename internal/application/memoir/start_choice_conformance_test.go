@@ -177,6 +177,10 @@ func (s startChoiceStore) LockTx(context.Context, tx.Tx, identity.PlayerID, time
 	return s.state, nil
 }
 
+func (startChoiceStore) TuningTx(context.Context, tx.Queryer) (d.Tuning, bool, error) {
+	return d.Tuning{}, false, nil
+}
+
 func (startChoiceStore) SaveTx(context.Context, tx.Tx, identity.PlayerID, d.State, time.Time) error {
 	return nil
 }

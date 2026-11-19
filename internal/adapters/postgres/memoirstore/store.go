@@ -35,6 +35,23 @@ func (Store) LockTx(c context.Context, t tx.Tx, p identity.PlayerID, at time.Tim
 	r, _, err := read(t.QueryRow(c, `SELECT payload::text,payload_version FROM memoir_players WHERE player_id=$1 FOR UPDATE`, int64(p)))
 	return r, err
 }
+
+// TuningTx reads the singleton operator overlay; found=false keeps the source catalog.
+func (Store) TuningTx(c context.Context, q tx.Queryer) (d.Tuning, bool, error) {
+	var raw string
+	var version int16
+	err := q.QueryRow(c, `SELECT payload::text,payload_version FROM memoir_tuning`).Scan(&raw, &version)
+	if errors.Is(err, kernelstore.ErrNoRows) {
+		return d.Tuning{}, false, nil
+	}
+	if err != nil {
+		return d.Tuning{}, false, err
+	}
+	var tuning d.Tuning
+	err = payload.Decode("memoir_tuning", version, []byte(raw), &tuning)
+	return tuning, true, err
+}
+
 func (Store) SaveTx(c context.Context, t tx.Tx, p identity.PlayerID, r d.State, at time.Time) error {
 	if err := r.Validate(); err != nil {
 		return err

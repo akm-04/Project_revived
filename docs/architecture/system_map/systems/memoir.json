@@ -7,6 +7,10 @@
    "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
   },
   {
+   "count": 1,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
    "count": 12,
    "file": "docs/i9/I9_MEMOIR_V1.json"
   },
@@ -165,7 +169,8 @@
  ],
  "tables": {
   "owned": [
-   "memoir_players"
+   "memoir_players",
+   "memoir_tuning"
   ],
   "read": [
    "account_sessions",
@@ -175,6 +180,7 @@
    "gxb_content_revisions",
    "gxb_operation_receipts",
    "memoir_players",
+   "memoir_tuning",
    "player_function_eligibility"
   ],
   "written": [
@@ -192,6 +198,7 @@
   ],
   "unit": [
    "battle_test.go",
+   "final_award_test.go",
    "player_test.go",
    "reads_test.go",
    "start_choice_conformance_test.go"

@@ -189,7 +189,7 @@ func (mode Mode) startRevision(ctx context.Context, current scope) (string, erro
 	if revision == current.revision {
 		return revision, nil
 	}
-	catalog, err := mode.Content.MemoirCatalogTx(ctx, current.timed.Tx, revision)
+	catalog, err := mode.catalog(ctx, current.timed.Tx, revision)
 	if err != nil {
 		return "", err
 	}

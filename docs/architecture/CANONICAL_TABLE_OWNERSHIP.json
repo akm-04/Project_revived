@@ -7918,6 +7918,29 @@
         "retention": null
       }
     },
+    "memoir_tuning": {
+      "owner": "memoir",
+      "allowed_query_owners": [
+        "memoir"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/memoirstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/memoirstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00181_i9_11_memoir_tuning.sql",
+      "data": {
+        "scope": "content",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
+    },
     "top_floor_task_periods": {
       "owner": "TopFloor",
       "allowed_query_owners": [
