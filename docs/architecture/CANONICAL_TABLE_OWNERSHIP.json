@@ -4145,7 +4145,7 @@
     },
     "library_hero_battle_counts": {
       "owner": "library-local-progression",
-      "migration": "migrations/00180_i9_11g2a_hero_battle_counts.sql",
+      "migration": "migrations/00179_i9_11g2a_hero_battle_counts.sql",
       "allowed_query_owners": [
         "library-local-progression"
       ],
