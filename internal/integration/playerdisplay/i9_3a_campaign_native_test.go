@@ -24,6 +24,7 @@ import (
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	d "gxb.local/backend/v2/internal/domain/campaign"
+	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	heroproj "gxb.local/backend/v2/internal/projection/hero"
@@ -144,5 +145,27 @@ func TestI9_3ACampaignNormalAndSuperNative(t *testing.T) {
 	}
 	if err = s.OverlayMID1(ctx, pool, a, false, time.Now(), detail); err != nil || fmt.Sprint(detail["112"]) != fmt.Sprint(loaded) {
 		t.Fatalf("MID1 detail[112] differs from 112: %v / %v %v", detail["112"], loaded, err)
+	}
+}
+
+func TestI9_3ACampaignShortEnergyNative(t *testing.T) {
+	p := pool(t)
+	defer p.Close()
+	s := campaignMode(t, p)
+	a, revision := bornActor(t, p), installed(t, p)
+	bornHero(t, p, a, revision, 10001001, 1)
+	team := []int64{1, 0, 0, 0, 0}
+	exec(t, p, `UPDATE player_temporal_resources SET stored_amount=0 WHERE player_id=$1 AND resource_key='energy'`, int64(a.PlayerID))
+	_, err := s.Fight(ctx, a, app.Fight{CampaignID: 100001, Type: d.Normal, Formation: team}, op())
+	if !errors.Is(err, economy.ErrInsufficientBalance) {
+		t.Fatalf("short energy START = %v", err)
+	}
+	var balance *economy.InsufficientBalanceError
+	if !errors.As(err, &balance) || balance.ResourceKey != "energy" {
+		t.Fatalf("short energy resource = %+v", balance)
+	}
+	r, err := (campaignstore.Store{}).ReadTx(ctx, p, a.PlayerID)
+	if err != nil || r.PendingGeneration != "" {
+		t.Fatalf("refused START kept an attempt: %+v %v", r, err)
 	}
 }

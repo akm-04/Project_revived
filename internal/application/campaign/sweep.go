@@ -178,8 +178,10 @@ func (s Mode) Reset(c context.Context, a identity.ActorContext, q Reset, op oper
 	})
 }
 
+// purchaseError keeps the typed D5 balance cause so the dispatcher answers the
+// named code; an unknown resource stays a rule refusal.
 func purchaseError(err error) error {
-	if errors.Is(err, economy.ErrInsufficientBalance) || errors.Is(err, economy.ErrUnknownResource) {
+	if errors.Is(err, economy.ErrUnknownResource) {
 		return fmt.Errorf("%w: cost unavailable", d.ErrRefused)
 	}
 	return err

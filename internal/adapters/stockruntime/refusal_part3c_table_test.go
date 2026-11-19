@@ -60,6 +60,10 @@ func TestPart3CCampaignFailureRows(t *testing.T) {
 		{"conflict", failCampaign(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
 		{"loan refused", failCampaign(combat.ErrLoanRefused), http.StatusConflict, unprovenRefusalCode, ""},
 		{"refused", failCampaign(campaign.ErrRefused), http.StatusConflict, unprovenRefusalCode, ""},
+		{"balance diamonds", failCampaign(economy.InsufficientBalance("crystal")), http.StatusConflict, insufficientDiamondCode, ""},
+		{"balance coins", failCampaign(economy.InsufficientBalance("mana")), http.StatusConflict, insufficientCoinCode, ""},
+		{"balance stamina", failCampaign(economy.InsufficientBalance("energy")), http.StatusConflict, insufficientStaminaCode, ""},
+		{"balance other", failCampaign(economy.InsufficientBalance("guild_coin")), http.StatusConflict, unprovenRefusalCode, ""},
 		{"unavailable", failCampaign(campaign.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})
 }

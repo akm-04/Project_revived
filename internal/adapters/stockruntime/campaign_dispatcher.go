@@ -7,6 +7,7 @@ import (
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
 	d "gxb.local/backend/v2/internal/domain/campaign"
 	cd "gxb.local/backend/v2/internal/domain/combat"
+	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -220,6 +221,7 @@ func campaignResult(p map[string]any) (app.Result, bool) {
 }
 
 var campaignModeFailureRows = []failureRow{
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
 	{match: d.ErrInvalid, class: failureMalformed, detail: "campaign_invalid_parameter"},
 	{match: cd.ErrLoanRefused, class: failureRefusal, code: unprovenRefusalCode},
 	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
