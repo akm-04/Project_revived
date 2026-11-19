@@ -341,6 +341,10 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 	if e != nil {
 		return e
 	}
+	dialogueCounts, e := s.Library.ListHeroDialogueCountsTx(ctx, q, a.PlayerID)
+	if e != nil {
+		return e
+	}
 	root, e := s.Library.ReadRootTx(ctx, q, a.PlayerID)
 	if e != nil {
 		return e
@@ -376,7 +380,7 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 			"partner_dialogs":  projectPartnerDialogs(catalog, rule.DialogEnabled, f.Facts.Favor, f.Facts.Married, h.PartnerID, dialogsByPartner[h.PartnerID]),
 			"partner_missions": partnerMissions,
 			"partner_acts":     projectPartnerActs(catalog, h.PartnerID, f.Facts.Favor, awards),
-			"partner_logs":     partnerLogMap(heroLogs, h.PartnerID, f.Facts.Favor, f.Facts.CreatedAt, at),
+			"partner_logs":     partnerLogMap(heroLogs, h.PartnerID, f.Facts.Favor, dialogueCounts[h.PartnerID], f.Facts.CreatedAt, at),
 		}
 	}
 
@@ -493,7 +497,7 @@ func (s Service) readPartnerDialogsOrActs(ctx context.Context, q tx.Queryer, a i
 // partnerLogMap is the single Girls Log projection shared by 836 and the
 // library.partner_log.v1 notice. The explicit acquisition row wins; a facet
 // without one is dated from its creation time (PRIVATE_POLICY).
-func partnerLogMap(heroLogs []lib.HeroLogFact, partnerID, favor int64, created, at time.Time) map[string]any {
+func partnerLogMap(heroLogs []lib.HeroLogFact, partnerID, favor, dialogueCount int64, created, at time.Time) map[string]any {
 	acquiredAt := created
 	out := map[string]any{}
 	for _, row := range heroLogs {
@@ -509,6 +513,14 @@ func partnerLogMap(heroLogs []lib.HeroLogFact, partnerID, favor int64, created, 
 		out[strconv.FormatInt(lib.LogAcquired, 10)] = map[string]any{"time": acquiredAt.Unix()}
 	}
 	for _, logID := range lib.FavorLogIDsCrossed(0, favor) {
+		key := strconv.FormatInt(logID, 10)
+		if _, present := out[key]; !present {
+			out[key] = map[string]any{"time": acquiredAt.Unix()}
+		}
+	}
+	// The durable completion counter, not the distinct dialog rows, decides
+	// these milestones; a written row keeps its own time.
+	for _, logID := range lib.DialogueLogIDsReached(0, dialogueCount) {
 		key := strconv.FormatInt(logID, 10)
 		if _, present := out[key]; !present {
 			out[key] = map[string]any{"time": acquiredAt.Unix()}

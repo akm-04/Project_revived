@@ -23,6 +23,7 @@ func PartnerLogRef(player identity.PlayerID, partnerID int64) string {
 // PartnerLogPort is the Library owner's read surface for the log projection.
 type PartnerLogPort interface {
 	ListHeroLogsTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.HeroLogFact, error)
+	ListHeroDialogueCountsTx(context.Context, tx.Queryer, identity.PlayerID) (map[int64]int64, error)
 	ReadHeroTx(context.Context, tx.Queryer, character.HeroRef) (lib.HeroFacts, error)
 }
 
@@ -41,9 +42,13 @@ func (r PartnerLogReader) ReadPartnerLog(ctx context.Context, player identity.Pl
 	if err != nil {
 		return nil, err
 	}
+	dialogueCounts, err := r.Library.ListHeroDialogueCountsTx(ctx, r.Queryer, player)
+	if err != nil {
+		return nil, err
+	}
 	facts, err := r.Library.ReadHeroTx(ctx, r.Queryer, character.HeroRef{PlayerID: player, PartnerID: partnerID})
 	if err != nil {
 		return nil, err
 	}
-	return partnerLogMap(rows, partnerID, facts.Favor, facts.CreatedAt, at), nil
+	return partnerLogMap(rows, partnerID, facts.Favor, dialogueCounts[partnerID], facts.CreatedAt, at), nil
 }

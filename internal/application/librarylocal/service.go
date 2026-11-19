@@ -243,6 +243,8 @@ type LibraryPort interface {
 	ListHeroLogsTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.HeroLogFact, error)
 	InsertHeroLogTx(context.Context, tx.Tx, lib.HeroLogFact) (bool, error)
 	BumpHeroBattleCountTx(context.Context, tx.Tx, identity.PlayerID, int64) (int64, error)
+	BumpHeroDialogueCountTx(context.Context, tx.Tx, identity.PlayerID, int64) (int64, error)
+	ListHeroDialogueCountsTx(context.Context, tx.Queryer, identity.PlayerID) (map[int64]int64, error)
 }
 type ContentPort interface {
 	LibraryInputsActive(context.Context) (string, bool, error)
@@ -798,7 +800,7 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 				}
 			}
 			if d.Command.Family == TalkAward && out.HasDialog && out.Dialog.IsAwarded {
-				if e = s.recordDialogueLogsTx(ctx, sc.Tx, a.PlayerID, d.Command.PartnerID, d.DecisionAt); e != nil {
+				if e = s.recordDialogueCompletionTx(ctx, sc.Tx, a.PlayerID, d.Command.PartnerID, d.DecisionAt); e != nil {
 					return e
 				}
 			}
