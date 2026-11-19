@@ -2,6 +2,7 @@ package bookskill
 
 import (
 	"context"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	i5 "gxb.local/backend/v2/internal/application/i5"
 	book "gxb.local/backend/v2/internal/domain/bookskill"
 	"gxb.local/backend/v2/internal/domain/grant"
@@ -114,7 +115,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	if e != nil {
 		return nil, e
 	}
-	if at.Before(root.UpdatedAt) {
+	if at.Before(gen.EffectiveObservation(at, root.UpdatedAt)) {
 		return nil, ErrStale
 	}
 	c, e := s.Content.BookCatalogTx(ctx, t, d.ContentRevision)
