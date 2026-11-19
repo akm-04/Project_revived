@@ -12,6 +12,7 @@ import (
 	app "gxb.local/backend/v2/internal/application/campaign"
 	"gxb.local/backend/v2/internal/application/i5"
 	d "gxb.local/backend/v2/internal/domain/campaign"
+	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/changes"
@@ -58,7 +59,8 @@ func TestI9_3BSweepReceiptCostsAndResetNative(t *testing.T) {
 		}
 	}
 	clear(100001, d.Normal)
-	if _, err := s.Sweep(ctx, a, q, op()); !errors.Is(err, d.ErrRefused) {
+	// P1: a missing sweep-card stack returns the typed balance cause.
+	if _, err := s.Sweep(ctx, a, q, op()); !errors.Is(err, economy.ErrInsufficientBalance) {
 		t.Fatal("no cards", err)
 	}
 	lines := []grant.Line{{Kind: grant.StackItem, ItemID: 50001013, Amount: 12}, {Kind: grant.ScalarCurrency, ResourceKey: "crystal", Amount: 1000}}
@@ -151,7 +153,7 @@ func TestI9_3BSweepReceiptCostsAndResetNative(t *testing.T) {
 	tooMany.Kind = 1
 	energyBefore := read(energySQL)
 	crystalBefore = read(crystalSQL)
-	if _, err = s.Sweep(ctx, a, tooMany, op()); !errors.Is(err, d.ErrRefused) || read(energySQL) != energyBefore || read(crystalSQL) != crystalBefore || read(cardsSQL) != expectedCards {
+	if _, err = s.Sweep(ctx, a, tooMany, op()); !errors.Is(err, economy.ErrInsufficientBalance) || read(energySQL) != energyBefore || read(crystalSQL) != crystalBefore || read(cardsSQL) != expectedCards {
 		t.Fatal("cost rollback", err)
 	}
 	clear(100019, d.Super)
