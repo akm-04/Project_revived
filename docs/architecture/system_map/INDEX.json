@@ -955,7 +955,7 @@
   },
   {
    "callees": 4,
-   "callers": 38,
+   "callers": 39,
    "mids": 0,
    "name": "characterasset",
    "path": "internal/application/characterasset",
@@ -1089,7 +1089,7 @@
    "tables": 1
   },
   {
-   "callees": 12,
+   "callees": 13,
    "callers": 3,
    "mids": 19,
    "name": "dormhouse",

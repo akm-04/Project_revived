@@ -221,6 +221,7 @@ type Service struct {
 	Timed          gen.TimedRunner
 	Reads          tx.Runner
 	Heroes         HeroPort
+	Awakening      RawAwakeningObserver
 	Owner          OwnerPort
 	Content        ContentPort
 	Players        playerroot.TxLocker
@@ -241,13 +242,13 @@ type Service struct {
 }
 
 func (s Service) complete() bool {
-	return s.Timed.Binder.Time != nil && s.Timed.Runner.DB != nil && s.Reads.DB != nil && s.Heroes != nil && s.Owner != nil && s.Content != nil && s.Players != nil && s.Fence != nil && s.Costs != nil && s.Values != nil && s.EXP != nil && s.Exchange != nil && s.Receipts != nil && s.Broadcast != nil
+	return s.Timed.Binder.Time != nil && s.Timed.Runner.DB != nil && s.Reads.DB != nil && s.Heroes != nil && s.Awakening != nil && s.Owner != nil && s.Content != nil && s.Players != nil && s.Fence != nil && s.Costs != nil && s.Values != nil && s.EXP != nil && s.Exchange != nil && s.Receipts != nil && s.Broadcast != nil
 }
 
 // Social commands do not touch Character progression, materials or exchange, so
 // they require only the ports their transaction uses.
 func (s Service) socialComplete() bool {
-	return s.Timed.Binder.Time != nil && s.Timed.Runner.DB != nil && s.Reads.DB != nil && s.Heroes != nil && s.Owner != nil && s.Content != nil && s.Players != nil && s.Fence != nil && s.Values != nil && s.Receipts != nil && s.Social != nil && s.Directory != nil && s.Moderation != nil
+	return s.Timed.Binder.Time != nil && s.Timed.Runner.DB != nil && s.Reads.DB != nil && s.Heroes != nil && s.Awakening != nil && s.Owner != nil && s.Content != nil && s.Players != nil && s.Fence != nil && s.Values != nil && s.Receipts != nil && s.Social != nil && s.Directory != nil && s.Moderation != nil
 }
 func receiptID(d Admission) receipt.Identity {
 	return receipt.Identity{OwnerKind: "player", OwnerKey: strconv.FormatInt(d.Actor.Player, 10), Domain: "dorm-house", Operation: d.Command.Family, SemanticKey: d.Operation.ID.String()}

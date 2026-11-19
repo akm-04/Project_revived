@@ -39,7 +39,7 @@ func dormService(p *pg.Pool, db tx.Beginner) app.Service {
 	runner := tx.Runner{DB: db}
 	exchange := i5.Service{Runner: runner, Store: values, Content: cs, Privileges: i5.BaselinePrivilegeProvider{}, Functions: i5.PetStarterFunctionAnnouncements{}, Directory: i4store.DirectoryLevelProjection{}, Backpack: values, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, RedeemSecret: []byte("i7c2c-fixture-redeem-key-000000000")}
 	exp := hero.Service{ProgressionStore: hs, Progression: cs}
-	return app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner}, Reads: tx.Runner{DB: p}, Heroes: characterstore.LibraryHeroPort{Store: hs}, Owner: owner, Content: cs, Players: i4store.PlayerRootLocker{}, Fence: values, Costs: i5.MaterialCostDebiter{Store: values, Content: cs}, Values: values, EXP: exp, Exchange: exchange, Receipts: kernelstore.Store{}, Broadcast: pg.BroadcastEmitter{}}
+	return app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner}, Reads: tx.Runner{DB: p}, Heroes: characterstore.LibraryHeroPort{Store: hs}, Awakening: hero.RawAwakeningObservationReader{Heroes: hs, Births: characterstore.RawAwakeningStore{}}, Owner: owner, Content: cs, Players: i4store.PlayerRootLocker{}, Fence: values, Costs: i5.MaterialCostDebiter{Store: values, Content: cs}, Values: values, EXP: exp, Exchange: exchange, Receipts: kernelstore.Store{}, Broadcast: pg.BroadcastEmitter{}}
 }
 
 // Explicit canonical prerequisite fixtures qualify Dorm conditional behavior,

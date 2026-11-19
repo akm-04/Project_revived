@@ -2,11 +2,14 @@ package dormhouse
 
 import (
 	"context"
+	"errors"
+	"gxb.local/backend/v2/internal/application/characterasset"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/domain/character"
 	dorm "gxb.local/backend/v2/internal/domain/dormhouse"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"sort"
 	"strconv"
@@ -24,11 +27,14 @@ func unixOrZero(at time.Time) int64 {
 	return at.Unix()
 }
 
-func roomWire(r dorm.Room, heroes map[int64]character.Hero, facts map[int64]dorm.HeroFacts, wire socialRoomWire) map[string]any {
+func roomWire(r dorm.Room, heroes map[int64]character.Hero, facts map[int64]dorm.HeroFacts, wire socialRoomWire, stages map[int64]int64) map[string]any {
 	residents := []any{}
 	for _, p := range r.Residents {
 		h := heroes[p]
-		row := map[string]any{"partner_id": p, "table_id": h.TableID, "star": h.Star, "color": h.Color, "lev": h.Level, "exp": h.Exp, "skills": h.RawSkills.Levels, "skill_ids": h.RawSkills.ChoiceIDs, "equips": h.Equipment, "fumos": h.Fumo, "practice_attr": h.Practice, "is_like": h.IsLike, "current_skin_id": h.CurrentSkinID, "illusion_skin_id": h.IllusionSkinID, "twice_awake_stage": 0, "house_id": r.ID, "house_table_id": r.TableID, "house_comfort": r.Comfort, "house_expand_lev": r.ExpansionLevel, "house_equips": facts[p].Equipment, "house_enter_time": unixOrZero(facts[p].LoungeAnchor)}
+		row := map[string]any{"partner_id": p, "table_id": h.TableID, "star": h.Star, "color": h.Color, "lev": h.Level, "exp": h.Exp, "skills": h.RawSkills.Levels, "skill_ids": h.RawSkills.ChoiceIDs, "equips": h.Equipment, "fumos": h.Fumo, "practice_attr": h.Practice, "is_like": h.IsLike, "current_skin_id": h.CurrentSkinID, "illusion_skin_id": h.IllusionSkinID, "house_id": r.ID, "house_table_id": r.TableID, "house_comfort": r.Comfort, "house_expand_lev": r.ExpansionLevel, "house_equips": facts[p].Equipment, "house_enter_time": unixOrZero(facts[p].LoungeAnchor)}
+		if stage, known := stages[p]; known {
+			row["twice_awake_stage"] = stage
+		}
 		if h.Kind == character.SuperHero {
 			row["partner_type"] = 2
 		}
@@ -44,7 +50,7 @@ func roomWire(r dorm.Room, heroes map[int64]character.Hero, facts map[int64]dorm
 	state := wire.Social[r.ID]
 	return map[string]any{"house_id": r.ID, "table_id": r.TableID, "house_type": r.MainType, "floor": r.Floor, "pos": r.Position, "comfort": r.Comfort, "expand_lev": r.ExpansionLevel, "expand_start_time": start, "last_enter_time": last, "partner_infos": residents, "house_name": state.Name, "is_hide": boolFlag(state.Hidden), "praise_num": wire.PraiseCounts[r.ID], "is_has_praise": boolFlag(wire.ActorPraises[r.ID].Actor != 0)}
 }
-func listWire(rooms map[int64]dorm.Room, heroes map[int64]character.Hero, facts map[int64]dorm.HeroFacts, wire socialRoomWire, includeHidden bool) [][]any {
+func listWire(rooms map[int64]dorm.Room, heroes map[int64]character.Hero, facts map[int64]dorm.HeroFacts, wire socialRoomWire, stages map[int64]int64, includeHidden bool) [][]any {
 	out := [][]any{{}, {}, {}, {}}
 	ids := []int64{}
 	for id := range rooms {
@@ -59,9 +65,52 @@ func listWire(rooms map[int64]dorm.Room, heroes map[int64]character.Hero, facts 
 		if r.MainType < 1 || r.MainType > 4 {
 			return out
 		}
-		out[r.MainType-1] = append(out[r.MainType-1], roomWire(r, heroes, facts, wire))
+		out[r.MainType-1] = append(out[r.MainType-1], roomWire(r, heroes, facts, wire, stages))
 	}
 	return out
+}
+
+// awakeningStagesTx reads the Character-owned raw twice-awake stage for every
+// resident in the caller's coherent read. A hero without the facet is unknown
+// and is omitted instead of being reported as stage 0.
+func (s Service) awakeningStagesTx(ctx context.Context, sc tx.Scope, revision string, at time.Time, rooms map[int64]dorm.Room, heroes map[int64]character.Hero) (map[int64]int64, error) {
+	operation := sc.Operation
+	refs := operation.Policies.Refs()
+	if pinned, ok := operation.Policies.Get("content"); ok {
+		if pinned != revision {
+			return nil, ErrUnavailable
+		}
+	} else {
+		refs = append(refs, policy.Ref{Name: "content", Version: revision})
+	}
+	var e error
+	if operation.Policies, e = policy.NewSet(refs...); e != nil {
+		return nil, e
+	}
+	coherent, e := characterasset.NewCoherentReadScope(tx.Scope{Tx: sc.Tx, Operation: operation, Attempt: sc.Attempt, Options: sc.Options}, revision, at)
+	if e != nil {
+		return nil, e
+	}
+	out := map[int64]int64{}
+	for _, room := range rooms {
+		for _, partner := range room.Residents {
+			hero, ok := heroes[partner]
+			if !ok {
+				continue
+			}
+			observation, e := s.Awakening.RawAwakeningTx(ctx, coherent, hero.Ref())
+			if errors.Is(e, character.ErrRawAwakeningUnavailable) {
+				continue
+			}
+			if e != nil {
+				return nil, e
+			}
+			if observation.Known && observation.Ref == hero.Ref() {
+				out[partner] = observation.RawStage
+			}
+		}
+	}
+	return out, nil
 }
 
 // Read owns its one captured DB decision instant. Foreign reads are strictly
@@ -134,6 +183,10 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, op operation
 			}
 			facts[h.PartnerID] = f
 		}
+		stages, e := s.awakeningStagesTx(ctx, tx.Scope{Tx: sc.Tx, Operation: sc.Operation.Operation(), Attempt: sc.Attempt, Options: sc.Options}, rev, at, rooms, hm)
+		if e != nil {
+			return e
+		}
 		values, e := s.Values.ReadDormPlayerStateTx(ctx, sc.Tx, pid, at)
 		if e != nil {
 			return e
@@ -153,7 +206,7 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, op operation
 					functions = append(functions, id)
 				}
 			}
-			body["house_list"] = listWire(rooms, hm, facts, wire, pid == a.PlayerID)
+			body["house_list"] = listWire(rooms, hm, facts, wire, stages, pid == a.PlayerID)
 			body["open_functions"] = functions
 			return nil
 		}
@@ -208,7 +261,7 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, op operation
 				used[strconv.FormatInt(item, 10)] += n
 			}
 		}
-		body["house_info"] = roomWire(r, hm, facts, wire)
+		body["house_info"] = roomWire(r, hm, facts, wire, stages)
 		body["house_detail"] = map[string]any{"house_id": r.ID, "record": r.Layout}
 		body["item_record"] = used
 		if own {

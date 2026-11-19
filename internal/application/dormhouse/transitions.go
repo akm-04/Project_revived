@@ -65,6 +65,10 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 			}
 		}
 	}
+	stages, e := s.awakeningStagesTx(ctx, tx.Scope{Tx: t, Operation: d.Operation, Attempt: 1, Options: tx.Options{Isolation: tx.Serializable}}, d.ContentRevision, at, rooms, hm)
+	if e != nil {
+		return nil, e
+	}
 	values, e := s.Values.ReadDormPlayerStateTx(ctx, t, a.PlayerID, at)
 	if c.Family != Exchange {
 		values, e = s.Values.LockDormPlayerStateTx(ctx, t, a.PlayerID, at)
@@ -337,7 +341,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 			if wireErr != nil {
 				return nil, wireErr
 			}
-			changed = append(changed, roomWire(r, hm, facts, wire))
+			changed = append(changed, roomWire(r, hm, facts, wire, stages))
 		}
 		body["changed_houses"] = changed
 		room = rooms[room.ID]
@@ -374,7 +378,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	if e != nil {
 		return nil, e
 	}
-	body["house_info"] = roomWire(room, hm, facts, wire)
+	body["house_info"] = roomWire(room, hm, facts, wire, stages)
 	changed := map[string]any{}
 	for _, h := range heroes {
 		f := facts[h.PartnerID]

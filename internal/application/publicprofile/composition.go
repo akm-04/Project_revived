@@ -264,6 +264,8 @@ func (s ReadService) ReadTx(c context.Context, sc tx.Scope, a identity.ActorCont
 	info["guild_name"] = g.Name
 	info["guild_job"] = int16(g.Role)
 	info["guild_invite_time"] = g.InviteTime
+	// PersonDisplayWindow reads the qualified invite instant from the top level.
+	out["guild_invite_time"] = g.InviteTime
 	info["title_info"] = display.TitleInfo
 	out["open_functions"] = basic.Functions
 	praise, e := s.Feedback.ObserveTx(c, sc, q.Target, a.PlayerID, rev, at)

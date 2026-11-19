@@ -328,6 +328,7 @@
   ],
   "unit": [
    "compose_test.go",
+   "projection_test.go",
    "social_native_test.go"
   ]
  }
