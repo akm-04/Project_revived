@@ -153,6 +153,42 @@ type occultStagePlan struct {
 
 var occultChapterTwoSolo = []occultStagePlan{{20011, 1}, {20012, 2}, {20013, 3}, {20014, 1}, {20015, 1}, {20016, 1}, {20017, 1}, {20018, 1}}
 
+// Chapter 1's final rows 10013/10026 keep back edges; the clear is the source
+// special_reward node, not a sink.
+var occultChapterOneSingle = []occultStagePlan{{10015, 3}, {10016, 3}, {10019, 3}, {10026, 1}}
+
+func occultClearChapterOneSolo(t *testing.T, s oc.Mode, a identity.ActorContext, formation []int64) oc.SettleResponse {
+	t.Helper()
+	var last oc.SettleResponse
+	for _, plan := range occultChapterOneSingle {
+		for sub := int64(1); sub <= plan.stages; sub++ {
+			if _, err := s.StartFight(ctx, a, plan.campaign, sub, op()); err != nil {
+				t.Fatalf("chapter 1 fight %d/%d: %v", plan.campaign, sub, err)
+			}
+			var err error
+			last, err = s.Settle(ctx, a, oc.SettleRequest{CampaignID: plan.campaign, SubID: sub, Star: 3, Formation: formation}, op())
+			if err != nil {
+				t.Fatalf("chapter 1 settle %d/%d: %v", plan.campaign, sub, err)
+			}
+		}
+	}
+	return last
+}
+
+func occultNoticeReader(p *pg.Pool) oc.NoticeReader {
+	return oc.NoticeReader{Rooms: sharedroomstore.Store{}, Content: contentstore.Store{}, Directory: i4store.PlayerDirectoryReader{},
+		Presence: presencestore.Store{Queryer: p}, Scores: occultstore.Store{}, Tickets: occultI5(p), Queryer: p}
+}
+
+func occultReadNotice(t *testing.T, p *pg.Pool, roomID int64) oc.RoomNotice {
+	t.Helper()
+	view, found, err := occultNoticeReader(p).ReadRoomNotice(ctx, strconv.FormatInt(roomID, 10))
+	if err != nil || !found {
+		t.Fatalf("room notice %v %v", found, err)
+	}
+	return view
+}
+
 func occultClearChapterTwoSolo(t *testing.T, p *pg.Pool, s oc.Mode, a identity.ActorContext, formation []int64) oc.SettleResponse {
 	t.Helper()
 	var last oc.SettleResponse
@@ -594,6 +630,49 @@ func TestI9_8COccultClearAndSweepNative(t *testing.T) {
 	}
 	if _, err = s.Sweep(ctx, a, 3, op()); !errors.Is(err, d.ErrRefused) {
 		t.Fatal("sweep of an uncleared chapter", err)
+	}
+}
+
+// TestI9_11T34OccultChapterOneSoloCompletionNative is A-181: chapter 1's final
+// rows keep back edges, so the source special_reward column decides the clear.
+// A team clear through a server-report fight is not reachable with fixture
+// heroes against the 5M-HP final boss; the closing-write notice is covered by
+// the notice reader units instead.
+func TestI9_11T34OccultChapterOneSoloCompletionNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	chapterOneItems := []int64{50010001, 240001001, 40001138, 230001001}
+
+	a, partner := occultOwner(t, p, server, 2)
+	s, _ := occultTestMode(t, p)
+	created, err := s.CreateSolo(ctx, a, 1, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	roomID := occultRoomID(t, created)
+	cleared := occultClearChapterOneSolo(t, s, a, []int64{partner})
+	detail := cleared.Body["award_info"].(map[string]any)["award_detail"].(map[string]any)
+	if detail["is_close"] != int64(1) {
+		t.Fatalf("chapter 1 solo clear %#v", cleared.Body)
+	}
+	for _, item := range chapterOneItems {
+		if got := occultItemQuantity(t, p, a.PlayerID, item); got != 1 {
+			t.Fatalf("solo clear reward %d quantity %d", item, got)
+		}
+	}
+	if best := scalar(t, p, `SELECT (scores->>'1')::bigint FROM occult_players WHERE player_id=$1`, int64(a.PlayerID)); best <= 0 {
+		t.Fatalf("chapter 1 best score %d", best)
+	}
+	if finished := scalar(t, p, `SELECT count(*) FROM occult_runs WHERE room_id=$1 AND finished_at IS NOT NULL`, roomID); finished != 1 {
+		t.Fatalf("solo run finish %d", finished)
+	}
+	info, err := s.Info(ctx, a, op())
+	if err != nil || info["base_info"].(map[string]any)["room_id"] != int64(0) {
+		t.Fatalf("cleared solo room %#v %v", info, err)
+	}
+	swept, err := s.Sweep(ctx, a, 1, op())
+	if err != nil || swept["progress"] != int64(1) {
+		t.Fatalf("2385 after a chapter 1 solo clear %#v %v", swept, err)
 	}
 }
 
