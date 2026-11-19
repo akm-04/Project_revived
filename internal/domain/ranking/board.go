@@ -326,9 +326,6 @@ func beginBoardSnapshot(r BoardRoot, at time.Time, rev string, op ids.UUID) (Boa
 	if r.UpdatedAt.After(observedAt) {
 		observedAt = r.UpdatedAt
 	}
-	if observedAt.Before(r.UpdatedAt) {
-		return out, Board{}, ErrStale
-	}
 	if r.StateVersion == math.MaxInt64 || r.NextGeneration == math.MaxInt64 {
 		return out, Board{}, ErrSnapshot
 	}

@@ -336,9 +336,6 @@ func (s Service) settleCurrentWeek(c context.Context, o operation.Context, board
 		if e != nil {
 			return e
 		}
-		if root.UpdatedAt.After(gen.EffectiveObservation(at, root.UpdatedAt)) {
-			return d.ErrStale
-		}
 		if observed, e := d.BoardWeek(at); e != nil || !observed.Equal(week) {
 			return ErrConflict
 		}
