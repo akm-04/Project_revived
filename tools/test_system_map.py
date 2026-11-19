@@ -115,6 +115,29 @@ class SystemMapViewTests(unittest.TestCase):
                     system_map.show_entry('161')
         self.assertEqual(json.loads(captured.getvalue())['class'], class_row)
 
+    def test_show_mid_joins_popup_rows(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            systems = output / 'systems'
+            systems.mkdir()
+            (output / 'INDEX.json').write_text(json.dumps({
+                'systems': [{'name': 'i5'}],
+                'lookups': {'mid_to_system': {'161': 'i5'}},
+            }))
+            (systems / 'i5.json').write_text(json.dumps({'name': 'i5', 'mids': [{'mid': 161}]}))
+            catalog = output / 'POPUP_CATALOG.json'
+            popups = [{'id': 'REPLY:app/x.lua:1', 'trigger': {'mids': [161]}},
+                      {'id': 'REPLY:app/y.lua:2', 'trigger': {'mids': [162]}}]
+            catalog.write_text(json.dumps({'rows': popups}))
+            with patch.object(system_map, 'OUTPUT_DIRECTORY', output), \
+                    patch.object(system_map, 'SYSTEMS_DIRECTORY', systems), \
+                    patch.object(system_map, 'POPUP_CATALOG_PATH', catalog), \
+                    patch.object(system_map, 'load_client_callers', return_value={}):
+                captured = io.StringIO()
+                with contextlib.redirect_stdout(captured):
+                    system_map.show_entry('161')
+        self.assertEqual(json.loads(captured.getvalue())['popups'], [popups[0]])
+
     def test_mid_class_validation_rejects_unknown_write_class(self):
         with self.assertRaisesRegex(SystemExit, 'unknown writes class'):
             system_map.validate_mid_classes([{'mid': 1, 'writes': 'sometimes'}])

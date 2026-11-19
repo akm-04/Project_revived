@@ -1644,6 +1644,18 @@ def check_output(files):
 
 
 SHOW_ALIASES = {"missions": "i5"}
+POPUP_CATALOG_PATH = ROOT / "docs" / "architecture" / "popup_catalog" / "POPUP_CATALOG.json"
+
+
+def popup_rows(key, by_mid):
+    """The catalogue rows of a MID or system (docs/architecture/popup_catalog)."""
+    if not POPUP_CATALOG_PATH.is_file():
+        return []
+    rows = json.loads(read_text(POPUP_CATALOG_PATH)).get("rows", [])
+    if by_mid:
+        return [row for row in rows
+                if str(key) in {str(mid) for mid in (row.get("trigger") or {}).get("mids", [])}]
+    return [row for row in rows if key in (row.get("owner") or "").split(",")]
 
 
 def mid_class(key):
@@ -1670,6 +1682,7 @@ def show_entry(key):
         record["calls"] = edges["calls"].get(key, {})
         record["called_by"] = edges["called_by"].get(key, {})
         record["composition"] = edges["composition"].get(key, [])
+        record["popups"] = popup_rows(key, by_mid=False)
         owned = record.get("tables", {}).get("owned") or []
         if owned:
             ownership = json.loads(read_text(ROOT / "docs" / "architecture" / "CANONICAL_TABLE_OWNERSHIP.json"))["tables"]
@@ -1699,6 +1712,7 @@ def show_entry(key):
             "mid": rows[0] if rows else None,
             "class": mid_class(key),
             "client": client,
+            "popups": popup_rows(key, by_mid=True),
         }, indent=1, ensure_ascii=False))
         return
     system = index["lookups"]["table_to_system"].get(key)
