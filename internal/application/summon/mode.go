@@ -516,7 +516,10 @@ func (s Mode) settle(c context.Context, sc gen.TimedScope, a identity.ActorConte
 }
 
 func purchaseError(err error) error {
-	if errors.Is(err, economy.ErrInsufficientBalance) || errors.Is(err, economy.ErrUnknownResource) {
+	if errors.Is(err, economy.ErrInsufficientBalance) {
+		return err
+	}
+	if errors.Is(err, economy.ErrUnknownResource) {
 		return fmt.Errorf("%w: cost unavailable", d.ErrRefused)
 	}
 	return err
