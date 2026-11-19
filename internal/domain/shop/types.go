@@ -11,8 +11,6 @@ import (
 )
 
 const (
-	// LockRankShop is the LEAD_SEAMS_I9-11 V2 section 2 rank 460.
-	LockRankShop int64 = 460
 	// PolicyID is the receipt policy version of every 11C command.
 	PolicyID = "I9_11C_CORE_SHOPS_V2"
 	// ReceiptClass is the LEAD_SEAMS_I9-11 V2 section 5 receipt class.
