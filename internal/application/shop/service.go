@@ -6,12 +6,14 @@ package shop
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"strconv"
 	"time"
 
 	gen "gxb.local/backend/v2/internal/application/generation"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerroot"
+	achd "gxb.local/backend/v2/internal/domain/achievement"
 	"gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/grant"
@@ -357,6 +359,21 @@ func (s Service) state(c context.Context, sc gen.TimedScope, catalog d.Catalog, 
 	return row, false, changed, nil
 }
 
+// currentState loads the player's frozen generation without generating one. A
+// purchase never generates stock (A-139): a missing row or a generation that a
+// source mark or game-day change would replace refuses as stale so the client
+// reloads MID 32. The player root lock taken by begin serialises the check.
+func (s Service) currentState(c context.Context, sc gen.TimedScope, shop d.Shop, pid identity.PlayerID) (d.Row, error) {
+	row, found, err := s.Store.LockShopTx(c, sc.Tx, pid, shop.Type)
+	if err != nil {
+		return d.Row{}, err
+	}
+	if !found || d.NeedsScheduledReroll(shop, row.Stock, sc.Operation.DecisionAt()) {
+		return d.Row{}, d.ErrStaleState
+	}
+	return row, nil
+}
+
 func (s Service) save(c context.Context, sc gen.TimedScope, row d.Row, insert bool) error {
 	row.UpdatedAt = sc.Operation.DecisionAt().UTC()
 	if insert {
@@ -387,7 +404,13 @@ func (s Service) observePurchase(c context.Context, sc gen.TimedScope, pid ident
 	if !ok {
 		return d.ErrUnavailable
 	}
-	return s.Achievements.ObserveShopPurchaseTx(c, sc.Tx, pid, revision, sc.Operation.DecisionAt())
+	err := s.Achievements.ObserveShopPurchaseTx(c, sc.Tx, pid, revision, sc.Operation.DecisionAt())
+	// A purchase overtaken by a newer accepted one lost the race; the client
+	// reloads. Every other achievement fault stays visible as a defect.
+	if errors.Is(err, achd.ErrOvertaken) {
+		return d.ErrStaleState
+	}
+	return err
 }
 
 func (s Service) record(c context.Context, sc gen.TimedScope, pid identity.PlayerID, applied appi5.ItemsEnergyExchangeResult) error {

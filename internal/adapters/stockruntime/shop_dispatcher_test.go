@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	appi5 "gxb.local/backend/v2/internal/application/i5"
 	app "gxb.local/backend/v2/internal/application/shop"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -119,6 +120,8 @@ func TestShopDispatcherRefusalCodes(t *testing.T) {
 		{d.ErrPriceDiscount, 409, 34021},
 		{economy.InsufficientBalance("crystal"), 409, 20005},
 		{economy.InsufficientBalance("mana"), 409, 20006},
+		{economy.ErrStackCapacity, 409, unprovenRefusalCode},
+		{appi5.ErrMailStackFull, 409, unprovenRefusalCode},
 		{d.ErrUnavailable, 503, serverBusyCode},
 		{errors.New("unexpected"), 500, unprovenRefusalCode},
 	} {

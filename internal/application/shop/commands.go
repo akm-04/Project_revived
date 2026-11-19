@@ -92,7 +92,7 @@ func (s Service) Buy(c context.Context, actor identity.ActorContext, request Buy
 		if err != nil {
 			return nil, err
 		}
-		row, insert, _, err := s.state(c, sc, catalog, shop, actor.PlayerID)
+		row, err := s.currentState(c, sc, shop, actor.PlayerID)
 		if err != nil {
 			return nil, err
 		}
@@ -124,7 +124,7 @@ func (s Service) Buy(c context.Context, actor identity.ActorContext, request Buy
 		if err = s.settle(c, sc, actor, "buy", cost, lines); err != nil {
 			return nil, err
 		}
-		if err = s.save(c, sc, row, insert); err != nil {
+		if err = s.save(c, sc, row, false); err != nil {
 			return nil, err
 		}
 		if err = s.observePurchase(c, sc, actor.PlayerID); err != nil {
@@ -155,7 +155,7 @@ func (s Service) MultiBuy(c context.Context, actor identity.ActorContext, reques
 		if err != nil {
 			return nil, err
 		}
-		row, insert, _, err := s.state(c, sc, catalog, shop, actor.PlayerID)
+		row, err := s.currentState(c, sc, shop, actor.PlayerID)
 		if err != nil {
 			return nil, err
 		}
@@ -196,7 +196,7 @@ func (s Service) MultiBuy(c context.Context, actor identity.ActorContext, reques
 		if err = s.settle(c, sc, actor, "multi_buy", cost, lines); err != nil {
 			return nil, err
 		}
-		if err = s.save(c, sc, row, insert); err != nil {
+		if err = s.save(c, sc, row, false); err != nil {
 			return nil, err
 		}
 		if err = s.observePurchase(c, sc, actor.PlayerID); err != nil {
