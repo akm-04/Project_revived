@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"gxb.local/backend/v2/internal/application/characterasset"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	ins "gxb.local/backend/v2/internal/domain/inscription"
@@ -72,7 +73,7 @@ func (s Service) rootInputsTx(ctx context.Context, q tx.Queryer, scope InputScop
 	if e != nil {
 		return out, e
 	}
-	if scope.ObservedAt.Before(r.UpdatedAt) {
+	if gen.EffectiveObservation(scope.ObservedAt, r.UpdatedAt).Before(r.UpdatedAt) {
 		return out, ErrStale
 	}
 	c, e := s.Content.InscriptionCatalogTx(ctx, q, scope.ContentRevision)
@@ -86,7 +87,7 @@ func (s Service) rootInputsTx(ctx context.Context, q tx.Queryer, scope InputScop
 	if e != nil {
 		return out, e
 	}
-	if scope.ObservedAt.Before(pop.UpdatedAt) {
+	if gen.EffectiveObservation(scope.ObservedAt, pop.UpdatedAt).Before(pop.UpdatedAt) {
 		return out, ErrStale
 	}
 	return Inputs{r, c, pop.StateVersion, map[int64]bool{}, scope.ObservedAt, scope.ContentRevision}, nil
@@ -132,7 +133,8 @@ func (s Service) CompleteSuitCountTx(ctx context.Context, q tx.Queryer, scope In
 		if !ok {
 			return 0, ins.ErrUnqualified
 		}
-		if scope.ObservedAt.Before(f.UpdatedAt) || scope.ObservedAt.Before(h.UpdatedAt) {
+		observedAt := gen.EffectiveObservation(scope.ObservedAt, f.UpdatedAt, h.UpdatedAt)
+		if observedAt.Before(f.UpdatedAt) || observedAt.Before(h.UpdatedAt) {
 			return 0, ErrStale
 		}
 		if e = f.Facts.Validate(v.Catalog); e != nil {
@@ -165,7 +167,8 @@ func (s Service) HeroInscriptionInputsTx(ctx context.Context, q tx.Queryer, scop
 	if e != nil {
 		return out, e
 	}
-	if scope.ObservedAt.Before(f.UpdatedAt) || scope.ObservedAt.Before(h.UpdatedAt) {
+	observedAt := gen.EffectiveObservation(scope.ObservedAt, f.UpdatedAt, h.UpdatedAt)
+	if observedAt.Before(f.UpdatedAt) || observedAt.Before(h.UpdatedAt) {
 		return out, ErrStale
 	}
 	if e = f.Facts.Validate(v.Catalog); e != nil {

@@ -2,6 +2,7 @@ package heroevolution
 
 import (
 	"context"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	evo "gxb.local/backend/v2/internal/domain/heroevolution"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -28,7 +29,7 @@ func (s Service) requirePlayer(ctx context.Context, q tx.Queryer, p identity.Pla
 	if rule.Validate() != nil || rule.ValidateState(v) != nil {
 		return evo.ErrUnqualified
 	}
-	if at.Before(v.UpdatedAt) {
+	if gen.EffectiveObservation(at, v.UpdatedAt).Before(v.UpdatedAt) {
 		return ErrStale
 	}
 	c, e := s.Content.EvolutionCatalogTx(ctx, q, rev)

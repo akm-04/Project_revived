@@ -107,7 +107,7 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, op operation
 		if e != nil {
 			return e
 		}
-		if at.Before(root.UpdatedAt) {
+		if gen.EffectiveObservation(at, root.UpdatedAt).Before(root.UpdatedAt) {
 			return ErrStale
 		}
 		catalog, e := s.Content.DormCatalogTx(ctx, sc.Tx, rev)
@@ -167,7 +167,7 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, op operation
 		if pid != a.PlayerID && wire.Social[house].Hidden {
 			return dorm.ErrHidden
 		}
-		if at.Before(r.UpdatedAt) {
+		if gen.EffectiveObservation(at, r.UpdatedAt).Before(r.UpdatedAt) {
 			return ErrStale
 		}
 		if own {
@@ -277,7 +277,8 @@ func (s Service) DormHouseInputsTx(ctx context.Context, q tx.Queryer, scope Inpu
 	if e != nil {
 		return out, e
 	}
-	if scope.ObservedAt.Before(h.UpdatedAt) || scope.ObservedAt.Before(f.UpdatedAt) || scope.ObservedAt.Before(dr.UpdatedAt) || scope.ObservedAt.Before(hr.UpdatedAt) {
+	observedAt := gen.EffectiveObservation(scope.ObservedAt, h.UpdatedAt, f.UpdatedAt, dr.UpdatedAt, hr.UpdatedAt)
+	if observedAt.Before(h.UpdatedAt) || observedAt.Before(f.UpdatedAt) || observedAt.Before(dr.UpdatedAt) || observedAt.Before(hr.UpdatedAt) {
 		return out, dorm.ErrUnqualified
 	}
 	out = HeroInputs{Hero: h, Facts: f, PopulationVersion: hr.StateVersion, DormRootVersion: dr.StateVersion, ContentRevision: scope.ContentRevision, ObservedAt: scope.ObservedAt}
@@ -286,7 +287,7 @@ func (s Service) DormHouseInputsTx(ctx context.Context, q tx.Queryer, scope Inpu
 		if e != nil {
 			return out, e
 		}
-		if scope.ObservedAt.Before(r.UpdatedAt) {
+		if gen.EffectiveObservation(scope.ObservedAt, r.UpdatedAt).Before(r.UpdatedAt) {
 			return out, dorm.ErrUnqualified
 		}
 		out.Room = &r
@@ -328,12 +329,13 @@ func (s Service) VillaCountTx(ctx context.Context, q tx.Queryer, scope InputScop
 	if e != nil {
 		return out, e
 	}
-	if scope.ObservedAt.Before(dr.UpdatedAt) || scope.ObservedAt.Before(hr.UpdatedAt) {
+	observedAt := gen.EffectiveObservation(scope.ObservedAt, dr.UpdatedAt, hr.UpdatedAt)
+	if observedAt.Before(dr.UpdatedAt) || observedAt.Before(hr.UpdatedAt) {
 		return out, dorm.ErrUnqualified
 	}
 	out = VillaInputs{PopulationVersion: hr.StateVersion, DormRootVersion: dr.StateVersion, ContentRevision: scope.ContentRevision, ObservedAt: scope.ObservedAt}
 	for _, r := range rooms {
-		if scope.ObservedAt.Before(r.UpdatedAt) {
+		if gen.EffectiveObservation(scope.ObservedAt, r.UpdatedAt).Before(r.UpdatedAt) {
 			return out, dorm.ErrUnqualified
 		}
 		if r.MainType == 4 {

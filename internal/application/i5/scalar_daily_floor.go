@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/modes"
@@ -58,10 +59,14 @@ func effectiveDailyFloorTx(ctx context.Context, query tx.Queryer, source any, ba
 		return economy.ScalarBalance{}, err
 	}
 	var previous *economy.ScalarDailyFloor
+	observedAt := generation.EffectiveObservation(at, balance.UpdatedAt)
 	if exists {
 		previous = &anchor
+		observedAt = generation.EffectiveObservation(observedAt, anchor.UpdatedAt)
 	}
-	plan, err := balance.PlanDailyFloor(previous, modes.Day(at), *minimum, at)
+	// K4: the game-day window uses the raw decision time; only the guard and the
+	// written timestamp move to the effective observation (K2/K3).
+	plan, err := balance.PlanDailyFloor(previous, modes.Day(at), *minimum, observedAt)
 	return plan.Balance, err
 }
 
@@ -85,11 +90,13 @@ func prepareDailyFloorTx(ctx context.Context, query tx.Queryer, source any, bala
 	}
 	var previous *economy.ScalarDailyFloor
 	previousVersion := int64(0)
+	observedAt := generation.EffectiveObservation(at, balance.UpdatedAt)
 	if anchored {
 		previous = &anchor
 		previousVersion = anchor.StateVersion
+		observedAt = generation.EffectiveObservation(observedAt, anchor.UpdatedAt)
 	}
-	plan, err := balance.PlanDailyFloor(previous, modes.Day(at), *minimum, at)
+	plan, err := balance.PlanDailyFloor(previous, modes.Day(at), *minimum, observedAt)
 	if err != nil {
 		return nil, err
 	}

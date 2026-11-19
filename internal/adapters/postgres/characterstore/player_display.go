@@ -3,6 +3,7 @@ package characterstore
 import (
 	"context"
 	ca "gxb.local/backend/v2/internal/application/characterasset"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	app "gxb.local/backend/v2/internal/application/playerdisplay"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -55,7 +56,7 @@ func (r DisplayReader) ReadDisplayHeroesTx(c context.Context, q tx.Queryer, pid 
 	}
 	out := make([]app.HeroFacet, 0, len(hs))
 	for _, h := range hs {
-		if h.ValidatePersistent() != nil || h.PlayerID != pid || h.UpdatedAt.After(at) {
+		if h.ValidatePersistent() != nil || h.PlayerID != pid || h.UpdatedAt.After(gen.EffectiveObservation(at, h.UpdatedAt)) {
 			return nil, app.ErrConflict
 		}
 		f := app.HeroFacet{PlayerID: pid, PartnerID: h.PartnerID, TableID: h.TableID, Version: h.StateVersion, Color: h.Color, Star: h.Star, Skins: []int64{}}
@@ -105,7 +106,7 @@ func (r DisplayReader) ReadDisplayPopulationTx(c context.Context, sc ca.Coherent
 	if e != nil {
 		return out, e
 	}
-	if root.Validate() != nil || root.PlayerID != pid || root.UpdatedAt.After(sc.ObservedAt) {
+	if root.Validate() != nil || root.PlayerID != pid || root.UpdatedAt.After(gen.EffectiveObservation(sc.ObservedAt, root.UpdatedAt)) {
 		return out, app.ErrConflict
 	}
 	hs, e := r.ReadDisplayHeroesTx(c, sc.Queryer(), pid, sc.ContentRevision, sc.ObservedAt)

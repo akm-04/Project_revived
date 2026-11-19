@@ -4,6 +4,7 @@ package commerceprivilege
 
 import (
 	"context"
+	"gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/privilege"
@@ -58,7 +59,8 @@ func (p Provider) snapshot(c context.Context, q tx.Queryer, pid identity.PlayerI
 	if e != nil || !ok {
 		return out, ok, e
 	}
-	if s.Validate() != nil || s.PlayerID != pid || s.UpdatedAt.After(at) {
+	observedAt := generation.EffectiveObservation(at, s.UpdatedAt)
+	if s.Validate() != nil || s.PlayerID != pid || s.UpdatedAt.After(observedAt) {
 		return out, true, d.ErrConflict
 	}
 	catalog, tuning, tuned, e := tunedPrivilegeCatalog(c, p.Store, p.Content, q, s.ContentRevision)

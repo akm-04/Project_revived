@@ -120,7 +120,15 @@ type Snapshot struct {
 }
 
 func (s Snapshot) Validate(pid identity.PlayerID, revision string, at time.Time) error {
-	if s.State.Validate() != nil || s.State.PlayerID != pid || s.ObservationRevision != revision || !RevisionValid(revision) || at.IsZero() || !s.ObservedAt.Equal(at) || s.State.UpdatedAt.After(at) || s.SkillPointCap < 0 || s.ProviderRevision != ManualPolicy+"/"+s.State.ContentRevision {
+	// The domain layer cannot import the application-level helper, so the
+	// effective observation (latest of the decision and the stored fact) is
+	// computed here for the one future-read comparison. K2/K4: only the
+	// comparison moves; windows keep the raw decision time.
+	observedAt := at
+	if s.State.UpdatedAt.After(observedAt) {
+		observedAt = s.State.UpdatedAt
+	}
+	if s.State.Validate() != nil || s.State.PlayerID != pid || s.ObservationRevision != revision || !RevisionValid(revision) || at.IsZero() || !s.ObservedAt.Equal(at) || s.State.UpdatedAt.After(observedAt) || s.SkillPointCap < 0 || s.ProviderRevision != ManualPolicy+"/"+s.State.ContentRevision {
 		return ErrUnavailable
 	}
 	return nil

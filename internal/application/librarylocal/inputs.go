@@ -76,7 +76,8 @@ func (s Service) HeroLibraryInputsTx(ctx context.Context, q tx.Queryer, scope In
 	if e != nil {
 		return out, e
 	}
-	if scope.ObservedAt.Before(root.UpdatedAt) || scope.ObservedAt.Before(lr.UpdatedAt) || scope.ObservedAt.Before(h.UpdatedAt) || scope.ObservedAt.Before(facts.UpdatedAt) || catalog.Feeding.ValidateApplied(facts.Applied) != nil {
+	observedAt := gen.EffectiveObservation(scope.ObservedAt, root.UpdatedAt, lr.UpdatedAt, h.UpdatedAt, facts.UpdatedAt)
+	if observedAt.Before(root.UpdatedAt) || observedAt.Before(lr.UpdatedAt) || observedAt.Before(h.UpdatedAt) || observedAt.Before(facts.UpdatedAt) || catalog.Feeding.ValidateApplied(facts.Applied) != nil {
 		return out, lib.ErrUnqualified
 	}
 	bonus, e := facts.FavorBonusBP()
@@ -105,7 +106,8 @@ func (s Service) PlayerCollectionInputsTx(ctx context.Context, q tx.Queryer, sco
 	if e != nil {
 		return out, e
 	}
-	if scope.ObservedAt.Before(hr.UpdatedAt) || scope.ObservedAt.Before(lr.UpdatedAt) {
+	observedAt := gen.EffectiveObservation(scope.ObservedAt, hr.UpdatedAt, lr.UpdatedAt)
+	if observedAt.Before(hr.UpdatedAt) || observedAt.Before(lr.UpdatedAt) {
 		return out, lib.ErrUnqualified
 	}
 	out.PopulationVersion = hr.StateVersion
@@ -138,7 +140,8 @@ func (s Service) PlayerCollectionInputsTx(ctx context.Context, q tx.Queryer, sco
 		if !ok {
 			return out, lib.ErrUnqualified
 		}
-		if scope.ObservedAt.Before(h.UpdatedAt) || scope.ObservedAt.Before(f.UpdatedAt) {
+		observedAt := gen.EffectiveObservation(scope.ObservedAt, h.UpdatedAt, f.UpdatedAt)
+		if observedAt.Before(h.UpdatedAt) || observedAt.Before(f.UpdatedAt) {
 			return out, lib.ErrUnqualified
 		}
 		if f.Married {
