@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/socialrelation"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -68,7 +69,7 @@ func (Store) TouchRootTx(ctx context.Context, t tx.Tx, old socialrelation.Root, 
 	if old.StateVersion == math.MaxInt64 {
 		return socialrelation.ErrCounterOverflow
 	}
-	if at.IsZero() || at.Before(old.CreatedAt) || at.Before(old.UpdatedAt) {
+	if at.IsZero() || at.Before(gen.EffectiveObservation(at, old.CreatedAt)) || at.Before(gen.EffectiveObservation(at, old.UpdatedAt)) {
 		return socialrelation.ErrStaleDecisionTime
 	}
 	return effect(t, ctx, `UPDATE player_social_roots SET state_version=state_version+1,updated_at=$3 WHERE player_id=$1 AND state_version=$2`, int64(old.PlayerID), old.StateVersion, at.UTC())
