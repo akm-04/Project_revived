@@ -47489,7 +47489,7 @@
    "isolation": [
     {
      "file": "internal/application/arena/reads.go",
-     "line": 39,
+     "line": 40,
      "value": "repeatable_read"
     }
    ],
@@ -47497,7 +47497,7 @@
    "read_only": [
     {
      "file": "internal/application/arena/reads.go",
-     "line": 39,
+     "line": 40,
      "value": "true"
     }
    ],
@@ -47505,7 +47505,7 @@
    "retry": [
     {
      "file": "internal/application/arena/reads.go",
-     "line": 39,
+     "line": 40,
      "value": "1"
     }
    ],
@@ -47516,12 +47516,17 @@
      "file": "internal/application/arena/reads.go",
      "function": "Service.Partners",
      "isolation": "repeatable_read",
-     "line": 39,
+     "line": 40,
      "read_only": "true",
      "retry": "1"
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/contentstore/arena.go",
+     "line": 56,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_array(table_id,origin_table_id,kind='SUPER',is_awakened,initial_star) ORDER BY table_id),'[]'::jsonb)::text FROM gxb_content_hero_templates WHERE revision_id=$1"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
@@ -49019,7 +49024,7 @@
    "isolation": [
     {
      "file": "internal/application/arena/reads.go",
-     "line": 64,
+     "line": 121,
      "value": "repeatable_read"
     }
    ],
@@ -49027,7 +49032,7 @@
    "read_only": [
     {
      "file": "internal/application/arena/reads.go",
-     "line": 64,
+     "line": 121,
      "value": "true"
     }
    ],
@@ -49035,7 +49040,7 @@
    "retry": [
     {
      "file": "internal/application/arena/reads.go",
-     "line": 64,
+     "line": 121,
      "value": "1"
     }
    ],
@@ -49046,7 +49051,7 @@
      "file": "internal/application/arena/reads.go",
      "function": "Service.Records",
      "isolation": "repeatable_read",
-     "line": 64,
+     "line": 121,
      "read_only": "true",
      "retry": "1"
     }
@@ -49090,7 +49095,7 @@
    "isolation": [
     {
      "file": "internal/application/arena/reads.go",
-     "line": 110,
+     "line": 167,
      "value": "repeatable_read"
     }
    ],
@@ -49098,7 +49103,7 @@
    "read_only": [
     {
      "file": "internal/application/arena/reads.go",
-     "line": 110,
+     "line": 167,
      "value": "true"
     }
    ],
@@ -49106,7 +49111,7 @@
    "retry": [
     {
      "file": "internal/application/arena/reads.go",
-     "line": 110,
+     "line": 167,
      "value": "1"
     }
    ],
@@ -49117,7 +49122,7 @@
      "file": "internal/application/arena/reads.go",
      "function": "Service.Report",
      "isolation": "repeatable_read",
-     "line": 110,
+     "line": 167,
      "read_only": "true",
      "retry": "1"
     }

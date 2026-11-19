@@ -603,6 +603,7 @@
   ],
   "unit": [
    "fight_test.go",
+   "partner_stars_test.go",
    "picks_test.go",
    "start_choice_conformance_test.go",
    "tournament_view_test.go"

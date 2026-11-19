@@ -7,6 +7,7 @@ import (
 
 	gen "gxb.local/backend/v2/internal/application/generation"
 	d "gxb.local/backend/v2/internal/domain/arena"
+	"gxb.local/backend/v2/internal/domain/character"
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
@@ -55,7 +56,63 @@ func (s Service) partnersSubject(c context.Context, q tx.Queryer, subject identi
 		return d.Player{}, nil, err
 	}
 	usage, err := s.Store.UsageTx(c, q, subject, p.Season)
-	return p, usage, err
+	if err != nil {
+		return d.Player{}, nil, err
+	}
+	if err = s.fillPartnerStars(c, q, subject, usage); err != nil {
+		return d.Player{}, nil, err
+	}
+	return p, usage, nil
+}
+
+// fillPartnerStars adds each usage girl's current star from the subject's owned
+// heroes; a girl the subject no longer owns keeps no star.
+func (s Service) fillPartnerStars(c context.Context, q tx.Queryer, subject identity.PlayerID, usage []d.Usage) error {
+	if len(usage) == 0 {
+		return nil
+	}
+	templates, err := s.templates(c, q)
+	if err != nil {
+		return err
+	}
+	owned, err := s.OwnedHeroes.ListHeroesTx(c, q, subject)
+	if err != nil {
+		return err
+	}
+	attachPartnerStars(usage, owned, templates)
+	return nil
+}
+
+// attachPartnerStars resolves each usage girl to the subject's strongest owned
+// copy, as lineupRows picks it, and records that copy's current star.
+func attachPartnerStars(usage []d.Usage, owned []character.Hero, templates d.Templates) {
+	strongest := make(map[int64]character.Hero, len(owned))
+	for _, hero := range owned {
+		base := templates.Base(hero.TableID)
+		if current, found := strongest[base]; !found || heroRanksAbove(hero, current) {
+			strongest[base] = hero
+		}
+	}
+	for index := range usage {
+		hero, found := strongest[templates.Base(usage[index].TableID)]
+		if !found {
+			continue
+		}
+		star := hero.Star
+		usage[index].Star = &star
+	}
+}
+
+// heroRanksAbove orders owned copies of one girl: most stars, then the highest
+// level, then the lowest partner id (C5D policy, as strongest does).
+func heroRanksAbove(candidate, current character.Hero) bool {
+	if candidate.Star != current.Star {
+		return candidate.Star > current.Star
+	}
+	if candidate.Level != current.Level {
+		return candidate.Level > current.Level
+	}
+	return candidate.PartnerID < current.PartnerID
 }
 
 // Records lists the retained ranked fights, newest first.
