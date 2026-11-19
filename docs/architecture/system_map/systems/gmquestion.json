@@ -8,6 +8,10 @@
   },
   {
    "count": 3,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 3,
    "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
   },
   {

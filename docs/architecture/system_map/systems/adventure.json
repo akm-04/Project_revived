@@ -9,6 +9,10 @@
  "content": [],
  "contracts": [
   {
+   "count": 21,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
    "count": 20,
    "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
   },
