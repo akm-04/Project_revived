@@ -26,7 +26,8 @@
    "appworldboss.Mode",
    "appadventure.Mode",
    "appcompat.BootstrapProjection",
-   "achievementstore.BootstrapProjection"
+   "achievementstore.BootstrapProjection",
+   "herorecommendstore.BootstrapProjection"
   ],
   "LoginReconcilers": [
    "i4store.PlayerLoginActivity",

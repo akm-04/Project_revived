@@ -4367,7 +4367,8 @@
     "*OverlayMID1"
    ],
    "store:contentstore": [
-    "*ActiveRevision"
+    "*ActiveRevision",
+    "*HeroOriginCatalogTx"
    ],
    "store:guildrentalread": [
     "*ProfileTx"

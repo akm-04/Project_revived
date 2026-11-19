@@ -97,10 +97,14 @@ func (c *fakeCohort) ListLogicalServersAfterTx(_ context.Context, _ tx.Queryer, 
 	return out, nil
 }
 
-type fakeContent struct{}
+type fakeContent struct{ origins []int64 }
 
 func (fakeContent) ActiveRevision(context.Context, tx.Queryer) (string, error) {
 	return testRevision, nil
+}
+
+func (c fakeContent) HeroOriginCatalogTx(context.Context, tx.Queryer, string) ([]int64, error) {
+	return c.origins, nil
 }
 
 type fakeDirectory struct {
@@ -500,6 +504,57 @@ func TestWeekStartUsesMondayFiveGMT8(t *testing.T) {
 
 // An old Monday 04:00 UTC snapshot that still covers the instant is this
 // week's snapshot until the old week rolls.
+func TestScoresTxWithoutSnapshotCoversCatalogueWithZero(t *testing.T) {
+	service := Service{Store: &fakeStore{}, Content: fakeContent{origins: []int64{100, 200}}}
+	scores, err := service.ScoresTx(context.Background(), fakeTx{}, 1, time.Date(2026, 11, 7, 12, 0, 0, 0, time.UTC))
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := map[string]int64{"100": 0, "200": 0}
+	if len(scores) != len(want) {
+		t.Fatalf("scores=%v", scores)
+	}
+	for id, value := range want {
+		if scores[id] != value {
+			t.Fatalf("scores[%s]=%d, want %d", id, scores[id], value)
+		}
+	}
+}
+
+func TestScoresTxUsesAcceptedSnapshotScoresAndZeroesAbsentHeroes(t *testing.T) {
+	at := time.Date(2026, 11, 7, 12, 0, 0, 0, time.UTC)
+	snapshot := d.Snapshot{Schema: d.Schema, Server: 1, Generation: WeekStart(at).Unix(), Overview: d.Overview{TotalRankList: []map[string]any{
+		{"table_id": int64(100), "recommend_score": int64(7)},
+		{"table_id": int64(900), "recommend_score": int64(5)},
+	}}}
+	service := Service{Store: &fakeStore{snapshots: map[int64]d.Snapshot{1: snapshot}}, Content: fakeContent{origins: []int64{100, 200, 300}}}
+	scores, err := service.ScoresTx(context.Background(), fakeTx{}, 1, at)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if scores["100"] != 7 || scores["200"] != 0 || scores["300"] != 0 {
+		t.Fatalf("scores=%v", scores)
+	}
+	if _, ok := scores["900"]; ok {
+		t.Fatalf("a non-catalogue id leaked into the map: %v", scores)
+	}
+}
+
+func TestScoresTxSnapshotOutsideTheGenerationRuleIsAllZero(t *testing.T) {
+	at := time.Date(2026, 11, 7, 12, 0, 0, 0, time.UTC)
+	snapshot := d.Snapshot{Schema: d.Schema, Server: 1, Generation: WeekStart(at).Unix() - 7*86400, Overview: d.Overview{TotalRankList: []map[string]any{
+		{"table_id": int64(100), "recommend_score": int64(7)},
+	}}}
+	service := Service{Store: &fakeStore{snapshots: map[int64]d.Snapshot{1: snapshot}}, Content: fakeContent{origins: []int64{100}}}
+	scores, err := service.ScoresTx(context.Background(), fakeTx{}, 1, at)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if scores["100"] != 0 {
+		t.Fatalf("stale snapshot was served: %v", scores)
+	}
+}
+
 func TestLegacyWeekSnapshotIsServedAcrossTheSwitch(t *testing.T) {
 	service, store, clock := testService(t)
 	at := time.Date(2026, 11, 2, 1, 0, 0, 0, time.UTC) // Monday 09:00 GMT+8

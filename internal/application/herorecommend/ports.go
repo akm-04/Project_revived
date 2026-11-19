@@ -39,6 +39,7 @@ type Sources struct {
 
 type Content interface {
 	ActiveRevision(context.Context, tx.Queryer) (string, error)
+	HeroOriginCatalogTx(context.Context, tx.Queryer, string) ([]int64, error)
 }
 
 type Directory interface {

@@ -2,7 +2,9 @@ package herorecommend
 
 import (
 	"context"
+	"errors"
 	"strconv"
+	"time"
 
 	ca "gxb.local/backend/v2/internal/application/characterasset"
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -48,6 +50,49 @@ func (s Service) Detail(ctx context.Context, a identity.ActorContext, o operatio
 		forceInfo["exceed_percent"] = exceedPercent(detail.ForceRows, force)
 	}
 	return body, nil
+}
+
+// ScoresTx is the read-only MID1 detail source for the flat score map. Every
+// origin catalogue id is present so no client lookup can be nil; a hero absent
+// from the accepted weekly snapshot is 0. It never builds a snapshot.
+func (s Service) ScoresTx(ctx context.Context, q tx.Queryer, server identity.LogicalServerID, at time.Time) (map[string]int64, error) {
+	if q == nil || !server.Valid() || at.IsZero() || s.Content == nil || s.Store == nil {
+		return nil, d.ErrUnavailable
+	}
+	revision, err := s.Content.ActiveRevision(ctx, q)
+	if err != nil {
+		return nil, err
+	}
+	origins, err := s.Content.HeroOriginCatalogTx(ctx, q, revision)
+	if err != nil {
+		return nil, err
+	}
+	scores := make(map[string]int64, len(origins))
+	for _, tableID := range origins {
+		scores[strconv.FormatInt(tableID, 10)] = 0
+	}
+	snapshot, current, err := s.Store.LatestSnapshotTx(ctx, q, server)
+	if errors.Is(err, d.ErrUnavailable) {
+		current, err = false, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	if !current || !servingGeneration(snapshot.Generation, at) {
+		return scores, nil
+	}
+	for _, row := range snapshot.Overview.TotalRankList {
+		key := strconv.FormatInt(rowNumber(row, "table_id"), 10)
+		if _, known := scores[key]; known {
+			scores[key] = rowNumber(row, "recommend_score")
+		}
+	}
+	return scores, nil
+}
+
+// servingGeneration mirrors the generation rule ensureSnapshot applies.
+func servingGeneration(generation int64, at time.Time) bool {
+	return generation == WeekStart(at).Unix() || generation == LegacyWeekStart(at).Unix()
 }
 
 // ForceRank returns the 2499 body. An unknown but positive hero id yields an

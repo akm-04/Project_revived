@@ -18,7 +18,8 @@ func TestFrozenMID1DetailComplete(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(d) != 33 {
+	// MID 2501 is owned by the herorecommend MID1 contributor, not this baseline.
+	if len(d) != 32 {
 		t.Fatalf("detail=%d", len(d))
 	}
 	for _, mid := range EmbeddedMID1Records {
