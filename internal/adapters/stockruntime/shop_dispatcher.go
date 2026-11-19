@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
+	appi5 "gxb.local/backend/v2/internal/application/i5"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
 	app "gxb.local/backend/v2/internal/application/shop"
 	"gxb.local/backend/v2/internal/domain/economy"
@@ -194,6 +195,10 @@ var shopFailureRows = []failureRow{
 	{match: d.ErrPriceExpired, class: failureRefusal, code: 34020},
 	{match: d.ErrPriceDiscount, class: failureRefusal, code: 34021},
 	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+	// C5/C16: a purchase never overflows to mail, so a full backpack is a
+	// permanent refusal, not a defect.
+	{match: economy.ErrStackCapacity, class: failureRefusal, code: unprovenRefusalCode},
+	{match: appi5.ErrMailStackFull, class: failureRefusal, code: unprovenRefusalCode},
 	{match: d.ErrUnavailable, class: failureUnavailable},
 }
 

@@ -5,12 +5,32 @@
  ],
  "contracts": [
   {
-   "count": 1,
+   "count": 3,
    "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
   },
   {
    "count": 1,
+   "file": "docs/i9/I9_10A_EVENT_CENTRE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10F_MENTOR_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_4B_PREIMPLEMENTATION.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_BROADCAST_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 2,
    "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_DODGEBALL_V1.json"
   },
   {
    "count": 1,
@@ -18,11 +38,21 @@
   },
   {
    "count": 1,
+   "file": "docs/i9/I9_MARCH_IMPLEMENTATION.md"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
    "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
   }
  ],
  "decorated_by": [],
- "dispatcher_files": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/hero_assets_dispatcher.go"
+ ],
  "facts": {
   "consumers": {},
   "emits": [],
@@ -61,7 +91,24 @@
  "login": [
   "OverlayMID1"
  ],
- "mids": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_assets_dispatcher.go",
+    "line": 30
+   },
+   "mid": 90,
+   "name": "USE_SKILL_POINT_ITEM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_assets_dispatcher.go",
+    "line": 30
+   },
+   "mid": 99,
+   "name": "BUY_SKILL_POINT"
+  }
+ ],
  "name": "heroassets",
  "pushes": [],
  "stores": [

@@ -5,8 +5,36 @@
  ],
  "contracts": [
   {
-   "count": 1,
+   "count": 5,
+   "file": "docs/architecture/CUMULATIVE_CONTENT_GENERATION_LOCK.json"
+  },
+  {
+   "count": 7,
    "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_10A_EVENT_CENTRE_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_10F_MENTOR_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_4C_RESEARCH_PLAN.md"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_ADVENTURE_POLICY_V1.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_ADVENTURE_V1.json"
   },
   {
    "count": 1,
@@ -14,7 +42,35 @@
   },
   {
    "count": 1,
+   "file": "docs/i9/I9_DORM_SOCIAL_GLUE_RANKING_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_POLICY_V1.json"
+  },
+  {
+   "count": 2,
    "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V2.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V3.json"
+  },
+  {
+   "count": 6,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_OCCULT_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_PVP_RESIDUAL_HANDOFF_V1.json"
   },
   {
    "count": 1,
@@ -22,7 +78,9 @@
   }
  ],
  "decorated_by": [],
- "dispatcher_files": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/shop_dispatcher.go"
+ ],
  "facts": {
   "consumers": {},
   "emits": [],
@@ -63,7 +121,56 @@
   "unresolved_methods": []
  },
  "login": [],
- "mids": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/shop_dispatcher.go",
+    "line": 39
+   },
+   "mid": 32,
+   "name": "LOAD_SHOP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/shop_dispatcher.go",
+    "line": 39
+   },
+   "mid": 33,
+   "name": "BUY_SHOP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/shop_dispatcher.go",
+    "line": 39
+   },
+   "mid": 34,
+   "name": "REFRESH_SHOP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/shop_dispatcher.go",
+    "line": 39
+   },
+   "mid": 37,
+   "name": "LOAD_SHOP_LIST"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/shop_dispatcher.go",
+    "line": 39
+   },
+   "mid": 38,
+   "name": "CLOSE_SHOP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/shop_dispatcher.go",
+    "line": 39
+   },
+   "mid": 2982,
+   "name": "BUY_SHOP_MULTI"
+  }
+ ],
  "name": "shop",
  "pushes": [],
  "stores": [
@@ -103,7 +210,9 @@
   "integration": [
    "playerdisplay"
   ],
-  "scenarios_naming": [],
+  "scenarios_naming": [
+   "i9_11c_core_shops.json"
+  ],
   "unit": []
  }
 }
