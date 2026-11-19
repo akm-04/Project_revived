@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	sg "gxb.local/backend/v2/internal/application/socialgift"
 	"gxb.local/backend/v2/internal/application/socialinbox"
 	dg "gxb.local/backend/v2/internal/domain/generation"
@@ -183,7 +184,7 @@ func (Store) Counts(c context.Context, q tx.Queryer, p identity.PlayerID, day st
 	return a, b, e
 }
 func (Store) PutEpoch(c context.Context, t tx.Tx, e sg.Epoch, exists bool, at time.Time) error {
-	if e.Validate() != nil || at.Before(e.UpdatedAt) {
+	if e.Validate() != nil || at.Before(gen.EffectiveObservation(at, e.UpdatedAt)) {
 		return sg.ErrClock
 	}
 	var tag tx.CommandTag
