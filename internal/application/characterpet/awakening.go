@@ -54,7 +54,7 @@ func (s Service) LockAwakeningPetsTx(c context.Context, t tx.Tx, p identity.Play
 }
 
 func (s Service) FinishAwakeningPetLockedTx(c context.Context, t tx.Tx, pet character.Pet, d objective.AwakeDefinition, revision string, op operation.Context, at time.Time) error {
-	if s.Awakening == nil || s.Equipment == nil || t == nil || d.Type != 3 || d.Stage != 2 || d.Before != pet.TableID || pet.ValidatePersistent() != nil || op.ID.IsZero() || at.Before(gen.EffectiveObservation(at, pet.UpdatedAt)) {
+	if s.Awakening == nil || s.Equipment == nil || t == nil || d.Type != 3 || d.Stage != 2 || d.Before != pet.TableID || pet.ValidatePersistent() != nil || op.ID.IsZero() {
 		return objective.ErrAwakeningRefused
 	}
 	awakened, e := s.Equipment.PetTemplateAwakenedTx(c, t, revision, d.After)
@@ -67,7 +67,7 @@ func (s Service) FinishAwakeningPetLockedTx(c context.Context, t tx.Tx, pet char
 	old := pet.StateVersion
 	pet.TableID = d.After
 	pet.StateVersion++
-	pet.UpdatedAt = at.UTC()
+	pet.UpdatedAt = gen.EffectiveObservation(at, pet.UpdatedAt, pet.CreatedAt)
 	return s.Awakening.SavePetAwakeningTx(c, t, pet, old)
 }
 

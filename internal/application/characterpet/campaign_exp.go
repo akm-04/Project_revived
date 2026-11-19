@@ -41,9 +41,6 @@ func (s Service) CreditCampaignEXPTx(c context.Context, t tx.Tx, pid identity.Pl
 	if !found || !p.IsShow {
 		return p, ErrPetNotFound
 	}
-	if at.Before(gen.EffectiveObservation(at, p.UpdatedAt)) {
-		return p, errors.New("character pet: stale campaign EXP")
-	}
 	cap, err := s.Progression.CharacterMaxLevelTx(c, t, revision, level)
 	if err != nil {
 		return p, err
@@ -70,6 +67,6 @@ func (s Service) CreditCampaignEXPTx(c context.Context, t tx.Tx, pid identity.Pl
 	p.Exp = nextExp
 	p.Level = nextLevel
 	p.StateVersion++
-	p.UpdatedAt = at.UTC()
+	p.UpdatedAt = gen.EffectiveObservation(at, p.UpdatedAt, p.CreatedAt)
 	return p, s.Store.SavePetStateTx(c, t, p, old)
 }
