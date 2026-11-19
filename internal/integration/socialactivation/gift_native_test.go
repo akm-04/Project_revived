@@ -281,15 +281,18 @@ func Test7A_ClockVersionNoticeBoundaryAndScalarFailures(t *testing.T) {
 				ns = r.NoticeIDs
 			}
 			claim := false
+			var futureAt time.Time
 			switch kind {
 			case "rootversion":
 				f.sql(`UPDATE player_social_roots SET state_version=9223372036854775807`)
 			case "rootfuture":
-				f.sql(`UPDATE player_social_roots SET updated_at=$1`, f.now().Add(time.Hour))
+				futureAt = f.now().Add(time.Hour)
+				f.sql(`UPDATE player_social_roots SET updated_at=$1`, futureAt)
 			case "epochversion":
 				f.sql(`UPDATE social_gift_epochs SET state_version=9223372036854775807`)
 			case "epochfuture":
-				f.sql(`UPDATE social_gift_epochs SET updated_at=$1`, f.now().Add(time.Hour))
+				futureAt = f.now().Add(time.Hour)
+				f.sql(`UPDATE social_gift_epochs SET updated_at=$1`, futureAt)
 			case "epochlaterday":
 				f.sql(`UPDATE social_gift_epochs SET day_token='2099-01-01'`)
 			case "noticesequence":
@@ -306,7 +309,8 @@ func Test7A_ClockVersionNoticeBoundaryAndScalarFailures(t *testing.T) {
 					version = 9223372036854775807
 				}
 				if kind == "scalarfuture" {
-					at = f.now().Add(time.Hour)
+					futureAt = f.now().Add(time.Hour)
+					at = futureAt
 				}
 				f.sql(`INSERT INTO player_currency_balances(player_id,resource_key,amount,state_version,updated_at)VALUES(200001,'friendship_coin',$1,$2,$3)`, amount, version, at)
 			}
@@ -323,6 +327,38 @@ func Test7A_ClockVersionNoticeBoundaryAndScalarFailures(t *testing.T) {
 				} else {
 					_, e = s.Send(ctx, a, b.PlayerID, f.op())
 				}
+			}
+			if !futureAt.IsZero() {
+				// K3': a forward stored timestamp is an observation, not a refusal;
+				// the command commits once and never rewrites the row backwards.
+				if e != nil {
+					t.Fatalf("forward stored timestamp refused: %v", e)
+				}
+				switch kind {
+				case "rootfuture":
+					if f.number(`SELECT count(*) FROM player_social_roots WHERE updated_at < $1`, futureAt) != 0 {
+						t.Fatal("stored root timestamp moved backwards")
+					}
+					if f.number(`SELECT count(*) FROM social_gift_transfers`) != 1 {
+						t.Fatal("forward root did not send exactly once")
+					}
+				case "epochfuture":
+					if f.number(`SELECT count(*) FROM social_gift_epochs WHERE player_id=100001 AND updated_at < $1`, futureAt) != 0 {
+						t.Fatal("stored epoch timestamp moved backwards")
+					}
+					if f.number(`SELECT count(*) FROM social_gift_transfers`) != 2 {
+						t.Fatal("forward epoch did not send exactly once")
+					}
+				case "scalarfuture":
+					if f.number(`SELECT count(*) FROM player_currency_balances WHERE player_id=200001 AND resource_key='friendship_coin' AND updated_at >= $1`, futureAt) != 1 {
+						t.Fatal("stored scalar timestamp moved backwards")
+					}
+					if f.number(`SELECT amount FROM player_currency_balances WHERE player_id=200001 AND resource_key='friendship_coin'`) != 5 {
+						t.Fatal("forward scalar did not credit exactly once")
+					}
+				}
+				t.Log("REAL_PG forward observation clamped; one effect, no rewrite backwards")
+				return
 			}
 			if e == nil || f.giftState() != before {
 				t.Fatal("clock/overflow/boundary failed atomicity", e)

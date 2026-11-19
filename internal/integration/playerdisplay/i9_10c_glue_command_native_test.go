@@ -139,10 +139,10 @@ func TestI910CGlueUnknownPrivilegeRecoversWithoutInventingVIPZero(t *testing.T) 
 	if _, err := privilegeService(database, database).ImportManual(ctx, authority(), importQ(player, uuid().String(), 0), op()); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := service.Command(ctx, player, app.Command{Family: app.BuyGlue}, op()); !errors.Is(err, app.ErrRejected) {
-		t.Fatal("old admission was not retired at stale captured time", err)
-	}
 	if _, err := service.Command(ctx, player, app.Command{Family: app.BuyGlue}, op()); err != nil {
-		t.Fatal("later qualification left lane permanently blocked", err)
+		t.Fatal("stale captured time was not clamped to the observation", err)
+	}
+	if stored, exists, err := (dormstore.Store{}).ReadGluePurchasesTx(ctx, database, player.PlayerID); err != nil || !exists || stored.Count != 1 {
+		t.Fatal("clamped admission did not buy once", exists, err)
 	}
 }

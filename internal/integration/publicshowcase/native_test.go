@@ -420,8 +420,8 @@ func TestRetryUnknownProofAndStaleActor(t *testing.T) {
 	}
 	stale := showcase(p, p)
 	stale.Timed.Binder.Time = fixedTime{r.DecisionAt.Add(-time.Microsecond)}
-	if got, e := stale.Execute(ctx, a, app.Selection{2}, op()); !errors.Is(e, app.ErrInvalidState) || got.Schema != "" {
-		t.Fatal("old decision", e)
+	if _, e := stale.Execute(ctx, a, app.Selection{2}, op()); e != nil {
+		t.Fatal("old decision was not clamped", e)
 	}
 	s = showcase(p, faultDB{p, true})
 	known := op()

@@ -749,8 +749,8 @@ func newLeagueGate(at time.Time, blockAt int) *leagueGateClock {
 }
 
 // TestI7C5FLeagueRequestOrderInfoNative: a request order inversion, not a clock
-// reversal, must be refused as stale (409/40002) on both 2800 and 2801 instead
-// of answering a server defect.
+// reversal, is clamped to the stored observation on both 2800 and 2801 instead
+// of refusing; the root timestamp never moves backwards.
 func TestI7C5FLeagueRequestOrderInfoNative(t *testing.T) {
 	p := pool(t)
 	for _, test := range []struct {
@@ -785,15 +785,24 @@ func TestI7C5FLeagueRequestOrderInfoNative(t *testing.T) {
 			}
 			close(gate.release)
 			released = true
-			if e := <-out; !errors.Is(e, d.ErrStaleTime) {
-				t.Fatalf("an overtaken INFO/ENEMY decision time must be a stale refusal, got %v", e)
+			if e := <-out; e != nil {
+				t.Fatalf("an overtaken INFO/ENEMY decision must clamp, got %v", e)
+			}
+			var stored string
+			if e := p.QueryRow(ctx, `SELECT payload->>'UpdatedAt' FROM league_competitions WHERE competition_id='GLOBAL'`).Scan(&stored); e != nil {
+				t.Fatal(e)
+			}
+			updatedAt, e := time.Parse(time.RFC3339Nano, stored)
+			if e != nil || updatedAt.Before(at.Add(time.Millisecond)) {
+				t.Fatalf("root timestamp moved backwards: %s %v", stored, e)
 			}
 		})
 	}
 }
 
 // TestI7C5FLeagueRequestOrderTerminalNative: the same inversion between the
-// terminal decision binding and its root lock must be a stale refusal.
+// terminal decision binding and its root lock is not refused as stale; the
+// unresolved fight still reports pending and nothing settles twice.
 func TestI7C5FLeagueRequestOrderTerminalNative(t *testing.T) {
 	p := pool(t)
 	s, clock, _, a, b, ha, _ := leagueActors(t, p)
@@ -827,7 +836,11 @@ func TestI7C5FLeagueRequestOrderTerminalNative(t *testing.T) {
 	}
 	close(gate.release)
 	released = true
-	if e := <-out; !errors.Is(e, d.ErrStaleTime) {
-		t.Fatalf("an overtaken terminal decision time must be a stale refusal, got %v", e)
+	if e := <-out; !errors.Is(e, d.ErrPending) {
+		t.Fatalf("an overtaken terminal decision must report the pending fight, got %v", e)
+	}
+	if leagueScalar(t, p, `SELECT count(*) FROM league_matches WHERE attacker=$1 AND payload->>'Status'='FIGHTING'`, int64(a.PlayerID)) != 1 ||
+		leagueScalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ACADEMY_LEAGUE' AND actor_player_id=$1`, int64(a.PlayerID)) != 1 {
+		t.Fatal("the overtaken terminal settled or staged a second attempt")
 	}
 }

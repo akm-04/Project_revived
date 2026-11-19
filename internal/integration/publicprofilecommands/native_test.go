@@ -430,15 +430,15 @@ func TestRetryTimeAndConcurrentAssignments(t *testing.T) {
 	if !row.CreatedAt.Equal(r.DecisionAt) {
 		t.Fatal("decision resampled")
 	}
-	// A deliberate older decision must fail without writing or resampling.
+	// A deliberate older decision is clamped to the stored observation, never refused.
 	stale := service(p, p)
 	stale.Timed.Binder.Time = fixedTime{r.DecisionAt.Add(-time.Microsecond)}
-	if got, e := stale.Execute(ctx, a, app.Command{Kind: app.IntroCommand, Intro: "stale rejected"}, op()); !errors.Is(e, app.ErrInvalidState) || got.Schema != "" {
-		t.Fatal("stale decision didnot failclosed", e)
+	if _, e := stale.Execute(ctx, a, app.Command{Kind: app.IntroCommand, Intro: "stale clamped"}, op()); e != nil {
+		t.Fatal("stale decision was not clamped", e)
 	}
 	latest, _ := root(t, p, a.PlayerID)
-	if latest.StateVersion != 1 {
-		t.Fatal("stale decision mutated")
+	if latest.StateVersion != 2 || latest.UpdatedAt.Before(r.DecisionAt) {
+		t.Fatalf("stale clamp mutated backwards: %d %v", latest.StateVersion, latest.UpdatedAt)
 	}
 	common, e := (pg.AuthoritativeTime{Queryer: p}).Now(ctx)
 	if e != nil {
@@ -487,7 +487,7 @@ func TestRetryTimeAndConcurrentAssignments(t *testing.T) {
 		t.Fatal("no concurrent operationcommitted")
 	}
 	row, _ = root(t, p, a.PlayerID)
-	if row.StateVersion < 2 || row.StateVersion > int64(1+committed) || row.StateVersion != highest {
+	if row.StateVersion < 3 || row.StateVersion > int64(2+committed) || row.StateVersion != highest {
 		t.Fatal("effective version/receipt inconsistency", row.StateVersion, highest)
 	}
 

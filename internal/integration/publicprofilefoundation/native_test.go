@@ -242,8 +242,12 @@ func TestPreparedCASAliasingAndTime(t *testing.T) {
 		t.Fatal("overflow")
 	}
 	sqlExec(t, p, "UPDATE player_public_profile_roots SET state_version=1,updated_at=$2 WHERE player_id=$1", int64(a.PlayerID), at.Add(time.Second))
-	if _, _, e = write(p, a, dom.Change{Intro: &txt}, at); e == nil {
-		t.Fatal("stale decision")
+	clamped, _, e := write(p, a, dom.Change{Intro: &txt}, at)
+	if e != nil {
+		t.Fatal("stale decision was not clamped", e)
+	}
+	if clamped.UpdatedAt.Before(at.Add(time.Second)) {
+		t.Fatalf("stale clamp moved the root backwards: %v", clamped.UpdatedAt)
 	}
 	if _, _, e = write(p, a, dom.Change{Intro: &txt}, at.Add(time.Second)); e != nil {
 		t.Fatal(e)
