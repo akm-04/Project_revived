@@ -46,27 +46,66 @@ func (s Service) ensureMissionSetTx(ctx context.Context, t tx.Tx, catalog lib.Ca
 	return nil
 }
 
-// advanceGiftMissionTx moves mission 1001 on a gift that actually raised favor.
-func (s Service) advanceGiftMissionTx(ctx context.Context, t tx.Tx, catalog lib.Catalog, player identity.PlayerID, partnerID int64, at time.Time) error {
-	rule, ok := catalog.Missions[lib.GiftMissionID]
-	if !ok {
-		return lib.ErrUnqualified
-	}
+// settlePartnerMissionsTx advances mission 1001 on a favor-raising gift and
+// awards every success row once, returning the amour the caller must raise on
+// the hero through the ordinary favor path.
+func (s Service) settlePartnerMissionsTx(ctx context.Context, t tx.Tx, catalog lib.Catalog, player identity.PlayerID, partnerID int64, advanceGift bool, at time.Time) (int64, bool, error) {
 	rows, e := s.Library.ListMissionsTx(ctx, t, player)
 	if e != nil {
-		return e
+		return 0, false, e
 	}
+	changed := false
+	var amour int64
 	for _, row := range rows {
-		if row.PartnerID != partnerID || row.MissionID != lib.GiftMissionID {
+		if row.PartnerID != partnerID {
 			continue
 		}
-		next, changed, e := row.Advance(rule.Required, at)
-		if e != nil || !changed {
-			return e
+		moved := false
+		if advanceGift && row.MissionID == lib.GiftMissionID && row.MissionState == lib.MissionProceed {
+			rule, ok := catalog.Missions[row.MissionID]
+			if !ok {
+				return 0, false, lib.ErrUnqualified
+			}
+			next, advanced, e := row.Advance(rule.Required, at)
+			if e != nil {
+				return 0, false, e
+			}
+			if advanced {
+				row, moved = next, true
+			}
 		}
-		return s.Library.SaveMissionTx(ctx, t, next)
+		if row.MissionState == lib.MissionSuccess {
+			rule, ok := catalog.Missions[row.MissionID]
+			if !ok {
+				return 0, false, lib.ErrUnqualified
+			}
+			next, awarded, e := row.Award(at)
+			if e != nil {
+				return 0, false, e
+			}
+			if awarded {
+				row, moved = next, true
+				amour += rule.Amour
+			}
+		}
+		if !moved {
+			continue
+		}
+		if e = s.Library.SaveMissionTx(ctx, t, row); e != nil {
+			return 0, false, e
+		}
+		changed = true
 	}
-	return nil
+	return amour, changed, nil
+}
+
+// awardMissionAmour folds the mission amour into the command's one hero write:
+// a command that already advanced the state version keeps that single bump.
+func awardMissionAmour(facts lib.HeroFacts, amour int64, advanced bool, at time.Time) (lib.HeroFacts, bool, error) {
+	if advanced {
+		return facts.AwardAmour(amour, at)
+	}
+	return facts.RaiseFavor(amour, at)
 }
 
 func (s Service) prepareFacts(ctx context.Context, t tx.Tx, player identity.PlayerID, d Admission) (context.Context, error) {

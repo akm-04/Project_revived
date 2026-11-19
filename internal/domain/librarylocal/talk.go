@@ -5,6 +5,16 @@ import "time"
 // RaiseFavor applies one settled intimacy reward with the live clamp. A hero at
 // the cap keeps its favor and the caller records no improvement.
 func (f HeroFacts) RaiseFavor(amount int64, now time.Time) (HeroFacts, bool, error) {
+	return f.addFavor(amount, now, true)
+}
+
+// AwardAmour applies a mission's amour when the command already advanced the
+// state version, so the merged facts are saved once.
+func (f HeroFacts) AwardAmour(amount int64, now time.Time) (HeroFacts, bool, error) {
+	return f.addFavor(amount, now, false)
+}
+
+func (f HeroFacts) addFavor(amount int64, now time.Time, advanceState bool) (HeroFacts, bool, error) {
 	if err := f.Validate(); err != nil {
 		return HeroFacts{}, false, err
 	}
@@ -16,7 +26,9 @@ func (f HeroFacts) RaiseFavor(amount int64, now time.Time) (HeroFacts, bool, err
 	}
 	next := f
 	next.Favor = min(f.Favor+amount, FavorLimit)
-	next.StateVersion++
+	if advanceState {
+		next.StateVersion++
+	}
 	next.UpdatedAt = now
 	return next, true, next.Validate()
 }

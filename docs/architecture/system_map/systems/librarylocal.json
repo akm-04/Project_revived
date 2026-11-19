@@ -407,6 +407,7 @@
    "battle_count_native_test.go",
    "command_reward_test.go",
    "commands_log_test.go",
+   "commands_mission_test.go",
    "inputs_test.go",
    "journal_policy_native_test.go",
    "notice_test.go",
