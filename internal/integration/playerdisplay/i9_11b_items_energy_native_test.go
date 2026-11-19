@@ -287,6 +287,17 @@ func TestI911BTuningOverlayAndFallback(t *testing.T) {
 	if fallback.HTTPStatus != http.StatusConflict || fallback.Body["error_code"] != int64(35031) {
 		t.Fatalf("invalid overlay did not fall back to source: %d %#v", fallback.HTTPStatus, fallback.Body)
 	}
+	// One invalid field rejects the whole overlay: the source cap and the source
+	// 120 grant apply even though buy_energy_num is valid on its own.
+	exec(t, database, `UPDATE items_energy_tuning SET payload='{"energy_max_limit":-1,"buy_energy_num":240}'::jsonb`)
+	exec(t, database, `UPDATE player_temporal_resources SET stored_amount=100 WHERE player_id=$1 AND resource_key='energy'`, int64(a.PlayerID))
+	exec(t, database, `UPDATE daily_consumption_players SET counts='{}'::jsonb WHERE player_id=$1`, int64(a.PlayerID))
+	i911bScalarSet(t, database, a, "crystal", 1000)
+	mixed := dispatcher.Dispatch(ctx, i911bRequest(a, 97, map[string]any{}, op()))
+	i911bStatusCode(t, mixed)
+	if mixed.Body["energy"] != int64(220) {
+		t.Fatalf("mixed invalid overlay did not fall back to the source grant: %#v", mixed.Body)
+	}
 	exec(t, database, `DELETE FROM items_energy_tuning`)
 }
 
@@ -462,7 +473,7 @@ func TestI911BBoxScheduleAndReplay(t *testing.T) {
 	}
 	wantAwards := make([]any, 0, len(expected.Awards))
 	for _, award := range expected.Awards {
-		wantAwards = append(wantAwards, map[string]any{"table_id": award.TableID, "item_num": award.ItemNum})
+		wantAwards = append(wantAwards, map[string]any{"table_id": award.TableID, "item_num": award.ItemNum, "to_stone": false, "is_partner": false})
 	}
 	i911bStack(t, database, a, itemID, 3)
 	first := i911bRequest(a, 241, map[string]any{"item_id": itemID, "gift_id": giftID, "num": int64(1)}, fixed)
@@ -574,6 +585,9 @@ func TestI911BBoxHeroDuplicateToStone(t *testing.T) {
 	for _, entry := range response.Body["awards"].([]any) {
 		award, ok := entry.(map[string]any)
 		if ok && award["table_id"] == stone[0] && award["to_stone"] == true {
+			if award["is_partner"] != false {
+				t.Fatalf("stone award partner flag %#v", award)
+			}
 			found = true
 		}
 	}
@@ -750,8 +764,13 @@ func TestI911BBoxFixedChooseOneSpirit(t *testing.T) {
 	chosen := dispatcher.Dispatch(ctx, i911bRequest(a, 241, map[string]any{"item_id": int64(50001052), "gift_id": int64(90001088), "num": int64(1)}, op()))
 	i911bStatusCode(t, chosen)
 	replyconformance.Check(t, 241, chosen.Body)
-	if len(chosen.Body["awards"].([]any)) == 0 || i911bStackQuantity(t, database, a, 50001052) != 0 {
+	awards := chosen.Body["awards"].([]any)
+	if len(awards) == 0 || i911bStackQuantity(t, database, a, 50001052) != 0 {
 		t.Fatalf("choose-one box %#v", chosen.Body)
+	}
+	heroAward, ok := awards[0].(map[string]any)
+	if !ok || heroAward["is_partner"] != true || heroAward["to_stone"] != false {
+		t.Fatalf("choose-one hero award %#v", awards)
 	}
 	// Spirit-energy gift row: 50002142 -> gift 90040410 grants 6 spirit energy.
 	before := i911bTemporal(t, database, a, "spirit_energy")
