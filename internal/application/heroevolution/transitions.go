@@ -2,6 +2,7 @@ package heroevolution
 
 import (
 	"context"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	i5 "gxb.local/backend/v2/internal/application/i5"
 	evo "gxb.local/backend/v2/internal/domain/heroevolution"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -27,7 +28,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	if e != nil {
 		return nil, e
 	}
-	if d.DecisionAt.Before(h.UpdatedAt) || d.DecisionAt.Before(pop.UpdatedAt) || d.DecisionAt.Before(f.UpdatedAt) {
+	if d.DecisionAt.Before(gen.EffectiveObservation(d.DecisionAt, h.UpdatedAt)) || d.DecisionAt.Before(gen.EffectiveObservation(d.DecisionAt, pop.UpdatedAt)) || d.DecisionAt.Before(gen.EffectiveObservation(d.DecisionAt, f.UpdatedAt)) {
 		return nil, ErrStale
 	}
 	c, e := s.Content.EvolutionCatalogTx(ctx, t, d.ContentRevision)
