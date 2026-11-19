@@ -145,6 +145,9 @@
    "dodgeball": [
     "NewCoherentReadScope"
    ],
+   "dormhouse": [
+    "NewCoherentReadScope"
+   ],
    "elementequipment": [
     "Queryer",
     "Validate"
@@ -268,7 +271,8 @@
     "*RawAwakeningTx"
    ],
    "dormhouse": [
-    "*ApplyDormEXPLockedTx"
+    "*ApplyDormEXPLockedTx",
+    "*RawAwakeningTx"
    ],
    "godstrial": [
     "*LockStoryRosterTx"
@@ -3579,8 +3583,12 @@
    ]
   },
   "dormhouse": {
+   "characterasset": [
+    "NewCoherentReadScope"
+   ],
    "characterhero": [
-    "*ApplyDormEXPLockedTx"
+    "*ApplyDormEXPLockedTx",
+    "*RawAwakeningTx"
    ],
    "commerceprivilege": [
     "*ReadCosmeticPrivilegeTx"

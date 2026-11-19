@@ -2,12 +2,19 @@ package dormhouse
 
 import (
 	"context"
+	"gxb.local/backend/v2/internal/application/characterasset"
 	"gxb.local/backend/v2/internal/domain/character"
 	dorm "gxb.local/backend/v2/internal/domain/dormhouse"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"time"
 )
+
+// RawAwakeningObserver is the Character-owned raw twice-awake facet, read
+// through the same observation reader the public-profile records use.
+type RawAwakeningObserver interface {
+	RawAwakeningTx(context.Context, characterasset.CoherentReadScope, character.HeroRef) (characterasset.HeroRawAwakeningObservation, error)
+}
 
 type OwnerReader interface {
 	ReadRootTx(context.Context, tx.Queryer, identity.PlayerID) (dorm.Root, error)

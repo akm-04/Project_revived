@@ -92624,32 +92624,32 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "repeatable_read"
     }
    ],
@@ -92657,68 +92657,68 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:323",
+    "internal/application/dormhouse/service.go:324",
     "internal/application/i5/service.go:719"
    ],
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "1"
     }
    ],
@@ -92760,7 +92760,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 95,
+     "line": 144,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -92768,7 +92768,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 383,
+     "line": 384,
      "read_only": "false",
      "retry": "1"
     },
@@ -92776,7 +92776,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 442,
+     "line": 443,
      "read_only": "false",
      "retry": "8"
     },
@@ -92784,7 +92784,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 517,
+     "line": 518,
      "read_only": "false",
      "retry": "8"
     },
@@ -92792,7 +92792,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 575,
+     "line": 576,
      "read_only": "false",
      "retry": "8"
     },
@@ -92800,7 +92800,7 @@
      "file": "internal/application/dormhouse/social.go",
      "function": "Service.SocialRead",
      "isolation": "repeatable_read",
-     "line": 408,
+     "line": 412,
      "read_only": "false",
      "retry": "1"
     }
@@ -92995,11 +92995,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:21",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:95"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
    ],
    "writes": "state"
   },
@@ -123908,32 +123908,32 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "repeatable_read"
     }
    ],
@@ -123941,68 +123941,68 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:323",
+    "internal/application/dormhouse/service.go:324",
     "internal/application/i5/service.go:719"
    ],
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "1"
     }
    ],
@@ -124044,7 +124044,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 95,
+     "line": 144,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -124052,7 +124052,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 383,
+     "line": 384,
      "read_only": "false",
      "retry": "1"
     },
@@ -124060,7 +124060,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 442,
+     "line": 443,
      "read_only": "false",
      "retry": "8"
     },
@@ -124068,7 +124068,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 517,
+     "line": 518,
      "read_only": "false",
      "retry": "8"
     },
@@ -124076,7 +124076,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 575,
+     "line": 576,
      "read_only": "false",
      "retry": "8"
     },
@@ -124084,7 +124084,7 @@
      "file": "internal/application/dormhouse/social.go",
      "function": "Service.SocialRead",
      "isolation": "repeatable_read",
-     "line": 408,
+     "line": 412,
      "read_only": "false",
      "retry": "1"
     }
@@ -124279,11 +124279,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:21",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:95"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
    ],
    "writes": "state"
   },
@@ -124292,32 +124292,32 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "repeatable_read"
     }
    ],
@@ -124325,68 +124325,68 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:323",
+    "internal/application/dormhouse/service.go:324",
     "internal/application/i5/service.go:719"
    ],
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "1"
     }
    ],
@@ -124428,7 +124428,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 95,
+     "line": 144,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -124436,7 +124436,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 383,
+     "line": 384,
      "read_only": "false",
      "retry": "1"
     },
@@ -124444,7 +124444,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 442,
+     "line": 443,
      "read_only": "false",
      "retry": "8"
     },
@@ -124452,7 +124452,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 517,
+     "line": 518,
      "read_only": "false",
      "retry": "8"
     },
@@ -124460,7 +124460,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 575,
+     "line": 576,
      "read_only": "false",
      "retry": "8"
     },
@@ -124468,7 +124468,7 @@
      "file": "internal/application/dormhouse/social.go",
      "function": "Service.SocialRead",
      "isolation": "repeatable_read",
-     "line": 408,
+     "line": 412,
      "read_only": "false",
      "retry": "1"
     }
@@ -124663,11 +124663,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:21",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:95"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
    ],
    "writes": "state"
   },
@@ -124676,32 +124676,32 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "repeatable_read"
     }
    ],
@@ -124709,68 +124709,68 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:323",
+    "internal/application/dormhouse/service.go:324",
     "internal/application/i5/service.go:719"
    ],
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "1"
     }
    ],
@@ -124812,7 +124812,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 95,
+     "line": 144,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -124820,7 +124820,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 383,
+     "line": 384,
      "read_only": "false",
      "retry": "1"
     },
@@ -124828,7 +124828,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 442,
+     "line": 443,
      "read_only": "false",
      "retry": "8"
     },
@@ -124836,7 +124836,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 517,
+     "line": 518,
      "read_only": "false",
      "retry": "8"
     },
@@ -124844,7 +124844,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 575,
+     "line": 576,
      "read_only": "false",
      "retry": "8"
     },
@@ -124852,7 +124852,7 @@
      "file": "internal/application/dormhouse/social.go",
      "function": "Service.SocialRead",
      "isolation": "repeatable_read",
-     "line": 408,
+     "line": 412,
      "read_only": "false",
      "retry": "1"
     }
@@ -125047,11 +125047,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:21",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:95"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
    ],
    "writes": "state"
   },
@@ -125060,32 +125060,32 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "repeatable_read"
     }
    ],
@@ -125093,68 +125093,68 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:323",
+    "internal/application/dormhouse/service.go:324",
     "internal/application/i5/service.go:719"
    ],
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "1"
     }
    ],
@@ -125196,7 +125196,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 95,
+     "line": 144,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -125204,7 +125204,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 383,
+     "line": 384,
      "read_only": "false",
      "retry": "1"
     },
@@ -125212,7 +125212,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 442,
+     "line": 443,
      "read_only": "false",
      "retry": "8"
     },
@@ -125220,7 +125220,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 517,
+     "line": 518,
      "read_only": "false",
      "retry": "8"
     },
@@ -125228,7 +125228,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 575,
+     "line": 576,
      "read_only": "false",
      "retry": "8"
     },
@@ -125236,7 +125236,7 @@
      "file": "internal/application/dormhouse/social.go",
      "function": "Service.SocialRead",
      "isolation": "repeatable_read",
-     "line": 408,
+     "line": 412,
      "read_only": "false",
      "retry": "1"
     }
@@ -125431,11 +125431,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:21",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:95"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
    ],
    "writes": "state"
   },
@@ -125444,32 +125444,32 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "repeatable_read"
     }
    ],
@@ -125477,68 +125477,68 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:323",
+    "internal/application/dormhouse/service.go:324",
     "internal/application/i5/service.go:719"
    ],
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "1"
     }
    ],
@@ -125580,7 +125580,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 95,
+     "line": 144,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -125588,7 +125588,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 383,
+     "line": 384,
      "read_only": "false",
      "retry": "1"
     },
@@ -125596,7 +125596,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 442,
+     "line": 443,
      "read_only": "false",
      "retry": "8"
     },
@@ -125604,7 +125604,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 517,
+     "line": 518,
      "read_only": "false",
      "retry": "8"
     },
@@ -125612,7 +125612,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 575,
+     "line": 576,
      "read_only": "false",
      "retry": "8"
     },
@@ -125620,7 +125620,7 @@
      "file": "internal/application/dormhouse/social.go",
      "function": "Service.SocialRead",
      "isolation": "repeatable_read",
-     "line": 408,
+     "line": 412,
      "read_only": "false",
      "retry": "1"
     }
@@ -125815,11 +125815,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:21",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:95"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
    ],
    "writes": "state"
   },
@@ -125828,32 +125828,32 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "repeatable_read"
     }
    ],
@@ -125861,68 +125861,68 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:323",
+    "internal/application/dormhouse/service.go:324",
     "internal/application/i5/service.go:719"
    ],
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "1"
     }
    ],
@@ -125964,7 +125964,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 95,
+     "line": 144,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -125972,7 +125972,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 383,
+     "line": 384,
      "read_only": "false",
      "retry": "1"
     },
@@ -125980,7 +125980,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 442,
+     "line": 443,
      "read_only": "false",
      "retry": "8"
     },
@@ -125988,7 +125988,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 517,
+     "line": 518,
      "read_only": "false",
      "retry": "8"
     },
@@ -125996,7 +125996,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 575,
+     "line": 576,
      "read_only": "false",
      "retry": "8"
     },
@@ -126004,7 +126004,7 @@
      "file": "internal/application/dormhouse/social.go",
      "function": "Service.SocialRead",
      "isolation": "repeatable_read",
-     "line": 408,
+     "line": 412,
      "read_only": "false",
      "retry": "1"
     }
@@ -126199,11 +126199,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:21",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:95"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
    ],
    "writes": "state"
   },
@@ -126212,32 +126212,32 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "repeatable_read"
     }
    ],
@@ -126245,68 +126245,68 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:323",
+    "internal/application/dormhouse/service.go:324",
     "internal/application/i5/service.go:719"
    ],
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "1"
     }
    ],
@@ -126348,7 +126348,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 95,
+     "line": 144,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -126356,7 +126356,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 383,
+     "line": 384,
      "read_only": "false",
      "retry": "1"
     },
@@ -126364,7 +126364,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 442,
+     "line": 443,
      "read_only": "false",
      "retry": "8"
     },
@@ -126372,7 +126372,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 517,
+     "line": 518,
      "read_only": "false",
      "retry": "8"
     },
@@ -126380,7 +126380,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 575,
+     "line": 576,
      "read_only": "false",
      "retry": "8"
     },
@@ -126388,7 +126388,7 @@
      "file": "internal/application/dormhouse/social.go",
      "function": "Service.SocialRead",
      "isolation": "repeatable_read",
-     "line": 408,
+     "line": 412,
      "read_only": "false",
      "retry": "1"
     }
@@ -126583,11 +126583,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:21",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:95"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
    ],
    "writes": "state"
   },
@@ -126596,32 +126596,32 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "repeatable_read"
     }
    ],
@@ -126629,68 +126629,68 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:323",
+    "internal/application/dormhouse/service.go:324",
     "internal/application/i5/service.go:719"
    ],
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "1"
     }
    ],
@@ -126732,7 +126732,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 95,
+     "line": 144,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -126740,7 +126740,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 383,
+     "line": 384,
      "read_only": "false",
      "retry": "1"
     },
@@ -126748,7 +126748,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 442,
+     "line": 443,
      "read_only": "false",
      "retry": "8"
     },
@@ -126756,7 +126756,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 517,
+     "line": 518,
      "read_only": "false",
      "retry": "8"
     },
@@ -126764,7 +126764,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 575,
+     "line": 576,
      "read_only": "false",
      "retry": "8"
     },
@@ -126772,7 +126772,7 @@
      "file": "internal/application/dormhouse/social.go",
      "function": "Service.SocialRead",
      "isolation": "repeatable_read",
-     "line": 408,
+     "line": 412,
      "read_only": "false",
      "retry": "1"
     }
@@ -126967,11 +126967,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:21",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:95"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
    ],
    "writes": "state"
   },
@@ -126980,32 +126980,32 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "repeatable_read"
     }
    ],
@@ -127013,68 +127013,68 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:323",
+    "internal/application/dormhouse/service.go:324",
     "internal/application/i5/service.go:719"
    ],
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "1"
     }
    ],
@@ -127116,7 +127116,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 95,
+     "line": 144,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -127124,7 +127124,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 383,
+     "line": 384,
      "read_only": "false",
      "retry": "1"
     },
@@ -127132,7 +127132,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 442,
+     "line": 443,
      "read_only": "false",
      "retry": "8"
     },
@@ -127140,7 +127140,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 517,
+     "line": 518,
      "read_only": "false",
      "retry": "8"
     },
@@ -127148,7 +127148,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 575,
+     "line": 576,
      "read_only": "false",
      "retry": "8"
     },
@@ -127156,7 +127156,7 @@
      "file": "internal/application/dormhouse/social.go",
      "function": "Service.SocialRead",
      "isolation": "repeatable_read",
-     "line": 408,
+     "line": 412,
      "read_only": "false",
      "retry": "1"
     }
@@ -127351,11 +127351,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:21",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:95"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
    ],
    "writes": "state"
   },
@@ -127364,32 +127364,32 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "repeatable_read"
     }
    ],
@@ -127397,68 +127397,68 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:323",
+    "internal/application/dormhouse/service.go:324",
     "internal/application/i5/service.go:719"
    ],
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "1"
     }
    ],
@@ -127500,7 +127500,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 95,
+     "line": 144,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -127508,7 +127508,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 383,
+     "line": 384,
      "read_only": "false",
      "retry": "1"
     },
@@ -127516,7 +127516,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 442,
+     "line": 443,
      "read_only": "false",
      "retry": "8"
     },
@@ -127524,7 +127524,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 517,
+     "line": 518,
      "read_only": "false",
      "retry": "8"
     },
@@ -127532,7 +127532,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 575,
+     "line": 576,
      "read_only": "false",
      "retry": "8"
     },
@@ -127540,7 +127540,7 @@
      "file": "internal/application/dormhouse/social.go",
      "function": "Service.SocialRead",
      "isolation": "repeatable_read",
-     "line": 408,
+     "line": 412,
      "read_only": "false",
      "retry": "1"
     }
@@ -127735,11 +127735,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:21",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:95"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
    ],
    "writes": "state"
   },
@@ -127748,32 +127748,32 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "repeatable_read"
     }
    ],
@@ -127781,68 +127781,68 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:323",
+    "internal/application/dormhouse/service.go:324",
     "internal/application/i5/service.go:719"
    ],
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "1"
     }
    ],
@@ -127884,7 +127884,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 95,
+     "line": 144,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -127892,7 +127892,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 383,
+     "line": 384,
      "read_only": "false",
      "retry": "1"
     },
@@ -127900,7 +127900,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 442,
+     "line": 443,
      "read_only": "false",
      "retry": "8"
     },
@@ -127908,7 +127908,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 517,
+     "line": 518,
      "read_only": "false",
      "retry": "8"
     },
@@ -127916,7 +127916,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 575,
+     "line": 576,
      "read_only": "false",
      "retry": "8"
     },
@@ -127924,7 +127924,7 @@
      "file": "internal/application/dormhouse/social.go",
      "function": "Service.SocialRead",
      "isolation": "repeatable_read",
-     "line": 408,
+     "line": 412,
      "read_only": "false",
      "retry": "1"
     }
@@ -128119,11 +128119,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:21",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:95"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
    ],
    "writes": "state"
   },
@@ -128132,32 +128132,32 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "repeatable_read"
     }
    ],
@@ -128165,68 +128165,68 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:323",
+    "internal/application/dormhouse/service.go:324",
     "internal/application/i5/service.go:719"
    ],
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "1"
     }
    ],
@@ -128268,7 +128268,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 95,
+     "line": 144,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -128276,7 +128276,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 383,
+     "line": 384,
      "read_only": "false",
      "retry": "1"
     },
@@ -128284,7 +128284,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 442,
+     "line": 443,
      "read_only": "false",
      "retry": "8"
     },
@@ -128292,7 +128292,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 517,
+     "line": 518,
      "read_only": "false",
      "retry": "8"
     },
@@ -128300,7 +128300,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 575,
+     "line": 576,
      "read_only": "false",
      "retry": "8"
     },
@@ -128308,7 +128308,7 @@
      "file": "internal/application/dormhouse/social.go",
      "function": "Service.SocialRead",
      "isolation": "repeatable_read",
-     "line": 408,
+     "line": 412,
      "read_only": "false",
      "retry": "1"
     }
@@ -128503,11 +128503,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:21",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:95"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
    ],
    "writes": "state"
   },
@@ -128516,32 +128516,32 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "repeatable_read"
     }
    ],
@@ -128549,68 +128549,68 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:323",
+    "internal/application/dormhouse/service.go:324",
     "internal/application/i5/service.go:719"
    ],
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "1"
     }
    ],
@@ -128652,7 +128652,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 95,
+     "line": 144,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -128660,7 +128660,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 383,
+     "line": 384,
      "read_only": "false",
      "retry": "1"
     },
@@ -128668,7 +128668,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 442,
+     "line": 443,
      "read_only": "false",
      "retry": "8"
     },
@@ -128676,7 +128676,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 517,
+     "line": 518,
      "read_only": "false",
      "retry": "8"
     },
@@ -128684,7 +128684,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 575,
+     "line": 576,
      "read_only": "false",
      "retry": "8"
     },
@@ -128692,7 +128692,7 @@
      "file": "internal/application/dormhouse/social.go",
      "function": "Service.SocialRead",
      "isolation": "repeatable_read",
-     "line": 408,
+     "line": 412,
      "read_only": "false",
      "retry": "1"
     }
@@ -128887,11 +128887,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:21",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:95"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
    ],
    "writes": "state"
   },
@@ -128900,32 +128900,32 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "repeatable_read"
     }
    ],
@@ -128933,68 +128933,68 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:323",
+    "internal/application/dormhouse/service.go:324",
     "internal/application/i5/service.go:719"
    ],
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "1"
     }
    ],
@@ -129036,7 +129036,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 95,
+     "line": 144,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -129044,7 +129044,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 383,
+     "line": 384,
      "read_only": "false",
      "retry": "1"
     },
@@ -129052,7 +129052,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 442,
+     "line": 443,
      "read_only": "false",
      "retry": "8"
     },
@@ -129060,7 +129060,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 517,
+     "line": 518,
      "read_only": "false",
      "retry": "8"
     },
@@ -129068,7 +129068,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 575,
+     "line": 576,
      "read_only": "false",
      "retry": "8"
     },
@@ -129076,7 +129076,7 @@
      "file": "internal/application/dormhouse/social.go",
      "function": "Service.SocialRead",
      "isolation": "repeatable_read",
-     "line": 408,
+     "line": 412,
      "read_only": "false",
      "retry": "1"
     }
@@ -129271,11 +129271,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:21",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:95"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
    ],
    "writes": "state"
   },
@@ -129284,32 +129284,32 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "repeatable_read"
     }
    ],
@@ -129317,68 +129317,68 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:323",
+    "internal/application/dormhouse/service.go:324",
     "internal/application/i5/service.go:719"
    ],
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "1"
     }
    ],
@@ -129420,7 +129420,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 95,
+     "line": 144,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -129428,7 +129428,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 383,
+     "line": 384,
      "read_only": "false",
      "retry": "1"
     },
@@ -129436,7 +129436,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 442,
+     "line": 443,
      "read_only": "false",
      "retry": "8"
     },
@@ -129444,7 +129444,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 517,
+     "line": 518,
      "read_only": "false",
      "retry": "8"
     },
@@ -129452,7 +129452,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 575,
+     "line": 576,
      "read_only": "false",
      "retry": "8"
     },
@@ -129460,7 +129460,7 @@
      "file": "internal/application/dormhouse/social.go",
      "function": "Service.SocialRead",
      "isolation": "repeatable_read",
-     "line": 408,
+     "line": 412,
      "read_only": "false",
      "retry": "1"
     }
@@ -129655,11 +129655,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:21",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:95"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
    ],
    "writes": "state"
   },
@@ -132506,32 +132506,32 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "repeatable_read"
     }
    ],
@@ -132539,68 +132539,68 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:323",
+    "internal/application/dormhouse/service.go:324",
     "internal/application/i5/service.go:719"
    ],
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "1"
     }
    ],
@@ -132642,7 +132642,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 95,
+     "line": 144,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -132650,7 +132650,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 383,
+     "line": 384,
      "read_only": "false",
      "retry": "1"
     },
@@ -132658,7 +132658,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 442,
+     "line": 443,
      "read_only": "false",
      "retry": "8"
     },
@@ -132666,7 +132666,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 517,
+     "line": 518,
      "read_only": "false",
      "retry": "8"
     },
@@ -132674,7 +132674,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 575,
+     "line": 576,
      "read_only": "false",
      "retry": "8"
     },
@@ -132682,7 +132682,7 @@
      "file": "internal/application/dormhouse/social.go",
      "function": "Service.SocialRead",
      "isolation": "repeatable_read",
-     "line": 408,
+     "line": 412,
      "read_only": "false",
      "retry": "1"
     }
@@ -132877,11 +132877,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:21",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:95"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
    ],
    "writes": "state"
   },
@@ -132890,32 +132890,32 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "repeatable_read"
     }
    ],
@@ -132923,68 +132923,68 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:323",
+    "internal/application/dormhouse/service.go:324",
     "internal/application/i5/service.go:719"
    ],
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "1"
     }
    ],
@@ -133026,7 +133026,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 95,
+     "line": 144,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -133034,7 +133034,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 383,
+     "line": 384,
      "read_only": "false",
      "retry": "1"
     },
@@ -133042,7 +133042,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 442,
+     "line": 443,
      "read_only": "false",
      "retry": "8"
     },
@@ -133050,7 +133050,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 517,
+     "line": 518,
      "read_only": "false",
      "retry": "8"
     },
@@ -133058,7 +133058,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 575,
+     "line": 576,
      "read_only": "false",
      "retry": "8"
     },
@@ -133066,7 +133066,7 @@
      "file": "internal/application/dormhouse/social.go",
      "function": "Service.SocialRead",
      "isolation": "repeatable_read",
-     "line": 408,
+     "line": 412,
      "read_only": "false",
      "retry": "1"
     }
@@ -133261,11 +133261,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:21",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:95"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
    ],
    "writes": "state"
   },
@@ -133274,32 +133274,32 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "serializable"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "repeatable_read"
     }
    ],
@@ -133307,68 +133307,68 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "false"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/dormhouse/service.go:323",
+    "internal/application/dormhouse/service.go:324",
     "internal/application/i5/service.go:719"
    ],
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 95,
+     "line": 144,
      "value": "UNKNOWN"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 383,
+     "line": 384,
      "value": "1"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 442,
+     "line": 443,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 517,
+     "line": 518,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/service.go",
-     "line": 575,
+     "line": 576,
      "value": "8"
     },
     {
      "file": "internal/application/dormhouse/social.go",
-     "line": 408,
+     "line": 412,
      "value": "1"
     }
    ],
@@ -133410,7 +133410,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 95,
+     "line": 144,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -133418,7 +133418,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "repeatable_read",
-     "line": 383,
+     "line": 384,
      "read_only": "false",
      "retry": "1"
     },
@@ -133426,7 +133426,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.Command",
      "isolation": "serializable",
-     "line": 442,
+     "line": 443,
      "read_only": "false",
      "retry": "8"
     },
@@ -133434,7 +133434,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 517,
+     "line": 518,
      "read_only": "false",
      "retry": "8"
     },
@@ -133442,7 +133442,7 @@
      "file": "internal/application/dormhouse/service.go",
      "function": "Service.execute",
      "isolation": "serializable",
-     "line": 575,
+     "line": 576,
      "read_only": "false",
      "retry": "8"
     },
@@ -133450,7 +133450,7 @@
      "file": "internal/application/dormhouse/social.go",
      "function": "Service.SocialRead",
      "isolation": "repeatable_read",
-     "line": 408,
+     "line": 412,
      "read_only": "false",
      "retry": "1"
     }
@@ -133645,11 +133645,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/dorm_exp.go:21",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:362",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:95",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:95"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
    ],
    "writes": "state"
   },

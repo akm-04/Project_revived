@@ -202,7 +202,7 @@ func (s Service) applySocial(ctx context.Context, t tx.Tx, actor identity.ActorC
 		if err = s.saveSocialRoom(ctx, t, state, at); err != nil {
 			return nil, err
 		}
-		wire, err := s.socialRoomReplyTx(ctx, t, target, viewer, c.HouseID)
+		wire, err := s.socialRoomReplyTx(ctx, t, target, viewer, c.HouseID, admission)
 		if err != nil {
 			return nil, err
 		}
@@ -319,7 +319,7 @@ func (s Service) saveSocialRoom(ctx context.Context, t tx.Tx, state dorm.SocialR
 	return s.Social.SaveSocialRoomTx(ctx, t, state, previous)
 }
 
-func (s Service) socialRoomReplyTx(ctx context.Context, t tx.Tx, owner, viewer identity.PlayerID, houseID int64) (map[string]any, error) {
+func (s Service) socialRoomReplyTx(ctx context.Context, t tx.Tx, owner, viewer identity.PlayerID, houseID int64, d Admission) (map[string]any, error) {
 	rooms, err := s.Owner.ListRoomsTx(ctx, t, owner)
 	if err != nil {
 		return nil, err
@@ -332,11 +332,15 @@ func (s Service) socialRoomReplyTx(ctx context.Context, t tx.Tx, owner, viewer i
 	if err != nil {
 		return nil, err
 	}
+	stages, err := s.awakeningStagesTx(ctx, tx.Scope{Tx: t, Operation: d.Operation, Attempt: 1, Options: tx.Options{Isolation: tx.Serializable}}, d.ContentRevision, d.DecisionAt, rooms, heroes)
+	if err != nil {
+		return nil, err
+	}
 	wire, err := s.socialRoomWireTx(ctx, t, owner, viewer)
 	if err != nil {
 		return nil, err
 	}
-	return roomWire(room, heroes, facts, wire), nil
+	return roomWire(room, heroes, facts, wire, stages), nil
 }
 
 func (s Service) roomHeroesTx(ctx context.Context, t tx.Queryer, owner identity.PlayerID) (map[int64]character.Hero, map[int64]dorm.HeroFacts, error) {
@@ -412,7 +416,14 @@ func (s Service) SocialRead(ctx context.Context, actor identity.ActorContext, op
 		}
 		switch mid {
 		case 2519:
-			body, runErr = s.randomHouseTx(ctx, scope.Tx, actor, at, op.EntropySeed)
+			revision, active, revisionErr := s.Content.DormInputsActive(ctx)
+			if revisionErr != nil {
+				return revisionErr
+			}
+			if !active {
+				return ErrUnavailable
+			}
+			body, runErr = s.randomHouseTx(ctx, scope.Tx, actor, at, op.EntropySeed, tx.Scope{Tx: scope.Tx, Operation: scope.Operation.Operation(), Attempt: scope.Attempt, Options: scope.Options}, revision)
 			return runErr
 		case 2522:
 			body, runErr = s.praisePageTx(ctx, scope.Tx, actor, house, start, offset)
@@ -431,7 +442,7 @@ func (s Service) SocialRead(ctx context.Context, actor identity.ActorContext, op
 	return body, nil
 }
 
-func (s Service) randomHouseTx(ctx context.Context, t tx.Tx, actor identity.ActorContext, at time.Time, entropy [32]byte) (map[string]any, error) {
+func (s Service) randomHouseTx(ctx context.Context, t tx.Tx, actor identity.ActorContext, at time.Time, entropy [32]byte, scope tx.Scope, revision string) (map[string]any, error) {
 	candidates, err := s.directoryCandidatesTx(ctx, t, actor)
 	if err != nil {
 		return nil, err
@@ -456,7 +467,7 @@ func (s Service) randomHouseTx(ctx context.Context, t tx.Tx, actor identity.Acto
 		if _, ok := values.Functions[71]; !ok {
 			continue
 		}
-		return s.randomHouseReplyTx(ctx, t, actor.PlayerID, profile.PlayerID, at)
+		return s.randomHouseReplyTx(ctx, t, actor.PlayerID, profile.PlayerID, at, scope, revision)
 	}
 	return nil, dorm.ErrUnqualified
 }
@@ -488,12 +499,16 @@ func (s Service) directoryCandidatesTx(ctx context.Context, t tx.Tx, actor ident
 	return filtered, nil
 }
 
-func (s Service) randomHouseReplyTx(ctx context.Context, t tx.Tx, viewer, target identity.PlayerID, at time.Time) (map[string]any, error) {
+func (s Service) randomHouseReplyTx(ctx context.Context, t tx.Tx, viewer, target identity.PlayerID, at time.Time, scope tx.Scope, revision string) (map[string]any, error) {
 	rooms, err := s.Owner.ListRoomsTx(ctx, t, target)
 	if err != nil {
 		return nil, err
 	}
 	heroes, facts, err := s.roomHeroesTx(ctx, t, target)
+	if err != nil {
+		return nil, err
+	}
+	stages, err := s.awakeningStagesTx(ctx, scope, revision, at, rooms, heroes)
 	if err != nil {
 		return nil, err
 	}
@@ -515,7 +530,7 @@ func (s Service) randomHouseReplyTx(ctx context.Context, t tx.Tx, viewer, target
 	if err != nil {
 		return nil, err
 	}
-	return map[string]any{"house_infos": map[string]any{"house_list": listWire(rooms, heroes, facts, wire, false), "open_functions": functions}, "host_info": authors[target]}, nil
+	return map[string]any{"house_infos": map[string]any{"house_list": listWire(rooms, heroes, facts, wire, stages, false), "open_functions": functions}, "host_info": authors[target]}, nil
 }
 
 func (s Service) praisePageTx(ctx context.Context, t tx.Tx, actor identity.ActorContext, house, start, offset int64) (map[string]any, error) {

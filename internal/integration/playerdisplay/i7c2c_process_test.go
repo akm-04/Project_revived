@@ -28,6 +28,7 @@ func TestI7C2CActualAPIDormAndRestartRoster(t *testing.T) {
 	}
 	p := pool(t)
 	a, _, catalog := dormFixture(t, p)
+	exec(t, p, `UPDATE player_hero_raw_awakening SET state_version=2,raw_stage=3,producer_reference='I9_AWAKENING_MISSIONS_V1/t34-fixture',updated_at=created_at WHERE player_id=$1 AND partner_id=1`, int64(a.PlayerID))
 	bearer := displayToken(t, p, a)
 	listener, e := net.Listen("tcp", "127.0.0.1:0")
 	if e != nil {
@@ -129,7 +130,32 @@ func TestI7C2CActualAPIDormAndRestartRoster(t *testing.T) {
 	if code != 200 || out["item_record"] == nil {
 		t.Fatal("detail", code, out)
 	}
-	code, out = post(2515, map[string]any{"house_id": house, "furniture_record": out["house_detail"].(map[string]any)["record"]})
+	resident := out["house_info"].(map[string]any)["partner_infos"].([]any)[0].(map[string]any)
+	if resident["twice_awake_stage"] != float64(3) {
+		t.Fatal("detail twice awake stage", resident)
+	}
+	record := out["house_detail"].(map[string]any)["record"]
+	code, out = post(2512, map[string]any{})
+	if code != 200 {
+		t.Fatal("list", code, out)
+	}
+	found := false
+	for _, group := range out["house_list"].([]any) {
+		for _, raw := range group.([]any) {
+			listed := raw.(map[string]any)
+			if listed["house_id"] != float64(house) {
+				continue
+			}
+			found = true
+			if listed["partner_infos"].([]any)[0].(map[string]any)["twice_awake_stage"] != float64(3) {
+				t.Fatal("list twice awake stage", listed)
+			}
+		}
+	}
+	if !found {
+		t.Fatal("list missing house", out)
+	}
+	code, out = post(2515, map[string]any{"house_id": house, "furniture_record": record})
 	if code != 200 {
 		t.Fatal("save", code, out)
 	}

@@ -18,6 +18,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
+	"gxb.local/backend/v2/internal/application/characterasset"
 	app "gxb.local/backend/v2/internal/application/dormhouse"
 	"gxb.local/backend/v2/internal/application/generation"
 	i5dom "gxb.local/backend/v2/internal/application/i5"
@@ -82,6 +83,12 @@ func (socialHeroes) LockHeroByPartnerIDTx(context.Context, tx.Tx, identity.Playe
 }
 func (socialHeroes) ListHeroesTx(context.Context, tx.Queryer, identity.PlayerID) ([]character.Hero, error) {
 	return nil, nil
+}
+
+type socialAwakening struct{}
+
+func (socialAwakening) RawAwakeningTx(context.Context, characterasset.CoherentReadScope, character.HeroRef) (characterasset.HeroRawAwakeningObservation, error) {
+	return characterasset.HeroRawAwakeningObservation{}, character.ErrRawAwakeningUnavailable
 }
 
 type socialContent struct{ revision string }
@@ -215,6 +222,7 @@ func newSocialHarness(t *testing.T) socialHarness {
 		Timed:      generation.TimedRunner{Binder: generation.Binder{Time: pgAuthoritativeTime{pool}}, Runner: runner},
 		Reads:      runner,
 		Heroes:     socialHeroes{},
+		Awakening:  socialAwakening{},
 		Owner:      dormstore.Store{},
 		Content:    socialContent{revision: revision},
 		Players:    socialPlayers{},
