@@ -2,7 +2,6 @@ package socialrelation
 
 import (
 	"context"
-	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/lockkey"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -82,7 +81,7 @@ func (provider FriendFightPrivacyProvider) PrepareFriendFightPrivacyTx(requestCo
 			return result, ErrInvalidState
 		}
 		result.BlockVersions[index] = block.StateVersion
-		if block.UpdatedAt.After(gen.EffectiveObservation(result.ChangedAt, block.UpdatedAt)) {
+		if block.UpdatedAt.After(result.ChangedAt) {
 			result.ChangedAt = block.UpdatedAt
 		}
 		result.Eligible = result.Eligible && !block.Active

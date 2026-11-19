@@ -60,14 +60,15 @@ func (s RootService) ApplyChangeTx(c context.Context, t tx.Tx, p PreparedRoot, a
 	}
 	r := p.root
 	if p.present {
-		if r.Validate() != nil || r.StateVersion == math.MaxInt64 || at.Before(gen.EffectiveObservation(at, r.UpdatedAt)) {
+		if r.Validate() != nil || r.StateVersion == math.MaxInt64 {
 			return Root{}, ErrInvalidState
 		}
-		if e := s.Store.TouchRootTx(c, t, r, at.UTC()); e != nil {
+		observed := gen.EffectiveObservation(at, r.UpdatedAt, r.CreatedAt)
+		if e := s.Store.TouchRootTx(c, t, r, observed); e != nil {
 			return Root{}, e
 		}
 		r.StateVersion++
-		r.UpdatedAt = at.UTC()
+		r.UpdatedAt = observed
 	} else {
 		r.StateVersion = 1
 		r.CreatedAt = at.UTC()
