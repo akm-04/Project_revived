@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	gen "gxb.local/backend/v2/internal/application/generation"
 	"slices"
 	"time"
 
@@ -165,9 +164,6 @@ func (s Service) OverlayRosterTx(c context.Context, q tx.Queryer, actor identity
 	for _, h := range heroes {
 		if h.Raw == nil {
 			continue
-		}
-		if at.Before(gen.EffectiveObservation(at, h.Raw.UpdatedAt)) || at.Before(gen.EffectiveObservation(at, h.Hero.UpdatedAt)) {
-			return character.ErrRawAwakeningUnavailable
 		}
 		row, ok := rows[fmt.Sprint(h.Hero.PartnerID)].(map[string]any)
 		if !ok {

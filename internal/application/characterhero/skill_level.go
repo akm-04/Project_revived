@@ -371,9 +371,6 @@ func (s HeroSkillLevelService) change(ctx context.Context, actor identity.ActorC
 		if hero.ValidatePersistent() != nil || hero.Ref() != ref {
 			return ErrHeroSkillLevelRequest
 		}
-		if at.Before(gen.EffectiveObservation(at, hero.UpdatedAt)) {
-			return ErrHeroSkillLevelStaleTime
-		}
 		kind, err := s.Content.HeroKindTx(ctx, scope.Tx, hero.CreationContentRevision, hero.TableID)
 		if err != nil {
 			return err
@@ -446,7 +443,7 @@ func (s HeroSkillLevelService) change(ctx context.Context, actor identity.ActorC
 			hero.RawSkills.Levels[index] += change.Count
 		}
 		hero.StateVersion++
-		hero.UpdatedAt = at
+		hero.UpdatedAt = gen.EffectiveObservation(at, hero.UpdatedAt, hero.CreatedAt)
 		if err := s.Store.SaveHeroSkillLevelsTx(ctx, scope.Tx, hero, oldVersion); err != nil {
 			return err
 		}

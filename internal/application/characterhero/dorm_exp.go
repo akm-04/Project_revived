@@ -22,9 +22,6 @@ func (s Service) ApplyDormEXPLockedTx(ctx context.Context, t tx.Tx, ref characte
 	if e != nil {
 		return h, false, e
 	}
-	if observed.Before(gen.EffectiveObservation(observed, h.UpdatedAt)) {
-		return h, false, errors.New("character: stale Dorm EXP time")
-	}
 	max, e := s.Progression.HeroMaxLevelTx(ctx, t, revision, playerLevel)
 	if e != nil {
 		return h, false, e
@@ -47,6 +44,7 @@ func (s Service) ApplyDormEXPLockedTx(ctx context.Context, t tx.Tx, ref characte
 	if e != nil {
 		return h, false, e
 	}
+	next.UpdatedAt = gen.EffectiveObservation(observed, h.UpdatedAt, h.CreatedAt)
 	if e = s.ProgressionStore.SaveHeroProgressionTx(ctx, t, next, h.StateVersion); e != nil {
 		return h, false, e
 	}

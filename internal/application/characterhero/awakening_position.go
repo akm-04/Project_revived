@@ -2,7 +2,6 @@ package characterhero
 
 import (
 	"context"
-	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -33,7 +32,7 @@ func (r *AwakeningPositionResolver) ResolveTx(ctx context.Context, q tx.Queryer,
 	if !found {
 		return pos, nil
 	}
-	if f.Validate() != nil || f.CreationContentRevision != h.CreationContentRevision || !f.BirthAt.Equal(h.CreatedAt) || f.UpdatedAt.After(gen.EffectiveObservation(h.UpdatedAt, f.UpdatedAt)) {
+	if f.Validate() != nil || f.CreationContentRevision != h.CreationContentRevision || !f.BirthAt.Equal(h.CreatedAt) {
 		return pos, character.ErrRawAwakeningUnavailable
 	}
 	if f.RawStage <= 1 {
