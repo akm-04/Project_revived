@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	app "gxb.local/backend/v2/internal/application/inscription"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -45,7 +46,7 @@ func (s InscriptionHeroPort) InscriptionEligibilityTx(c context.Context, q tx.Qu
 	if e != nil {
 		return app.Eligibility{}, e
 	}
-	if f.CreationContentRevision != h.CreationContentRevision || !f.BirthAt.Equal(h.CreatedAt) || at.Before(h.UpdatedAt) || at.Before(f.UpdatedAt) {
+	if f.CreationContentRevision != h.CreationContentRevision || !f.BirthAt.Equal(h.CreatedAt) || at.Before(gen.EffectiveObservation(at, h.UpdatedAt)) || at.Before(gen.EffectiveObservation(at, f.UpdatedAt)) {
 		return app.Eligibility{}, app.ErrUnavailable
 	}
 	kind, e := s.Content.HeroKindTx(c, q, revision, h.TableID)

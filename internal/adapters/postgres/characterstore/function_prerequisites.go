@@ -2,6 +2,7 @@ package characterstore
 
 import (
 	"context"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	app "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -25,7 +26,7 @@ func (reader FunctionPrerequisites) ReadCharacterFunctionPrerequisitesTx(request
 	if err != nil {
 		return result, err
 	}
-	if root.Validate() != nil || at.Before(root.UpdatedAt) {
+	if root.Validate() != nil || at.Before(gen.EffectiveObservation(at, root.UpdatedAt)) {
 		return result, character.ErrRawAwakeningUnavailable
 	}
 	result.PopulationVersion = root.StateVersion
@@ -57,7 +58,7 @@ func (reader FunctionPrerequisites) ReadCharacterFunctionPrerequisitesTx(request
 			return result, character.ErrRawAwakeningUnavailable
 		}
 		hero.Kind = kind
-		if hero.PlayerID != player || hero.Validate() != nil || at.Before(hero.UpdatedAt) {
+		if hero.PlayerID != player || hero.Validate() != nil || at.Before(gen.EffectiveObservation(at, hero.UpdatedAt)) {
 			return result, character.ErrRawAwakeningUnavailable
 		}
 		if kind != character.NormalHero && kind != character.SuperHero {
@@ -71,7 +72,7 @@ func (reader FunctionPrerequisites) ReadCharacterFunctionPrerequisitesTx(request
 		if !found {
 			continue
 		}
-		if raw.Validate() != nil || raw.CreationContentRevision != hero.CreationContentRevision || !raw.BirthAt.Equal(hero.CreatedAt) || at.Before(raw.UpdatedAt) {
+		if raw.Validate() != nil || raw.CreationContentRevision != hero.CreationContentRevision || !raw.BirthAt.Equal(hero.CreatedAt) || at.Before(gen.EffectiveObservation(at, raw.UpdatedAt)) {
 			return result, character.ErrRawAwakeningUnavailable
 		}
 		result.EmblemReady = result.EmblemReady || raw.RawStage == 3

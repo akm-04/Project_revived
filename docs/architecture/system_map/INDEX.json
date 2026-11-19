@@ -1005,7 +1005,7 @@
    "tables": 4
   },
   {
-   "callees": 10,
+   "callees": 11,
    "callers": 19,
    "mids": 0,
    "name": "combat",
@@ -1132,7 +1132,7 @@
   },
   {
    "callees": 5,
-   "callers": 64,
+   "callers": 67,
    "mids": 0,
    "name": "generation",
    "path": "internal/application/generation",
@@ -1473,7 +1473,7 @@
    "tables": 4
   },
   {
-   "callees": 13,
+   "callees": 14,
    "callers": 9,
    "mids": 0,
    "name": "publicstats",
@@ -1572,7 +1572,7 @@
    "tables": 3
   },
   {
-   "callees": 0,
+   "callees": 1,
    "callers": 8,
    "mids": 0,
    "name": "socialinbox",
