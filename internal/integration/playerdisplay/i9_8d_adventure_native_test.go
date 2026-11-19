@@ -701,3 +701,115 @@ func TestI9_8DAdventureAdmissionSeatOrderNative(t *testing.T) {
 		t.Fatalf("the owner was refused in seat order: %v", err)
 	}
 }
+
+// A-187: exit and kick clear every busy position of the departing player in the
+// same room update, append the function 8 free push, and the position becomes
+// prepareable by another member.
+func TestI9_11T34AdventureDefenseBusyReleaseNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	a, _ := adventureOwner(t, p, server, 11, 10001001)
+	b, _ := adventureOwner(t, p, server, 11, 10001002)
+	c, _ := adventureOwner(t, p, server, 11, 10001003)
+	clock := &leagueClock{at: time.Now().UTC().Add(2 * time.Minute)}
+	mode := adventureTestMode(t, p, clock, adventureOpponents{})
+	opContext := opPinned(installed(t, p))
+	opContext.StartedAt = clock.at
+	now := clock.at
+
+	putAdventureOccurrence(t, p, a.PlayerID, d.EventDefense, 0, now, now.Add(time.Hour), "busy-release-owner")
+	info, err := mode.Info(ctx, a, d.EventDefense, opContext)
+	if err != nil {
+		t.Fatal(err)
+	}
+	roomID := adventureRoomID(t, info)
+	for _, member := range []identity.ActorContext{b, c} {
+		if _, err = mode.EnterDefense(ctx, member, roomID, opContext); err != nil {
+			t.Fatal("defense join", member.PlayerID, err)
+		}
+	}
+
+	// Kick frees the kicked member's busy position.
+	if _, err = mode.PrepareDefense(ctx, b, 2, opContext); err != nil {
+		t.Fatal("prepare before kick", err)
+	}
+	positions := defensePositions(t, mode, a, opContext)
+	if positions[1]["busy_type"] != int64(1) || positions[1]["player_id"] != int64(b.PlayerID) {
+		t.Fatalf("position 2 not busy by b: %#v", positions[1])
+	}
+	if _, err = mode.KickDefense(ctx, a, b.PlayerID, opContext); err != nil {
+		t.Fatal("kick busy member", err)
+	}
+	positions = defensePositions(t, mode, a, opContext)
+	if positions[1]["busy_type"] != int64(0) {
+		t.Fatalf("kicked position still busy: %#v", positions[1])
+	}
+	if _, err = mode.PrepareDefense(ctx, a, 2, opContext); err != nil {
+		t.Fatal("another member cannot prepare a freed position", err)
+	}
+	if _, err = mode.QuitDefense(ctx, a, 2, opContext); err != nil {
+		t.Fatal("quit freed position", err)
+	}
+
+	// Exit frees the leaving member's busy position.
+	if _, err = mode.PrepareDefense(ctx, c, 3, opContext); err != nil {
+		t.Fatal("prepare before exit", err)
+	}
+	if _, err = mode.ExitDefense(ctx, c, opContext); err != nil {
+		t.Fatal("member exit", err)
+	}
+	positions = defensePositions(t, mode, a, opContext)
+	if positions[2]["busy_type"] != int64(0) {
+		t.Fatalf("departed member's position still busy: %#v", positions[2])
+	}
+	if _, err = mode.PrepareDefense(ctx, a, 3, opContext); err != nil {
+		t.Fatal("another member cannot prepare the exited position", err)
+	}
+
+	var raw string
+	if err = p.QueryRow(ctx, `SELECT payload::text FROM shared_rooms WHERE room_id=$1`, roomID).Scan(&raw); err != nil {
+		t.Fatal(err)
+	}
+	state, err := d.LoadRoomState([]byte(raw))
+	if err != nil {
+		t.Fatal(err)
+	}
+	freed := map[int64]bool{}
+	for _, push := range state.Pushes {
+		if push.Function != 8 {
+			continue
+		}
+		if position, ok := push.Body["monster_pos"].(float64); ok {
+			freed[int64(position)] = true
+		}
+	}
+	if !freed[2] || !freed[3] {
+		t.Fatalf("free pushes %+v", state.Pushes)
+	}
+
+	if _, err = mode.ExitDefense(ctx, a, opContext); err != nil {
+		t.Fatal("owner exit", err)
+	}
+}
+
+func defensePositions(t *testing.T, mode appadventure.Mode, actor identity.ActorContext, opContext operation.Context) []map[string]any {
+	t.Helper()
+	info, err := mode.Info(ctx, actor, d.EventDefense, opContext)
+	if err != nil {
+		t.Fatal(err)
+	}
+	detail, ok := info["detail"].(map[string]any)
+	if !ok {
+		t.Fatalf("2417 detail %#v", info)
+	}
+	rows, ok := detail["pos_statuses"].([]any)
+	if !ok || len(rows) != d.DefenseMonsterCount {
+		t.Fatalf("2417 pos_statuses %#v", detail["pos_statuses"])
+	}
+	out := make([]map[string]any, 0, len(rows))
+	for _, row := range rows {
+		position, _ := row.(map[string]any)
+		out = append(out, position)
+	}
+	return out
+}
