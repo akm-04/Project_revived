@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	gen "gxb.local/backend/v2/internal/application/generation"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -19,7 +18,7 @@ func (Store) ReadDormPlayerStateTx(ctx context.Context, q tx.Queryer, pid identi
 	if e := q.QueryRow(ctx, `SELECT level,state_version,updated_at FROM player_progression WHERE player_id=$1`, int64(pid)).Scan(&out.Level, &out.LevelVersion, &out.UpdatedAt); e != nil {
 		return out, e
 	}
-	if out.Level <= 0 || out.LevelVersion <= 0 || observed.Before(gen.EffectiveObservation(observed, out.UpdatedAt)) {
+	if out.Level <= 0 || out.LevelVersion <= 0 {
 		return out, errors.New("i5: unqualified Dorm progression")
 	}
 	var raw string

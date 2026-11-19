@@ -63,12 +63,12 @@ func (s Store) ImportInscriptionCertificatesTx(c context.Context, t tx.Tx, p ide
 		if e != nil {
 			return e
 		}
-		if !ok || b.Amount != 0 || b.StateVersion != 1 || at.Before(gen.EffectiveObservation(at, b.UpdatedAt)) {
+		if !ok || b.Amount != 0 || b.StateVersion != 1 {
 			return errors.New("inscription import: target is not untouched zero seed")
 		}
 		b.Amount = amounts[i]
 		b.StateVersion++
-		b.UpdatedAt = at
+		b.UpdatedAt = gen.EffectiveObservation(at, b.UpdatedAt)
 		next = append(next, b)
 	}
 	for _, b := range next {
