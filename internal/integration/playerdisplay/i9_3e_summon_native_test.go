@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"testing"
 
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
@@ -16,11 +17,13 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/summonstore"
+	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	hero "gxb.local/backend/v2/internal/application/characterhero"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	app "gxb.local/backend/v2/internal/application/summon"
 	"gxb.local/backend/v2/internal/domain/character"
+	"gxb.local/backend/v2/internal/domain/economy"
 	d "gxb.local/backend/v2/internal/domain/summon"
 	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -112,15 +115,30 @@ func TestI9_3ESummonNative(t *testing.T) {
 	if balances, ok := body["economy_"].(map[string]int64); !ok || balances["crystal"] != 10 {
 		t.Fatal("a paid pull reports the crystal balance", body["economy_"])
 	}
-	if body, e = s.Summon(ctx, a, app.Pull{Type: 2, Index: 1}, op()); !errors.Is(e, d.ErrRefused) {
+	if body, e = s.Summon(ctx, a, app.Pull{Type: 2, Index: 1}, op()); !errors.Is(e, economy.ErrInsufficientBalance) {
 		t.Fatal("unpaid Medium", body, e)
+	}
+	dispatcher := stockruntime.SummonDispatcher{Authority: playtestAuthority{a}, Service: summonMode(p)}
+	var receiptsBefore int64
+	if e = p.QueryRow(ctx, `SELECT count(*) FROM gxb_operation_receipts WHERE owner_key=$1 AND domain='summon'`, fmt.Sprint(int64(a.PlayerID))).Scan(&receiptsBefore); e != nil {
+		t.Fatal(e)
+	}
+	short := dispatcher.Dispatch(ctx, playtestRequest(a, 50, map[string]any{"summon_type": int64(2), "summon_index": int64(2)}))
+	// "Not enough diamonds" is message.lua 20005 (D5).
+	if short.HTTPStatus != http.StatusConflict || short.Body["error_code"] != int64(20005) {
+		t.Fatalf("short crystal pull HTTP %d %#v", short.HTTPStatus, short.Body)
+	}
+	var crystalAfter int64
+	var receiptsAfter int64
+	if e = p.QueryRow(ctx, `SELECT (SELECT amount FROM player_currency_balances WHERE player_id=$1 AND resource_key='crystal'),(SELECT count(*) FROM gxb_operation_receipts WHERE owner_key=$2 AND domain='summon')`, int64(a.PlayerID), fmt.Sprint(int64(a.PlayerID))).Scan(&crystalAfter, &receiptsAfter); e != nil || crystalAfter != 10 || receiptsAfter != receiptsBefore {
+		t.Fatalf("a short balance debited or stored a receipt: crystal %d receipts %d/%d %v", crystalAfter, receiptsAfter, receiptsBefore, e)
 	}
 	exec(t, p, `INSERT INTO player_item_stacks(player_id,item_id,quantity,state_version,acquired_at,updated_at)VALUES($1,50001024,1,1,clock_timestamp()-interval '1 hour',clock_timestamp()-interval '1 hour')`, int64(a.PlayerID))
 	body, e = s.Summon(ctx, a, app.Pull{Type: 6, Index: 1}, op())
 	if e != nil || len(summonRows(t, body)) != 1 || stackQuantity(t, p, a.PlayerID, 50001024) != 0 {
 		t.Fatal("D143 ticket pull spends its ticket", body, e)
 	}
-	if _, e = s.Summon(ctx, a, app.Pull{Type: 6, Index: 1}, op()); !errors.Is(e, d.ErrRefused) {
+	if _, e = s.Summon(ctx, a, app.Pull{Type: 6, Index: 1}, op()); !errors.Is(e, economy.ErrInsufficientBalance) {
 		t.Fatal("ticket pull without a ticket", e)
 	}
 	if _, e = s.Summon(ctx, a, app.Pull{Type: 4, Index: 1}, op()); !errors.Is(e, d.ErrRefused) {
@@ -152,6 +170,16 @@ func TestI9_3ESummonNative(t *testing.T) {
 			t.Fatal("girl catalogue lacks a gacha girl", id, e)
 		}
 	}
+
+	sourceInfo, e := s.Load(ctx, a, op())
+	if e != nil {
+		t.Fatal(e)
+	}
+	exec(t, p, `INSERT INTO summon_tuning(payload,updated_at)VALUES('{"version":3,"main_ids":[0,0],"second_ids":[0,0,0]}',now())`)
+	if info, e = s.Load(ctx, a, op()); e != nil || fmt.Sprint(info["main_ids"]) != fmt.Sprint(sourceInfo["main_ids"]) || fmt.Sprint(info["second_ids"]) != fmt.Sprint(sourceInfo["second_ids"]) {
+		t.Fatal("a zero-id overlay must leave the source rotation", info, e)
+	}
+	exec(t, p, `DELETE FROM summon_tuning`)
 
 	pinned := catalog.Policy.Cohorts.MediumFeatured[5]
 	exec(t, p, `INSERT INTO summon_tuning(payload,updated_at)VALUES(jsonb_build_object('version',1,'partner_id',$1::bigint),now())`, pinned)
