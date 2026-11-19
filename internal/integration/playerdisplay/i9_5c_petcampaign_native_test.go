@@ -139,6 +139,7 @@ func TestI9_5CTowerNativeProgressAndTimedSweep(t *testing.T) {
 	if _, ok := detail["awards"]; ok {
 		t.Fatalf("822 detail carries an uncommitted award: %v", detail)
 	}
+	replyconformance.Check(t, 822, detail)
 	login := map[string]any{}
 	if e = s.OverlayMID1(ctx, p, a, false, clock.at, login); e != nil {
 		t.Fatal("login detail", e)
