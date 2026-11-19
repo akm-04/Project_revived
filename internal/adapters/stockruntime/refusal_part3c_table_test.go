@@ -239,6 +239,8 @@ func TestPart3CSummonFailureRows(t *testing.T) {
 		{"invalid", failSummon(summon.ErrInvalid), http.StatusBadRequest, 0, "summon_invalid_parameter"},
 		{"conflict", failSummon(&receipt.ConflictError{}), http.StatusConflict, staleConflictCode, ""},
 		{"refused", failSummon(summon.ErrRefused), http.StatusConflict, unprovenRefusalCode, ""},
+		{"balance mana", failSummon(economy.InsufficientBalance("mana")), http.StatusConflict, insufficientCoinCode, ""},
+		{"balance crystal", failSummon(economy.InsufficientBalance("crystal")), http.StatusConflict, insufficientDiamondCode, ""},
 		{"capacity", failSummon(apphero.ErrHeroCapacityExceeded), http.StatusConflict, unprovenRefusalCode, ""},
 		{"unavailable", failSummon(summon.ErrUnavailable), http.StatusServiceUnavailable, serverBusyCode, ""},
 	})

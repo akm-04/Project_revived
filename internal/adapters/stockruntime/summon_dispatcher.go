@@ -6,6 +6,7 @@ import (
 	apphero "gxb.local/backend/v2/internal/application/characterhero"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
 	app "gxb.local/backend/v2/internal/application/summon"
+	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/summon"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -98,6 +99,7 @@ func (o SummonDispatcher) summon(ctx context.Context, a identity.ActorContext, r
 
 // A refusal answers non-200, so Backend.lua never hands it to SelfPlayer.summonHero, which iterates result.
 var summonFailureRows = []failureRow{
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
 	{match: d.ErrInvalid, class: failureMalformed, detail: "summon_invalid_parameter"},
 	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
 	{match: apphero.ErrHeroCapacityExceeded, class: failureRefusal, code: unprovenRefusalCode},

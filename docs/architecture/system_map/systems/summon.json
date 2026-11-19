@@ -141,7 +141,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/summon_dispatcher.go",
-    "line": 31
+    "line": 32
    },
    "mid": 50,
    "name": "SUMMON_HERO"
@@ -149,7 +149,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/summon_dispatcher.go",
-    "line": 31
+    "line": 32
    },
    "mid": 56,
    "name": "LOAD_SUMMON_INFO"
@@ -157,7 +157,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/summon_dispatcher.go",
-    "line": 31
+    "line": 32
    },
    "mid": 70,
    "name": "MAGIC_SUMMON_BUY"
@@ -165,7 +165,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/summon_dispatcher.go",
-    "line": 31
+    "line": 32
    },
    "mid": 71,
    "name": "MAGIC_SUMMON_SWITCH_HERO"
@@ -173,7 +173,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/summon_dispatcher.go",
-    "line": 31
+    "line": 32
    },
    "mid": 306,
    "name": "SUPER_HERO_STONE_EXCHANGE"
@@ -221,7 +221,8 @@
    "i9_8d_adventure.json"
   ],
   "unit": [
-   "achievement_test.go"
+   "achievement_test.go",
+   "mode_test.go"
   ]
  }
 }

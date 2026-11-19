@@ -2734,7 +2734,7 @@
    "isolation": [
     {
      "file": "internal/application/summon/mode.go",
-     "line": 550,
+     "line": 553,
      "value": "serializable"
     }
    ],
@@ -2742,7 +2742,7 @@
    "read_only": [
     {
      "file": "internal/application/summon/mode.go",
-     "line": 550,
+     "line": 553,
      "value": "false"
     }
    ],
@@ -2750,12 +2750,12 @@
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1398",
     "internal/application/i5/service.go:719",
-    "internal/application/summon/mode.go:604"
+    "internal/application/summon/mode.go:607"
    ],
    "retry": [
     {
      "file": "internal/application/summon/mode.go",
-     "line": 550,
+     "line": 553,
      "value": "6"
     }
    ],
@@ -2794,7 +2794,7 @@
      "file": "internal/application/summon/mode.go",
      "function": "Mode.purchase",
      "isolation": "serializable",
-     "line": 550,
+     "line": 553,
      "read_only": "false",
      "retry": "6"
     }
@@ -3003,7 +3003,7 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "UNRESOLVED apply at internal/application/summon/mode.go:582",
+    "UNRESOLVED apply at internal/application/summon/mode.go:585",
     "UNRESOLVED draw at internal/domain/summon/summon.go:409",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED observe at internal/application/achievement/service.go:332"
@@ -5762,7 +5762,7 @@
    "isolation": [
     {
      "file": "internal/application/summon/mode.go",
-     "line": 550,
+     "line": 553,
      "value": "serializable"
     }
    ],
@@ -5770,7 +5770,7 @@
    "read_only": [
     {
      "file": "internal/application/summon/mode.go",
-     "line": 550,
+     "line": 553,
      "value": "false"
     }
    ],
@@ -5778,12 +5778,12 @@
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1398",
     "internal/application/i5/service.go:719",
-    "internal/application/summon/mode.go:604"
+    "internal/application/summon/mode.go:607"
    ],
    "retry": [
     {
      "file": "internal/application/summon/mode.go",
-     "line": 550,
+     "line": 553,
      "value": "6"
     }
    ],
@@ -5819,7 +5819,7 @@
      "file": "internal/application/summon/mode.go",
      "function": "Mode.purchase",
      "isolation": "serializable",
-     "line": 550,
+     "line": 553,
      "read_only": "false",
      "retry": "6"
     }
@@ -6013,7 +6013,7 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "UNRESOLVED apply at internal/application/summon/mode.go:582",
+    "UNRESOLVED apply at internal/application/summon/mode.go:585",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
@@ -6023,7 +6023,7 @@
    "isolation": [
     {
      "file": "internal/application/summon/mode.go",
-     "line": 550,
+     "line": 553,
      "value": "serializable"
     }
    ],
@@ -6031,17 +6031,17 @@
    "read_only": [
     {
      "file": "internal/application/summon/mode.go",
-     "line": 550,
+     "line": 553,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/summon/mode.go:604"
+    "internal/application/summon/mode.go:607"
    ],
    "retry": [
     {
      "file": "internal/application/summon/mode.go",
-     "line": 550,
+     "line": 553,
      "value": "6"
     }
    ],
@@ -6060,7 +6060,7 @@
      "file": "internal/application/summon/mode.go",
      "function": "Mode.purchase",
      "isolation": "serializable",
-     "line": 550,
+     "line": 553,
      "read_only": "false",
      "retry": "6"
     }
@@ -6168,7 +6168,7 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED apply at internal/application/summon/mode.go:582",
+    "UNRESOLVED apply at internal/application/summon/mode.go:585",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
@@ -35091,7 +35091,7 @@
    "isolation": [
     {
      "file": "internal/application/summon/mode.go",
-     "line": 550,
+     "line": 553,
      "value": "serializable"
     }
    ],
@@ -35099,18 +35099,18 @@
    "read_only": [
     {
      "file": "internal/application/summon/mode.go",
-     "line": 550,
+     "line": 553,
      "value": "false"
     }
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:719",
-    "internal/application/summon/mode.go:604"
+    "internal/application/summon/mode.go:607"
    ],
    "retry": [
     {
      "file": "internal/application/summon/mode.go",
-     "line": 550,
+     "line": 553,
      "value": "6"
     }
    ],
@@ -35145,7 +35145,7 @@
      "file": "internal/application/summon/mode.go",
      "function": "Mode.purchase",
      "isolation": "serializable",
-     "line": 550,
+     "line": 553,
      "read_only": "false",
      "retry": "6"
     }
@@ -35324,7 +35324,7 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "UNRESOLVED apply at internal/application/summon/mode.go:582",
+    "UNRESOLVED apply at internal/application/summon/mode.go:585",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
