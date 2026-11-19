@@ -14,6 +14,7 @@ import (
 	approominvite "gxb.local/backend/v2/internal/application/roominvite"
 	"gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/economy"
+	"gxb.local/backend/v2/internal/domain/privilege"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -100,6 +101,7 @@ func TestR4Part4SharedFailureRows(t *testing.T) {
 		{"pet appearance content inactive", apppet.ErrPetAppearanceContentInactive, http.StatusConflict, unprovenRefusalCode},
 		{"practice content inactive", apppractice.ErrContentInactive, http.StatusConflict, unprovenRefusalCode},
 		{"room invite sender rate", approominvite.ErrSenderLimited, http.StatusConflict, unprovenRefusalCode},
+		{"privilege conflict", privilege.ErrConflict, http.StatusConflict, unprovenRefusalCode},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
