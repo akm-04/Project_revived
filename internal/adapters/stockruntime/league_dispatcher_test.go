@@ -22,7 +22,7 @@ type leagueFake struct {
 func (f *leagueFake) Execute(_ context.Context, _ identity.ActorContext, c app.Command, _ operation.Context) (app.Reply, error) {
 	f.last = c
 	f.calls++
-	v := app.Reply{Info: d.InfoView{Player: d.Player{Season: 150, Group: 3, Points: 2000}, Rank: 1, At: time.Unix(1800000000, 0), Active: true}, Enemy: d.EnemyView{Face: d.Face{ID: 200007}, Heroes: []map[string]any{{"partner_id": int64(19)}}}, Match: d.Match{SelfRows: []map[string]any{{"partner_id": int64(7)}}, EnemyRows: []map[string]any{{"partner_id": int64(19)}}, Win: true}, Report: []byte(`{"star":1}`), Honor: []d.SettlementRow{{Placement: d.Placement{Rank: 1}}}}
+	v := app.Reply{Info: d.InfoView{Player: d.Player{Season: 150, Group: 3, Points: 2000}, Rank: 1, At: time.Unix(1800000000, 0), Active: true, Defense: d.EnemyView{Heroes: []map[string]any{{"partner_id": int64(19)}}, Pet: map[string]any{"pet_id": int64(5)}, Lineup: d.Lineup{Heroes: []int64{19}, Pet: 5}}}, Enemy: d.EnemyView{Face: d.Face{ID: 200007}, Heroes: []map[string]any{{"partner_id": int64(19)}}}, Match: d.Match{SelfRows: []map[string]any{{"partner_id": int64(7)}}, EnemyRows: []map[string]any{{"partner_id": int64(19)}}, Win: true}, Report: []byte(`{"star":1}`), Honor: []d.SettlementRow{{Placement: d.Placement{Rank: 1}}}}
 	v.Records = f.records
 	if f.pending {
 		v.Report = nil
@@ -52,6 +52,13 @@ func TestI7C5FLeagueSourceWireAndInstanceParsing(t *testing.T) {
 	info := call(2800, map[string]any{})
 	if info["stage"] != int64(1) || info["base_info"].(map[string]any)["season_count"] != int64(150) {
 		t.Fatal("real season count", info)
+	}
+	defense := info["defense_info"].(map[string]any)
+	if heroes, ok := defense["heros"].([]int64); !ok || len(heroes) != 1 || heroes[0] != 19 {
+		t.Fatalf("2800 defense_info.heros = %#v, want owned ids", defense["heros"])
+	}
+	if defense["pet"] != int64(5) {
+		t.Fatalf("2800 defense_info.pet = %#v, want the numeric pet id", defense["pet"])
 	}
 	enemy := call(2801, map[string]any{"enemy_id": n("200007")})
 	if enemy["player_id"] != int64(200007) {
