@@ -238,6 +238,7 @@
    "audit_a075_snapshot_fence_test.go",
    "audit_a129_transition_test.go",
    "audit_a130_transition_test.go",
+   "clock_rollback_test.go",
    "extension_start_test.go",
    "pinned_buildings_test.go",
    "pins_a55_test.go",

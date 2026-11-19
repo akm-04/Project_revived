@@ -220,9 +220,6 @@ func (s Service) observeOwnedTx(c context.Context, sc gen.TimedScope, rev string
 		}
 		families = allFamilies()
 	}
-	if root.UpdatedAt.After(gen.EffectiveObservation(at, root.UpdatedAt)) {
-		return catalog, d.ErrConflict
-	}
 	scope, e := ca.NewCoherentReadScope(tx.Scope{Tx: sc.Tx, Operation: sc.Operation.Operation(), Attempt: sc.Attempt, Options: sc.Options}, rev, at)
 	if e != nil {
 		return catalog, e

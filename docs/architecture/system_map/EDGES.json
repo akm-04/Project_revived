@@ -663,7 +663,6 @@
   "generation": {
    "achievement": [
     "DecisionAt",
-    "EffectiveObservation",
     "Operation",
     "Run"
    ],
@@ -710,9 +709,6 @@
     "EffectiveObservation",
     "Operation",
     "Run"
-   ],
-   "combat": [
-    "EffectiveObservation"
    ],
    "commerceprivilege": [
     "DecisionAt",
@@ -774,7 +770,6 @@
    ],
    "guildbroadcast": [
     "DecisionAt",
-    "EffectiveObservation",
     "Operation",
     "Run",
     "Validate"
@@ -797,7 +792,6 @@
    ],
    "guildinvitetarget": [
     "DecisionAt",
-    "EffectiveObservation",
     "Run"
    ],
    "guildrental": [
@@ -889,9 +883,6 @@
     "Operation",
     "Run"
    ],
-   "playerdisplay": [
-    "EffectiveObservation"
-   ],
    "profilefeedback": [
     "Bind",
     "DecisionAt",
@@ -910,12 +901,8 @@
     "Operation",
     "Run"
    ],
-   "publicstats": [
-    "EffectiveObservation"
-   ],
    "ranking": [
     "DecisionAt",
-    "EffectiveObservation",
     "Operation",
     "Run"
    ],
@@ -935,7 +922,6 @@
    ],
    "socialdismiss": [
     "DecisionAt",
-    "EffectiveObservation",
     "Run"
    ],
    "socialexchange": [
@@ -949,12 +935,8 @@
    ],
    "socialgift": [
     "DecisionAt",
-    "EffectiveObservation",
     "Operation",
     "Run"
-   ],
-   "socialinbox": [
-    "EffectiveObservation"
    ],
    "socialinvite": [
     "DecisionAt",
@@ -969,7 +951,6 @@
    ],
    "socialrecall": [
     "DecisionAt",
-    "EffectiveObservation",
     "Run"
    ],
    "socialrelation": [
@@ -2399,7 +2380,6 @@
    ],
    "generation": [
     "DecisionAt",
-    "EffectiveObservation",
     "Operation",
     "Run"
    ],
@@ -3316,9 +3296,6 @@
    "conquerschool": [
     "*FactsTx"
    ],
-   "generation": [
-    "EffectiveObservation"
-   ],
    "guildrental": [
     "*LendTx"
    ],
@@ -3962,7 +3939,6 @@
   "guildbroadcast": {
    "generation": [
     "DecisionAt",
-    "EffectiveObservation",
     "Operation",
     "Run",
     "Validate"
@@ -4188,7 +4164,6 @@
   "guildinvitetarget": {
    "generation": [
     "DecisionAt",
-    "EffectiveObservation",
     "Run"
    ],
    "guildinvite": [
@@ -5321,9 +5296,6 @@
    "dormhouse": [
     "*TitleProgressTx"
    ],
-   "generation": [
-    "EffectiveObservation"
-   ],
    "i5": [
     "*ApplyDisplayValueTx",
     "*FenceActorTx",
@@ -5606,9 +5578,6 @@
    "elementequipment": [
     "*CoherentHeroInputsTx"
    ],
-   "generation": [
-    "EffectiveObservation"
-   ],
    "heroevolution": [
     "*CoherentHeroInputsTx"
    ],
@@ -5637,7 +5606,6 @@
    ],
    "generation": [
     "DecisionAt",
-    "EffectiveObservation",
     "Operation",
     "Run"
    ],
@@ -5782,7 +5750,6 @@
   "socialdismiss": {
    "generation": [
     "DecisionAt",
-    "EffectiveObservation",
     "Run"
    ],
    "playerroot": [
@@ -5864,7 +5831,6 @@
   "socialgift": {
    "generation": [
     "DecisionAt",
-    "EffectiveObservation",
     "Operation",
     "Run"
    ],
@@ -5930,11 +5896,7 @@
     "*ValidateActor"
    ]
   },
-  "socialinbox": {
-   "generation": [
-    "EffectiveObservation"
-   ]
-  },
+  "socialinbox": {},
   "socialinvite": {
    "characterasset": [
     "ValidateExactRevisionID"
@@ -6053,7 +6015,6 @@
    ],
    "generation": [
     "DecisionAt",
-    "EffectiveObservation",
     "Run"
    ],
    "i5": [
