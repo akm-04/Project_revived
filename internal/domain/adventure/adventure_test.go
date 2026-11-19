@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/operation"
 )
 
@@ -33,10 +34,11 @@ func fixedEvent(t *testing.T, id int64) Event {
 
 func TestTriggerMapOnlyUsesFactKindsWithProducers(t *testing.T) {
 	cases := map[string]int64{
-		SweepFactKind:    EventDefense,
-		BattleFactKind:   EventBattle,
-		SummonFactKind:   EventSummon,
-		IllusionFactKind: EventIllusion,
+		SweepFactKind:              EventDefense,
+		BattleFactKind:             EventBattle,
+		SummonFactKind:             EventSummon,
+		IllusionFactKind:           EventIllusion,
+		objective.ShopPurchaseKind: EventShop,
 	}
 	for kind, want := range cases {
 		event, ok := EventForFactKind(kind)

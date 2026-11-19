@@ -83,7 +83,9 @@
  ],
  "facts": {
   "consumers": {},
-  "emits": [],
+  "emits": [
+   "SHOP_PURCHASE"
+  ],
   "reads": []
  },
  "locks": {
@@ -213,6 +215,8 @@
   "scenarios_naming": [
    "i9_11c_core_shops.json"
   ],
-  "unit": []
+  "unit": [
+   "service_test.go"
+  ]
  }
 }

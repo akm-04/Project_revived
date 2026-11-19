@@ -1529,6 +1529,7 @@
     "*ReadProgressionTx",
     "*ReadScalarTx",
     "*ReadStackTx",
+    "*RecordTx",
     "*SnapshotTx"
    ],
    "socialexchange": [
@@ -5701,6 +5702,7 @@
     "*ReadProgressionTx",
     "*ReadScalarTx",
     "*ReadStackTx",
+    "*RecordTx",
     "*SnapshotTx"
    ],
    "store:contentstore": [

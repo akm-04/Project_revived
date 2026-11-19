@@ -1565,7 +1565,7 @@
    "isolation": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 245,
+     "line": 253,
      "value": "UNKNOWN"
     }
    ],
@@ -1573,7 +1573,7 @@
    "read_only": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 245,
+     "line": 253,
      "value": "UNKNOWN"
     }
    ],
@@ -1581,7 +1581,7 @@
    "retry": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 245,
+     "line": 253,
      "value": "6"
     }
    ],
@@ -1595,7 +1595,7 @@
      "file": "internal/application/shop/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 245,
+     "line": 253,
      "read_only": "UNKNOWN",
      "retry": "6"
     }
@@ -1678,12 +1678,12 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED body at internal/application/shop/service.go:255",
+    "UNRESOLVED body at internal/application/shop/service.go:263",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED weight at internal/domain/shop/rolls.go:80",
     "UNRESOLVED weight at internal/domain/shop/rolls.go:92",
-    "transaction ReadOnly flag not statically decidable at internal/application/shop/service.go:245",
-    "transaction isolation not statically decidable at internal/application/shop/service.go:245"
+    "transaction ReadOnly flag not statically decidable at internal/application/shop/service.go:253",
+    "transaction isolation not statically decidable at internal/application/shop/service.go:253"
    ],
    "writes": "state"
   },
@@ -1692,7 +1692,7 @@
    "isolation": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 174,
+     "line": 182,
      "value": "read_committed"
     }
    ],
@@ -1700,18 +1700,20 @@
    "read_only": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 174,
+     "line": 182,
      "value": "false"
     }
    ],
    "receipt_writes": [
+    "internal/application/i5/mission_facts.go:129",
+    "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717",
-    "internal/application/shop/service.go:214"
+    "internal/application/shop/service.go:222"
    ],
    "retry": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 174,
+     "line": 182,
      "value": "6"
     }
    ],
@@ -1720,9 +1722,14 @@
     "internal/adapters/postgres/achievementstore/store.go:112",
     "internal/adapters/postgres/achievementstore/store.go:215",
     "internal/adapters/postgres/achievementstore/store.go:47",
+    "internal/adapters/postgres/adventurestore/store.go:54",
     "internal/adapters/postgres/characterstore/store.go:109",
     "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
+    "internal/adapters/postgres/i5store/missions.go:14",
+    "internal/adapters/postgres/i5store/missions.go:45",
+    "internal/adapters/postgres/i5store/missions.go:57",
+    "internal/adapters/postgres/i5store/missions.go:65",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
     "internal/adapters/postgres/i5store/store.go:270",
@@ -1735,6 +1742,7 @@
     "internal/adapters/postgres/i5store/store.go:483",
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
+    "internal/adapters/postgres/i5store/store.go:736",
     "internal/adapters/postgres/shopstore/store.go:44",
     "internal/adapters/postgres/shopstore/store.go:58",
     "internal/adapters/postgres/spiritstore/store.go:43"
@@ -1745,7 +1753,7 @@
      "file": "internal/application/shop/service.go",
      "function": "Service.execute",
      "isolation": "read_committed",
-     "line": 174,
+     "line": 182,
      "read_only": "false",
      "retry": "6"
     }
@@ -1767,6 +1775,16 @@
      "statement": "SELECT payload::text FROM content_achievement_catalogs WHERE revision_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/book_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/book_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_book_input_catalogs WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -1785,6 +1803,16 @@
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
      "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/missions.go",
+     "line": 19,
+     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(d)-ARRAY['revision_id','payload_version'] ORDER BY objective_id),'[]'::jsonb)::text FROM gxb_content_objective_definitions d WHERE revision_id=$1 AND definition_revision='I9_MISSIONS_V1'"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/missions.go",
+     "line": 44,
+     "statement": "SELECT COALESCE(a.payload::text,''),COALESCE(r.manifest->'enabled_capabilities' ? 'MISSION_ACTIVITY_I9_4B',false) FROM gxb_content_revisions r LEFT JOIN content_mission_activity_catalogs a USING(revision_id) WHERE r.revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
@@ -1872,6 +1900,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 797,
+     "statement": "SELECT stock_family,strategy,accepted_fact_kind,target,reward_plan::text,huoyue FROM gxb_content_objective_definitions WHERE revision_id=$1 AND program_id=$2 AND objective_id=$3 AND definition_revision=$4"
+    },
+    {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
      "line": 19,
      "statement": "SELECT run,is_win,percent,start_time,end_time FROM guild_campaign_chapters WHERE guild_id=$1 AND chapter_id=$2"
@@ -1902,6 +1935,16 @@
      "statement": "SELECT payload::text,payload_version FROM mail_tuning"
     },
     {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 664,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',i.player_id,'program_id',i.program_id,'objective_id',i.objective_id,'generation_id',i.generation_id, 'definition_revision',i.definition_revision,'content_revision',COALESCE(i.content_revision,''),'legacy_definition',(i.content_revision IS NULL), 'progress',i.progress,'completed_at',i.completed_at,'claim_state',i.claim_state,'claimed_at',i.claimed_at,'state_version',i.state_version, 'family',COALESCE(d.stock_family,0),'strategy',COALESCE(d.strategy,''),'fact',COALESCE(d.accepted_fact_kind,''),'target',COALESCE(d.target,0), 'reward_plan',COALESCE(d.reward_plan,'{}'::jsonb),'huoyue',COALESCE(d.huoyue,0)) ORDER BY i.objective_id,i.generation_id),'[]'::jsonb)::text FROM locked i LEFT JOIN objective_definitions d ON i.content_revision IS NULL AND d.program_id=i.program_id AND d.objective_id=i.objective_id AND d.definition_revision=i.definition_revision"
+    },
+    {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 664,
+     "statement": "WITH locked AS MATERIALIZED ("
+    },
+    {
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 25,
      "statement": "SELECT EXISTS(SELECT 1 FROM ins) AS inserted"
@@ -1924,7 +1967,7 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "UNRESOLVED body at internal/application/shop/service.go:195",
+    "UNRESOLVED body at internal/application/shop/service.go:203",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED observe at internal/application/achievement/service.go:332",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122"
@@ -1936,7 +1979,7 @@
    "isolation": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 174,
+     "line": 182,
      "value": "read_committed"
     }
    ],
@@ -1944,17 +1987,17 @@
    "read_only": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 174,
+     "line": 182,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/shop/service.go:214"
+    "internal/application/shop/service.go:222"
    ],
    "retry": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 174,
+     "line": 182,
      "value": "6"
     }
    ],
@@ -1972,7 +2015,7 @@
      "file": "internal/application/shop/service.go",
      "function": "Service.execute",
      "isolation": "read_committed",
-     "line": 174,
+     "line": 182,
      "read_only": "false",
      "retry": "6"
     }
@@ -2090,7 +2133,7 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED body at internal/application/shop/service.go:195",
+    "UNRESOLVED body at internal/application/shop/service.go:203",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED weight at internal/domain/shop/rolls.go:80",
     "UNRESOLVED weight at internal/domain/shop/rolls.go:92"
@@ -2132,7 +2175,7 @@
    "isolation": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 245,
+     "line": 253,
      "value": "UNKNOWN"
     }
    ],
@@ -2140,7 +2183,7 @@
    "read_only": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 245,
+     "line": 253,
      "value": "UNKNOWN"
     }
    ],
@@ -2148,7 +2191,7 @@
    "retry": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 245,
+     "line": 253,
      "value": "6"
     }
    ],
@@ -2159,7 +2202,7 @@
      "file": "internal/application/shop/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 245,
+     "line": 253,
      "read_only": "UNKNOWN",
      "retry": "6"
     }
@@ -2217,10 +2260,10 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED body at internal/application/shop/service.go:255",
+    "UNRESOLVED body at internal/application/shop/service.go:263",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
-    "transaction ReadOnly flag not statically decidable at internal/application/shop/service.go:245",
-    "transaction isolation not statically decidable at internal/application/shop/service.go:245"
+    "transaction ReadOnly flag not statically decidable at internal/application/shop/service.go:253",
+    "transaction isolation not statically decidable at internal/application/shop/service.go:253"
    ],
    "writes": "UNKNOWN"
   },
@@ -2229,7 +2272,7 @@
    "isolation": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 245,
+     "line": 253,
      "value": "UNKNOWN"
     }
    ],
@@ -2237,7 +2280,7 @@
    "read_only": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 245,
+     "line": 253,
      "value": "UNKNOWN"
     }
    ],
@@ -2245,7 +2288,7 @@
    "retry": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 245,
+     "line": 253,
      "value": "6"
     }
    ],
@@ -2256,7 +2299,7 @@
      "file": "internal/application/shop/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 245,
+     "line": 253,
      "read_only": "UNKNOWN",
      "retry": "6"
     }
@@ -2309,10 +2352,10 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED body at internal/application/shop/service.go:255",
+    "UNRESOLVED body at internal/application/shop/service.go:263",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
-    "transaction ReadOnly flag not statically decidable at internal/application/shop/service.go:245",
-    "transaction isolation not statically decidable at internal/application/shop/service.go:245"
+    "transaction ReadOnly flag not statically decidable at internal/application/shop/service.go:253",
+    "transaction isolation not statically decidable at internal/application/shop/service.go:253"
    ],
    "writes": "UNKNOWN"
   },
@@ -145162,7 +145205,7 @@
    "isolation": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 174,
+     "line": 182,
      "value": "read_committed"
     }
    ],
@@ -145170,18 +145213,20 @@
    "read_only": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 174,
+     "line": 182,
      "value": "false"
     }
    ],
    "receipt_writes": [
+    "internal/application/i5/mission_facts.go:129",
+    "internal/application/i5/service.go:1396",
     "internal/application/i5/service.go:717",
-    "internal/application/shop/service.go:214"
+    "internal/application/shop/service.go:222"
    ],
    "retry": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 174,
+     "line": 182,
      "value": "6"
     }
    ],
@@ -145190,9 +145235,14 @@
     "internal/adapters/postgres/achievementstore/store.go:112",
     "internal/adapters/postgres/achievementstore/store.go:215",
     "internal/adapters/postgres/achievementstore/store.go:47",
+    "internal/adapters/postgres/adventurestore/store.go:54",
     "internal/adapters/postgres/characterstore/store.go:109",
     "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
+    "internal/adapters/postgres/i5store/missions.go:14",
+    "internal/adapters/postgres/i5store/missions.go:45",
+    "internal/adapters/postgres/i5store/missions.go:57",
+    "internal/adapters/postgres/i5store/missions.go:65",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
     "internal/adapters/postgres/i5store/store.go:270",
@@ -145205,6 +145255,7 @@
     "internal/adapters/postgres/i5store/store.go:483",
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
+    "internal/adapters/postgres/i5store/store.go:736",
     "internal/adapters/postgres/shopstore/store.go:44",
     "internal/adapters/postgres/shopstore/store.go:58",
     "internal/adapters/postgres/spiritstore/store.go:43"
@@ -145215,7 +145266,7 @@
      "file": "internal/application/shop/service.go",
      "function": "Service.execute",
      "isolation": "read_committed",
-     "line": 174,
+     "line": 182,
      "read_only": "false",
      "retry": "6"
     }
@@ -145237,6 +145288,16 @@
      "statement": "SELECT payload::text FROM content_achievement_catalogs WHERE revision_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/book_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/book_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_book_input_catalogs WHERE revision_id=$1"
+    },
+    {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
      "line": 25,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -145255,6 +145316,16 @@
      "file": "internal/adapters/postgres/contentstore/hero_progression.go",
      "line": 246,
      "statement": "SELECT h.table_id,h.origin_table_id,h.kind,h.initial_star,h.fragment_item_id FROM gxb_content_resource_definitions r JOIN gxb_content_hero_templates h ON h.revision_id=r.revision_id AND h.table_id=r.partner_id WHERE r.revision_id=$1 AND r.item_id=$2 AND r.partner_id IS NOT NULL AND h.table_id=h.origin_table_id"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/missions.go",
+     "line": 19,
+     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(d)-ARRAY['revision_id','payload_version'] ORDER BY objective_id),'[]'::jsonb)::text FROM gxb_content_objective_definitions d WHERE revision_id=$1 AND definition_revision='I9_MISSIONS_V1'"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/missions.go",
+     "line": 44,
+     "statement": "SELECT COALESCE(a.payload::text,''),COALESCE(r.manifest->'enabled_capabilities' ? 'MISSION_ACTIVITY_I9_4B',false) FROM gxb_content_revisions r LEFT JOIN content_mission_activity_catalogs a USING(revision_id) WHERE r.revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
@@ -145342,6 +145413,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 797,
+     "statement": "SELECT stock_family,strategy,accepted_fact_kind,target,reward_plan::text,huoyue FROM gxb_content_objective_definitions WHERE revision_id=$1 AND program_id=$2 AND objective_id=$3 AND definition_revision=$4"
+    },
+    {
      "file": "internal/adapters/postgres/guildcampaignstore/mode.go",
      "line": 19,
      "statement": "SELECT run,is_win,percent,start_time,end_time FROM guild_campaign_chapters WHERE guild_id=$1 AND chapter_id=$2"
@@ -145372,6 +145448,16 @@
      "statement": "SELECT payload::text,payload_version FROM mail_tuning"
     },
     {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 664,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',i.player_id,'program_id',i.program_id,'objective_id',i.objective_id,'generation_id',i.generation_id, 'definition_revision',i.definition_revision,'content_revision',COALESCE(i.content_revision,''),'legacy_definition',(i.content_revision IS NULL), 'progress',i.progress,'completed_at',i.completed_at,'claim_state',i.claim_state,'claimed_at',i.claimed_at,'state_version',i.state_version, 'family',COALESCE(d.stock_family,0),'strategy',COALESCE(d.strategy,''),'fact',COALESCE(d.accepted_fact_kind,''),'target',COALESCE(d.target,0), 'reward_plan',COALESCE(d.reward_plan,'{}'::jsonb),'huoyue',COALESCE(d.huoyue,0)) ORDER BY i.objective_id,i.generation_id),'[]'::jsonb)::text FROM locked i LEFT JOIN objective_definitions d ON i.content_revision IS NULL AND d.program_id=i.program_id AND d.objective_id=i.objective_id AND d.definition_revision=i.definition_revision"
+    },
+    {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 664,
+     "statement": "WITH locked AS MATERIALIZED ("
+    },
+    {
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 25,
      "statement": "SELECT EXISTS(SELECT 1 FROM ins) AS inserted"
@@ -145394,7 +145480,7 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "UNRESOLVED body at internal/application/shop/service.go:195",
+    "UNRESOLVED body at internal/application/shop/service.go:203",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED observe at internal/application/achievement/service.go:332",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122"

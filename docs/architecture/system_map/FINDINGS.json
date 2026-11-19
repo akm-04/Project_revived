@@ -7597,6 +7597,12 @@
    "systems": [
     "campaign"
    ]
+  },
+  {
+   "fact": "SHOP_PURCHASE",
+   "systems": [
+    "shop"
+   ]
   }
  ],
  "facts_without_emitter": [
