@@ -634,11 +634,11 @@ func TestI9_8BIllusionMemberTeamNative(t *testing.T) {
 		t.Fatal(err)
 	}
 	heroes, ok := body["heros"].([]map[string]any)
-	if !ok || len(heroes) != 1 || heroes[0]["partner_id"] != picks[0] {
+	if !ok || len(heroes) != 1 || heroes[0]["partner_id"] != float64(picks[0]) {
 		t.Fatalf("1364 read the wrong occurrence %#v", body)
 	}
 	pet, ok := body["pet"].(map[string]any)
-	if !ok || pet["pet_id"] != ricky.PetID {
+	if !ok || pet["pet_id"] != float64(ricky.PetID) {
 		t.Fatalf("1364 pet %#v", body["pet"])
 	}
 	if _, err = s.MemberTeam(ctx, member, other.PlayerID, op()); !errors.Is(err, di.ErrRefused) {
@@ -671,7 +671,7 @@ func TestI9_8BIllusionMemberTeamFrozenBoardNative(t *testing.T) {
 		t.Fatal(err)
 	}
 	heroes, ok := body["heros"].([]map[string]any)
-	if !ok || len(heroes) != 1 || heroes[0]["partner_id"] != partner {
+	if !ok || len(heroes) != 1 || heroes[0]["partner_id"] != float64(partner) {
 		t.Fatalf("1364 lost the frozen team on the rest day %#v", body)
 	}
 }
