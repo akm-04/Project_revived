@@ -102119,7 +102119,7 @@
     "internal/adapters/postgres/librarystore/battle_counts.go:15",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/memoirstore/store.go:31",
-    "internal/adapters/postgres/memoirstore/store.go:38",
+    "internal/adapters/postgres/memoirstore/store.go:55",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "memoir",
@@ -102321,6 +102321,11 @@
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
     },
     {
+     "file": "internal/adapters/postgres/memoirstore/store.go",
+     "line": 40,
+     "statement": "SELECT payload::text,payload_version FROM memoir_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/realtime_wakeup_core.go",
      "line": 22,
      "statement": "SELECT pg_notify($1,$2)"
@@ -102366,7 +102371,7 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/memoirstore/store.go:31",
-    "internal/adapters/postgres/memoirstore/store.go:38"
+    "internal/adapters/postgres/memoirstore/store.go:55"
    ],
    "system": "memoir",
    "transactions": [
@@ -102646,6 +102651,11 @@
      "statement": "SELECT payload::text,payload_version FROM league_settlements WHERE kind=$1 AND number=$2"
     },
     {
+     "file": "internal/adapters/postgres/memoirstore/store.go",
+     "line": 40,
+     "statement": "SELECT payload::text,payload_version FROM memoir_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/topfloorstore/store.go",
      "line": 133,
      "statement": "SELECT rank FROM top_floor_ranks WHERE logical_server_id=$1 AND robot_team=$2"
@@ -102694,7 +102704,7 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/memoirstore/store.go:31",
-    "internal/adapters/postgres/memoirstore/store.go:38"
+    "internal/adapters/postgres/memoirstore/store.go:55"
    ],
    "system": "memoir",
    "transactions": [
@@ -102757,6 +102767,11 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 61,
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/memoirstore/store.go",
+     "line": 40,
+     "statement": "SELECT payload::text,payload_version FROM memoir_tuning"
     }
    ],
    "unknown": [
@@ -102814,7 +102829,7 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/memoirstore/store.go:31",
-    "internal/adapters/postgres/memoirstore/store.go:38",
+    "internal/adapters/postgres/memoirstore/store.go:55",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "memoir",
@@ -102963,6 +102978,11 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 61,
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/memoirstore/store.go",
+     "line": 40,
+     "statement": "SELECT payload::text,payload_version FROM memoir_tuning"
     }
    ],
    "unknown": [
@@ -103006,7 +103026,7 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/memoirstore/store.go:31",
-    "internal/adapters/postgres/memoirstore/store.go:38"
+    "internal/adapters/postgres/memoirstore/store.go:55"
    ],
    "system": "memoir",
    "transactions": [
@@ -103286,6 +103306,11 @@
      "statement": "SELECT payload::text,payload_version FROM league_settlements WHERE kind=$1 AND number=$2"
     },
     {
+     "file": "internal/adapters/postgres/memoirstore/store.go",
+     "line": 40,
+     "statement": "SELECT payload::text,payload_version FROM memoir_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/topfloorstore/store.go",
      "line": 133,
      "statement": "SELECT rank FROM top_floor_ranks WHERE logical_server_id=$1 AND robot_team=$2"
@@ -103334,7 +103359,7 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/memoirstore/store.go:31",
-    "internal/adapters/postgres/memoirstore/store.go:38"
+    "internal/adapters/postgres/memoirstore/store.go:55"
    ],
    "system": "memoir",
    "transactions": [
@@ -103397,6 +103422,11 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 61,
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/memoirstore/store.go",
+     "line": 40,
+     "statement": "SELECT payload::text,payload_version FROM memoir_tuning"
     }
    ],
    "unknown": [
@@ -103458,7 +103488,7 @@
     "internal/adapters/postgres/librarystore/battle_counts.go:15",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/memoirstore/store.go:31",
-    "internal/adapters/postgres/memoirstore/store.go:38",
+    "internal/adapters/postgres/memoirstore/store.go:55",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "memoir",
@@ -103632,6 +103662,11 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 61,
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/memoirstore/store.go",
+     "line": 40,
+     "statement": "SELECT payload::text,payload_version FROM memoir_tuning"
     },
     {
      "file": "internal/adapters/postgres/realtime_wakeup_core.go",
@@ -103747,7 +103782,7 @@
     "internal/adapters/postgres/librarystore/battle_counts.go:15",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/memoirstore/store.go:31",
-    "internal/adapters/postgres/memoirstore/store.go:38",
+    "internal/adapters/postgres/memoirstore/store.go:55",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "memoir",
@@ -104152,6 +104187,11 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 61,
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/memoirstore/store.go",
+     "line": 40,
+     "statement": "SELECT payload::text,payload_version FROM memoir_tuning"
     },
     {
      "file": "internal/adapters/postgres/realtime_wakeup_core.go",
@@ -104265,7 +104305,7 @@
     "internal/adapters/postgres/librarystore/battle_counts.go:15",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/memoirstore/store.go:31",
-    "internal/adapters/postgres/memoirstore/store.go:38",
+    "internal/adapters/postgres/memoirstore/store.go:55",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "memoir",
@@ -104467,6 +104507,11 @@
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
     },
     {
+     "file": "internal/adapters/postgres/memoirstore/store.go",
+     "line": 40,
+     "statement": "SELECT payload::text,payload_version FROM memoir_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/realtime_wakeup_core.go",
      "line": 22,
      "statement": "SELECT pg_notify($1,$2)"
@@ -104527,7 +104572,7 @@
     "internal/adapters/postgres/i5store/store.go:494",
     "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/memoirstore/store.go:31",
-    "internal/adapters/postgres/memoirstore/store.go:38",
+    "internal/adapters/postgres/memoirstore/store.go:55",
     "internal/adapters/postgres/spiritstore/store.go:43"
    ],
    "system": "memoir",
@@ -104676,6 +104721,11 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 61,
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/memoirstore/store.go",
+     "line": 40,
+     "statement": "SELECT payload::text,payload_version FROM memoir_tuning"
     }
    ],
    "unknown": [
@@ -104741,7 +104791,7 @@
     "internal/adapters/postgres/i5store/store.go:415",
     "internal/adapters/postgres/i5store/store.go:736",
     "internal/adapters/postgres/memoirstore/store.go:31",
-    "internal/adapters/postgres/memoirstore/store.go:38"
+    "internal/adapters/postgres/memoirstore/store.go:55"
    ],
    "system": "memoir",
    "transactions": [
@@ -105091,6 +105141,11 @@
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
     },
     {
+     "file": "internal/adapters/postgres/memoirstore/store.go",
+     "line": 40,
+     "statement": "SELECT payload::text,payload_version FROM memoir_tuning"
+    },
+    {
      "file": "internal/adapters/postgres/sharedroomstore/store.go",
      "line": 42,
      "statement": "SELECT room_id,logical_server_id,family,slot,owner_player,status,capacity,expires_at,state_version,notice_version,payload::text,created_at,updated_at,closed_at FROM shared_rooms WHERE room_id=$1 FOR UPDATE"
@@ -105150,7 +105205,7 @@
     "internal/adapters/postgres/i5store/store.go:384",
     "internal/adapters/postgres/i5store/store.go:415",
     "internal/adapters/postgres/memoirstore/store.go:31",
-    "internal/adapters/postgres/memoirstore/store.go:38"
+    "internal/adapters/postgres/memoirstore/store.go:55"
    ],
    "system": "memoir",
    "transactions": [
@@ -105238,6 +105293,11 @@
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 61,
      "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
+    },
+    {
+     "file": "internal/adapters/postgres/memoirstore/store.go",
+     "line": 40,
+     "statement": "SELECT payload::text,payload_version FROM memoir_tuning"
     }
    ],
    "unknown": [

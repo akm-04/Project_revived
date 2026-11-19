@@ -13,13 +13,16 @@ import (
 	applicationcombat "gxb.local/backend/v2/internal/application/combat"
 	"gxb.local/backend/v2/internal/application/i5"
 	application "gxb.local/backend/v2/internal/application/memoir"
+	"gxb.local/backend/v2/internal/domain/campaign"
 	"gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/march"
 	"gxb.local/backend/v2/internal/domain/memoir"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"strconv"
 	"strings"
 	"sync"
@@ -743,5 +746,88 @@ func TestI9_6CMemoirNativePlayerRecoveryAfterAdmission(t *testing.T) {
 		if memoirRecord(t, pool, actor).Sequence <= state.Sequence {
 			t.Fatal("loss replay trapped a fresh request")
 		}
+	}
+}
+
+func memoirFinalState(revision string, girl int64) memoir.State {
+	cells := make([]int64, memoir.BoardCells)
+	for index := range cells {
+		cells[index] = memoir.Road
+	}
+	cells[memoir.FinalPosition-1] = memoir.Endpoint
+	return memoir.State{
+		Occurrence: "native-tuning",
+		Revision:   revision,
+		Girl:       girl,
+		Floor:      3,
+		Board: memoir.Board{
+			Cells:       cells,
+			Open:        map[int]int64{memoir.InitialPosition: 1},
+			Enemies:     map[int]int64{},
+			Position:    memoir.InitialPosition,
+			GuardianWon: true,
+		},
+		Heroes:    map[int64]combat.ActorStatus{},
+		Enemies:   map[int]memoir.EnemyCarry{},
+		Opponents: map[int]march.Enemy{},
+		Drops:     []campaign.Item{},
+		MaxFloor:  map[int64]int{},
+	}
+}
+
+func memoirAwarded(value any, table int64) bool {
+	rows, present := value.([]map[string]any)
+	if !present {
+		return false
+	}
+	for _, row := range rows {
+		if row["table_id"] == table {
+			return true
+		}
+	}
+	return false
+}
+
+// TestI9_11T34MemoirTuningNative proves the operator overlay row reaches the
+// final draw and that a rejected overlay still serves the source catalog.
+func TestI9_11T34MemoirTuningNative(t *testing.T) {
+	pool := pool(t)
+	actor, revision := bornActor(t, pool), installed(t, pool)
+	compositeLevel(t, pool, actor, revision, 100)
+	clock := &workplaceTime{at: time.Now().UTC().Add(time.Hour)}
+	mode := memoirMode(t, pool, clock)
+	catalog, err := mode.Content.MemoirCatalogTx(ctx, pool, revision)
+	if err != nil {
+		t.Fatal(err)
+	}
+	state := memoirFinalState(revision, catalog.Selected[0])
+	raw, version, err := payload.Encode(state)
+	if err != nil {
+		t.Fatal(err)
+	}
+	restore := func() {
+		exec(t, pool, `INSERT INTO memoir_players(player_id,payload,payload_version,updated_at)VALUES($1,$2::jsonb,$3,now()) ON CONFLICT(player_id) DO UPDATE SET payload=EXCLUDED.payload,payload_version=EXCLUDED.payload_version,updated_at=EXCLUDED.updated_at`, int64(actor.PlayerID), string(raw), int(version))
+	}
+	restore()
+	exec(t, pool, `INSERT INTO memoir_tuning(singleton,payload,payload_version,revision,updated_at)VALUES(true,$1::jsonb,1,1,now())`, `{"box_rates":{"597011":{"20001154":10000}}}`)
+	t.Cleanup(func() { exec(t, pool, `DELETE FROM memoir_tuning`) })
+	response, err := mode.FinalAward(ctx, actor, memoir.FinalPosition, catalog.FinalGifts[0], op())
+	if err != nil {
+		t.Fatal("tuned final award", err)
+	}
+	if !memoirAwarded(response["awards"], 20001154) {
+		t.Fatalf("tuned guaranteed row missing from %#v", response["awards"])
+	}
+	exec(t, pool, `UPDATE memoir_tuning SET payload='{"box_rates":{"1":{"1":10000}}}'::jsonb,revision=2,updated_at=now()`)
+	tuning, found, err := (memoirstore.Store{}).TuningTx(ctx, pool)
+	if err != nil || !found {
+		t.Fatal("overlay row", found, err)
+	}
+	if _, err = catalog.Tune(tuning); err == nil {
+		t.Fatal("malformed overlay accepted")
+	}
+	restore()
+	if _, err = mode.FinalAward(ctx, actor, memoir.FinalPosition, catalog.FinalGifts[0], op()); err != nil {
+		t.Fatal("rejected overlay stopped the mode", err)
 	}
 }
