@@ -39861,6 +39861,21 @@
    "writes": "state"
   },
   {
+   "handler": "",
+   "isolation": [],
+   "mid": 517,
+   "read_only": [],
+   "receipt_writes": [],
+   "retry": [],
+   "state_writes": [],
+   "transactions": [],
+   "unbounded_read": [],
+   "unknown": [
+    "inactive fallback registration: no dispatcher route to trace"
+   ],
+   "writes": "UNKNOWN"
+  },
+  {
    "handler": "internal/adapters/stockruntime/workplace_dispatcher.go",
    "isolation": [
     {
@@ -81368,6 +81383,21 @@
    "writes": "state"
   },
   {
+   "handler": "",
+   "isolation": [],
+   "mid": 1348,
+   "read_only": [],
+   "receipt_writes": [],
+   "retry": [],
+   "state_writes": [],
+   "transactions": [],
+   "unbounded_read": [],
+   "unknown": [
+    "inactive fallback registration: no dispatcher route to trace"
+   ],
+   "writes": "UNKNOWN"
+  },
+  {
    "handler": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
    "isolation": [
     {
@@ -82185,6 +82215,21 @@
     }
    ],
    "writes": "state"
+  },
+  {
+   "handler": "",
+   "isolation": [],
+   "mid": 1355,
+   "read_only": [],
+   "receipt_writes": [],
+   "retry": [],
+   "state_writes": [],
+   "transactions": [],
+   "unbounded_read": [],
+   "unknown": [
+    "inactive fallback registration: no dispatcher route to trace"
+   ],
+   "writes": "UNKNOWN"
   },
   {
    "handler": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
@@ -83026,6 +83071,21 @@
    "writes": "state"
   },
   {
+   "handler": "",
+   "isolation": [],
+   "mid": 1359,
+   "read_only": [],
+   "receipt_writes": [],
+   "retry": [],
+   "state_writes": [],
+   "transactions": [],
+   "unbounded_read": [],
+   "unknown": [
+    "inactive fallback registration: no dispatcher route to trace"
+   ],
+   "writes": "UNKNOWN"
+  },
+  {
    "handler": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
    "isolation": [
     {
@@ -83139,6 +83199,21 @@
     "UNRESOLVED cancel at internal/application/roominvite/service.go:157"
    ],
    "writes": "state"
+  },
+  {
+   "handler": "",
+   "isolation": [],
+   "mid": 1361,
+   "read_only": [],
+   "receipt_writes": [],
+   "retry": [],
+   "state_writes": [],
+   "transactions": [],
+   "unbounded_read": [],
+   "unknown": [
+    "inactive fallback registration: no dispatcher route to trace"
+   ],
+   "writes": "UNKNOWN"
   },
   {
    "handler": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
@@ -129327,6 +129402,21 @@
     "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:95"
    ],
    "writes": "state"
+  },
+  {
+   "handler": "",
+   "isolation": [],
+   "mid": 2527,
+   "read_only": [],
+   "receipt_writes": [],
+   "retry": [],
+   "state_writes": [],
+   "transactions": [],
+   "unbounded_read": [],
+   "unknown": [
+    "inactive fallback registration: no dispatcher route to trace"
+   ],
+   "writes": "UNKNOWN"
   },
   {
    "handler": "",

@@ -20,20 +20,20 @@
  "counts": {
   "by_disposition": {
    "DELIVERED": 196,
-   "ACTIVE": 377,
-   "INACTIVE_SUPERSEDED": 96,
+   "ACTIVE": 371,
+   "INACTIVE_SUPERSEDED": 102,
    "LATER": 502,
    "INACTIVE_D79": 21
   },
   "active_by_stage": {
    "I9-11": 34,
-   "I9-10": 112,
+   "I9-10": 111,
    "I9-3": 17,
    "I9-4": 7,
    "I9-4D": 12,
    "I9-7": 42,
    "I9-5": 24,
-   "I9-8": 71,
+   "I9-8": 66,
    "I9-9": 28,
    "I9-6": 30
   }
@@ -2050,10 +2050,11 @@
    "mid": 517,
    "name": "ILLUSION_INVITE",
    "family": "ILLUSION_FANTASY",
-   "disposition": "ACTIVE",
-   "target": "I9-8",
+   "disposition": "INACTIVE_SUPERSEDED",
+   "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 T33 A-146: superseded under I9_ILLUSION_V1 C8/C10; no client sender"
   },
   {
    "mid": 518,
@@ -4532,10 +4533,11 @@
    "mid": 1348,
    "name": "ILLUSION_RANK_LIST",
    "family": "ILLUSION_FANTASY",
-   "disposition": "ACTIVE",
-   "target": "I9-8",
+   "disposition": "INACTIVE_SUPERSEDED",
+   "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 T33 A-146: superseded under I9_ILLUSION_V1 C8/C10; no client sender"
   },
   {
    "mid": 1349,
@@ -4601,10 +4603,11 @@
    "mid": 1355,
    "name": "ILLUSION_CLEAR_ROOM",
    "family": "ILLUSION_FANTASY",
-   "disposition": "ACTIVE",
-   "target": "I9-8",
+   "disposition": "INACTIVE_SUPERSEDED",
+   "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 T33 A-146: superseded under I9_ILLUSION_V1 C8/C10; no client sender"
   },
   {
    "mid": 1356,
@@ -4640,10 +4643,11 @@
    "mid": 1359,
    "name": "ILLUSION_GET_ROOM_LIST",
    "family": "ILLUSION_FANTASY",
-   "disposition": "ACTIVE",
-   "target": "I9-8",
+   "disposition": "INACTIVE_SUPERSEDED",
+   "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 T33 A-146: superseded under I9_ILLUSION_V1 C8/C10; no client sender"
   },
   {
    "mid": 1360,
@@ -4659,10 +4663,11 @@
    "mid": 1361,
    "name": "ILLUSION_INVITE_BROADCAST",
    "family": "ILLUSION_FANTASY",
-   "disposition": "ACTIVE",
-   "target": "I9-8",
+   "disposition": "INACTIVE_SUPERSEDED",
+   "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 T33 A-146: superseded under I9_ILLUSION_V1 C8/C10; no client sender"
   },
   {
    "mid": 1362,
@@ -7777,10 +7782,11 @@
    "mid": 2527,
    "name": "GET_COMFORT_RANK_LIST",
    "family": "DORM",
-   "disposition": "ACTIVE",
-   "target": "I9-10",
+   "disposition": "INACTIVE_SUPERSEDED",
+   "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 T33 A-145: superseded by D494; no client sender"
   },
   {
    "mid": 2529,

@@ -22,16 +22,6 @@
    "stage": null
   },
   {
-   "mid": 517,
-   "name": "ILLUSION_INVITE",
-   "files": [
-    "app/common/network/Backend.lua"
-   ],
-   "family": "ILLUSION_FANTASY",
-   "disposition": "ACTIVE",
-   "stage": "I9-8"
-  },
-  {
    "mid": 518,
    "name": "ILLUSION_NOTICE",
    "files": [
@@ -7641,7 +7631,7 @@
   "internal/application/occult/settlement.go:111: fact kind is not a constant"
  ],
  "inactive_mids": {
-  "count": 619,
+  "count": 625,
   "mids": [
    6,
    17,
@@ -7704,6 +7694,7 @@
    277,
    302,
    435,
+   517,
    529,
    534,
    535,
@@ -7797,6 +7788,10 @@
    1330,
    1331,
    1332,
+   1348,
+   1355,
+   1359,
+   1361,
    1376,
    1377,
    1378,
@@ -7970,6 +7965,7 @@
    2465,
    2466,
    2467,
+   2527,
    2529,
    2530,
    2531,
@@ -8382,6 +8378,26 @@
    "system": ""
   },
   {
+   "mid": 1348,
+   "name": "ILLUSION_RANK_LIST",
+   "system": ""
+  },
+  {
+   "mid": 1355,
+   "name": "ILLUSION_CLEAR_ROOM",
+   "system": ""
+  },
+  {
+   "mid": 1359,
+   "name": "ILLUSION_GET_ROOM_LIST",
+   "system": ""
+  },
+  {
+   "mid": 1361,
+   "name": "ILLUSION_INVITE_BROADCAST",
+   "system": ""
+  },
+  {
    "mid": 1409,
    "name": "REGION_GET_ENEMY_LIST",
    "system": ""
@@ -8444,6 +8460,11 @@
   {
    "mid": 2088,
    "name": "ACADEMY_COMMAND_LIST",
+   "system": ""
+  },
+  {
+   "mid": 2527,
+   "name": "GET_COMFORT_RANK_LIST",
    "system": ""
   },
   {
