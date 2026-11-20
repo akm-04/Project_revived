@@ -124,8 +124,14 @@ func TestI9_10B841MissionReadAndGiftAdvance(t *testing.T) {
 		t.Fatalf("841 status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	missions, ok := response.Body["mission_list"].([]any)
-	if !ok || len(missions) != 0 {
+	if !ok || len(missions) != 3 {
 		t.Fatalf("zero-favor mission_list %T %+v", response.Body["mission_list"], response.Body["mission_list"])
+	}
+	for index, wantID := range []int64{1001, 1002, 1003} {
+		row := missions[index].(map[string]any)
+		if row["mission_id"] != wantID || row["process"] != int64(0) || row["mission_state"] != int64(2) {
+			t.Fatalf("zero-favor mission %d row %+v", index, row)
+		}
 	}
 
 	setLibraryFavor(t, p, a, 1, 100)
@@ -151,7 +157,7 @@ func TestI9_10B841MissionReadAndGiftAdvance(t *testing.T) {
 
 	response = libraryDispatchService(t, a, service, 841, map[string]any{"partner_id": int64(1)}, op())
 	missions = response.Body["mission_list"].([]any)
-	if len(missions) != 3 {
+	if len(missions) != 4 {
 		t.Fatalf("post-gift missions %+v", missions)
 	}
 	first := missions[0].(map[string]any)
@@ -188,7 +194,7 @@ func TestI9_10B841MissionReadAndGiftAdvance(t *testing.T) {
 	}
 	response = libraryDispatchService(t, a, service, 841, map[string]any{"partner_id": int64(2)}, op())
 	missions = response.Body["mission_list"].([]any)
-	if len(missions) != 3 || missions[0].(map[string]any)["mission_id"] != int64(1001) || missions[0].(map[string]any)["process"] != int64(1) || missions[0].(map[string]any)["mission_state"] != int64(4) {
+	if len(missions) != 4 || missions[0].(map[string]any)["mission_id"] != int64(1001) || missions[0].(map[string]any)["process"] != int64(1) || missions[0].(map[string]any)["mission_state"] != int64(4) {
 		t.Fatalf("boundary missions %+v", missions)
 	}
 }
