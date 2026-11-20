@@ -7,6 +7,7 @@ import (
 	"errors"
 	"time"
 
+	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	library "gxb.local/backend/v2/internal/domain/librarylocal"
@@ -86,6 +87,22 @@ func (Store) ReadHeroTx(ctx context.Context, q tx.Queryer, ref character.HeroRef
 		return library.HeroFacts{}, library.ErrInvalidFacts
 	}
 	return scanHero(q.QueryRow(ctx, `SELECT `+heroColumns+` FROM player_library_heroes WHERE player_id=$1 AND partner_id=$2`, int64(ref.PlayerID), ref.PartnerID))
+}
+
+// FavorOccurrenceTx is Adventure C4's typed Library read: the partner must be
+// an owned Library hero below the favor limit before a 10002 occurrence exists.
+func (Store) FavorOccurrenceTx(ctx context.Context, q tx.Queryer, pid identity.PlayerID, partnerID int64) (bool, error) {
+	if q == nil || !pid.Valid() || partnerID <= 0 {
+		return false, library.ErrInvalidFacts
+	}
+	f, e := (Store{}).ReadHeroTx(ctx, q, character.HeroRef{PlayerID: pid, PartnerID: partnerID})
+	if errors.Is(e, kernelstore.ErrNoRows) {
+		return false, nil
+	}
+	if e != nil {
+		return false, e
+	}
+	return f.Favor < library.FavorLimit, nil
 }
 
 // ListHeroesTx returns every Library Hero facet of one player in one owner read.

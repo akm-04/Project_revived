@@ -330,7 +330,7 @@ func main() {
 	// C17/C18: the Library settling commands emit INTIMACY_IMPROVED through the
 	// same objective port as charge/summon, including the Adventure 10002 observer.
 	librarySvc.Grants = i5svc
-	librarySvc.Facts = appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}, Wake: adventureWakeup{}}}
+	librarySvc.Facts = appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}, Wake: adventureWakeup{}, Favor: librarystore.Store{}}}
 	eventCentreSvc.Facts = appi5.ObjectiveFacts{Owner: i5svc, Open: i5db}
 	rosterProjection := &characterstore.HeroBootstrapProjection{AwakeningPositions: heroSvc.AwakeningPositions, Awakening: heroSvc, Content: contentDB, Library: librarySvc, Dorm: dormSvc, Book: bookSvc, Course: courseSvc, Inscription: inscriptionSvc, Element: elementSvc, Spirit: spiritSvc, Evolution: evolutionSvc}
 	librarySvc.Roster = rosterProjection

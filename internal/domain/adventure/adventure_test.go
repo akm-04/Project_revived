@@ -93,7 +93,7 @@ func TestRollIsDeterministicPerFactKey(t *testing.T) {
 func TestOccurrenceLifetimeAndOneActivePerType(t *testing.T) {
 	at := time.Unix(1700000000, 0).UTC()
 	event := fixedEvent(t, EventDefense)
-	occurrence, err := NewOccurrence("campaign/sweep/1", testPlayer(), event, at)
+	occurrence, err := NewOccurrence("campaign/sweep/1", testPlayer(), event, at, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -149,7 +149,7 @@ func TestOccurrenceSpecialData(t *testing.T) {
 		EventDefense:  func(id int64) bool { return id == 0 },
 	}
 	for eventType, valid := range cases {
-		occurrence, err := NewOccurrence("fact/"+fmt.Sprint(eventType), testPlayer(), fixedEvent(t, eventType), at)
+		occurrence, err := NewOccurrence("fact/"+fmt.Sprint(eventType), testPlayer(), fixedEvent(t, eventType), at, 0)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -281,5 +281,34 @@ func TestGeneratedCatalogPricesAreRecomputed(t *testing.T) {
 	drift.Events[0].Rate = 4
 	if !errors.Is(drift.Validate(), ErrUnavailable) {
 		t.Fatal("rating drift must refuse the catalog")
+	}
+}
+
+// C4: a Favor occurrence carries its partner id, and a stored row with
+// special_data 0 is retired from every read.
+func TestFavorOccurrenceSpecialDataAndRetirement(t *testing.T) {
+	at := time.Unix(1700000000, 0).UTC()
+	event := fixedEvent(t, EventFavor)
+	occurrence, err := NewOccurrence("library/favor/1", testPlayer(), event, at, 10001001)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if occurrence.SpecialData != 10001001 {
+		t.Fatalf("favor special_data %d", occurrence.SpecialData)
+	}
+	if !occurrence.Servable(at) {
+		t.Fatal("a live favor occurrence with a partner id must be served")
+	}
+	retired := occurrence
+	retired.SpecialData = 0
+	if retired.Servable(at) {
+		t.Fatal("a retired favor occurrence must never be served")
+	}
+	defense, err := NewOccurrence("campaign/sweep/1", testPlayer(), fixedEvent(t, EventDefense), at, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !defense.Servable(at) {
+		t.Fatal("an occurrence without a partner id stays servable outside Favor")
 	}
 }

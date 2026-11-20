@@ -31,6 +31,11 @@ type LeaveResult struct {
 	Closed bool
 }
 
+// RoomMutator completes the family payload inside a membership transaction,
+// like UpdateRequest.Apply, so a leave or kick can retire family state and its
+// push in the same room update.
+type RoomMutator func(context.Context, gen.TimedScope, *d.Room) error
+
 func (s Service) Open(c context.Context, actor identity.ActorContext, request OpenRequest, op operation.Context) (d.Room, error) {
 	if err := request.Family.validate(); err != nil {
 		return d.Room{}, err
@@ -198,7 +203,8 @@ func (s Service) Update(c context.Context, actor identity.ActorContext, request 
 }
 
 // Leave removes the actor from their active room; owner or last leave closes it.
-func (s Service) Leave(c context.Context, actor identity.ActorContext, family Family, op operation.Context) (LeaveResult, error) {
+// An optional mutator runs under the room lock before the membership change.
+func (s Service) Leave(c context.Context, actor identity.ActorContext, family Family, op operation.Context, mutators ...RoomMutator) (LeaveResult, error) {
 	if err := family.validate(); err != nil {
 		return LeaveResult{}, err
 	}
@@ -223,6 +229,11 @@ func (s Service) Leave(c context.Context, actor identity.ActorContext, family Fa
 			return err
 		}
 		before := locked.StateVersion
+		for _, mutate := range mutators {
+			if err := mutate(c, sc, &locked); err != nil {
+				return err
+			}
+		}
 		if err := locked.Leave(actor.PlayerID, at); err != nil {
 			return err
 		}
@@ -235,8 +246,9 @@ func (s Service) Leave(c context.Context, actor identity.ActorContext, family Fa
 	return out, err
 }
 
-// Kick removes a seated player on the owner's order.
-func (s Service) Kick(c context.Context, actor identity.ActorContext, family Family, target identity.PlayerID, op operation.Context) (d.Room, error) {
+// Kick removes a seated player on the owner's order. An optional mutator runs
+// under the room lock before the membership change.
+func (s Service) Kick(c context.Context, actor identity.ActorContext, family Family, target identity.PlayerID, op operation.Context, mutators ...RoomMutator) (d.Room, error) {
 	if err := family.validate(); err != nil {
 		return d.Room{}, err
 	}
@@ -264,6 +276,11 @@ func (s Service) Kick(c context.Context, actor identity.ActorContext, family Fam
 			return err
 		}
 		before := locked.StateVersion
+		for _, mutate := range mutators {
+			if err := mutate(c, sc, &locked); err != nil {
+				return err
+			}
+		}
 		if err := locked.Kick(actor.PlayerID, target, at); err != nil {
 			return err
 		}

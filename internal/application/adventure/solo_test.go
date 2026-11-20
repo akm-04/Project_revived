@@ -62,7 +62,7 @@ func (queryerStub) QueryRow(context.Context, string, ...any) tx.Row { return nil
 
 func testOccurrence(eventType int64, at time.Time, finished bool) d.Occurrence {
 	event, _ := d.Profile(eventType)
-	occurrence, _ := d.NewOccurrence("fact/"+time.Unix(int64(eventType), 0).String(), identity.PlayerID(7001), event, at)
+	occurrence, _ := d.NewOccurrence("fact/"+time.Unix(int64(eventType), 0).String(), identity.PlayerID(7001), event, at, 0)
 	if finished {
 		occurrence.Finish(at.Add(time.Minute))
 	}

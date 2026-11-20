@@ -12,6 +12,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
+	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	appadventure "gxb.local/backend/v2/internal/application/adventure"
 	i5 "gxb.local/backend/v2/internal/application/i5"
@@ -45,7 +46,7 @@ func libraryFactService(p *pg.Pool) app.Service {
 	owner := missionOwner(p)
 	service := libraryService(p, p)
 	service.Grants = owner
-	service.Facts = i5.ObjectiveFacts{Owner: owner, Open: i5store.Store{Queryer: p}, Observer: appadventure.Observer{Store: adventurestore.Store{}}}
+	service.Facts = i5.ObjectiveFacts{Owner: owner, Open: i5store.Store{Queryer: p}, Observer: appadventure.Observer{Store: adventurestore.Store{}, Favor: librarystore.Store{}}}
 	return service
 }
 

@@ -67,7 +67,7 @@ func TestStartChoiceConformanceAdventureIllusion(t *testing.T) {
 	if !ok {
 		t.Fatal("adventure illusion event is not profiled")
 	}
-	occurrence, err := d.NewOccurrence("start-choice-occurrence", actor.PlayerID, event, at)
+	occurrence, err := d.NewOccurrence("start-choice-occurrence", actor.PlayerID, event, at, 0)
 	if err != nil {
 		t.Fatal(err)
 	}

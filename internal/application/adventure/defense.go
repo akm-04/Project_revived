@@ -395,7 +395,7 @@ func (s Mode) KickDefense(c context.Context, a identity.ActorContext, target ide
 	if err := s.requireAdmission(c, a, op); err != nil {
 		return nil, err
 	}
-	if _, err := s.Rooms.Kick(c, a, DefenseFamily(), target, op); err != nil {
+	if _, err := s.Rooms.Kick(c, a, DefenseFamily(), target, op, s.clearDefenseBusy(int64(target))); err != nil {
 		return nil, err
 	}
 	return map[string]any{}, nil
@@ -405,10 +405,39 @@ func (s Mode) ExitDefense(c context.Context, a identity.ActorContext, op operati
 	if err := s.requireAdmission(c, a, op); err != nil {
 		return nil, err
 	}
-	if _, err := s.Rooms.Leave(c, a, DefenseFamily(), op); err != nil {
+	if _, err := s.Rooms.Leave(c, a, DefenseFamily(), op, s.clearDefenseBusy(int64(a.PlayerID))); err != nil {
 		return nil, err
 	}
 	return map[string]any{}, nil
+}
+
+// clearDefenseBusy retires every monster position the departing player holds
+// in the same room update that removes the seat, and appends the function 8
+// free push QuitDefense sends.
+func (s Mode) clearDefenseBusy(player int64) sr.RoomMutator {
+	return func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
+		state, err := s.roomState(*room)
+		if err != nil {
+			return err
+		}
+		if !freeDefenseBusy(&state, player, room.ID) {
+			return nil
+		}
+		return s.restoreRoom(sc, room, state)
+	}
+}
+
+func freeDefenseBusy(state *d.RoomState, player, roomID int64) bool {
+	freed := false
+	for index := range state.Busy {
+		if state.Busy[index].Player != player {
+			continue
+		}
+		state.Busy[index] = d.BusyState{}
+		state.AddPush(8, player, false, map[string]any{"room_id": roomID, "monster_pos": int64(index + 1)})
+		freed = true
+	}
+	return freed
 }
 
 func (s Mode) QuitDefense(c context.Context, a identity.ActorContext, position int64, op operation.Context) (map[string]any, error) {

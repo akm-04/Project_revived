@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"gxb.local/backend/v2/internal/application/playerdirectory"
+	d "gxb.local/backend/v2/internal/domain/adventure"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/sharedroom"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -79,5 +80,51 @@ func TestRoomMemberInfosCarryGuildAndConquer(t *testing.T) {
 	}
 	if got := guilds.reads[0].players; len(got) != 2 || got[0] != 11 || got[1] != 22 {
 		t.Fatalf("guild read players %#v want one batch of both members", got)
+	}
+}
+
+// A-187: the departing player's busy positions are retired in the same room
+// update, the function 8 free push is appended, and the seat leaves.
+func TestDefenseBusyReleaseFreesPosition(t *testing.T) {
+	room := sharedroom.Room{ID: 9, LogicalServerID: 5, Seats: []sharedroom.Seat{
+		{Index: 0, Player: 11, Stage: sharedroom.SeatSeated},
+		{Index: 1, Player: 22, Stage: sharedroom.SeatSeated},
+	}}
+	state := d.RoomState{RoomType: d.RoomTypeDefense, Busy: make([]d.BusyState, d.DefenseMonsterCount), Monsters: make([]d.MonsterState, d.DefenseMonsterCount)}
+	state.Busy[1] = d.BusyState{Player: 11, Type: 2}
+	state.Busy[2] = d.BusyState{Player: 22, Type: 1}
+	if !freeDefenseBusy(&state, 11, room.ID) {
+		t.Fatal("a busy departing player must free its position")
+	}
+	if state.Busy[1] != (d.BusyState{}) || state.Busy[2].Player != 22 {
+		t.Fatalf("busy after release %+v", state.Busy)
+	}
+	if len(state.Pushes) != 1 || state.Pushes[0].Function != 8 {
+		t.Fatalf("free push %+v", state.Pushes)
+	}
+	if body := state.Pushes[0].Body; body["room_id"] != room.ID || body["monster_pos"] != int64(2) {
+		t.Fatalf("free push body %+v", body)
+	}
+
+	room.Seats[0].Stage = sharedroom.SeatLeft
+	mode := Mode{
+		Directory: memberDirectory{11: {PlayerID: 11, Name: "gone"}, 22: {PlayerID: 22, Name: "other"}},
+		Guilds:    &memberGuilds{},
+	}
+	detail, err := mode.defenseDetail(context.Background(), nil, room, state, 22)
+	if err != nil {
+		t.Fatal(err)
+	}
+	positions, ok := detail["pos_statuses"].([]any)
+	if !ok || len(positions) != d.DefenseMonsterCount {
+		t.Fatalf("pos_statuses %#v", detail["pos_statuses"])
+	}
+	freed, _ := positions[1].(map[string]any)
+	if freed["busy_type"] != int64(0) {
+		t.Fatalf("departed position still busy %#v", freed)
+	}
+	// Another member can prepare: the position precondition is no longer held.
+	if state.Busy[1].Type != 0 {
+		t.Fatal("position must be free for the next prepare")
 	}
 }
