@@ -705,7 +705,15 @@ func liveStockStrings(in []apphero.LIVEResultState) (string, string, error) {
 
 func requiredPipeIntegers(params map[string]any, key string) ([]int64, error) {
 	value, ok := params[key].(string)
-	if !ok || value == "" {
+	if !ok {
+		// xyd.luaStringMerge returns a one-element list as the bare number, not a string.
+		single, err := requiredInt64(params, key)
+		if err != nil {
+			return nil, err
+		}
+		return []int64{single}, nil
+	}
+	if value == "" {
 		return nil, errors.New("missing stock integer list")
 	}
 	parts := strings.Split(value, "|")
