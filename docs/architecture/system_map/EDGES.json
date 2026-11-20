@@ -1746,7 +1746,8 @@
     "*GraduatedCountTx"
    ],
    "socialgift": [
-    "*AddDailyBondTx"
+    "*AddDailyBondTx",
+    "*GiftBaseInfoTx"
    ]
   },
   "missioninputs": {
@@ -5873,7 +5874,8 @@
     "*VerifyGiftBalanceTx"
    ],
    "mentor": [
-    "*AddDailyBondTx"
+    "*AddDailyBondTx",
+    "*GiftBaseInfoTx"
    ],
    "playerroot": [
     "CanonicalPlayerIDs",

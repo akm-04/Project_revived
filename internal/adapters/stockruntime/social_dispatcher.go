@@ -153,6 +153,7 @@ var socialRelationFailureRows = []failureRow{
 	{match: sr.ErrInvalidCommand, class: failureMalformed, detail: "invalid_social_request"},
 	{match: sr.ErrNotEligible, class: failureRefusal, code: unprovenRefusalCode},
 	{match: sr.ErrStateConflict, class: failureRefusal, code: staleConflictCode},
+	{match: sp.ErrSearchSaturated, class: failureRefusal, code: unprovenRefusalCode},
 }
 
 func socialFailure(e error) httpedge.Response {
@@ -270,7 +271,11 @@ func (d SocialDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 		if e == nil && len(refs) > 0 {
 			d.Emitter.Emit(ctx, refs)
 		}
-		return httpedge.Response{HTTPStatus: 200, Body: map[string]any{}}
+		body := map[string]any{}
+		if result.MasterInfo != nil {
+			body["master_info"] = result.MasterInfo
+		}
+		return httpedge.Response{HTTPStatus: 200, Body: body}
 	}
 	if mid == 184 {
 		fields, e := socialFields(m, "notice_ids")

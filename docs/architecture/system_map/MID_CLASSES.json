@@ -17918,17 +17918,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "serializable"
     },
     {
@@ -17976,17 +17976,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "true"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "false"
     },
     {
@@ -18036,17 +18036,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "1"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "3"
     },
     {
@@ -18150,7 +18150,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.read",
      "isolation": "repeatable_read",
-     "line": 59,
+     "line": 67,
      "read_only": "true",
      "retry": "1"
     },
@@ -18158,7 +18158,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 360,
+     "line": 368,
      "read_only": "false",
      "retry": "3"
     },
@@ -18166,7 +18166,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 530,
+     "line": 548,
      "read_only": "false",
      "retry": "3"
     },
@@ -18502,11 +18502,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/mentor/service.go:133",
-    "UNRESOLVED body at internal/application/socialgift/service.go:59",
+    "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
@@ -18548,17 +18548,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "serializable"
     },
     {
@@ -18606,17 +18606,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "true"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "false"
     },
     {
@@ -18666,17 +18666,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "1"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "3"
     },
     {
@@ -18780,7 +18780,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.read",
      "isolation": "repeatable_read",
-     "line": 59,
+     "line": 67,
      "read_only": "true",
      "retry": "1"
     },
@@ -18788,7 +18788,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 360,
+     "line": 368,
      "read_only": "false",
      "retry": "3"
     },
@@ -18796,7 +18796,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 530,
+     "line": 548,
      "read_only": "false",
      "retry": "3"
     },
@@ -19132,11 +19132,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/mentor/service.go:133",
-    "UNRESOLVED body at internal/application/socialgift/service.go:59",
+    "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
@@ -19178,17 +19178,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "serializable"
     },
     {
@@ -19236,17 +19236,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "true"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "false"
     },
     {
@@ -19296,17 +19296,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "1"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "3"
     },
     {
@@ -19410,7 +19410,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.read",
      "isolation": "repeatable_read",
-     "line": 59,
+     "line": 67,
      "read_only": "true",
      "retry": "1"
     },
@@ -19418,7 +19418,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 360,
+     "line": 368,
      "read_only": "false",
      "retry": "3"
     },
@@ -19426,7 +19426,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 530,
+     "line": 548,
      "read_only": "false",
      "retry": "3"
     },
@@ -19762,11 +19762,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/mentor/service.go:133",
-    "UNRESOLVED body at internal/application/socialgift/service.go:59",
+    "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
@@ -19808,17 +19808,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "serializable"
     },
     {
@@ -19866,17 +19866,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "true"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "false"
     },
     {
@@ -19926,17 +19926,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "1"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "3"
     },
     {
@@ -20040,7 +20040,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.read",
      "isolation": "repeatable_read",
-     "line": 59,
+     "line": 67,
      "read_only": "true",
      "retry": "1"
     },
@@ -20048,7 +20048,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 360,
+     "line": 368,
      "read_only": "false",
      "retry": "3"
     },
@@ -20056,7 +20056,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 530,
+     "line": 548,
      "read_only": "false",
      "retry": "3"
     },
@@ -20392,11 +20392,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/mentor/service.go:133",
-    "UNRESOLVED body at internal/application/socialgift/service.go:59",
+    "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
@@ -20438,17 +20438,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "serializable"
     },
     {
@@ -20496,17 +20496,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "true"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "false"
     },
     {
@@ -20556,17 +20556,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "1"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "3"
     },
     {
@@ -20670,7 +20670,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.read",
      "isolation": "repeatable_read",
-     "line": 59,
+     "line": 67,
      "read_only": "true",
      "retry": "1"
     },
@@ -20678,7 +20678,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 360,
+     "line": 368,
      "read_only": "false",
      "retry": "3"
     },
@@ -20686,7 +20686,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 530,
+     "line": 548,
      "read_only": "false",
      "retry": "3"
     },
@@ -21022,11 +21022,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/mentor/service.go:133",
-    "UNRESOLVED body at internal/application/socialgift/service.go:59",
+    "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
@@ -21068,17 +21068,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "serializable"
     },
     {
@@ -21126,17 +21126,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "true"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "false"
     },
     {
@@ -21186,17 +21186,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "1"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "3"
     },
     {
@@ -21300,7 +21300,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.read",
      "isolation": "repeatable_read",
-     "line": 59,
+     "line": 67,
      "read_only": "true",
      "retry": "1"
     },
@@ -21308,7 +21308,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 360,
+     "line": 368,
      "read_only": "false",
      "retry": "3"
     },
@@ -21316,7 +21316,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 530,
+     "line": 548,
      "read_only": "false",
      "retry": "3"
     },
@@ -21652,11 +21652,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/mentor/service.go:133",
-    "UNRESOLVED body at internal/application/socialgift/service.go:59",
+    "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
@@ -21698,17 +21698,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "serializable"
     },
     {
@@ -21756,17 +21756,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "true"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "false"
     },
     {
@@ -21816,17 +21816,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "1"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "3"
     },
     {
@@ -21930,7 +21930,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.read",
      "isolation": "repeatable_read",
-     "line": 59,
+     "line": 67,
      "read_only": "true",
      "retry": "1"
     },
@@ -21938,7 +21938,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 360,
+     "line": 368,
      "read_only": "false",
      "retry": "3"
     },
@@ -21946,7 +21946,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 530,
+     "line": 548,
      "read_only": "false",
      "retry": "3"
     },
@@ -22282,11 +22282,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/mentor/service.go:133",
-    "UNRESOLVED body at internal/application/socialgift/service.go:59",
+    "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
@@ -22328,17 +22328,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "serializable"
     },
     {
@@ -22386,17 +22386,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "true"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "false"
     },
     {
@@ -22446,17 +22446,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "1"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "3"
     },
     {
@@ -22560,7 +22560,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.read",
      "isolation": "repeatable_read",
-     "line": 59,
+     "line": 67,
      "read_only": "true",
      "retry": "1"
     },
@@ -22568,7 +22568,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 360,
+     "line": 368,
      "read_only": "false",
      "retry": "3"
     },
@@ -22576,7 +22576,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 530,
+     "line": 548,
      "read_only": "false",
      "retry": "3"
     },
@@ -22912,11 +22912,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/mentor/service.go:133",
-    "UNRESOLVED body at internal/application/socialgift/service.go:59",
+    "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
@@ -22958,17 +22958,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "serializable"
     },
     {
@@ -23016,17 +23016,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "true"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "false"
     },
     {
@@ -23076,17 +23076,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "1"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "3"
     },
     {
@@ -23190,7 +23190,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.read",
      "isolation": "repeatable_read",
-     "line": 59,
+     "line": 67,
      "read_only": "true",
      "retry": "1"
     },
@@ -23198,7 +23198,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 360,
+     "line": 368,
      "read_only": "false",
      "retry": "3"
     },
@@ -23206,7 +23206,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 530,
+     "line": 548,
      "read_only": "false",
      "retry": "3"
     },
@@ -23542,11 +23542,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/mentor/service.go:133",
-    "UNRESOLVED body at internal/application/socialgift/service.go:59",
+    "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
@@ -23588,17 +23588,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "serializable"
     },
     {
@@ -23646,17 +23646,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "true"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "false"
     },
     {
@@ -23706,17 +23706,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "1"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "3"
     },
     {
@@ -23820,7 +23820,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.read",
      "isolation": "repeatable_read",
-     "line": 59,
+     "line": 67,
      "read_only": "true",
      "retry": "1"
     },
@@ -23828,7 +23828,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 360,
+     "line": 368,
      "read_only": "false",
      "retry": "3"
     },
@@ -23836,7 +23836,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 530,
+     "line": 548,
      "read_only": "false",
      "retry": "3"
     },
@@ -24172,11 +24172,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/mentor/service.go:133",
-    "UNRESOLVED body at internal/application/socialgift/service.go:59",
+    "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
@@ -24218,17 +24218,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "serializable"
     },
     {
@@ -24276,17 +24276,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "true"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "false"
     },
     {
@@ -24336,17 +24336,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "1"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "3"
     },
     {
@@ -24450,7 +24450,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.read",
      "isolation": "repeatable_read",
-     "line": 59,
+     "line": 67,
      "read_only": "true",
      "retry": "1"
     },
@@ -24458,7 +24458,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 360,
+     "line": 368,
      "read_only": "false",
      "retry": "3"
     },
@@ -24466,7 +24466,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 530,
+     "line": 548,
      "read_only": "false",
      "retry": "3"
     },
@@ -24802,11 +24802,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/mentor/service.go:133",
-    "UNRESOLVED body at internal/application/socialgift/service.go:59",
+    "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
@@ -24848,17 +24848,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "serializable"
     },
     {
@@ -24906,17 +24906,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "true"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "false"
     },
     {
@@ -24966,17 +24966,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "1"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "3"
     },
     {
@@ -25080,7 +25080,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.read",
      "isolation": "repeatable_read",
-     "line": 59,
+     "line": 67,
      "read_only": "true",
      "retry": "1"
     },
@@ -25088,7 +25088,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 360,
+     "line": 368,
      "read_only": "false",
      "retry": "3"
     },
@@ -25096,7 +25096,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 530,
+     "line": 548,
      "read_only": "false",
      "retry": "3"
     },
@@ -25432,11 +25432,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/mentor/service.go:133",
-    "UNRESOLVED body at internal/application/socialgift/service.go:59",
+    "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
@@ -25478,17 +25478,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "serializable"
     },
     {
@@ -25536,17 +25536,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "true"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "false"
     },
     {
@@ -25596,17 +25596,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "1"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "3"
     },
     {
@@ -25710,7 +25710,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.read",
      "isolation": "repeatable_read",
-     "line": 59,
+     "line": 67,
      "read_only": "true",
      "retry": "1"
     },
@@ -25718,7 +25718,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 360,
+     "line": 368,
      "read_only": "false",
      "retry": "3"
     },
@@ -25726,7 +25726,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 530,
+     "line": 548,
      "read_only": "false",
      "retry": "3"
     },
@@ -26062,11 +26062,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/mentor/service.go:133",
-    "UNRESOLVED body at internal/application/socialgift/service.go:59",
+    "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
@@ -26108,17 +26108,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "serializable"
     },
     {
@@ -26166,17 +26166,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "true"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "false"
     },
     {
@@ -26226,17 +26226,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "1"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "3"
     },
     {
@@ -26340,7 +26340,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.read",
      "isolation": "repeatable_read",
-     "line": 59,
+     "line": 67,
      "read_only": "true",
      "retry": "1"
     },
@@ -26348,7 +26348,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 360,
+     "line": 368,
      "read_only": "false",
      "retry": "3"
     },
@@ -26356,7 +26356,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 530,
+     "line": 548,
      "read_only": "false",
      "retry": "3"
     },
@@ -26692,11 +26692,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/mentor/service.go:133",
-    "UNRESOLVED body at internal/application/socialgift/service.go:59",
+    "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
@@ -26738,17 +26738,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "repeatable_read"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "serializable"
     },
     {
@@ -26796,17 +26796,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "true"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "false"
     },
     {
@@ -26856,17 +26856,17 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 59,
+     "line": 67,
      "value": "1"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 360,
+     "line": 368,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 530,
+     "line": 548,
      "value": "3"
     },
     {
@@ -26970,7 +26970,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.read",
      "isolation": "repeatable_read",
-     "line": 59,
+     "line": 67,
      "read_only": "true",
      "retry": "1"
     },
@@ -26978,7 +26978,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 360,
+     "line": 368,
      "read_only": "false",
      "retry": "3"
     },
@@ -26986,7 +26986,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 530,
+     "line": 548,
      "read_only": "false",
      "retry": "3"
     },
@@ -27322,11 +27322,11 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED body at internal/application/mentor/service.go:133",
-    "UNRESOLVED body at internal/application/socialgift/service.go:59",
+    "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"

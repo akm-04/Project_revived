@@ -176,6 +176,7 @@ type Result struct {
 	GrantReceiptID          string                 `json:"grant_receipt_id,omitempty"`
 	Amount                  int64                  `json:"amount"`
 	Revision                string                 `json:"revision"`
+	MasterInfo              map[string]any         `json:"master_info,omitempty"`
 }
 type ClaimOperation struct {
 	ID                    ids.UUID

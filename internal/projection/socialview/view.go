@@ -23,8 +23,9 @@ type Common struct {
 }
 type Friend struct {
 	Common
-	IsSent          bool  `json:"is_sent"`
-	RecallingFriend int64 `json:"recalling_friend"`
+	IsSent          bool   `json:"is_sent"`
+	RecallingFriend int64  `json:"recalling_friend"`
+	Region          *int64 `json:"region,omitempty"`
 	// 0 is "no attached notice": a friend row has no social_notices row of its own,
 	// and the client compares this field only on notice rows.
 	NoticeType int16 `json:"notice_type"`

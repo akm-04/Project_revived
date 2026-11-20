@@ -494,6 +494,40 @@ func (service Service) ClassRelationActive(ctx context.Context, actor identity.A
 	return active, nil
 }
 
+// GiftBaseInfoTx projects the freshBaseInfo record SocialSystem.lua reads from
+// a gift reply when first and second hold an active class relation. ok is false
+// for any other pair. The caller reads it inside the transaction that raised
+// the pair's bond, so the projection carries the raised intimacy. It performs
+// no write.
+func (service Service) GiftBaseInfoTx(ctx context.Context, t tx.Tx, first, second identity.PlayerID, at time.Time) (map[string]any, bool, error) {
+	if t == nil || !first.Valid() || !second.Valid() || first == second || at.IsZero() || service.Store == nil || service.Directory == nil || service.Cards == nil || service.Content == nil {
+		return nil, false, ErrUnavailable
+	}
+	catalog, err := service.catalog()
+	if err != nil {
+		return nil, false, err
+	}
+	facts, err := service.readClassFacts(ctx, t, first, at, catalog, rulesFromCatalog(catalog))
+	if err != nil {
+		return nil, false, err
+	}
+	linked := false
+	for _, relation := range facts.Relations {
+		if relation.Mentor == second || relation.Student == second {
+			linked = true
+			break
+		}
+	}
+	if !linked {
+		return nil, false, nil
+	}
+	base, ok := BuildClassInfo(facts)["base_info"].(map[string]any)
+	if !ok {
+		return nil, false, ErrUnavailable
+	}
+	return base, true, nil
+}
+
 // ProjectClassInfo builds the login-embedded 1856 record from real state using
 // the caller's transaction. It owns no gameplay authority and performs no write.
 func (service Service) ProjectClassInfo(ctx context.Context, t tx.Tx, actor identity.PlayerID, at time.Time) (map[string]any, error) {
