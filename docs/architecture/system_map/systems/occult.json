@@ -269,8 +269,18 @@
  "pushes": [
   {
    "file": "internal/adapters/stockruntime/occult_room_notice.go",
+   "kind": "direct",
+   "line": 46,
+   "mid": 516,
+   "roles": [
+    "Role",
+    "World"
+   ]
+  },
+  {
+   "file": "internal/adapters/stockruntime/occult_room_notice.go",
    "kind": "notice",
-   "line": 45,
+   "line": 49,
    "namespace": "rt.NoticeNamespaceGeneric",
    "notice_type": 32,
    "parent_mid": 36854,
