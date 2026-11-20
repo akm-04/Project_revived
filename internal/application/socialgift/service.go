@@ -35,12 +35,20 @@ type Service struct {
 	Admission         ActorAdmission
 	Fence             ActorFence
 	Bond              DailyBondOwner
+	ClassInfo         ClassInfoProjector
 }
 
 // DailyBondOwner is the Mentor seam that raises the pair's bond once per day
 // when they exchange the stock gift. It must be called inside this transaction.
 type DailyBondOwner interface {
 	AddDailyBondTx(context.Context, tx.Tx, identity.PlayerID, identity.PlayerID, time.Time) error
+}
+
+// ClassInfoProjector is the Mentor seam that projects the sender's class info
+// inside the gift transaction. ok is false when the pair holds no active class
+// relation, and the reply then omits master_info.
+type ClassInfoProjector interface {
+	GiftBaseInfoTx(context.Context, tx.Tx, identity.PlayerID, identity.PlayerID, time.Time) (map[string]any, bool, error)
 }
 
 func Profile() tx.Profile {
@@ -469,12 +477,22 @@ func (s Service) Send(c context.Context, actor identity.ActorContext, recipient 
 				return e
 			}
 		}
+		var masterInfo map[string]any
+		if s.ClassInfo != nil {
+			projected, linked, e := s.ClassInfo.GiftBaseInfoTx(c, sc.Tx, actor.PlayerID, recipient, at)
+			if e != nil {
+				return e
+			}
+			if linked {
+				masterInfo = projected
+			}
+		}
 		for _, pid := range []identity.PlayerID{actor.PlayerID, recipient} {
 			if e := s.Relations.TouchRootTx(c, sc.Tx, roots[pid], at); e != nil {
 				return e
 			}
 		}
-		answer = Result{NoticeIDs: []socialinbox.NoticeID{n.NoticeID}, TransferIDs: []string{t.ID.String()}, Revision: content.Revision}
+		answer = Result{NoticeIDs: []socialinbox.NoticeID{n.NoticeID}, TransferIDs: []string{t.ID.String()}, Revision: content.Revision, MasterInfo: masterInfo}
 		return nil
 	})
 	return resolved(answer, outcome, e)
