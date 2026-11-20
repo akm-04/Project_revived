@@ -4,6 +4,10 @@
  "contracts": [
   {
    "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 1,
    "file": "docs/i9/I9_GACHA_V1.json"
   },
   {

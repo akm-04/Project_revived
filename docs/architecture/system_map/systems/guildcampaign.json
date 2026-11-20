@@ -18,6 +18,26 @@
   },
   {
    "count": 1,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 9,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
    "file": "docs/i9/I9_CAMPAIGN_V1.json"
   },
   {
@@ -91,6 +111,10 @@
   {
    "count": 2,
    "file": "docs/i9/I9_WORLD_BOSS_V1.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
   }
  ],
  "decorated_by": [

@@ -30,6 +30,26 @@
   },
   {
    "count": 1,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11B_ITEMS_ENERGY_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_11_CLOCK_ROLLBACK_V1.md"
+  },
+  {
+   "count": 7,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
    "file": "docs/i9/I9_GACHA_V1.json"
   },
   {

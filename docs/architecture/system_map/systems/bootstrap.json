@@ -55,6 +55,50 @@
    "file": "docs/i9/I9_10_ROBOT_LINEUP_PRIVATE_POLICY_V1.json"
   },
   {
+   "count": 2,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11B_ITEMS_ENERGY_V2.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_CLOCK_ROLLBACK_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_FURNITURE_COMPOSE_V1.md"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11_GIRLS_LOG_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_HERO_RECOMMEND_SCORES_V1.md"
+  },
+  {
+   "count": 4,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_TRIAL_SWEEP_V1.md"
+  },
+  {
    "count": 1,
    "file": "docs/i9/I9_4A_RESEARCH_PLAN.md"
   },
@@ -263,6 +307,10 @@
    "file": "docs/i9/I9_WORLD_BOSS_V1.json"
   },
   {
+   "count": 3,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  },
+  {
    "count": 1,
    "file": "docs/i9/PROFILE_MEDIA_HISTORY_RETENTION_V1.json"
   },
@@ -277,6 +325,10 @@
   {
    "count": 1,
    "file": "docs/i9/R8_PRIVATE_RETENTION_RUN_BUDGET_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/RULING_I9-11_100010_STARS.md"
   },
   {
    "count": 1,

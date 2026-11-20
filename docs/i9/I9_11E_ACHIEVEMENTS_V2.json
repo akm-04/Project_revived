@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "contract_id": "I9_11E_ACHIEVEMENTS_V2",
+  "node": "ROOT/I9/I9-11/I9-11E",
+  "status": "WORKING_DESIGN_NOT_STAGE_ACCEPTED",
+  "owner": "I9-11E",
+  "supersedes": "I9_11E_ACHIEVEMENTS_V1",
+  "base": "repair-final 04ed0b53 (work/backend_i9_11)",
+  "evidence": "research/11E_ACHIEVEMENTS.md (lead review research/REVIEW.md)",
+  "extends": [
+    "I9_PARENT_CONTRACT_V1",
+    "I9_MODE_FRAMEWORK_V2",
+    "I9_MODE_FOUNDATION_V3",
+    "ACHIEVEMENT_EVENT_FACTS_V1",
+    "LEAD_SEAMS_I9-11_V2",
+    "REPLY_CONFORMANCE_V1"
+  ],
+  "mids": [
+    1302,
+    1303
+  ],
+  "pushes": [
+    "36854 PLAYER_NOTICE notice_type 17"
+  ],
+  "decisions": [
+    "D454",
+    "D451",
+    "D476",
+    "D3",
+    "D5_REFUSAL_CODES",
+    "R6",
+    "R8",
+    "E1-E7",
+    "F1",
+    "F2",
+    "I9_11E_ACHIEVEMENT_FACT_V1",
+    "A-140",
+    "A-141 (RQ9 approved 2026-11-19)",
+    "REGISTRY_SWEEP_I9-11 E1-E5 (folded 2026-11-19)"
+  ],
+  "C1_SCOPE": "11E adds producers for 100006, 100007 and 100012 (owners live) and, after 11C merges, 100011. It adds none for rows already produced on 04ed0b53 (100001-100005, 100010, 100013-100017, 100019-100025, 100027-100032) and none for 100008 (Incubus inactive), 100009 (Guild War inactive, D404), 100018 (robbery excluded by I9_WORKPLACE_V1 C1), 100026 (Auction, I10) or 100033 (owner unknown). No mode, Butler or fake fact is built (D451). The V1 C1 list and C20 are stale and withdrawn.",
+  "C2_100006_FANTASY_RANK": "Progress = number of distinct Fantasy (Paradise/Illusion) campaign ids 100001-100012 on which the player's settled personal board rank was 1-3; thresholds 1/3/6 from achievement.lua. The rank is the published board order (killed first, then hurt, then time; illusionstore ReadRankTx), the same list the settlement freezes. A campaign counts once; daily repeats add nothing. Not World Boss (5 bosses cannot reach tier 3).",
+  "C3_100007_FANTASY_DAMAGE": "Progress = number of distinct Fantasy campaign ids on which the player's settled best hurt was at least 5,000,000 (stated only in the achievement.lua desc text 'Damage reaches 5 million', so it is one named constant citing that row, not a content field); thresholds 1/3/6; a campaign counts once.",
+  "C4_SETTLEMENT_ATTACHMENT": "100006/100007 facts are written by the illusion occurrence settlement inside its own transaction, after the rank list is frozen, through a typed achievement port (as topfloor/oneonone/arena already do). Lock order: the illusion owner's ranks (occurrence 606 and its player rows), then the achievement rows last, as the existing observing wrap orders them. An achievement error fails that settlement transaction, which retries idempotently (mail keeps its source key). Never computed in Load, never from a client value. The settlement observes the frozen players' facts in ascending player order, so two settlements never deadlock across players (sweep E1). A producer that meets an untracked legacy player creates that player's achievement root in its own transaction, so the fact counts (sweep E4; applies to every 11E producer).",
+  "C5_BOSS_FACT_STORAGE": "Migration 00177 (LEAD_SEAMS_I9-11_V2 section 4): table achievement_boss_facts (player_id REFERENCES players, achievement_id, campaign_id, occurrence_day, created_at; PRIMARY KEY (player_id, achievement_id, campaign_id)); inserts ON CONFLICT DO NOTHING; progress is its row count per (player, id), at most 12. The same migration widens the achievement_streaks profile CHECK to admit 100006, 100007 and 100012 (and 100011, C7). Classified player/state/backup true/retention null in docs/architecture/CANONICAL_TABLE_OWNERSHIP.json, PLAYER_DATA_MANIFEST regenerated, player_data_manifest --check passes. The widened profile CHECK and the fact/tier policy are governed by policy id I9_11E_ACHIEVEMENT_FACT_V1 (sweep E2).",
+  "C6_100012_MEDIUM_TEN_PULL": "Only Vending MID 50 with the generated button summon_type 2, summon_index 2 (medium_paid, 10 pulls) advances 100012. Progress = high-water best single pull, counting result rows with is_partner and rows with to_stone (both play the girl animation, SummonResultWindow.lua:993-1015); item rows do not count. Observed inside the summon transaction from the settled result, after the I5 suffix; a receipt replay returns the stored reply before apply and observes nothing (summon/mode.go:513-521). Thresholds 3/4/5.",
+  "C7_100011_GREAT_CUSTOMER": "Built only after 11C merges. Progress = today's count of accepted shop purchase requests: one per accepted MID 33 or MID 2982 request (a 2982 request counts once, whatever its slot count), none for refresh (34), refusal or replay; thresholds 10/100/200. The day is modes.Day (05:00 GMT+8, D3), lazily rolled. Achievement owns the counter and the tiers; 11C calls the typed increment port inside its settling transaction (11C C15) and writes no achievement row; achievement writes no shop row. Do not use the monotonic ObserveCount path. As built (fleet_11e7, merged 3e3ce977; sweep E5): one ObserveShopPurchaseTx call per accepted Buy/MultiBuy after settle and save, achievement locks last; a read normalises a stale day to 0 and never writes; earned tiers are kept across rollovers. An observation whose time is older than the stored day returns the typed ErrOvertaken, the only achievement error the shop maps to 409+40002 (A-140).",
+  "C8_DAILY_STORAGE": "Migration 00177 also adds achievement_daily_counts (player_id REFERENCES players, achievement_id, day date, count bigint, PRIMARY KEY (player_id, achievement_id)), upserted with a day comparison; a new day restarts count at the increment. The view returns today's count (0 after rollover). Earned tiers and completion times stay in achievement_streaks and are never revoked by a rollover. Classified player/state/backup true/retention null. Policy id I9_11E_ACHIEVEMENT_FACT_V1 (sweep E2).",
+  "C9_100010_STAR_FACT": "User ruling 2026-11-18 (RULING_I9-11_100010_STARS, amends ACHIEVEMENT_EVENT_FACTS_V1 row 100010): the fact is the sum of best stars over the playable Normal, Super and Challenge chain nodes (155+155+144, content ceiling 1,362), matching the text 'Clear all campaigns and earn %d stars'. The previous Normal-only sum (ceiling 465) left tiers 600 and 1200 unreachable. Existing rows are re-derived from campaign_nodes on the first observation after deploy (owned-state count, no backfill migration); a proof covers a player with Super and Challenge stars.",
+  "C10_STATUS": "StatusOf: 100006/100007/100012 become QUALIFIED with their producers; 100011 QUALIFIED when the 11C producer lands; 100033 stays OWNER_UNKNOWN (the ACHIEVEMENT_EVENT_FACTS_V1 ruling 4 label MODE_NOT_LIVE is corrected at the next PassMap sync); the others keep their status. Status is documentation, never a runtime waiver. Families lists only owned-state achievements that an owner's command re-observes; a new owned-state family is added to Families in the same change (observing panics on an unknown family). The 11E facts (100006/100007/100010/100012, and 100011 later) are written through typed producer ports their owners call (C4, C6, C7, C9) and are not Families entries (lead amendment 2026-11-18, review E-9). Policy id I9_11E_ACHIEVEMENT_FACT_V1 (sweep E2).",
+  "C11_WIRE": "No new MID and no new 1302/1303 field. 1302 returns all 33 rows (hidden rows included; the client drops them) and base_info; rows without a producer return progress 0; 1303 keeps its lowest-reached-unclaimed, receipt-idempotent claim. All REQUIRED reply_consumers paths are kept. The push is MID 36854 PLAYER_NOTICE notice_type 17 (V1's 'pushes: [17]' was the notice type).",
+  "C12_NOTICE_AND_CLAIM": "A newly completed tier emits at most one type-17 notice; hidden rows stay silent. Producers grant no item, currency, mail or broadcast; the 1303 claim through I5 is the only grant path.",
+  "C13_OWNER_BOUNDARY": "Achievement reads other owners only through typed ports and writes only its own tables; owners call typed achievement Tx methods. No SQL against another owner's tables, no client-supplied total.",
+  "C14_REFUSALS": "D5: producer failures surface through the owning dispatcher's mapper; 1302/1303 keep their current mapping (nothing to claim 409+35028, invalid 400, stale 409+40002, transient 503+35033, defect 500+35028); never a 200 error body, never error_code 1.",
+  "C15_REPLAY": "1302/1303 stay state MIDs in MID_EFFECTS.json. Fact inserts ON CONFLICT DO NOTHING; settlement retries and receipt replays are no-ops; 1302 observations are high-water writes.",
+  "C16_PROOFS": "Natives through the production composition: Fantasy top-3 and damage thresholds with a campaign counted once and a settlement retry no-op; medium ten-pull counting partner and to_stone rows, not items, other buttons ignored, replay no-op; Great Customer single and multi-buy (2982 counts once), 04:59 vs 05:00 rollover, tiers kept after rollover; status and Families. VC scenarios i9_11e_achievement_fantasy, i9_11e_achievement_medium_vending, i9_11e_achievement_great_customer. Checks: system_map --check, player_data_manifest --check, mid_effects --check, reply conformance unchanged.",
+  "UNKNOWN": [
+    "100011 per-unit counting (PRIVATE_POLICY: one per accepted request).",
+    "100027 'pass all stages' versus recorded score (foundation ruling kept; residual UNKNOWN).",
+    "100033 Butler owner and trigger.",
+    "100020 tier 3 (30 stories) is unreachable on the 23 story talks in content."
+  ],
+  "C17_MID1_DETAIL_1304": "Lead ruling 2026-11-18 on research 11F C4/Q2: a new appboot MID1DetailContributor in the achievement owner claims exactly \"1304\" and returns the ordered achievement ids of the player's undelivered achievement_notices rows (the ids notice 17 would push; hidden rows excluded). Inside the login transaction the same rows are marked delivered, so the popup shows once and a later wakeup cannot push them again. No new table. Proofs: a native bootstrap test (pending ids returned then marked; a second login returns none; no notice-17 push afterwards) and the MID 1 golden update. The standalone MID 1304 stays INACTIVE_SUPERSEDED. The login correlates by its login operation id when readable, else the login instant; the documented limit is a possible duplicate popup when neither correlates (sweep E3). Delivery is at most once (RQ9, user-approved 2026-11-19, A-141 closed as policy): if the MID 1 reply projection fails after the login transaction committed, the popup stays marked delivered and is not shown; the tier and its claim stay intact and the achievement window still shows it."
+}
