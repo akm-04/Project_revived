@@ -8,6 +8,7 @@ import (
 const (
 	MissionProceed = 2
 	MissionSuccess = 3
+	MissionAwarded = 4
 	GiftMissionID  = 1001
 )
 
@@ -46,6 +47,20 @@ func (f MissionFact) Advance(required int64, now time.Time) (MissionFact, bool, 
 	if f.Process >= required {
 		f.MissionState = MissionSuccess
 	}
+	f.UpdatedAt = now
+	return f, true, f.Validate()
+}
+
+// Award marks one success row collected. The caller settles its amour in the
+// same transaction, exactly once because the state is terminal.
+func (f MissionFact) Award(now time.Time) (MissionFact, bool, error) {
+	if err := f.Validate(); err != nil {
+		return MissionFact{}, false, err
+	}
+	if f.MissionState != MissionSuccess {
+		return f, false, nil
+	}
+	f.MissionState = MissionAwarded
 	f.UpdatedAt = now
 	return f, true, f.Validate()
 }

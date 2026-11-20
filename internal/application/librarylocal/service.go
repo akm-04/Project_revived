@@ -707,9 +707,16 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 						return e
 					}
 					_, e = s.Costs.DebitMaterialCostTx(ctx, sc.Tx, a.PlayerID, i5.MaterialCost{Stacks: []i5.StackMaterialCost{{ItemID: gift.ItemID, Amount: quantity}}}, costOp)
-					if e == nil && facts.Favor > oldFavor {
-						if e = s.ensureMissionSetTx(ctx, sc.Tx, catalog, a.PlayerID, d.Command.PartnerID, facts.Favor, d.DecisionAt); e == nil {
-							e = s.advanceGiftMissionTx(ctx, sc.Tx, catalog, a.PlayerID, d.Command.PartnerID, d.DecisionAt)
+					if e == nil {
+						if facts.Favor > oldFavor {
+							if e = s.ensureMissionSetTx(ctx, sc.Tx, catalog, a.PlayerID, d.Command.PartnerID, facts.Favor, d.DecisionAt); e != nil {
+								return e
+							}
+						}
+						var amour int64
+						amour, _, e = s.settlePartnerMissionsTx(ctx, sc.Tx, catalog, a.PlayerID, d.Command.PartnerID, facts.Favor > oldFavor, d.DecisionAt)
+						if e == nil && amour > 0 {
+							facts, _, e = facts.AwardAmour(amour, d.DecisionAt)
 						}
 					}
 				}
@@ -769,7 +776,24 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 			if e != nil {
 				return e
 			}
-			if changed {
+			if d.Command.Family != Gift {
+				var amour int64
+				var missionChanged bool
+				amour, missionChanged, e = s.settlePartnerMissionsTx(ctx, sc.Tx, catalog, a.PlayerID, d.Command.PartnerID, false, d.DecisionAt)
+				if e != nil {
+					return e
+				}
+				favorChanged := false
+				if amour > 0 {
+					if facts, favorChanged, e = awardMissionAmour(facts, amour, facts.StateVersion != old, d.DecisionAt); e != nil {
+						return e
+					}
+				}
+				if missionChanged || favorChanged {
+					changed = true
+				}
+			}
+			if changed && facts.StateVersion != old {
 				facts.UpdatedAt = gen.EffectiveObservation(d.DecisionAt, facts.UpdatedAt, facts.CreatedAt)
 				if e = s.Library.SaveHeroTx(ctx, sc.Tx, facts, old); e != nil {
 					return e

@@ -109,7 +109,7 @@ func TestI9_10GirlsLogImportReconstructionAndMilestone(t *testing.T) {
 
 	seedStack(t, p, a, rev, 50001113, 1) // +100 favor crosses the first threshold
 	response := libraryCall(t, p, a, 840, map[string]any{"partner_id": int64(1), "gift_id": int64(50001113), "gift_num": int64(1)})
-	if response.HTTPStatus != 200 || response.Body["favor_degree"] != int64(100) {
+	if response.HTTPStatus != 200 || response.Body["favor_degree"] != int64(105) {
 		t.Fatalf("milestone gift status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	logs = girlsLogs(t, p, a)
