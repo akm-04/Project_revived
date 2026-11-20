@@ -3,6 +3,8 @@ package adventure
 import (
 	"encoding/json"
 	"strconv"
+
+	"gxb.local/backend/v2/internal/domain/sharedroom"
 )
 
 const (
@@ -50,6 +52,7 @@ type PushRecord struct {
 
 // RoomState is the opaque sharedroom payload of both Adventure rooms.
 type RoomState struct {
+	sharedroom.ChatRing
 	RoomType    int64                      `json:"room_type"`
 	SpecialData int64                      `json:"special_data"`
 	CampaignID  int64                      `json:"campaign_id,omitempty"`

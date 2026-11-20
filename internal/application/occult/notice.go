@@ -42,6 +42,7 @@ type RoomNotice struct {
 	Events    []d.EventRecord
 	Pushes    []RoomPush
 	Positions map[identity.PlayerID]int64
+	Chats     []domainroom.ChatMessage
 }
 
 // RoomPush is one co-op or fight-status push with the body each addressee gets.
@@ -85,7 +86,7 @@ func (r NoticeReader) ReadRoomNotice(c context.Context, reference string) (RoomN
 	if err != nil {
 		return RoomNotice{}, false, err
 	}
-	out := RoomNotice{RoomID: room.ID, Signature: roomSignature(room, state), Events: state.Events, Positions: map[identity.PlayerID]int64{}}
+	out := RoomNotice{RoomID: room.ID, Signature: roomSignature(room, state), Events: state.Events, Positions: map[identity.PlayerID]int64{}, Chats: state.Chats}
 	view := &roomView{room: room, state: state, catalog: catalog, at: room.UpdatedAt}
 	if room.Status == domainroom.StatusOpen {
 		out.Seated, err = r.seatedBodies(c, view)

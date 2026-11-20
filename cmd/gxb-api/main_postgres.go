@@ -564,7 +564,7 @@ func main() {
 		mustRegister(mid, shopDispatcher)
 	}
 	ranking := stockruntime.RankingDispatcher{Authority: authority, Service: boardRanking, Trophy: achievements, Guilds: guildView}
-	var roomChat stockruntime.RoomChatSender
+	var roomChat, occultRoomChat, adventureRoomChat stockruntime.RoomChatSender
 	if fightReady {
 		sharedRooms := appsharedroom.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner},
 			Fresh: pool, Store: sharedroomstore.Store{}, Fence: i5db, Players: i4store.PlayerRootLocker{}}
@@ -581,6 +581,7 @@ func main() {
 		ranking.Illusion = illusion
 		roomChat = illusion
 		occultMode := canonicalOccult(pool, runner, contentDB, i5db, i5svc, fight, sharedRooms, roomInvites, retentionPolicies.RetentionDays, librarySvc)
+		occultRoomChat = occultMode
 		if occultMode.BattleObserver == nil {
 			log.Fatal("I9-11G2 Occult battle observer is not composed")
 		}
@@ -700,6 +701,7 @@ func main() {
 			mustRegister(mid, stockruntime.IllusionDispatcher{Authority: authority, Service: illusion})
 		}
 		adventureMode := canonicalAdventure(pool, runner, contentDB, i5db, i5svc, fight, adventureOpponents{Arena: arena, TopFloor: topFloor}, sharedRooms, heroSvc, heroproj.StockHero, roomInvites, retentionPolicies.RetentionDays, librarySvc)
+		adventureRoomChat = adventureMode
 		if adventureMode.BattleObserver == nil {
 			log.Fatal("I9-11G2 Adventure battle observer is not composed")
 		}
@@ -816,7 +818,9 @@ func main() {
 	generalDM := generaldm.Service{Timed: socialTimed, Queryer: pool, Store: generaldmstore.Store{}, Bindings: generaldmbindings.Reader{}, Privacy: socialrelation.GeneralDMPrivacyProvider{Store: socialRelationDB}, Players: i4store.PlayerRootLocker{}, Presentation: socialPresentation, Observer: socialPresentation, Owner: presencestore.Store{Queryer: pool}}
 	mustRegister(513, stockruntime.GeneralDMDispatcher{Authority: authority, Service: generalDM, Slots: make(chan struct{}, 16), Emitter: postgres.GeneralDMWakeupEmitter{Pool: pool}})
 	friendBase := socialfriendbase.Service{FriendDM: friendDM, Projection: socialReads}
-	mustRegister(515, stockruntime.FriendDMDispatcher{Authority: authority, Service: friendDM, RoomChat: roomChat, Emitter: postgres.FriendDMWakeupEmitter{Pool: pool, OnError: func(err error) { log.Printf("friend dm wakeup degraded: %v", err) }}})
+	mustRegister(515, stockruntime.FriendDMDispatcher{Authority: authority, Service: friendDM, RoomChat: roomChat,
+		OccultRoomChat: occultRoomChat, AdventureRoomChat: adventureRoomChat,
+		Emitter: postgres.FriendDMWakeupEmitter{Pool: pool, OnError: func(err error) { log.Printf("friend dm wakeup degraded: %v", err) }}})
 	socialDismissal := socialdismiss.Service{Timed: socialTimed, PlayerRoots: i4store.PlayerRootLocker{}, Roots: socialRelationDB, Inbox: socialInboxDB}
 	socialDispatcher := stockruntime.SocialDispatcher{Authority: authority, Relations: socialCommands, Projection: friendBase, Dismissal: socialDismissal, Scalar: appi5.ScalarProjector{Runner: runner, Store: i5db, FloorPolicies: contentDB}, Tracker: tracker, Emitter: postgres.SocialWakeupEmitter{Pool: pool, OnError: func(err error) { log.Printf("social wakeup degraded: %v", err) }}}
 	giftReload := socialreload.Service{Runner: runner, Relations: socialRelationDB, Inbox: socialInboxDB, Observer: socialPresentation, Gifts: giftService}
