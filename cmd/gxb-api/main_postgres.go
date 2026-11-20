@@ -914,7 +914,7 @@ func main() {
 	for _, mid := range []uint16{1056, 1057, 1058, 1059, 1060, 1061, 1077, 1078, 1079, 1080} {
 		mustRegister(mid, observing(authority, achievements, "Book", bookD))
 	}
-	composeD := stockruntime.ComposeDispatcher{Authority: authority, Book: stockruntime.NewCoalescedBookRead(bookSvc), Furniture: dormSvc, Equipment: heroSvc}
+	composeD := stockruntime.ComposeDispatcher{Authority: authority, Book: stockruntime.NewCoalescedBookRead(bookSvc), Furniture: dormSvc, Awakening: heroSvc, Equipment: heroSvc}
 	mustRegister(83, observing(authority, achievements, "Book", composeD))
 	eventCentreD := stockruntime.EventCentreDispatcher{Authority: authority, Service: eventCentreSvc}
 	for _, mid := range []uint16{1072, 1073, 1074, 1075, 1076, 1081, 1082, 1083, 1084, 1085, 1086, 1087, 1088, 1089, 1090, 1091} {

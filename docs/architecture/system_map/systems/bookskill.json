@@ -131,7 +131,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/compose_dispatcher.go",
-    "line": 38
+    "line": 47
    },
    "mid": 83,
    "name": "COMPOSE_ITEM"
