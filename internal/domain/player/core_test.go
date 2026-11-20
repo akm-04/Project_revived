@@ -45,6 +45,34 @@ func TestSaveStoryGuideEndIsPresentationMarkerOnly(t *testing.T) {
 	}
 }
 
+func TestSaveStoryClearsFirstEntryAtTheOpeningStoryCursor(t *testing.T) {
+	now := time.Unix(1700000000, 0).UTC()
+	cur := CompatibilityBootstrap(identity.PlayerID(100001), now).Story
+	for _, tc := range []struct {
+		name       string
+		storyID    int64
+		storyState int64
+		guideID    int64
+		want       bool
+	}{
+		{"opening cursor", 0, 0, GuideOpeningDoneID, true},
+		{"before the opening cursor", 0, 0, GuideOpeningDoneID - 1, false},
+		{"first skill cursor", 10002, 3, 100198, true},
+		{"later skill cursor", 10002, 3, 100200, true},
+		{"guide below GUIDE_END after the opening", 10002, 3, GuideEndID - 1, true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			_, done, err := SaveStory(cur, tc.storyID, tc.storyState, tc.guideID, now.Add(time.Second))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if done != tc.want {
+				t.Fatalf("done=%v want %v", done, tc.want)
+			}
+		})
+	}
+}
+
 func TestGuideFunctionsProjectAsStringKeyedCompletionMap(t *testing.T) {
 	now := time.Unix(1700000000, 0).UTC()
 	core := CompatibilityBootstrap(identity.PlayerID(100001), now)

@@ -497,6 +497,7 @@
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/auditstore",
+  "internal/adapters/postgres/campaignstore",
   "internal/adapters/postgres/characterstore",
   "internal/adapters/postgres/contentstore",
   "internal/adapters/postgres/i4store",
@@ -508,6 +509,7 @@
   "read": [
    "account_sessions",
    "accounts",
+   "campaign_nodes",
    "content_awakening_catalogs",
    "content_dorm_input_catalogs",
    "content_mission_activity_catalogs",
@@ -584,6 +586,7 @@
   "integration": [
    "guildbroadcast",
    "guildinvite",
+   "logincapacity",
    "missions",
    "playerdisplay",
    "publicshowcase",

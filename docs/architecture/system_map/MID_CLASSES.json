@@ -504,7 +504,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/playerdisplay/commands.go:347"
    ],
    "retry": [
@@ -793,7 +793,7 @@
    "isolation": [
     {
      "file": "internal/application/i5/service.go",
-     "line": 774,
+     "line": 782,
      "value": "serializable"
     }
    ],
@@ -801,17 +801,17 @@
    "read_only": [
     {
      "file": "internal/application/i5/service.go",
-     "line": 774,
+     "line": 782,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:810"
+    "internal/application/i5/service.go:818"
    ],
    "retry": [
     {
      "file": "internal/application/i5/service.go",
-     "line": 774,
+     "line": 782,
      "value": "3"
     }
    ],
@@ -825,7 +825,7 @@
      "file": "internal/application/i5/service.go",
      "function": "Service.SaveStory",
      "isolation": "serializable",
-     "line": 774,
+     "line": 782,
      "read_only": "false",
      "retry": "3"
     }
@@ -877,7 +877,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/itemsenergy/service.go:225"
    ],
    "retry": [
@@ -1197,8 +1197,8 @@
    "receipt_writes": [
     "internal/application/campaign/sweep.go:273",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/itemsenergy/service.go:225"
    ],
    "retry": [
@@ -1220,7 +1220,7 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/campaignstore/store.go:48",
+    "internal/adapters/postgres/campaignstore/store.go:61",
     "internal/adapters/postgres/characterstore/store.go:109",
     "internal/adapters/postgres/characterstore/store.go:263",
     "internal/adapters/postgres/characterstore/store.go:95",
@@ -1706,8 +1706,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/shop/service.go:222"
    ],
    "retry": [
@@ -2399,7 +2399,7 @@
    "receipt_writes": [
     "internal/application/characterhero/skill_level.go:488",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398"
+    "internal/application/i5/service.go:1406"
    ],
    "retry": [
     {
@@ -2748,8 +2748,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/summon/mode.go:607"
    ],
    "retry": [
@@ -3029,7 +3029,7 @@
    ],
    "receipt_writes": [
     "internal/application/characterhero/promotion_service.go:154",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -3476,7 +3476,7 @@
    "receipt_writes": [
     "internal/application/characterhero/skill_level.go:488",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398"
+    "internal/application/i5/service.go:1406"
    ],
    "retry": [
     {
@@ -4092,7 +4092,7 @@
    ],
    "receipt_writes": [
     "internal/application/characterhero/promotion_service.go:154",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -5776,8 +5776,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/summon/mode.go:607"
    ],
    "retry": [
@@ -6232,8 +6232,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/librarylocal/service.go:384"
    ],
    "retry": [
@@ -6633,7 +6633,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/itemsenergy/service.go:225"
    ],
    "retry": [
@@ -6921,7 +6921,7 @@
    ],
    "receipt_writes": [
     "internal/application/bookskill/service.go:239",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -7294,7 +7294,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/itemsenergy/service.go:225"
    ],
    "retry": [
@@ -7511,7 +7511,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/itemsenergy/service.go:225"
    ],
    "retry": [
@@ -7899,7 +7899,7 @@
    ],
    "receipt_writes": [
     "internal/application/heroassets/service.go:180",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -8131,8 +8131,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/itemsenergy/service.go:225"
    ],
    "retry": [
@@ -8392,7 +8392,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/itemsenergy/service.go:225"
    ],
    "retry": [
@@ -8641,7 +8641,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/playerdisplay/commands.go:347"
    ],
    "retry": [
@@ -8944,7 +8944,7 @@
    ],
    "receipt_writes": [
     "internal/application/heroassets/service.go:180",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -9192,7 +9192,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/playerdisplay/commands.go:347"
    ],
    "retry": [
@@ -9576,7 +9576,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398"
+    "internal/application/i5/service.go:1406"
    ],
    "retry": [
     {
@@ -9587,8 +9587,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/campaignstore/store.go:48",
-    "internal/adapters/postgres/campaignstore/store.go:96",
+    "internal/adapters/postgres/campaignstore/store.go:109",
+    "internal/adapters/postgres/campaignstore/store.go:61",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -9622,7 +9622,7 @@
    "unbounded_read": [
     {
      "file": "internal/adapters/postgres/campaignstore/store.go",
-     "line": 96,
+     "line": 109,
      "statement": "SELECT $1,campaign_id,star,win_day,wins,reset_day,resets,partner_drop,clear_count_floor,clear_count_exact,first_clear_day FROM jsonb_to_recordset($2::jsonb) AS x(campaign_id bigint,star smallint,win_day bigint,wins bigint,reset_day bigint,resets bigint,partner_drop boolean,clear_count_floor bigint,clear_count_exact boolean,first_clear_day bigint) ON CONFLICT(player_id,campaign_id) DO UPDATE SET star=EXCLUDED.star,win_day=EXCLUDED.win_day,wins=EXCLUDED.wins,reset_day=EXCLUDED.reset_day,resets=EXCLUDED.resets,partner_drop=EXCLUDED.partner_drop,clear_count_floor=EXCLUDED.clear_count_floor,clear_count_exact=EXCLUDED.clear_count_exact,first_clear_day=COALESCE(campaign_nodes.first_clear_day,EXCLUDED.first_clear_day)"
     },
     {
@@ -9998,8 +9998,8 @@
    "receipt_writes": [
     "internal/application/campaign/mode.go:616",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -10010,8 +10010,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/campaignstore/store.go:48",
-    "internal/adapters/postgres/campaignstore/store.go:96",
+    "internal/adapters/postgres/campaignstore/store.go:109",
+    "internal/adapters/postgres/campaignstore/store.go:61",
     "internal/adapters/postgres/characterstore/pet.go:171",
     "internal/adapters/postgres/characterstore/store.go:109",
     "internal/adapters/postgres/characterstore/store.go:247",
@@ -10057,7 +10057,7 @@
    "unbounded_read": [
     {
      "file": "internal/adapters/postgres/campaignstore/store.go",
-     "line": 96,
+     "line": 109,
      "statement": "SELECT $1,campaign_id,star,win_day,wins,reset_day,resets,partner_drop,clear_count_floor,clear_count_exact,first_clear_day FROM jsonb_to_recordset($2::jsonb) AS x(campaign_id bigint,star smallint,win_day bigint,wins bigint,reset_day bigint,resets bigint,partner_drop boolean,clear_count_floor bigint,clear_count_exact boolean,first_clear_day bigint) ON CONFLICT(player_id,campaign_id) DO UPDATE SET star=EXCLUDED.star,win_day=EXCLUDED.win_day,wins=EXCLUDED.wins,reset_day=EXCLUDED.reset_day,resets=EXCLUDED.resets,partner_drop=EXCLUDED.partner_drop,clear_count_floor=EXCLUDED.clear_count_floor,clear_count_exact=EXCLUDED.clear_count_exact,first_clear_day=COALESCE(campaign_nodes.first_clear_day,EXCLUDED.first_clear_day)"
     },
     {
@@ -10398,8 +10398,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/campaignstore/store.go:48",
-    "internal/adapters/postgres/campaignstore/store.go:96",
+    "internal/adapters/postgres/campaignstore/store.go:109",
+    "internal/adapters/postgres/campaignstore/store.go:61",
     "internal/adapters/postgres/i5store/missions.go:14",
     "internal/adapters/postgres/i5store/missions.go:45",
     "internal/adapters/postgres/i5store/missions.go:57",
@@ -10424,7 +10424,7 @@
    "unbounded_read": [
     {
      "file": "internal/adapters/postgres/campaignstore/store.go",
-     "line": 96,
+     "line": 109,
      "statement": "SELECT $1,campaign_id,star,win_day,wins,reset_day,resets,partner_drop,clear_count_floor,clear_count_exact,first_clear_day FROM jsonb_to_recordset($2::jsonb) AS x(campaign_id bigint,star smallint,win_day bigint,wins bigint,reset_day bigint,resets bigint,partner_drop boolean,clear_count_floor bigint,clear_count_exact boolean,first_clear_day bigint) ON CONFLICT(player_id,campaign_id) DO UPDATE SET star=EXCLUDED.star,win_day=EXCLUDED.win_day,wins=EXCLUDED.wins,reset_day=EXCLUDED.reset_day,resets=EXCLUDED.resets,partner_drop=EXCLUDED.partner_drop,clear_count_floor=EXCLUDED.clear_count_floor,clear_count_exact=EXCLUDED.clear_count_exact,first_clear_day=COALESCE(campaign_nodes.first_clear_day,EXCLUDED.first_clear_day)"
     },
     {
@@ -10575,8 +10575,8 @@
    "receipt_writes": [
     "internal/application/campaign/sweep.go:273",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -10587,8 +10587,8 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:54",
-    "internal/adapters/postgres/campaignstore/store.go:48",
-    "internal/adapters/postgres/campaignstore/store.go:96",
+    "internal/adapters/postgres/campaignstore/store.go:109",
+    "internal/adapters/postgres/campaignstore/store.go:61",
     "internal/adapters/postgres/characterstore/store.go:109",
     "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
@@ -10626,7 +10626,7 @@
    "unbounded_read": [
     {
      "file": "internal/adapters/postgres/campaignstore/store.go",
-     "line": 96,
+     "line": 109,
      "statement": "SELECT $1,campaign_id,star,win_day,wins,reset_day,resets,partner_drop,clear_count_floor,clear_count_exact,first_clear_day FROM jsonb_to_recordset($2::jsonb) AS x(campaign_id bigint,star smallint,win_day bigint,wins bigint,reset_day bigint,resets bigint,partner_drop boolean,clear_count_floor bigint,clear_count_exact boolean,first_clear_day bigint) ON CONFLICT(player_id,campaign_id) DO UPDATE SET star=EXCLUDED.star,win_day=EXCLUDED.win_day,wins=EXCLUDED.wins,reset_day=EXCLUDED.reset_day,resets=EXCLUDED.resets,partner_drop=EXCLUDED.partner_drop,clear_count_floor=EXCLUDED.clear_count_floor,clear_count_exact=EXCLUDED.clear_count_exact,first_clear_day=COALESCE(campaign_nodes.first_clear_day,EXCLUDED.first_clear_day)"
     },
     {
@@ -10832,7 +10832,7 @@
    ],
    "receipt_writes": [
     "internal/application/campaign/sweep.go:273",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -10842,8 +10842,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/campaignstore/store.go:48",
-    "internal/adapters/postgres/campaignstore/store.go:96",
+    "internal/adapters/postgres/campaignstore/store.go:109",
+    "internal/adapters/postgres/campaignstore/store.go:61",
     "internal/adapters/postgres/characterstore/store.go:109",
     "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
@@ -10879,7 +10879,7 @@
    "unbounded_read": [
     {
      "file": "internal/adapters/postgres/campaignstore/store.go",
-     "line": 96,
+     "line": 109,
      "statement": "SELECT $1,campaign_id,star,win_day,wins,reset_day,resets,partner_drop,clear_count_floor,clear_count_exact,first_clear_day FROM jsonb_to_recordset($2::jsonb) AS x(campaign_id bigint,star smallint,win_day bigint,wins bigint,reset_day bigint,resets bigint,partner_drop boolean,clear_count_floor bigint,clear_count_exact boolean,first_clear_day bigint) ON CONFLICT(player_id,campaign_id) DO UPDATE SET star=EXCLUDED.star,win_day=EXCLUDED.win_day,wins=EXCLUDED.wins,reset_day=EXCLUDED.reset_day,resets=EXCLUDED.resets,partner_drop=EXCLUDED.partner_drop,clear_count_floor=EXCLUDED.clear_count_floor,clear_count_exact=EXCLUDED.clear_count_exact,first_clear_day=COALESCE(campaign_nodes.first_clear_day,EXCLUDED.first_clear_day)"
     },
     {
@@ -11104,7 +11104,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/playerdisplay/commands.go:347"
    ],
    "retry": [
@@ -14947,7 +14947,7 @@
     },
     {
      "file": "internal/application/i5/service.go",
-     "line": 1254,
+     "line": 1262,
      "value": "serializable"
     },
     {
@@ -14970,7 +14970,7 @@
     },
     {
      "file": "internal/application/i5/service.go",
-     "line": 1254,
+     "line": 1262,
      "value": "false"
     },
     {
@@ -14982,8 +14982,8 @@
    "receipt_writes": [
     "internal/application/i5/awakening.go:419",
     "internal/application/i5/mission_runtime.go:356",
-    "internal/application/i5/service.go:1308",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1316",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -14998,7 +14998,7 @@
     },
     {
      "file": "internal/application/i5/service.go",
-     "line": 1254,
+     "line": 1262,
      "value": "3"
     },
     {
@@ -15056,7 +15056,7 @@
      "file": "internal/application/i5/service.go",
      "function": "Service.ClaimObjectiveByID",
      "isolation": "serializable",
-     "line": 1254,
+     "line": 1262,
      "read_only": "false",
      "retry": "3"
     },
@@ -15338,7 +15338,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/awakening.go:419",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -15630,7 +15630,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/awakening.go:419",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -15922,7 +15922,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/awakening.go:419",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -16214,7 +16214,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/awakening.go:419",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -16506,7 +16506,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/awakening.go:419",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -16798,7 +16798,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/awakening.go:419",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -17090,7 +17090,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_activity.go:139",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -17360,7 +17360,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_activity.go:139",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -17630,7 +17630,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/awakening.go:419",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -18001,7 +18001,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -18631,7 +18631,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -19261,7 +19261,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -19891,7 +19891,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -20521,7 +20521,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -21151,7 +21151,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -21781,7 +21781,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -22411,7 +22411,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -23041,7 +23041,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -23671,7 +23671,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -24301,7 +24301,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -24931,7 +24931,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -25561,7 +25561,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -26191,7 +26191,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -26821,7 +26821,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -27351,7 +27351,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/socialexchange/service.go:194"
    ],
    "retry": [
@@ -27827,7 +27827,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/mentor/service.go:198",
     "internal/application/socialinvite/claim.go:192",
     "internal/application/socialrecall/claim.go:167",
@@ -28407,7 +28407,7 @@
    "isolation": [
     {
      "file": "internal/application/i5/service.go",
-     "line": 1421,
+     "line": 1429,
      "value": "serializable"
     },
     {
@@ -28420,7 +28420,7 @@
    "read_only": [
     {
      "file": "internal/application/i5/service.go",
-     "line": 1421,
+     "line": 1429,
      "value": "false"
     },
     {
@@ -28430,13 +28430,13 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:1557",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1565",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
      "file": "internal/application/i5/service.go",
-     "line": 1421,
+     "line": 1429,
      "value": "3"
     },
     {
@@ -28470,7 +28470,7 @@
      "file": "internal/application/i5/service.go",
      "function": "Service.Redeem",
      "isolation": "serializable",
-     "line": 1421,
+     "line": 1429,
      "read_only": "false",
      "retry": "3"
     },
@@ -28850,7 +28850,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/itemsenergy/service.go:225"
    ],
    "retry": [
@@ -30363,7 +30363,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398"
+    "internal/application/i5/service.go:1406"
    ],
    "retry": [
     {
@@ -31957,7 +31957,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398"
+    "internal/application/i5/service.go:1406"
    ],
    "retry": [
     {
@@ -35570,7 +35570,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/summon/mode.go:607"
    ],
    "retry": [
@@ -36466,7 +36466,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
+    "internal/application/i5/service.go:1406",
     "internal/application/march/mode.go:178"
    ],
    "retry": [
@@ -36860,7 +36860,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/march/mode.go:178"
    ],
    "retry": [
@@ -37289,7 +37289,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
+    "internal/application/i5/service.go:1406",
     "internal/application/march/mode.go:178"
    ],
    "retry": [
@@ -37744,7 +37744,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/march/mode.go:178"
    ],
    "retry": [
@@ -38174,8 +38174,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/march/mode.go:178"
    ],
    "retry": [
@@ -38698,7 +38698,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/i5/signin.go:229"
    ],
    "retry": [
@@ -39039,7 +39039,7 @@
    "isolation": [
     {
      "file": "internal/application/i5/service.go",
-     "line": 920,
+     "line": 928,
      "value": "serializable"
     },
     {
@@ -39052,7 +39052,7 @@
    "read_only": [
     {
      "file": "internal/application/i5/service.go",
-     "line": 920,
+     "line": 928,
      "value": "false"
     },
     {
@@ -39062,13 +39062,13 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
-    "internal/application/i5/service.go:986"
+    "internal/application/i5/service.go:727",
+    "internal/application/i5/service.go:994"
    ],
    "retry": [
     {
      "file": "internal/application/i5/service.go",
-     "line": 920,
+     "line": 928,
      "value": "3"
     },
     {
@@ -39101,7 +39101,7 @@
      "file": "internal/application/i5/service.go",
      "function": "Service.ClaimMail",
      "isolation": "serializable",
-     "line": 920,
+     "line": 928,
      "read_only": "false",
      "retry": "3"
     },
@@ -39267,7 +39267,7 @@
    "isolation": [
     {
      "file": "internal/application/i5/service.go",
-     "line": 1033,
+     "line": 1041,
      "value": "serializable"
     },
     {
@@ -39280,7 +39280,7 @@
    "read_only": [
     {
      "file": "internal/application/i5/service.go",
-     "line": 1033,
+     "line": 1041,
      "value": "false"
     },
     {
@@ -39290,13 +39290,13 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:1093",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1101",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
      "file": "internal/application/i5/service.go",
-     "line": 1033,
+     "line": 1041,
      "value": "3"
     },
     {
@@ -39329,7 +39329,7 @@
      "file": "internal/application/i5/service.go",
      "function": "Service.ClaimMailBatch",
      "isolation": "serializable",
-     "line": 1033,
+     "line": 1041,
      "read_only": "false",
      "retry": "3"
     },
@@ -39687,7 +39687,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/mentor/service.go:198",
     "internal/application/socialinvite/claim.go:192",
     "internal/application/socialrecall/claim.go:167",
@@ -40753,7 +40753,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
+    "internal/application/i5/service.go:1406",
     "internal/application/workplace/mode.go:225"
    ],
    "retry": [
@@ -41208,7 +41208,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/workplace/mode.go:225"
    ],
    "retry": [
@@ -44288,7 +44288,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398"
+    "internal/application/i5/service.go:1406"
    ],
    "retry": [
     {
@@ -45107,8 +45107,8 @@
    "receipt_writes": [
     "internal/application/guildcampaign/commands.go:547",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -46274,7 +46274,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
+    "internal/application/i5/service.go:1406",
     "internal/application/worldboss/service.go:100"
    ],
    "retry": [
@@ -47100,7 +47100,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/playerdisplay/commands.go:347"
    ],
    "retry": [
@@ -47403,7 +47403,7 @@
    ],
    "receipt_writes": [
     "internal/application/commerceprivilege/vip_award.go:102",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -47613,7 +47613,7 @@
    ],
    "receipt_writes": [
     "internal/application/arena/service.go:498",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -48393,8 +48393,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -48846,8 +48846,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -49688,8 +49688,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -50523,7 +50523,7 @@
    ],
    "receipt_writes": [
     "internal/application/characterpet/promotion_service.go:110",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -51145,7 +51145,7 @@
    ],
    "receipt_writes": [
     "internal/application/characterpet/promotion_service.go:504",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -51995,8 +51995,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/petcampaign/run.go:179"
    ],
    "retry": [
@@ -52363,7 +52363,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
+    "internal/application/i5/service.go:1406",
     "internal/application/petcampaign/run.go:179"
    ],
    "retry": [
@@ -52776,8 +52776,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/petcampaign/run.go:179"
    ],
    "retry": [
@@ -53289,8 +53289,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/petcampaign/run.go:179"
    ],
    "retry": [
@@ -53541,8 +53541,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/petcampaign/run.go:179"
    ],
    "retry": [
@@ -54084,7 +54084,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
+    "internal/application/i5/service.go:1406",
     "internal/application/petcampaign/run.go:179"
    ],
    "retry": [
@@ -54798,8 +54798,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/librarylocal/service.go:384"
    ],
    "retry": [
@@ -55196,8 +55196,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/librarylocal/service.go:384"
    ],
    "retry": [
@@ -55594,8 +55594,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/librarylocal/service.go:384"
    ],
    "retry": [
@@ -55992,8 +55992,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/librarylocal/service.go:384"
    ],
    "retry": [
@@ -56390,8 +56390,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/librarylocal/service.go:384"
    ],
    "retry": [
@@ -56788,8 +56788,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/librarylocal/service.go:384"
    ],
    "retry": [
@@ -57186,8 +57186,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/librarylocal/service.go:384"
    ],
    "retry": [
@@ -57584,8 +57584,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/librarylocal/service.go:384"
    ],
    "retry": [
@@ -57982,8 +57982,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/librarylocal/service.go:384"
    ],
    "retry": [
@@ -58380,8 +58380,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/librarylocal/service.go:384"
    ],
    "retry": [
@@ -58778,8 +58778,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/librarylocal/service.go:384"
    ],
    "retry": [
@@ -59176,8 +59176,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/librarylocal/service.go:384"
    ],
    "retry": [
@@ -59574,8 +59574,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/librarylocal/service.go:384"
    ],
    "retry": [
@@ -60120,7 +60120,7 @@
    ],
    "receipt_writes": [
     "internal/application/arena/service.go:498",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -60387,8 +60387,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/librarylocal/service.go:384"
    ],
    "retry": [
@@ -60785,8 +60785,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/librarylocal/service.go:384"
    ],
    "retry": [
@@ -61183,8 +61183,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/librarylocal/service.go:384"
    ],
    "retry": [
@@ -61581,8 +61581,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/librarylocal/service.go:384"
    ],
    "retry": [
@@ -61979,8 +61979,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/librarylocal/service.go:384"
    ],
    "retry": [
@@ -62377,8 +62377,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/librarylocal/service.go:384"
    ],
    "retry": [
@@ -62775,8 +62775,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/librarylocal/service.go:384"
    ],
    "retry": [
@@ -63163,7 +63163,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398"
+    "internal/application/i5/service.go:1406"
    ],
    "retry": [
     {
@@ -64142,7 +64142,7 @@
    ],
    "receipt_writes": [
     "internal/application/bookskill/service.go:239",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -64490,7 +64490,7 @@
    ],
    "receipt_writes": [
     "internal/application/bookskill/service.go:239",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -64838,7 +64838,7 @@
    ],
    "receipt_writes": [
     "internal/application/bookskill/service.go:239",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -65186,7 +65186,7 @@
    ],
    "receipt_writes": [
     "internal/application/bookskill/service.go:239",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -65534,7 +65534,7 @@
    ],
    "receipt_writes": [
     "internal/application/bookskill/service.go:239",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -65882,7 +65882,7 @@
    ],
    "receipt_writes": [
     "internal/application/bookskill/service.go:239",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -66251,8 +66251,8 @@
    "receipt_writes": [
     "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -66917,8 +66917,8 @@
    "receipt_writes": [
     "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -67583,8 +67583,8 @@
    "receipt_writes": [
     "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -68249,8 +68249,8 @@
    "receipt_writes": [
     "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -68915,8 +68915,8 @@
    "receipt_writes": [
     "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -69560,7 +69560,7 @@
    ],
    "receipt_writes": [
     "internal/application/bookskill/service.go:239",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -69908,7 +69908,7 @@
    ],
    "receipt_writes": [
     "internal/application/bookskill/service.go:239",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -70256,7 +70256,7 @@
    ],
    "receipt_writes": [
     "internal/application/bookskill/service.go:239",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -70604,7 +70604,7 @@
    ],
    "receipt_writes": [
     "internal/application/bookskill/service.go:239",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -70973,8 +70973,8 @@
    "receipt_writes": [
     "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -71639,8 +71639,8 @@
    "receipt_writes": [
     "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -72305,8 +72305,8 @@
    "receipt_writes": [
     "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -72971,8 +72971,8 @@
    "receipt_writes": [
     "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -73637,8 +73637,8 @@
    "receipt_writes": [
     "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -74303,8 +74303,8 @@
    "receipt_writes": [
     "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -74969,8 +74969,8 @@
    "receipt_writes": [
     "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -75635,8 +75635,8 @@
    "receipt_writes": [
     "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -76301,8 +76301,8 @@
    "receipt_writes": [
     "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -76967,8 +76967,8 @@
    "receipt_writes": [
     "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -77633,8 +77633,8 @@
    "receipt_writes": [
     "internal/application/eventcentre/service.go:271",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -80383,7 +80383,7 @@
    ],
    "receipt_writes": [
     "internal/application/achievement/catalog.go:449",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -81363,7 +81363,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
+    "internal/application/i5/service.go:1406",
     "internal/application/illusion/service.go:106"
    ],
    "retry": [
@@ -81782,7 +81782,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
+    "internal/application/i5/service.go:1406",
     "internal/application/illusion/service.go:106"
    ],
    "retry": [
@@ -83200,7 +83200,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398"
+    "internal/application/i5/service.go:1406"
    ],
    "retry": [
     {
@@ -84351,7 +84351,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/inscription/service.go:258"
    ],
    "retry": [
@@ -84678,7 +84678,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/inscription/service.go:258"
    ],
    "retry": [
@@ -85005,7 +85005,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/inscription/service.go:258"
    ],
    "retry": [
@@ -85332,7 +85332,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/inscription/service.go:258"
    ],
    "retry": [
@@ -85659,7 +85659,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/inscription/service.go:258"
    ],
    "retry": [
@@ -85986,7 +85986,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/inscription/service.go:258"
    ],
    "retry": [
@@ -86313,7 +86313,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/inscription/service.go:258"
    ],
    "retry": [
@@ -86640,7 +86640,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/inscription/service.go:258"
    ],
    "retry": [
@@ -87563,7 +87563,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398"
+    "internal/application/i5/service.go:1406"
    ],
    "retry": [
     {
@@ -87977,7 +87977,7 @@
    ],
    "receipt_writes": [
     "internal/application/conquerschool/mode.go:407",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -88830,8 +88830,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -89091,7 +89091,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -93162,7 +93162,7 @@
    ],
    "receipt_writes": [
     "internal/application/dormhouse/service.go:324",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -94072,7 +94072,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/mentor/service.go:198"
    ],
    "retry": [
@@ -94302,7 +94302,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/mentor/service.go:198"
    ],
    "retry": [
@@ -95579,7 +95579,7 @@
    ],
    "receipt_writes": [
     "internal/application/campaign/sweep.go:273",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -95589,8 +95589,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/campaignstore/store.go:48",
-    "internal/adapters/postgres/campaignstore/store.go:96",
+    "internal/adapters/postgres/campaignstore/store.go:109",
+    "internal/adapters/postgres/campaignstore/store.go:61",
     "internal/adapters/postgres/characterstore/store.go:109",
     "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:26",
@@ -95627,7 +95627,7 @@
    "unbounded_read": [
     {
      "file": "internal/adapters/postgres/campaignstore/store.go",
-     "line": 96,
+     "line": 109,
      "statement": "SELECT $1,campaign_id,star,win_day,wins,reset_day,resets,partner_drop,clear_count_floor,clear_count_exact,first_clear_day FROM jsonb_to_recordset($2::jsonb) AS x(campaign_id bigint,star smallint,win_day bigint,wins bigint,reset_day bigint,resets bigint,partner_drop boolean,clear_count_floor bigint,clear_count_exact boolean,first_clear_day bigint) ON CONFLICT(player_id,campaign_id) DO UPDATE SET star=EXCLUDED.star,win_day=EXCLUDED.win_day,wins=EXCLUDED.wins,reset_day=EXCLUDED.reset_day,resets=EXCLUDED.resets,partner_drop=EXCLUDED.partner_drop,clear_count_floor=EXCLUDED.clear_count_floor,clear_count_exact=EXCLUDED.clear_count_exact,first_clear_day=COALESCE(campaign_nodes.first_clear_day,EXCLUDED.first_clear_day)"
     },
     {
@@ -96128,7 +96128,7 @@
    ],
    "receipt_writes": [
     "internal/application/course/service.go:257",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -96522,7 +96522,7 @@
    ],
    "receipt_writes": [
     "internal/application/course/service.go:257",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -96916,7 +96916,7 @@
    ],
    "receipt_writes": [
     "internal/application/course/service.go:257",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -97310,7 +97310,7 @@
    ],
    "receipt_writes": [
     "internal/application/course/service.go:257",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -97704,7 +97704,7 @@
    ],
    "receipt_writes": [
     "internal/application/course/service.go:257",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -98098,7 +98098,7 @@
    ],
    "receipt_writes": [
     "internal/application/course/service.go:257",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -98492,7 +98492,7 @@
    ],
    "receipt_writes": [
     "internal/application/course/service.go:257",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -98886,7 +98886,7 @@
    ],
    "receipt_writes": [
     "internal/application/course/service.go:257",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -99280,7 +99280,7 @@
    ],
    "receipt_writes": [
     "internal/application/course/service.go:257",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -99674,7 +99674,7 @@
    ],
    "receipt_writes": [
     "internal/application/course/service.go:257",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -100068,7 +100068,7 @@
    ],
    "receipt_writes": [
     "internal/application/course/service.go:257",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -100462,7 +100462,7 @@
    ],
    "receipt_writes": [
     "internal/application/course/service.go:257",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -100856,7 +100856,7 @@
    ],
    "receipt_writes": [
     "internal/application/course/service.go:257",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -101250,7 +101250,7 @@
    ],
    "receipt_writes": [
     "internal/application/course/service.go:257",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -101644,7 +101644,7 @@
    ],
    "receipt_writes": [
     "internal/application/course/service.go:257",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -102668,7 +102668,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/memoir/run.go:141"
    ],
    "retry": [
@@ -103392,7 +103392,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/memoir/run.go:141"
    ],
    "retry": [
@@ -104047,7 +104047,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/memoir/run.go:141"
    ],
    "retry": [
@@ -104315,8 +104315,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/memoir/run.go:141"
    ],
    "retry": [
@@ -104854,7 +104854,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/memoir/run.go:141"
    ],
    "retry": [
@@ -105136,7 +105136,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/memoir/run.go:141"
    ],
    "retry": [
@@ -105348,7 +105348,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
+    "internal/application/i5/service.go:1406",
     "internal/application/memoir/run.go:141"
    ],
    "retry": [
@@ -107934,8 +107934,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -108469,8 +108469,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -108976,8 +108976,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -109531,8 +109531,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -110189,8 +110189,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -110744,8 +110744,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -111299,8 +111299,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -111854,8 +111854,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -112829,8 +112829,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/occult/service.go:124"
    ],
    "retry": [
@@ -113377,7 +113377,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398"
+    "internal/application/i5/service.go:1406"
    ],
    "retry": [
     {
@@ -114157,7 +114157,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -114597,7 +114597,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -115048,8 +115048,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -115588,7 +115588,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -116009,7 +116009,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398"
+    "internal/application/i5/service.go:1406"
    ],
    "retry": [
     {
@@ -116423,7 +116423,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -116684,7 +116684,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -117781,7 +117781,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -118324,7 +118324,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -118745,7 +118745,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398"
+    "internal/application/i5/service.go:1406"
    ],
    "retry": [
     {
@@ -120109,7 +120109,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398"
+    "internal/application/i5/service.go:1406"
    ],
    "retry": [
     {
@@ -121174,7 +121174,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/playerdisplay/commands.go:347"
    ],
    "retry": [
@@ -121506,7 +121506,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/playerdisplay/commands.go:347"
    ],
    "retry": [
@@ -121838,7 +121838,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/playerdisplay/commands.go:347"
    ],
    "retry": [
@@ -122170,7 +122170,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:727",
     "internal/application/playerdisplay/commands.go:347"
    ],
    "retry": [
@@ -124077,7 +124077,7 @@
    ],
    "receipt_writes": [
     "internal/application/course/service.go:257",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -124461,7 +124461,7 @@
    ],
    "receipt_writes": [
     "internal/application/dormhouse/service.go:324",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -124845,7 +124845,7 @@
    ],
    "receipt_writes": [
     "internal/application/dormhouse/service.go:324",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -125229,7 +125229,7 @@
    ],
    "receipt_writes": [
     "internal/application/dormhouse/service.go:324",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -125613,7 +125613,7 @@
    ],
    "receipt_writes": [
     "internal/application/dormhouse/service.go:324",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -125997,7 +125997,7 @@
    ],
    "receipt_writes": [
     "internal/application/dormhouse/service.go:324",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -126381,7 +126381,7 @@
    ],
    "receipt_writes": [
     "internal/application/dormhouse/service.go:324",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -126765,7 +126765,7 @@
    ],
    "receipt_writes": [
     "internal/application/dormhouse/service.go:324",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -127149,7 +127149,7 @@
    ],
    "receipt_writes": [
     "internal/application/dormhouse/service.go:324",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -127533,7 +127533,7 @@
    ],
    "receipt_writes": [
     "internal/application/dormhouse/service.go:324",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -127917,7 +127917,7 @@
    ],
    "receipt_writes": [
     "internal/application/dormhouse/service.go:324",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -128301,7 +128301,7 @@
    ],
    "receipt_writes": [
     "internal/application/dormhouse/service.go:324",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -128685,7 +128685,7 @@
    ],
    "receipt_writes": [
     "internal/application/dormhouse/service.go:324",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -129069,7 +129069,7 @@
    ],
    "receipt_writes": [
     "internal/application/dormhouse/service.go:324",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -129453,7 +129453,7 @@
    ],
    "receipt_writes": [
     "internal/application/dormhouse/service.go:324",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -129837,7 +129837,7 @@
    ],
    "receipt_writes": [
     "internal/application/dormhouse/service.go:324",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -130581,7 +130581,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/awakening.go:419",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -131449,7 +131449,7 @@
    ],
    "receipt_writes": [
     "internal/application/campaign/sweep.go:273",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -131459,8 +131459,8 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/campaignstore/store.go:48",
-    "internal/adapters/postgres/campaignstore/store.go:96",
+    "internal/adapters/postgres/campaignstore/store.go:109",
+    "internal/adapters/postgres/campaignstore/store.go:61",
     "internal/adapters/postgres/characterstore/store.go:109",
     "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
@@ -131496,7 +131496,7 @@
    "unbounded_read": [
     {
      "file": "internal/adapters/postgres/campaignstore/store.go",
-     "line": 96,
+     "line": 109,
      "statement": "SELECT $1,campaign_id,star,win_day,wins,reset_day,resets,partner_drop,clear_count_floor,clear_count_exact,first_clear_day FROM jsonb_to_recordset($2::jsonb) AS x(campaign_id bigint,star smallint,win_day bigint,wins bigint,reset_day bigint,resets bigint,partner_drop boolean,clear_count_floor bigint,clear_count_exact boolean,first_clear_day bigint) ON CONFLICT(player_id,campaign_id) DO UPDATE SET star=EXCLUDED.star,win_day=EXCLUDED.win_day,wins=EXCLUDED.wins,reset_day=EXCLUDED.reset_day,resets=EXCLUDED.resets,partner_drop=EXCLUDED.partner_drop,clear_count_floor=EXCLUDED.clear_count_floor,clear_count_exact=EXCLUDED.clear_count_exact,first_clear_day=COALESCE(campaign_nodes.first_clear_day,EXCLUDED.first_clear_day)"
     },
     {
@@ -133059,7 +133059,7 @@
    ],
    "receipt_writes": [
     "internal/application/dormhouse/service.go:324",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -133443,7 +133443,7 @@
    ],
    "receipt_writes": [
     "internal/application/dormhouse/service.go:324",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -133827,7 +133827,7 @@
    ],
    "receipt_writes": [
     "internal/application/dormhouse/service.go:324",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -134674,7 +134674,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/awakening.go:419",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -134966,7 +134966,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/awakening.go:419",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -135650,8 +135650,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/librarylocal/service.go:384"
    ],
    "retry": [
@@ -136048,8 +136048,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/librarylocal/service.go:384"
    ],
    "retry": [
@@ -136602,8 +136602,8 @@
    "receipt_writes": [
     "internal/application/championsleague/service.go:441",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -137251,8 +137251,8 @@
    "receipt_writes": [
     "internal/application/championsleague/service.go:441",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -137900,8 +137900,8 @@
    "receipt_writes": [
     "internal/application/championsleague/service.go:441",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -138549,8 +138549,8 @@
    "receipt_writes": [
     "internal/application/championsleague/service.go:441",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -139198,8 +139198,8 @@
    "receipt_writes": [
     "internal/application/championsleague/service.go:441",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -139847,8 +139847,8 @@
    "receipt_writes": [
     "internal/application/championsleague/service.go:441",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -140496,8 +140496,8 @@
    "receipt_writes": [
     "internal/application/championsleague/service.go:441",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -141145,8 +141145,8 @@
    "receipt_writes": [
     "internal/application/championsleague/service.go:441",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -142228,7 +142228,7 @@
    ],
    "receipt_writes": [
     "internal/application/elementequipment/service.go:242",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -142565,7 +142565,7 @@
    ],
    "receipt_writes": [
     "internal/application/elementequipment/service.go:242",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -142902,7 +142902,7 @@
    ],
    "receipt_writes": [
     "internal/application/elementequipment/service.go:242",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -143239,7 +143239,7 @@
    ],
    "receipt_writes": [
     "internal/application/elementequipment/service.go:242",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -143576,7 +143576,7 @@
    ],
    "receipt_writes": [
     "internal/application/elementequipment/service.go:242",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -143871,7 +143871,7 @@
    "isolation": [
     {
      "file": "internal/application/i5/service.go",
-     "line": 842,
+     "line": 850,
      "value": "serializable"
     }
    ],
@@ -143879,17 +143879,17 @@
    "read_only": [
     {
      "file": "internal/application/i5/service.go",
-     "line": 842,
+     "line": 850,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:876"
+    "internal/application/i5/service.go:884"
    ],
    "retry": [
     {
      "file": "internal/application/i5/service.go",
-     "line": 842,
+     "line": 850,
      "value": "3"
     }
    ],
@@ -143902,7 +143902,7 @@
      "file": "internal/application/i5/service.go",
      "function": "Service.saveGuide",
      "isolation": "serializable",
-     "line": 842,
+     "line": 850,
      "read_only": "false",
      "retry": "3"
     }
@@ -143935,7 +143935,7 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED apply at internal/application/i5/service.go:858"
+    "UNRESOLVED apply at internal/application/i5/service.go:866"
    ],
    "writes": "state"
   },
@@ -143944,7 +143944,7 @@
    "isolation": [
     {
      "file": "internal/application/i5/service.go",
-     "line": 842,
+     "line": 850,
      "value": "serializable"
     }
    ],
@@ -143952,17 +143952,17 @@
    "read_only": [
     {
      "file": "internal/application/i5/service.go",
-     "line": 842,
+     "line": 850,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/service.go:876"
+    "internal/application/i5/service.go:884"
    ],
    "retry": [
     {
      "file": "internal/application/i5/service.go",
-     "line": 842,
+     "line": 850,
      "value": "3"
     }
    ],
@@ -143975,7 +143975,7 @@
      "file": "internal/application/i5/service.go",
      "function": "Service.saveGuide",
      "isolation": "serializable",
-     "line": 842,
+     "line": 850,
      "read_only": "false",
      "retry": "3"
     }
@@ -144008,7 +144008,7 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED apply at internal/application/i5/service.go:858"
+    "UNRESOLVED apply at internal/application/i5/service.go:866"
    ],
    "writes": "state"
   },
@@ -145083,7 +145083,7 @@
    "receipt_writes": [
     "internal/application/dodgeball/run.go:152",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398"
+    "internal/application/i5/service.go:1406"
    ],
    "retry": [
     {
@@ -145500,7 +145500,7 @@
    ],
    "receipt_writes": [
     "internal/application/dodgeball/run.go:152",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -146017,8 +146017,8 @@
    ],
    "receipt_writes": [
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719",
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727",
     "internal/application/shop/service.go:222"
    ],
    "retry": [
@@ -147976,7 +147976,7 @@
    "receipt_writes": [
     "internal/application/godstrial/run.go:170",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398"
+    "internal/application/i5/service.go:1406"
    ],
    "retry": [
     {
@@ -148394,8 +148394,8 @@
    "receipt_writes": [
     "internal/application/godstrial/run.go:170",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -149444,8 +149444,8 @@
    "receipt_writes": [
     "internal/application/godstrial/run.go:170",
     "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1398",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:1406",
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
@@ -150986,7 +150986,7 @@
    ],
    "receipt_writes": [
     "internal/application/commerceprivilege/tap.go:175",
-    "internal/application/i5/service.go:719"
+    "internal/application/i5/service.go:727"
    ],
    "retry": [
     {

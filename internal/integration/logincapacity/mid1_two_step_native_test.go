@@ -20,6 +20,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterbirth"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/commerceprivilegestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/compatstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/coursestore"
@@ -29,26 +30,31 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/herorecommendstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
+	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/inscriptionstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
 	"gxb.local/backend/v2/internal/adapters/postgres/spiritstore"
 	appboot "gxb.local/backend/v2/internal/application/bootstrap"
+	"gxb.local/backend/v2/internal/application/commerceprivilege"
 	appcompat "gxb.local/backend/v2/internal/application/compat"
 	appdorm "gxb.local/backend/v2/internal/application/dormhouse"
 	appherorecommend "gxb.local/backend/v2/internal/application/herorecommend"
+	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/content/builtin"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/guild"
 	hrd "gxb.local/backend/v2/internal/domain/herorecommend"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
+	"gxb.local/backend/v2/internal/domain/player"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
 var twoStepSecret = []byte("c1-4-native-digest-and-bearer-secret")
+var twoStepCredentialCounter atomic.Int64
 
 var twoStepAt = time.Date(2026, 11, 15, 4, 0, 0, 0, time.UTC)
 
@@ -119,6 +125,91 @@ type twoStepPlayer struct {
 	sessionUUID ids.UUID
 	credentials appboot.AccountCredentials
 	operation   operation.Context
+}
+
+// seedTwoStepAccount writes only the account and session pair, so MID1 takes
+// the production new-character path.
+func seedTwoStepAccount(t *testing.T, p *postgres.Pool, accountUUID, sessionUUID ids.UUID, operationRaw string) twoStepPlayer {
+	t.Helper()
+	credentials := appboot.AccountCredentials{SID: "sid-" + sessionUUID.String(), LoginToken: "login-" + sessionUUID.String()}
+	twoStepExec(t, p, `INSERT INTO accounts(account_id,account_uid,status,created_at)VALUES($1,$2,'ACTIVE',$3)`, accountUUID.String(), accountUUID.String(), twoStepAt.Add(-48*time.Hour))
+	twoStepExec(t, p, `INSERT INTO account_sessions(session_id,account_id,auth_profile,issued_at,last_activity_at)VALUES($1,$2,'SID_LOGIN_TOKEN_PAIR',$3,$3)`, sessionUUID.String(), accountUUID.String(), twoStepAt.Add(-time.Hour))
+	for _, credential := range []struct{ kind, label, raw string }{{"SID", "sid", credentials.SID}, {"LOGIN_TOKEN", "login_token", credentials.LoginToken}} {
+		digest, err := identity.DigestCredential(twoStepSecret, credential.label, credential.raw)
+		if err != nil {
+			t.Fatal(err)
+		}
+		credentialID := twoStepUUID(t, fmt.Sprintf("10000000-0000-4000-8000-%012d", twoStepCredentialCounter.Add(1)))
+		twoStepExec(t, p, `INSERT INTO account_session_credentials(credential_id,session_id,kind,digest,issued_at)VALUES($1,$2,$3,$4,$5)`, credentialID.String(), sessionUUID.String(), credential.kind, digest[:], twoStepAt.Add(-time.Hour))
+	}
+	twoStepExec(t, p, `INSERT INTO account_session_server_observations(session_id,logical_server_id,observed_at)VALUES($1,1,$2)`, sessionUUID.String(), twoStepAt.Add(-time.Hour))
+	return twoStepPlayer{accountUUID: accountUUID, sessionUUID: sessionUUID, credentials: credentials, operation: twoStepOperation(t, operationRaw)}
+}
+
+func twoStepActor(t *testing.T, p *postgres.Pool, result appboot.MID1Result) identity.ActorContext {
+	t.Helper()
+	selected := result.ContextPlan.Selected
+	var sessionLiveness int64
+	if err := p.Raw().QueryRow(context.Background(), `SELECT liveness_version FROM account_sessions WHERE session_id=$1`, selected.SessionID.UUID().String()).Scan(&sessionLiveness); err != nil {
+		t.Fatal(err)
+	}
+	return identity.ActorContext{
+		AccountID: selected.AccountID, AccountUID: result.UID, SessionID: selected.SessionID,
+		ContextID: selected.ID, LogicalServerID: selected.LogicalServerID, PlayerID: selected.PlayerID,
+		ContextGeneration: selected.ContextGeneration, ContextLivenessVersion: selected.LivenessVersion,
+		SessionLivenessVersion: sessionLiveness,
+	}
+}
+
+func TestI9TutorialFreshLoginClearsOnOpeningProgressAndStartsAtTheSkillCap(t *testing.T) {
+	p := twoStepPool(t, 8)
+	revision := twoStepContentRevision(t, p)
+	fixture := seedTwoStepAccount(t, p, twoStepUUID(t, "33333333-3333-4333-8333-333333333301"), twoStepUUID(t, "33333333-3333-4333-8333-333333333302"), "33333333-3333-4333-8333-333333333303")
+	service := twoStepBirthService(t, p, revision)
+	first, err := service.MID1(context.Background(), appboot.RuntimeMID1Request{Credentials: fixture.credentials, Region: 1, Operation: fixture.operation})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if first.IsNew != 1 {
+		t.Fatalf("fresh MID1 is_new=%d", first.IsNew)
+	}
+	record, ok := first.Detail["17"].(map[string]any)
+	if !ok || record["skill_point"] != int64(10) || record["skill_time"] != int64(0) {
+		t.Fatalf("fresh MID1 detail 17 = %#v", first.Detail["17"])
+	}
+	actor := twoStepActor(t, p, first)
+	i5 := appi5.Service{Runner: tx.Runner{DB: p}, Store: i5store.Store{}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+	if err := i5.SaveStory(context.Background(), actor, 10002, 3, 100198, fixture.operation); err != nil {
+		t.Fatal(err)
+	}
+	again, err := service.MID1(context.Background(), appboot.RuntimeMID1Request{Credentials: fixture.credentials, Region: 1, Operation: twoStepOperation(t, "33333333-3333-4333-8333-333333333304")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if again.IsNew != 0 {
+		t.Fatalf("relogin MID1 is_new=%d, want 0", again.IsNew)
+	}
+	record, ok = again.Detail["17"].(map[string]any)
+	if !ok || record["guide_id"] != int64(100198) {
+		t.Fatalf("relogin MID1 detail 17 = %#v", again.Detail["17"])
+	}
+
+	opening := seedTwoStepAccount(t, p, twoStepUUID(t, "44444444-4444-4444-8444-444444444401"), twoStepUUID(t, "44444444-4444-4444-8444-444444444402"), "44444444-4444-4444-8444-444444444403")
+	created, err := service.MID1(context.Background(), appboot.RuntimeMID1Request{Credentials: opening.credentials, Region: 1, Operation: opening.operation})
+	if err != nil {
+		t.Fatal(err)
+	}
+	openingActor := twoStepActor(t, p, created)
+	if err := i5.SaveStory(context.Background(), openingActor, 0, 0, player.GuideOpeningDoneID, opening.operation); err != nil {
+		t.Fatal(err)
+	}
+	relogged, err := service.MID1(context.Background(), appboot.RuntimeMID1Request{Credentials: opening.credentials, Region: 1, Operation: twoStepOperation(t, "44444444-4444-4444-8444-444444444404")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if relogged.IsNew != 0 {
+		t.Fatalf("opening-cursor relogin is_new=%d, want 0", relogged.IsNew)
+	}
 }
 
 // seedTwoStepPlayer writes only fixture state: an existing returned player with
@@ -335,6 +426,30 @@ func twoStepService(t *testing.T, p *postgres.Pool, hooks tx.Hooks) i4store.Boot
 		LoginTime:               twoStepClock{at: twoStepAt},
 		LoginReconcilers:        []appboot.CharacterLoginReconciler{i4store.PlayerLoginActivity{}},
 		DetailContributors:      twoStepContributors(p),
+	}
+}
+
+// twoStepBirthService is the production MID1 birth chain: a missing player is
+// created with every owner root the first login needs, through the same
+// characterbirth contributors cmd/gxb-api registers.
+func twoStepBirthService(t *testing.T, p *postgres.Pool, revision string) i4store.BootstrapService {
+	t.Helper()
+	content := contentstore.Store{Queryer: p}
+	privileges := commerceprivilege.Provider{Store: commerceprivilegestore.Store{}, Content: content}
+	details := append(twoStepContributors(p), i5store.BootstrapProjection{Content: content, Privileges: privileges, MaxHeroColor: appi5.CurrentMaxHeroColorProvider{}, BackpackSort: characterstore.Store{}})
+	return i4store.BootstrapService{
+		Runner:                  tx.Runner{DB: p},
+		Receipts:                kernelstore.Store{},
+		ReceiptReader:           kernelstore.Reader{Queryer: p},
+		DigestSecret:            twoStepSecret,
+		BearerSecret:            twoStepSecret,
+		DerivationKeyID:         "c1-4-native",
+		BootstrapProfileVersion: "c1-4-native",
+		LoginTime:               twoStepClock{at: twoStepAt},
+		LoginReconcilers:        []appboot.CharacterLoginReconciler{i4store.PlayerLoginActivity{}},
+		OperationBinder:         contentstore.Store{},
+		PersistenceContributors: characterbirth.Contributors(content, privileges, revision),
+		DetailContributors:      details,
 	}
 }
 
