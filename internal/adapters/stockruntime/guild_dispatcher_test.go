@@ -61,7 +61,8 @@ func (f *fakeGuildCore) AcceptInvite(context.Context, identity.ActorContext, gui
 }
 
 type fakeGuildView struct {
-	self guildview.SelfGuild
+	self      guildview.SelfGuild
+	guildless bool
 }
 
 func (f fakeGuildView) Self(context.Context, identity.ActorContext) (guildview.SelfGuild, bool, error) {
@@ -74,7 +75,7 @@ func (f fakeGuildView) Other(context.Context, identity.ActorContext, guild.ID) (
 	return f.self, f.self.GuildInfo.GuildID != 0, nil
 }
 func (f fakeGuildView) Members(context.Context, identity.ActorContext) (guildview.GuildInfo, []guildview.Member, error) {
-	if f.self.GuildInfo.GuildID == 0 {
+	if f.guildless {
 		return guildview.GuildInfo{}, nil, guildview.ErrForbidden
 	}
 	return f.self.GuildInfo, []guildview.Member{{PlayerID: 100001, Role: 1, LastTime: 0, SevenVitality: 0, CopyChallengeTime: 0}}, nil
@@ -120,7 +121,7 @@ func TestI9_11T34GuildlessRosterAndMissingGuildDetail(t *testing.T) {
 	// precondition and expect OK plus a zero roster (SelfGuild.lua:32-63 then
 	// takes its own "not in a guild" branch).
 	actor := actorForHTTP(t)
-	d := GuildDispatcher{Authority: httpAuthority{actor}, Core: &fakeGuildCore{}, View: fakeGuildView{}}
+	d := GuildDispatcher{Authority: httpAuthority{actor}, Core: &fakeGuildCore{}, View: fakeGuildView{guildless: true}}
 	now := time.Unix(100, 0).UTC()
 
 	guildless := d.Dispatch(context.Background(), env(579, nil, now))
