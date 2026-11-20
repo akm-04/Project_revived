@@ -29,6 +29,10 @@ type recordingFacts struct {
 	facts []objective.Fact
 }
 
+func (f *recordingFacts) PrepareTx(c context.Context, _ tx.Tx, _ identity.PlayerID, _ gen.TimedOperation) (context.Context, error) {
+	return c, nil
+}
+
 func (f *recordingFacts) RecordTx(_ context.Context, _ tx.Tx, _ operation.Context, facts ...objective.Fact) error {
 	f.calls++
 	f.facts = append(f.facts, facts...)
