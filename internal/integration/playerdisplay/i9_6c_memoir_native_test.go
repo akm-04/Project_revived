@@ -800,15 +800,17 @@ func TestI9_11T34MemoirTuningNative(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	state := memoirFinalState(revision, catalog.Selected[0])
-	raw, version, err := payload.Encode(state)
-	if err != nil {
-		t.Fatal(err)
-	}
-	restore := func() {
+	// Each award gets its own occurrence: the reward receipt is keyed by it, and the two draws differ.
+	restore := func(occurrence string) {
+		state := memoirFinalState(revision, catalog.Selected[0])
+		state.Occurrence = occurrence
+		raw, version, err := payload.Encode(state)
+		if err != nil {
+			t.Fatal(err)
+		}
 		exec(t, pool, `INSERT INTO memoir_players(player_id,payload,payload_version,updated_at)VALUES($1,$2::jsonb,$3,now()) ON CONFLICT(player_id) DO UPDATE SET payload=EXCLUDED.payload,payload_version=EXCLUDED.payload_version,updated_at=EXCLUDED.updated_at`, int64(actor.PlayerID), string(raw), int(version))
 	}
-	restore()
+	restore("native-tuning")
 	exec(t, pool, `INSERT INTO memoir_tuning(singleton,payload,payload_version,revision,updated_at)VALUES(true,$1::jsonb,1,1,now())`, `{"box_rates":{"597011":{"20001154":10000}}}`)
 	t.Cleanup(func() { exec(t, pool, `DELETE FROM memoir_tuning`) })
 	response, err := mode.FinalAward(ctx, actor, memoir.FinalPosition, catalog.FinalGifts[0], op())
@@ -826,7 +828,7 @@ func TestI9_11T34MemoirTuningNative(t *testing.T) {
 	if _, err = catalog.Tune(tuning); err == nil {
 		t.Fatal("malformed overlay accepted")
 	}
-	restore()
+	restore("native-tuning-source")
 	if _, err = mode.FinalAward(ctx, actor, memoir.FinalPosition, catalog.FinalGifts[0], op()); err != nil {
 		t.Fatal("rejected overlay stopped the mode", err)
 	}

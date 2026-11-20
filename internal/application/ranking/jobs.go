@@ -339,6 +339,14 @@ func (s Service) settleCurrentWeek(c context.Context, o operation.Context, board
 		if observed, e := d.BoardWeek(at); e != nil || !observed.Equal(week) {
 			return ErrConflict
 		}
+		// A concurrent settlement that held the root lock first already froze this week.
+		_, frozen, e := s.Store.ReadBoardPeriodTx(c, sc.Tx, board, server, week)
+		if e != nil {
+			return e
+		}
+		if frozen {
+			return nil
+		}
 		rows, e := s.Store.AllScoreRowsTx(c, sc.Tx, board.Policy, server)
 		if e != nil {
 			return e
