@@ -73,7 +73,7 @@ func Test6A_G26_G28_G30_G31_G32_G38_G39ProductionProcesses(t *testing.T) {
 	if code != 200 || len(dmOffline(t, body)) != 0 {
 		t.Fatal("live occurrence redrained", code, body)
 	}
-	for _, msg := range []string{`{"message":"report","msgType":2}`, `{"message":"mode","msgType":0,"selectType":1}`, `{"message":"room","msgType":0,"roomID":1}`, `{"message":"duplicate","msgType":0,"msgType":0}`, `{"message":"surrogate\ud800","msgType":0}`} {
+	for _, msg := range []string{`{"message":"report","msgType":2}`, `{"message":"mode","msgType":0,"selectType":1}`, `{"message":"room","msgType":0,"roomID":-1}`, `{"message":"duplicate","msgType":0,"msgType":0}`, `{"message":"surrogate\ud800","msgType":0}`} {
 		code, body = postProcess(t, api, sender, 1, 515, map[string]any{"player_id": 200001, "msg": msg})
 		if code == 200 {
 			t.Fatal("false echo rejection", code, body)
