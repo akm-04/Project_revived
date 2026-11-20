@@ -1565,7 +1565,7 @@
    "isolation": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 253,
+     "line": 256,
      "value": "UNKNOWN"
     }
    ],
@@ -1573,7 +1573,7 @@
    "read_only": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 253,
+     "line": 256,
      "value": "UNKNOWN"
     }
    ],
@@ -1581,7 +1581,7 @@
    "retry": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 253,
+     "line": 256,
      "value": "6"
     }
    ],
@@ -1595,7 +1595,7 @@
      "file": "internal/application/shop/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 253,
+     "line": 256,
      "read_only": "UNKNOWN",
      "retry": "6"
     }
@@ -1678,12 +1678,12 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED body at internal/application/shop/service.go:263",
+    "UNRESOLVED body at internal/application/shop/service.go:266",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED weight at internal/domain/shop/rolls.go:80",
     "UNRESOLVED weight at internal/domain/shop/rolls.go:92",
-    "transaction ReadOnly flag not statically decidable at internal/application/shop/service.go:253",
-    "transaction isolation not statically decidable at internal/application/shop/service.go:253"
+    "transaction ReadOnly flag not statically decidable at internal/application/shop/service.go:256",
+    "transaction isolation not statically decidable at internal/application/shop/service.go:256"
    ],
    "writes": "state"
   },
@@ -1692,7 +1692,7 @@
    "isolation": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 182,
+     "line": 185,
      "value": "read_committed"
     }
    ],
@@ -1700,7 +1700,7 @@
    "read_only": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 182,
+     "line": 185,
      "value": "false"
     }
    ],
@@ -1708,12 +1708,12 @@
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1406",
     "internal/application/i5/service.go:727",
-    "internal/application/shop/service.go:222"
+    "internal/application/shop/service.go:225"
    ],
    "retry": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 182,
+     "line": 185,
      "value": "6"
     }
    ],
@@ -1753,7 +1753,7 @@
      "file": "internal/application/shop/service.go",
      "function": "Service.execute",
      "isolation": "read_committed",
-     "line": 182,
+     "line": 185,
      "read_only": "false",
      "retry": "6"
     }
@@ -1967,7 +1967,7 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "UNRESOLVED body at internal/application/shop/service.go:203",
+    "UNRESOLVED body at internal/application/shop/service.go:206",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED observe at internal/application/achievement/service.go:332",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122"
@@ -1979,7 +1979,7 @@
    "isolation": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 182,
+     "line": 185,
      "value": "read_committed"
     }
    ],
@@ -1987,17 +1987,17 @@
    "read_only": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 182,
+     "line": 185,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/shop/service.go:222"
+    "internal/application/shop/service.go:225"
    ],
    "retry": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 182,
+     "line": 185,
      "value": "6"
     }
    ],
@@ -2015,7 +2015,7 @@
      "file": "internal/application/shop/service.go",
      "function": "Service.execute",
      "isolation": "read_committed",
-     "line": 182,
+     "line": 185,
      "read_only": "false",
      "retry": "6"
     }
@@ -2133,7 +2133,7 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED body at internal/application/shop/service.go:203",
+    "UNRESOLVED body at internal/application/shop/service.go:206",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED weight at internal/domain/shop/rolls.go:80",
     "UNRESOLVED weight at internal/domain/shop/rolls.go:92"
@@ -2175,7 +2175,7 @@
    "isolation": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 253,
+     "line": 256,
      "value": "UNKNOWN"
     }
    ],
@@ -2183,7 +2183,7 @@
    "read_only": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 253,
+     "line": 256,
      "value": "UNKNOWN"
     }
    ],
@@ -2191,7 +2191,7 @@
    "retry": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 253,
+     "line": 256,
      "value": "6"
     }
    ],
@@ -2202,7 +2202,7 @@
      "file": "internal/application/shop/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 253,
+     "line": 256,
      "read_only": "UNKNOWN",
      "retry": "6"
     }
@@ -2260,10 +2260,10 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED body at internal/application/shop/service.go:263",
+    "UNRESOLVED body at internal/application/shop/service.go:266",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
-    "transaction ReadOnly flag not statically decidable at internal/application/shop/service.go:253",
-    "transaction isolation not statically decidable at internal/application/shop/service.go:253"
+    "transaction ReadOnly flag not statically decidable at internal/application/shop/service.go:256",
+    "transaction isolation not statically decidable at internal/application/shop/service.go:256"
    ],
    "writes": "UNKNOWN"
   },
@@ -2272,7 +2272,7 @@
    "isolation": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 253,
+     "line": 256,
      "value": "UNKNOWN"
     }
    ],
@@ -2280,7 +2280,7 @@
    "read_only": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 253,
+     "line": 256,
      "value": "UNKNOWN"
     }
    ],
@@ -2288,7 +2288,7 @@
    "retry": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 253,
+     "line": 256,
      "value": "6"
     }
    ],
@@ -2299,7 +2299,7 @@
      "file": "internal/application/shop/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 253,
+     "line": 256,
      "read_only": "UNKNOWN",
      "retry": "6"
     }
@@ -2352,10 +2352,10 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED body at internal/application/shop/service.go:263",
+    "UNRESOLVED body at internal/application/shop/service.go:266",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
-    "transaction ReadOnly flag not statically decidable at internal/application/shop/service.go:253",
-    "transaction isolation not statically decidable at internal/application/shop/service.go:253"
+    "transaction ReadOnly flag not statically decidable at internal/application/shop/service.go:256",
+    "transaction isolation not statically decidable at internal/application/shop/service.go:256"
    ],
    "writes": "UNKNOWN"
   },
@@ -146003,7 +146003,7 @@
    "isolation": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 182,
+     "line": 185,
      "value": "read_committed"
     }
    ],
@@ -146011,7 +146011,7 @@
    "read_only": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 182,
+     "line": 185,
      "value": "false"
     }
    ],
@@ -146019,12 +146019,12 @@
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1406",
     "internal/application/i5/service.go:727",
-    "internal/application/shop/service.go:222"
+    "internal/application/shop/service.go:225"
    ],
    "retry": [
     {
      "file": "internal/application/shop/service.go",
-     "line": 182,
+     "line": 185,
      "value": "6"
     }
    ],
@@ -146064,7 +146064,7 @@
      "file": "internal/application/shop/service.go",
      "function": "Service.execute",
      "isolation": "read_committed",
-     "line": 182,
+     "line": 185,
      "read_only": "false",
      "retry": "6"
     }
@@ -146278,7 +146278,7 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "UNRESOLVED body at internal/application/shop/service.go:203",
+    "UNRESOLVED body at internal/application/shop/service.go:206",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED observe at internal/application/achievement/service.go:332",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122"

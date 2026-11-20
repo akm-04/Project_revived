@@ -71,8 +71,11 @@ type Achievements interface {
 }
 
 // ObjectiveFacts is the objective-fact port; a purchase that debits crystal
-// reports one SHOP_PURCHASE fact inside the settling transaction (C4).
+// reports one SHOP_PURCHASE fact inside the settling transaction (C4). The
+// mission rank 610 is prepared before the I5 700-722 suffix, as the money path
+// requires (LEAD_SEAMS_I9-11 V2 section 1).
 type ObjectiveFacts interface {
+	PrepareTx(context.Context, tx.Tx, identity.PlayerID, gen.TimedOperation) (context.Context, error)
 	RecordTx(context.Context, tx.Tx, operation.Context, ...objective.Fact) error
 }
 

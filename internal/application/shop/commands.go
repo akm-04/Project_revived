@@ -120,6 +120,10 @@ func (s Service) Buy(c context.Context, actor identity.ActorContext, request Buy
 		}
 		bill.addProduct(slot.ItemID, slot.ItemNum)
 		cost, lines := bill.finalize()
+		factContext, err := s.Facts.PrepareTx(c, sc.Tx, actor.PlayerID, sc.Operation)
+		if err != nil {
+			return nil, err
+		}
 		setBought(&row, request.Index)
 		if err = s.settle(c, sc, actor, "buy", cost, lines); err != nil {
 			return nil, err
@@ -127,7 +131,7 @@ func (s Service) Buy(c context.Context, actor identity.ActorContext, request Buy
 		if err = s.save(c, sc, row, false); err != nil {
 			return nil, err
 		}
-		if err = s.observePurchase(c, sc, actor.PlayerID, crystalDebit(cost)); err != nil {
+		if err = s.observePurchase(factContext, sc, actor.PlayerID, crystalDebit(cost)); err != nil {
 			return nil, err
 		}
 		return map[string]any{"shop_type": shop.Type, "index": request.Index, "isbuy": int64(1), "isBuy": int64(1), "buy_times": int64(1)}, nil
@@ -190,6 +194,10 @@ func (s Service) MultiBuy(c context.Context, actor identity.ActorContext, reques
 			bill.addProduct(slot.ItemID, slot.ItemNum)
 		}
 		cost, lines := bill.finalize()
+		factContext, err := s.Facts.PrepareTx(c, sc.Tx, actor.PlayerID, sc.Operation)
+		if err != nil {
+			return nil, err
+		}
 		for _, index := range request.List {
 			setBought(&row, index)
 		}
@@ -199,7 +207,7 @@ func (s Service) MultiBuy(c context.Context, actor identity.ActorContext, reques
 		if err = s.save(c, sc, row, false); err != nil {
 			return nil, err
 		}
-		if err = s.observePurchase(c, sc, actor.PlayerID, crystalDebit(cost)); err != nil {
+		if err = s.observePurchase(factContext, sc, actor.PlayerID, crystalDebit(cost)); err != nil {
 			return nil, err
 		}
 		isBuy := make([]int64, len(request.List))
