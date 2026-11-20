@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 
+	pg "gxb.local/backend/v2/internal/adapters/postgres"
+	app "gxb.local/backend/v2/internal/application/librarylocal"
+	"gxb.local/backend/v2/internal/application/realtimewakeup"
 	"gxb.local/backend/v2/internal/domain/identity"
 	library "gxb.local/backend/v2/internal/domain/librarylocal"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -87,8 +90,13 @@ func (Store) SaveMissionTx(ctx context.Context, t tx.Tx, f library.MissionFact) 
 	if t == nil || f.Validate() != nil {
 		return library.ErrInvalidFacts
 	}
-	_, e := t.Exec(ctx, `INSERT INTO player_library_partner_missions(player_id,partner_id,mission_id,process,mission_state,updated_at)VALUES($1,$2,$3,$4,$5,$6)ON CONFLICT(player_id,partner_id,mission_id)DO UPDATE SET process=EXCLUDED.process,mission_state=EXCLUDED.mission_state,updated_at=EXCLUDED.updated_at`, int64(f.PlayerID), f.PartnerID, f.MissionID, f.Process, f.MissionState, f.UpdatedAt.UTC())
-	return e
+	if _, e := t.Exec(ctx, `INSERT INTO player_library_partner_missions(player_id,partner_id,mission_id,process,mission_state,updated_at)VALUES($1,$2,$3,$4,$5,$6)ON CONFLICT(player_id,partner_id,mission_id)DO UPDATE SET process=EXCLUDED.process,mission_state=EXCLUDED.mission_state,updated_at=EXCLUDED.updated_at`, int64(f.PlayerID), f.PartnerID, f.MissionID, f.Process, f.MissionState, f.UpdatedAt.UTC()); e != nil {
+		return e
+	}
+	if f.MissionState != library.MissionAwarded {
+		return nil
+	}
+	return pg.EmitRealtimeWakeup(ctx, t, realtimewakeup.Envelope{Version: realtimewakeup.EnvelopeVersion, Route: app.MissionNoticeRoute, Ref: app.MissionNoticeRef(f.PlayerID, f.PartnerID, f.MissionID)})
 }
 
 // InsertTalkClaimTx reports whether this call inserted the once-per-player talk claim.
