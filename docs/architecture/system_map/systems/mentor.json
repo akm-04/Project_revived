@@ -187,7 +187,8 @@
  },
  "tests": {
   "integration": [
-   "playerdisplay"
+   "playerdisplay",
+   "socialactivation"
   ],
   "scenarios_naming": [
    "i9_10f_mentor.json"
@@ -196,6 +197,7 @@
    "calendar_test.go",
    "commands_test.go",
    "friendship_refusal_test.go",
+   "gift_base_info_test.go",
    "read_test.go"
   ]
  }

@@ -3,6 +3,8 @@ package socialpresentation
 import (
 	sp "gxb.local/backend/v2/internal/application/socialprojection"
 	sr "gxb.local/backend/v2/internal/application/socialrelation"
+	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/logicalserver"
 	sv "gxb.local/backend/v2/internal/projection/socialview"
 	"time"
 )
@@ -56,6 +58,11 @@ func wireInput(r sp.Result) sv.Result {
 func MapBase(r sp.Result) sv.Base {
 	out := sv.MapBase(wireInput(r))
 	out.Count = int(sr.FriendCapacity)
+	for index := range out.Friends {
+		region := int64(logicalserver.PlayerRegion(identity.PlayerID(out.Friends[index].PlayerID)))
+		out.Friends[index].Region = &region
+	}
+	out.List = out.Friends
 	for _, m := range r.PrivateMessages {
 		out.Offline = append(out.Offline, sv.PrivateMessage{PlayerID: int64(m.PlayerID), Message: m.Message, Time: m.Time})
 	}
