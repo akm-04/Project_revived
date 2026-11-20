@@ -602,6 +602,53 @@ class ReplyConsumerTests(unittest.TestCase):
         )
         self.assertEqual(waived["mids"]["532"]["paths"][0]["requirement"], "WAIVED")
 
+    def test_1829_is_split_by_the_request_sub_type(self):
+        record = self.payload["mids"]["1829"]
+        self.assertEqual("sub_type", record.get("branch_request"))
+        self.assertEqual("sub_type", next(iter(record["branches"])))
+        history = branch_requirements(self.payload, 1829, "sub_type", "2")
+        self.assertIn("arena_performance", history)
+        self.assertNotIn("player_info", history)
+        basic = branch_requirements(self.payload, 1829, "sub_type", "1")
+        self.assertIn("player_info", basic)
+        self.assertNotIn("arena_performance", basic)
+        space = branch_requirements(self.payload, 1829, "sub_type", "4")
+        self.assertIn("comment_list[]", space)
+        self.assertNotIn("player_info", space)
+
+
+class RequestBranchTests(unittest.TestCase):
+    def test_paths_join_the_reader_their_site_names(self):
+        policy = reply_consumers.REQUEST_BRANCH_POLICIES[1829]
+        sites = {
+            "player_info": {"a": reply_consumers.Site("app/model/PersonDisplay.lua", 91, "arg_3_0:updateBasicInfo", False)},
+            "show_case[]": {"b": reply_consumers.Site("app/windows/PersonDisplayWindow.lua", 698, "PersonDisplay:getShowCase return", False)},
+            "arena_performance": {"c": reply_consumers.Site("app/model/PersonDisplay.lua", 147, "arg_3_0:updateHistoryInfo", False)},
+            "comment_list": {"d": reply_consumers.Site("app/model/PersonDisplay.lua", 165, "arg_3_0:updateSpaceInfo", False)},
+            "comment_list[].content": {"e": reply_consumers.Site("app/windows/PersonDisplayWindow.lua", 1300, "return", False)},
+            "always": {"f": reply_consumers.Site("app/windows/Other.lua", 1, "arg_1_0:helper", False)},
+        }
+        unconditional, branches = reply_consumers.request_branch_sites(sites, policy)
+        self.assertIn("always", unconditional)
+        self.assertEqual({"player_info", "show_case[]"}, set(branches["1"]))
+        self.assertEqual({"arena_performance"}, set(branches["2"]))
+        self.assertEqual({"comment_list", "comment_list[].content"}, set(branches["4"]))
+
+    def test_a_waiver_applies_inside_a_request_branch(self):
+        payload = {
+            "mids": {
+                "1829": {
+                    "paths": [],
+                    "branches": {"sub_type": {"1": {"status": "CHECKED", "paths": [{"path": "player_info", "requirement": "REQUIRED"}]}}},
+                }
+            }
+        }
+        waived = reply_consumers.apply_waivers(
+            {"waivers": [{"mid": 1829, "path": "player_info", "reason": "guarded", "client": "app/model/PersonDisplay.lua:91"}]},
+            payload,
+        )
+        self.assertEqual(waived["mids"]["1829"]["branches"]["sub_type"]["1"]["paths"][0]["requirement"], "WAIVED")
+
 
 if __name__ == "__main__":
     unittest.main()

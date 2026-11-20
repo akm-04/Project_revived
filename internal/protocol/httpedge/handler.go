@@ -287,7 +287,7 @@ func (h Handler) serve(w http.ResponseWriter, r *http.Request, record *observabi
 	if record.Cause == nil && status >= http.StatusInternalServerError && hasPublicCode {
 		record.Cause = errors.New(publicCode)
 	}
-	h.checkReplyConformance(decoded.MID, status, resp)
+	h.checkReplyConformance(decoded.MID, decoded.Params, status, resp)
 	for k, v := range resp.Headers {
 		w.Header().Set(k, v)
 	}
@@ -317,7 +317,7 @@ func (h Handler) serve(w http.ResponseWriter, r *http.Request, record *observabi
 // checkReplyConformance reports, but never changes, a successful Body/JSON reply
 // that omits a REQUIRED client path (A-079). A Raw reply was checked when its
 // committed bytes were produced, and failures carry no client reply obligation.
-func (h Handler) checkReplyConformance(mid uint16, status int, response Response) {
+func (h Handler) checkReplyConformance(mid uint16, request map[string]any, status int, response Response) {
 	if h.Conformance == nil || response.Raw != nil || !successReply(status, response) {
 		return
 	}
@@ -325,7 +325,14 @@ func (h Handler) checkReplyConformance(mid uint16, status int, response Response
 	if response.JSON != nil {
 		reply = response.JSON
 	}
-	for _, path := range h.Conformance.Check(mid, reply) {
+	checker, requestAware := h.Conformance.(interface {
+		CheckRequest(mid uint16, request, reply any) []string
+	})
+	violations := h.Conformance.Check(mid, reply)
+	if requestAware {
+		violations = checker.CheckRequest(mid, request, reply)
+	}
+	for _, path := range violations {
 		log.Printf("reply_conformance_violation mid=%d path=%s", mid, path)
 		h.counter(replyConformanceViolations, 1)
 	}

@@ -151,6 +151,35 @@ class BranchPolicy:
 BRANCH_POLICIES = {
     234: BranchPolicy(reply_key="table_id", request_keys=("activity_id", "table_id")),
 }
+
+# A MID whose client dispatches its reply reader on a REQUEST value. The value
+# is not in the reply, so the edge selects the obligation set from the decoded
+# request. Each reader method below is a branch of PersonDisplay.lua:23-39
+# (updateInfo), which the 1829 request callback calls with the request's
+# sub_type; the getters return fields stored by that reader (A-195/A-202).
+@dataclass(frozen=True)
+class RequestBranchPolicy:
+    request_key: str
+    readers: dict[str, str]
+
+
+REQUEST_BRANCH_POLICIES = {
+    1829: RequestBranchPolicy(
+        request_key="sub_type",
+        readers={
+            "updateBasicInfo": "1", "getBasicInfo": "1", "getHideTypes": "1",
+            "getShowCase": "1", "getShowTypes": "1", "getPraiseNum": "1",
+            "checkIsRobot": "1", "getIsHasPraise": "1", "checkYouIsInBlackList": "1",
+            "getIntroduce": "1", "getLastPlayerID": "1", "getPlayerID": "1",
+            "getPlayerName": "1", "createBasicMsg": "1", "createGuildText": "1",
+            "initPlayerAvatar": "1", "initPlayerTitle": "1", "setRegion": "1",
+            "updateHistoryInfo": "2", "getArena": "2", "getRegionArena": "2",
+            "getSuperArena": "2",
+            "updateRecordInfo": "3",
+            "updateSpaceInfo": "4", "getCommentInfos": "4",
+        },
+    ),
+}
 # A MID consumed by more than one Activity<table_id> window that needs no branch
 # split, with the evidence. branch_coverage_problems fails on a new split MID.
 BRANCH_POLICY_EXEMPTIONS = {
@@ -2074,6 +2103,54 @@ def branch_record(sites_by_path: dict, policy: BranchPolicy) -> dict:
     return {policy.reply_key: values}
 
 
+def _reader_name(via: str) -> str | None:
+    name = via.rsplit(":", 1)[-1].strip()
+    if name.endswith(" return"):
+        name = name[: -len(" return")]
+    return name
+
+
+def _branch_ancestors(path: str) -> list[str]:
+    plain = path.replace("[]", "")
+    segments = plain.split(".")
+    ancestors = [".".join(segments[:index]) for index in range(len(segments) - 1, 0, -1)]
+    if plain != path:
+        ancestors.insert(0, plain)
+    return ancestors
+
+
+def request_branch_sites(sites_by_path: dict, policy: RequestBranchPolicy) -> tuple[dict, dict]:
+    """Split extracted paths by the request value that selects their reader.
+
+    A path read by exactly one value's reader belongs to that branch; a path
+    under a list or field read by one reader inherits it; every other path is
+    unconditional. The request carries the value, so the checker selects it
+    (never the reply, which has no discriminator here)."""
+    direct: dict[str, str] = {}
+    for path, sites in sites_by_path.items():
+        values = {
+            value
+            for site in sites.values()
+            for name in (_reader_name(site.via),)
+            if name is not None
+            for value in (policy.readers.get(name),)
+            if value is not None
+        }
+        if len(values) == 1:
+            direct[path] = next(iter(values))
+    unconditional: dict = {}
+    branches: dict[str, dict] = {value: {} for value in sorted(set(policy.readers.values()))}
+    for path, sites in sites_by_path.items():
+        value = direct.get(path)
+        if value is None:
+            value = next((direct[ancestor] for ancestor in _branch_ancestors(path) if ancestor in direct), None)
+        if value is None:
+            unconditional[path] = sites
+        else:
+            branches[value][path] = sites
+    return unconditional, branches
+
+
 def build(blobs: dict[str, str], collapse: bool = True) -> dict:
     extractor = Extractor(blobs)
     extractor.run()
@@ -2081,11 +2158,22 @@ def build(blobs: dict[str, str], collapse: bool = True) -> dict:
     for mid, callbacks in sorted(extractor.callbacks.items(), key=lambda item: int(item[0])):
         sites_by_path = extractor.paths.get(mid, {})
         policy = BRANCH_POLICIES.get(int(mid))
+        request_policy = REQUEST_BRANCH_POLICIES.get(int(mid))
         record = {
             "name": mid_name(extractor, int(mid)),
             "callbacks": sorted(callbacks, key=lambda entry: (entry["file"], entry["line"], entry["status"])),
         }
-        if policy is None:
+        if request_policy is not None:
+            unconditional, branch_sites = request_branch_sites(sites_by_path, request_policy)
+            record["paths"] = site_entries(unconditional)
+            record["branch_request"] = request_policy.request_key
+            record["branches"] = {
+                request_policy.request_key: {
+                    value: {"status": "CHECKED", "paths": site_entries(paths)}
+                    for value, paths in branch_sites.items()
+                }
+            }
+        elif policy is None:
             record["paths"] = site_entries(sites_by_path)
         else:
             record["paths"] = site_entries(split_branches(sites_by_path)[0])
@@ -2162,7 +2250,7 @@ def collapse_sites(payload: dict) -> dict:
 
 def row_with_optional_status(record: dict, paths: list, callbacks=None) -> dict:
     row = {"name": record["name"], "callbacks": record["callbacks"] if callbacks is None else callbacks, "paths": paths}
-    for field in ("status", "reason"):
+    for field in ("status", "reason", "branch_request"):
         if field in record:
             row[field] = record[field]
     return row
@@ -2310,7 +2398,8 @@ def validate_waivers(waivers: dict, payload: dict, blobs: dict[str, str]) -> lis
     known = {
         (int(mid), path_name(entry))
         for mid, record in payload.get("mids", {}).items()
-        for entry in record.get("paths", [])
+        for entries in [record.get("paths", []), *branch_path_lists(record)]
+        for entry in entries
         if path_requirement(entry) == "REQUIRED"
     }
     for waiver in waivers.get("waivers", []):
@@ -2346,19 +2435,20 @@ def apply_waivers(waivers: dict, payload: dict) -> dict:
         record = payload.get("mids", {}).get(str(waiver["mid"]))
         if record is None:
             continue
-        for entry in record.get("paths", []):
-            if path_name(entry) != waiver["path"] or path_requirement(entry) != "REQUIRED":
-                continue
-            applied = {"reason": waiver["reason"], "client": waiver["client"]}
-            if isinstance(entry, list):
-                entry[1] = REQUIREMENT_CODES["WAIVED"]
-                if len(entry) == 3:
-                    entry.append(applied)
+        for entries in [record.get("paths", []), *branch_path_lists(record)]:
+            for entry in entries:
+                if path_name(entry) != waiver["path"] or path_requirement(entry) != "REQUIRED":
+                    continue
+                applied = {"reason": waiver["reason"], "client": waiver["client"]}
+                if isinstance(entry, list):
+                    entry[1] = REQUIREMENT_CODES["WAIVED"]
+                    if len(entry) == 3:
+                        entry.append(applied)
+                    else:
+                        entry[3] = applied
                 else:
-                    entry[3] = applied
-            else:
-                entry["requirement"] = "WAIVED"
-                entry["waiver"] = applied
+                    entry["requirement"] = "WAIVED"
+                    entry["waiver"] = applied
     return payload
 
 
