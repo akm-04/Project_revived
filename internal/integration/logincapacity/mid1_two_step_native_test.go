@@ -164,7 +164,7 @@ func twoStepActor(t *testing.T, p *postgres.Pool, result appboot.MID1Result) ide
 func TestI9TutorialFreshLoginClearsOnOpeningProgressAndStartsAtTheSkillCap(t *testing.T) {
 	p := twoStepPool(t, 8)
 	revision := twoStepContentRevision(t, p)
-	fixture := seedTwoStepAccount(t, p, twoStepUUID(t, "33333333-3333-4333-8333-333333333301"), twoStepUUID(t, "33333333-3333-4333-8333-333333333302"), "33333333-3333-4333-8333-333333333303")
+	fixture := seedTwoStepAccount(t, p, twoStepUUID(t, "66666666-6666-4666-8666-666666666601"), twoStepUUID(t, "66666666-6666-4666-8666-666666666602"), "66666666-6666-4666-8666-666666666603")
 	service := twoStepBirthService(t, p, revision)
 	first, err := service.MID1(context.Background(), appboot.RuntimeMID1Request{Credentials: fixture.credentials, Region: 1, Operation: fixture.operation})
 	if err != nil {
@@ -182,7 +182,7 @@ func TestI9TutorialFreshLoginClearsOnOpeningProgressAndStartsAtTheSkillCap(t *te
 	if err := i5.SaveStory(context.Background(), actor, 10002, 3, 100198, fixture.operation); err != nil {
 		t.Fatal(err)
 	}
-	again, err := service.MID1(context.Background(), appboot.RuntimeMID1Request{Credentials: fixture.credentials, Region: 1, Operation: twoStepOperation(t, "33333333-3333-4333-8333-333333333304")})
+	again, err := service.MID1(context.Background(), appboot.RuntimeMID1Request{Credentials: fixture.credentials, Region: 1, Operation: twoStepOperation(t, "66666666-6666-4666-8666-666666666604")})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -194,7 +194,7 @@ func TestI9TutorialFreshLoginClearsOnOpeningProgressAndStartsAtTheSkillCap(t *te
 		t.Fatalf("relogin MID1 detail 17 = %#v", again.Detail["17"])
 	}
 
-	opening := seedTwoStepAccount(t, p, twoStepUUID(t, "44444444-4444-4444-8444-444444444401"), twoStepUUID(t, "44444444-4444-4444-8444-444444444402"), "44444444-4444-4444-8444-444444444403")
+	opening := seedTwoStepAccount(t, p, twoStepUUID(t, "77777777-7777-4777-8777-777777777701"), twoStepUUID(t, "77777777-7777-4777-8777-777777777702"), "77777777-7777-4777-8777-777777777703")
 	created, err := service.MID1(context.Background(), appboot.RuntimeMID1Request{Credentials: opening.credentials, Region: 1, Operation: opening.operation})
 	if err != nil {
 		t.Fatal(err)
@@ -203,7 +203,7 @@ func TestI9TutorialFreshLoginClearsOnOpeningProgressAndStartsAtTheSkillCap(t *te
 	if err := i5.SaveStory(context.Background(), openingActor, 0, 0, player.GuideOpeningDoneID, opening.operation); err != nil {
 		t.Fatal(err)
 	}
-	relogged, err := service.MID1(context.Background(), appboot.RuntimeMID1Request{Credentials: opening.credentials, Region: 1, Operation: twoStepOperation(t, "44444444-4444-4444-8444-444444444404")})
+	relogged, err := service.MID1(context.Background(), appboot.RuntimeMID1Request{Credentials: opening.credentials, Region: 1, Operation: twoStepOperation(t, "77777777-7777-4777-8777-777777777704")})
 	if err != nil {
 		t.Fatal(err)
 	}
