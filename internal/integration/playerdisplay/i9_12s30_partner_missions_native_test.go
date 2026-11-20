@@ -14,6 +14,7 @@ import (
 	"gxb.local/backend/v2/internal/application/realtimewakeup"
 	"gxb.local/backend/v2/internal/domain/identity"
 	lib "gxb.local/backend/v2/internal/domain/librarylocal"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 )
 
 type missionWakeupListener struct {
@@ -97,6 +98,7 @@ func TestI9_12S30PartnerMissionsDefaultAndNotice(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
+	replyconformance.Check(t, 836, body)
 	missions := partnerMissions(t, body, 1)
 	assertMissionRow(t, missions, 0, 1001, 0, lib.MissionProceed)
 	assertMissionRow(t, missions, 1, 1002, 0, lib.MissionProceed)

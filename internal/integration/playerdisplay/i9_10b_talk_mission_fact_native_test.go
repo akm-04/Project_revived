@@ -23,6 +23,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 	"gxb.local/backend/v2/internal/protocol/wire"
 )
 
@@ -123,6 +124,7 @@ func TestI9_10B841MissionReadAndGiftAdvance(t *testing.T) {
 	if response.HTTPStatus != 200 {
 		t.Fatalf("841 status %d body %+v", response.HTTPStatus, response.Body)
 	}
+	replyconformance.Check(t, 841, response.Body)
 	missions, ok := response.Body["mission_list"].([]any)
 	if !ok || len(missions) != 3 {
 		t.Fatalf("zero-favor mission_list %T %+v", response.Body["mission_list"], response.Body["mission_list"])
