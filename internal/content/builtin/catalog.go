@@ -1635,6 +1635,10 @@ func validateCatalog(c *Catalog) error {
 			if gate.AnnouncementCapability != "PET_STARTER_CA3" || gate.RequiredLevel == nil || *gate.RequiredLevel != 40 || gate.GateKind != "PURE_LEVEL" {
 				return errors.New("builtin content: Pet Function 38 announcement/gate drift")
 			}
+		} else if gate.FunctionID == 33 {
+			if gate.AnnouncementCapability != "CAMPAIGN_FIRST_CLEAR:100007" || gate.RequiredLevel == nil || *gate.RequiredLevel != 7 || gate.GateKind != "PURE_LEVEL" {
+				return errors.New("builtin content: Skill Function 33 announcement/gate drift")
+			}
 		} else if gate.AnnouncementCapability != "NONE" {
 			return errors.New("builtin content: unexpected function announcement capability")
 		}

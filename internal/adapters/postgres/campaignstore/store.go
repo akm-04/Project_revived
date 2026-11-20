@@ -18,6 +18,19 @@ import (
 
 type Store struct{}
 
+// TutorialMilestones is Campaign's typed observation of the durable tutorial
+// milestone. I5 owns the announcement rule; Campaign owns the clear fact.
+type TutorialMilestones struct{}
+
+func (TutorialMilestones) CampaignFirstClearCommittedTx(c context.Context, q tx.Queryer, p identity.PlayerID, node int64) (bool, error) {
+	if q == nil || !p.Valid() || node <= 0 {
+		return false, errors.New("invalid campaign first-clear read")
+	}
+	var reached bool
+	err := q.QueryRow(c, `SELECT EXISTS(SELECT 1 FROM campaign_nodes WHERE player_id=$1 AND campaign_id=$2 AND first_clear_day IS NOT NULL)`, int64(p), node).Scan(&reached)
+	return reached, err
+}
+
 type nodeRow struct {
 	FirstClearDay   *int64 `json:"first_clear_day"`
 	ClearCountFloor int64  `json:"clear_count_floor"`

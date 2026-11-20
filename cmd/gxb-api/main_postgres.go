@@ -255,7 +255,7 @@ func main() {
 	i5db := i5store.Store{Queryer: pool, StackUsage: appdorm.FurnitureUsage{Owner: dormstore.Store{}, Content: contentstore.Store{Queryer: pool}}}
 	contentDB := contentstore.Store{Queryer: pool}
 	privileges := commerceprivilege.Provider{Store: commerceprivilegestore.Store{}, Content: contentDB}
-	i5svc := appi5.Service{Runner: runner, Store: i5db, Content: contentDB, Privileges: privileges, Functions: appi5.LevelFunctionAnnouncements{}, Directory: i4store.DirectoryLevelProjection{}, Backpack: i5db, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, RedeemSecret: redeemSecret}
+	i5svc := appi5.Service{Runner: runner, Store: i5db, Content: contentDB, Privileges: privileges, Functions: appi5.LevelFunctionAnnouncements{}, CampaignClears: campaignstore.TutorialMilestones{}, Directory: i4store.DirectoryLevelProjection{}, Backpack: i5db, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, RedeemSecret: redeemSecret}
 	if e := i5svc.ValidateStartup(); e != nil {
 		log.Fatalf("I5 startup: %v", e)
 	}

@@ -179,6 +179,7 @@ type Service struct {
 	Content            ContentRuntime
 	Privileges         PrivilegeSnapshotProvider
 	Functions          FunctionAnnouncementProvider
+	CampaignClears     CampaignFirstClearReader
 	CharacterFunctions CharacterFunctionReader
 	ServerLevels       ServerLevelReader
 	Directory          DirectoryLevelProjectionPort
@@ -243,6 +244,9 @@ type GrantTxOptions struct {
 	// SystemSettlement marks a grant the owner did not request while present,
 	// so overflow mail waits for the owner's login to receive an expiry.
 	SystemSettlement bool
+	// CommittedCampaignFirstClears names Campaign milestone nodes whose first
+	// clear commits in this same transaction (the caller owns that proof).
+	CommittedCampaignFirstClears []int64
 }
 
 // SettleGrantTx settles one semantic Grant inside a caller-owned Wave-A
@@ -544,6 +548,10 @@ func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identi
 				return GrantResult{}, err
 			}
 			eligible, err := pureLevelEligibility(*pf.FunctionPolicy, plan.PlayerID, transition.After.Level, now)
+			if err != nil {
+				return GrantResult{}, err
+			}
+			eligible, err = s.filterMilestoneEligibilityTx(ctx, t, plan.PlayerID, *pf.FunctionPolicy, eligible, opts.CommittedCampaignFirstClears)
 			if err != nil {
 				return GrantResult{}, err
 			}

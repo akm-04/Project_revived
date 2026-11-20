@@ -887,7 +887,7 @@ func (s Mode) reward(c context.Context, sc gen.TimedScope, a identity.ActorConte
 	level := profile.Level
 	if len(lines) > 0 {
 		plan := grant.Plan{PlayerID: a.PlayerID, Source: grant.SourceIdentity{Domain: "campaign", Operation: "result", BusinessKey: "campaign:attempt:" + attempt, Occurrence: current.ID.String(), PolicyVersion: d.ContractID}, Lines: lines}
-		granted, err := s.Grants.SettleGrantTx(c, sc.Tx, a, plan, current, i5.GrantTxOptions{AllowOverflowMail: true})
+		granted, err := s.Grants.SettleGrantTx(c, sc.Tx, a, plan, current, i5.GrantTxOptions{AllowOverflowMail: true, CommittedCampaignFirstClears: campaignFirstClears(node, outcome)})
 		if err != nil {
 			return err
 		}
@@ -919,6 +919,13 @@ func (s Mode) reward(c context.Context, sc gen.TimedScope, a identity.ActorConte
 		}
 	}
 	return nil
+}
+
+func campaignFirstClears(node d.Node, outcome d.Outcome) []int64 {
+	if node.Type != d.Normal || !outcome.FirstClear {
+		return nil
+	}
+	return []int64{node.ID}
 }
 
 func (Mode) Name() string     { return "i9-3a.campaign-world" }

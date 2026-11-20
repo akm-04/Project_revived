@@ -56,6 +56,13 @@ type FunctionGatePolicy struct {
 	Gates    []FunctionGate
 }
 
+// CampaignFirstClearReader is Campaign's typed observation of the durable
+// tutorial milestone. A content gate names the node; I5 never reads Campaign
+// tables directly.
+type CampaignFirstClearReader interface {
+	CampaignFirstClearCommittedTx(context.Context, tx.Queryer, identity.PlayerID, int64) (bool, error)
+}
+
 type PetStarterPolicy struct {
 	StarterEggItemID int64
 }
