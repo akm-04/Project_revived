@@ -120,7 +120,9 @@ type scenario struct {
 	ExpectClientLogAbsent []string `json:"expect_client_log_absent"`
 }
 
-const closeFunctionNotice = "lua:local m=xyd.WindowManager.get() if m:getWindow('function_show') then m:closeWindow('function_show') end"
+// closeFunctionNotice also closes the daily sign_in and alert_award popups a provisioned account meets in the lobby
+// since the opening flag survives relogin (T34 S31); before that the replayed opening hid them.
+const closeFunctionNotice = "lua:local m=xyd.WindowManager.get() for _,n in ipairs({'function_show','alert_award','sign_in'}) do if m:getWindow(n) then m:closeWindow(n) end end"
 
 type run struct {
 	source, assets, updateTree, device, origin, databaseURL, reportPath string
