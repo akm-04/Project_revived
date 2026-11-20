@@ -13,7 +13,7 @@ need(Path('internal/domain/realtimeauth/authority.go'),'WORLD','SERVICE','GUILD'
 need(Path('internal/adapters/stockruntime/realtime_server.go'),'handshakeDeadline','MIDSocketHeartbeat','validateLive','ConnectionRegistry')
 need(Path('internal/adapters/stockruntime/realtime_registry.go'),'type ConnectionRegistry struct','func NewConnectionRegistry() *ConnectionRegistry')
 need(Path('internal/adapters/stockruntime/realtime_policy.go'),'StockTCPLoginTimeout','StockHeartbeatInterval','ClientIdleTimeout','AuthQueryTimeout','LivenessQueryTimeout')
-need(Path('internal/adapters/stockruntime/http_dispatchers.go'),'case 18:','case 1:','error_code": int64(20018)','room_id','log_url','server_time','story_type')
+need(Path('internal/adapters/stockruntime/http_dispatchers.go'),'case 18:','case 1:','refusalWithBody(int64(20018)','room_id','log_url','server_time','story_type')
 need(Path('internal/adapters/postgres/i4store/bootstrap_runtime.go'),'tx.Serializable','MID1Fingerprint(session.ID, req.Region)','generation:%d','FindTx','PutTx','revokeContextCredentials')
 need(Path('internal/adapters/postgres/i4store/realtime_authority.go'),'ResolveGameplayBearer','ValidateActor','validateActorLiveness')
 need(Path('internal/projection/lobby/shapes.go'),'EmbeddedMID1Records','1304','is_enroll')

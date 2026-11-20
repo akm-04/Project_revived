@@ -29,7 +29,7 @@ for n in [279,2484,535,774,1412,1570,2515]:
     if f'{n}:' not in mids.replace(' ', ''):errs.append(f'zlib MID {n} missing')
 for token in ['url.ParseQuery','exactly one payload field required','zlib.NewReader','spoolUploadPart','conflicting source-shaped duplicate field','MID1844','form_name must match file part name']:
     if token not in httpd:errs.append('HTTP boundary missing '+token)
-for token in ['StatusNotFound','StatusNotImplemented','StatusServiceUnavailable','CatalogRevision','recordObservation']:
+for token in ['case wire.ErrUnknownMID, wire.ErrUnimplemented, wire.ErrForbidden:','return http.StatusConflict, edgeRefusalCode','StatusServiceUnavailable','CatalogRevision','recordObservation']:
     if token not in handler:errs.append('HTTP failure/dispatch contract missing '+token)
 for token in ['case 0x00','case 0x06','case 0x09','case 0x0a','marker 0x%02x','only dynamic anonymous object','utf8.ValidString']:
     if token not in amf:errs.append('AMF profile missing '+token)
