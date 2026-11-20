@@ -163,6 +163,7 @@
  },
  "tests": {
   "integration": [
+   "logincapacity",
    "missions",
    "playerdisplay",
    "socialprojection"

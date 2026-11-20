@@ -1566,6 +1566,13 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         announcement_capability = "PET_STARTER_CA3" if fid == 38 else "NONE"
         if fid == 38 and (gate_kind != "PURE_LEVEL" or required_level != 40):
             raise CompileError(f"Pet Function 38 gate drifted: kind={gate_kind} level={required_level} raw={raw_level!r}")
+        if fid == 33:
+            # Function 33 (Skill Upgrade) waits for the tutorial's first Normal
+            # Campaign clear. The node id is content so an operator content
+            # revision can move the milestone without a server build.
+            if gate_kind != "PURE_LEVEL" or required_level != 7:
+                raise CompileError(f"Skill Function 33 gate drifted: kind={gate_kind} level={required_level} raw={raw_level!r}")
+            announcement_capability = "CAMPAIGN_FIRST_CLEAR:100007"
         function_gates.append({
             "announcement_capability": announcement_capability,
             "function_id": fid,

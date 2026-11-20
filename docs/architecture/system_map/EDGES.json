@@ -75,6 +75,9 @@
    "achievement": [
     "*MainChainStarsTx"
    ],
+   "i5": [
+    "*CampaignFirstClearCommittedTx"
+   ],
    "missioninputs": [
     "*ReadTx"
    ],
@@ -4526,6 +4529,9 @@
   "i5": {
    "adventure": [
     "*ObserveTx"
+   ],
+   "campaign": [
+    "*CampaignFirstClearCommittedTx"
    ],
    "characterhero": [
     "*ApplyAwakeningHeroLockedTx",
