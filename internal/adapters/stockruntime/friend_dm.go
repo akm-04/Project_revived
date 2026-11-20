@@ -29,7 +29,24 @@ type FriendDMDispatcher struct {
 	Authority realtimeauth.GameplayAuthorityPort
 	Service   FriendDMSender
 	Emitter   FriendDMEmitter
-	RoomChat  RoomChatSender
+	// RoomChat routes ILLUSION, OccultRoomChat OCCULT and AdventureRoomChat
+	// ADVENTURE_ILLUSION/ADVENTURE_DEFENSE to their room owners.
+	RoomChat          RoomChatSender
+	OccultRoomChat    RoomChatSender
+	AdventureRoomChat RoomChatSender
+}
+
+// roomChat routes one room-scoped selectType to its owner. A permanent refusal
+// (no room, not a member, roomID mismatch) is 409 through refusalOrTransient.
+func (d FriendDMDispatcher) roomChat(c context.Context, a identity.ActorContext, recipient int64, message friendmessage.Message, r httpedge.DispatchRequest, sender RoomChatSender) httpedge.Response {
+	if sender == nil {
+		return failureReply(defect(nil))
+	}
+	if e := sender.SendRoomChat(c, a, identity.PlayerID(recipient), message, r.Envelope.Operation); e != nil {
+		return refusalOrTransient(e)
+	}
+	// The stock 515 callback reads server_time for the sender's own line.
+	return httpedge.Response{HTTPStatus: 200, Body: map[string]any{"server_time": r.Envelope.ReceivedAt.Unix()}}
 }
 
 func (d FriendDMDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequest) httpedge.Response {
@@ -79,16 +96,15 @@ func (d FriendDMDispatcher) Dispatch(c context.Context, r httpedge.DispatchReque
 	if e != nil {
 		return bad()
 	}
-	if msg.SelectType == friendmessage.SelectIllusion {
-		if d.RoomChat == nil {
-			return failureReply(defect(nil))
-		}
-		if e = d.RoomChat.SendRoomChat(c, a, identity.PlayerID(pid), msg, r.Envelope.Operation); e != nil {
-			return refusalOrTransient(e)
-		}
-		return httpedge.Response{HTTPStatus: 200, Body: map[string]any{}}
-	}
-	if msg.SelectType != friendmessage.SelectSocialSystem {
+	switch msg.SelectType {
+	case friendmessage.SelectIllusion:
+		return d.roomChat(c, a, pid, msg, r, d.RoomChat)
+	case friendmessage.SelectOccult:
+		return d.roomChat(c, a, pid, msg, r, d.OccultRoomChat)
+	case friendmessage.SelectAdventureIllusion, friendmessage.SelectAdventureDefense:
+		return d.roomChat(c, a, pid, msg, r, d.AdventureRoomChat)
+	case friendmessage.SelectSocialSystem:
+	default:
 		return bad()
 	}
 	if d.Service == nil || d.Emitter == nil {

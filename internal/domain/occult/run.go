@@ -3,6 +3,8 @@ package occult
 import (
 	"encoding/json"
 	"strconv"
+
+	"gxb.local/backend/v2/internal/domain/sharedroom"
 )
 
 const (
@@ -44,6 +46,7 @@ type HeroStatus struct {
 // until the challenge starts. hero_status is the HP authority for the next
 // stage; a result can only lower it.
 type RunState struct {
+	sharedroom.ChatRing
 	ChapterID          int64                            `json:"chapter_id"`
 	CampaignType       int64                            `json:"campaign_type"`
 	StartedAt          int64                            `json:"started_at"`

@@ -227,6 +227,16 @@
  "name": "adventure",
  "pushes": [
   {
+   "file": "internal/adapters/stockruntime/adventure_room_notice.go",
+   "kind": "direct",
+   "line": 41,
+   "mid": 516,
+   "roles": [
+    "Role",
+    "World"
+   ]
+  },
+  {
    "file": "internal/adapters/stockruntime/adventure_notice.go",
    "kind": "notice",
    "line": 67,
@@ -253,7 +263,7 @@
   {
    "file": "internal/adapters/stockruntime/adventure_room_notice.go",
    "kind": "notice",
-   "line": 40,
+   "line": 44,
    "namespace": "rt.NoticeNamespaceGeneric",
    "notice_type": 32,
    "parent_mid": 36854,

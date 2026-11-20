@@ -20,7 +20,36 @@ const (
 	// MaxSeats matches the combat member limit; raise both together.
 	MaxSeats        = 8
 	MaxFamilyLength = 64
+	// ChatHistoryLimit bounds the chat ring a family keeps in its room payload
+	// for the realtime pusher; older lines are already delivered or lost.
+	ChatHistoryLimit = 24
 )
+
+// ChatMessage is one delivered room-chat line. Message is the canonical
+// CHAT_TO_FRIEND body, including selectType so the recipient's window accepts it.
+type ChatMessage struct {
+	Serial     int64   `json:"serial"`
+	Sender     int64   `json:"sender"`
+	Recipients []int64 `json:"recipients"`
+	Message    string  `json:"message"`
+	At         int64   `json:"at"`
+}
+
+// ChatRing is the family payload's bounded room-chat history: AddChat stamps
+// the next serial and drops the oldest line past the ring limit.
+type ChatRing struct {
+	ChatSerial int64         `json:"chat_serial,omitempty"`
+	Chats      []ChatMessage `json:"chats,omitempty"`
+}
+
+func (r *ChatRing) AddChat(message ChatMessage) {
+	r.ChatSerial++
+	message.Serial = r.ChatSerial
+	r.Chats = append(r.Chats, message)
+	if len(r.Chats) > ChatHistoryLimit {
+		r.Chats = r.Chats[len(r.Chats)-ChatHistoryLimit:]
+	}
+}
 
 var (
 	ErrInvalid       = errors.New("shared room: invalid room")

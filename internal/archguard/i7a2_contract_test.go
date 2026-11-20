@@ -178,7 +178,7 @@ var allowedRegistrations = map[string]allowedRegistration{
 	"rt.DirectRegistration{MID:mids.MIDIllusionNotice,Validate:ValidateIllusionRoomNotice}":                                                                                     {dormantRegistration, 1},
 	"DirectRegistration{MID:mids.MIDChatMessage,Validate:ValidateChannelChat}":                                                                                                  {dormantRegistration, 1},
 	"rt.DirectRegistration{MID:mids.MIDChatFromPlayer,Validate:rt.ValidateGeneralDM}":                                                                                           {generalDMRegistration, 1},
-	"rt.DirectRegistration{MID:mids.MIDChatFromFriend,Validate:rt.ValidateFriendDM}":                                                                                            {friendDMRegistration, 3},
+	"rt.DirectRegistration{MID:mids.MIDChatFromFriend,Validate:rt.ValidateFriendDM}":                                                                                            {friendDMRegistration, 5},
 	"rt.DirectRegistration{MID:mids.MIDForceReload,Validate:ValidateSocialReload}":                                                                                              {socialRegistration, 3},
 }
 
