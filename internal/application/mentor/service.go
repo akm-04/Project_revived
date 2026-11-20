@@ -27,6 +27,10 @@ const MentorPolicyVersion = domain.MinimumLevelGapPolicy
 // qualification both parties of an application must hold.
 const MentorFunctionID int64 = 50
 
+// MissingTargetCode is message.lua 20004 "This Player Doesn't Exist", the stock
+// row for an application target that has no player root or profile.
+const MissingTargetCode int64 = 20004
+
 // FindingScanLimit and FindingResultLimit bound the find list. The client misc
 // facts give 20 results and a 100 range; PRIVATE_POLICY D508 uses the range as
 // the per-request candidate scan because the stock server's paging is UNKNOWN.

@@ -17897,6 +17897,11 @@
      "value": "repeatable_read"
     },
     {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
+    },
+    {
      "file": "internal/application/socialdismiss/service.go",
      "line": 49,
      "value": "serializable"
@@ -17948,6 +17953,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "true"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -18003,6 +18013,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -18098,6 +18113,14 @@
      "line": 41,
      "read_only": "true",
      "retry": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "function": "Service.run",
+     "isolation": "UNKNOWN",
+     "line": 132,
+     "read_only": "UNKNOWN",
+     "retry": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -18412,6 +18435,11 @@
     },
     {
      "file": "internal/adapters/postgres/mentorstore/relationships.go",
+     "line": 82,
+     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM mentor_relations r WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/mentorstore/relationships.go",
      "line": 93,
      "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM (SELECT * FROM mentor_relations WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL ORDER BY mentor_id,student_id,relation_id FOR UPDATE) r"
     },
@@ -18473,12 +18501,15 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
+    "UNRESOLVED body at internal/application/mentor/service.go:133",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
-    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
+    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
    ],
    "writes": "state"
   },
@@ -18494,6 +18525,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "repeatable_read"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -18549,6 +18585,11 @@
      "value": "true"
     },
     {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
+    },
+    {
      "file": "internal/application/socialdismiss/service.go",
      "line": 49,
      "value": "false"
@@ -18602,6 +18643,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -18697,6 +18743,14 @@
      "line": 41,
      "read_only": "true",
      "retry": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "function": "Service.run",
+     "isolation": "UNKNOWN",
+     "line": 132,
+     "read_only": "UNKNOWN",
+     "retry": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -19011,6 +19065,11 @@
     },
     {
      "file": "internal/adapters/postgres/mentorstore/relationships.go",
+     "line": 82,
+     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM mentor_relations r WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/mentorstore/relationships.go",
      "line": 93,
      "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM (SELECT * FROM mentor_relations WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL ORDER BY mentor_id,student_id,relation_id FOR UPDATE) r"
     },
@@ -19072,12 +19131,15 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
+    "UNRESOLVED body at internal/application/mentor/service.go:133",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
-    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
+    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
    ],
    "writes": "state"
   },
@@ -19093,6 +19155,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "repeatable_read"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -19148,6 +19215,11 @@
      "value": "true"
     },
     {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
+    },
+    {
      "file": "internal/application/socialdismiss/service.go",
      "line": 49,
      "value": "false"
@@ -19201,6 +19273,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -19296,6 +19373,14 @@
      "line": 41,
      "read_only": "true",
      "retry": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "function": "Service.run",
+     "isolation": "UNKNOWN",
+     "line": 132,
+     "read_only": "UNKNOWN",
+     "retry": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -19610,6 +19695,11 @@
     },
     {
      "file": "internal/adapters/postgres/mentorstore/relationships.go",
+     "line": 82,
+     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM mentor_relations r WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/mentorstore/relationships.go",
      "line": 93,
      "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM (SELECT * FROM mentor_relations WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL ORDER BY mentor_id,student_id,relation_id FOR UPDATE) r"
     },
@@ -19671,12 +19761,15 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
+    "UNRESOLVED body at internal/application/mentor/service.go:133",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
-    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
+    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
    ],
    "writes": "state"
   },
@@ -19692,6 +19785,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "repeatable_read"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -19747,6 +19845,11 @@
      "value": "true"
     },
     {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
+    },
+    {
      "file": "internal/application/socialdismiss/service.go",
      "line": 49,
      "value": "false"
@@ -19800,6 +19903,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -19895,6 +20003,14 @@
      "line": 41,
      "read_only": "true",
      "retry": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "function": "Service.run",
+     "isolation": "UNKNOWN",
+     "line": 132,
+     "read_only": "UNKNOWN",
+     "retry": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -20209,6 +20325,11 @@
     },
     {
      "file": "internal/adapters/postgres/mentorstore/relationships.go",
+     "line": 82,
+     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM mentor_relations r WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/mentorstore/relationships.go",
      "line": 93,
      "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM (SELECT * FROM mentor_relations WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL ORDER BY mentor_id,student_id,relation_id FOR UPDATE) r"
     },
@@ -20270,12 +20391,15 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
+    "UNRESOLVED body at internal/application/mentor/service.go:133",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
-    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
+    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
    ],
    "writes": "state"
   },
@@ -20291,6 +20415,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "repeatable_read"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -20346,6 +20475,11 @@
      "value": "true"
     },
     {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
+    },
+    {
      "file": "internal/application/socialdismiss/service.go",
      "line": 49,
      "value": "false"
@@ -20399,6 +20533,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -20494,6 +20633,14 @@
      "line": 41,
      "read_only": "true",
      "retry": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "function": "Service.run",
+     "isolation": "UNKNOWN",
+     "line": 132,
+     "read_only": "UNKNOWN",
+     "retry": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -20808,6 +20955,11 @@
     },
     {
      "file": "internal/adapters/postgres/mentorstore/relationships.go",
+     "line": 82,
+     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM mentor_relations r WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/mentorstore/relationships.go",
      "line": 93,
      "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM (SELECT * FROM mentor_relations WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL ORDER BY mentor_id,student_id,relation_id FOR UPDATE) r"
     },
@@ -20869,12 +21021,15 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
+    "UNRESOLVED body at internal/application/mentor/service.go:133",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
-    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
+    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
    ],
    "writes": "state"
   },
@@ -20890,6 +21045,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "repeatable_read"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -20945,6 +21105,11 @@
      "value": "true"
     },
     {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
+    },
+    {
      "file": "internal/application/socialdismiss/service.go",
      "line": 49,
      "value": "false"
@@ -20998,6 +21163,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -21093,6 +21263,14 @@
      "line": 41,
      "read_only": "true",
      "retry": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "function": "Service.run",
+     "isolation": "UNKNOWN",
+     "line": 132,
+     "read_only": "UNKNOWN",
+     "retry": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -21407,6 +21585,11 @@
     },
     {
      "file": "internal/adapters/postgres/mentorstore/relationships.go",
+     "line": 82,
+     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM mentor_relations r WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/mentorstore/relationships.go",
      "line": 93,
      "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM (SELECT * FROM mentor_relations WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL ORDER BY mentor_id,student_id,relation_id FOR UPDATE) r"
     },
@@ -21468,12 +21651,15 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
+    "UNRESOLVED body at internal/application/mentor/service.go:133",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
-    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
+    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
    ],
    "writes": "state"
   },
@@ -21489,6 +21675,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "repeatable_read"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -21544,6 +21735,11 @@
      "value": "true"
     },
     {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
+    },
+    {
      "file": "internal/application/socialdismiss/service.go",
      "line": 49,
      "value": "false"
@@ -21597,6 +21793,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -21692,6 +21893,14 @@
      "line": 41,
      "read_only": "true",
      "retry": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "function": "Service.run",
+     "isolation": "UNKNOWN",
+     "line": 132,
+     "read_only": "UNKNOWN",
+     "retry": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -22006,6 +22215,11 @@
     },
     {
      "file": "internal/adapters/postgres/mentorstore/relationships.go",
+     "line": 82,
+     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM mentor_relations r WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/mentorstore/relationships.go",
      "line": 93,
      "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM (SELECT * FROM mentor_relations WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL ORDER BY mentor_id,student_id,relation_id FOR UPDATE) r"
     },
@@ -22067,12 +22281,15 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
+    "UNRESOLVED body at internal/application/mentor/service.go:133",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
-    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
+    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
    ],
    "writes": "state"
   },
@@ -22088,6 +22305,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "repeatable_read"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -22143,6 +22365,11 @@
      "value": "true"
     },
     {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
+    },
+    {
      "file": "internal/application/socialdismiss/service.go",
      "line": 49,
      "value": "false"
@@ -22196,6 +22423,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -22291,6 +22523,14 @@
      "line": 41,
      "read_only": "true",
      "retry": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "function": "Service.run",
+     "isolation": "UNKNOWN",
+     "line": 132,
+     "read_only": "UNKNOWN",
+     "retry": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -22605,6 +22845,11 @@
     },
     {
      "file": "internal/adapters/postgres/mentorstore/relationships.go",
+     "line": 82,
+     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM mentor_relations r WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/mentorstore/relationships.go",
      "line": 93,
      "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM (SELECT * FROM mentor_relations WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL ORDER BY mentor_id,student_id,relation_id FOR UPDATE) r"
     },
@@ -22666,12 +22911,15 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
+    "UNRESOLVED body at internal/application/mentor/service.go:133",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
-    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
+    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
    ],
    "writes": "state"
   },
@@ -22687,6 +22935,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "repeatable_read"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -22742,6 +22995,11 @@
      "value": "true"
     },
     {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
+    },
+    {
      "file": "internal/application/socialdismiss/service.go",
      "line": 49,
      "value": "false"
@@ -22795,6 +23053,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -22890,6 +23153,14 @@
      "line": 41,
      "read_only": "true",
      "retry": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "function": "Service.run",
+     "isolation": "UNKNOWN",
+     "line": 132,
+     "read_only": "UNKNOWN",
+     "retry": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -23204,6 +23475,11 @@
     },
     {
      "file": "internal/adapters/postgres/mentorstore/relationships.go",
+     "line": 82,
+     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM mentor_relations r WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/mentorstore/relationships.go",
      "line": 93,
      "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM (SELECT * FROM mentor_relations WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL ORDER BY mentor_id,student_id,relation_id FOR UPDATE) r"
     },
@@ -23265,12 +23541,15 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
+    "UNRESOLVED body at internal/application/mentor/service.go:133",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
-    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
+    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
    ],
    "writes": "state"
   },
@@ -23286,6 +23565,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "repeatable_read"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -23341,6 +23625,11 @@
      "value": "true"
     },
     {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
+    },
+    {
      "file": "internal/application/socialdismiss/service.go",
      "line": 49,
      "value": "false"
@@ -23394,6 +23683,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -23489,6 +23783,14 @@
      "line": 41,
      "read_only": "true",
      "retry": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "function": "Service.run",
+     "isolation": "UNKNOWN",
+     "line": 132,
+     "read_only": "UNKNOWN",
+     "retry": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -23803,6 +24105,11 @@
     },
     {
      "file": "internal/adapters/postgres/mentorstore/relationships.go",
+     "line": 82,
+     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM mentor_relations r WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/mentorstore/relationships.go",
      "line": 93,
      "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM (SELECT * FROM mentor_relations WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL ORDER BY mentor_id,student_id,relation_id FOR UPDATE) r"
     },
@@ -23864,12 +24171,15 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
+    "UNRESOLVED body at internal/application/mentor/service.go:133",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
-    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
+    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
    ],
    "writes": "state"
   },
@@ -23885,6 +24195,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "repeatable_read"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -23940,6 +24255,11 @@
      "value": "true"
     },
     {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
+    },
+    {
      "file": "internal/application/socialdismiss/service.go",
      "line": 49,
      "value": "false"
@@ -23993,6 +24313,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -24088,6 +24413,14 @@
      "line": 41,
      "read_only": "true",
      "retry": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "function": "Service.run",
+     "isolation": "UNKNOWN",
+     "line": 132,
+     "read_only": "UNKNOWN",
+     "retry": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -24402,6 +24735,11 @@
     },
     {
      "file": "internal/adapters/postgres/mentorstore/relationships.go",
+     "line": 82,
+     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM mentor_relations r WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/mentorstore/relationships.go",
      "line": 93,
      "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM (SELECT * FROM mentor_relations WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL ORDER BY mentor_id,student_id,relation_id FOR UPDATE) r"
     },
@@ -24463,12 +24801,15 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
+    "UNRESOLVED body at internal/application/mentor/service.go:133",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
-    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
+    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
    ],
    "writes": "state"
   },
@@ -24484,6 +24825,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "repeatable_read"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -24539,6 +24885,11 @@
      "value": "true"
     },
     {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
+    },
+    {
      "file": "internal/application/socialdismiss/service.go",
      "line": 49,
      "value": "false"
@@ -24592,6 +24943,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -24687,6 +25043,14 @@
      "line": 41,
      "read_only": "true",
      "retry": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "function": "Service.run",
+     "isolation": "UNKNOWN",
+     "line": 132,
+     "read_only": "UNKNOWN",
+     "retry": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -25001,6 +25365,11 @@
     },
     {
      "file": "internal/adapters/postgres/mentorstore/relationships.go",
+     "line": 82,
+     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM mentor_relations r WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/mentorstore/relationships.go",
      "line": 93,
      "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM (SELECT * FROM mentor_relations WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL ORDER BY mentor_id,student_id,relation_id FOR UPDATE) r"
     },
@@ -25062,12 +25431,15 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
+    "UNRESOLVED body at internal/application/mentor/service.go:133",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
-    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
+    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
    ],
    "writes": "state"
   },
@@ -25083,6 +25455,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "repeatable_read"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -25138,6 +25515,11 @@
      "value": "true"
     },
     {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
+    },
+    {
      "file": "internal/application/socialdismiss/service.go",
      "line": 49,
      "value": "false"
@@ -25191,6 +25573,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -25286,6 +25673,14 @@
      "line": 41,
      "read_only": "true",
      "retry": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "function": "Service.run",
+     "isolation": "UNKNOWN",
+     "line": 132,
+     "read_only": "UNKNOWN",
+     "retry": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -25600,6 +25995,11 @@
     },
     {
      "file": "internal/adapters/postgres/mentorstore/relationships.go",
+     "line": 82,
+     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM mentor_relations r WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/mentorstore/relationships.go",
      "line": 93,
      "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM (SELECT * FROM mentor_relations WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL ORDER BY mentor_id,student_id,relation_id FOR UPDATE) r"
     },
@@ -25661,12 +26061,15 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
+    "UNRESOLVED body at internal/application/mentor/service.go:133",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
-    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
+    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
    ],
    "writes": "state"
   },
@@ -25682,6 +26085,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "repeatable_read"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -25737,6 +26145,11 @@
      "value": "true"
     },
     {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
+    },
+    {
      "file": "internal/application/socialdismiss/service.go",
      "line": 49,
      "value": "false"
@@ -25790,6 +26203,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -25885,6 +26303,14 @@
      "line": 41,
      "read_only": "true",
      "retry": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "function": "Service.run",
+     "isolation": "UNKNOWN",
+     "line": 132,
+     "read_only": "UNKNOWN",
+     "retry": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -26199,6 +26625,11 @@
     },
     {
      "file": "internal/adapters/postgres/mentorstore/relationships.go",
+     "line": 82,
+     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM mentor_relations r WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/mentorstore/relationships.go",
      "line": 93,
      "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM (SELECT * FROM mentor_relations WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL ORDER BY mentor_id,student_id,relation_id FOR UPDATE) r"
     },
@@ -26260,12 +26691,15 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
+    "UNRESOLVED body at internal/application/mentor/service.go:133",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
-    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
+    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
    ],
    "writes": "state"
   },
@@ -26281,6 +26715,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "repeatable_read"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -26336,6 +26775,11 @@
      "value": "true"
     },
     {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "UNKNOWN"
+    },
+    {
      "file": "internal/application/socialdismiss/service.go",
      "line": 49,
      "value": "false"
@@ -26389,6 +26833,11 @@
      "file": "internal/application/i5/scalar_projection.go",
      "line": 41,
      "value": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "line": 132,
+     "value": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -26484,6 +26933,14 @@
      "line": 41,
      "read_only": "true",
      "retry": "1"
+    },
+    {
+     "file": "internal/application/mentor/service.go",
+     "function": "Service.run",
+     "isolation": "UNKNOWN",
+     "line": 132,
+     "read_only": "UNKNOWN",
+     "retry": "3"
     },
     {
      "file": "internal/application/socialdismiss/service.go",
@@ -26798,6 +27255,11 @@
     },
     {
      "file": "internal/adapters/postgres/mentorstore/relationships.go",
+     "line": 82,
+     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM mentor_relations r WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL"
+    },
+    {
+     "file": "internal/adapters/postgres/mentorstore/relationships.go",
      "line": 93,
      "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY mentor_id,student_id,relation_id),'[]'::jsonb)::text FROM (SELECT * FROM mentor_relations WHERE logical_server_id=$2 AND (mentor_id=$1 OR student_id=$1) AND ended_at IS NULL ORDER BY mentor_id,student_id,relation_id FOR UPDATE) r"
     },
@@ -26859,12 +27321,15 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
+    "UNRESOLVED body at internal/application/mentor/service.go:133",
     "UNRESOLVED body at internal/application/socialgift/service.go:59",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
-    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:148",
+    "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:170",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:328",
     "UNRESOLVED cancel at internal/application/socialgift/service.go:484",
-    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
+    "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
    ],
    "writes": "state"
   },
@@ -27299,7 +27764,7 @@
     },
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "UNKNOWN"
     },
     {
@@ -27337,7 +27802,7 @@
     },
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "UNKNOWN"
     },
     {
@@ -27363,7 +27828,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:719",
-    "internal/application/mentor/service.go:194",
+    "internal/application/mentor/service.go:198",
     "internal/application/socialinvite/claim.go:192",
     "internal/application/socialrecall/claim.go:167",
     "internal/application/workplace/mode.go:225"
@@ -27381,7 +27846,7 @@
     },
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "3"
     },
     {
@@ -27455,7 +27920,7 @@
      "file": "internal/application/mentor/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 128,
+     "line": 132,
      "read_only": "UNKNOWN",
      "retry": "3"
     },
@@ -27752,12 +28217,12 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/workplace/mode.go:127",
-    "UNRESOLVED apply at internal/application/mentor/service.go:181",
+    "UNRESOLVED apply at internal/application/mentor/service.go:185",
     "UNRESOLVED apply at internal/application/workplace/mode.go:202",
-    "UNRESOLVED body at internal/application/mentor/service.go:129",
+    "UNRESOLVED body at internal/application/mentor/service.go:133",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
-    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:128",
-    "transaction isolation not statically decidable at internal/application/mentor/service.go:128"
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
    ],
    "writes": "state"
   },
@@ -39159,7 +39624,7 @@
     },
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "UNKNOWN"
     },
     {
@@ -39197,7 +39662,7 @@
     },
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "UNKNOWN"
     },
     {
@@ -39223,7 +39688,7 @@
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:719",
-    "internal/application/mentor/service.go:194",
+    "internal/application/mentor/service.go:198",
     "internal/application/socialinvite/claim.go:192",
     "internal/application/socialrecall/claim.go:167",
     "internal/application/workplace/mode.go:225"
@@ -39241,7 +39706,7 @@
     },
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "3"
     },
     {
@@ -39315,7 +39780,7 @@
      "file": "internal/application/mentor/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 128,
+     "line": 132,
      "read_only": "UNKNOWN",
      "retry": "3"
     },
@@ -39612,12 +40077,12 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/workplace/mode.go:127",
-    "UNRESOLVED apply at internal/application/mentor/service.go:181",
+    "UNRESOLVED apply at internal/application/mentor/service.go:185",
     "UNRESOLVED apply at internal/application/workplace/mode.go:202",
-    "UNRESOLVED body at internal/application/mentor/service.go:129",
+    "UNRESOLVED body at internal/application/mentor/service.go:133",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
-    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:128",
-    "transaction isolation not statically decidable at internal/application/mentor/service.go:128"
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
    ],
    "writes": "state"
   },
@@ -93008,7 +93473,7 @@
    "isolation": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "UNKNOWN"
     }
    ],
@@ -93016,7 +93481,7 @@
    "read_only": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "UNKNOWN"
     }
    ],
@@ -93024,7 +93489,7 @@
    "retry": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "3"
     }
    ],
@@ -93035,7 +93500,7 @@
      "file": "internal/application/mentor/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 128,
+     "line": 132,
      "read_only": "UNKNOWN",
      "retry": "3"
     }
@@ -93063,9 +93528,9 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED body at internal/application/mentor/service.go:129",
-    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:128",
-    "transaction isolation not statically decidable at internal/application/mentor/service.go:128"
+    "UNRESOLVED body at internal/application/mentor/service.go:133",
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
    ],
    "writes": "UNKNOWN"
   },
@@ -93074,7 +93539,7 @@
    "isolation": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "UNKNOWN"
     }
    ],
@@ -93082,17 +93547,17 @@
    "read_only": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "UNKNOWN"
     }
    ],
    "receipt_writes": [
-    "internal/application/mentor/service.go:194"
+    "internal/application/mentor/service.go:198"
    ],
    "retry": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "3"
     }
    ],
@@ -93107,7 +93572,7 @@
      "file": "internal/application/mentor/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 128,
+     "line": 132,
      "read_only": "UNKNOWN",
      "retry": "3"
     }
@@ -93167,13 +93632,18 @@
      "file": "internal/adapters/postgres/mentorstore/transaction.go",
      "line": 13,
      "statement": "SELECT current_setting('transaction_read_only')::boolean"
+    },
+    {
+     "file": "internal/adapters/postgres/socialrelationstore/store.go",
+     "line": 133,
+     "statement": "SELECT blocker_player_id,blocked_player_id,generation,active,activated_at,removed_at,state_version,updated_at FROM social_blocks WHERE blocker_player_id=$1 AND blocked_player_id=$2 FOR UPDATE"
     }
    ],
    "unknown": [
-    "UNRESOLVED apply at internal/application/mentor/service.go:181",
-    "UNRESOLVED body at internal/application/mentor/service.go:129",
-    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:128",
-    "transaction isolation not statically decidable at internal/application/mentor/service.go:128"
+    "UNRESOLVED apply at internal/application/mentor/service.go:185",
+    "UNRESOLVED body at internal/application/mentor/service.go:133",
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
    ],
    "writes": "state"
   },
@@ -93182,7 +93652,7 @@
    "isolation": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "UNKNOWN"
     }
    ],
@@ -93190,7 +93660,7 @@
    "read_only": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "UNKNOWN"
     }
    ],
@@ -93198,7 +93668,7 @@
    "retry": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "3"
     }
    ],
@@ -93209,7 +93679,7 @@
      "file": "internal/application/mentor/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 128,
+     "line": 132,
      "read_only": "UNKNOWN",
      "retry": "3"
     }
@@ -93252,9 +93722,9 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED body at internal/application/mentor/service.go:129",
-    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:128",
-    "transaction isolation not statically decidable at internal/application/mentor/service.go:128"
+    "UNRESOLVED body at internal/application/mentor/service.go:133",
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
    ],
    "writes": "UNKNOWN"
   },
@@ -93263,7 +93733,7 @@
    "isolation": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "UNKNOWN"
     }
    ],
@@ -93271,17 +93741,17 @@
    "read_only": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "UNKNOWN"
     }
    ],
    "receipt_writes": [
-    "internal/application/mentor/service.go:194"
+    "internal/application/mentor/service.go:198"
    ],
    "retry": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "3"
     }
    ],
@@ -93300,7 +93770,7 @@
      "file": "internal/application/mentor/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 128,
+     "line": 132,
      "read_only": "UNKNOWN",
      "retry": "3"
     }
@@ -93378,10 +93848,10 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED apply at internal/application/mentor/service.go:181",
-    "UNRESOLVED body at internal/application/mentor/service.go:129",
-    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:128",
-    "transaction isolation not statically decidable at internal/application/mentor/service.go:128"
+    "UNRESOLVED apply at internal/application/mentor/service.go:185",
+    "UNRESOLVED body at internal/application/mentor/service.go:133",
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
    ],
    "writes": "state"
   },
@@ -93390,7 +93860,7 @@
    "isolation": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "UNKNOWN"
     }
    ],
@@ -93398,17 +93868,17 @@
    "read_only": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "UNKNOWN"
     }
    ],
    "receipt_writes": [
-    "internal/application/mentor/service.go:194"
+    "internal/application/mentor/service.go:198"
    ],
    "retry": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "3"
     }
    ],
@@ -93421,7 +93891,7 @@
      "file": "internal/application/mentor/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 128,
+     "line": 132,
      "read_only": "UNKNOWN",
      "retry": "3"
     }
@@ -93469,10 +93939,10 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED apply at internal/application/mentor/service.go:181",
-    "UNRESOLVED body at internal/application/mentor/service.go:129",
-    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:128",
-    "transaction isolation not statically decidable at internal/application/mentor/service.go:128"
+    "UNRESOLVED apply at internal/application/mentor/service.go:185",
+    "UNRESOLVED body at internal/application/mentor/service.go:133",
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
    ],
    "writes": "state"
   },
@@ -93481,7 +93951,7 @@
    "isolation": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "UNKNOWN"
     }
    ],
@@ -93489,17 +93959,17 @@
    "read_only": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "UNKNOWN"
     }
    ],
    "receipt_writes": [
-    "internal/application/mentor/service.go:194"
+    "internal/application/mentor/service.go:198"
    ],
    "retry": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "3"
     }
    ],
@@ -93515,7 +93985,7 @@
      "file": "internal/application/mentor/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 128,
+     "line": 132,
      "read_only": "UNKNOWN",
      "retry": "3"
     }
@@ -93568,10 +94038,10 @@
     }
    ],
    "unknown": [
-    "UNRESOLVED apply at internal/application/mentor/service.go:181",
-    "UNRESOLVED body at internal/application/mentor/service.go:129",
-    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:128",
-    "transaction isolation not statically decidable at internal/application/mentor/service.go:128"
+    "UNRESOLVED apply at internal/application/mentor/service.go:185",
+    "UNRESOLVED body at internal/application/mentor/service.go:133",
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
    ],
    "writes": "state"
   },
@@ -93580,7 +94050,7 @@
    "isolation": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "UNKNOWN"
     }
    ],
@@ -93588,18 +94058,18 @@
    "read_only": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "UNKNOWN"
     }
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:719",
-    "internal/application/mentor/service.go:194"
+    "internal/application/mentor/service.go:198"
    ],
    "retry": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "3"
     }
    ],
@@ -93628,7 +94098,7 @@
      "file": "internal/application/mentor/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 128,
+     "line": 132,
      "read_only": "UNKNOWN",
      "retry": "3"
     }
@@ -93797,11 +94267,11 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "UNRESOLVED apply at internal/application/mentor/service.go:181",
-    "UNRESOLVED body at internal/application/mentor/service.go:129",
+    "UNRESOLVED apply at internal/application/mentor/service.go:185",
+    "UNRESOLVED body at internal/application/mentor/service.go:133",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
-    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:128",
-    "transaction isolation not statically decidable at internal/application/mentor/service.go:128"
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
    ],
    "writes": "state"
   },
@@ -93810,7 +94280,7 @@
    "isolation": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "UNKNOWN"
     }
    ],
@@ -93818,18 +94288,18 @@
    "read_only": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "UNKNOWN"
     }
    ],
    "receipt_writes": [
     "internal/application/i5/service.go:719",
-    "internal/application/mentor/service.go:194"
+    "internal/application/mentor/service.go:198"
    ],
    "retry": [
     {
      "file": "internal/application/mentor/service.go",
-     "line": 128,
+     "line": 132,
      "value": "3"
     }
    ],
@@ -93858,7 +94328,7 @@
      "file": "internal/application/mentor/service.go",
      "function": "Service.run",
      "isolation": "UNKNOWN",
-     "line": 128,
+     "line": 132,
      "read_only": "UNKNOWN",
      "retry": "3"
     }
@@ -94022,11 +94492,11 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "UNRESOLVED apply at internal/application/mentor/service.go:181",
-    "UNRESOLVED body at internal/application/mentor/service.go:129",
+    "UNRESOLVED apply at internal/application/mentor/service.go:185",
+    "UNRESOLVED body at internal/application/mentor/service.go:133",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
-    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:128",
-    "transaction isolation not statically decidable at internal/application/mentor/service.go:128"
+    "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
+    "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
    ],
    "writes": "state"
   },

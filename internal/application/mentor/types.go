@@ -132,6 +132,7 @@ type CardReader interface {
 
 type FriendshipEnsurer interface {
 	EnsureFriendshipTx(context.Context, tx.Tx, identity.PlayerID, identity.PlayerID, time.Time) (bool, error)
+	PairBlockedTx(context.Context, tx.Tx, identity.PlayerID, identity.PlayerID) (bool, error)
 }
 
 type BackgroundReader interface {

@@ -28,6 +28,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 	"gxb.local/backend/v2/internal/protocol/wire"
 )
 
@@ -166,6 +167,7 @@ func TestI9_10FMentorLifeCycleThroughDispatcher(t *testing.T) {
 	}
 
 	accepted := expectMentorOK(t, mentorCall(t, service, teacher, 1859, map[string]any{"from_player_id": int64(student.PlayerID)}), 1859)
+	replyconformance.Check(t, 1859, accepted)
 	base := accepted["base_info"].(map[string]any)
 	relations := base["relations"].([]any)
 	if relations[1].(map[string]any)["player_id"] != int64(student.PlayerID) || relations[0].(map[string]any)["player_id"] != nil {

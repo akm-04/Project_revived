@@ -40,6 +40,14 @@ type SocialGiftCommands interface {
 	Claim(context.Context, identity.ActorContext, []socialinbox.NoticeID, operation.Context) (socialgift.Result, error)
 	ReloadReferences(context.Context, identity.ActorContext, identity.PlayerID, socialgift.Result, operation.Context) ([]sr.ReloadReference, error)
 }
+
+// MentorClassRelation is the Mentor-owned observation the Social dispatcher
+// applies before deleting a friend or adding a blacklist: an active class
+// relation must not be broken through the friend surface.
+type MentorClassRelation interface {
+	ClassRelationActive(context.Context, identity.ActorContext, identity.PlayerID, operation.Context) (bool, error)
+}
+
 type SocialDispatcher struct {
 	Gifts          SocialGiftCommands
 	giftStockReady bool
@@ -48,6 +56,7 @@ type SocialDispatcher struct {
 	Relations      SocialRelationCommands
 	Dismissal      SocialDismissCommands
 	Projection     SocialProjectionQueries
+	Mentor         MentorClassRelation
 	Emitter        SocialReloadEmitter
 	Tracker        *lobby.BootTracker
 }
@@ -123,6 +132,19 @@ func socialTargets(m map[string]any, key string, batch bool) ([]identity.PlayerI
 		out = append(out, id)
 	}
 	return out, nil
+}
+
+// classPairRefusal names the stock message.lua row for breaking a class pair
+// through the friend surface: 34017 delete friend, 34013 add blacklist.
+func classPairRefusal(mid uint16) (int64, bool) {
+	switch mid {
+	case 181:
+		return 34017, true
+	case 185:
+		return 34013, true
+	default:
+		return 0, false
+	}
 }
 
 // The owner's stale decision time, counter overflow and policy drift are
@@ -354,6 +376,21 @@ func (d SocialDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 		command.Message, ok = msg.(string)
 		if !ok {
 			return bad()
+		}
+	}
+	if refusalCode, guarded := classPairRefusal(mid); guarded {
+		if d.Mentor == nil {
+			return failureReply(defect(nil))
+		}
+		if len(command.Targets) != 1 {
+			return bad()
+		}
+		active, e := d.Mentor.ClassRelationActive(ctx, a, command.Targets[0], op)
+		if e != nil {
+			return socialFailure(e)
+		}
+		if active {
+			return failureReply(refusal(refusalCode))
 		}
 	}
 	result, e := d.Relations.Execute(ctx, a, command, op)

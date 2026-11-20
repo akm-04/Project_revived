@@ -2183,7 +2183,8 @@
     "ReadTx"
    ],
    "mentor": [
-    "*EnsureFriendshipTx"
+    "*EnsureFriendshipTx",
+    "*PairBlockedTx"
    ],
    "profilefeedback": [
     "CanonicalServer"
@@ -5058,7 +5059,8 @@
     "Validate"
    ],
    "socialrelation": [
-    "*EnsureFriendshipTx"
+    "*EnsureFriendshipTx",
+    "*PairBlockedTx"
    ],
    "store:contentstore": [
     "*ActiveRevision",

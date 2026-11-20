@@ -105,6 +105,19 @@ func TestMentorDispatcherRefusalIsConflict(t *testing.T) {
 	}
 }
 
+// A-199: a blocked pair answers 34014 and a missing target answers 20004,
+// both as typed 409 refusals through the stock Mentor dispatcher.
+func TestMentorDispatcherApplyGuardRefusals(t *testing.T) {
+	for _, code := range []int64{34014, 20004} {
+		service := &mentorTestService{err: &mentor.Refusal{Code: code}}
+		dispatcher := MentorDispatcher{Authority: mentorTestAuthority{actor: mentorTestActor()}, Service: service}
+		got := dispatcher.Dispatch(context.Background(), mentorTestRequest(1857, map[string]any{"to_player_id": int64(100100002), "relation_type": int64(1), "msg": ""}))
+		if got.HTTPStatus != 409 || got.Body["error_code"] != code {
+			t.Fatalf("1857 refusal %d %#v, want 409/%d", got.HTTPStatus, got.Body, code)
+		}
+	}
+}
+
 // The 1858 windows check only xyd.error.OK, so a business refusal must be a
 // 409 carrying a code the stock message table knows (34011: search level limit).
 func TestMentorDispatcherFindingRefusalIsConflict(t *testing.T) {

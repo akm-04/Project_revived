@@ -194,6 +194,7 @@
   ],
   "unit": [
    "calendar_test.go",
+   "card_wire_test.go",
    "commands_test.go",
    "friendship_refusal_test.go",
    "read_test.go"
