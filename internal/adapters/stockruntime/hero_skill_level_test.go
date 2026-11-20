@@ -2,6 +2,7 @@ package stockruntime
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"reflect"
@@ -67,6 +68,11 @@ func TestHeroSkillLevelMIDsWireSuccessAndPrivateRefusal(t *testing.T) {
 	wantChanges := []apphero.HeroSkillLevelChange{{Slot: 2, Count: 1}, {Slot: 1, Count: 2}}
 	if bulk.HTTPStatus != http.StatusOK || bulk.Body["skills"] != "3|2|1|1|1|1" || bulk.Body["is_success"] != int64(1) || stub.bulkPartnerID != 9 || !reflect.DeepEqual(stub.changes, wantChanges) {
 		t.Fatal("MID 39 success", bulk, stub)
+	}
+
+	oneSkill := dispatcher.Dispatch(context.Background(), heroReq(t, 39, map[string]any{"partner_id": int64(9), "skill_colors": json.Number("3"), "skill_counts": float64(8)}))
+	if oneSkill.HTTPStatus != http.StatusOK || !reflect.DeepEqual(stub.changes, []apphero.HeroSkillLevelChange{{Slot: 3, Count: 8}}) {
+		t.Fatal("MID 39 one-skill bulk sent as bare numbers", oneSkill, stub)
 	}
 
 	stub.singleResult.Success = false
