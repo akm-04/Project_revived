@@ -60,28 +60,51 @@ func socialRoots(t *testing.T, p *pg.Pool, ids ...identity.PlayerID) {
 	}
 }
 
-func TestA121PrivacyAndEmptySlotAreRefusals(t *testing.T) {
+// A section the target hid answers empty inside a normal reply, as the stock
+// window reads it (PersonDisplay.lua:146-173, PersonDisplayWindow.lua:1554-1563).
+func TestHiddenSectionAnswersEmptyAndGenuineRefusalsStay(t *testing.T) {
 	p := pool(t)
 	installed(t, p)
-	a, b := actor(t, p), actor(t, p)
-	socialRoots(t, p, a.PlayerID, b.PlayerID)
+	a, b, c := actor(t, p), actor(t, p), actor(t, p)
+	socialRoots(t, p, a.PlayerID, b.PlayerID, c.PlayerID)
 	assign(t, p, b, app.Command{Kind: app.HideCommand, Hide: []int16{2}}, op())
+	assign(t, p, c, app.Command{Kind: app.HideCommand, Hide: []int16{4}}, op())
 	d := stockruntime.PublicProfileReadDispatcher{Authority: fixedAuthority{a}, Service: refusalReads(p)}
-	cases := []struct {
-		mid    uint16
-		params map[string]any
-	}{
-		{1829, map[string]any{"to_player_id": int64(b.PlayerID), "sub_type": int64(2)}},
-		{1838, map[string]any{"to_player_id": int64(b.PlayerID), "index": int64(1)}},
+
+	statistics := dispatchRead(t, d, 1829, map[string]any{"to_player_id": int64(b.PlayerID), "sub_type": int64(2)})
+	if statistics.HTTPStatus != 200 || statistics.Body["error_code"] != int64(0) {
+		t.Fatalf("hidden statistics %+v", statistics)
 	}
-	for _, tc := range cases {
-		got := dispatchRead(t, d, tc.mid, tc.params)
-		if got.HTTPStatus != 409 || got.Body["error_code"] != int64(35028) || got.Body["error_msg"] != "" {
-			t.Fatalf("MID %d denial %+v", tc.mid, got)
+	for _, key := range []string{"arena_performance", "region_arena_performance", "super_arena_performance"} {
+		if values, ok := statistics.Body[key].(map[string]any); !ok || len(values) != 0 {
+			t.Fatalf("hidden statistics field %s %#v", key, statistics.Body[key])
 		}
-		if len(got.Body) != 2 {
-			t.Fatalf("MID %d refusal carries profile fields %+v", tc.mid, got.Body)
+	}
+	if _, leaked := statistics.Body["arena_info"]; leaked {
+		t.Fatalf("hidden statistics leaked %+v", statistics.Body)
+	}
+
+	space := dispatchRead(t, d, 1829, map[string]any{"to_player_id": int64(c.PlayerID), "sub_type": int64(4)})
+	if space.HTTPStatus != 200 || space.Body["error_code"] != int64(0) || space.Body["comment_num"] != int64(0) {
+		t.Fatalf("hidden space %+v", space)
+	}
+	for _, key := range []string{"best_comments", "comment_list"} {
+		if values, ok := space.Body[key].([]any); !ok || len(values) != 0 {
+			t.Fatalf("hidden space field %s %#v", key, space.Body[key])
 		}
+	}
+
+	// An empty showcase slot is still a typed refusal (A-121 R4).
+	got := dispatchRead(t, d, 1838, map[string]any{"to_player_id": int64(b.PlayerID), "index": int64(1)})
+	if got.HTTPStatus != 409 || got.Body["error_code"] != int64(35028) || got.Body["error_msg"] != "" || len(got.Body) != 2 {
+		t.Fatalf("empty showcase slot %+v", got)
+	}
+
+	// A directed block is a genuine refusal, never an empty section.
+	sqlExec(t, p, `INSERT INTO social_blocks(blocker_player_id,blocked_player_id,generation,active,activated_at,state_version,updated_at)VALUES($1,$2,1,true,clock_timestamp(),1,clock_timestamp())`, int64(b.PlayerID), int64(a.PlayerID))
+	blocked := dispatchRead(t, d, 1829, map[string]any{"to_player_id": int64(b.PlayerID), "sub_type": int64(2)})
+	if blocked.HTTPStatus != 409 || blocked.Body["error_code"] != int64(35028) || blocked.Body["error_msg"] != "" || len(blocked.Body) != 2 {
+		t.Fatalf("blocked statistics %+v", blocked)
 	}
 }
 

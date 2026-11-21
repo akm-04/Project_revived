@@ -219,8 +219,13 @@ func Test6BCoherentCompositionPrivacyMetricsAndCurrentDetail(t *testing.T) {
 		t.Fatal("SPACE genuineempty", out, e)
 	}
 	assign(t, p, b, app.Command{Kind: app.HideCommand, Hide: []int16{2, 4}}, op())
-	if _, e = read(a, b.PlayerID, 4); e == nil {
-		t.Fatal("hiddenSPACE")
+	hiddenSpace, e := read(a, b.PlayerID, 4)
+	if e != nil || hiddenSpace["comment_num"] != int64(0) || len(hiddenSpace["best_comments"].([]any)) != 0 {
+		t.Fatal("hiddenSPACEempty", hiddenSpace, e)
+	}
+	hiddenStatistics, e := read(a, b.PlayerID, 2)
+	if e != nil || len(hiddenStatistics["arena_performance"].(map[string]any)) != 0 || len(hiddenStatistics["region_arena_performance"].(map[string]any)) != 0 || len(hiddenStatistics["super_arena_performance"].(map[string]any)) != 0 {
+		t.Fatal("hiddenSTATISTICSempty", hiddenStatistics, e)
 	}
 	if _, e = read(b, b.PlayerID, 4); e != nil {
 		t.Fatal("ownhiddenSPACE", e)
@@ -256,6 +261,9 @@ func Test6BCoherentCompositionPrivacyMetricsAndCurrentDetail(t *testing.T) {
 		}
 		if _, e = s.Read(ctx, a, app.ReadRequest{MID: 1838, Target: b.PlayerID, Index: 1}, op()); e == nil {
 			t.Fatal("blockdetail")
+		}
+		if _, e = read(a, b.PlayerID, 2); !errors.Is(e, app.ErrShowcasePrivate) {
+			t.Fatal("blockedstatistics", e)
 		}
 		sqlExec(t, p, `UPDATE social_blocks SET active=false,removed_at=clock_timestamp(),updated_at=clock_timestamp() WHERE blocker_player_id=$1 AND blocked_player_id=$2`, int64(pair[0]), int64(pair[1]))
 	}
