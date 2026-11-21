@@ -276,6 +276,32 @@ func TestRestoredOutOfOrderIdsAreNormalisedOnRead(t *testing.T) {
 	}
 }
 
+// K3: a preference row written while the clock was forward keeps its stored
+// updated_at when a later toggle is decided after a backward step.
+func TestCompatSaveKeepsAForwardStoredUpdatedAt(t *testing.T) {
+	pool := compatPool(t)
+	ctx := context.Background()
+	now := time.Now().UTC().Truncate(time.Microsecond)
+	actor := compatActor(t, pool, now)
+	if err := compatService(pool).FirstMainTouch(ctx, actor, compatOperation(t, now)); err != nil {
+		t.Fatal(err)
+	}
+	forward := now.Add(8 * time.Hour)
+	if _, err := pool.Raw().Exec(ctx, `UPDATE player_compat_preferences SET updated_at=$2 WHERE player_id=$1`, int64(actor.PlayerID), forward); err != nil {
+		t.Fatal(err)
+	}
+	if err := compatService(pool).SetMessagePush(ctx, actor, 1, true, compatOperation(t, now)); err != nil {
+		t.Fatal(err)
+	}
+	var stored time.Time
+	if err := pool.QueryRow(ctx, `SELECT updated_at FROM player_compat_preferences WHERE player_id=$1`, int64(actor.PlayerID)).Scan(&stored); err != nil {
+		t.Fatal(err)
+	}
+	if stored.Before(forward) {
+		t.Fatalf("updated_at moved backwards: %v < %v", stored, forward)
+	}
+}
+
 func TestStaleSaveIsAConflictSentinel(t *testing.T) {
 	pool := compatPool(t)
 	ctx := context.Background()

@@ -18,7 +18,7 @@ type Store struct{}
 const createRowSQL = `INSERT INTO player_compat_preferences(player_id,first_main_touch,message_push_ids,state_version,created_at,updated_at) VALUES($1,0,'{}',1,$2,$2) ON CONFLICT (player_id) DO NOTHING`
 const selectRowSQL = `SELECT first_main_touch,message_push_ids,state_version FROM player_compat_preferences WHERE player_id=$1`
 const lockRowSQL = selectRowSQL + ` FOR UPDATE`
-const saveRowSQL = `UPDATE player_compat_preferences SET first_main_touch=$2,message_push_ids=$3,state_version=$4,updated_at=$5 WHERE player_id=$1 AND state_version=$6`
+const saveRowSQL = `UPDATE player_compat_preferences SET first_main_touch=$2,message_push_ids=$3,state_version=$4,updated_at=GREATEST($5,updated_at,created_at) WHERE player_id=$1 AND state_version=$6`
 
 func scan(row tx.Row) (d.Preferences, error) {
 	var firstMainTouch int16
