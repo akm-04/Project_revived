@@ -75,6 +75,14 @@ func TestI9_5BAdventurePvpUnresolvedNative(t *testing.T) {
 	if resolved := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ADVENTURE_PVP' AND domain_locator=$1 AND state='TERMINAL' AND terminal_kind='ADVENTURE_PVP_RESULT'`, locator); resolved != 1 {
 		t.Fatalf("settled attempts after the retry %d", resolved)
 	}
+	// The replay carried picks[1], but the frozen attempt fought picks[0]: the
+	// Girls Log count follows the heroes that actually fought.
+	if count := scalar(t, p, `SELECT count FROM library_hero_battle_counts WHERE player_id=$1 AND partner_id=$2`, int64(a.PlayerID), picks[0]); count != 1 {
+		t.Fatalf("frozen hero battle count %d, want 1", count)
+	}
+	if count := scalar(t, p, `SELECT COALESCE((SELECT count FROM library_hero_battle_counts WHERE player_id=$1 AND partner_id=$2),0)`, int64(a.PlayerID), picks[1]); count != 0 {
+		t.Fatalf("retry-request hero battle count %d, want 0", count)
+	}
 	if finished := scalar(t, p, `SELECT count(*) FROM adventure_occurrences WHERE player_id=$1 AND event_type=$2 AND occurred_at=$3 AND finished_at IS NOT NULL`, int64(a.PlayerID), d.EventBattle, now.UTC()); finished != 1 {
 		t.Fatalf("finished occurrences after the retry %d", finished)
 	}

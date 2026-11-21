@@ -95,7 +95,14 @@ func (s Mode) Fight(c context.Context, a identity.ActorContext, request FightReq
 		if _, err = s.finish(c, sc.Tx, a, current, at); err != nil {
 			return err
 		}
-		if err = s.BattleObserver.ObserveBattleTx(c, sc.Tx, a.PlayerID, request.Formation, at); err != nil {
+		// A same-stage retry replays the frozen attempt whatever formation it
+		// carries, so the Girls Log count follows the heroes that actually
+		// fought, not this call's request.
+		snapshot, err := s.Combat.SnapshotTx(c, sc.Tx, started.Attempt.ID)
+		if err != nil {
+			return err
+		}
+		if err = s.BattleObserver.ObserveBattleTx(c, sc.Tx, a.PlayerID, frozenPartners(snapshot, a.PlayerID), at); err != nil {
 			return err
 		}
 		response.Body = map[string]any{"battle_report": string(terminal.Report), "is_win": boolNumber(d.IsWin(star)), "awards": awards}
