@@ -106,15 +106,17 @@ type CopyRow struct {
 	StartFight   *time.Time
 }
 
-// EnemyRow is one wave entry as stored.
+// EnemyRow is one wave entry as stored. PartnerID is the enemy identity the
+// stock 604 row exposes through Hero.getHeroID and 610 reports as hero_id.
 type EnemyRow struct {
-	TableID int64 `json:"table_id"`
-	Lev     int64 `json:"lev"`
-	Star    int64 `json:"star"`
-	Color   int64 `json:"color"`
-	Health  int64 `json:"health"`
-	HP      int64 `json:"hp,omitempty"`
-	Reborn  int64 `json:"is_reborn,omitempty"`
+	PartnerID int64 `json:"partner_id"`
+	TableID   int64 `json:"table_id"`
+	Lev       int64 `json:"lev"`
+	Star      int64 `json:"star"`
+	Color     int64 `json:"color"`
+	Health    int64 `json:"health"`
+	HP        int64 `json:"hp,omitempty"`
+	Reborn    int64 `json:"is_reborn,omitempty"`
 }
 
 // GuildLogRow is one 609 log entry.

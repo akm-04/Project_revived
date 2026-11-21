@@ -132,14 +132,18 @@ func TestI9_9CDispatcherChapterAndCopyJSON(t *testing.T) {
 		t.Fatalf("603 copy_list %+v", copies)
 	}
 
-	waves := map[int64][]app.EnemyRow{1: {{TableID: 80000010, Lev: 60, Star: 5, Color: 6, Health: 0}},
-		2: {{TableID: 80000011, Lev: 60, Star: 5, Color: 6, Health: 0}}, 3: {{TableID: 80000012, Lev: 60, Star: 5, Color: 6, Health: 0}}}
+	waves := map[int64][]app.EnemyRow{1: {{PartnerID: 1, TableID: 91071010, Lev: 60, Star: 5, Color: 6, Health: 0}},
+		2: {{PartnerID: 2, TableID: 91071022, Lev: 60, Star: 5, Color: 6, Health: 0}},
+		3: {{PartnerID: 3, TableID: 91071060, Lev: 60, Star: 5, Color: 6, Health: 0}}}
 	stub.started = app.Started{CopyID: 700028, CurrentIndex: 1, Waves: waves}
 	started := campaignDispatch(t, stub, 604, map[string]any{"copy_id": int64(700028), "chapter_id": int64(7), "campaign_type": int64(7), "formation": "10001001"})
 	// SelectTeamNewWindow.lua:6819 indexes enemy_status by wave number, so it
-	// is an array of waves, not an object.
+	// is an array of waves, not an object. Each row owes the battle monster and
+	// the partner_id Hero.populate keeps as getHeroID (NormalHero.lua:142).
 	enemies := started.Body["enemy_status"].([]any)
-	if len(enemies) != 3 || len(enemies[0].([]any)) != 1 || enemies[2].([]any)[0].(map[string]any)["table_id"] != int64(80000012) {
+	last := enemies[2].([]any)[0].(map[string]any)
+	if len(enemies) != 3 || len(enemies[0].([]any)) != 1 || last["table_id"] != int64(91071060) || last["partner_id"] != int64(3) ||
+		last["lev"] != int64(60) || last["star"] != int64(5) || last["color"] != int64(6) {
 		t.Fatalf("604 enemy_status %+v", enemies)
 	}
 
@@ -161,9 +165,9 @@ func TestI9_9CEnemyStatusCarriesHPForRecordedRows(t *testing.T) {
 	// BattleCreate.lua:1106-1111 applies hp only when health is 1, so a recorded
 	// row owes health 1 with hp numeric; an untouched row keeps health 0 and no hp.
 	waves := map[int64][]app.EnemyRow{1: {
-		{TableID: 80000010, Lev: 60, Star: 5, Color: 6, HP: 77},
-		{TableID: 80000011, Lev: 60, Star: 5, Color: 6, Health: 1},
-		{TableID: 80000012, Lev: 60, Star: 5, Color: 6},
+		{PartnerID: 1, TableID: 91071010, Lev: 60, Star: 5, Color: 6, HP: 77},
+		{PartnerID: 2, TableID: 91071011, Lev: 60, Star: 5, Color: 6, Health: 1},
+		{PartnerID: 3, TableID: 91071012, Lev: 60, Star: 5, Color: 6},
 	}}
 	stub := &campaignStub{started: app.Started{CopyID: 700028, CurrentIndex: 1, Waves: waves},
 		detail: app.DetailView{CopyID: 700028, ChapterID: 7, CurrentIndex: 1, Waves: waves, IsOpen: true}}
@@ -179,7 +183,7 @@ func TestI9_9CEnemyStatusCarriesHPForRecordedRows(t *testing.T) {
 		}
 		rows := got.Body[key].([]any)[0].([]any)
 		damaged, dead, untouched := rows[0].(map[string]any), rows[1].(map[string]any), rows[2].(map[string]any)
-		if damaged["health"] != int64(1) || damaged["hp"] != int64(77) {
+		if damaged["health"] != int64(1) || damaged["hp"] != int64(77) || damaged["partner_id"] != int64(1) || damaged["table_id"] != int64(91071010) {
 			t.Fatalf("%d damaged row %+v", mid, damaged)
 		}
 		if dead["health"] != int64(1) || dead["hp"] != int64(0) {
@@ -269,14 +273,17 @@ func TestI9_9CDispatcherAwardRankAndLogJSON(t *testing.T) {
 func TestI9_9CDispatcherSettleBodyAndAlternativeNumbers(t *testing.T) {
 	stub := &campaignStub{settled: app.Settled{Body: map[string]any{"rank_award": map[string]any{"crystal": int64(100), "guild_coin": int64(100)},
 		"normal_drop": []any{}, "guild_drop": []any{}, "coin_award": int64(123), "exps": []any{}}}}
+	// BattleCreate.lua:2985-3045 sends hero_id = enemy:getHeroID(), which is the
+	// 604 row's partner_id, with a fractional hp and the wave index.
 	params := map[string]any{"total_damage": 12.9, "star": int64(0), "chapter_id": int64(7), "copy_id": int64(700028),
 		"current_index": int64(1), "formation": "10001001", "rent_formation": "10001002", "rent_player_id": int64(77),
-		"enemy_status": []any{map[string]any{"hero_id": int64(80000010), "hp": 5.9, "is_reborn": int64(1), "index": int64(1)}}}
+		"enemy_status": []any{map[string]any{"hero_id": int64(2), "hp": 5.9, "is_reborn": int64(1), "index": int64(1)}}}
 	got := campaignDispatch(t, stub, 610, params)
 	if got.HTTPStatus != http.StatusOK || got.Body["rank_award"].(map[string]any)["crystal"] != int64(100) {
 		t.Fatalf("610 %+v", got)
 	}
-	if !stub.settledRecorded || stub.settledRequest.TotalDamage != 12 || len(stub.settledRequest.Enemies) != 1 || stub.settledRequest.Enemies[0].HP != 5 {
+	if !stub.settledRecorded || stub.settledRequest.TotalDamage != 12 || len(stub.settledRequest.Enemies) != 1 ||
+		stub.settledRequest.Enemies[0].HeroID != 2 || stub.settledRequest.Enemies[0].HP != 5 || stub.settledRequest.Enemies[0].Index != 1 {
 		t.Fatalf("610 request %+v", stub.settledRequest)
 	}
 }

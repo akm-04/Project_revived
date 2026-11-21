@@ -174,7 +174,7 @@ func (f campaignFixture) waveEnemies(t *testing.T, started app.Started, star int
 	t.Helper()
 	enemies := []app.ResultEnemy{}
 	for _, enemy := range started.Waves[started.CurrentIndex] {
-		enemies = append(enemies, app.ResultEnemy{HeroID: enemy.TableID, HP: hp, Index: started.CurrentIndex})
+		enemies = append(enemies, app.ResultEnemy{HeroID: enemy.PartnerID, HP: hp, Index: started.CurrentIndex})
 	}
 	_ = star
 	return app.Result{ChapterID: 7, CopyID: started.CopyID, CurrentIndex: started.CurrentIndex,
@@ -782,7 +782,7 @@ func (f campaignFixture) startAt(t *testing.T, a identity.ActorContext, chapterI
 func resultFor(chapterID int64, started app.Started, damage, star, hp int64) app.Result {
 	enemies := make([]app.ResultEnemy, 0, len(started.Waves[started.CurrentIndex]))
 	for _, enemy := range started.Waves[started.CurrentIndex] {
-		enemies = append(enemies, app.ResultEnemy{HeroID: enemy.TableID, HP: hp, Index: started.CurrentIndex})
+		enemies = append(enemies, app.ResultEnemy{HeroID: enemy.PartnerID, HP: hp, Index: started.CurrentIndex})
 	}
 	return app.Result{ChapterID: chapterID, CopyID: started.CopyID, CurrentIndex: started.CurrentIndex,
 		Formation: "1", TotalDamage: damage, Star: star, Enemies: enemies}

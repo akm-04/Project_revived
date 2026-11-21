@@ -81,8 +81,8 @@ func s20RequireConforming(t *testing.T, mid uint16, response httpedge.Response, 
 
 func TestS20GuildCampaignReplyObligations(t *testing.T) {
 	at := time.Unix(1700000000, 0)
-	waves := map[int64][]app.EnemyRow{1: {{TableID: 80000010, Lev: 60, Star: 5, Color: 6, Health: 0}},
-		2: {{TableID: 80000011, Lev: 60, Star: 5, Color: 6, Health: 0}}}
+	waves := map[int64][]app.EnemyRow{1: {{PartnerID: 1, TableID: 91071010, Lev: 60, Star: 5, Color: 6, Health: 0}},
+		2: {{PartnerID: 2, TableID: 91071011, Lev: 60, Star: 5, Color: 6, Health: 0}}}
 	stub := &s20CampaignStub{started: app.Started{CopyID: 700028, CurrentIndex: 1, Waves: waves},
 		logs:   []app.LogRow{{Type: 1, Profile: app.ProfileView{Name: "p"}, MemberName: "m", PlayerJob: 1, ChapterID: 7, At: time.Unix(1700000000, 0)}},
 		detail: app.DetailView{CopyID: 700028, ChapterID: 7, CurrentIndex: 1, IsOpen: true},
