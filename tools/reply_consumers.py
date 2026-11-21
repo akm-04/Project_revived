@@ -197,6 +197,21 @@ VALUE_BRANCH = "<value branch>"
 # path (the variable is seeded only at its later reads): it guards reads of the
 # same local variable and field path, never a same-named field of another one.
 LOCAL_GUARD = "<local>"
+# A reply read inside the request callback's non-OK branch: the edge checker
+# only inspects successful replies, so such a path is OPTIONAL.
+ERROR_BRANCH = ("<error branch>",)
+# Anonymous functions passed to these calls receive elements of the argument
+# named by the key; the element taint keeps the reply's receiver prefix.
+ITERATION_CALLBACKS = {
+    ("table", ("sort",)): "all",
+    ("table", ("foreach",)): "values",
+}
+# The sweep in tmp/i912_research/CONFORM.md opened the client reader of every
+# violation the live server logged and found no defect: the obligations below
+# were generator false positives. The relaxations that model those guards apply
+# only to these MIDs, so every other MID keeps its established obligation set
+# (a broad relaxation would turn hundreds of genuine REQUIRED paths OPTIONAL).
+RELAXATION_MIDS = frozenset({1, 23, 50, 54, 112, 114, 229, 832, 1056, 1303, 1537, 1829, 2417, 2480})
 # Guard marker for `self.field == CONSTANT` (SocialSystemWindow's windowState): a
 # value stored under one constant never reaches a branch on another constant of
 # the same field, so self.data's friend rows do not reach the notice builder.
@@ -522,6 +537,102 @@ def path_string(parts) -> str:
         else:
             out += ("." if out else "") + part
     return out
+
+
+def _parent_guarded(parts, guards) -> bool:
+    """A nil/truthiness guard on a parent path makes every read below it safe:
+    the client cannot enter the body when the parent is absent."""
+    return any(parts[:width] in guards for width in range(1, len(parts)))
+
+
+def _call_argument_at(tokens, position):
+    """The call paren, its argument list and the argument index holding the
+    token at position, or None when it is not a direct call argument."""
+    depth = 0
+    index = position - 1
+    while index >= 0:
+        token = tokens[index]
+        if token.kind == "punct":
+            if token.value in (")", "}", "]"):
+                depth += 1
+            elif token.value in ("(", "{", "["):
+                if depth:
+                    depth -= 1
+                elif token.value == "(":
+                    arguments, _ = split_arguments(tokens, index)
+                    for argument_index, (start, end) in enumerate(arguments):
+                        if start <= position < end:
+                            return index, arguments, argument_index
+                    return None
+                else:
+                    return None
+        index -= 1
+    return None
+
+
+def _callee_identity(tokens, open_index) -> tuple[str, tuple[str, ...]] | None:
+    end = open_index - 1
+    if end < 0 or tokens[end].kind != "name":
+        return None
+    start = end
+    while start >= 2 and tokens[start - 1].value in (".", ":") and tokens[start - 2].kind == "name":
+        start -= 2
+    root, segments, _ = chain_at(tokens, start)
+    return root, tuple(name for kind, name in segments if kind == "field")
+
+
+def _nil_checked_parameters(tokens, function) -> frozenset[str]:
+    """Parameters the callee tests for nil/truthiness: passing an absent reply
+    field into one of them cannot crash the client."""
+    if not function.params:
+        return frozenset()
+    found: set[str] = set()
+    position = function.body_start
+    while position < function.end:
+        if tokens[position].kind == "kw" and tokens[position].value == "if":
+            if_end = _block_end(tokens, position)
+            for kind, condition, _, _ in _branches(tokens, position, if_end):
+                if kind == "else":
+                    continue
+                positive, negative = condition_paths(tokens, *condition)
+                for _, root, segments in positive | negative:
+                    if root in function.params and not segments:
+                        found.add(root)
+            position = if_end + 1
+            continue
+        position += 1
+    return frozenset(found)
+
+
+def _error_comparison_status(tokens, start, end, function) -> bool | None:
+    """True when the branch condition is `error == xyd.error.OK`, False when it
+    is `error ~= xyd.error.OK`; None when the condition does not compare the
+    request callback's error parameter with OK."""
+    if not function.params:
+        return None
+    parameter = function.params[0]
+    position = start
+    while position < end:
+        token = tokens[position]
+        if token.kind != "name" or token.value != parameter:
+            position += 1
+            continue
+        if position > start and tokens[position - 1].value in (".", ":"):
+            position += 1
+            continue
+        _, segments, after = chain_at(tokens, position)
+        if segments or after + 1 >= end or tokens[after].value not in ("==", "~="):
+            position = max(after, position + 1)
+            continue
+        if _is_error_ok(tokens, after + 1, end):
+            return tokens[after].value == "=="
+        position = after + 1
+    return None
+
+
+def _is_error_ok(tokens, start, end) -> bool:
+    values = [token.value for token in tokens[start:min(end, start + 5)]]
+    return len(values) == 5 and values[1] == "." and values[2] == "error" and values[3] == "." and values[4] == "OK"
 
 
 class Extractor:
@@ -926,14 +1037,20 @@ class Extractor:
                     position = self.handle_for(mid, file, function, position, end, bindings, via, guards, seeds)
                     continue
                 if token.value == "if":
-                    position = self.handle_if(mid, file, function, position, bindings, via, guards, seeds)
+                    position, guards = self.handle_if(mid, file, function, position, bindings, via, guards, seeds)
                     continue
                 if token.value == "function":
                     parsed = index.by_start.get(position)
                     if parsed is not None and parsed.end < end:
                         inner = dict(bindings)
                         if parsed.params and parsed.name is None:
-                            inner[parsed.params[0]] = (Taint(), mid_set(mid))
+                            mode, bound = self.iteration_callback(mid, file, tokens, position, bindings, seeds)
+                            if bound is not None:
+                                parameters = parsed.params[1:] if mode == "values" else parsed.params
+                                for parameter in parameters:
+                                    inner[parameter] = (bound, mid_set(mid))
+                            elif mode is None:
+                                inner[parsed.params[0]] = (Taint(), mid_set(mid))
                         self.scan(mid, file, parsed, parsed.body_start, parsed.end, inner, via, guards, seeds, returned)
                         position = parsed.end + 1
                         continue
@@ -957,8 +1074,7 @@ class Extractor:
                 position = self.handle_assignment(mid, file, function, root, segments, after, bindings, seeds, via, guards)
                 continue
             if after < end and tokens[after].value == "(":
-                self.handle_call(mid, file, function, position, root, segments, after, bindings, via, guards, seeds)
-                position = after
+                position = self.handle_call(mid, file, function, position, root, segments, after, bindings, via, guards, seeds)
                 continue
             if root in bindings:
                 taint, mids = bindings[root]
@@ -977,8 +1093,16 @@ class Extractor:
             path = path_string(parts)
             if not path:
                 continue
-            guarded = fallback or parts in guards or base >= 0 and parts[base:] in local_guards or any(
-                guard[0] == VALUE_BRANCH and parts[:len(guard) - 1] == guard[1:] for guard in guards
+            relax = bool(mids & RELAXATION_MIDS)
+            guarded = (
+                fallback
+                or parts in guards
+                or relax and (
+                    ERROR_BRANCH in guards
+                    or _parent_guarded(parts, guards)
+                    or base >= 0 and (parts[base:] in local_guards or _parent_guarded(parts[base:], local_guards))
+                )
+                or any(guard[0] == VALUE_BRANCH and parts[:len(guard) - 1] == guard[1:] for guard in guards)
             )
             for mid in mids:
                 self.add_site(mid, path, Site(file, line, via, guarded, self.branch_for_site(mid, file, taint.branch)))
@@ -1099,12 +1223,52 @@ class Extractor:
         self.scan(mid, file, function, do_index + 1, loop_end, bindings, via, guards, seeds, None)
         return loop_end + 1
 
-    def handle_if(self, mid, file, function, position, bindings, via, guards, seeds) -> int:
+    def iteration_callback(self, mid, file, tokens, position, bindings, seeds):
+        """A table.sort/foreach callback receives entries of the container
+        argument; when that container is a reply, bind its element taint so the
+        callback's reads keep the reply's receiver prefix (contents[].id)."""
+        if mid not in RELAXATION_MIDS:
+            return None, None
+        call = _call_argument_at(tokens, position)
+        if call is None:
+            return None, None
+        open_index, arguments, argument_index = call
+        mode = ITERATION_CALLBACKS.get(_callee_identity(tokens, open_index))
+        if mode is None or argument_index < 1:
+            return None, None
+        container = arguments[0]
+        found = self.expression_taint(file, container[0], bindings, seeds)
+        if found is None:
+            found = self.stored_read_taint(mid, file, container)
+        if found is None:
+            return mode, None
+        return mode, element(found[0])
+
+    def stored_read_taint(self, mid, file, argument):
+        """The reply taint the client stored at a self/file field earlier in
+        this callback (self.boardInfo = reply.contents)."""
+        tokens = self.index(file).tokens
+        root, segments, _ = chain_at(tokens, argument[0])
+        store_path = tuple(segments)
+        if not store_path:
+            return None
+        function = self.index(file).innermost[argument[0]]
+        owner = enclosing_self_class(self.file_class(file), function, root)
+        taints = self.stores.get((owner, file, store_path)) if owner is not None else None
+        if taints is None:
+            taints = self.file_stores.get((file, store_path))
+        matches = [(taint, mids) for taint, mids in (taints or {}).items() if mid in mids]
+        if not matches:
+            return None
+        taint = max((item for item, _ in matches), key=lambda item: (len(item.path), item.path))
+        return taint, frozenset({mid})
+
+    def handle_if(self, mid, file, function, position, bindings, via, guards, seeds) -> tuple[int, frozenset]:
         tokens = self.index(file).tokens
         if_end = _block_end(tokens, position)
         branches = _branches(tokens, position, if_end)
         if not branches:
-            return position + 1
+            return position + 1, guards
         exiting: list[tuple[str, frozenset[tuple[str, ...]], frozenset[tuple[str, ...]]]] = []
         value_branch = frozenset(
             (VALUE_BRANCH,) + path[:len(path) - path[::-1].index("[]")]
@@ -1115,24 +1279,38 @@ class Extractor:
             guard for kind, condition, _, _ in branches if kind != "else"
             for guard in self.record_branches(_compared_chains(tokens, *condition), bindings, seeds)
         )
+        relax = mid in RELAXATION_MIDS
+        previous_success: bool | None = None
         for kind, condition, body_start, body_end in branches:
             positive, negative = (self.reply_paths(chains, bindings, seeds) for chains in condition_paths(tokens, *condition))
+            if kind == "else":
+                error_branch = relax and previous_success is True
+            else:
+                status = _error_comparison_status(tokens, *condition, function) if relax else None
+                error_branch = status is False
+                previous_success = status
+            compared = frozenset(
+                path for path in self.reply_paths(_compared_chains(tokens, *condition), bindings, seeds)
+                if relax and path and path[0] != LOCAL_GUARD
+            )
             self.scan(mid, file, function, condition[0], condition[1], bindings, via,
-                      guards | positive | negative, seeds, None)
+                      guards | positive | negative | compared, seeds, None)
             branch_guards = guards | (negative if kind == "else" else positive)
             branch_guards = branch_guards | value_branch
+            if error_branch:
+                branch_guards = branch_guards | frozenset({ERROR_BRANCH})
             states = frozenset() if kind == "else" else state_guards(tokens, *condition, file, function)
             branch_seeds = seeds_for_states(seeds, states, body_start, body_end)
             self.scan(mid, file, function, body_start, body_end, bindings, via, frozenset(branch_guards | states), branch_seeds, None)
             if kind != "else":
                 exiting.append((kind, positive, negative))
         has_else = any(kind == "else" for kind, _, _, _ in branches)
-        if not has_else:
+        if not has_else and relax:
             for kind, positive, negative in exiting:
                 if branch_exits(tokens, *_branch_body(tokens, position, if_end, kind)):
                     guards = guards | negative
                     break
-        return if_end + 1
+        return if_end + 1, guards
 
     @staticmethod
     def record_branches(chains, bindings, seeds) -> frozenset[tuple[str, ...]]:
@@ -1163,13 +1341,13 @@ class Extractor:
         return frozenset(parts[-1] for parts in resolved if parts)
 
     # ------------------------------------------------------------------- calls
-    def handle_call(self, mid, file, function, position, root, segments, after, bindings, via, guards, seeds) -> None:
+    def handle_call(self, mid, file, function, position, root, segments, after, bindings, via, guards, seeds) -> int:
         del position
         tokens = self.index(file).tokens
         arguments, _ = split_arguments(tokens, after)
         target = self.resolve_callee(file, function, root, segments)
         if target is None:
-            return
+            return after
         target_file, target_function, offset = target
         bound: dict[str, tuple[Taint, frozenset[int]]] = {}
         for index, argument in enumerate(arguments):
@@ -1182,16 +1360,20 @@ class Extractor:
             if found is not None:
                 bound[target_function.params[parameter]] = found
         if not bound:
-            return
+            return after
         inherited = frozenset(guard for guard in guards if guard[:1] == (VALUE_BRANCH,))
         key = (target_file, target_function.start, tuple(sorted((name, value[0].path, value[0].wrapper or "") for name, value in bound.items())), inherited)
         if key in self.replay:
-            return
+            return after
         self.replay.add(key)
-        for taint, mids in bound.values():
-            self.record_read(file, tokens[after].line, taint, [], via, guards, mids)
+        safe = _nil_checked_parameters(self.index(target_file).tokens, target_function) if mid in RELAXATION_MIDS else frozenset()
+        for parameter, (taint, mids) in bound.items():
+            self.record_read(file, tokens[after].line, taint, [], via, guards, mids, fallback=parameter in safe)
         self.scan(mid, target_file, target_function, target_function.body_start, target_function.end, bound,
                   f"{root}:{segments[-1][1] if segments else target_function.name or ''}", inherited, None, None)
+        if safe and safe.issuperset(bound):
+            return matching_close(tokens, after) + 1
+        return after
 
     def resolve_callee(self, file, function, root, segments) -> tuple[str, Function, int] | None:
         if segments and segments[-1][0] == "method":

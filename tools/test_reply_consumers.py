@@ -650,5 +650,146 @@ class RequestBranchTests(unittest.TestCase):
         self.assertEqual(waived["mids"]["1829"]["branches"]["sub_type"]["1"]["paths"][0]["requirement"], "WAIVED")
 
 
+def mechanism_blobs(symbol, number, body):
+    return {
+        "app/common/network/mid.lua": f"xyd.mid.{symbol} = {number}\n",
+        "app/common/enums.lua": "",
+        "data/tables/model_define.lua": "",
+        "app/common/network/Backend.lua": "",
+        "app/model/Mechanism.lua": 'local var_0_0 = class("Mechanism")\n' + body,
+    }
+
+
+def mechanism_requirements(symbol, number, body):
+    return obligation_map(reply_consumers.build(mechanism_blobs(symbol, number, body), collapse=False))[str(number)]["paths"]
+
+
+class IterationCallbackPrefixTests(unittest.TestCase):
+    def test_a_sort_callback_keeps_the_receiver_prefix_through_a_stored_field(self):
+        # MID 1537: arg_4_0.boardInfo = reply.contents, then table.sort sorts it.
+        # The comparator reads entries, so the path is contents[].notice_id.
+        requirements = mechanism_requirements(
+            "GET_BOARD_INFO", 1537,
+            "function var_0_0.load(arg_1_0)\n"
+            "\txyd.Backend.get():request(xyd.mid.GET_BOARD_INFO, {}, function(arg_2_0, arg_2_1)\n"
+            "\t\targ_1_0.boardInfo = arg_2_1.contents or {}\n"
+            "\t\ttable.sort(arg_1_0.boardInfo, function(arg_3_0, arg_3_1)\n"
+            "\t\t\treturn arg_3_0.notice_id > arg_3_1.notice_id\n"
+            "\t\tend)\n"
+            "\tend)\n"
+            "end\n",
+        )
+        self.assertEqual("REQUIRED", requirements["contents[].notice_id"])
+        self.assertNotIn("notice_id", requirements)
+
+
+class ParentNilGuardTests(unittest.TestCase):
+    def test_a_nil_guard_on_a_parent_path_guards_its_children(self):
+        # MID 50: each reward list is read only under `if reply.X then`.
+        requirements = mechanism_requirements(
+            "SUMMON_HERO", 50,
+            "function var_0_0.load(arg_1_0)\n"
+            "\txyd.Backend.get():request(xyd.mid.SUMMON_HERO, {}, function(arg_2_0, arg_2_1)\n"
+            "\t\tif arg_2_1.extra_reward then\n"
+            "\t\t\tprint(arg_2_1.extra_reward.item_id, arg_2_1.extra_reward.item_num)\n"
+            "\t\tend\n"
+            "\tend)\n"
+            "end\n",
+        )
+        for path in ("extra_reward", "extra_reward.item_id", "extra_reward.item_num"):
+            self.assertEqual("OPTIONAL", requirements[path], path)
+
+    def test_a_guard_that_returns_early_guards_later_reads(self):
+        # MID 1829: `if not local then ... return end` then reads are safe.
+        requirements = mechanism_requirements(
+            "GET_PLAYER_CARD_INFO", 1829,
+            "function var_0_0.load(arg_1_0)\n"
+            "\txyd.Backend.get():request(xyd.mid.GET_PLAYER_CARD_INFO, {}, function(arg_2_0, arg_2_1)\n"
+            "\t\tif not arg_2_1.avatar_file_path then\n"
+            "\t\t\tprint(\"default\")\n"
+            "\t\t\treturn\n"
+            "\t\tend\n"
+            "\t\tprint(arg_2_1.avatar_file_path)\n"
+            "\tend)\n"
+            "end\n",
+        )
+        self.assertEqual("OPTIONAL", requirements["avatar_file_path"])
+
+    def test_a_nil_safe_comparison_read_is_optional(self):
+        # MID 54 / 1303: `nil == constant` is a legal comparison, never a crash.
+        requirements = mechanism_requirements(
+            "SET_HERO_EQUIP", 54,
+            "function var_0_0.load(arg_1_0)\n"
+            "\txyd.Backend.get():request(xyd.mid.SET_HERO_EQUIP, {}, function(arg_2_0, arg_2_1)\n"
+            "\t\tif arg_2_1.error_code == 30001 then\n"
+            "\t\t\tprint(\"already\")\n"
+            "\t\tend\n"
+            "\t\tfor iter_2_0, iter_2_1 in ipairs(arg_2_1.awards) do\n"
+            "\t\t\tif iter_2_1.is_partner == true then\n"
+            "\t\t\t\tprint(\"partner\")\n"
+            "\t\t\tend\n"
+            "\t\tend\n"
+            "\tend)\n"
+            "end\n",
+        )
+        self.assertEqual("OPTIONAL", requirements["error_code"])
+        self.assertEqual("OPTIONAL", requirements["awards[].is_partner"])
+
+    def test_a_helper_that_nil_checks_its_parameter_guards_the_call_argument(self):
+        # MID 2480: setCoolTime guards both time parameters; passing an unset
+        # time (putUnix omits it) is legal.
+        requirements = mechanism_requirements(
+            "LOAD_PEAK_ARENA", 2480,
+            "function var_0_0.setCoolTime(arg_1_0, arg_1_1)\n"
+            "\tif arg_1_1 then\n"
+            "\t\tprint(arg_1_1)\n"
+            "\tend\n"
+            "end\n"
+            "function var_0_0.load(arg_2_0)\n"
+            "\txyd.Backend.get():request(xyd.mid.LOAD_PEAK_ARENA, {}, function(arg_3_0, arg_3_1)\n"
+            "\t\targ_2_0:setCoolTime(arg_3_1.last_fight_time)\n"
+            "\tend)\n"
+            "end\n",
+        )
+        self.assertEqual("OPTIONAL", requirements["last_fight_time"])
+
+
+class ErrorBranchTests(unittest.TestCase):
+    def test_reads_in_the_non_ok_login_branch_are_optional(self):
+        # MID 1: the success body deliberately has no error_msg/error_code.
+        requirements = mechanism_requirements(
+            "RETRIEVE_TOKEN", 1,
+            "function var_0_0.load(arg_1_0)\n"
+            "\txyd.Backend.get():request(xyd.mid.RETRIEVE_TOKEN, {}, xyd.scb(arg_1_0, function(arg_2_0, arg_2_1)\n"
+            "\t\tif arg_2_0 == xyd.error.OK then\n"
+            "\t\t\tprint(arg_2_1.detail)\n"
+            "\t\telse\n"
+            "\t\t\tprint(arg_2_1.error_msg, arg_2_1.error_code)\n"
+            "\t\tend\n"
+            "\tend))\n"
+            "end\n",
+        )
+        for path in ("error_msg", "error_code"):
+            self.assertEqual("OPTIONAL", requirements[path], path)
+        self.assertEqual("REQUIRED", requirements["detail"])
+
+    def test_a_non_error_else_branch_keeps_its_reads_required(self):
+        # The relaxation must not treat every else as a failure branch.
+        requirements = mechanism_requirements(
+            "EDIT_PLAYER_NAME", 23,
+            "function var_0_0.load(arg_1_0)\n"
+            "\txyd.Backend.get():request(xyd.mid.EDIT_PLAYER_NAME, {}, function(arg_2_0, arg_2_1)\n"
+            "\t\tif arg_2_1.flag then\n"
+            "\t\t\tprint(arg_2_1.then_value)\n"
+            "\t\telse\n"
+            "\t\t\tprint(arg_2_1.else_value)\n"
+            "\t\tend\n"
+            "\tend)\n"
+            "end\n",
+        )
+        for path in ("then_value", "else_value"):
+            self.assertEqual("REQUIRED", requirements[path], path)
+
+
 if __name__ == "__main__":
     unittest.main()
