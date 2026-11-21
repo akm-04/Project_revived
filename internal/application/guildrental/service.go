@@ -296,23 +296,8 @@ func (s Service) LendTx(c context.Context, t tx.Tx, scope ca.CoherentReadScope, 
 	if err != nil {
 		return nil, err
 	}
-	// Mission rows precede the economy debit (C16 records Fact 116 in START).
-	timed, err := generation.NewTimedOperation(bound, scope.ObservedAt)
-	if err != nil {
-		return nil, err
-	}
-	prepared, err := s.Facts.PrepareTx(c, t, borrower, timed)
-	if err != nil {
-		return nil, err
-	}
 	if _, err := s.Costs.DebitMaterialCostTx(c, t, borrower, i5.MaterialCost{Scalars: []i5.ScalarMaterialCost{{ResourceKey: manaResource, Amount: total}}}, bound); err != nil {
 		return nil, fmt.Errorf("%w: %w", d.ErrLoanRefused, err)
-	}
-	for _, loan := range paid {
-		key := fmt.Sprintf("rental:%d:%d:%d", int64(borrower), int64(loan.Lender), day)
-		if err := s.Facts.RecordTx(prepared, t, bound, objective.Fact{PlayerID: borrower, SourceDomain: "guildrental", SourceBusinessKey: key, Kind: "HERO_LENT", Delta: 1}); err != nil {
-			return nil, err
-		}
 	}
 	// A-206 R7: a charged hero loan advances the lender's mission 1003 last,
 	// after the borrower's economy debit. Pet loans are not girl missions.
@@ -371,8 +356,43 @@ func (s Service) Place(c context.Context, a identity.ActorContext, kind guild.Re
 		if err := s.checkCap(offers, kind, unitID, privilege.VIPLevel); err != nil {
 			return err
 		}
-		return s.Store.InsertRentalOfferTx(c, t, guild.RentalOffer{Lender: a.PlayerID, Kind: kind, Unit: unitID, Guild: membership.GuildID, Force: unit.Force, RentTime: at})
+		offer := guild.RentalOffer{Lender: a.PlayerID, Kind: kind, Unit: unitID, Guild: membership.GuildID, Force: unit.Force, RentTime: at}
+		if err := s.Store.InsertRentalOfferTx(c, t, offer); err != nil {
+			return err
+		}
+		return s.recordLenderMissionFact(c, t, offer, op)
 	})
+}
+
+// recordLenderMissionFact advances the lender's "Lend 1 battle girl" mission
+// (fact 116) when the offer is placed. C16/D413 credited the borrower's paid
+// START instead, but the stock client confirms the send with "You will lend {}
+// out" (translation.lua:3016) before it sends RENT_HERO, and the user expects
+// the lend itself. A pet is not a battle girl.
+// UNKNOWN: the original server's action; the client text and the user report
+// name the lend, not the borrow.
+func (s Service) recordLenderMissionFact(c context.Context, t tx.Tx, offer guild.RentalOffer, op operation.Context) error {
+	if offer.Kind != guild.RentalHero {
+		return nil
+	}
+	revision, err := s.Content.ActiveRevision(c, t)
+	if err != nil {
+		return err
+	}
+	bound, err := bindContent(op, revision)
+	if err != nil {
+		return err
+	}
+	timed, err := generation.NewTimedOperation(bound, offer.RentTime)
+	if err != nil {
+		return err
+	}
+	prepared, err := s.Facts.PrepareTx(c, t, offer.Lender, timed)
+	if err != nil {
+		return err
+	}
+	return s.Facts.RecordTx(prepared, t, bound, objective.Fact{PlayerID: offer.Lender, SourceDomain: "guildrental",
+		SourceBusinessKey: offerKey(offer), Kind: "HERO_LENT", Delta: 1})
 }
 
 func (s Service) checkCap(offers []guild.RentalOffer, kind guild.RentalKind, unitID, vipLevel int64) error {

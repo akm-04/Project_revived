@@ -23,3 +23,22 @@ func TestMarchProducerActivatesOldPinnedDefinitionOnly(t *testing.T) {
 		t.Fatal("unrelated deferral bypassed")
 	}
 }
+
+func TestGuildRentalProducerActivatesOldPinnedLendMission(t *testing.T) {
+	m := MissionMaterializer{}
+	d := objective.MissionDefinition{AcceptedFactKind: "HERO_LENT", Presentation: objective.MissionPresentation{DeferredUntil: "I9-9"}}
+	if !m.bindingAvailable(d) {
+		t.Fatal("old pinned lend mission remained deferred")
+	}
+	for _, kind := range []string{"GUILD_ACTIVITY", "TEA_PARTY_DONATED", objective.IntimacyImprovedKind} {
+		d.AcceptedFactKind = kind
+		if m.bindingAvailable(d) {
+			t.Fatal("unimplemented producer activated", kind)
+		}
+	}
+	d.AcceptedFactKind = "HERO_LENT"
+	d.Presentation.DeferredUntil = "I10"
+	if m.bindingAvailable(d) {
+		t.Fatal("unrelated deferral bypassed")
+	}
+}
