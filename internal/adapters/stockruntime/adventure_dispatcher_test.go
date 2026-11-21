@@ -2,6 +2,7 @@ package stockruntime
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"testing"
 	"time"
@@ -185,6 +186,28 @@ func TestAdventureDispatcherRoutesRoomMIDs(t *testing.T) {
 	}
 	if stub.result.Star != 1 || stub.pick.PartnerID != 11 {
 		t.Fatalf("parsed result %+v pick %+v", stub.result, stub.pick)
+	}
+}
+
+// BUGS #126: the stock defense battle scene sends the raw harm sum as
+// total_damage (BattleCreate.lua:3175,3182), a Lua double that can carry a
+// fraction. The sibling result paths floor it client-side (BattleCreate.lua:18,
+// 3239); the decoder must accept the same wire value.
+func TestAdventureDispatcherDefenseResultAcceptsFractionalDamage(t *testing.T) {
+	stub := &adventureStub{}
+	dispatcher := AdventureDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: stub}
+	response := dispatcher.Dispatch(context.Background(), adventureRequest(2410, map[string]any{
+		"star":         json.Number("3"),
+		"total_damage": json.Number("12345.75"),
+		"monster_pos":  json.Number("2"),
+		"formation":    "11|12",
+		"table_id":     json.Number("10001"),
+	}))
+	if response.HTTPStatus != 200 {
+		t.Fatalf("fractional total_damage refused: %d %#v", response.HTTPStatus, response.Body)
+	}
+	if stub.result.Damage != 12345 || stub.result.Star != 3 {
+		t.Fatalf("parsed result %+v", stub.result)
 	}
 }
 

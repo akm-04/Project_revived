@@ -2,6 +2,7 @@ package adventure
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -27,6 +28,14 @@ const (
 	defenseGiftTitle  = "Guard Campus Rewards"
 	defenseGiftBody   = "Congrats on your success in guarding the campus against the invasion of the rogues. Thank you very much and present the following rewards to you."
 	defenseGiftSender = "Student union: Smartie"
+
+	// defenseBusyStarted is the busy type StartDefense writes (PrepareDefense
+	// writes type 1).
+	defenseBusyStarted = 2
+	// defenseExpiredKind and defenseExpiredReceiptPrefix close a started
+	// position whose RESULT deadline passed, so the lock cannot outlive it.
+	defenseExpiredKind          = "ADVENTURE_DEFENSE_EXPIRED"
+	defenseExpiredReceiptPrefix = "adventure-defense-expired:"
 
 	defenseMailSourceKind = "ADVENTURE_DEFENSE"
 )
@@ -201,7 +210,13 @@ func (s Mode) PrepareDefense(c context.Context, a identity.ActorContext, positio
 				return fmt.Errorf("%w: monster already killed", d.ErrRefused)
 			}
 			if state.Busy[position-1].Type != 0 {
-				return fmt.Errorf("%w: position is busy", d.ErrRefused)
+				released, err := s.releaseExpiredDefenseHold(c, sc, *room, position, state)
+				if err != nil {
+					return err
+				}
+				if !released && state.Busy[position-1].Type != 0 {
+					return fmt.Errorf("%w: position is busy", d.ErrRefused)
+				}
 			}
 			progress := d.DefenseProgress{}
 			copy(progress.Tries[:], state.TriesOf(int64(a.PlayerID)))
@@ -220,6 +235,43 @@ func (s Mode) PrepareDefense(c context.Context, a identity.ActorContext, positio
 		return nil, err
 	}
 	return map[string]any{}, nil
+}
+
+// releaseExpiredDefenseHold retires a started position whose frozen combat
+// attempt can no longer settle (the RESULT deadline passed, or the attempt is
+// gone or already terminal). Without it a battle whose RESULT never arrives
+// holds the position forever; the next PrepareDefense of that position frees it.
+func (s Mode) releaseExpiredDefenseHold(c context.Context, sc gen.TimedScope, room sharedroom.Room, position int64, state *d.RoomState) (bool, error) {
+	if state.Busy[position-1].Type != defenseBusyStarted {
+		return false, nil
+	}
+	at := sc.Operation.DecisionAt()
+	current, found, err := s.Combat.CurrentAttemptTx(c, sc.Tx, defenseLocator(room, position))
+	if err != nil {
+		return false, err
+	}
+	if !defenseHoldExpired(found, current.Attempt, at) {
+		return false, nil
+	}
+	if found && current.Attempt.State == cd.Staged {
+		_, err = s.Combat.CloseTx(c, sc.Tx, cb.TerminalRequest{Locator: defenseLocator(room, position),
+			GenerationRef: current.Attempt.GenerationRef, TerminalKind: defenseExpiredKind,
+			SemanticReceiptID: defenseExpiredReceiptPrefix + current.Attempt.ID.String(), At: at})
+		if err != nil && !errors.Is(err, cb.ErrAttemptNotFound) && !errors.Is(err, cd.ErrStale) {
+			return false, err
+		}
+	}
+	holder := state.Busy[position-1].Player
+	state.Busy[position-1] = d.BusyState{}
+	delete(state.Attempts, strconv.Itoa(int(position)))
+	state.AddPush(8, holder, false, map[string]any{"room_id": room.ID, "monster_pos": position})
+	return true, nil
+}
+
+// defenseHoldExpired reports whether a started hold's attempt can no longer
+// settle: absent, already terminal, or at/after the deadline START froze.
+func defenseHoldExpired(found bool, attempt cd.Attempt, at time.Time) bool {
+	return !found || attempt.State != cd.Staged || !at.Before(attempt.ResultDeadline)
 }
 
 // StartDefense answers 2431: a client-summary attempt is frozen for one monster.

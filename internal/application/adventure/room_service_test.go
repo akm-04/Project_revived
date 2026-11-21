@@ -3,9 +3,11 @@ package adventure
 import (
 	"context"
 	"testing"
+	"time"
 
 	"gxb.local/backend/v2/internal/application/playerdirectory"
 	d "gxb.local/backend/v2/internal/domain/adventure"
+	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/sharedroom"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -80,6 +82,29 @@ func TestRoomMemberInfosCarryGuildAndConquer(t *testing.T) {
 	}
 	if got := guilds.reads[0].players; len(got) != 2 || got[0] != 11 || got[1] != 22 {
 		t.Fatalf("guild read players %#v want one batch of both members", got)
+	}
+}
+
+// BUGS #126: a started position is released only once its frozen RESULT
+// deadline has passed, or when its attempt can no longer settle.
+func TestDefenseHoldExpiredFollowsResultDeadline(t *testing.T) {
+	deadline := time.Unix(1700000000, 0).UTC()
+	for _, test := range []struct {
+		name    string
+		found   bool
+		attempt cd.Attempt
+		at      time.Time
+		want    bool
+	}{
+		{"live", true, cd.Attempt{State: cd.Staged, ResultDeadline: deadline}, deadline.Add(-time.Second), false},
+		{"at deadline", true, cd.Attempt{State: cd.Staged, ResultDeadline: deadline}, deadline, true},
+		{"past deadline", true, cd.Attempt{State: cd.Staged, ResultDeadline: deadline}, deadline.Add(time.Second), true},
+		{"terminal attempt", true, cd.Attempt{State: cd.Terminal, ResultDeadline: deadline}, deadline.Add(-time.Second), true},
+		{"missing attempt", false, cd.Attempt{}, deadline.Add(-time.Second), true},
+	} {
+		if got := defenseHoldExpired(test.found, test.attempt, test.at); got != test.want {
+			t.Fatalf("%s: expired=%v want %v", test.name, got, test.want)
+		}
 	}
 }
 
