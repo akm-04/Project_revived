@@ -448,7 +448,11 @@ func (s Service) settleLounge(ctx context.Context, t tx.Tx, r dorm.Room, heroes 
 		}
 		facts[p] = f
 		heroes[p] = next
-		exp = append(exp, map[string]any{"partner_id": p, "exp": next.Exp})
+		// Only a settled gain is reported: the stock client animates every
+		// exp_partners row as "+100", so a zero-gain row fakes a payout.
+		if next.Exp != h.Exp {
+			exp = append(exp, map[string]any{"partner_id": p, "exp": next.Exp})
+		}
 	}
 	body["exp_partners"] = exp
 	return nil
