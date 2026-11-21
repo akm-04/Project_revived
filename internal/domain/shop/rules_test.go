@@ -154,6 +154,12 @@ func TestPriceAppliesDiscountAndMonthCard(t *testing.T) {
 	}
 }
 
+func TestLockRankShopRowIsPinned(t *testing.T) {
+	if LockRankShopRow != 460 {
+		t.Fatalf("shop row lock rank %d, want 460", LockRankShopRow)
+	}
+}
+
 func TestNeedsScheduledRerollAcrossMarksAndDay(t *testing.T) {
 	shop := testCatalog().Shops[1]
 	gmt8 := time.FixedZone("GMT+8", 8*3600)
@@ -170,6 +176,22 @@ func TestNeedsScheduledRerollAcrossMarksAndDay(t *testing.T) {
 	}
 	if !NeedsScheduledReroll(shop, Stock{ScheduleDay: day - 1, ScheduleMark: 4, Slots: []StockSlot{{Index: 1}}}, at) {
 		t.Fatal("a generation from the previous game day must reroll")
+	}
+	// Before 05:00 GMT+8 the game day that began the previous morning is still
+	// running: all of its marks have passed, so a generation from 10:00 must
+	// reroll even though the calendar clock has passed midnight.
+	night := time.Date(2026, 11, 19, 0, 30, 0, 0, gmt8)
+	nightDay, nightMark := ScheduledMark(shop, night)
+	if nightDay != day || nightMark != 4 {
+		t.Fatalf("00:30 GMT+8 = day %d mark %d, want day %d mark 4", nightDay, nightMark, day)
+	}
+	if !NeedsScheduledReroll(shop, Stock{ScheduleDay: day, ScheduleMark: 1, Slots: []StockSlot{{Index: 1}}}, night) {
+		t.Fatal("a generation from before the evening marks must reroll after midnight of the same game day")
+	}
+	_, marksBefore := ScheduledMark(shop, time.Date(2026, 11, 19, 4, 59, 0, 0, gmt8))
+	afterDay, marksAfter := ScheduledMark(shop, time.Date(2026, 11, 19, 5, 1, 0, 0, gmt8))
+	if marksBefore != 4 || marksAfter != 0 || afterDay == day {
+		t.Fatalf("05:00 boundary marks %d/%d day %d/%d", marksBefore, marksAfter, day, afterDay)
 	}
 	noSchedule := Shop{Type: 7}
 	if NeedsScheduledReroll(noSchedule, Stock{ScheduleDay: 0, ScheduleMark: 0, Slots: []StockSlot{{Index: 1}}}, at) {
