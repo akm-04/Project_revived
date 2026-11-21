@@ -8,11 +8,13 @@ import (
 	"fmt"
 
 	"gxb.local/backend/v2/internal/application/characterasset"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	lib "gxb.local/backend/v2/internal/domain/librarylocal"
+	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -153,6 +155,12 @@ func putHeroPromotionReceipt(ctx context.Context, s Service, t tx.Tx, actor iden
 	rr.PolicyVersion = heroPromotionPolicyVersion
 	_, err = s.Receipts.PutTx(ctx, t, rr)
 	return err
+}
+
+// promotionFactsReady reports whether the production objective-fact port and
+// its authoritative clock are composed. Standalone fixtures keep them unset.
+func (s Service) promotionFactsReady() bool {
+	return s.Facts.Open != nil && s.Facts.Owner.Store != nil && s.Facts.Owner.Receipts != nil && s.Timed.Binder.Time != nil
 }
 
 func (s Service) validatePromotionBase() error {
@@ -496,6 +504,14 @@ func (s Service) PowerUpHero(ctx context.Context, actor identity.ActorContext, p
 	if err != nil {
 		return HeroPromotionResult{}, err
 	}
+	factsReady := s.promotionFactsReady()
+	var timed gen.TimedOperation
+	if factsReady {
+		timed, err = s.Timed.Binder.Bind(ctx, bound)
+		if err != nil {
+			return HeroPromotionResult{}, err
+		}
+	}
 	id := heroReceiptID(actor, "powerup-hero", bound)
 	fp, err := receipt.FingerprintRequest(map[string]any{"partner_id": partnerID})
 	if err != nil {
@@ -533,6 +549,13 @@ func (s Service) PowerUpHero(ctx context.Context, actor identity.ActorContext, p
 		if !allOrdinaryCollected(hero, positions) {
 			return ErrHeroPromotionPrerequisites
 		}
+		factContext := txctx
+		if factsReady {
+			factContext, err = s.Facts.PrepareTx(txctx, scope.Tx, actor.PlayerID, timed)
+			if err != nil {
+				return err
+			}
+		}
 		restoration, err := s.buildPromotionRestorationPlanTx(txctx, scope.Tx, actor, revision, hero, positions, bound)
 		if err != nil {
 			return err
@@ -562,6 +585,12 @@ func (s Service) PowerUpHero(ctx context.Context, actor identity.ActorContext, p
 				return err
 			}
 		}
+		if factsReady && next.Color > hero.Color {
+			fact := objective.Fact{PlayerID: actor.PlayerID, SourceDomain: "character-hero", SourceBusinessKey: bound.ID.String(), Kind: "HERO_PROMOTED", Delta: 1}
+			if err := s.Facts.RecordTx(factContext, scope.Tx, bound, fact); err != nil {
+				return err
+			}
+		}
 		awards, err := awardsFromRestoration(grantResult)
 		if err != nil {
 			return err
@@ -582,6 +611,14 @@ func (s Service) OneClickJinjie(ctx context.Context, actor identity.ActorContext
 	bound, revision, err := s.bindPromotionContent(ctx, op, true)
 	if err != nil {
 		return HeroPromotionResult{}, err
+	}
+	factsReady := s.promotionFactsReady()
+	var timed gen.TimedOperation
+	if factsReady {
+		timed, err = s.Timed.Binder.Bind(ctx, bound)
+		if err != nil {
+			return HeroPromotionResult{}, err
+		}
 	}
 	id := heroReceiptID(actor, "one-click-jinjie", bound)
 	fp, err := receipt.FingerprintRequest(map[string]any{"partner_id": partnerID})
@@ -629,6 +666,13 @@ func (s Service) OneClickJinjie(ctx context.Context, actor identity.ActorContext
 			return errors.New("character hero: invalid max_color policy value")
 		}
 		promote := hero.Color < maxColor
+		factContext := txctx
+		if promote && factsReady {
+			factContext, err = s.Facts.PrepareTx(txctx, scope.Tx, actor.PlayerID, timed)
+			if err != nil {
+				return err
+			}
+		}
 		var restoration *grant.Plan
 		if promote {
 			restoration, err = s.buildPromotionRestorationPlanTx(txctx, scope.Tx, actor, revision, hero, positions, bound)
@@ -685,6 +729,12 @@ func (s Service) OneClickJinjie(ctx context.Context, actor identity.ActorContext
 		}
 		if logID, ok := lib.ColorLogID(next.Color); ok && next.Color > hero.Color {
 			if err := s.recordHeroJournalTx(txctx, scope.Tx, actor.PlayerID, next.PartnerID, logID, bound.StartedAt); err != nil {
+				return err
+			}
+		}
+		if promote && factsReady {
+			fact := objective.Fact{PlayerID: actor.PlayerID, SourceDomain: "character-hero", SourceBusinessKey: bound.ID.String(), Kind: "HERO_PROMOTED", Delta: 1}
+			if err := s.Facts.RecordTx(factContext, scope.Tx, bound, fact); err != nil {
 				return err
 			}
 		}

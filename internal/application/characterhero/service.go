@@ -97,6 +97,7 @@ type Service struct {
 	StrictRestoration         appi5.TxStrictRestorationSettler
 	MaxHeroColorPolicy        MaxHeroColorPolicyProvider
 	RestorationModifier       RestorationModifier
+	Facts                     appi5.ObjectiveFacts
 	RosterProjection          HeroRosterProjectionContent
 	AppearanceStore           HeroAppearanceStore
 	Appearance                characterasset.AppearanceContent

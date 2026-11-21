@@ -7615,15 +7615,6 @@
    ]
   },
   {
-   "fact": "HERO_PROMOTED",
-   "missions": [
-    2
-   ],
-   "stages": [
-    "I9-11"
-   ]
-  },
-  {
    "fact": "PET_FED",
    "missions": [
     121
