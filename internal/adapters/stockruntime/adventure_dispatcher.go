@@ -2,7 +2,11 @@ package stockruntime
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"math"
+	"strconv"
+	"strings"
 
 	app "gxb.local/backend/v2/internal/application/adventure"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
@@ -266,13 +270,34 @@ func adventureResult(params map[string]any) (app.ResultRequest, bool) {
 // adventureDefenseResult reads 2410: the client's star, position and damage.
 func adventureDefenseResult(params map[string]any) (app.ResultRequest, int64, bool) {
 	star, starOK := topFloorInteger(params, "star", true)
-	damage, damageOK := topFloorInteger(params, "total_damage", true)
+	damage, damageOK := adventureDamage(params["total_damage"])
 	position, positionOK := topFloorInteger(params, "monster_pos", true)
 	pet, petOK := topFloorInteger(params, "pet_id", false)
 	formation, formationOK := topFloorFormation(params["formation"])
 	allowed := onlyStockGameplayParams(params, "star", "total_damage", "monster_pos", "formation", "pet_id", "table_id", "rent_pet_id", "rent_pet_player_id", "rent_formation", "rent_player_id")
 	request := app.ResultRequest{Star: star, Damage: damage, PetID: pet, Formation: formation}
 	return request, position, allowed && starOK && damageOK && positionOK && petOK && formationOK
+}
+
+// maxStockDamage is the largest exactly representable integer in the client's
+// Lua double (2^53-1).
+const maxStockDamage = 9007199254740991
+
+// adventureDamage reads total_damage, the battle scene's raw harm sum: a Lua
+// double that can carry a fraction (BattleCreate.lua:3175,3182). The sibling
+// result paths floor it before sending (math.floor, BattleCreate.lua:18,3239),
+// so the same floor is the wire conversion here.
+func adventureDamage(raw any) (int64, bool) {
+	number, fractional := raw.(json.Number)
+	if !fractional || !strings.ContainsAny(number.String(), ".eE") {
+		value, err := feedbackInteger(raw, 0, maxStockDamage)
+		return value, err == nil
+	}
+	value, err := strconv.ParseFloat(number.String(), 64)
+	if err != nil || math.IsNaN(value) || math.IsInf(value, 0) || value < 0 || value > maxStockDamage {
+		return 0, false
+	}
+	return int64(math.Floor(value)), true
 }
 
 func adventureDefenseStart(params map[string]any) (app.FightRequest, bool) {

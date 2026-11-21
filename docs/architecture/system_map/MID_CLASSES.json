@@ -114552,6 +114552,8 @@
     }
    ],
    "state_writes": [
+    "internal/adapters/postgres/combatstore/store.go:176",
+    "internal/adapters/postgres/combatstore/store.go:26",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:93"
    ],
@@ -114567,6 +114569,31 @@
     }
    ],
    "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/combatstore/store.go",
+     "line": 26,
+     "statement": "SELECT 1 FROM combat_locator_roots WHERE domain_kind=$1 AND authority_scope=$2 AND domain_locator=$3 FOR UPDATE"
+    },
+    {
+     "file": "internal/adapters/postgres/combatstore/store.go",
+     "line": 72,
+     "statement": "SELECT attempt_id::text,domain_kind,authority_scope,domain_locator,actor_player_id,gameplay_context_id::text,generation_ref,start_fingerprint,snapshot_hash,rules_corpus_version,entropy_key_version,resolver_status,COALESCE(resolver_failure,''),state,started_at,result_deadline,state_version,COALESCE(resolution_hash,''),COALESCE(terminal_kind,''),terminal_at,COALESCE(semantic_receipt_id,''),trust_profile_id,trust_profile_version,replay_response,replay_error_code,COALESCE(supersedes_attempt_id::text,'') FROM combat_attempts WHERE domain_kind=$1 AND authority_scope=$2 AND domain_locator=$3 AND state<>'TERMINAL'"
+    },
+    {
+     "file": "internal/adapters/postgres/combatstore/store.go",
+     "line": 129,
+     "statement": "SELECT attempt_id::text,domain_kind,authority_scope,domain_locator,actor_player_id,gameplay_context_id::text,generation_ref,start_fingerprint,snapshot_hash,rules_corpus_version,entropy_key_version,resolver_status,COALESCE(resolver_failure,''),state,started_at,result_deadline,state_version,COALESCE(resolution_hash,''),COALESCE(terminal_kind,''),terminal_at,COALESCE(semantic_receipt_id,''),trust_profile_id,trust_profile_version,replay_response,replay_error_code,COALESCE(supersedes_attempt_id::text,'') FROM combat_attempts WHERE domain_kind=$1 AND authority_scope=$2 AND domain_locator=$3 AND state='TERMINAL' AND semantic_receipt_id=$4"
+    },
+    {
+     "file": "internal/adapters/postgres/combatstore/store.go",
+     "line": 143,
+     "statement": "SELECT attempt_id::text,domain_kind,authority_scope,domain_locator,actor_player_id,gameplay_context_id::text,generation_ref,start_fingerprint,snapshot_hash,rules_corpus_version,entropy_key_version,resolver_status,COALESCE(resolver_failure,''),state,started_at,result_deadline,state_version,COALESCE(resolution_hash,''),COALESCE(terminal_kind,''),terminal_at,COALESCE(semantic_receipt_id,''),trust_profile_id,trust_profile_version,replay_response,replay_error_code,COALESCE(supersedes_attempt_id::text,'') FROM combat_attempts WHERE attempt_id=$1 FOR UPDATE"
+    },
+    {
+     "file": "internal/adapters/postgres/combatstore/store.go",
+     "line": 211,
+     "statement": "SELECT canonical FROM combat_snapshots WHERE snapshot_hash=$1"
+    },
     {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
