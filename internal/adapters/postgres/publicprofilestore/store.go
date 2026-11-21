@@ -57,6 +57,20 @@ func (Store) InsertRootTx(c context.Context, t tx.Tx, r app.Root) error {
 	}
 	return e
 }
+
+// A concurrent creator is serialized by the caller's canonical315 lock and the
+// PK; ON CONFLICT keeps the loser's RepeatableRead snapshot from failing 23505.
+func (Store) InsertRootIfAbsentTx(c context.Context, t tx.Tx, r app.Root) (bool, error) {
+	if t == nil || r.Validate() != nil || r.StateVersion != 1 || !r.CreatedAt.Equal(r.UpdatedAt) {
+		return false, app.ErrInvalidState
+	}
+	p := r.Preferences.Clone()
+	tag, e := t.Exec(c, `INSERT INTO player_public_profile_roots(player_id,intro,show_type_ids,hide_subtypes,share_switch,is_first_time,state_version,policy_version,created_at,updated_at)VALUES($1,$2,$3,$4,$5,$6,1,$7,$8,$8) ON CONFLICT(player_id) DO NOTHING`, int64(r.PlayerID), p.Intro, p.ShowTypeIDs, p.HideSubtypes, p.ShareSwitch, p.IsFirstTime, p.PolicyVersion, r.CreatedAt)
+	if e != nil {
+		return false, e
+	}
+	return tag.RowsAffected() == 1, nil
+}
 func (Store) UpdateRootTx(c context.Context, t tx.Tx, old, r app.Root) error {
 	if t == nil || old.Validate() != nil || r.Validate() != nil || old.PlayerID != r.PlayerID || r.StateVersion <= old.StateVersion || r.StateVersion-old.StateVersion != 1 || !r.CreatedAt.Equal(old.CreatedAt) || r.UpdatedAt.Before(old.UpdatedAt) {
 		return app.ErrInvalidState

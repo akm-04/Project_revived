@@ -9,6 +9,7 @@ import (
 	"gxb.local/backend/v2/internal/application/guildcore"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
+	"gxb.local/backend/v2/internal/application/playerroot"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -108,7 +109,7 @@ func (s ReadService) Read(c context.Context, a identity.ActorContext, q ReadRequ
 		return nil, e
 	}
 	var out map[string]any
-	res, e := s.Runner.Run(c, o, i5.DefaultProfile(), tx.Options{Isolation: tx.RepeatableRead}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
+	res, e := s.Runner.Run(c, o, i5.DefaultProfile(), tx.Options{Isolation: tx.RepeatableRead}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true}, nil, func(c context.Context, sc tx.Scope) error {
 		var e error
 		out, e = s.ReadTx(c, sc, a, q, rev, at)
 		return e
@@ -247,9 +248,23 @@ func (s ReadService) ReadTx(c context.Context, sc tx.Scope, a identity.ActorCont
 		return nil, e
 	}
 	prefs := snapshot.Root.Preferences
+	isFirstTime := int16(0)
+	if q.Target == a.PlayerID && prefs.IsFirstTime == 0 {
+		prepared, e := s.Basic.Roots.PreparePreferencesTx(c, sc.Tx, playerroot.Root{PlayerID: q.Target, LogicalServerID: a.LogicalServerID})
+		if e != nil {
+			return nil, e
+		}
+		claimed, e := s.Basic.Roots.MarkFirstSeenTx(c, sc.Tx, prepared, at)
+		if e != nil {
+			return nil, e
+		}
+		if claimed {
+			isFirstTime = 1
+		}
+	}
 	out["intro"] = basic.Intro
 	out["share_switch"] = prefs.ShareSwitch
-	out["is_first_time"] = prefs.IsFirstTime
+	out["is_first_time"] = isFirstTime
 	out["hide_types"] = prefs.HideSubtypes
 	// SYSTEM also refreshes the source basic cache; self must receive the
 	// complete qualified basic projection instead of clearing MAIN fields.
