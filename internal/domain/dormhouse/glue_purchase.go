@@ -33,13 +33,12 @@ func EffectiveGluePurchaseCount(previous *GluePurchases, player identity.PlayerI
 	if previous.Validate() != nil || previous.Player != player {
 		return 0, ErrInvalidFacts
 	}
-	if previous.GameDay > gameDay {
-		return 0, ErrStaleTime
+	// A backward day step stays on the stored day: no second daily reset and no
+	// refusal for the already-counted purchases.
+	if previous.GameDay >= gameDay {
+		return previous.Count, nil
 	}
-	if previous.GameDay < gameDay {
-		return 0, nil
-	}
-	return previous.Count, nil
+	return 0, nil
 }
 
 func (rules GlueRules) PlanPurchase(previous *GluePurchases, player identity.PlayerID, vipLevel, gameDay int64, at time.Time) (GluePurchases, int64, error) {
@@ -69,5 +68,9 @@ func (rules GlueRules) PlanPurchase(previous *GluePurchases, player identity.Pla
 	if previous != nil && previous.UpdatedAt.After(stamp) {
 		stamp = previous.UpdatedAt
 	}
-	return GluePurchases{Player: player, GameDay: gameDay, Count: count + 1, StateVersion: version, UpdatedAt: stamp}, cost, nil
+	day := gameDay
+	if previous != nil && previous.GameDay > day {
+		day = previous.GameDay
+	}
+	return GluePurchases{Player: player, GameDay: day, Count: count + 1, StateVersion: version, UpdatedAt: stamp}, cost, nil
 }

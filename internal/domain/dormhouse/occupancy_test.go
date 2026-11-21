@@ -38,6 +38,16 @@ func TestReparentHonorsBothCooldownsAndLoungeException(t *testing.T) {
 	}
 }
 
+func TestPlanResidentsAcceptsBackwardObservation(t *testing.T) {
+	stored := time.Unix(100000, 0).UTC()
+	c := Catalog{Rooms: map[int64]RoomRule{1: {MainType: LoungeType}}, Types: map[int64]TypeRule{LoungeType: {Residents: 5}}}
+	rooms := map[int64]Room{1: {ID: 1, TableID: 1, StateVersion: 1, UpdatedAt: stored}}
+	p, e := c.PlanResidents(rooms, 1, []int64{10}, stored.Add(-time.Hour))
+	if e != nil || len(p.ChangedRooms) != 1 || p.Assignments[10] != 1 {
+		t.Fatal("backward observation refused the membership plan", p, e)
+	}
+}
+
 func TestLoungeDesiredSetOrderConverges(t *testing.T) {
 	s := time.Unix(100000, 0).UTC()
 	c := Catalog{Rooms: map[int64]RoomRule{1: {MainType: 1}}, Types: map[int64]TypeRule{1: {Residents: 5}}}

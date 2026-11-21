@@ -167,6 +167,7 @@ func TestPart2DormFailureRows(t *testing.T) {
 		{"invalid facts", failDorm(dormhouse.ErrInvalidFacts), http.StatusBadRequest, 0, "dorm_unavailable"},
 		{"unqualified", failDorm(dormhouse.ErrUnqualified), http.StatusConflict, unprovenRefusalCode, ""},
 		{"invalid layout", failDorm(dormhouse.ErrInvalidLayout), http.StatusBadRequest, 0, "dorm_unavailable"},
+		{"stale time", failDorm(dormhouse.ErrStaleTime), http.StatusConflict, staleConflictCode, ""},
 		{"fallback", failDorm(errors.New("dorm dependency")), http.StatusInternalServerError, unprovenRefusalCode, ""},
 		{"social rejected", failSocialDorm(appdorm.ErrRejected), http.StatusConflict, unprovenRefusalCode, ""},
 		{"social stale", failSocialDorm(appdorm.ErrStale), http.StatusConflict, staleConflictCode, ""},
