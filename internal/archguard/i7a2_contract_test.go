@@ -141,6 +141,7 @@ var familyNoticeRoutes = []string{
 	"realtimewakeup.Registration{Route: guildcore.ApplyNoticeRoute, Handler: guildApplyNotices}",
 	"realtimewakeup.Registration{Route: appbroadcast.Route, Handler: broadcastNotices}",
 	"realtimewakeup.Registration{Route: applibrary.PartnerLogNoticeRoute, Handler: libraryPartnerLogNotices}",
+	"realtimewakeup.Registration{Route: applibrary.MissionNoticeRoute, Handler: libraryMissionNotices}",
 }
 
 // allowedRegistrations is the identity allow-list for I7A-2 notice and direct
@@ -171,6 +172,7 @@ var allowedRegistrations = map[string]allowedRegistration{
 	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:GuildApplyNoticeType,Validate:ValidateGuildApplyNotice}":               {dormantRegistration, 1},
 	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:OccultRoomNoticeType,Validate:ValidateOccultRoomNotice}":               {dormantRegistration, 1},
 	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:LibraryPartnerLogNoticeType,Validate:ValidateLibraryPartnerLogNotice}": {dormantRegistration, 1},
+	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:LibraryMissionNoticeType,Validate:ValidateLibraryMissionNotice}":       {dormantRegistration, 1},
 	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:TournamentNoticeType,Validate:ValidateTournamentNotice}":               {dormantRegistration, 1},
 	"rt.DirectRegistration{MID:mids.MIDActivityBroadcast,Validate:ValidateActivityBroadcast}":                                                                                   {dormantRegistration, 1},
 	"rt.DirectRegistration{MID:mids.MIDSystemBroadcast,Validate:ValidateSystemBroadcast}":                                                                                       {dormantRegistration, 1},

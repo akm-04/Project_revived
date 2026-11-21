@@ -298,6 +298,11 @@ func run() error {
 		log.Fatal(err)
 	}
 	libraryPartnerLogNotices := stockruntime.LibraryPartnerLogNoticeHandler{Service: applibrary.PartnerLogReader{Queryer: pool, Library: librarystore.Store{}}, Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: libraryPartnerLogEvents, Limits: limits.Default()}, Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections, OnDeliveryError: func(e error) { log.Printf("library partner log notice delivery degraded: %v", e) }}
+	libraryMissionEvents, err := stockruntime.NewLibraryMissionNoticeRegistry()
+	if err != nil {
+		log.Fatal(err)
+	}
+	libraryMissionNotices := stockruntime.LibraryMissionNoticeHandler{Service: applibrary.MissionNoticeReader{Queryer: pool, Library: librarystore.Store{}}, Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: libraryMissionEvents, Limits: limits.Default()}, Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections, OnDeliveryError: func(e error) { log.Printf("library mission notice delivery degraded: %v", e) }}
 	tournamentEvents, err := stockruntime.NewTournamentNoticeRegistry()
 	if err != nil {
 		log.Fatal(err)
@@ -375,7 +380,8 @@ func run() error {
 		realtimewakeup.Registration{Route: guildcore.ApplyNoticeRoute, Handler: guildApplyNotices},
 		realtimewakeup.Registration{Route: appbroadcast.Route, Handler: broadcastNotices},
 		realtimewakeup.Registration{Route: stockruntime.GuildCampaignNoticeRoute, Handler: guildFightNotices},
-		realtimewakeup.Registration{Route: applibrary.PartnerLogNoticeRoute, Handler: libraryPartnerLogNotices})
+		realtimewakeup.Registration{Route: applibrary.PartnerLogNoticeRoute, Handler: libraryPartnerLogNotices},
+		realtimewakeup.Registration{Route: applibrary.MissionNoticeRoute, Handler: libraryMissionNotices})
 	if err != nil {
 		log.Fatal(err)
 	}

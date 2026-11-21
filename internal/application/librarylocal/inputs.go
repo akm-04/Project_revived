@@ -297,7 +297,11 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 		return nil
 	}
 	if mid == 841 {
-		return s.readPartnerMissions(ctx, q, a.PlayerID, targetIdentifier, out)
+		catalog, e := s.Content.LibraryCatalogTx(ctx, q, revision)
+		if e != nil {
+			return e
+		}
+		return s.readPartnerMissions(ctx, q, scope, targetIdentifier, catalog, out)
 	}
 	if mid == 838 || mid == 842 {
 		return s.readPartnerDialogsOrActs(ctx, q, a, scope, targetIdentifier, mid, out)
@@ -354,11 +358,9 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 	for _, d := range dialogs {
 		dialogsByPartner[d.PartnerID] = append(dialogsByPartner[d.PartnerID], d)
 	}
-	missionsByPartner := map[int64][]any{}
+	missionsByPartner := map[int64][]lib.MissionFact{}
 	for _, m := range missions {
-		missionsByPartner[m.PartnerID] = append(missionsByPartner[m.PartnerID], map[string]any{
-			"mission_id": m.MissionID, "process": m.Process, "mission_state": m.MissionState,
-		})
+		missionsByPartner[m.PartnerID] = append(missionsByPartner[m.PartnerID], m)
 	}
 	infos := map[string]any{}
 	for _, h := range heroes {
@@ -370,15 +372,11 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 		if !ok {
 			return lib.ErrUnqualified
 		}
-		partnerMissions := missionsByPartner[h.PartnerID]
-		if partnerMissions == nil {
-			partnerMissions = []any{}
-		}
 		infos[strconv.FormatInt(h.PartnerID, 10)] = map[string]any{
 			"favor_degree":     f.Facts.Favor,
 			"is_married":       bit(f.Facts.Married),
 			"partner_dialogs":  projectPartnerDialogs(catalog, rule.DialogEnabled, f.Facts.Favor, f.Facts.Married, h.PartnerID, dialogsByPartner[h.PartnerID]),
-			"partner_missions": partnerMissions,
+			"partner_missions": projectPartnerMissions(catalog, f.Facts.Favor, h.PartnerID, missionsByPartner[h.PartnerID]),
 			"partner_acts":     projectPartnerActs(catalog, h.PartnerID, f.Facts.Favor, awards),
 			"partner_logs":     partnerLogMap(heroLogs, h.PartnerID, f.Facts.Favor, dialogueCounts[h.PartnerID], f.Facts.CreatedAt, at),
 		}
@@ -417,33 +415,41 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 	return nil
 }
 
-func (s Service) readPartnerMissions(ctx context.Context, q tx.Queryer, player identity.PlayerID, partnerID int64, out *map[string]any) error {
-	heroes, e := s.Heroes.ListHeroesTx(ctx, q, player)
-	if e != nil {
-		return e
-	}
-	owned := false
-	for _, hero := range heroes {
-		if hero.PartnerID == partnerID {
-			owned = true
-			break
+// projectPartnerMissions projects the hero's full unlocked set: a stored row as
+// stored and a missing one as a PROCEED row, ordered by mission_id.
+func projectPartnerMissions(catalog lib.Catalog, favor, partnerID int64, rows []lib.MissionFact) []any {
+	stored := map[int64]lib.MissionFact{}
+	for _, row := range rows {
+		if row.PartnerID == partnerID {
+			stored[row.MissionID] = row
 		}
 	}
-	if !owned {
-		return lib.ErrUnqualified
-	}
-	missions, e := s.Library.ListMissionsTx(ctx, q, player)
-	if e != nil {
-		return e
-	}
-	rows := make([]any, 0, len(missions))
-	for _, mission := range missions {
-		if mission.PartnerID != partnerID {
+	unlocked := catalog.UnlockedMissions(favor)
+	out := make([]any, 0, len(unlocked))
+	for _, missionID := range unlocked {
+		if row, ok := stored[missionID]; ok {
+			out = append(out, partMissionRow(row.MissionID, row.Process, row.MissionState))
 			continue
 		}
-		rows = append(rows, map[string]any{"mission_id": mission.MissionID, "process": mission.Process, "mission_state": mission.MissionState})
+		out = append(out, partMissionRow(missionID, 0, lib.MissionProceed))
 	}
-	*out = map[string]any{"mission_list": rows}
+	return out
+}
+
+func partMissionRow(missionID, process, state int64) map[string]any {
+	return map[string]any{"mission_id": missionID, "process": process, "mission_state": state}
+}
+
+func (s Service) readPartnerMissions(ctx context.Context, q tx.Queryer, scope InputScope, partnerID int64, catalog lib.Catalog, out *map[string]any) error {
+	inputs, e := s.HeroLibraryInputsTx(ctx, q, scope, partnerID)
+	if e != nil {
+		return e
+	}
+	missions, e := s.Library.ListMissionsTx(ctx, q, scope.Player)
+	if e != nil {
+		return e
+	}
+	*out = map[string]any{"mission_list": projectPartnerMissions(catalog, inputs.Facts.Favor, partnerID, missions)}
 	return nil
 }
 

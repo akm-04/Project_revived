@@ -12,24 +12,14 @@ const (
 	GiftMissionID  = 1001
 )
 
-// UnlockedMissions is the union of library_amour mission sets whose favor
-// threshold the hero has reached.
+// UnlockedMissions is the mission set of the stage that contains favor, using
+// ActUnlocked's stage lookup: the amour column is the stage's upper bound.
 func (c Catalog) UnlockedMissions(favor int64) []int64 {
-	ids := map[int64]bool{}
-	for _, stage := range c.Stages {
-		if favor < stage.Favor {
-			continue
-		}
-		for _, id := range stage.MissionIDs {
-			ids[id] = true
-		}
+	stage, ok := c.stageForFavor(favor)
+	if !ok {
+		return []int64{}
 	}
-	out := make([]int64, 0, len(ids))
-	for id := range ids {
-		out = append(out, id)
-	}
-	slices.Sort(out)
-	return out
+	return slices.Clone(stage.MissionIDs)
 }
 
 // Advance moves one auto-accepted partner mission on its single stock producer.

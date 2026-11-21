@@ -165,12 +165,18 @@ func TestI9_10BLibrary836FullPayload(t *testing.T) {
 		t.Fatalf("act 1 dialog missing %+v", dialogs)
 	}
 	missions, ok := row["partner_missions"].([]any)
-	if !ok || len(missions) != 1 {
+	if !ok || len(missions) != 3 {
 		t.Fatalf("partner_missions %T %+v", row["partner_missions"], row["partner_missions"])
 	}
 	mission := missions[0].(map[string]any)
 	if mission["mission_id"] != int64(1001) || mission["process"] != int64(1) || mission["mission_state"] != int64(2) {
 		t.Fatalf("mission row %+v", mission)
+	}
+	for index, wantID := range []int64{1002, 1003} {
+		row := missions[index+1].(map[string]any)
+		if row["mission_id"] != wantID || row["process"] != int64(0) || row["mission_state"] != int64(2) {
+			t.Fatalf("default mission %d row %+v", index, row)
+		}
 	}
 	acts, ok := row["partner_acts"].([]app.ActSlot)
 	if !ok || len(acts) != 1 {

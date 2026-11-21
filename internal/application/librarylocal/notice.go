@@ -11,6 +11,59 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
+// MissionNoticeRoute wakes the realtime projection that pushes notice 20
+// (LIBRARY_MISSION). Its reference is "<player>:<partner_id>:<mission_id>".
+const MissionNoticeRoute = "library.mission.v1"
+
+// MissionNoticeRef is the bounded wakeup reference of one awarded mission.
+func MissionNoticeRef(player identity.PlayerID, partnerID, missionID int64) string {
+	return strconv.FormatInt(int64(player), 10) + ":" + strconv.FormatInt(partnerID, 10) + ":" + strconv.FormatInt(missionID, 10)
+}
+
+// MissionNotice is the notice-20 body of one awarded partner mission.
+type MissionNotice struct {
+	Player       identity.PlayerID
+	PartnerID    int64
+	MissionID    int64
+	Process      int64
+	MissionState int64
+	Favor        int64
+}
+
+// MissionNoticePort is the Library owner's read surface for notice 20.
+type MissionNoticePort interface {
+	ListMissionsTx(context.Context, tx.Queryer, identity.PlayerID) ([]lib.MissionFact, error)
+	ReadHeroTx(context.Context, tx.Queryer, character.HeroRef) (lib.HeroFacts, error)
+}
+
+// MissionNoticeReader projects one awarded mission after its commit, so the
+// pushed row and favor match the durable state the client would load.
+type MissionNoticeReader struct {
+	Queryer tx.Queryer
+	Library MissionNoticePort
+}
+
+func (r MissionNoticeReader) ReadMissionNotice(ctx context.Context, player identity.PlayerID, partnerID, missionID int64) (MissionNotice, error) {
+	if r.Queryer == nil || r.Library == nil || !player.Valid() || partnerID <= 0 || missionID <= 0 {
+		return MissionNotice{}, lib.ErrUnqualified
+	}
+	rows, err := r.Library.ListMissionsTx(ctx, r.Queryer, player)
+	if err != nil {
+		return MissionNotice{}, err
+	}
+	for _, row := range rows {
+		if row.PartnerID != partnerID || row.MissionID != missionID {
+			continue
+		}
+		facts, err := r.Library.ReadHeroTx(ctx, r.Queryer, character.HeroRef{PlayerID: player, PartnerID: partnerID})
+		if err != nil {
+			return MissionNotice{}, err
+		}
+		return MissionNotice{Player: player, PartnerID: partnerID, MissionID: missionID, Process: row.Process, MissionState: row.MissionState, Favor: facts.Favor}, nil
+	}
+	return MissionNotice{}, lib.ErrUnqualified
+}
+
 // PartnerLogNoticeRoute wakes the realtime projection that pushes notice 24
 // (LIBRARY_PARTNER_LOG). Its reference is "<player>:<partner_id>".
 const PartnerLogNoticeRoute = "library.partner_log.v1"

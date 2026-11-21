@@ -48,7 +48,7 @@ func TestI9_10BulkGiftCountExact(t *testing.T) {
 
 	bulk := op()
 	response := libraryDispatch(t, p, a, 840, map[string]any{"partner_id": int64(1), "gift_id": likeGift, "gift_num": int64(3)}, bulk)
-	if response.HTTPStatus != 200 || response.Body["favor_degree"] != int64(39) {
+	if response.HTTPStatus != 200 || response.Body["favor_degree"] != int64(44) {
 		t.Fatalf("bulk gift status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	if got := stackQuantityOrZero(t, p, a.PlayerID, likeGift); got != 2 {
@@ -56,7 +56,7 @@ func TestI9_10BulkGiftCountExact(t *testing.T) {
 	}
 
 	retry := libraryDispatch(t, p, a, 840, map[string]any{"partner_id": int64(1), "gift_id": likeGift, "gift_num": int64(3)}, bulk)
-	if retry.HTTPStatus != 200 || retry.Body["favor_degree"] != int64(39) {
+	if retry.HTTPStatus != 200 || retry.Body["favor_degree"] != int64(44) {
 		t.Fatalf("bulk retry status %d body %+v", retry.HTTPStatus, retry.Body)
 	}
 	if got := stackQuantityOrZero(t, p, a.PlayerID, likeGift); got != 2 {
@@ -70,7 +70,7 @@ func TestI9_10BulkGiftCountExact(t *testing.T) {
 	if short.HTTPStatus != 409 || short.Body["error_code"] != int64(35028) {
 		t.Fatalf("short bulk gift status %d body %+v", short.HTTPStatus, short.Body)
 	}
-	if got := libraryHeroFavor(t, p, a.PlayerID, 1); got != 39 {
+	if got := libraryHeroFavor(t, p, a.PlayerID, 1); got != 44 {
 		t.Fatalf("short bulk gift changed favor to %d", got)
 	}
 	if got := stackQuantityOrZero(t, p, a.PlayerID, likeGift); got != 2 {
@@ -80,7 +80,7 @@ func TestI9_10BulkGiftCountExact(t *testing.T) {
 	const dislikeGift = int64(50005014) // category 2 == table 10001001 dislike type: 8-3 per gift
 	seedStack(t, p, a, rev, dislikeGift, 2)
 	response = libraryDispatch(t, p, a, 840, map[string]any{"partner_id": int64(1), "gift_id": dislikeGift, "gift_num": int64(2)}, op())
-	if response.HTTPStatus != 200 || response.Body["favor_degree"] != int64(49) {
+	if response.HTTPStatus != 200 || response.Body["favor_degree"] != int64(54) {
 		t.Fatalf("second bulk gift status %d body %+v", response.HTTPStatus, response.Body)
 	}
 	if got := stackQuantityOrZero(t, p, a.PlayerID, dislikeGift); got != 0 {

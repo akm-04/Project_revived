@@ -351,7 +351,19 @@
   {
    "file": "internal/adapters/stockruntime/library_notice.go",
    "kind": "notice",
-   "line": 58,
+   "line": 74,
+   "namespace": "rt.NoticeNamespaceGeneric",
+   "notice_type": 20,
+   "parent_mid": 36854,
+   "roles": [
+    "Role",
+    "World"
+   ]
+  },
+  {
+   "file": "internal/adapters/stockruntime/library_notice.go",
+   "kind": "notice",
+   "line": 222,
    "namespace": "rt.NoticeNamespaceGeneric",
    "notice_type": 24,
    "parent_mid": 36854,
