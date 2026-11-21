@@ -8,6 +8,7 @@ import (
 	"gxb.local/backend/v2/internal/application/characterasset"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
+	"gxb.local/backend/v2/internal/content/guildrentalpolicy"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/guild"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -167,7 +168,7 @@ func emptyListReader() Reader {
 		Now:     func(context.Context, tx.Queryer) (time.Time, error) { return now, nil },
 		Policy: Policy{
 			Money:     guild.RentalMoney{PriceForceDivisor: 1000, PriceFloorMana: 1000, HourlyInterestForceDivisor: 100, RecallMinimumSeconds: 1800, LevelUpCeiling: 5},
-			Modes:     map[int64]ModeRule{1: {Enabled: true}, 8: {Enabled: false}, 79: {Enabled: false}},
+			Modes:     map[int64]ModeRule{1: {Enabled: true}, 67: {Enabled: false}, 99: {Enabled: false}},
 			VIP:       map[int64]VIPLimit{0: {Lend: 2, LevelUp: 0}},
 			Departure: DepartureMail{Sender: "guild", Title: "rental", Body: "closed"},
 		},
@@ -182,7 +183,7 @@ func TestGuildOffersEmptyListsUseTheRowHash(t *testing.T) {
 	reader := emptyListReader()
 	actor := identity.ActorContext{LogicalServerID: 1, PlayerID: 9}
 	op := operation.Context{StartedAt: time.Unix(1700000000, 0).UTC()}
-	for _, requestedType := range []int64{8, 79} {
+	for _, requestedType := range []int64{67, 99} {
 		list, err := reader.GuildOffers(context.Background(), actor, guild.RentalHero, requestedType, op)
 		if err != nil {
 			t.Fatal("disabled type", requestedType, err)
@@ -207,6 +208,92 @@ func TestGuildOffersEmptyListsUseTheRowHash(t *testing.T) {
 	}
 	if second.RentCount == first.RentCount {
 		t.Fatalf("guildless list key ignores the requested type: %d", first.RentCount)
+	}
+}
+
+type listingReadStore struct{ emptyReadStore }
+
+func (listingReadStore) ReadMembershipTx(context.Context, tx.Queryer, identity.PlayerID) (guild.Membership, bool, error) {
+	return guild.Membership{GuildID: 5}, true, nil
+}
+func (listingReadStore) ListRentalOffersByGuildTx(context.Context, tx.Queryer, guild.ID, guild.RentalKind, int) ([]guild.RentalOffer, error) {
+	return []guild.RentalOffer{{Lender: 7, Guild: 5, Kind: guild.RentalHero, Unit: 31, Force: 2000}}, nil
+}
+
+type listingCharacters struct{ emptyReadCharacters }
+
+func (listingCharacters) HeroProjectionTx(context.Context, tx.Queryer, string, time.Time, identity.PlayerID, int64) (HeroProjection, bool, error) {
+	return HeroProjection{Hero: character.Hero{PartnerID: 31, Level: 1}}, true, nil
+}
+
+type listingProfiles struct{ emptyReadProfiles }
+
+func (listingProfiles) ProfileTx(context.Context, tx.Queryer, identity.PlayerID) (playerdirectory.Profile, bool, error) {
+	return playerdirectory.Profile{Name: "lender"}, true, nil
+}
+
+type listingContent struct{ emptyReadContent }
+
+func (listingContent) HeroExpPolicyTx(context.Context, tx.Queryer, string, int64) ([]character.HeroExpThreshold, error) {
+	return []character.HeroExpThreshold{{Level: 1, TotalExp: 0}}, nil
+}
+
+// builtinPolicy is the production embedded policy bound the way cmd/gxb-api
+// binds it, so this test fails when the shipped row is disabled.
+func builtinPolicy(t *testing.T) Policy {
+	t.Helper()
+	artifact, err := guildrentalpolicy.LoadBuiltin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	modes := map[int64]ModeRule{}
+	for _, mode := range artifact.Policy.Modes {
+		rule := ModeRule{Enabled: mode.Enabled}
+		if mode.StarCap > 0 {
+			rule.StarCap = mode.StarCap
+		}
+		for _, campaignType := range mode.CampaignTypes {
+			modes[campaignType] = rule
+		}
+	}
+	vip := map[int64]VIPLimit{}
+	for _, row := range artifact.Policy.VIPLimits {
+		vip[row.VIP] = VIPLimit{Lend: row.Lend, LevelUp: row.LevelUp}
+	}
+	return Policy{
+		Money:     guild.RentalMoney{PriceForceDivisor: artifact.Policy.Money.PriceForceDivisor, PriceFloorMana: artifact.Policy.Money.PriceFloorMana, HourlyInterestForceDivisor: artifact.Policy.Money.HourlyInterestForceDivisor, RecallMinimumSeconds: artifact.Policy.Money.RecallMinimumSeconds, LevelUpCeiling: artifact.Policy.Money.LevelUpCeiling},
+		Modes:     modes,
+		VIP:       vip,
+		Departure: DepartureMail{Sender: artifact.Policy.Departure.Sender, Title: artifact.Policy.Departure.Title, Body: artifact.Policy.Departure.Body},
+	}
+}
+
+// TestGuildOffersListsWorldBossAndGodsTrialModes is carry 5: the shipped
+// policy enables the World Boss [8] and Gods Trial [79] rows, so 2768 returns
+// their offers instead of the early-empty list. Chapter Boss [67] stays absent.
+func TestGuildOffersListsWorldBossAndGodsTrialModes(t *testing.T) {
+	now := time.Unix(1700000000, 0).UTC()
+	reader := Reader{
+		Runner: tx.Runner{DB: emptyReadBeginner{}}, Store: listingReadStore{}, Characters: listingCharacters{},
+		Profiles: listingProfiles{}, Levels: emptyReadLevels{}, Mana: emptyReadMana{}, Privileges: emptyReadPrivileges{},
+		Content: listingContent{},
+		Now:     func(context.Context, tx.Queryer) (time.Time, error) { return now, nil },
+		Policy:  builtinPolicy(t),
+	}
+	actor := identity.ActorContext{LogicalServerID: 1, PlayerID: 9}
+	op := operation.Context{StartedAt: now}
+	for _, requestedType := range []int64{8, 79} {
+		list, err := reader.GuildOffers(context.Background(), actor, guild.RentalHero, requestedType, op)
+		if err != nil {
+			t.Fatal("mode", requestedType, err)
+		}
+		if len(list.Rows) != 1 || list.Rows[0].Offer.Unit != 31 {
+			t.Fatalf("mode %d did not list the offer: %v", requestedType, list.Rows)
+		}
+	}
+	chapterBoss, err := reader.GuildOffers(context.Background(), actor, guild.RentalHero, 67, op)
+	if err != nil || len(chapterBoss.Rows) != 0 {
+		t.Fatalf("Chapter Boss [67] must stay unlisted: %v %v", chapterBoss.Rows, err)
 	}
 }
 
