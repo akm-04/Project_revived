@@ -73,6 +73,38 @@ func TestAwakeningWireRoutesAndTrustBoundary(t *testing.T) {
 	}
 }
 
+type awakeMissionSeedWire struct {
+	MissionServicePort
+	family objective.StockFamily
+}
+
+func (m *awakeMissionSeedWire) ReadMissions(_ context.Context, _ identity.ActorContext, family objective.StockFamily, _ operation.Context) (map[string]any, error) {
+	m.family = family
+	return map[string]any{
+		"mission_list": []any{},
+		"extra_info":   map[string]any{"daily_left_time": int64(3600), "huoyue_info": map[string]any{"day_huoyue": int64(40), "week_huoyue": int64(55), "day_award": []int64{0, 0, 0, 0, 0}, "week_award": []int64{0, 0}}},
+	}, nil
+}
+
+// The stock Task model seeds one huoyue copy for every family, so the Awake
+// branch of 2736 must carry the same extra_info as the mission families.
+func TestAwakeTaskLoadCarriesMissionHuoyueSeed(t *testing.T) {
+	m := &awakeMissionSeedWire{}
+	d := I5Dispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: &i5WireFake{}, Awakening: &awakeWireFake{}, Missions: m}
+	got := d.Dispatch(context.Background(), i5Req(2736, map[string]any{"mission_type": json.Number("5")}, time.Unix(703, 0)))
+	if got.HTTPStatus != 200 || got.Body["mission_list"] == nil || m.family != objective.Awake {
+		t.Fatalf("awake load: %+v family=%d", got, m.family)
+	}
+	extra, ok := got.Body["extra_info"].(map[string]any)
+	if !ok {
+		t.Fatalf("awake load lacks extra_info: %+v", got.Body)
+	}
+	info, ok := extra["huoyue_info"].(map[string]any)
+	if !ok || info["week_huoyue"] != int64(55) || info["day_huoyue"] != int64(40) {
+		t.Fatalf("awake huoyue seed: %+v", extra)
+	}
+}
+
 type bloodWireFake struct{ calls int }
 
 func (f *bloodWireFake) Start(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error) {

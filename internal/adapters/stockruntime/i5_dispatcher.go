@@ -255,10 +255,20 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		if err != nil || familyRaw < int64(objective.Daily) || familyRaw > int64(objective.Challenge) {
 			return badI5()
 		}
-		if familyRaw == 5 && d.Awakening != nil {
+		if familyRaw == int64(objective.Awake) && d.Awakening != nil {
 			body, e := d.Awakening.ReadAwakening(ctx, actor, req.Envelope.Operation)
 			if e != nil {
 				return failI5(e)
+			}
+			// The stock Task model seeds its huoyue copy from every 2736 family reply.
+			if d.Missions != nil {
+				missions, e := d.Missions.ReadMissions(ctx, actor, objective.Awake, req.Envelope.Operation)
+				if e != nil {
+					return failI5(e)
+				}
+				if extra, ok := missions["extra_info"]; ok {
+					body["extra_info"] = extra
+				}
 			}
 			return okI5(body)
 		}
