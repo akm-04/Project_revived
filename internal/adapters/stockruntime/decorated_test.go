@@ -148,3 +148,36 @@ func TestDecoratedDailyResetKeepsDispatcherWrittenKeys(t *testing.T) {
 		t.Fatalf("dispatcher-written reset keys were overwritten: %#v", economy)
 	}
 }
+
+type pendingFunctions []int64
+
+func (p pendingFunctions) PendingFunctionAnnouncementIDs(context.Context, identity.PlayerID) ([]int64, error) {
+	return p, nil
+}
+
+func dispatchPending(pending pendingFunctions, mid uint16, body map[string]any, status int) httpedge.Response {
+	return Decorated{
+		PendingFunctions: pending,
+		Next: httpedge.DispatcherFunc(func(context.Context, httpedge.DispatchRequest) httpedge.Response {
+			return httpedge.Response{HTTPStatus: status, Body: body}
+		}),
+	}.Dispatch(resetContext(1000004), httpedge.DispatchRequest{Envelope: wire.RequestEnvelope{MID: mid}})
+}
+
+// BUGS #114: a function whose reply was lost repeats on later successful replies
+// until the client acknowledges it, but never on the login reply.
+func TestDecoratedReplaysUnacknowledgedFunctionAnnouncements(t *testing.T) {
+	replay := dispatchPending(pendingFunctions{33}, 112, map[string]any{}, 200)
+	if !reflect.DeepEqual(replay.Body["new_funcs_"], []int64{33}) {
+		t.Fatalf("later reply new_funcs_ %v", replay.Body["new_funcs_"])
+	}
+	if _, present := dispatchPending(pendingFunctions{33}, loginMID, map[string]any{}, 200).Body["new_funcs_"]; present {
+		t.Fatal("login reply carried a pending announcement")
+	}
+	if _, present := dispatchPending(pendingFunctions{33}, 112, map[string]any{"error_code": int64(1)}, 200).Body["new_funcs_"]; present {
+		t.Fatal("refusal carried a pending announcement")
+	}
+	if _, present := dispatchPending(nil, 112, map[string]any{}, 200).Body["new_funcs_"]; present {
+		t.Fatal("a nil pending reader still wrote new_funcs_")
+	}
+}

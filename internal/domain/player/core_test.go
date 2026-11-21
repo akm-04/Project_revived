@@ -110,3 +110,27 @@ func TestGuideFunctionsProjectAsStringKeyedCompletionMap(t *testing.T) {
 		t.Fatal("negative guide return id accepted")
 	}
 }
+
+// BUGS #114: SAVE_STORY with an announcement's guide cursor proves the client
+// saw that function; every other cursor acknowledges no function.
+func TestFunctionAnnouncementAcknowledgementMapping(t *testing.T) {
+	for functionID, cursor := range map[int64]int64{
+		SkillUpFunctionID:       SkillUpGuideCursor,
+		superCampaignFunctionID: superBattleGuideCursor,
+		cloudCityFunctionID:     cloudCityGuideCursor,
+		conquerSchoolFunctionID: conquerSchoolGuideCursor,
+	} {
+		if got, ok := FunctionAnnouncementAcknowledgement(functionID); !ok || got != cursor {
+			t.Fatalf("function %d cursor=%d ok=%v", functionID, got, ok)
+		}
+		if got, ok := AcknowledgedFunction(cursor); !ok || got != functionID {
+			t.Fatalf("cursor %d function=%d ok=%v", cursor, got, ok)
+		}
+	}
+	if _, ok := FunctionAnnouncementAcknowledgement(99); ok {
+		t.Fatal("an unacknowledged function was marked acknowledgeable")
+	}
+	if _, ok := AcknowledgedFunction(GuideEndID); ok {
+		t.Fatal("the guide end cursor acknowledged a function")
+	}
+}
