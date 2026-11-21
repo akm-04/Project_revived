@@ -89822,7 +89822,7 @@
    "isolation": [
     {
      "file": "internal/application/publicprofile/composition.go",
-     "line": 111,
+     "line": 112,
      "value": "repeatable_read"
     }
    ],
@@ -89830,7 +89830,7 @@
    "read_only": [
     {
      "file": "internal/application/publicprofile/composition.go",
-     "line": 111,
+     "line": 112,
      "value": "false"
     }
    ],
@@ -89838,20 +89838,24 @@
    "retry": [
     {
      "file": "internal/application/publicprofile/composition.go",
-     "line": 111,
-     "value": "1"
+     "line": 112,
+     "value": "3"
     }
    ],
-   "state_writes": [],
+   "state_writes": [
+    "internal/adapters/postgres/publicprofilestore/store.go:49",
+    "internal/adapters/postgres/publicprofilestore/store.go:63",
+    "internal/adapters/postgres/publicprofilestore/store.go:74"
+   ],
    "system": "publicprofile",
    "transactions": [
     {
      "file": "internal/application/publicprofile/composition.go",
      "function": "ReadService.Read",
      "isolation": "repeatable_read",
-     "line": 111,
+     "line": 112,
      "read_only": "false",
-     "retry": "1"
+     "retry": "3"
     }
    ],
    "unbounded_read": [
@@ -90229,7 +90233,7 @@
     "UNRESOLVED skinDef at internal/application/characterasset/appearance_projection.go:153",
     "UNRESOLVED styleDef at internal/application/characterasset/appearance_projection.go:248"
    ],
-   "writes": "UNKNOWN"
+   "writes": "state"
   },
   {
    "handler": "internal/adapters/stockruntime/profile_feedback.go",
@@ -90377,7 +90381,7 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/publicprofilestore/store.go:49",
-    "internal/adapters/postgres/publicprofilestore/store.go:60"
+    "internal/adapters/postgres/publicprofilestore/store.go:74"
    ],
    "system": "publicprofile",
    "transactions": [
@@ -90727,7 +90731,7 @@
    "state_writes": [
     "internal/adapters/postgres/publicprofilestore/showcase.go:50",
     "internal/adapters/postgres/publicprofilestore/store.go:49",
-    "internal/adapters/postgres/publicprofilestore/store.go:60"
+    "internal/adapters/postgres/publicprofilestore/store.go:74"
    ],
    "system": "publicprofile",
    "transactions": [
@@ -90861,7 +90865,7 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/publicprofilestore/store.go:49",
-    "internal/adapters/postgres/publicprofilestore/store.go:60"
+    "internal/adapters/postgres/publicprofilestore/store.go:74"
    ],
    "system": "publicprofile",
    "transactions": [
@@ -91210,7 +91214,7 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/publicprofilestore/store.go:49",
-    "internal/adapters/postgres/publicprofilestore/store.go:60"
+    "internal/adapters/postgres/publicprofilestore/store.go:74"
    ],
    "system": "publicprofile",
    "transactions": [
@@ -92020,7 +92024,7 @@
    "isolation": [
     {
      "file": "internal/application/publicprofile/composition.go",
-     "line": 111,
+     "line": 112,
      "value": "repeatable_read"
     }
    ],
@@ -92028,7 +92032,7 @@
    "read_only": [
     {
      "file": "internal/application/publicprofile/composition.go",
-     "line": 111,
+     "line": 112,
      "value": "false"
     }
    ],
@@ -92036,20 +92040,24 @@
    "retry": [
     {
      "file": "internal/application/publicprofile/composition.go",
-     "line": 111,
-     "value": "1"
+     "line": 112,
+     "value": "3"
     }
    ],
-   "state_writes": [],
+   "state_writes": [
+    "internal/adapters/postgres/publicprofilestore/store.go:49",
+    "internal/adapters/postgres/publicprofilestore/store.go:63",
+    "internal/adapters/postgres/publicprofilestore/store.go:74"
+   ],
    "system": "publicprofile",
    "transactions": [
     {
      "file": "internal/application/publicprofile/composition.go",
      "function": "ReadService.Read",
      "isolation": "repeatable_read",
-     "line": 111,
+     "line": 112,
      "read_only": "false",
-     "retry": "1"
+     "retry": "3"
     }
    ],
    "unbounded_read": [
@@ -92427,7 +92435,7 @@
     "UNRESOLVED skinDef at internal/application/characterasset/appearance_projection.go:153",
     "UNRESOLVED styleDef at internal/application/characterasset/appearance_projection.go:248"
    ],
-   "writes": "UNKNOWN"
+   "writes": "state"
   },
   {
    "handler": "internal/adapters/stockruntime/profile_comments.go",
@@ -92613,7 +92621,7 @@
    "isolation": [
     {
      "file": "internal/application/publicprofile/composition.go",
-     "line": 111,
+     "line": 112,
      "value": "repeatable_read"
     }
    ],
@@ -92621,7 +92629,7 @@
    "read_only": [
     {
      "file": "internal/application/publicprofile/composition.go",
-     "line": 111,
+     "line": 112,
      "value": "false"
     }
    ],
@@ -92629,20 +92637,24 @@
    "retry": [
     {
      "file": "internal/application/publicprofile/composition.go",
-     "line": 111,
-     "value": "1"
+     "line": 112,
+     "value": "3"
     }
    ],
-   "state_writes": [],
+   "state_writes": [
+    "internal/adapters/postgres/publicprofilestore/store.go:49",
+    "internal/adapters/postgres/publicprofilestore/store.go:63",
+    "internal/adapters/postgres/publicprofilestore/store.go:74"
+   ],
    "system": "publicprofile",
    "transactions": [
     {
      "file": "internal/application/publicprofile/composition.go",
      "function": "ReadService.Read",
      "isolation": "repeatable_read",
-     "line": 111,
+     "line": 112,
      "read_only": "false",
-     "retry": "1"
+     "retry": "3"
     }
    ],
    "unbounded_read": [
@@ -93020,7 +93032,7 @@
     "UNRESOLVED skinDef at internal/application/characterasset/appearance_projection.go:153",
     "UNRESOLVED styleDef at internal/application/characterasset/appearance_projection.go:248"
    ],
-   "writes": "UNKNOWN"
+   "writes": "state"
   },
   {
    "handler": "internal/adapters/stockruntime/profile_comments.go",
@@ -93492,7 +93504,7 @@
     "internal/adapters/postgres/publicprofilestore/media.go:83",
     "internal/adapters/postgres/publicprofilestore/media.go:97",
     "internal/adapters/postgres/publicprofilestore/store.go:49",
-    "internal/adapters/postgres/publicprofilestore/store.go:60"
+    "internal/adapters/postgres/publicprofilestore/store.go:74"
    ],
    "system": "publicprofile",
    "transactions": [

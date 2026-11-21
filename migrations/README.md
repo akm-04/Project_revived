@@ -17,6 +17,7 @@ Every canonical SQL migration must begin with the literal `-- +goose Up` directi
 - 00011: R5 foundation repairs.
 - 00012: I6C canonical Guild/GuildMembership authority and Guild workflow ledgers.
 - 00013: F2/I6C data-cleanup-only replay repair removing obsolete Guild applications for players who already have canonical membership.
+- 00040: I7B-2A PublicProfile roots. Correction (I9-12 R5, PERSON_FIRST_CLICK_EDIT): the migration comment "Reads never materialize this root" is superseded; the first self MID 1829 read now materializes the root with is_first_time 1 under the 315 then 391 root locks. The applied migration bytes are unchanged.
 - 00064: I7C-5A Combat foundation: locator roots (lock rank 609), append-only snapshots/resolutions/report blobs and the Pass418 attempt envelope. Empty on upgrade.
 - 00065: I7C-5B Top Floor: content catalog, per-server ladder root (lock rank 601), ranks, player state, fights, last-10 records, partner usage, daily settlements and the Achievement 100001 streak table. Empty on upgrade.
 - 00066: I7C-5C 1 on 1: content catalog, one global competition root (lock rank 602), player state with slots/points/teams/promotion, matches with per-round Combat attempts, last-20 records, partner usage, Wednesday/Sunday settlements with server/global ranks and titles; Achievement streaks keyed by (player, achievement) for 100002/100028. Empty on upgrade.
