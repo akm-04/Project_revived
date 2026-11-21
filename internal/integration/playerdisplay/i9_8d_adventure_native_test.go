@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 	"testing"
 	"time"
 
@@ -710,7 +711,8 @@ func TestI9_11T34AdventureDefenseBusyReleaseNative(t *testing.T) {
 	server := rankingServer(t, p)
 	a, _ := adventureOwner(t, p, server, 11, 10001001)
 	b, _ := adventureOwner(t, p, server, 11, 10001002)
-	c, _ := adventureOwner(t, p, server, 11, 10001003)
+	c, cPicks := adventureOwner(t, p, server, 11, 10001003)
+	fighter, fighterPicks := adventureOwner(t, p, server, 11, 10001004)
 	clock := &leagueClock{at: time.Now().UTC().Add(2 * time.Minute)}
 	mode := adventureTestMode(t, p, clock, adventureOpponents{})
 	opContext := opPinned(installed(t, p))
@@ -749,6 +751,48 @@ func TestI9_11T34AdventureDefenseBusyReleaseNative(t *testing.T) {
 	}
 	if _, err = mode.QuitDefense(ctx, a, 2, opContext); err != nil {
 		t.Fatal("quit freed position", err)
+	}
+
+	// A kick during a battle (busy type 2) leaves the attempt unresolved but
+	// reachable: the kicked player's result is refused as not-in-room, and the
+	// next member's START retires the old attempt and freezes a fresh one.
+	if _, err = mode.EnterDefense(ctx, fighter, roomID, opContext); err != nil {
+		t.Fatal("fighting member join", err)
+	}
+	if _, err = mode.PrepareDefense(ctx, fighter, 2, opContext); err != nil {
+		t.Fatal("prepare started battle", err)
+	}
+	if _, err = mode.StartDefense(ctx, fighter, appadventure.FightRequest{Formation: []int64{fighterPicks[0]}}, 2, opContext); err != nil {
+		t.Fatal("start battle before kick", err)
+	}
+	positions = defensePositions(t, mode, a, opContext)
+	if positions[1]["busy_type"] != int64(2) || positions[1]["player_id"] != int64(fighter.PlayerID) {
+		t.Fatalf("position 2 not in battle by fighter: %#v", positions[1])
+	}
+	if _, err = mode.KickDefense(ctx, a, fighter.PlayerID, opContext); err != nil {
+		t.Fatal("kick fighting member", err)
+	}
+	if _, err = mode.DefenseResult(ctx, fighter, appadventure.ResultRequest{Star: 3, Damage: 100, Formation: []int64{fighterPicks[0]}}, 2, opContext); !errors.Is(err, appsharedroom.ErrNotInRoom) {
+		t.Fatalf("kicked result %v, want not-in-room", err)
+	}
+	locator := fmt.Sprintf("room:%d/pos:2", roomID)
+	if open := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ADVENTURE_DEFENSE' AND domain_locator=$1 AND state<>'TERMINAL'`, locator); open != 1 {
+		t.Fatalf("kicked attempt open %d, want the started battle retained", open)
+	}
+	if _, err = mode.PrepareDefense(ctx, c, 2, opContext); err != nil {
+		t.Fatal("prepare after kicked battle", err)
+	}
+	if _, err = mode.StartDefense(ctx, c, appadventure.FightRequest{Formation: []int64{cPicks[0]}}, 2, opContext); err != nil {
+		t.Fatalf("next member start after kick: %v", err)
+	}
+	if closed := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ADVENTURE_DEFENSE' AND domain_locator=$1 AND terminal_kind='ADVENTURE_START_CLOSED'`, locator); closed != 1 {
+		t.Fatalf("start-closed attempts %d, want the kicked battle retired", closed)
+	}
+	if staged := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ADVENTURE_DEFENSE' AND domain_locator=$1 AND state='STAGED'`, locator); staged != 1 {
+		t.Fatalf("staged attempts %d, want the next member's START to proceed", staged)
+	}
+	if _, err = mode.QuitDefense(ctx, c, 2, opContext); err != nil {
+		t.Fatal("quit next member's battle", err)
 	}
 
 	// Exit frees the leaving member's busy position.
@@ -812,4 +856,72 @@ func defensePositions(t *testing.T, mode appadventure.Mode, actor identity.Actor
 		out = append(out, position)
 	}
 	return out
+}
+
+// R2: the result that solves a room's last position mails the room's band gift
+// once to each distinct defeater; a partial room and a replayed result mail
+// nothing.
+func TestI9_12AdventureDefenseGiftNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	a, aPicks := adventureOwner(t, p, server, 11, 10001001)
+	b, bPicks := adventureOwner(t, p, server, 11, 10001002)
+	clock := &leagueClock{at: time.Now().UTC().Add(2 * time.Minute)}
+	mode := adventureTestMode(t, p, clock, adventureOpponents{})
+	opContext := opPinned(installed(t, p))
+	opContext.StartedAt = clock.at
+	now := clock.at
+
+	putAdventureOccurrence(t, p, a.PlayerID, d.EventDefense, 0, now, now.Add(time.Hour), "gift-room-owner")
+	info, err := mode.Info(ctx, a, d.EventDefense, opContext)
+	if err != nil {
+		t.Fatal(err)
+	}
+	roomID := adventureRoomID(t, info)
+	if _, err = mode.EnterDefense(ctx, b, roomID, opContext); err != nil {
+		t.Fatal("defense join", err)
+	}
+	sourceKey := strconv.FormatInt(roomID, 10)
+	solve := func(player identity.ActorContext, hero, position int64) {
+		t.Helper()
+		if _, err := mode.PrepareDefense(ctx, player, position, opContext); err != nil {
+			t.Fatalf("prepare %d: %v", position, err)
+		}
+		if _, err := mode.StartDefense(ctx, player, appadventure.FightRequest{Formation: []int64{hero}}, position, opContext); err != nil {
+			t.Fatalf("start %d: %v", position, err)
+		}
+		if _, err := mode.DefenseResult(ctx, player, appadventure.ResultRequest{Star: 3, Damage: 100, Formation: []int64{hero}}, position, opContext); err != nil {
+			t.Fatalf("result %d: %v", position, err)
+		}
+	}
+
+	solve(a, aPicks[0], 1)
+	solve(b, bPicks[0], 2)
+	if mails := scalar(t, p, `SELECT count(*) FROM mail_records WHERE source_kind='ADVENTURE_DEFENSE' AND source_key=$1`, sourceKey); mails != 0 {
+		t.Fatalf("partial room mailed %d, want 0", mails)
+	}
+
+	solve(a, aPicks[0], 3)
+	if mails := scalar(t, p, `SELECT count(*) FROM mail_records WHERE source_kind='ADVENTURE_DEFENSE' AND source_key=$1`, sourceKey); mails != 2 {
+		t.Fatalf("completed room mailed %d, want one per distinct defeater", mails)
+	}
+	for _, player := range []identity.ActorContext{a, b} {
+		if got := scalar(t, p, `SELECT count(*) FROM mail_records WHERE source_kind='ADVENTURE_DEFENSE' AND source_key=$1 AND recipient_player_id=$2`, sourceKey, int64(player.PlayerID)); got != 1 {
+			t.Fatalf("recipient %d mailed %d, want 1", player.PlayerID, got)
+		}
+	}
+	if got := scalar(t, p, `SELECT count(*) FROM mail_attachments a JOIN mail_records m USING(mail_uuid) WHERE m.source_kind='ADVENTURE_DEFENSE' AND m.source_key=$1`, sourceKey); got != 8 {
+		t.Fatalf("band gift attachments %d, want 4 per winner", got)
+	}
+	if got := scalar(t, p, `SELECT count(*) FROM mail_attachments a JOIN mail_records m USING(mail_uuid) WHERE m.source_kind='ADVENTURE_DEFENSE' AND m.source_key=$1 AND a.item_id=50001014 AND a.amount=5`, sourceKey); got != 2 {
+		t.Fatalf("band gift item 50001014 counted %d, want one per winner", got)
+	}
+
+	replay, err := mode.DefenseResult(ctx, a, appadventure.ResultRequest{Star: 3, Damage: 100, Formation: []int64{aPicks[0]}}, 3, opContext)
+	if err != nil || !replay.Duplicate {
+		t.Fatalf("late result duplicate=%v err=%v", replay.Duplicate, err)
+	}
+	if mails := scalar(t, p, `SELECT count(*) FROM mail_records WHERE source_kind='ADVENTURE_DEFENSE' AND source_key=$1`, sourceKey); mails != 2 {
+		t.Fatalf("late result mailed %d, want no new mail", mails)
+	}
 }
