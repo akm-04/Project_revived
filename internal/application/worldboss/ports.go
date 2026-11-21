@@ -112,7 +112,7 @@ type BattleCountObserver interface {
 
 func (s Mode) ready() bool {
 	return s.Fresh != nil && s.Store != nil && s.Content != nil && s.Fence != nil && s.Players != nil && s.Directory != nil && s.Population != nil &&
-		s.Heroes != nil && s.Combat != nil && s.Privileges != nil && s.Costs != nil && s.Mail != nil && s.Receipts != nil && s.ReceiptRead != nil
+		s.Heroes != nil && s.Combat != nil && s.Privileges != nil && s.Costs != nil && s.Mail != nil && s.Receipts != nil && s.ReceiptRead != nil && s.BattleCounts != nil
 }
 
 // StartRequest is the stock 626 request.
