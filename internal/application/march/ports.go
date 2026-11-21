@@ -30,6 +30,7 @@ type Content interface {
 	ActiveRevision(context.Context, tx.Queryer) (string, error)
 	MarchCatalogTx(context.Context, tx.Queryer, string) (d.Catalog, error)
 	SummonCatalogTx(context.Context, tx.Queryer, string) (summon.Catalog, error)
+	HeroColorLevelsTx(context.Context, tx.Queryer, string) (map[int64]d.HeroColorLevels, error)
 }
 type Fence interface {
 	FenceActorTx(context.Context, tx.Tx, identity.ActorContext, time.Time) error

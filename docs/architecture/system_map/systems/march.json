@@ -172,6 +172,8 @@
    "accounts",
    "gameplay_contexts",
    "gxb_content_activation",
+   "gxb_content_equipment_primitives",
+   "gxb_content_hero_equipment",
    "gxb_content_revisions",
    "gxb_operation_receipts",
    "march_players",
@@ -191,6 +193,7 @@
    "i9_5a_march.json"
   ],
   "unit": [
+   "scale_coherence_test.go",
    "settle_balance_test.go",
    "start_choice_conformance_test.go"
   ]
