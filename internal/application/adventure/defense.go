@@ -8,6 +8,7 @@ import (
 
 	cb "gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
+	"gxb.local/backend/v2/internal/application/i5"
 	sr "gxb.local/backend/v2/internal/application/sharedroom"
 	"gxb.local/backend/v2/internal/application/socialinbox"
 	d "gxb.local/backend/v2/internal/domain/adventure"
@@ -18,7 +19,17 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-const defenseCampaignType = 62
+const (
+	defenseCampaignType = 62
+
+	// defenseGiftTitle, defenseGiftBody and defenseGiftSender are the stock
+	// translation rows ADVENTURE_MONSTER_REWARD_* the defeaters' mail uses.
+	defenseGiftTitle  = "Guard Campus Rewards"
+	defenseGiftBody   = "Congrats on your success in guarding the campus against the invasion of the rogues. Thank you very much and present the following rewards to you."
+	defenseGiftSender = "Student union: Smartie"
+
+	defenseMailSourceKind = "ADVENTURE_DEFENSE"
+)
 
 var defenseSummaryPolicy = cd.SummaryPolicy{ID: "I9_ADVENTURE_DEFENSE_SUMMARY_V1", Version: 1, MaxStar: d.DefenseMaxStar, WinFromStar: true, MaxDamage: d.DefenseDamageCap}
 
@@ -279,6 +290,10 @@ func (s Mode) DefenseResult(c context.Context, a identity.ActorContext, request 
 	if err := validateFormation(request.Formation); err != nil {
 		return Response{}, d.ErrInvalid
 	}
+	op, err := s.pin(c, op)
+	if err != nil {
+		return Response{}, err
+	}
 	var response Response
 	room, err := s.Rooms.Update(c, a, sr.UpdateRequest{Family: DefenseFamily(), Before: s.admissionBefore(a, op), Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
 		at := sc.Operation.DecisionAt()
@@ -317,7 +332,12 @@ func (s Mode) DefenseResult(c context.Context, a identity.ActorContext, request 
 				return d.ErrRefused
 			}
 			killer = profile.Name
-			state.Monsters[position-1] = d.MonsterState{Killer: killer, Solved: true}
+			state.Monsters[position-1] = d.MonsterState{Killer: killer, KillerPlayer: a.PlayerID, Solved: true}
+		}
+		if state.DefenseCompleted() {
+			if err = s.deliverDefenseGift(c, sc, *room, state, at); err != nil {
+				return err
+			}
 		}
 		state.AddPush(7, int64(a.PlayerID), true, map[string]any{"room_id": room.ID, "monster_pos": position,
 			"pos_status": map[string]any{"player_id": int64(0), "busy_type": int64(0)}, "monster_status": monsterKillers(state)})
@@ -340,6 +360,33 @@ func (s Mode) DefenseResult(c context.Context, a identity.ActorContext, request 
 	body := map[string]any{"favor": map[string]any{}, "exps": []any{}, "tutorCoin": int64(0), "star_crystal": int64(0),
 		"awards": map[string]any{"awards": []any{}}, "room_info": detail["room_info"]}
 	return Response{Body: body, Duplicate: response.Duplicate}, nil
+}
+
+// deliverDefenseGift mails the room's band gift to each distinct defeater once,
+// in the transaction that solved the room's last position. The (recipient,
+// source kind, source key) mail key makes a repeated pass deliver nothing.
+func (s Mode) deliverDefenseGift(c context.Context, sc gen.TimedScope, room sharedroom.Room, state d.RoomState, at time.Time) error {
+	catalog, _, err := s.readCatalogs(c, sc.Tx, sc.Operation.Operation())
+	if err != nil {
+		return err
+	}
+	campaign, ok := catalog.CampaignByID(state.CampaignID)
+	if !ok {
+		return d.ErrUnavailable
+	}
+	_, lines := giftAwards(catalog, campaign.Gift)
+	if len(lines) == 0 {
+		return d.ErrUnavailable
+	}
+	sourceKey := strconv.FormatInt(room.ID, 10)
+	for _, recipient := range state.DefenseRecipients() {
+		if _, _, err = s.Mail.DeliverTx(c, sc.Tx, i5.SettlementMailRequest{Recipient: recipient, SourceKind: defenseMailSourceKind,
+			SourceKey: sourceKey, Title: defenseGiftTitle, Sender: defenseGiftSender, Body: defenseGiftBody,
+			PolicyVersion: d.PolicyID, Lines: lines, At: at}); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func monsterKillers(state d.RoomState) []any {

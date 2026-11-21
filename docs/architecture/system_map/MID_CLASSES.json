@@ -113223,6 +113223,9 @@
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:26",
     "internal/adapters/postgres/combatstore/store.go:285",
+    "internal/adapters/postgres/i5store/store.go:249",
+    "internal/adapters/postgres/i5store/store.go:494",
+    "internal/adapters/postgres/i5store/store.go:528",
     "internal/adapters/postgres/librarystore/battle_counts.go:15",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
@@ -113319,6 +113322,11 @@
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 226,
      "statement": "SELECT EXISTS("
+    },
+    {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 501,
+     "statement": "SELECT payload::text,payload_version FROM mail_tuning"
     },
     {
      "file": "internal/adapters/postgres/realtime_wakeup_core.go",

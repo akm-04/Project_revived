@@ -312,3 +312,40 @@ func TestFavorOccurrenceSpecialDataAndRetirement(t *testing.T) {
 		t.Fatal("an occurrence without a partner id stays servable outside Favor")
 	}
 }
+
+// R2: the gift recipients are the distinct defeaters, ascending, and a position
+// solved before KillerPlayer existed contributes no recipient.
+func TestDefenseRecipientsDistinctAscending(t *testing.T) {
+	state := RoomState{Monsters: []MonsterState{
+		{Killer: "c", KillerPlayer: 30, Solved: true},
+		{Killer: "a", KillerPlayer: 10, Solved: true},
+		{Killer: "c", KillerPlayer: 30, Solved: true},
+	}}
+	if got := state.DefenseRecipients(); len(got) != 2 || got[0] != 10 || got[1] != 30 {
+		t.Fatalf("recipients %v, want [10 30]", got)
+	}
+	if !state.DefenseCompleted() {
+		t.Fatal("three solved positions are a completed room")
+	}
+
+	partial := RoomState{Monsters: []MonsterState{
+		{Killer: "a", KillerPlayer: 10, Solved: true},
+		{Killer: "b", KillerPlayer: 20},
+		{},
+	}}
+	if got := partial.DefenseRecipients(); len(got) != 1 || got[0] != 10 {
+		t.Fatalf("partial recipients %v, want [10]", got)
+	}
+	if partial.DefenseCompleted() {
+		t.Fatal("an unsolved position is not a completed room")
+	}
+
+	carried := RoomState{Monsters: []MonsterState{
+		{Killer: "old", Solved: true},
+		{Killer: "b", KillerPlayer: 20, Solved: true},
+		{Killer: "b", KillerPlayer: 20, Solved: true},
+	}}
+	if got := carried.DefenseRecipients(); len(got) != 1 || got[0] != 20 {
+		t.Fatalf("carried-over recipients %v, want [20]", got)
+	}
+}
