@@ -130,6 +130,7 @@ func TestI911CCoreShopsNative(t *testing.T) {
 	if list.HTTPStatus != 200 {
 		t.Fatalf("MID 37: %+v", list)
 	}
+	replyconformance.Check(t, 37, list.Body)
 	served, _ := list.Body["list"].([]int64)
 	found := map[int64]bool{}
 	for _, shopType := range served {
@@ -174,6 +175,7 @@ func TestI911CCoreShopsNative(t *testing.T) {
 	if buy.HTTPStatus != 200 || buy.Body["isbuy"] != int64(1) || buy.Body["isBuy"] != int64(1) || buy.Body["buy_times"] != int64(1) {
 		t.Fatalf("MID 33: %+v", buy)
 	}
+	replyconformance.Check(t, 33, buy.Body)
 	if after := i911cScalarAmount(t, p, a, currency); after != before-price {
 		t.Fatalf("%s %d -> %d, price %d", currency, before, after, price)
 	}
@@ -195,6 +197,7 @@ func TestI911CCoreShopsNative(t *testing.T) {
 	if multi.HTTPStatus != 200 {
 		t.Fatalf("MID 2982: %+v", multi)
 	}
+	replyconformance.Check(t, 2982, multi.Body)
 	if isBuy, _ := multi.Body["isbuy"].([]int64); len(isBuy) != 2 || isBuy[0] != 1 || isBuy[1] != 1 {
 		t.Fatalf("multi isbuy %#v", multi.Body["isbuy"])
 	}
