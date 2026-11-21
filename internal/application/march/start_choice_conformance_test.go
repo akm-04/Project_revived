@@ -184,6 +184,10 @@ func (startChoiceContent) SummonCatalogTx(context.Context, tx.Queryer, string) (
 	return summon.Catalog{}, nil
 }
 
+func (startChoiceContent) HeroColorLevelsTx(context.Context, tx.Queryer, string) (map[int64]d.HeroColorLevels, error) {
+	return map[int64]d.HeroColorLevels{}, nil
+}
+
 type startChoiceFence struct{}
 
 func (startChoiceFence) FenceActorTx(context.Context, tx.Tx, identity.ActorContext, time.Time) error {

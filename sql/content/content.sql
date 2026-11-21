@@ -995,6 +995,17 @@ SELECT item_id,ordinary_eligible
 FROM gxb_content_hero_equipment
 WHERE revision_id=$1 AND hero_table_id=$2 AND color=$3 AND slot=$4;
 
+-- name: ReadHeroColorRequiredLevels :one
+SELECT COALESCE(jsonb_agg(jsonb_build_array(hero_table_id,color,required_level) ORDER BY hero_table_id,color),'[]'::jsonb)::text
+FROM (
+  SELECT he.hero_table_id,he.color,MAX(ep.required_level)::bigint AS required_level
+  FROM gxb_content_hero_equipment he
+  JOIN gxb_content_equipment_primitives ep
+    ON ep.revision_id=he.revision_id AND ep.item_id=he.item_id
+  WHERE he.revision_id=$1 AND he.ordinary_eligible
+  GROUP BY he.hero_table_id,he.color
+) rows;
+
 -- name: ReadSuperEquipmentPosition :one
 SELECT item_id
 FROM gxb_content_super_equipment_positions

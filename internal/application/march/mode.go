@@ -35,10 +35,17 @@ type Result struct {
 	CostDrink int64     `json:"cost_drink"`
 }
 type view struct {
-	catalog  d.Catalog
-	revision string
-	day      int64
-	level    int64
+	catalog     d.Catalog
+	revision    string
+	day         int64
+	level       int64
+	colorLevels *heroColorLevelsCache
+}
+
+// heroColorLevelsCache loads the immutable colour level table once per run.
+type heroColorLevelsCache struct {
+	loaded bool
+	levels map[int64]d.HeroColorLevels
 }
 
 var reportPolicy = cd.ReportPolicy{ID: "MARCH_REPORT_V1", Version: 2, Formation: true, CompleteEnemies: true, LivingWinner: true, WinClearsEnemies: true, MaxHP: 1e12, HPPerFrozen: cd.ReportedHPBound}
@@ -146,7 +153,7 @@ func (s Mode) run(c context.Context, a identity.ActorContext, name string, reque
 		if !found {
 			return d.ErrUnavailable
 		}
-		v := view{catalog: cat, revision: revision, day: modes.Day(at), level: player.Level}
+		v := view{catalog: cat, revision: revision, day: modes.Day(at), level: player.Level, colorLevels: &heroColorLevelsCache{}}
 		if r.Occurrence == "" {
 			if err = s.initialize(c, sc, a, v, &r, false); err != nil {
 				return err

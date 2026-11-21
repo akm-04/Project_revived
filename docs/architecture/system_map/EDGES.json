@@ -5008,6 +5008,7 @@
    ],
    "store:contentstore": [
     "*ActiveRevision",
+    "*HeroColorLevelsTx",
     "*MarchCatalogTx",
     "*SummonCatalogTx"
    ],

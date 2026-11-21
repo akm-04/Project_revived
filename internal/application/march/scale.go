@@ -25,12 +25,13 @@ const (
 // currently chosen for it. Rows stay copies; the stored defense is never read
 // for writing and the owner's heroes are never changed.
 type scaledHero struct {
-	row    map[string]any
-	ref    character.HeroRef
-	frozen *publicstats.FrozenHero
-	level  int64
-	star   int64
-	color  int64
+	row         map[string]any
+	evaluate    func(level, star, color int64) (publicstats.Result, error)
+	levels      d.HeroColorLevels
+	levelsKnown bool
+	level       int64
+	star        int64
+	color       int64
 }
 
 // frozenTeam caches one owner read per opponent hero for the whole candidate
@@ -78,16 +79,13 @@ func (s Mode) scaleEnemy(c context.Context, sc gen.TimedScope, a identity.ActorC
 	if len(heroes) == 0 {
 		return nil
 	}
-	for _, field := range []int{scaleLevel, scaleColor, scaleStar} {
-		floor := scaleFloor(policy, field)
-		if err = s.fitScale(heroes, field, floor, limit); err != nil {
-			return err
-		}
+	if err = s.fitCoherentTeam(heroes, policy, limit); err != nil {
+		return err
 	}
 	total := int64(0)
 	for i := range heroes {
 		h := &heroes[i]
-		result, err := h.frozen.Evaluate(h.level, h.star, h.color)
+		result, err := h.evaluate(h.level, h.star, h.color)
 		if err != nil {
 			return err
 		}
@@ -103,6 +101,10 @@ func (s Mode) scaleEnemy(c context.Context, sc gen.TimedScope, a identity.ActorC
 }
 
 func (s Mode) scaledHeroes(c context.Context, sc gen.TimedScope, a identity.ActorContext, v view, enemy *d.Enemy, frozen frozenTeam) ([]scaledHero, error) {
+	levels, err := s.heroColorLevels(c, sc.Tx, v)
+	if err != nil {
+		return nil, err
+	}
 	keys := make([]int64, 0, len(enemy.Heroes))
 	for key := range enemy.Heroes {
 		id, err := strconv.ParseInt(key, 10, 64)
@@ -119,21 +121,84 @@ func (s Mode) scaledHeroes(c context.Context, sc gen.TimedScope, a identity.Acto
 		if partner <= 0 {
 			return nil, d.ErrUnavailable
 		}
+		tableID := number(row["table_id"])
+		if tableID <= 0 {
+			return nil, d.ErrUnavailable
+		}
+		color := number(row["color"])
+		if color < 1 || color > 16 {
+			return nil, d.ErrUnavailable
+		}
+		heroLevels, known := levels[tableID]
+		if color > 1 && !known {
+			return nil, d.ErrUnavailable
+		}
 		ref := character.HeroRef{PlayerID: identity.PlayerID(enemy.Player), PartnerID: partner}
 		owner, err := s.frozenOwner(c, sc, a, ref, v.revision, frozen)
 		if err != nil {
 			return nil, err
 		}
 		heroes = append(heroes, scaledHero{
-			row:    row,
-			ref:    ref,
-			frozen: owner,
-			level:  number(row["lev"]),
-			star:   number(row["star"]),
-			color:  number(row["color"]),
+			row:         row,
+			evaluate:    owner.Evaluate,
+			levels:      heroLevels,
+			levelsKnown: known,
+			level:       number(row["lev"]),
+			star:        number(row["star"]),
+			color:       color,
 		})
 	}
 	return heroes, nil
+}
+
+// fitCoherentTeam fits the copied team to the stage limit and then clamps its
+// colours to combinations a real girl can hold. The colour clamp runs after the
+// level step and again after the star step; it only lowers force.
+func (s Mode) fitCoherentTeam(heroes []scaledHero, policy d.Policy, limit float64) error {
+	for _, field := range []int{scaleLevel, scaleColor, scaleStar} {
+		if err := s.fitScale(heroes, field, scaleFloor(policy, field), limit); err != nil {
+			return err
+		}
+		if field == scaleLevel {
+			if err := clampCoherentColors(heroes, policy.RivalScaleMinColor); err != nil {
+				return err
+			}
+		}
+	}
+	return clampCoherentColors(heroes, policy.RivalScaleMinColor)
+}
+
+func clampCoherentColors(heroes []scaledHero, floor int64) error {
+	for i := range heroes {
+		h := &heroes[i]
+		if h.color <= 1 {
+			continue
+		}
+		if !h.levelsKnown {
+			return d.ErrUnavailable
+		}
+		color, err := d.CoherentColor(h.levels, h.level, h.color, floor)
+		if err != nil {
+			return err
+		}
+		h.color = color
+	}
+	return nil
+}
+
+func (s Mode) heroColorLevels(c context.Context, q tx.Queryer, v view) (map[int64]d.HeroColorLevels, error) {
+	if v.colorLevels == nil {
+		return nil, d.ErrUnavailable
+	}
+	if v.colorLevels.loaded {
+		return v.colorLevels.levels, nil
+	}
+	levels, err := s.Content.HeroColorLevelsTx(c, q, v.revision)
+	if err != nil {
+		return nil, err
+	}
+	v.colorLevels.loaded, v.colorLevels.levels = true, levels
+	return levels, nil
 }
 
 // fitScale binary-searches the largest common value at or below every hero's
@@ -188,7 +253,7 @@ func scaledTeamForce(heroes []scaledHero, field int, value int64) (int64, error)
 		case scaleStar:
 			star = value
 		}
-		result, err := h.frozen.Evaluate(level, star, color)
+		result, err := h.evaluate(level, star, color)
 		if err != nil {
 			return 0, err
 		}
