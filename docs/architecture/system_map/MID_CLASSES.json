@@ -9731,10 +9731,7 @@
      "value": "false"
     }
    ],
-   "receipt_writes": [
-    "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1411"
-   ],
+   "receipt_writes": [],
    "retry": [
     {
      "file": "internal/application/campaign/mode.go",
@@ -9743,7 +9740,6 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/adventurestore/store.go:54",
     "internal/adapters/postgres/campaignstore/store.go:109",
     "internal/adapters/postgres/campaignstore/store.go:61",
     "internal/adapters/postgres/combatstore/store.go:154",
@@ -9755,15 +9751,10 @@
     "internal/adapters/postgres/guildstore/rental.go:113",
     "internal/adapters/postgres/guildstore/rental.go:131",
     "internal/adapters/postgres/guildstore/rental.go:141",
-    "internal/adapters/postgres/i5store/missions.go:14",
-    "internal/adapters/postgres/i5store/missions.go:45",
-    "internal/adapters/postgres/i5store/missions.go:57",
-    "internal/adapters/postgres/i5store/missions.go:65",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:270",
     "internal/adapters/postgres/i5store/store.go:384",
     "internal/adapters/postgres/i5store/store.go:415",
-    "internal/adapters/postgres/i5store/store.go:772",
     "internal/adapters/postgres/librarystore/facets.go:89",
     "internal/adapters/postgres/librarystore/missions.go:12"
    ],
@@ -9945,16 +9936,6 @@
      "statement": "SELECT payload::text FROM content_library_input_catalogs WHERE revision_id=$1"
     },
     {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 19,
-     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(d)-ARRAY['revision_id','payload_version'] ORDER BY objective_id),'[]'::jsonb)::text FROM gxb_content_objective_definitions d WHERE revision_id=$1 AND definition_revision='I9_MISSIONS_V1'"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 44,
-     "statement": "SELECT COALESCE(a.payload::text,''),COALESCE(r.manifest->'enabled_capabilities' ? 'MISSION_ACTIVITY_I9_4B',false) FROM gxb_content_revisions r LEFT JOIN content_mission_activity_catalogs a USING(revision_id) WHERE r.revision_id=$1"
-    },
-    {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -10076,11 +10057,6 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
-     "line": 797,
-     "statement": "SELECT stock_family,strategy,accepted_fact_kind,target,reward_plan::text,huoyue FROM gxb_content_objective_definitions WHERE revision_id=$1 AND program_id=$2 AND objective_id=$3 AND definition_revision=$4"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 909,
      "statement": "SELECT COALESCE(manifest->>'source_archive_sha256','') FROM gxb_content_revisions WHERE revision_id=$1"
     },
@@ -10108,26 +10084,6 @@
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 226,
      "statement": "SELECT EXISTS("
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',i.player_id,'program_id',i.program_id,'objective_id',i.objective_id,'generation_id',i.generation_id, 'definition_revision',i.definition_revision,'content_revision',COALESCE(i.content_revision,''),'legacy_definition',(i.content_revision IS NULL), 'progress',i.progress,'completed_at',i.completed_at,'claim_state',i.claim_state,'claimed_at',i.claimed_at,'state_version',i.state_version, 'family',COALESCE(d.stock_family,0),'strategy',COALESCE(d.strategy,''),'fact',COALESCE(d.accepted_fact_kind,''),'target',COALESCE(d.target,0), 'reward_plan',COALESCE(d.reward_plan,'{}'::jsonb),'huoyue',COALESCE(d.huoyue,0)) ORDER BY i.objective_id,i.generation_id),'[]'::jsonb)::text FROM locked i LEFT JOIN objective_definitions d ON i.content_revision IS NULL AND d.program_id=i.program_id AND d.objective_id=i.objective_id AND d.definition_revision=i.definition_revision"
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "WITH locked AS MATERIALIZED ("
-    },
-    {
-     "file": "internal/adapters/postgres/kernelstore/store.go",
-     "line": 25,
-     "statement": "SELECT EXISTS(SELECT 1 FROM ins) AS inserted"
-    },
-    {
-     "file": "internal/adapters/postgres/kernelstore/store.go",
-     "line": 61,
-     "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
     },
     {
      "file": "internal/adapters/postgres/realtime_wakeup_core.go",
@@ -37750,8 +37706,6 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1411",
     "internal/application/march/mode.go:178"
    ],
    "retry": [
@@ -37762,7 +37716,6 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/adventurestore/store.go:54",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -37772,15 +37725,10 @@
     "internal/adapters/postgres/guildstore/rental.go:113",
     "internal/adapters/postgres/guildstore/rental.go:131",
     "internal/adapters/postgres/guildstore/rental.go:141",
-    "internal/adapters/postgres/i5store/missions.go:14",
-    "internal/adapters/postgres/i5store/missions.go:45",
-    "internal/adapters/postgres/i5store/missions.go:57",
-    "internal/adapters/postgres/i5store/missions.go:65",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:270",
     "internal/adapters/postgres/i5store/store.go:384",
     "internal/adapters/postgres/i5store/store.go:415",
-    "internal/adapters/postgres/i5store/store.go:772",
     "internal/adapters/postgres/librarystore/facets.go:89",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/marchstore/store.go:32",
@@ -37959,16 +37907,6 @@
      "statement": "SELECT payload::text FROM content_library_input_catalogs WHERE revision_id=$1"
     },
     {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 19,
-     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(d)-ARRAY['revision_id','payload_version'] ORDER BY objective_id),'[]'::jsonb)::text FROM gxb_content_objective_definitions d WHERE revision_id=$1 AND definition_revision='I9_MISSIONS_V1'"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 44,
-     "statement": "SELECT COALESCE(a.payload::text,''),COALESCE(r.manifest->'enabled_capabilities' ? 'MISSION_ACTIVITY_I9_4B',false) FROM gxb_content_revisions r LEFT JOIN content_mission_activity_catalogs a USING(revision_id) WHERE r.revision_id=$1"
-    },
-    {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -38105,11 +38043,6 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
-     "line": 797,
-     "statement": "SELECT stock_family,strategy,accepted_fact_kind,target,reward_plan::text,huoyue FROM gxb_content_objective_definitions WHERE revision_id=$1 AND program_id=$2 AND objective_id=$3 AND definition_revision=$4"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 909,
      "statement": "SELECT COALESCE(manifest->>'source_archive_sha256','') FROM gxb_content_revisions WHERE revision_id=$1"
     },
@@ -38142,16 +38075,6 @@
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 226,
      "statement": "SELECT EXISTS("
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',i.player_id,'program_id',i.program_id,'objective_id',i.objective_id,'generation_id',i.generation_id, 'definition_revision',i.definition_revision,'content_revision',COALESCE(i.content_revision,''),'legacy_definition',(i.content_revision IS NULL), 'progress',i.progress,'completed_at',i.completed_at,'claim_state',i.claim_state,'claimed_at',i.claimed_at,'state_version',i.state_version, 'family',COALESCE(d.stock_family,0),'strategy',COALESCE(d.strategy,''),'fact',COALESCE(d.accepted_fact_kind,''),'target',COALESCE(d.target,0), 'reward_plan',COALESCE(d.reward_plan,'{}'::jsonb),'huoyue',COALESCE(d.huoyue,0)) ORDER BY i.objective_id,i.generation_id),'[]'::jsonb)::text FROM locked i LEFT JOIN objective_definitions d ON i.content_revision IS NULL AND d.program_id=i.program_id AND d.objective_id=i.objective_id AND d.definition_revision=i.definition_revision"
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "WITH locked AS MATERIALIZED ("
     },
     {
      "file": "internal/adapters/postgres/kernelstore/store.go",
@@ -44838,10 +44761,7 @@
      "value": "false"
     }
    ],
-   "receipt_writes": [
-    "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1411"
-   ],
+   "receipt_writes": [],
    "retry": [
     {
      "file": "internal/application/guildcampaign/commands.go",
@@ -44850,7 +44770,6 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/adventurestore/store.go:54",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -44862,15 +44781,10 @@
     "internal/adapters/postgres/guildstore/rental.go:113",
     "internal/adapters/postgres/guildstore/rental.go:131",
     "internal/adapters/postgres/guildstore/rental.go:141",
-    "internal/adapters/postgres/i5store/missions.go:14",
-    "internal/adapters/postgres/i5store/missions.go:45",
-    "internal/adapters/postgres/i5store/missions.go:57",
-    "internal/adapters/postgres/i5store/missions.go:65",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:270",
     "internal/adapters/postgres/i5store/store.go:384",
     "internal/adapters/postgres/i5store/store.go:415",
-    "internal/adapters/postgres/i5store/store.go:772",
     "internal/adapters/postgres/librarystore/facets.go:89",
     "internal/adapters/postgres/librarystore/missions.go:12"
    ],
@@ -45047,16 +44961,6 @@
      "statement": "SELECT payload::text FROM content_library_input_catalogs WHERE revision_id=$1"
     },
     {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 19,
-     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(d)-ARRAY['revision_id','payload_version'] ORDER BY objective_id),'[]'::jsonb)::text FROM gxb_content_objective_definitions d WHERE revision_id=$1 AND definition_revision='I9_MISSIONS_V1'"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 44,
-     "statement": "SELECT COALESCE(a.payload::text,''),COALESCE(r.manifest->'enabled_capabilities' ? 'MISSION_ACTIVITY_I9_4B',false) FROM gxb_content_revisions r LEFT JOIN content_mission_activity_catalogs a USING(revision_id) WHERE r.revision_id=$1"
-    },
-    {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -45173,11 +45077,6 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
-     "line": 797,
-     "statement": "SELECT stock_family,strategy,accepted_fact_kind,target,reward_plan::text,huoyue FROM gxb_content_objective_definitions WHERE revision_id=$1 AND program_id=$2 AND objective_id=$3 AND definition_revision=$4"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 909,
      "statement": "SELECT COALESCE(manifest->>'source_archive_sha256','') FROM gxb_content_revisions WHERE revision_id=$1"
     },
@@ -45215,26 +45114,6 @@
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 226,
      "statement": "SELECT EXISTS("
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',i.player_id,'program_id',i.program_id,'objective_id',i.objective_id,'generation_id',i.generation_id, 'definition_revision',i.definition_revision,'content_revision',COALESCE(i.content_revision,''),'legacy_definition',(i.content_revision IS NULL), 'progress',i.progress,'completed_at',i.completed_at,'claim_state',i.claim_state,'claimed_at',i.claimed_at,'state_version',i.state_version, 'family',COALESCE(d.stock_family,0),'strategy',COALESCE(d.strategy,''),'fact',COALESCE(d.accepted_fact_kind,''),'target',COALESCE(d.target,0), 'reward_plan',COALESCE(d.reward_plan,'{}'::jsonb),'huoyue',COALESCE(d.huoyue,0)) ORDER BY i.objective_id,i.generation_id),'[]'::jsonb)::text FROM locked i LEFT JOIN objective_definitions d ON i.content_revision IS NULL AND d.program_id=i.program_id AND d.objective_id=i.objective_id AND d.definition_revision=i.definition_revision"
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "WITH locked AS MATERIALIZED ("
-    },
-    {
-     "file": "internal/adapters/postgres/kernelstore/store.go",
-     "line": 25,
-     "statement": "SELECT EXISTS(SELECT 1 FROM ins) AS inserted"
-    },
-    {
-     "file": "internal/adapters/postgres/kernelstore/store.go",
-     "line": 61,
-     "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
     },
     {
      "file": "internal/adapters/postgres/realtime_wakeup_core.go",
@@ -46850,8 +46729,6 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1411",
     "internal/application/worldboss/service.go:100"
    ],
    "retry": [
@@ -46862,7 +46739,6 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/adventurestore/store.go:54",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -46872,15 +46748,10 @@
     "internal/adapters/postgres/guildstore/rental.go:113",
     "internal/adapters/postgres/guildstore/rental.go:131",
     "internal/adapters/postgres/guildstore/rental.go:141",
-    "internal/adapters/postgres/i5store/missions.go:14",
-    "internal/adapters/postgres/i5store/missions.go:45",
-    "internal/adapters/postgres/i5store/missions.go:57",
-    "internal/adapters/postgres/i5store/missions.go:65",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:270",
     "internal/adapters/postgres/i5store/store.go:384",
     "internal/adapters/postgres/i5store/store.go:415",
-    "internal/adapters/postgres/i5store/store.go:772",
     "internal/adapters/postgres/librarystore/facets.go:89",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/worldbossstore/store.go:25",
@@ -47060,16 +46931,6 @@
      "statement": "SELECT payload::text FROM content_library_input_catalogs WHERE revision_id=$1"
     },
     {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 19,
-     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(d)-ARRAY['revision_id','payload_version'] ORDER BY objective_id),'[]'::jsonb)::text FROM gxb_content_objective_definitions d WHERE revision_id=$1 AND definition_revision='I9_MISSIONS_V1'"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 44,
-     "statement": "SELECT COALESCE(a.payload::text,''),COALESCE(r.manifest->'enabled_capabilities' ? 'MISSION_ACTIVITY_I9_4B',false) FROM gxb_content_revisions r LEFT JOIN content_mission_activity_catalogs a USING(revision_id) WHERE r.revision_id=$1"
-    },
-    {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -47186,11 +47047,6 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
-     "line": 797,
-     "statement": "SELECT stock_family,strategy,accepted_fact_kind,target,reward_plan::text,huoyue FROM gxb_content_objective_definitions WHERE revision_id=$1 AND program_id=$2 AND objective_id=$3 AND definition_revision=$4"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 909,
      "statement": "SELECT COALESCE(manifest->>'source_archive_sha256','') FROM gxb_content_revisions WHERE revision_id=$1"
     },
@@ -47218,16 +47074,6 @@
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 226,
      "statement": "SELECT EXISTS("
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',i.player_id,'program_id',i.program_id,'objective_id',i.objective_id,'generation_id',i.generation_id, 'definition_revision',i.definition_revision,'content_revision',COALESCE(i.content_revision,''),'legacy_definition',(i.content_revision IS NULL), 'progress',i.progress,'completed_at',i.completed_at,'claim_state',i.claim_state,'claimed_at',i.claimed_at,'state_version',i.state_version, 'family',COALESCE(d.stock_family,0),'strategy',COALESCE(d.strategy,''),'fact',COALESCE(d.accepted_fact_kind,''),'target',COALESCE(d.target,0), 'reward_plan',COALESCE(d.reward_plan,'{}'::jsonb),'huoyue',COALESCE(d.huoyue,0)) ORDER BY i.objective_id,i.generation_id),'[]'::jsonb)::text FROM locked i LEFT JOIN objective_definitions d ON i.content_revision IS NULL AND d.program_id=i.program_id AND d.objective_id=i.objective_id AND d.definition_revision=i.definition_revision"
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "WITH locked AS MATERIALIZED ("
     },
     {
      "file": "internal/adapters/postgres/kernelstore/store.go",
@@ -53090,8 +52936,6 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1411",
     "internal/application/petcampaign/run.go:179"
    ],
    "retry": [
@@ -53102,7 +52946,6 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/adventurestore/store.go:54",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -53112,15 +52955,10 @@
     "internal/adapters/postgres/guildstore/rental.go:113",
     "internal/adapters/postgres/guildstore/rental.go:131",
     "internal/adapters/postgres/guildstore/rental.go:141",
-    "internal/adapters/postgres/i5store/missions.go:14",
-    "internal/adapters/postgres/i5store/missions.go:45",
-    "internal/adapters/postgres/i5store/missions.go:57",
-    "internal/adapters/postgres/i5store/missions.go:65",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:270",
     "internal/adapters/postgres/i5store/store.go:384",
     "internal/adapters/postgres/i5store/store.go:415",
-    "internal/adapters/postgres/i5store/store.go:772",
     "internal/adapters/postgres/librarystore/facets.go:89",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/petcampaignstore/store.go:32",
@@ -53299,16 +53137,6 @@
      "statement": "SELECT payload::text FROM content_library_input_catalogs WHERE revision_id=$1"
     },
     {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 19,
-     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(d)-ARRAY['revision_id','payload_version'] ORDER BY objective_id),'[]'::jsonb)::text FROM gxb_content_objective_definitions d WHERE revision_id=$1 AND definition_revision='I9_MISSIONS_V1'"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 44,
-     "statement": "SELECT COALESCE(a.payload::text,''),COALESCE(r.manifest->'enabled_capabilities' ? 'MISSION_ACTIVITY_I9_4B',false) FROM gxb_content_revisions r LEFT JOIN content_mission_activity_catalogs a USING(revision_id) WHERE r.revision_id=$1"
-    },
-    {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -53425,11 +53253,6 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
-     "line": 797,
-     "statement": "SELECT stock_family,strategy,accepted_fact_kind,target,reward_plan::text,huoyue FROM gxb_content_objective_definitions WHERE revision_id=$1 AND program_id=$2 AND objective_id=$3 AND definition_revision=$4"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 909,
      "statement": "SELECT COALESCE(manifest->>'source_archive_sha256','') FROM gxb_content_revisions WHERE revision_id=$1"
     },
@@ -53457,16 +53280,6 @@
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 226,
      "statement": "SELECT EXISTS("
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',i.player_id,'program_id',i.program_id,'objective_id',i.objective_id,'generation_id',i.generation_id, 'definition_revision',i.definition_revision,'content_revision',COALESCE(i.content_revision,''),'legacy_definition',(i.content_revision IS NULL), 'progress',i.progress,'completed_at',i.completed_at,'claim_state',i.claim_state,'claimed_at',i.claimed_at,'state_version',i.state_version, 'family',COALESCE(d.stock_family,0),'strategy',COALESCE(d.strategy,''),'fact',COALESCE(d.accepted_fact_kind,''),'target',COALESCE(d.target,0), 'reward_plan',COALESCE(d.reward_plan,'{}'::jsonb),'huoyue',COALESCE(d.huoyue,0)) ORDER BY i.objective_id,i.generation_id),'[]'::jsonb)::text FROM locked i LEFT JOIN objective_definitions d ON i.content_revision IS NULL AND d.program_id=i.program_id AND d.objective_id=i.objective_id AND d.definition_revision=i.definition_revision"
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "WITH locked AS MATERIALIZED ("
     },
     {
      "file": "internal/adapters/postgres/kernelstore/store.go",
@@ -54852,8 +54665,6 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1411",
     "internal/application/petcampaign/run.go:179"
    ],
    "retry": [
@@ -54864,7 +54675,6 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/adventurestore/store.go:54",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -54874,15 +54684,10 @@
     "internal/adapters/postgres/guildstore/rental.go:113",
     "internal/adapters/postgres/guildstore/rental.go:131",
     "internal/adapters/postgres/guildstore/rental.go:141",
-    "internal/adapters/postgres/i5store/missions.go:14",
-    "internal/adapters/postgres/i5store/missions.go:45",
-    "internal/adapters/postgres/i5store/missions.go:57",
-    "internal/adapters/postgres/i5store/missions.go:65",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:270",
     "internal/adapters/postgres/i5store/store.go:384",
     "internal/adapters/postgres/i5store/store.go:415",
-    "internal/adapters/postgres/i5store/store.go:772",
     "internal/adapters/postgres/librarystore/facets.go:89",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/petcampaignstore/store.go:32",
@@ -55061,16 +54866,6 @@
      "statement": "SELECT payload::text FROM content_library_input_catalogs WHERE revision_id=$1"
     },
     {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 19,
-     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(d)-ARRAY['revision_id','payload_version'] ORDER BY objective_id),'[]'::jsonb)::text FROM gxb_content_objective_definitions d WHERE revision_id=$1 AND definition_revision='I9_MISSIONS_V1'"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 44,
-     "statement": "SELECT COALESCE(a.payload::text,''),COALESCE(r.manifest->'enabled_capabilities' ? 'MISSION_ACTIVITY_I9_4B',false) FROM gxb_content_revisions r LEFT JOIN content_mission_activity_catalogs a USING(revision_id) WHERE r.revision_id=$1"
-    },
-    {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -55187,11 +54982,6 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
-     "line": 797,
-     "statement": "SELECT stock_family,strategy,accepted_fact_kind,target,reward_plan::text,huoyue FROM gxb_content_objective_definitions WHERE revision_id=$1 AND program_id=$2 AND objective_id=$3 AND definition_revision=$4"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 909,
      "statement": "SELECT COALESCE(manifest->>'source_archive_sha256','') FROM gxb_content_revisions WHERE revision_id=$1"
     },
@@ -55219,16 +55009,6 @@
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 226,
      "statement": "SELECT EXISTS("
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',i.player_id,'program_id',i.program_id,'objective_id',i.objective_id,'generation_id',i.generation_id, 'definition_revision',i.definition_revision,'content_revision',COALESCE(i.content_revision,''),'legacy_definition',(i.content_revision IS NULL), 'progress',i.progress,'completed_at',i.completed_at,'claim_state',i.claim_state,'claimed_at',i.claimed_at,'state_version',i.state_version, 'family',COALESCE(d.stock_family,0),'strategy',COALESCE(d.strategy,''),'fact',COALESCE(d.accepted_fact_kind,''),'target',COALESCE(d.target,0), 'reward_plan',COALESCE(d.reward_plan,'{}'::jsonb),'huoyue',COALESCE(d.huoyue,0)) ORDER BY i.objective_id,i.generation_id),'[]'::jsonb)::text FROM locked i LEFT JOIN objective_definitions d ON i.content_revision IS NULL AND d.program_id=i.program_id AND d.objective_id=i.objective_id AND d.definition_revision=i.definition_revision"
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "WITH locked AS MATERIALIZED ("
     },
     {
      "file": "internal/adapters/postgres/kernelstore/store.go",
@@ -64001,10 +63781,7 @@
      "value": "false"
     }
    ],
-   "receipt_writes": [
-    "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1411"
-   ],
+   "receipt_writes": [],
    "retry": [
     {
      "file": "internal/application/awakeningbattle/mode.go",
@@ -64013,7 +63790,6 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/adventurestore/store.go:54",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -64023,15 +63799,10 @@
     "internal/adapters/postgres/guildstore/rental.go:113",
     "internal/adapters/postgres/guildstore/rental.go:131",
     "internal/adapters/postgres/guildstore/rental.go:141",
-    "internal/adapters/postgres/i5store/missions.go:14",
-    "internal/adapters/postgres/i5store/missions.go:45",
-    "internal/adapters/postgres/i5store/missions.go:57",
-    "internal/adapters/postgres/i5store/missions.go:65",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:270",
     "internal/adapters/postgres/i5store/store.go:384",
     "internal/adapters/postgres/i5store/store.go:415",
-    "internal/adapters/postgres/i5store/store.go:772",
     "internal/adapters/postgres/librarystore/facets.go:89",
     "internal/adapters/postgres/librarystore/missions.go:12"
    ],
@@ -64213,16 +63984,6 @@
      "statement": "SELECT payload::text FROM content_library_input_catalogs WHERE revision_id=$1"
     },
     {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 19,
-     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(d)-ARRAY['revision_id','payload_version'] ORDER BY objective_id),'[]'::jsonb)::text FROM gxb_content_objective_definitions d WHERE revision_id=$1 AND definition_revision='I9_MISSIONS_V1'"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 44,
-     "statement": "SELECT COALESCE(a.payload::text,''),COALESCE(r.manifest->'enabled_capabilities' ? 'MISSION_ACTIVITY_I9_4B',false) FROM gxb_content_revisions r LEFT JOIN content_mission_activity_catalogs a USING(revision_id) WHERE r.revision_id=$1"
-    },
-    {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -64339,11 +64100,6 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
-     "line": 797,
-     "statement": "SELECT stock_family,strategy,accepted_fact_kind,target,reward_plan::text,huoyue FROM gxb_content_objective_definitions WHERE revision_id=$1 AND program_id=$2 AND objective_id=$3 AND definition_revision=$4"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 909,
      "statement": "SELECT COALESCE(manifest->>'source_archive_sha256','') FROM gxb_content_revisions WHERE revision_id=$1"
     },
@@ -64371,26 +64127,6 @@
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 226,
      "statement": "SELECT EXISTS("
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',i.player_id,'program_id',i.program_id,'objective_id',i.objective_id,'generation_id',i.generation_id, 'definition_revision',i.definition_revision,'content_revision',COALESCE(i.content_revision,''),'legacy_definition',(i.content_revision IS NULL), 'progress',i.progress,'completed_at',i.completed_at,'claim_state',i.claim_state,'claimed_at',i.claimed_at,'state_version',i.state_version, 'family',COALESCE(d.stock_family,0),'strategy',COALESCE(d.strategy,''),'fact',COALESCE(d.accepted_fact_kind,''),'target',COALESCE(d.target,0), 'reward_plan',COALESCE(d.reward_plan,'{}'::jsonb),'huoyue',COALESCE(d.huoyue,0)) ORDER BY i.objective_id,i.generation_id),'[]'::jsonb)::text FROM locked i LEFT JOIN objective_definitions d ON i.content_revision IS NULL AND d.program_id=i.program_id AND d.objective_id=i.objective_id AND d.definition_revision=i.definition_revision"
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "WITH locked AS MATERIALIZED ("
-    },
-    {
-     "file": "internal/adapters/postgres/kernelstore/store.go",
-     "line": 25,
-     "statement": "SELECT EXISTS(SELECT 1 FROM ins) AS inserted"
-    },
-    {
-     "file": "internal/adapters/postgres/kernelstore/store.go",
-     "line": 61,
-     "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
     },
     {
      "file": "internal/adapters/postgres/realtime_wakeup_core.go",
@@ -82393,8 +82129,6 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1411",
     "internal/application/illusion/service.go:106"
    ],
    "retry": [
@@ -82405,7 +82139,6 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/adventurestore/store.go:54",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -82415,15 +82148,10 @@
     "internal/adapters/postgres/guildstore/rental.go:113",
     "internal/adapters/postgres/guildstore/rental.go:131",
     "internal/adapters/postgres/guildstore/rental.go:141",
-    "internal/adapters/postgres/i5store/missions.go:14",
-    "internal/adapters/postgres/i5store/missions.go:45",
-    "internal/adapters/postgres/i5store/missions.go:57",
-    "internal/adapters/postgres/i5store/missions.go:65",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:270",
     "internal/adapters/postgres/i5store/store.go:384",
     "internal/adapters/postgres/i5store/store.go:415",
-    "internal/adapters/postgres/i5store/store.go:772",
     "internal/adapters/postgres/illusionstore/store.go:28",
     "internal/adapters/postgres/illusionstore/store.go:51",
     "internal/adapters/postgres/illusionstore/store.go:59",
@@ -82603,16 +82331,6 @@
      "statement": "SELECT payload::text FROM content_library_input_catalogs WHERE revision_id=$1"
     },
     {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 19,
-     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(d)-ARRAY['revision_id','payload_version'] ORDER BY objective_id),'[]'::jsonb)::text FROM gxb_content_objective_definitions d WHERE revision_id=$1 AND definition_revision='I9_MISSIONS_V1'"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 44,
-     "statement": "SELECT COALESCE(a.payload::text,''),COALESCE(r.manifest->'enabled_capabilities' ? 'MISSION_ACTIVITY_I9_4B',false) FROM gxb_content_revisions r LEFT JOIN content_mission_activity_catalogs a USING(revision_id) WHERE r.revision_id=$1"
-    },
-    {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -82729,11 +82447,6 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
-     "line": 797,
-     "statement": "SELECT stock_family,strategy,accepted_fact_kind,target,reward_plan::text,huoyue FROM gxb_content_objective_definitions WHERE revision_id=$1 AND program_id=$2 AND objective_id=$3 AND definition_revision=$4"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 909,
      "statement": "SELECT COALESCE(manifest->>'source_archive_sha256','') FROM gxb_content_revisions WHERE revision_id=$1"
     },
@@ -82761,16 +82474,6 @@
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 226,
      "statement": "SELECT EXISTS("
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',i.player_id,'program_id',i.program_id,'objective_id',i.objective_id,'generation_id',i.generation_id, 'definition_revision',i.definition_revision,'content_revision',COALESCE(i.content_revision,''),'legacy_definition',(i.content_revision IS NULL), 'progress',i.progress,'completed_at',i.completed_at,'claim_state',i.claim_state,'claimed_at',i.claimed_at,'state_version',i.state_version, 'family',COALESCE(d.stock_family,0),'strategy',COALESCE(d.strategy,''),'fact',COALESCE(d.accepted_fact_kind,''),'target',COALESCE(d.target,0), 'reward_plan',COALESCE(d.reward_plan,'{}'::jsonb),'huoyue',COALESCE(d.huoyue,0)) ORDER BY i.objective_id,i.generation_id),'[]'::jsonb)::text FROM locked i LEFT JOIN objective_definitions d ON i.content_revision IS NULL AND d.program_id=i.program_id AND d.objective_id=i.objective_id AND d.definition_revision=i.definition_revision"
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "WITH locked AS MATERIALIZED ("
     },
     {
      "file": "internal/adapters/postgres/illusionstore/store.go",
@@ -88697,10 +88400,7 @@
      "value": "false"
     }
    ],
-   "receipt_writes": [
-    "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1411"
-   ],
+   "receipt_writes": [],
    "retry": [
     {
      "file": "internal/application/conquerschool/mode.go",
@@ -88709,7 +88409,6 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/adventurestore/store.go:54",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -88722,15 +88421,10 @@
     "internal/adapters/postgres/guildstore/rental.go:113",
     "internal/adapters/postgres/guildstore/rental.go:131",
     "internal/adapters/postgres/guildstore/rental.go:141",
-    "internal/adapters/postgres/i5store/missions.go:14",
-    "internal/adapters/postgres/i5store/missions.go:45",
-    "internal/adapters/postgres/i5store/missions.go:57",
-    "internal/adapters/postgres/i5store/missions.go:65",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:270",
     "internal/adapters/postgres/i5store/store.go:384",
     "internal/adapters/postgres/i5store/store.go:415",
-    "internal/adapters/postgres/i5store/store.go:772",
     "internal/adapters/postgres/librarystore/facets.go:89",
     "internal/adapters/postgres/librarystore/missions.go:12"
    ],
@@ -88907,16 +88601,6 @@
      "statement": "SELECT payload::text FROM content_library_input_catalogs WHERE revision_id=$1"
     },
     {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 19,
-     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(d)-ARRAY['revision_id','payload_version'] ORDER BY objective_id),'[]'::jsonb)::text FROM gxb_content_objective_definitions d WHERE revision_id=$1 AND definition_revision='I9_MISSIONS_V1'"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 44,
-     "statement": "SELECT COALESCE(a.payload::text,''),COALESCE(r.manifest->'enabled_capabilities' ? 'MISSION_ACTIVITY_I9_4B',false) FROM gxb_content_revisions r LEFT JOIN content_mission_activity_catalogs a USING(revision_id) WHERE r.revision_id=$1"
-    },
-    {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -89033,11 +88717,6 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
-     "line": 797,
-     "statement": "SELECT stock_family,strategy,accepted_fact_kind,target,reward_plan::text,huoyue FROM gxb_content_objective_definitions WHERE revision_id=$1 AND program_id=$2 AND objective_id=$3 AND definition_revision=$4"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 909,
      "statement": "SELECT COALESCE(manifest->>'source_archive_sha256','') FROM gxb_content_revisions WHERE revision_id=$1"
     },
@@ -89065,26 +88744,6 @@
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 226,
      "statement": "SELECT EXISTS("
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',i.player_id,'program_id',i.program_id,'objective_id',i.objective_id,'generation_id',i.generation_id, 'definition_revision',i.definition_revision,'content_revision',COALESCE(i.content_revision,''),'legacy_definition',(i.content_revision IS NULL), 'progress',i.progress,'completed_at',i.completed_at,'claim_state',i.claim_state,'claimed_at',i.claimed_at,'state_version',i.state_version, 'family',COALESCE(d.stock_family,0),'strategy',COALESCE(d.strategy,''),'fact',COALESCE(d.accepted_fact_kind,''),'target',COALESCE(d.target,0), 'reward_plan',COALESCE(d.reward_plan,'{}'::jsonb),'huoyue',COALESCE(d.huoyue,0)) ORDER BY i.objective_id,i.generation_id),'[]'::jsonb)::text FROM locked i LEFT JOIN objective_definitions d ON i.content_revision IS NULL AND d.program_id=i.program_id AND d.objective_id=i.objective_id AND d.definition_revision=i.definition_revision"
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "WITH locked AS MATERIALIZED ("
-    },
-    {
-     "file": "internal/adapters/postgres/kernelstore/store.go",
-     "line": 25,
-     "statement": "SELECT EXISTS(SELECT 1 FROM ins) AS inserted"
-    },
-    {
-     "file": "internal/adapters/postgres/kernelstore/store.go",
-     "line": 61,
-     "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
     },
     {
      "file": "internal/adapters/postgres/realtime_wakeup_core.go",
@@ -105695,8 +105354,6 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1411",
     "internal/application/i5/service.go:727",
     "internal/application/memoir/run.go:141"
    ],
@@ -105718,7 +105375,6 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/adventurestore/store.go:54",
     "internal/adapters/postgres/characterstore/store.go:109",
     "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/combatstore/store.go:154",
@@ -105732,10 +105388,6 @@
     "internal/adapters/postgres/guildstore/rental.go:131",
     "internal/adapters/postgres/guildstore/rental.go:141",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
-    "internal/adapters/postgres/i5store/missions.go:14",
-    "internal/adapters/postgres/i5store/missions.go:45",
-    "internal/adapters/postgres/i5store/missions.go:57",
-    "internal/adapters/postgres/i5store/missions.go:65",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
     "internal/adapters/postgres/i5store/store.go:270",
@@ -105749,7 +105401,6 @@
     "internal/adapters/postgres/i5store/store.go:519",
     "internal/adapters/postgres/i5store/store.go:530",
     "internal/adapters/postgres/i5store/store.go:564",
-    "internal/adapters/postgres/i5store/store.go:772",
     "internal/adapters/postgres/librarystore/battle_counts.go:15",
     "internal/adapters/postgres/librarystore/facets.go:89",
     "internal/adapters/postgres/librarystore/logs.go:32",
@@ -105968,16 +105619,6 @@
      "statement": "SELECT payload::text FROM content_library_input_catalogs WHERE revision_id=$1"
     },
     {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 19,
-     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(d)-ARRAY['revision_id','payload_version'] ORDER BY objective_id),'[]'::jsonb)::text FROM gxb_content_objective_definitions d WHERE revision_id=$1 AND definition_revision='I9_MISSIONS_V1'"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 44,
-     "statement": "SELECT COALESCE(a.payload::text,''),COALESCE(r.manifest->'enabled_capabilities' ? 'MISSION_ACTIVITY_I9_4B',false) FROM gxb_content_revisions r LEFT JOIN content_mission_activity_catalogs a USING(revision_id) WHERE r.revision_id=$1"
-    },
-    {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -106114,11 +105755,6 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
-     "line": 797,
-     "statement": "SELECT stock_family,strategy,accepted_fact_kind,target,reward_plan::text,huoyue FROM gxb_content_objective_definitions WHERE revision_id=$1 AND program_id=$2 AND objective_id=$3 AND definition_revision=$4"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 909,
      "statement": "SELECT COALESCE(manifest->>'source_archive_sha256','') FROM gxb_content_revisions WHERE revision_id=$1"
     },
@@ -106156,16 +105792,6 @@
      "file": "internal/adapters/postgres/i5store/store.go",
      "line": 537,
      "statement": "SELECT payload::text,payload_version FROM mail_tuning"
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',i.player_id,'program_id',i.program_id,'objective_id',i.objective_id,'generation_id',i.generation_id, 'definition_revision',i.definition_revision,'content_revision',COALESCE(i.content_revision,''),'legacy_definition',(i.content_revision IS NULL), 'progress',i.progress,'completed_at',i.completed_at,'claim_state',i.claim_state,'claimed_at',i.claimed_at,'state_version',i.state_version, 'family',COALESCE(d.stock_family,0),'strategy',COALESCE(d.strategy,''),'fact',COALESCE(d.accepted_fact_kind,''),'target',COALESCE(d.target,0), 'reward_plan',COALESCE(d.reward_plan,'{}'::jsonb),'huoyue',COALESCE(d.huoyue,0)) ORDER BY i.objective_id,i.generation_id),'[]'::jsonb)::text FROM locked i LEFT JOIN objective_definitions d ON i.content_revision IS NULL AND d.program_id=i.program_id AND d.objective_id=i.objective_id AND d.definition_revision=i.definition_revision"
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "WITH locked AS MATERIALIZED ("
     },
     {
      "file": "internal/adapters/postgres/kernelstore/store.go",
@@ -106758,8 +106384,6 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1411",
     "internal/application/memoir/run.go:141"
    ],
    "retry": [
@@ -106770,7 +106394,6 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/adventurestore/store.go:54",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -106780,17 +106403,12 @@
     "internal/adapters/postgres/guildstore/rental.go:113",
     "internal/adapters/postgres/guildstore/rental.go:131",
     "internal/adapters/postgres/guildstore/rental.go:141",
-    "internal/adapters/postgres/i5store/missions.go:14",
-    "internal/adapters/postgres/i5store/missions.go:45",
-    "internal/adapters/postgres/i5store/missions.go:57",
-    "internal/adapters/postgres/i5store/missions.go:65",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:270",
     "internal/adapters/postgres/i5store/store.go:304",
     "internal/adapters/postgres/i5store/store.go:327",
     "internal/adapters/postgres/i5store/store.go:384",
     "internal/adapters/postgres/i5store/store.go:415",
-    "internal/adapters/postgres/i5store/store.go:772",
     "internal/adapters/postgres/librarystore/facets.go:89",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/memoirstore/store.go:31",
@@ -106974,16 +106592,6 @@
      "statement": "SELECT payload::text FROM content_library_input_catalogs WHERE revision_id=$1"
     },
     {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 19,
-     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(d)-ARRAY['revision_id','payload_version'] ORDER BY objective_id),'[]'::jsonb)::text FROM gxb_content_objective_definitions d WHERE revision_id=$1 AND definition_revision='I9_MISSIONS_V1'"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 44,
-     "statement": "SELECT COALESCE(a.payload::text,''),COALESCE(r.manifest->'enabled_capabilities' ? 'MISSION_ACTIVITY_I9_4B',false) FROM gxb_content_revisions r LEFT JOIN content_mission_activity_catalogs a USING(revision_id) WHERE r.revision_id=$1"
-    },
-    {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -107105,11 +106713,6 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
-     "line": 797,
-     "statement": "SELECT stock_family,strategy,accepted_fact_kind,target,reward_plan::text,huoyue FROM gxb_content_objective_definitions WHERE revision_id=$1 AND program_id=$2 AND objective_id=$3 AND definition_revision=$4"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 909,
      "statement": "SELECT COALESCE(manifest->>'source_archive_sha256','') FROM gxb_content_revisions WHERE revision_id=$1"
     },
@@ -107137,16 +106740,6 @@
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 226,
      "statement": "SELECT EXISTS("
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',i.player_id,'program_id',i.program_id,'objective_id',i.objective_id,'generation_id',i.generation_id, 'definition_revision',i.definition_revision,'content_revision',COALESCE(i.content_revision,''),'legacy_definition',(i.content_revision IS NULL), 'progress',i.progress,'completed_at',i.completed_at,'claim_state',i.claim_state,'claimed_at',i.claimed_at,'state_version',i.state_version, 'family',COALESCE(d.stock_family,0),'strategy',COALESCE(d.strategy,''),'fact',COALESCE(d.accepted_fact_kind,''),'target',COALESCE(d.target,0), 'reward_plan',COALESCE(d.reward_plan,'{}'::jsonb),'huoyue',COALESCE(d.huoyue,0)) ORDER BY i.objective_id,i.generation_id),'[]'::jsonb)::text FROM locked i LEFT JOIN objective_definitions d ON i.content_revision IS NULL AND d.program_id=i.program_id AND d.objective_id=i.objective_id AND d.definition_revision=i.definition_revision"
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "WITH locked AS MATERIALIZED ("
     },
     {
      "file": "internal/adapters/postgres/kernelstore/store.go",
@@ -114985,10 +114578,7 @@
      "value": "false"
     }
    ],
-   "receipt_writes": [
-    "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1411"
-   ],
+   "receipt_writes": [],
    "retry": [
     {
      "file": "internal/application/combat/service.go",
@@ -115008,7 +114598,6 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/adventurestore/store.go:135",
-    "internal/adapters/postgres/adventurestore/store.go:54",
     "internal/adapters/postgres/adventurestore/store.go:97",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
@@ -115021,10 +114610,6 @@
     "internal/adapters/postgres/guildstore/rental.go:113",
     "internal/adapters/postgres/guildstore/rental.go:131",
     "internal/adapters/postgres/guildstore/rental.go:141",
-    "internal/adapters/postgres/i5store/missions.go:14",
-    "internal/adapters/postgres/i5store/missions.go:45",
-    "internal/adapters/postgres/i5store/missions.go:57",
-    "internal/adapters/postgres/i5store/missions.go:65",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
     "internal/adapters/postgres/i5store/store.go:270",
@@ -115032,7 +114617,6 @@
     "internal/adapters/postgres/i5store/store.go:415",
     "internal/adapters/postgres/i5store/store.go:530",
     "internal/adapters/postgres/i5store/store.go:564",
-    "internal/adapters/postgres/i5store/store.go:772",
     "internal/adapters/postgres/librarystore/battle_counts.go:15",
     "internal/adapters/postgres/librarystore/facets.go:89",
     "internal/adapters/postgres/librarystore/logs.go:32",
@@ -115249,16 +114833,6 @@
      "statement": "SELECT payload::text FROM content_library_input_catalogs WHERE revision_id=$1"
     },
     {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 19,
-     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(d)-ARRAY['revision_id','payload_version'] ORDER BY objective_id),'[]'::jsonb)::text FROM gxb_content_objective_definitions d WHERE revision_id=$1 AND definition_revision='I9_MISSIONS_V1'"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 44,
-     "statement": "SELECT COALESCE(a.payload::text,''),COALESCE(r.manifest->'enabled_capabilities' ? 'MISSION_ACTIVITY_I9_4B',false) FROM gxb_content_revisions r LEFT JOIN content_mission_activity_catalogs a USING(revision_id) WHERE r.revision_id=$1"
-    },
-    {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -115375,11 +114949,6 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
-     "line": 797,
-     "statement": "SELECT stock_family,strategy,accepted_fact_kind,target,reward_plan::text,huoyue FROM gxb_content_objective_definitions WHERE revision_id=$1 AND program_id=$2 AND objective_id=$3 AND definition_revision=$4"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 909,
      "statement": "SELECT COALESCE(manifest->>'source_archive_sha256','') FROM gxb_content_revisions WHERE revision_id=$1"
     },
@@ -115412,26 +114981,6 @@
      "file": "internal/adapters/postgres/i5store/store.go",
      "line": 537,
      "statement": "SELECT payload::text,payload_version FROM mail_tuning"
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',i.player_id,'program_id',i.program_id,'objective_id',i.objective_id,'generation_id',i.generation_id, 'definition_revision',i.definition_revision,'content_revision',COALESCE(i.content_revision,''),'legacy_definition',(i.content_revision IS NULL), 'progress',i.progress,'completed_at',i.completed_at,'claim_state',i.claim_state,'claimed_at',i.claimed_at,'state_version',i.state_version, 'family',COALESCE(d.stock_family,0),'strategy',COALESCE(d.strategy,''),'fact',COALESCE(d.accepted_fact_kind,''),'target',COALESCE(d.target,0), 'reward_plan',COALESCE(d.reward_plan,'{}'::jsonb),'huoyue',COALESCE(d.huoyue,0)) ORDER BY i.objective_id,i.generation_id),'[]'::jsonb)::text FROM locked i LEFT JOIN objective_definitions d ON i.content_revision IS NULL AND d.program_id=i.program_id AND d.objective_id=i.objective_id AND d.definition_revision=i.definition_revision"
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "WITH locked AS MATERIALIZED ("
-    },
-    {
-     "file": "internal/adapters/postgres/kernelstore/store.go",
-     "line": 25,
-     "statement": "SELECT EXISTS(SELECT 1 FROM ins) AS inserted"
-    },
-    {
-     "file": "internal/adapters/postgres/kernelstore/store.go",
-     "line": 61,
-     "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
     },
     {
      "file": "internal/adapters/postgres/realtime_wakeup_core.go",
@@ -116708,8 +116257,6 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1411",
     "internal/application/i5/service.go:727"
    ],
    "retry": [
@@ -116735,7 +116282,6 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/adventurestore/store.go:54",
     "internal/adapters/postgres/adventurestore/store.go:97",
     "internal/adapters/postgres/characterstore/store.go:109",
     "internal/adapters/postgres/characterstore/store.go:95",
@@ -116750,10 +116296,6 @@
     "internal/adapters/postgres/guildstore/rental.go:131",
     "internal/adapters/postgres/guildstore/rental.go:141",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
-    "internal/adapters/postgres/i5store/missions.go:14",
-    "internal/adapters/postgres/i5store/missions.go:45",
-    "internal/adapters/postgres/i5store/missions.go:57",
-    "internal/adapters/postgres/i5store/missions.go:65",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
     "internal/adapters/postgres/i5store/store.go:270",
@@ -116766,7 +116308,6 @@
     "internal/adapters/postgres/i5store/store.go:519",
     "internal/adapters/postgres/i5store/store.go:530",
     "internal/adapters/postgres/i5store/store.go:564",
-    "internal/adapters/postgres/i5store/store.go:772",
     "internal/adapters/postgres/librarystore/battle_counts.go:15",
     "internal/adapters/postgres/librarystore/facets.go:89",
     "internal/adapters/postgres/librarystore/logs.go:32",
@@ -116991,16 +116532,6 @@
      "statement": "SELECT payload::text FROM content_library_input_catalogs WHERE revision_id=$1"
     },
     {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 19,
-     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(d)-ARRAY['revision_id','payload_version'] ORDER BY objective_id),'[]'::jsonb)::text FROM gxb_content_objective_definitions d WHERE revision_id=$1 AND definition_revision='I9_MISSIONS_V1'"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 44,
-     "statement": "SELECT COALESCE(a.payload::text,''),COALESCE(r.manifest->'enabled_capabilities' ? 'MISSION_ACTIVITY_I9_4B',false) FROM gxb_content_revisions r LEFT JOIN content_mission_activity_catalogs a USING(revision_id) WHERE r.revision_id=$1"
-    },
-    {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -117137,11 +116668,6 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
-     "line": 797,
-     "statement": "SELECT stock_family,strategy,accepted_fact_kind,target,reward_plan::text,huoyue FROM gxb_content_objective_definitions WHERE revision_id=$1 AND program_id=$2 AND objective_id=$3 AND definition_revision=$4"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 909,
      "statement": "SELECT COALESCE(manifest->>'source_archive_sha256','') FROM gxb_content_revisions WHERE revision_id=$1"
     },
@@ -117179,16 +116705,6 @@
      "file": "internal/adapters/postgres/i5store/store.go",
      "line": 537,
      "statement": "SELECT payload::text,payload_version FROM mail_tuning"
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',i.player_id,'program_id',i.program_id,'objective_id',i.objective_id,'generation_id',i.generation_id, 'definition_revision',i.definition_revision,'content_revision',COALESCE(i.content_revision,''),'legacy_definition',(i.content_revision IS NULL), 'progress',i.progress,'completed_at',i.completed_at,'claim_state',i.claim_state,'claimed_at',i.claimed_at,'state_version',i.state_version, 'family',COALESCE(d.stock_family,0),'strategy',COALESCE(d.strategy,''),'fact',COALESCE(d.accepted_fact_kind,''),'target',COALESCE(d.target,0), 'reward_plan',COALESCE(d.reward_plan,'{}'::jsonb),'huoyue',COALESCE(d.huoyue,0)) ORDER BY i.objective_id,i.generation_id),'[]'::jsonb)::text FROM locked i LEFT JOIN objective_definitions d ON i.content_revision IS NULL AND d.program_id=i.program_id AND d.objective_id=i.objective_id AND d.definition_revision=i.definition_revision"
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "WITH locked AS MATERIALIZED ("
     },
     {
      "file": "internal/adapters/postgres/kernelstore/store.go",
@@ -117691,10 +117207,7 @@
      "value": "false"
     }
    ],
-   "receipt_writes": [
-    "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1411"
-   ],
+   "receipt_writes": [],
    "retry": [
     {
      "file": "internal/application/adventure/service.go",
@@ -117703,7 +117216,6 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/adventurestore/store.go:54",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -117713,15 +117225,10 @@
     "internal/adapters/postgres/guildstore/rental.go:113",
     "internal/adapters/postgres/guildstore/rental.go:131",
     "internal/adapters/postgres/guildstore/rental.go:141",
-    "internal/adapters/postgres/i5store/missions.go:14",
-    "internal/adapters/postgres/i5store/missions.go:45",
-    "internal/adapters/postgres/i5store/missions.go:57",
-    "internal/adapters/postgres/i5store/missions.go:65",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:270",
     "internal/adapters/postgres/i5store/store.go:384",
     "internal/adapters/postgres/i5store/store.go:415",
-    "internal/adapters/postgres/i5store/store.go:772",
     "internal/adapters/postgres/librarystore/facets.go:89",
     "internal/adapters/postgres/librarystore/missions.go:12"
    ],
@@ -117903,16 +117410,6 @@
      "statement": "SELECT payload::text FROM content_library_input_catalogs WHERE revision_id=$1"
     },
     {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 19,
-     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(d)-ARRAY['revision_id','payload_version'] ORDER BY objective_id),'[]'::jsonb)::text FROM gxb_content_objective_definitions d WHERE revision_id=$1 AND definition_revision='I9_MISSIONS_V1'"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 44,
-     "statement": "SELECT COALESCE(a.payload::text,''),COALESCE(r.manifest->'enabled_capabilities' ? 'MISSION_ACTIVITY_I9_4B',false) FROM gxb_content_revisions r LEFT JOIN content_mission_activity_catalogs a USING(revision_id) WHERE r.revision_id=$1"
-    },
-    {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -118029,11 +117526,6 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
-     "line": 797,
-     "statement": "SELECT stock_family,strategy,accepted_fact_kind,target,reward_plan::text,huoyue FROM gxb_content_objective_definitions WHERE revision_id=$1 AND program_id=$2 AND objective_id=$3 AND definition_revision=$4"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 909,
      "statement": "SELECT COALESCE(manifest->>'source_archive_sha256','') FROM gxb_content_revisions WHERE revision_id=$1"
     },
@@ -118061,26 +117553,6 @@
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 226,
      "statement": "SELECT EXISTS("
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',i.player_id,'program_id',i.program_id,'objective_id',i.objective_id,'generation_id',i.generation_id, 'definition_revision',i.definition_revision,'content_revision',COALESCE(i.content_revision,''),'legacy_definition',(i.content_revision IS NULL), 'progress',i.progress,'completed_at',i.completed_at,'claim_state',i.claim_state,'claimed_at',i.claimed_at,'state_version',i.state_version, 'family',COALESCE(d.stock_family,0),'strategy',COALESCE(d.strategy,''),'fact',COALESCE(d.accepted_fact_kind,''),'target',COALESCE(d.target,0), 'reward_plan',COALESCE(d.reward_plan,'{}'::jsonb),'huoyue',COALESCE(d.huoyue,0)) ORDER BY i.objective_id,i.generation_id),'[]'::jsonb)::text FROM locked i LEFT JOIN objective_definitions d ON i.content_revision IS NULL AND d.program_id=i.program_id AND d.objective_id=i.objective_id AND d.definition_revision=i.definition_revision"
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "WITH locked AS MATERIALIZED ("
-    },
-    {
-     "file": "internal/adapters/postgres/kernelstore/store.go",
-     "line": 25,
-     "statement": "SELECT EXISTS(SELECT 1 FROM ins) AS inserted"
-    },
-    {
-     "file": "internal/adapters/postgres/kernelstore/store.go",
-     "line": 61,
-     "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
     },
     {
      "file": "internal/adapters/postgres/realtime_wakeup_core.go",
@@ -120461,10 +119933,7 @@
      "value": "false"
     }
    ],
-   "receipt_writes": [
-    "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1411"
-   ],
+   "receipt_writes": [],
    "retry": [
     {
      "file": "internal/application/sharedroom/service.go",
@@ -120473,7 +119942,6 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/adventurestore/store.go:54",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -120483,15 +119951,10 @@
     "internal/adapters/postgres/guildstore/rental.go:113",
     "internal/adapters/postgres/guildstore/rental.go:131",
     "internal/adapters/postgres/guildstore/rental.go:141",
-    "internal/adapters/postgres/i5store/missions.go:14",
-    "internal/adapters/postgres/i5store/missions.go:45",
-    "internal/adapters/postgres/i5store/missions.go:57",
-    "internal/adapters/postgres/i5store/missions.go:65",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:270",
     "internal/adapters/postgres/i5store/store.go:384",
     "internal/adapters/postgres/i5store/store.go:415",
-    "internal/adapters/postgres/i5store/store.go:772",
     "internal/adapters/postgres/librarystore/facets.go:89",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
@@ -120675,16 +120138,6 @@
      "statement": "SELECT payload::text FROM content_library_input_catalogs WHERE revision_id=$1"
     },
     {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 19,
-     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(d)-ARRAY['revision_id','payload_version'] ORDER BY objective_id),'[]'::jsonb)::text FROM gxb_content_objective_definitions d WHERE revision_id=$1 AND definition_revision='I9_MISSIONS_V1'"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 44,
-     "statement": "SELECT COALESCE(a.payload::text,''),COALESCE(r.manifest->'enabled_capabilities' ? 'MISSION_ACTIVITY_I9_4B',false) FROM gxb_content_revisions r LEFT JOIN content_mission_activity_catalogs a USING(revision_id) WHERE r.revision_id=$1"
-    },
-    {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -120801,11 +120254,6 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
-     "line": 797,
-     "statement": "SELECT stock_family,strategy,accepted_fact_kind,target,reward_plan::text,huoyue FROM gxb_content_objective_definitions WHERE revision_id=$1 AND program_id=$2 AND objective_id=$3 AND definition_revision=$4"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 909,
      "statement": "SELECT COALESCE(manifest->>'source_archive_sha256','') FROM gxb_content_revisions WHERE revision_id=$1"
     },
@@ -120833,26 +120281,6 @@
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 226,
      "statement": "SELECT EXISTS("
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',i.player_id,'program_id',i.program_id,'objective_id',i.objective_id,'generation_id',i.generation_id, 'definition_revision',i.definition_revision,'content_revision',COALESCE(i.content_revision,''),'legacy_definition',(i.content_revision IS NULL), 'progress',i.progress,'completed_at',i.completed_at,'claim_state',i.claim_state,'claimed_at',i.claimed_at,'state_version',i.state_version, 'family',COALESCE(d.stock_family,0),'strategy',COALESCE(d.strategy,''),'fact',COALESCE(d.accepted_fact_kind,''),'target',COALESCE(d.target,0), 'reward_plan',COALESCE(d.reward_plan,'{}'::jsonb),'huoyue',COALESCE(d.huoyue,0)) ORDER BY i.objective_id,i.generation_id),'[]'::jsonb)::text FROM locked i LEFT JOIN objective_definitions d ON i.content_revision IS NULL AND d.program_id=i.program_id AND d.objective_id=i.objective_id AND d.definition_revision=i.definition_revision"
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "WITH locked AS MATERIALIZED ("
-    },
-    {
-     "file": "internal/adapters/postgres/kernelstore/store.go",
-     "line": 25,
-     "statement": "SELECT EXISTS(SELECT 1 FROM ins) AS inserted"
-    },
-    {
-     "file": "internal/adapters/postgres/kernelstore/store.go",
-     "line": 61,
-     "statement": "SELECT receipt_id::text, COALESCE(operation_id::text, '') AS operation_id, owner_kind, owner_key, domain, operation, semantic_key, operation_class, encode(request_fingerprint, 'hex') AS request_fingerprint_hex, result_schema, result_payload::text, operation_started_at, COALESCE(policy_version, '') AS policy_version, operation_policy_refs::text, COALESCE(actor_account_uid, '') AS actor_account_uid, COALESCE(context_id::text, '') AS context_id, recorded_at, retain_until IS NOT NULL AS has_retain_until, COALESCE(retain_until, 'epoch'::timestamptz) AS retain_until, payload_version FROM gxb_operation_receipts WHERE owner_kind = $1 AND owner_key = $2 AND domain = $3 AND operation = $4 AND semantic_key = $5"
     },
     {
      "file": "internal/adapters/postgres/realtime_wakeup_core.go",
@@ -147252,9 +146680,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/dodgeball/run.go:152",
-    "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1411"
+    "internal/application/dodgeball/run.go:152"
    ],
    "retry": [
     {
@@ -147264,7 +146690,6 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/adventurestore/store.go:54",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -147276,15 +146701,10 @@
     "internal/adapters/postgres/guildstore/rental.go:113",
     "internal/adapters/postgres/guildstore/rental.go:131",
     "internal/adapters/postgres/guildstore/rental.go:141",
-    "internal/adapters/postgres/i5store/missions.go:14",
-    "internal/adapters/postgres/i5store/missions.go:45",
-    "internal/adapters/postgres/i5store/missions.go:57",
-    "internal/adapters/postgres/i5store/missions.go:65",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:270",
     "internal/adapters/postgres/i5store/store.go:384",
     "internal/adapters/postgres/i5store/store.go:415",
-    "internal/adapters/postgres/i5store/store.go:772",
     "internal/adapters/postgres/librarystore/facets.go:89",
     "internal/adapters/postgres/librarystore/missions.go:12"
    ],
@@ -147461,16 +146881,6 @@
      "statement": "SELECT payload::text FROM content_library_input_catalogs WHERE revision_id=$1"
     },
     {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 19,
-     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(d)-ARRAY['revision_id','payload_version'] ORDER BY objective_id),'[]'::jsonb)::text FROM gxb_content_objective_definitions d WHERE revision_id=$1 AND definition_revision='I9_MISSIONS_V1'"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 44,
-     "statement": "SELECT COALESCE(a.payload::text,''),COALESCE(r.manifest->'enabled_capabilities' ? 'MISSION_ACTIVITY_I9_4B',false) FROM gxb_content_revisions r LEFT JOIN content_mission_activity_catalogs a USING(revision_id) WHERE r.revision_id=$1"
-    },
-    {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -147587,11 +146997,6 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
-     "line": 797,
-     "statement": "SELECT stock_family,strategy,accepted_fact_kind,target,reward_plan::text,huoyue FROM gxb_content_objective_definitions WHERE revision_id=$1 AND program_id=$2 AND objective_id=$3 AND definition_revision=$4"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 909,
      "statement": "SELECT COALESCE(manifest->>'source_archive_sha256','') FROM gxb_content_revisions WHERE revision_id=$1"
     },
@@ -147619,16 +147024,6 @@
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 226,
      "statement": "SELECT EXISTS("
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',i.player_id,'program_id',i.program_id,'objective_id',i.objective_id,'generation_id',i.generation_id, 'definition_revision',i.definition_revision,'content_revision',COALESCE(i.content_revision,''),'legacy_definition',(i.content_revision IS NULL), 'progress',i.progress,'completed_at',i.completed_at,'claim_state',i.claim_state,'claimed_at',i.claimed_at,'state_version',i.state_version, 'family',COALESCE(d.stock_family,0),'strategy',COALESCE(d.strategy,''),'fact',COALESCE(d.accepted_fact_kind,''),'target',COALESCE(d.target,0), 'reward_plan',COALESCE(d.reward_plan,'{}'::jsonb),'huoyue',COALESCE(d.huoyue,0)) ORDER BY i.objective_id,i.generation_id),'[]'::jsonb)::text FROM locked i LEFT JOIN objective_definitions d ON i.content_revision IS NULL AND d.program_id=i.program_id AND d.objective_id=i.objective_id AND d.definition_revision=i.definition_revision"
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "WITH locked AS MATERIALIZED ("
     },
     {
      "file": "internal/adapters/postgres/kernelstore/store.go",
@@ -150179,9 +149574,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/godstrial/run.go:170",
-    "internal/application/i5/mission_facts.go:129",
-    "internal/application/i5/service.go:1411"
+    "internal/application/godstrial/run.go:170"
    ],
    "retry": [
     {
@@ -150191,7 +149584,6 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/adventurestore/store.go:54",
     "internal/adapters/postgres/combatstore/store.go:154",
     "internal/adapters/postgres/combatstore/store.go:176",
     "internal/adapters/postgres/combatstore/store.go:196",
@@ -150203,15 +149595,10 @@
     "internal/adapters/postgres/guildstore/rental.go:113",
     "internal/adapters/postgres/guildstore/rental.go:131",
     "internal/adapters/postgres/guildstore/rental.go:141",
-    "internal/adapters/postgres/i5store/missions.go:14",
-    "internal/adapters/postgres/i5store/missions.go:45",
-    "internal/adapters/postgres/i5store/missions.go:57",
-    "internal/adapters/postgres/i5store/missions.go:65",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:270",
     "internal/adapters/postgres/i5store/store.go:384",
     "internal/adapters/postgres/i5store/store.go:415",
-    "internal/adapters/postgres/i5store/store.go:772",
     "internal/adapters/postgres/librarystore/facets.go:89",
     "internal/adapters/postgres/librarystore/missions.go:12"
    ],
@@ -150388,16 +149775,6 @@
      "statement": "SELECT payload::text FROM content_library_input_catalogs WHERE revision_id=$1"
     },
     {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 19,
-     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(d)-ARRAY['revision_id','payload_version'] ORDER BY objective_id),'[]'::jsonb)::text FROM gxb_content_objective_definitions d WHERE revision_id=$1 AND definition_revision='I9_MISSIONS_V1'"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/missions.go",
-     "line": 44,
-     "statement": "SELECT COALESCE(a.payload::text,''),COALESCE(r.manifest->'enabled_capabilities' ? 'MISSION_ACTIVITY_I9_4B',false) FROM gxb_content_revisions r LEFT JOIN content_mission_activity_catalogs a USING(revision_id) WHERE r.revision_id=$1"
-    },
-    {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
      "line": 21,
      "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
@@ -150519,11 +149896,6 @@
     },
     {
      "file": "internal/adapters/postgres/contentstore/store.go",
-     "line": 797,
-     "statement": "SELECT stock_family,strategy,accepted_fact_kind,target,reward_plan::text,huoyue FROM gxb_content_objective_definitions WHERE revision_id=$1 AND program_id=$2 AND objective_id=$3 AND definition_revision=$4"
-    },
-    {
-     "file": "internal/adapters/postgres/contentstore/store.go",
      "line": 909,
      "statement": "SELECT COALESCE(manifest->>'source_archive_sha256','') FROM gxb_content_revisions WHERE revision_id=$1"
     },
@@ -150551,16 +149923,6 @@
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 226,
      "statement": "SELECT EXISTS("
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',i.player_id,'program_id',i.program_id,'objective_id',i.objective_id,'generation_id',i.generation_id, 'definition_revision',i.definition_revision,'content_revision',COALESCE(i.content_revision,''),'legacy_definition',(i.content_revision IS NULL), 'progress',i.progress,'completed_at',i.completed_at,'claim_state',i.claim_state,'claimed_at',i.claimed_at,'state_version',i.state_version, 'family',COALESCE(d.stock_family,0),'strategy',COALESCE(d.strategy,''),'fact',COALESCE(d.accepted_fact_kind,''),'target',COALESCE(d.target,0), 'reward_plan',COALESCE(d.reward_plan,'{}'::jsonb),'huoyue',COALESCE(d.huoyue,0)) ORDER BY i.objective_id,i.generation_id),'[]'::jsonb)::text FROM locked i LEFT JOIN objective_definitions d ON i.content_revision IS NULL AND d.program_id=i.program_id AND d.objective_id=i.objective_id AND d.definition_revision=i.definition_revision"
-    },
-    {
-     "file": "internal/adapters/postgres/i5store/store.go",
-     "line": 700,
-     "statement": "WITH locked AS MATERIALIZED ("
     },
     {
      "file": "internal/adapters/postgres/kernelstore/store.go",
