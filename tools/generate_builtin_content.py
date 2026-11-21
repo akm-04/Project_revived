@@ -2798,7 +2798,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
                 "library_shop_item", "guild_friend_shop_item", "vending_shop_item", "cross_arena_shop",
                 "team_shop7", "team_shop8", "team_shop9", "team_shop10", "team_shop11", "team_shop12",
                 "team_shop13", "team_shop14", "team_shop15", "team_shop16", "team_shop17", "team_shop18",
-                "team_shop19", "team_shop20", "team_shop21", "team_shop22")},
+                "team_shop19", "team_shop20", "team_shop21", "team_shop22", "object_book_shop")},
             dropbox_rows,
             refresh_cost_rows,
             stone_item_by_item,

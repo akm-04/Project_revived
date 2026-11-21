@@ -87,10 +87,10 @@ func QualifyShopCatalog(c ShopCatalog) error {
 		return errors.New("shop catalog: unqualified policy")
 	}
 	counts := c.SourceRowCounts
-	if counts.ShopConfig != 38 || len(c.Shops) != counts.Shops || counts.Shops != 30 ||
-		len(c.StockTables) != counts.StockTables || counts.StockTables != 30 ||
-		counts.StockRows != 1317 || len(c.Groups) != counts.DropboxGroupsReferenced ||
-		counts.DropboxGroupsReferenced != 342 || counts.DropboxRowsReferenced != 2690 ||
+	if counts.ShopConfig != 38 || len(c.Shops) != counts.Shops || counts.Shops != 31 ||
+		len(c.StockTables) != counts.StockTables || counts.StockTables != 31 ||
+		counts.StockRows != 1417 || len(c.Groups) != counts.DropboxGroupsReferenced ||
+		counts.DropboxGroupsReferenced != 348 || counts.DropboxRowsReferenced != 2696 ||
 		counts.RefreshCostRows != 330 {
 		return errors.New("shop catalog: source row count drift")
 	}
