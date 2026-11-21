@@ -143142,7 +143142,7 @@
    "isolation": [
     {
      "file": "internal/application/elementequipment/projection.go",
-     "line": 166,
+     "line": 161,
      "value": "repeatable_read"
     },
     {
@@ -143170,7 +143170,7 @@
    "read_only": [
     {
      "file": "internal/application/elementequipment/projection.go",
-     "line": 166,
+     "line": 161,
      "value": "false"
     },
     {
@@ -143201,7 +143201,7 @@
    "retry": [
     {
      "file": "internal/application/elementequipment/projection.go",
-     "line": 166,
+     "line": 161,
      "value": "1"
     },
     {
@@ -143252,7 +143252,7 @@
      "file": "internal/application/elementequipment/projection.go",
      "function": "Service.Response",
      "isolation": "repeatable_read",
-     "line": 166,
+     "line": 161,
      "read_only": "false",
      "retry": "1"
     },
@@ -143479,7 +143479,7 @@
    "isolation": [
     {
      "file": "internal/application/elementequipment/projection.go",
-     "line": 166,
+     "line": 161,
      "value": "repeatable_read"
     },
     {
@@ -143507,7 +143507,7 @@
    "read_only": [
     {
      "file": "internal/application/elementequipment/projection.go",
-     "line": 166,
+     "line": 161,
      "value": "false"
     },
     {
@@ -143538,7 +143538,7 @@
    "retry": [
     {
      "file": "internal/application/elementequipment/projection.go",
-     "line": 166,
+     "line": 161,
      "value": "1"
     },
     {
@@ -143589,7 +143589,7 @@
      "file": "internal/application/elementequipment/projection.go",
      "function": "Service.Response",
      "isolation": "repeatable_read",
-     "line": 166,
+     "line": 161,
      "read_only": "false",
      "retry": "1"
     },
@@ -143816,7 +143816,7 @@
    "isolation": [
     {
      "file": "internal/application/elementequipment/projection.go",
-     "line": 166,
+     "line": 161,
      "value": "repeatable_read"
     },
     {
@@ -143844,7 +143844,7 @@
    "read_only": [
     {
      "file": "internal/application/elementequipment/projection.go",
-     "line": 166,
+     "line": 161,
      "value": "false"
     },
     {
@@ -143875,7 +143875,7 @@
    "retry": [
     {
      "file": "internal/application/elementequipment/projection.go",
-     "line": 166,
+     "line": 161,
      "value": "1"
     },
     {
@@ -143926,7 +143926,7 @@
      "file": "internal/application/elementequipment/projection.go",
      "function": "Service.Response",
      "isolation": "repeatable_read",
-     "line": 166,
+     "line": 161,
      "read_only": "false",
      "retry": "1"
     },
@@ -144153,7 +144153,7 @@
    "isolation": [
     {
      "file": "internal/application/elementequipment/projection.go",
-     "line": 166,
+     "line": 161,
      "value": "repeatable_read"
     },
     {
@@ -144181,7 +144181,7 @@
    "read_only": [
     {
      "file": "internal/application/elementequipment/projection.go",
-     "line": 166,
+     "line": 161,
      "value": "false"
     },
     {
@@ -144212,7 +144212,7 @@
    "retry": [
     {
      "file": "internal/application/elementequipment/projection.go",
-     "line": 166,
+     "line": 161,
      "value": "1"
     },
     {
@@ -144263,7 +144263,7 @@
      "file": "internal/application/elementequipment/projection.go",
      "function": "Service.Response",
      "isolation": "repeatable_read",
-     "line": 166,
+     "line": 161,
      "read_only": "false",
      "retry": "1"
     },
@@ -144490,7 +144490,7 @@
    "isolation": [
     {
      "file": "internal/application/elementequipment/projection.go",
-     "line": 166,
+     "line": 161,
      "value": "repeatable_read"
     },
     {
@@ -144518,7 +144518,7 @@
    "read_only": [
     {
      "file": "internal/application/elementequipment/projection.go",
-     "line": 166,
+     "line": 161,
      "value": "false"
     },
     {
@@ -144549,7 +144549,7 @@
    "retry": [
     {
      "file": "internal/application/elementequipment/projection.go",
-     "line": 166,
+     "line": 161,
      "value": "1"
     },
     {
@@ -144600,7 +144600,7 @@
      "file": "internal/application/elementequipment/projection.go",
      "function": "Service.Response",
      "isolation": "repeatable_read",
-     "line": 166,
+     "line": 161,
      "read_only": "false",
      "retry": "1"
     },

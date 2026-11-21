@@ -221,6 +221,8 @@
    "playerdisplay"
   ],
   "scenarios_naming": [],
-  "unit": []
+  "unit": [
+   "projection_clock_test.go"
+  ]
  }
 }
