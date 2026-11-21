@@ -221,10 +221,19 @@ func TestI7C5FLeagueGenuineFightReplayAndClockNative(t *testing.T) {
 	if len(r.Report) != 0 || len(r.Records) != 1 {
 		t.Fatal("expired replay lost record")
 	}
-	// Canonical owner clock reversal refuses effects.
+	// I9_11_CLOCK_ROLLBACK_V1 K2'/K3': a backwards clock step is clamped, not
+	// refused; the stored observation never moves backwards.
+	before, ok, e := s.Store.RootTx(ctx, p, false)
+	if e != nil || !ok {
+		t.Fatal("root before clock reversal", e)
+	}
 	clock.Set(cat.SeasonNumbered(fight.Match.Season).OpensAt)
-	if _, e = s.Execute(ctx, a, app.Command{Kind: "INFO"}, op()); e == nil {
-		t.Fatal("backwards clock accepted mutation")
+	if _, e = s.Execute(ctx, a, app.Command{Kind: "INFO"}, op()); e != nil {
+		t.Fatalf("a backwards clock step refused the read: %v", e)
+	}
+	after, ok, e := s.Store.RootTx(ctx, p, false)
+	if e != nil || !ok || after.UpdatedAt.Before(before.UpdatedAt) {
+		t.Fatalf("stored observation moved backwards: %v -> %v", before.UpdatedAt, after.UpdatedAt)
 	}
 }
 func TestI9_10LeagueSeasonOneHonorRoomIsEmptyNative(t *testing.T) {

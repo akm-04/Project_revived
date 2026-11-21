@@ -37,6 +37,13 @@ func TestI7C5FLeagueStaleDecisionTimeRefusal(t *testing.T) {
 	}
 }
 
+func TestI9_12LeagueCanonicalConflictRefusal(t *testing.T) {
+	response := failLeague(d.ErrConflict)
+	if response.HTTPStatus != http.StatusConflict || response.Body["error_code"] != unprovenRefusalCode || response.Body["error_msg"] != "" {
+		t.Fatalf("a real canonical conflict is 409/%d (I9_11_CLOCK_ROLLBACK_V1 K5), got %d %#v", unprovenRefusalCode, response.HTTPStatus, response.Body)
+	}
+}
+
 func TestI7C5FLeagueSourceWireAndInstanceParsing(t *testing.T) {
 	f := &leagueFake{}
 	actor := actorForHTTP(t)

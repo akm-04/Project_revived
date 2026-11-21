@@ -94,7 +94,7 @@ var ReportRetention = *cd.MustMode(cd.ModeChampionsLeague).Retention
 func (s Service) savePlayer(c context.Context, t tx.Tx, p *d.Player, at time.Time) error {
 	old := p.Version
 	p.Version++
-	p.UpdatedAt = at
+	p.UpdatedAt = gen.EffectiveObservation(at, p.UpdatedAt, p.CreatedAt)
 	return s.Store.PutPlayerTx(c, t, *p, old)
 }
 func (s Service) rows(c context.Context, q tx.Queryer, pid identity.PlayerID, l d.Lineup, at time.Time) ([]map[string]any, map[string]any, error) {
