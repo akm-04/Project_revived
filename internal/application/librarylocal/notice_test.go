@@ -43,6 +43,20 @@ func TestPartnerLogMapMatches836Sources(t *testing.T) {
 		t.Fatal("the projection leaked another partner's row into partner 1")
 	}
 
+	// Any type-1 source row is the acquisition row; a soul-stone summon must
+	// not also get a synthetic Vending entry, and its time dates the hold-time
+	// milestones.
+	soulStone := partnerLogMap([]lib.HeroLogFact{{PlayerID: 1, PartnerID: 1, LogID: lib.LogAcquiredSoulStone, OccurredAt: explicit}}, 1, 0, 0, created, at)
+	if entry, ok := soulStone["10004"].(map[string]any); !ok || entry["time"] != explicit.Unix() {
+		t.Fatalf("soul-stone acquisition %#v", soulStone["10004"])
+	}
+	if _, present := soulStone["10001"]; present {
+		t.Fatalf("synthetic Vending source beside the soul-stone row %#v", soulStone)
+	}
+	if _, present := soulStone["50001"]; !present {
+		t.Fatalf("hold-time milestone from acquisition time missing %#v", soulStone)
+	}
+
 	// A facet without an explicit acquisition row is dated from creation.
 	fallback := partnerLogMap(nil, 1, 0, 0, created, created.AddDate(0, 0, 30))
 	if entry, ok := fallback["10001"].(map[string]any); !ok || entry["time"] != created.Unix() {

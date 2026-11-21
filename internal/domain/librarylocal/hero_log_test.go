@@ -93,6 +93,22 @@ func TestBattleLogIDsCrossed(t *testing.T) {
 	}
 }
 
+func TestAcquisitionLogSources(t *testing.T) {
+	for _, logID := range []int64{10001, 10004, 10008} {
+		if !IsAcquisitionLog(logID) {
+			t.Fatalf("source %d not an acquisition row", logID)
+		}
+	}
+	for _, logID := range []int64{10000, 10009, 20001, 90001} {
+		if IsAcquisitionLog(logID) {
+			t.Fatalf("log %d wrongly an acquisition row", logID)
+		}
+	}
+	if LogAcquiredSoulStone != 10004 {
+		t.Fatalf("soul-stone source %d", LogAcquiredSoulStone)
+	}
+}
+
 func TestHeroLogColorAndStarIDs(t *testing.T) {
 	if id, ok := ColorLogID(2); !ok || id != 20001 {
 		t.Fatalf("color 2 %d %v", id, ok)

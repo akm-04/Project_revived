@@ -72,7 +72,7 @@ func (s Service) AwardStoryPartnerTx(c context.Context, t tx.Tx, pid identity.Pl
 	if err != nil {
 		return h, nil, err
 	}
-	if err = insertFreshHero(c, t, s.AcquisitionStore, s.FreshFacets, h); err != nil {
+	if err = insertFreshHero(c, t, s.AcquisitionStore, s.FreshFacets, h, 0); err != nil {
 		return h, nil, err
 	}
 	next, err := advanceRoot(root, 1, op)

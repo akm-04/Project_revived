@@ -28,9 +28,18 @@ const (
 	// stock acquisition path this server owns (PRIVATE_POLICY for non-summon
 	// creation paths).
 	LogAcquired int64 = 10001
-	LogAwakened int64 = 30001
-	LogMarried  int64 = 90001
+	// LogAcquiredSoulStone is the stock soul-stone acquisition source (10004,
+	// 灵魂石获取) used by MID 59 STONE_SUMMON_HERO.
+	LogAcquiredSoulStone int64 = 10004
+	LogAwakened          int64 = 30001
+	LogMarried           int64 = 90001
 )
+
+// IsAcquisitionLog reports a type-1 acquisition source row
+// (library_hero_log.lua rows 1-8, sub_ids 10001-10008).
+func IsAcquisitionLog(logID int64) bool {
+	return logID >= 10001 && logID <= 10008
+}
 
 type logThreshold struct {
 	threshold int64
