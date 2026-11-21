@@ -494,21 +494,26 @@ func (Store) AcknowledgeFunctionAnnouncementTx(ctx context.Context, t tx.Tx, pid
 	return err
 }
 
-// PendingFunctionAnnouncementIDs lists the announcements the client has not
-// acknowledged, in ascending function order.
+// PendingFunctionAnnouncementIDs lists the announcements the client can still
+// acknowledge and has not acknowledged, in ascending function order. Rows of
+// functions without an acknowledgement cursor, or already passed by the saved
+// story cursor, are not replayed.
 func (s Store) PendingFunctionAnnouncementIDs(ctx context.Context, pid identity.PlayerID) ([]int64, error) {
 	if s.Queryer == nil || !pid.Valid() {
 		return nil, errors.New("invalid function announcement query")
 	}
 	var raw string
-	if err := s.Queryer.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(function_id ORDER BY function_id),'[]'::jsonb)::text FROM player_function_unlocks WHERE player_id=$1 AND acknowledged_at IS NULL`, int64(pid)).Scan(&raw); err != nil {
+	var savedGuideID int64
+	if err := s.Queryer.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(function_id ORDER BY function_id),'[]'::jsonb)::text,
+		COALESCE((SELECT guide_id FROM player_story_cursors WHERE player_id=$1),0)
+		FROM player_function_unlocks WHERE player_id=$1 AND acknowledged_at IS NULL`, int64(pid)).Scan(&raw, &savedGuideID); err != nil {
 		return nil, err
 	}
 	var ids []int64
 	if err := json.Unmarshal([]byte(raw), &ids); err != nil {
 		return nil, err
 	}
-	return ids, nil
+	return player.ReplayableFunctionAnnouncements(ids, savedGuideID), nil
 }
 
 func (Store) AdvanceFunctionStateTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, expected int64, now time.Time) error {
