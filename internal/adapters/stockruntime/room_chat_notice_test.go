@@ -151,3 +151,62 @@ func TestAdventureRoomChatDeliversSelectType(t *testing.T) {
 		t.Fatalf("chat frame %#v", fields)
 	}
 }
+
+// TestAdventureRoomChatRetriesAnUndeliveredLine names BUGS #127: a line is not
+// consumed when the addressee is between world sockets. The host talks while the
+// teammate's chat socket is absent; when the teammate reconnects and the room
+// wakes again the same line must arrive instead of being marked delivered.
+func TestAdventureRoomChatRetriesAnUndeliveredLine(t *testing.T) {
+	registry := NewConnectionRegistry()
+	defer registry.CloseAll()
+	events, err := NewAdventureRoomNoticeRegistry()
+	if err != nil {
+		t.Fatal(err)
+	}
+	const host, teammate = identity.PlayerID(100001), identity.PlayerID(100002)
+	message := `{"msgType":0,"message":"host line","selectType":4,"roomID":9}`
+	view := appadventure.RoomNotice{RoomID: 9, RoomType: 2,
+		Seated: []appadventure.PlayerBody{{Player: host}, {Player: teammate}},
+		Chats:  []sharedroom.ChatMessage{{Serial: 1, Sender: int64(host), Recipients: []int64{int64(teammate)}, Message: message, At: 1700000000}}}
+	handler := AdventureRoomNoticeHandler{Service: adventureChatNoticeSource{view: view},
+		Delivery: RoomDelivery{Registry: registry, Publisher: RealtimePublisher{Registry: events, Limits: limits.Default()},
+			Authority: deliveryAuthority{}, Time: deliveryClock{}, MaxHandles: 10,
+			OnDeliveryError: func(err error) { t.Errorf("delivery: %v", err) }},
+		Delivered: NewRoomNoticeLedger(), Pushes: NewAdventurePushLedger()}
+	if err = handler.ReloadAndDeliver(context.Background(), "9"); err != nil {
+		t.Fatal(err)
+	}
+
+	teammateWriter, _, teammateClient := newRegistryPipeWriter(t)
+	defer teammateClient.Close()
+	if _, err = registry.Replace(registryAdmission(t, "33333333-3333-4333-8333-333333333312", teammate, domainrt.World, 1), teammateWriter); err != nil {
+		t.Fatal(err)
+	}
+	frames := readRoomFrames(teammateClient)
+	if err = handler.ReloadAndDeliver(context.Background(), "9"); err != nil {
+		t.Fatal(err)
+	}
+
+	deadline := time.After(3 * time.Second)
+	for {
+		select {
+		case frame, open := <-frames:
+			if !open {
+				t.Fatal("teammate socket closed before the chat line")
+			}
+			if frame.MID != mids.MIDChatFromFriend {
+				continue
+			}
+			fields, strictErr := frame.Params.(*amf3.Object).StrictMap()
+			if strictErr != nil {
+				t.Fatal(strictErr)
+			}
+			if fields["friend_id"] != float64(host) || fields["message"] != message {
+				t.Fatalf("chat frame %#v", fields)
+			}
+			return
+		case <-deadline:
+			t.Fatal("teammate never received the host's line after reconnecting")
+		}
+	}
+}

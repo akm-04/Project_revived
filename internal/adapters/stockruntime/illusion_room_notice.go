@@ -343,10 +343,19 @@ type RoomDelivery struct {
 }
 
 func (delivery RoomDelivery) Deliver(c context.Context, player identity.PlayerID, mid uint16, frame *amf3.Object) error {
+	_, err := delivery.DeliverOnce(c, player, mid, frame)
+	return err
+}
+
+// DeliverOnce publishes to every current live world socket of one player and
+// reports whether at least one accepted the frame. A player with no live handle
+// is not an error: the caller may keep the fact undelivered for a later wakeup.
+func (delivery RoomDelivery) DeliverOnce(c context.Context, player identity.PlayerID, mid uint16, frame *amf3.Object) (bool, error) {
 	handles := delivery.Registry.ByPlayerRole(player, domainrt.World)
 	if len(handles) > delivery.MaxHandles {
-		return errors.New("room notice connection bound exceeded")
+		return false, errors.New("room notice connection bound exceeded")
 	}
+	delivered := false
 	for _, handle := range handles {
 		metadata, valid := handle.Metadata()
 		if !valid || !delivery.Registry.IsCurrent(handle) || metadata.PlayerID != player || metadata.PhysicalRole != domainrt.World || metadata.RoomID != int64(metadata.LogicalServerID) {
@@ -354,7 +363,7 @@ func (delivery RoomDelivery) Deliver(c context.Context, player identity.PlayerID
 		}
 		at, err := delivery.Time.Now(c)
 		if err != nil {
-			return err
+			return delivered, err
 		}
 		actor := identity.ActorContext{AccountID: metadata.AccountID, AccountUID: metadata.AccountUID, SessionID: metadata.SessionID, ContextID: metadata.ContextID, LogicalServerID: metadata.LogicalServerID, PlayerID: metadata.PlayerID, ContextGeneration: metadata.ContextGeneration, SessionLivenessVersion: metadata.SessionLivenessVersion, ContextLivenessVersion: metadata.ContextLivenessVersion}
 		if delivery.Authority.ValidateActor(c, actor, at) != nil {
@@ -365,11 +374,15 @@ func (delivery RoomDelivery) Deliver(c context.Context, player identity.PlayerID
 		} else {
 			err = delivery.Publisher.PublishNotice(c, handle, mid, rt.NoticeNamespaceGeneric, frame)
 		}
-		if err != nil && delivery.OnDeliveryError != nil {
-			delivery.OnDeliveryError(err)
+		if err != nil {
+			if delivery.OnDeliveryError != nil {
+				delivery.OnDeliveryError(err)
+			}
+			continue
 		}
+		delivered = true
 	}
-	return nil
+	return delivered, nil
 }
 
 type illusionMessageSlot struct{ idName, infoName, prefix string }
