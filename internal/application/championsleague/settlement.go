@@ -340,7 +340,7 @@ func (s Service) cutoff(c context.Context, sc gen.TimedScope, ev event) error {
 	}
 	old := root.Version
 	root.Version++
-	root.UpdatedAt = at
+	root.UpdatedAt = gen.EffectiveObservation(at, root.UpdatedAt, root.CreatedAt)
 	return s.Store.PutRootTx(c, sc.Tx, root, old)
 }
 

@@ -245,7 +245,8 @@
    "league.json"
   ],
   "unit": [
-   "fight_test.go"
+   "fight_test.go",
+   "save_player_test.go"
   ]
  }
 }
