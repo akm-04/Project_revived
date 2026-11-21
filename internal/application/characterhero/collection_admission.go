@@ -29,12 +29,12 @@ func (a CatalogCollectionAdmission) AuthorizeCollectionOriginTx(c context.Contex
 	var out character.CollectionAdmissionProof
 	content, cp := op.Policies.Get("content")
 	pin, pp := op.Policies.Get(character.CollectionAdmissionPolicyRef)
-	if t == nil || a.Content == nil || root.Validate() != nil || root.UpdatedAt.Before(root.CreatedAt) || root.UpdatedAt.After(op.StartedAt) || !cp || content != revision || !pp || pin != character.CollectionAdmissionPolicy {
+	if t == nil || a.Content == nil || root.Validate() != nil || root.UpdatedAt.Before(root.CreatedAt) || !cp || content != revision || !pp || pin != character.CollectionAdmissionPolicy {
 		return out, ErrHeroCapacityUnavailable
 	}
 	origins, instances := []int64{}, map[int64]bool{}
 	for _, h := range heroes {
-		if h.ValidatePersistent() != nil || h.PlayerID != root.PlayerID || h.CreatedAt.After(h.UpdatedAt) || h.UpdatedAt.After(op.StartedAt) || instances[h.PartnerID] {
+		if h.ValidatePersistent() != nil || h.PlayerID != root.PlayerID || h.CreatedAt.After(h.UpdatedAt) || instances[h.PartnerID] {
 			return out, ErrHeroCapacityUnavailable
 		}
 		instances[h.PartnerID] = true

@@ -245,7 +245,7 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, op operation
 			if mutated {
 				old := root.StateVersion
 				root.StateVersion++
-				root.UpdatedAt = at
+				root.UpdatedAt = gen.EffectiveObservation(at, root.UpdatedAt, root.CreatedAt)
 				if e = s.Owner.SaveRootTx(ctx, sc.Tx, root, old); e != nil {
 					return e
 				}
