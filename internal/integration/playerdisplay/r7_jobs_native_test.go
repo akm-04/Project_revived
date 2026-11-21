@@ -151,6 +151,26 @@ func TestR7SettlementAtBoundaryWithoutReadersAndReplay(t *testing.T) {
 	_ = rev
 }
 
+// A backwards clock step across a weekly boundary settles the week of the
+// stored root observation, not the earlier decision week. Before the fix the
+// snapshot was bound to the stored week while the caller re-read the decision
+// week, committing phantom snapshots and reporting ErrConflict forever.
+func TestR7SettlementAfterClockRollbackUsesTheStoredWeek(t *testing.T) {
+	p := pool(t)
+	_ = installed(t, p)
+	server := rankingServer(t, p)
+	settledAt := time.Date(2026, 11, 18, 12, 0, 0, 0, time.UTC)
+	service := r7JobService(p)
+	service.Timed.Binder.Time = r7FixedTime{at: settledAt.Add(time.Minute)}
+	if e := service.SettleBoardServer(ctx, op(), d.GirlsBoard, server); e != nil {
+		t.Fatal(e)
+	}
+	service.Timed.Binder.Time = r7FixedTime{at: settledAt.Add(-7 * 24 * time.Hour)}
+	if e := service.SettleBoardServer(ctx, op(), d.GirlsBoard, server); e != nil {
+		t.Fatalf("settlement after a backwards clock step across the week: %v", e)
+	}
+}
+
 func r7BulkPlayers(t *testing.T, p *pg.Pool, server identity.LogicalServerID, count int64) {
 	t.Helper()
 	tr, e := p.Begin(ctx, tx.Options{Isolation: tx.ReadCommitted})
