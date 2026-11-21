@@ -333,6 +333,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 		changed := []any{}
 		for _, id := range plan.ChangedRooms {
 			r := plan.Rooms[id]
+			r.UpdatedAt = gen.EffectiveObservation(at, rooms[id].UpdatedAt, r.CreatedAt)
 			if e = s.Owner.SaveRoomTx(ctx, t, r, rooms[id].StateVersion); e != nil {
 				return nil, e
 			}
