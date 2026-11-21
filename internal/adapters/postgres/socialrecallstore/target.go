@@ -178,7 +178,8 @@ func (reader TargetReader) currentFactsTx(ctx context.Context, scope tx.Scope, t
 	if err != nil {
 		return domainrecall.Baseline{}, err
 	}
-	if privilegeSnapshot.Validate(target, revision, at) != nil || privilegeSnapshot.State.LogicalServerID != logicalserver.PlayerRegion(target) {
+	// K2': the provider observes at the latest stored fact, so validate there.
+	if privilegeSnapshot.Validate(target, revision, privilegeSnapshot.ObservedAt) != nil || privilegeSnapshot.State.LogicalServerID != logicalserver.PlayerRegion(target) {
 		return domainrecall.Baseline{}, socialrecall.ErrStartFacts
 	}
 
