@@ -682,6 +682,7 @@
    ],
    "arena": [
     "DecisionAt",
+    "EffectiveObservation",
     "Operation",
     "Run"
    ],
@@ -2561,6 +2562,7 @@
    ],
    "generation": [
     "DecisionAt",
+    "EffectiveObservation",
     "Operation",
     "Run"
    ],

@@ -210,6 +210,7 @@ func arenaTableIDs(raw any) ([]int64, error) {
 
 var arenaFailureRows = []failureRow{
 	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: d.ErrConflict, class: failureRefusal, code: unprovenRefusalCode},
 	{match: d.ErrInvalid, class: failureMalformed, detail: "arena_request_refused"},
 	{match: d.ErrClosed, class: failureRefusal, code: unprovenRefusalCode},
 	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},

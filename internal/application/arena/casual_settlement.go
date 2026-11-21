@@ -107,7 +107,7 @@ func (service Service) SettleCasualSession(requestContext context.Context, weekD
 		}
 		previous = root.StateVersion
 		root.StateVersion++
-		root.UpdatedAt = scope.Operation.DecisionAt()
+		root.UpdatedAt = gen.EffectiveObservation(scope.Operation.DecisionAt(), root.UpdatedAt, root.CreatedAt)
 		if err := service.Store.SaveCompetitionTx(requestContext, scope.Tx, root, previous); err != nil {
 			return err
 		}
