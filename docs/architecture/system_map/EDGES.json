@@ -780,6 +780,7 @@
    ],
    "guildbroadcast": [
     "DecisionAt",
+    "EffectiveObservation",
     "Operation",
     "Run",
     "Validate"
@@ -913,6 +914,7 @@
    ],
    "ranking": [
     "DecisionAt",
+    "EffectiveObservation",
     "Operation",
     "Run"
    ],
@@ -3976,6 +3978,7 @@
   "guildbroadcast": {
    "generation": [
     "DecisionAt",
+    "EffectiveObservation",
     "Operation",
     "Run",
     "Validate"
@@ -5658,6 +5661,7 @@
    ],
    "generation": [
     "DecisionAt",
+    "EffectiveObservation",
     "Operation",
     "Run"
    ],

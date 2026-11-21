@@ -43596,7 +43596,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/guildbroadcast/service.go:362"
+    "internal/application/guildbroadcast/service.go:364"
    ],
    "retry": [
     {

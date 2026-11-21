@@ -205,6 +205,7 @@
    "final_award_test.go",
    "player_test.go",
    "reads_test.go",
+   "run_test.go",
    "start_choice_conformance_test.go"
   ]
  }
