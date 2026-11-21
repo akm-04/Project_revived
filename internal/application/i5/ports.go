@@ -199,6 +199,7 @@ type Store interface {
 	LockFunctionStateTx(context.Context, tx.Tx, identity.PlayerID) (int64, error)
 	InsertFunctionEligibilityTx(context.Context, tx.Tx, player.FunctionEligibility) (bool, error)
 	InsertFunctionUnlockTx(context.Context, tx.Tx, player.FunctionUnlock) (bool, error)
+	AcknowledgeFunctionAnnouncementTx(context.Context, tx.Tx, identity.PlayerID, int64, time.Time) error
 	AdvanceFunctionStateTx(context.Context, tx.Tx, identity.PlayerID, int64, time.Time) error
 
 	AllocateMailWireIDTx(context.Context, tx.Tx, identity.PlayerID, mail.Namespace) (int64, error)

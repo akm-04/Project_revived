@@ -22,6 +22,59 @@ const GuideEndID int64 = 100197
 // enums.lua:348). A save at or above it proves the opening sequence is over.
 const GuideOpeningDoneID int64 = 100001
 
+// SkillUpFunctionID is the stock Skill Upgrade function (enums.lua:588). Its
+// announcement starts the skill guide from a reply's new_funcs_ (SelfPlayer.lua:487-518,554).
+const SkillUpFunctionID int64 = 33
+
+// SkillUpGuideCursor is the cursor the client saves after the Skill Upgrade
+// announcement runs playFuncGuide (enums.lua:445, MainScene.lua:1069-1078,
+// StoryData.lua:82-92). SAVE_STORY with it proves the announcement was seen.
+const SkillUpGuideCursor int64 = 100198
+
+// These functions set and persist a guide cursor from their announcement
+// (SelfPlayer.lua:487-618, MainScene.lua:1069-1085): 31 super campaign, 42 cloud
+// city and 48 conquer school. Their cursor SAVE_STORY is the acknowledgement too.
+const (
+	superCampaignFunctionID  int64 = 31
+	cloudCityFunctionID      int64 = 42
+	conquerSchoolFunctionID  int64 = 48
+	superBattleGuideCursor   int64 = 100250
+	cloudCityGuideCursor     int64 = 100701
+	conquerSchoolGuideCursor int64 = 101000
+)
+
+// FunctionAnnouncementAcknowledgement names the guide cursor whose SAVE_STORY
+// request acknowledges this function's announcement. A function with no entry
+// has no client acknowledgement and its unlock is born acknowledged.
+func FunctionAnnouncementAcknowledgement(functionID int64) (int64, bool) {
+	switch functionID {
+	case SkillUpFunctionID:
+		return SkillUpGuideCursor, true
+	case superCampaignFunctionID:
+		return superBattleGuideCursor, true
+	case cloudCityFunctionID:
+		return cloudCityGuideCursor, true
+	case conquerSchoolFunctionID:
+		return conquerSchoolGuideCursor, true
+	}
+	return 0, false
+}
+
+// AcknowledgedFunction is the function a saved guide cursor acknowledges.
+func AcknowledgedFunction(guideID int64) (int64, bool) {
+	switch guideID {
+	case SkillUpGuideCursor:
+		return SkillUpFunctionID, true
+	case superBattleGuideCursor:
+		return superCampaignFunctionID, true
+	case cloudCityGuideCursor:
+		return cloudCityFunctionID, true
+	case conquerSchoolGuideCursor:
+		return conquerSchoolFunctionID, true
+	}
+	return 0, false
+}
+
 type Profile struct {
 	PlayerID      identity.PlayerID
 	DisplayName   string

@@ -484,7 +484,7 @@ func main() {
 	undeliveredMarks := undeliveredstore.Store{Pool: pool.Raw()}
 	replayWindow := envDurationWithin("GXB_UNDELIVERED_REPLAY_WINDOW", 10*time.Minute, time.Minute, 30*time.Minute)
 	router.Wrap = func(d httpedge.Dispatcher) httpedge.Dispatcher {
-		return stockruntime.UndeliveredReplay{Next: stockruntime.Decorated{Next: d, DailyReset: dailyReset}, Authority: authority, Marks: undeliveredMarks, Window: replayWindow, Metrics: txMetrics}
+		return stockruntime.UndeliveredReplay{Next: stockruntime.Decorated{Next: d, DailyReset: dailyReset, PendingFunctions: i5db}, Authority: authority, Marks: undeliveredMarks, Window: replayWindow, Metrics: txMetrics}
 	}
 	for _, mid := range stockruntime.ItemsEnergyMIDs {
 		mustRegister(mid, energyDispatcher)

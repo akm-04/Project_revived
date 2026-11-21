@@ -466,7 +466,11 @@ func (Store) InsertFunctionUnlockTx(ctx context.Context, t tx.Tx, u player.Funct
 	if err := u.Validate(); err != nil {
 		return false, err
 	}
-	tag, err := t.Exec(ctx, `INSERT INTO player_function_unlocks(player_id,function_id,opened_at,source_fact_key,state_version) VALUES($1,$2,$3,$4,1) ON CONFLICT(player_id,function_id) DO NOTHING`, int64(u.PlayerID), u.FunctionID, u.OpenedAt.UTC(), u.SourceFactKey)
+	var acknowledgedAt any = u.OpenedAt.UTC()
+	if _, pending := player.FunctionAnnouncementAcknowledgement(u.FunctionID); pending {
+		acknowledgedAt = nil
+	}
+	tag, err := t.Exec(ctx, `INSERT INTO player_function_unlocks(player_id,function_id,opened_at,source_fact_key,state_version,acknowledged_at) VALUES($1,$2,$3,$4,1,$5) ON CONFLICT(player_id,function_id) DO NOTHING`, int64(u.PlayerID), u.FunctionID, u.OpenedAt.UTC(), u.SourceFactKey, acknowledgedAt)
 	if err != nil {
 		return false, err
 	}
@@ -478,6 +482,33 @@ func (Store) InsertFunctionUnlockTx(ctx context.Context, t tx.Tx, u player.Funct
 		changes.FunctionOpened(ctx, u.FunctionID)
 	}
 	return n == 1, nil
+}
+
+// AcknowledgeFunctionAnnouncementTx clears the pending announcement of a
+// function the client has now seen; an already acknowledged row is untouched.
+func (Store) AcknowledgeFunctionAnnouncementTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, functionID int64, now time.Time) error {
+	if t == nil || !pid.Valid() || functionID <= 0 || now.IsZero() {
+		return errors.New("invalid function acknowledgement")
+	}
+	_, err := t.Exec(ctx, `UPDATE player_function_unlocks SET acknowledged_at=$3 WHERE player_id=$1 AND function_id=$2 AND acknowledged_at IS NULL`, int64(pid), functionID, now.UTC())
+	return err
+}
+
+// PendingFunctionAnnouncementIDs lists the announcements the client has not
+// acknowledged, in ascending function order.
+func (s Store) PendingFunctionAnnouncementIDs(ctx context.Context, pid identity.PlayerID) ([]int64, error) {
+	if s.Queryer == nil || !pid.Valid() {
+		return nil, errors.New("invalid function announcement query")
+	}
+	var raw string
+	if err := s.Queryer.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(function_id ORDER BY function_id),'[]'::jsonb)::text FROM player_function_unlocks WHERE player_id=$1 AND acknowledged_at IS NULL`, int64(pid)).Scan(&raw); err != nil {
+		return nil, err
+	}
+	var ids []int64
+	if err := json.Unmarshal([]byte(raw), &ids); err != nil {
+		return nil, err
+	}
+	return ids, nil
 }
 
 func (Store) AdvanceFunctionStateTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, expected int64, now time.Time) error {
