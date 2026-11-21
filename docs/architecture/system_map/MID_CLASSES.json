@@ -131259,6 +131259,21 @@
    "unbounded_read": [
     {
      "file": "internal/adapters/postgres/guildstore/activity.go",
+     "line": 71,
+     "statement": "SELECT CASE WHEN NOT EXISTS (SELECT 1 FROM target) THEN 0 ELSE 1+(SELECT COUNT(*) FROM board b CROSS JOIN target t WHERE b.three_day>t.three_day OR (b.three_day=t.three_day AND b.guild_id<$3)) END"
+    },
+    {
+     "file": "internal/adapters/postgres/guildstore/activity.go",
+     "line": 71,
+     "statement": "SELECT g.guild_id,COALESCE(SUM(LEAST($4,d.amount)),0)::bigint AS three_day FROM guilds g LEFT JOIN guild_memberships m ON m.guild_id=g.guild_id LEFT JOIN player_guild_activity_days d ON d.player_id=m.player_id AND d.game_day BETWEEN $2-2 AND $2 WHERE g.logical_server_id=$1 AND g.retired_at IS NULL GROUP BY g.guild_id ), target AS (SELECT three_day FROM board WHERE guild_id=$3)"
+    },
+    {
+     "file": "internal/adapters/postgres/guildstore/activity.go",
+     "line": 71,
+     "statement": "WITH board AS ("
+    },
+    {
+     "file": "internal/adapters/postgres/guildstore/activity.go",
      "line": 90,
      "statement": "SELECT COALESCE((SELECT SUM(LEAST($2,d.amount)-d.folded_amount) FROM player_guild_activity_days d JOIN guild_memberships m ON m.player_id=d.player_id WHERE m.guild_id=$1 AND d.folded_amount<LEAST($2,d.amount)),0)::bigint +COALESCE((SELECT SUM(amount) FROM guild_activity_awards WHERE guild_id=$1 AND NOT folded),0)::bigint"
     },

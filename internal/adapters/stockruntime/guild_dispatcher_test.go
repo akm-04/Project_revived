@@ -141,6 +141,23 @@ func TestI9_11T34GuildlessRosterAndMissingGuildDetail(t *testing.T) {
 	}
 }
 
+func TestGuildDispatcher2565AnswersActivityBoardRank(t *testing.T) {
+	actor := actorForHTTP(t)
+	view := fakeGuildView{self: guildview.SelfGuild{GuildInfo: guildview.GuildInfo{GuildID: 1000001, Name: "g", GuildRank: 4}}}
+	d := GuildDispatcher{Authority: httpAuthority{actor}, Core: &fakeGuildCore{}, View: view}
+	rq := env(2565, nil, time.Unix(100, 0).UTC())
+	rq.Envelope.Params["player_id"] = int64(100002)
+	r := d.Dispatch(context.Background(), rq)
+	if r.HTTPStatus != 200 {
+		t.Fatalf("2565=%+v", r)
+	}
+	info, ok := r.Body["guild_info"].(map[string]any)
+	if !ok || info["guild_rank"] != int64(4) {
+		t.Fatalf("2565 guild_info=%+v", r.Body)
+	}
+	replyconformance.Check(t, 2565, r.Body)
+}
+
 func TestGuildDispatcherRecoveredCooldownProtocolShapes(t *testing.T) {
 	actor := actorForHTTP(t)
 	core := &fakeGuildCore{applyErr: &guildcore.CantJoinError{Kind: guildcore.JoinCooldownOtherGuild, RemainingSeconds: 77}}
