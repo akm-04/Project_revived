@@ -18,6 +18,7 @@ import (
 	identity "gxb.local/backend/v2/internal/domain/identity"
 	tx "gxb.local/backend/v2/internal/foundation/tx"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 	wireproto "gxb.local/backend/v2/internal/protocol/wire"
 )
 
@@ -83,6 +84,9 @@ func TestHiddenSectionAnswersEmptyAndGenuineRefusalsStay(t *testing.T) {
 	if _, leaked := statistics.Body["arena_info"]; leaked {
 		t.Fatalf("hidden statistics leaked %+v", statistics.Body)
 	}
+	if violations := (replyconformance.Checker{}).CheckRequest(1829, map[string]any{"sub_type": int64(2)}, statistics.Body); len(violations) != 0 {
+		t.Fatalf("hidden statistics conformance %v", violations)
+	}
 
 	space := dispatchRead(t, d, 1829, map[string]any{"to_player_id": int64(c.PlayerID), "sub_type": int64(4)})
 	if space.HTTPStatus != 200 || space.Body["error_code"] != int64(0) || space.Body["comment_num"] != int64(0) {
@@ -92,6 +96,9 @@ func TestHiddenSectionAnswersEmptyAndGenuineRefusalsStay(t *testing.T) {
 		if values, ok := space.Body[key].([]any); !ok || len(values) != 0 {
 			t.Fatalf("hidden space field %s %#v", key, space.Body[key])
 		}
+	}
+	if violations := (replyconformance.Checker{}).CheckRequest(1829, map[string]any{"sub_type": int64(4)}, space.Body); len(violations) != 0 {
+		t.Fatalf("hidden space conformance %v", violations)
 	}
 
 	// An empty showcase slot is still a typed refusal (A-121 R4).
