@@ -93122,7 +93122,7 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -93155,7 +93155,7 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "false"
     },
     {
@@ -93191,7 +93191,7 @@
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -93258,7 +93258,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 144,
+     "line": 162,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -93496,8 +93496,8 @@
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:162",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:162"
    ],
    "writes": "state"
   },
@@ -124429,7 +124429,7 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -124462,7 +124462,7 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "false"
     },
     {
@@ -124498,7 +124498,7 @@
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -124565,7 +124565,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 144,
+     "line": 162,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -124803,8 +124803,8 @@
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:162",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:162"
    ],
    "writes": "state"
   },
@@ -124813,7 +124813,7 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -124846,7 +124846,7 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "false"
     },
     {
@@ -124882,7 +124882,7 @@
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -124949,7 +124949,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 144,
+     "line": 162,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -125187,8 +125187,8 @@
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:162",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:162"
    ],
    "writes": "state"
   },
@@ -125197,7 +125197,7 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -125230,7 +125230,7 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "false"
     },
     {
@@ -125266,7 +125266,7 @@
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -125333,7 +125333,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 144,
+     "line": 162,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -125571,8 +125571,8 @@
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:162",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:162"
    ],
    "writes": "state"
   },
@@ -125581,7 +125581,7 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -125614,7 +125614,7 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "false"
     },
     {
@@ -125650,7 +125650,7 @@
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -125717,7 +125717,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 144,
+     "line": 162,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -125955,8 +125955,8 @@
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:162",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:162"
    ],
    "writes": "state"
   },
@@ -125965,7 +125965,7 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -125998,7 +125998,7 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "false"
     },
     {
@@ -126034,7 +126034,7 @@
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -126101,7 +126101,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 144,
+     "line": 162,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -126339,8 +126339,8 @@
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:162",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:162"
    ],
    "writes": "state"
   },
@@ -126349,7 +126349,7 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -126382,7 +126382,7 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "false"
     },
     {
@@ -126418,7 +126418,7 @@
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -126485,7 +126485,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 144,
+     "line": 162,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -126723,8 +126723,8 @@
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:162",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:162"
    ],
    "writes": "state"
   },
@@ -126733,7 +126733,7 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -126766,7 +126766,7 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "false"
     },
     {
@@ -126802,7 +126802,7 @@
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -126869,7 +126869,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 144,
+     "line": 162,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -127107,8 +127107,8 @@
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:162",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:162"
    ],
    "writes": "state"
   },
@@ -127117,7 +127117,7 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -127150,7 +127150,7 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "false"
     },
     {
@@ -127186,7 +127186,7 @@
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -127253,7 +127253,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 144,
+     "line": 162,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -127491,8 +127491,8 @@
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:162",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:162"
    ],
    "writes": "state"
   },
@@ -127501,7 +127501,7 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -127534,7 +127534,7 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "false"
     },
     {
@@ -127570,7 +127570,7 @@
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -127637,7 +127637,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 144,
+     "line": 162,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -127875,8 +127875,8 @@
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:162",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:162"
    ],
    "writes": "state"
   },
@@ -127885,7 +127885,7 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -127918,7 +127918,7 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "false"
     },
     {
@@ -127954,7 +127954,7 @@
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -128021,7 +128021,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 144,
+     "line": 162,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -128259,8 +128259,8 @@
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:162",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:162"
    ],
    "writes": "state"
   },
@@ -128269,7 +128269,7 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -128302,7 +128302,7 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "false"
     },
     {
@@ -128338,7 +128338,7 @@
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -128405,7 +128405,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 144,
+     "line": 162,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -128643,8 +128643,8 @@
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:162",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:162"
    ],
    "writes": "state"
   },
@@ -128653,7 +128653,7 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -128686,7 +128686,7 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "false"
     },
     {
@@ -128722,7 +128722,7 @@
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -128789,7 +128789,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 144,
+     "line": 162,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -129027,8 +129027,8 @@
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:162",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:162"
    ],
    "writes": "state"
   },
@@ -129037,7 +129037,7 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -129070,7 +129070,7 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "false"
     },
     {
@@ -129106,7 +129106,7 @@
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -129173,7 +129173,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 144,
+     "line": 162,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -129411,8 +129411,8 @@
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:162",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:162"
    ],
    "writes": "state"
   },
@@ -129421,7 +129421,7 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -129454,7 +129454,7 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "false"
     },
     {
@@ -129490,7 +129490,7 @@
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -129557,7 +129557,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 144,
+     "line": 162,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -129795,8 +129795,8 @@
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:162",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:162"
    ],
    "writes": "state"
   },
@@ -129805,7 +129805,7 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -129838,7 +129838,7 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "false"
     },
     {
@@ -129874,7 +129874,7 @@
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -129941,7 +129941,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 144,
+     "line": 162,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -130179,8 +130179,8 @@
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:162",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:162"
    ],
    "writes": "state"
   },
@@ -133042,7 +133042,7 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -133075,7 +133075,7 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "false"
     },
     {
@@ -133111,7 +133111,7 @@
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -133178,7 +133178,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 144,
+     "line": 162,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -133416,8 +133416,8 @@
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:162",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:162"
    ],
    "writes": "state"
   },
@@ -133426,7 +133426,7 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -133459,7 +133459,7 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "false"
     },
     {
@@ -133495,7 +133495,7 @@
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -133562,7 +133562,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 144,
+     "line": 162,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -133800,8 +133800,8 @@
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:162",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:162"
    ],
    "writes": "state"
   },
@@ -133810,7 +133810,7 @@
    "isolation": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -133843,7 +133843,7 @@
    "read_only": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "false"
     },
     {
@@ -133879,7 +133879,7 @@
    "retry": [
     {
      "file": "internal/application/dormhouse/projection.go",
-     "line": 144,
+     "line": 162,
      "value": "UNKNOWN"
     },
     {
@@ -133946,7 +133946,7 @@
      "file": "internal/application/dormhouse/projection.go",
      "function": "Service.Read",
      "isolation": "UNKNOWN",
-     "line": 144,
+     "line": 162,
      "read_only": "false",
      "retry": "UNKNOWN"
     },
@@ -134184,8 +134184,8 @@
     "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/dormhouse/service.go:363",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122",
-    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:144",
-    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:144"
+    "transaction isolation not statically decidable at internal/application/dormhouse/projection.go:162",
+    "transaction retry policy not statically decidable at internal/application/dormhouse/projection.go:162"
    ],
    "writes": "state"
   },

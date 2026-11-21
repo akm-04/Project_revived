@@ -123,6 +123,11 @@ func TestDormSocialDispatcherParsesEachStableShape(t *testing.T) {
 	if response.HTTPStatus != 200 || fake.readMID != 2524 || fake.readHost != 2 || fake.readHouse != 3 {
 		t.Fatal(response, fake)
 	}
+	// DormRoomWindow's message-board path sends total_num, not comment_num.
+	response = dispatcher.Dispatch(context.Background(), socialEnv(t, 2524, map[string]any{"host_id": int64(2), "house_id": int64(3), "start": int64(0), "offset": int64(20), "total_num": int64(0)}))
+	if response.HTTPStatus != 200 || fake.readMID != 2524 || fake.readHost != 2 || fake.readHouse != 3 {
+		t.Fatal(response, fake)
+	}
 
 	for _, mid := range []uint16{2518, 2520, 2521, 2523, 2525, 2526} {
 		response = dispatcher.Dispatch(context.Background(), socialEnv(t, mid, map[string]any{"house_id": int64(3), "unexpected": int64(1)}))

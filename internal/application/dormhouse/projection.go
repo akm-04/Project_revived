@@ -27,6 +27,24 @@ func unixOrZero(at time.Time) int64 {
 	return at.Unix()
 }
 
+// dormPanelKinds is xyd.DormPanelType: the stock client reads
+// house_detail.record as a three-element panel array (Floor, LeftWall,
+// RightWall), indexed 1..3.
+const dormPanelKinds = 3
+
+// stockHouseRecord presents the flat stored placement map in the stock panel
+// array; ValidateLayout has already bounded Panel to 1..3.
+func stockHouseRecord(layout map[string]string, validated dorm.LayoutResult) []map[string]string {
+	record := make([]map[string]string, dormPanelKinds)
+	for index := range record {
+		record[index] = map[string]string{}
+	}
+	for _, placement := range validated.Placements {
+		record[placement.Panel-1][placement.Key] = layout[placement.Key]
+	}
+	return record
+}
+
 func roomWire(r dorm.Room, heroes map[int64]character.Hero, facts map[int64]dorm.HeroFacts, wire socialRoomWire, stages map[int64]int64) map[string]any {
 	residents := []any{}
 	for _, p := range r.Residents {
@@ -252,17 +270,22 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, op operation
 			}
 		}
 		used := map[string]int64{}
-		for _, r := range rooms {
-			v, e := catalog.ValidateLayout(r.TableID, r.ExpansionLevel, r.Layout)
+		targetID := r.ID
+		var houseLayout dorm.LayoutResult
+		for _, room := range rooms {
+			v, e := catalog.ValidateLayout(room.TableID, room.ExpansionLevel, room.Layout)
 			if e != nil {
 				return e
+			}
+			if room.ID == targetID {
+				houseLayout = v
 			}
 			for item, n := range v.Used {
 				used[strconv.FormatInt(item, 10)] += n
 			}
 		}
 		body["house_info"] = roomWire(r, hm, facts, wire, stages)
-		body["house_detail"] = map[string]any{"house_id": r.ID, "record": r.Layout}
+		body["house_detail"] = map[string]any{"house_id": r.ID, "record": stockHouseRecord(r.Layout, houseLayout)}
 		body["item_record"] = used
 		if own {
 			changed := map[string]any{}
