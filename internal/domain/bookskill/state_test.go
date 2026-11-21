@@ -44,11 +44,12 @@ func TestSnapshotRefundLargeValuesAndPages(t *testing.T) {
 		t.Fatal("due refund")
 	}
 }
-func TestBackwardJobObservationRejected(t *testing.T) {
+func TestBackwardJobObservationSettlesAtStoredStart(t *testing.T) {
 	s := Seed()
 	s.Buildings[1] = Building{Level: 1, Job: &Job{StartedAt: time.Unix(100, 0), Duration: 60, Target: 2, Subject: 1}}
-	if _, e := s.Settle(time.Unix(99, 0)); e != ErrStaleTime {
-		t.Fatal(e)
+	due, e := s.Settle(time.Unix(99, 0))
+	if e != nil || due || s.Buildings[1].Job == nil || s.Buildings[1].Level != 1 {
+		t.Fatalf("backward observation completed or refused the job: due=%v err=%v state=%+v", due, e, s.Buildings[1])
 	}
 }
 func FuzzSpeedCostMonotonic(f *testing.F) {

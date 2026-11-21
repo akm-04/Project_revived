@@ -197,7 +197,7 @@ func Remaining(j *Job, at time.Time) (int64, error) {
 		return 0, ErrInvalid
 	}
 	if at.Before(j.StartedAt) {
-		return 0, ErrStaleTime
+		at = j.StartedAt
 	}
 	elapsed := at.Unix() - j.StartedAt.Unix()
 	if elapsed >= j.Duration {
