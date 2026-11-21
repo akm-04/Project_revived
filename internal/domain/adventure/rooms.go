@@ -2,8 +2,10 @@ package adventure
 
 import (
 	"encoding/json"
+	"slices"
 	"strconv"
 
+	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/sharedroom"
 )
 
@@ -37,8 +39,40 @@ type BusyState struct {
 
 // MonsterState is one defense monster position's kill state.
 type MonsterState struct {
-	Killer string `json:"killer,omitempty"`
-	Solved bool   `json:"solved,omitempty"`
+	Killer       string            `json:"killer,omitempty"`
+	KillerPlayer identity.PlayerID `json:"killer_player,omitempty"`
+	Solved       bool              `json:"solved,omitempty"`
+}
+
+// DefenseCompleted reports whether every monster position has been solved.
+func (s RoomState) DefenseCompleted() bool {
+	solved := 0
+	for _, monster := range s.Monsters {
+		if monster.Solved {
+			solved++
+		}
+	}
+	return solved >= DefenseMonsterCount
+}
+
+// DefenseRecipients is the distinct players who solved a position, ascending by
+// player id. A position solved before KillerPlayer was recorded has no
+// recipient, so a room carried over from that time mails nobody for it.
+func (s RoomState) DefenseRecipients() []identity.PlayerID {
+	unique := make(map[identity.PlayerID]struct{}, len(s.Monsters))
+	recipients := make([]identity.PlayerID, 0, len(s.Monsters))
+	for _, monster := range s.Monsters {
+		if !monster.Solved || monster.KillerPlayer == 0 {
+			continue
+		}
+		if _, duplicate := unique[monster.KillerPlayer]; duplicate {
+			continue
+		}
+		unique[monster.KillerPlayer] = struct{}{}
+		recipients = append(recipients, monster.KillerPlayer)
+	}
+	slices.Sort(recipients)
+	return recipients
 }
 
 // PushRecord is one room state change the realtime projection delivers once.
