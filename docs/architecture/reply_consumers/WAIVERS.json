@@ -1386,6 +1386,180 @@
    "mid": 2362,
    "path": "team_fight_info.pet.table_id",
    "reason": "the ROOM_NOTICE/FUNCTION push body carries it; the flat GET_INFO HTTP reply does not (Occult.lua:757-817)"
+  },
+  {
+   "client": "app/windows/SummonResultWindow.lua:58",
+   "mid": 50,
+   "path": "items",
+   "reason": "SummonResultWindow.didOpen nil-guards extraAward (the window alias of reply.items) before ipairs: `if arg_3_0.extraAward and next(arg_3_0.extraAward) then`"
+  },
+  {
+   "client": "app/model/SelfPlayer.lua:2293",
+   "mid": 50,
+   "path": "extra_reward",
+   "reason": "SelfPlayer.summonHero reads the list only under `if arg_138_1.extra_reward then`; the BackpackWindow wrapper copies it into the result window without indexing it"
+  },
+  {
+   "client": "app/model/SelfPlayer.lua:2302",
+   "mid": 50,
+   "path": "sakura_items",
+   "reason": "SelfPlayer.summonHero reads the list only under `if arg_138_1.sakura_items then`; the BackpackWindow wrapper copies it into the result window without indexing it"
+  },
+  {
+   "client": "app/model/SelfPlayer.lua:2313",
+   "mid": 50,
+   "path": "stick_items",
+   "reason": "SelfPlayer.summonHero reads the list only under `if arg_138_1.stick_items then`; the BackpackWindow wrapper copies it into the result window without indexing it"
+  },
+  {
+   "client": "app/windows/BossMapDetailWindow.lua:94",
+   "mid": 112,
+   "path": "chapter_events[].record",
+   "reason": "V1 sends the same chapter rows without record; the only hard reader, BossMapDetailWindow, opens only when is_open==1 and val>0 (MapWindow.lua:1183), and the server always writes val:0"
+  },
+  {
+   "client": "app/scenes/ActivityBattleCreate.lua:431",
+   "mid": 114,
+   "path": "click_id",
+   "reason": "click_id is client-side BATTLE_END_BACK_TO_MAIN data (BattleLoseWindow.lua:169) consumed by ActivityBattleCreate; SelfPlayer.lua:4693 sends it as a request and never reads it from MID 114"
+  },
+  {
+   "client": "app/windows/GetPointWindow.lua:65",
+   "mid": 229,
+   "path": "list[].details.mission_ids",
+   "reason": "details is per-activity and nil-guarded; only worldboss is registered (cmd/gxb-api/main_postgres.go:243) and its details is {level} (application/worldboss/activity.go:23); GetPointWindow runs only for its own activity window"
+  },
+  {
+   "client": "app/windows/GetPointWindow.lua:83",
+   "mid": 229,
+   "path": "list[].details.mission_ids[]",
+   "reason": "details is per-activity and nil-guarded; only worldboss is registered and its details is {level}; GetPointWindow runs only for its own activity window"
+  },
+  {
+   "client": "app/windows/GetPointWindow.lua:66",
+   "mid": 229,
+   "path": "list[].details.mission_nums",
+   "reason": "details is per-activity and nil-guarded; only worldboss is registered and its details is {level}; GetPointWindow runs only for its own activity window"
+  },
+  {
+   "client": "app/windows/GetPointWindow.lua:85",
+   "mid": 229,
+   "path": "list[].details.mission_nums[]",
+   "reason": "details is per-activity and nil-guarded; only worldboss is registered and its details is {level}; GetPointWindow runs only for its own activity window"
+  },
+  {
+   "client": "app/windows/PetForumWindow.lua:192",
+   "mid": 832,
+   "path": "comments[].pet_color",
+   "reason": "the reply branches on request forum_type: the pet forum sends 2 (PetForumWindow.lua:103), the hero forum sends none and the server defaults to Hero, so a hero reply correctly omits the pet keys"
+  },
+  {
+   "client": "app/windows/PetForumWindow.lua:186",
+   "mid": 832,
+   "path": "comments[].pet_lev",
+   "reason": "the reply branches on request forum_type: the pet forum sends 2 (PetForumWindow.lua:103), the hero forum sends none and the server defaults to Hero, so a hero reply correctly omits the pet keys"
+  },
+  {
+   "client": "app/model/EventCentre.lua:387",
+   "mid": 1056,
+   "path": "desk_info.building_info.lev",
+   "reason": "building_info is owned by MID 1074 (EventCentre.lua:384-389, ProductionTableWindow.lua:307); the 1056 desk_info carries only make state, so V1 has no building_info here"
+  },
+  {
+   "client": "app/model/EventCentre.lua:387",
+   "mid": 1056,
+   "path": "desk_info.building_info.need_time",
+   "reason": "building_info is owned by MID 1074 (EventCentre.lua:384-389, ProductionTableWindow.lua:307); the 1056 desk_info carries only make state, so V1 has no building_info here"
+  },
+  {
+   "client": "app/model/EventCentre.lua:387",
+   "mid": 1056,
+   "path": "desk_info.building_info.new_evolve",
+   "reason": "building_info is owned by MID 1074 (EventCentre.lua:384-389, ProductionTableWindow.lua:307); the 1056 desk_info carries only make state, so V1 has no building_info here"
+  },
+  {
+   "client": "app/model/EventCentre.lua:387",
+   "mid": 1056,
+   "path": "desk_info.building_info.start_time",
+   "reason": "building_info is owned by MID 1074 (EventCentre.lua:384-389, ProductionTableWindow.lua:307); the 1056 desk_info carries only make state, so V1 has no building_info here"
+  },
+  {
+   "client": "app/model/EventCentre.lua:388",
+   "mid": 1056,
+   "path": "pet_cabin_info.building_info.lev",
+   "reason": "building_info is owned by MID 1074 (EventCentre.lua:384-389, PetRoomWindow.lua:307); the 1056 pet_cabin_info carries only make state, so V1 has no building_info here"
+  },
+  {
+   "client": "app/model/EventCentre.lua:388",
+   "mid": 1056,
+   "path": "pet_cabin_info.building_info.need_time",
+   "reason": "building_info is owned by MID 1074 (EventCentre.lua:384-389); the 1056 pet_cabin_info carries only make state, so V1 has no building_info here"
+  },
+  {
+   "client": "app/model/EventCentre.lua:388",
+   "mid": 1056,
+   "path": "pet_cabin_info.building_info.new_evolve",
+   "reason": "building_info is owned by MID 1074 (EventCentre.lua:384-389); the 1056 pet_cabin_info carries only make state, so V1 has no building_info here"
+  },
+  {
+   "client": "app/model/EventCentre.lua:388",
+   "mid": 1056,
+   "path": "pet_cabin_info.building_info.start_time",
+   "reason": "building_info is owned by MID 1074 (EventCentre.lua:384-389); the 1056 pet_cabin_info carries only make state, so V1 has no building_info here"
+  },
+  {
+   "client": "app/windows/ProductionTableWindow.lua:225",
+   "mid": 1056,
+   "path": "desk_info.making_item",
+   "reason": "making_item is sent only while is_making==1 and is read only under that guard (ProductionTableWindow.lua:220-225) or nil-guarded; the no-root map writes is_making:0 (internal/application/eventcentre/makeinfo.go:15-16)"
+  },
+  {
+   "client": "app/windows/PetRoomWindow.lua:337",
+   "mid": 1056,
+   "path": "pet_cabin_info.making_item",
+   "reason": "making_item is sent only while is_making==1 and is nil-guarded at its reads (PetRoomWindow.lua:337); the no-root map writes is_making:0 (internal/application/eventcentre/makeinfo.go:15-16)"
+  },
+  {
+   "client": "app/windows/PersonDisplayWindow.lua:2372",
+   "mid": 1829,
+   "path": "avatar_file_path",
+   "reason": "the client explicitly handles a nil avatar and draws the default avatar before any use; the server omits both avatar fields when no custom avatar exists"
+  },
+  {
+   "client": "app/windows/PersonDisplayWindow.lua:2372",
+   "mid": 1829,
+   "path": "avatar_md5_code",
+   "reason": "the client explicitly handles a nil avatar and draws the default avatar before any use; the server omits both avatar fields when no custom avatar exists"
+  },
+  {
+   "client": "app/windows/AdventureDefenseMonsterDetailWindow.lua:56",
+   "mid": 2417,
+   "path": "detail.challenge_times[]",
+   "reason": "challenge_times exists only for the defense table (application/adventure/defense.go:75-79,145-151); the defense window that reads it opens only for an active defense room"
+  },
+  {
+   "client": "app/windows/AdventureDefenseWindow.lua:88",
+   "mid": 2417,
+   "path": "detail.monster_statuses[]",
+   "reason": "monster_statuses exists only for the defense table (application/adventure/defense.go:75-79,145-151); the defense window reads it only for an active defense room"
+  },
+  {
+   "client": "app/windows/AdventureDefenseWindow.lua:16",
+   "mid": 2417,
+   "path": "detail.room_info.campaign_id",
+   "reason": "room_info exists only for the defense table (application/adventure/defense.go:75-79,145-151); the defense window reads it only for an active defense room"
+  },
+  {
+   "client": "app/model/AdventureEvent.lua:285",
+   "mid": 2417,
+   "path": "detail.room_info.members[]",
+   "reason": "room_info exists only for the defense table; other event details do not carry it and are nil-guarded at the reader"
+  },
+  {
+   "client": "app/model/AdventureEvent.lua:298",
+   "mid": 2417,
+   "path": "detail.room_info.room_id",
+   "reason": "room_info exists only for the defense table (application/adventure/defense.go:75-79,145-151); the defense window reads it only for an active defense room"
   }
  ]
 }
