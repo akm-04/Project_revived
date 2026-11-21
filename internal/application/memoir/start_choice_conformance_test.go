@@ -96,25 +96,32 @@ func startChoiceOperation(t *testing.T, id ids.UUID, at time.Time) operation.Con
 func startChoiceMode(at time.Time, roster *startChoiceRoster, combat *startChoiceCombat) Mode {
 	state := startChoiceState()
 	return Mode{
-		Timed:       gen.TimedRunner{Binder: gen.Binder{Time: startChoiceClock{at: at}}, Runner: tx.Runner{DB: startChoiceBeginner{}}},
-		Fresh:       startChoiceTx{},
-		Store:       startChoiceStore{state: state},
-		Content:     startChoiceContent{},
-		Fence:       startChoiceFence{},
-		Functions:   startChoiceFunctions{},
-		Heroes:      startChoiceHeroes{},
-		HeroLocks:   startChoiceHeroLocks{},
-		Roster:      roster,
-		Pets:        startChoicePets{},
-		Opponents:   startChoiceOpponents{},
-		Combat:      combat,
-		Grants:      startChoiceGrants{},
-		Costs:       startChoiceCosts{},
-		Energy:      startChoiceEnergy{},
-		Exchange:    startChoiceExchange{},
-		Receipts:    startChoiceReceipts{},
-		ReceiptRead: startChoiceReceiptRead{},
+		Timed:        gen.TimedRunner{Binder: gen.Binder{Time: startChoiceClock{at: at}}, Runner: tx.Runner{DB: startChoiceBeginner{}}},
+		Fresh:        startChoiceTx{},
+		Store:        startChoiceStore{state: state},
+		Content:      startChoiceContent{},
+		Fence:        startChoiceFence{},
+		Functions:    startChoiceFunctions{},
+		Heroes:       startChoiceHeroes{},
+		HeroLocks:    startChoiceHeroLocks{},
+		Roster:       roster,
+		Pets:         startChoicePets{},
+		Opponents:    startChoiceOpponents{},
+		Combat:       combat,
+		Grants:       startChoiceGrants{},
+		Costs:        startChoiceCosts{},
+		Energy:       startChoiceEnergy{},
+		Exchange:     startChoiceExchange{},
+		Receipts:     startChoiceReceipts{},
+		ReceiptRead:  startChoiceReceiptRead{},
+		BattleCounts: startChoiceBattleCounts{},
 	}
+}
+
+type startChoiceBattleCounts struct{}
+
+func (startChoiceBattleCounts) ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error {
+	return nil
 }
 
 func startChoiceState() d.State {
