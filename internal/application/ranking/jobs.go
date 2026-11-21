@@ -330,6 +330,7 @@ func (s Service) settleCurrentWeek(c context.Context, o operation.Context, board
 	if e != nil {
 		return e
 	}
+	settledWeek := week
 	_, _, e = s.Timed.Run(c, bound, Profile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 8, RetryDefiniteAbort: true, DefiniteAbortBackoffBase: 20 * time.Millisecond, DefiniteAbortBackoffMax: 80 * time.Millisecond}, nil, func(c context.Context, sc gen.TimedScope) error {
 		at := sc.Operation.DecisionAt()
 		root, e := s.Store.LockBoardRootTx(c, sc.Tx, board, server, at)
@@ -339,8 +340,15 @@ func (s Service) settleCurrentWeek(c context.Context, o operation.Context, board
 		if observed, e := d.BoardWeek(at); e != nil || !observed.Equal(week) {
 			return ErrConflict
 		}
+		// K3: a backwards clock step is observed at the latest stored root
+		// time, so a settlement that crosses a week boundary binds the week
+		// the clamped observation actually falls in.
+		settledWeek, e = d.BoardWeek(gen.EffectiveObservation(at, root.UpdatedAt))
+		if e != nil {
+			return e
+		}
 		// A concurrent settlement that held the root lock first already froze this week.
-		_, frozen, e := s.Store.ReadBoardPeriodTx(c, sc.Tx, board, server, week)
+		_, frozen, e := s.Store.ReadBoardPeriodTx(c, sc.Tx, board, server, settledWeek)
 		if e != nil {
 			return e
 		}
@@ -396,7 +404,7 @@ func (s Service) settleCurrentWeek(c context.Context, o operation.Context, board
 	if e != nil {
 		return e
 	}
-	p, ok, e = s.Store.ReadBoardPeriodTx(c, s.Fresh, board, server, week)
+	p, ok, e = s.Store.ReadBoardPeriodTx(c, s.Fresh, board, server, settledWeek)
 	if e != nil {
 		return e
 	}

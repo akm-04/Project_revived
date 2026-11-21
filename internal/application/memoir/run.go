@@ -32,7 +32,7 @@ type scope struct {
 }
 
 func (mode Mode) pin(ctx context.Context, operationContext operation.Context) (operation.Context, error) {
-	if mode.Timed.Runner.DB == nil || mode.Fresh == nil || mode.Store == nil || mode.Content == nil || mode.Fence == nil || mode.Functions == nil || mode.Heroes == nil || mode.HeroLocks == nil || mode.Roster == nil || mode.Pets == nil || mode.Opponents == nil || mode.Combat == nil || mode.Grants == nil || mode.Costs == nil || mode.Energy == nil || mode.Exchange == nil || mode.Receipts == nil || mode.ReceiptRead == nil {
+	if mode.Timed.Runner.DB == nil || mode.Fresh == nil || mode.Store == nil || mode.Content == nil || mode.Fence == nil || mode.Functions == nil || mode.Heroes == nil || mode.HeroLocks == nil || mode.Roster == nil || mode.Pets == nil || mode.Opponents == nil || mode.Combat == nil || mode.Grants == nil || mode.Costs == nil || mode.Energy == nil || mode.Exchange == nil || mode.Receipts == nil || mode.ReceiptRead == nil || mode.BattleCounts == nil {
 		return operationContext, memoir.ErrUnavailable
 	}
 	if _, found := operationContext.Policies.Get("content"); found {

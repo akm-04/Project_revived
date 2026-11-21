@@ -288,6 +288,9 @@ func (s Service) Submit(c context.Context, actor identity.ActorContext, request 
 			return ErrConflict
 		}
 		recipients := make([]gb.Member, 0, len(roster))
+		// K2': a stored snapshot later than the raw decision time (a backwards
+		// clock step) is observed at the latest stored fact, not refused.
+		observedAt := at
 		leader := false
 		for _, snapshot := range roster {
 			m, ok, e := s.Guild.LockMembershipTx(c, sc.Tx, snapshot.PlayerID)
@@ -305,6 +308,7 @@ func (s Service) Submit(c context.Context, actor identity.ActorContext, request 
 				return ErrConflict
 			}
 			recipients = append(recipients, gb.Member{PlayerID: m.PlayerID, JoinEventID: ev.EventID, JoinedAt: m.JoinedAt.UTC()})
+			observedAt = gen.EffectiveObservation(observedAt, m.JoinedAt.UTC())
 			if m.PlayerID == actor.PlayerID && m.Role == guild.Leader {
 				leader = true
 			}
@@ -319,10 +323,8 @@ func (s Service) Submit(c context.Context, actor identity.ActorContext, request 
 		if name.Validate() != nil || name.PlayerID != actor.PlayerID || name.Server != actor.LogicalServerID {
 			return ErrConflict
 		}
-		if name.ChangedAt.After(at) {
-			return ErrStale
-		}
-		source := gb.Source{Operation: bound, GuildID: gid, Server: actor.LogicalServerID, LeaderID: actor.PlayerID, LeaderName: name.Name, NameSnapshotChangedAt: name.ChangedAt, DecisionAt: at, ContentRevision: p.Revision, GuildCoreRevision: p.GuildCoreRevision, PolicyID: p.PolicyID, Request: request, Recipients: recipients}
+		observedAt = gen.EffectiveObservation(observedAt, name.ChangedAt)
+		source := gb.Source{Operation: bound, GuildID: gid, Server: actor.LogicalServerID, LeaderID: actor.PlayerID, LeaderName: name.Name, NameSnapshotChangedAt: name.ChangedAt, DecisionAt: observedAt, ContentRevision: p.Revision, GuildCoreRevision: p.GuildCoreRevision, PolicyID: p.PolicyID, Request: request, Recipients: recipients}
 		if e = source.Validate(); e != nil {
 			return e
 		}

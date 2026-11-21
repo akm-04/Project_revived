@@ -123,7 +123,9 @@ func (h OccultRoomNoticeHandler) ReloadAndDeliver(c context.Context, reference s
 			return err
 		}
 	}
-	if len(seated) == 0 {
+	// A closed room keeps its terminal-push cursor: a redelivered wakeup must
+	// not send the final report again.
+	if len(seated) == 0 && !view.Closed {
 		h.Delivered.forget(view.RoomID)
 	}
 	return nil
