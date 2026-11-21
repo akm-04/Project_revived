@@ -39,6 +39,20 @@ func TestBookComposeRefusalIs409WithCode(t *testing.T) {
 	}
 }
 
+func TestBookDomainRefusalAnswers409(t *testing.T) {
+	dispatcher := BookDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: fakeBookService{err: book.ErrInvalid}}
+	for _, mid := range []uint16{1060, 1077} {
+		params := map[string]any{"skill_id": int64(10010001)}
+		if mid == 1077 {
+			params = map[string]any{"type": int64(3)}
+		}
+		got := dispatcher.Dispatch(context.Background(), heroReq(t, mid, params))
+		if got.HTTPStatus != http.StatusConflict || got.Body["error_code"] != unprovenRefusalCode || got.Body["error_msg"] != "" {
+			t.Fatalf("MID %d domain refusal status=%d body=%#v", mid, got.HTTPStatus, got.Body)
+		}
+	}
+}
+
 func TestBookFailureRowTable(t *testing.T) {
 	rows := []struct {
 		name       string
@@ -47,7 +61,7 @@ func TestBookFailureRowTable(t *testing.T) {
 		wantCode   int64
 	}{
 		{"rejected", app.ErrRejected, http.StatusConflict, unprovenRefusalCode},
-		{"invalid", book.ErrInvalid, http.StatusBadRequest, 0},
+		{"invalid", book.ErrInvalid, http.StatusConflict, unprovenRefusalCode},
 		{"insufficient", economy.ErrInsufficientBalance, http.StatusConflict, unprovenRefusalCode},
 		{"book unqualified", book.ErrUnqualified, http.StatusConflict, unprovenRefusalCode},
 		{"book stale time", book.ErrStaleTime, http.StatusConflict, staleConflictCode},
@@ -61,14 +75,11 @@ func TestBookFailureRowTable(t *testing.T) {
 			if got.HTTPStatus != row.wantStatus {
 				t.Fatalf("status=%d want=%d body=%#v", got.HTTPStatus, row.wantStatus, got.Body)
 			}
-			if row.wantCode == 0 {
-				if got.Body["error_code"] != unprovenRefusalCode || got.Body["error_msg"] != "" {
-					t.Fatalf("malformed code body: %#v", got.Body)
-				}
-				return
-			}
 			if got.Body["error_code"] != row.wantCode {
 				t.Fatalf("error_code=%#v want=%d", got.Body["error_code"], row.wantCode)
+			}
+			if got.Body["error_msg"] != "" {
+				t.Fatalf("refusal body: %#v", got.Body)
 			}
 		})
 	}
