@@ -10,7 +10,16 @@ const (
 	MissionSuccess = 3
 	MissionAwarded = 4
 	GiftMissionID  = 1001
+
+	FriendFightMissionID = 1002
+	RentalMissionID      = 1003
+	ChampionMissionID    = 1004
+	TeaPartyMissionID    = 1005
+	PvPKillMissionID     = 1006
 )
+
+// PartnerMissionIDs are the missions advanced by another owner's settlement.
+var PartnerMissionIDs = []int64{FriendFightMissionID, RentalMissionID, ChampionMissionID, TeaPartyMissionID, PvPKillMissionID}
 
 // UnlockedMissions is the mission set of the stage that contains favor, using
 // ActUnlocked's stage lookup: the amour column is the stage's upper bound.

@@ -213,6 +213,7 @@ type HeroPort interface {
 	ReadRootTx(context.Context, tx.Queryer, identity.PlayerID) (character.HeroRoot, error)
 	LockRootTx(context.Context, tx.Tx, identity.PlayerID) (character.HeroRoot, error)
 	ReadHeroByPartnerIDTx(context.Context, tx.Queryer, identity.PlayerID, int64) (character.Hero, error)
+	FindHeroByPartnerIDTx(context.Context, tx.Queryer, identity.PlayerID, int64) (character.Hero, bool, error)
 	LockHeroByPartnerIDTx(context.Context, tx.Tx, identity.PlayerID, int64) (character.Hero, error)
 	ListHeroesTx(context.Context, tx.Queryer, identity.PlayerID) ([]character.Hero, error)
 }

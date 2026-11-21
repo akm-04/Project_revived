@@ -1675,7 +1675,8 @@
     "*ObserveBattleTx"
    ],
    "arena": [
-    "*ObserveBattleTx"
+    "*ObserveBattleTx",
+    "*ObservePartnerMissionTx"
    ],
    "awakeningbattle": [
     "*ObserveBattleTx"
@@ -1701,11 +1702,18 @@
    "guildcampaign": [
     "*ObserveBattleTx"
    ],
+   "guildrental": [
+    "*ObservePartnerMissionTx"
+   ],
+   "guildtea": [
+    "*ObservePartnerMissionTx"
+   ],
    "illusion": [
     "*ObserveBattleTx"
    ],
    "march": [
-    "*ObserveBattleTx"
+    "*ObserveBattleTx",
+    "*ObservePartnerMissionTx"
    ],
    "memoir": [
     "*ObserveBattleTx"
@@ -2573,7 +2581,8 @@
     "*OverlayMID1"
    ],
    "librarylocal": [
-    "*ObserveBattleTx"
+    "*ObserveBattleTx",
+    "*ObservePartnerMissionTx"
    ],
    "playerroot": [
     "CanonicalPlayerIDs",
@@ -4254,6 +4263,9 @@
     "*SnapshotTx",
     "DefaultProfile"
    ],
+   "librarylocal": [
+    "*ObservePartnerMissionTx"
+   ],
    "store:contentstore": [
     "*ActiveRevision",
     "*HeroExpPolicyTx"
@@ -4305,6 +4317,9 @@
    ],
    "interface:guildtea.Heroes": [
     "*ListHeroesTx"
+   ],
+   "librarylocal": [
+    "*ObservePartnerMissionTx"
    ],
    "store:contentstore": [
     "*ActiveRevision",
@@ -4888,6 +4903,7 @@
     "*ListHeroesTx"
    ],
    "interface:librarylocal.HeroPort": [
+    "*FindHeroByPartnerIDTx",
     "*ListHeroesTx",
     "*LockHeroByPartnerIDTx",
     "*LockRootTx",
@@ -4979,7 +4995,8 @@
     "*OverlayMID1"
    ],
    "librarylocal": [
-    "*ObserveBattleTx"
+    "*ObserveBattleTx",
+    "*ObservePartnerMissionTx"
    ],
    "publicstats": [
     "*FreezeHeroTx",
