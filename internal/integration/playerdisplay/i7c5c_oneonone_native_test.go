@@ -381,6 +381,14 @@ func TestI7C5COneOnOneEntryMatchSettlementNative(t *testing.T) {
 	if pointsA != 4300+gain || pointsB != 4500-gain {
 		t.Fatalf("Elo points %d %d gain %d", pointsA, pointsB, gain)
 	}
+	// The client retry and the 60 s cooldown are server-time questions: pin the
+	// closure clock just inside the replay window, however long the first START took.
+	mostRecent, mostRecentFound, err := (oneononestore.Store{}).LatestMatchTx(ctx, pool, a.PlayerID)
+	if err != nil || !mostRecentFound {
+		t.Fatal("recorded match", err)
+	}
+	authoritativeTime := s.Timed.Binder.Time
+	s.Timed.Binder.Time = fixedTime{at: mostRecent.StartedAt.Add(time.Second)}
 	replay, err := startSettled(s, a, command)
 	if err != nil || replay.Win != result.Win || strings.Join(replay.ReportKeys, ",") != strings.Join(result.ReportKeys, ",") {
 		t.Fatal("identical START must return the recorded match", err)
@@ -402,6 +410,7 @@ func TestI7C5COneOnOneEntryMatchSettlementNative(t *testing.T) {
 	if _, err = s.Start(ctx, a, app.StartCommand{Formations: teamsOf(heroesA[3:], 3), Enemy: b.PlayerID}, op()); err == nil {
 		t.Fatal("junior cooldown must refuse the next START")
 	}
+	s.Timed.Binder.Time = authoritativeTime
 	if scalar(t, pool, `SELECT count(*) FROM one_on_one_matches WHERE attacker_id=$1 AND status='SETTLED'`, int64(a.PlayerID)) != 1 ||
 		scalar(t, pool, `SELECT count(*) FROM combat_attempts a JOIN one_on_one_rounds r USING(attempt_id) JOIN one_on_one_matches m USING(match_id) WHERE a.state='TERMINAL' AND m.attacker_id=$1`, int64(a.PlayerID)) != int64(len(result.Wins)) {
 		t.Fatal("match and rounds settled once")
