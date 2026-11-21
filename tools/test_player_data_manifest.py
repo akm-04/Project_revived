@@ -76,12 +76,13 @@ class PlayerDataManifestTests(unittest.TestCase):
         classes = {table: entry["data"] for table, entry in
                    json.loads(manifest_tool.CONTRACT_PATH.read_text())["tables"].items()
                    if table in ("players", "guild_campaign_copies")}
+        classes["guild_campaign_copies"]["references"] = ["holder_id", "ghost_ref"]
         catalog = manifest_tool.Catalog(
             ["players", "guild_campaign_copies"],
-            {"players": ["player_id"], "guild_campaign_copies": ["guild_id", "holder_id", "settled_by"]},
+            {"players": ["player_id"], "guild_campaign_copies": ["guild_id", "holder_id", "ghost_ref"]},
             {"guild_campaign_copies": [("holder_id", "players")]}, {}, {})
         problems = manifest_tool.check(catalog, classes, manifest_tool.build_manifest(catalog, classes))
-        self.assertTrue(any("settled_by" in problem for problem in problems))
+        self.assertIn("guild_campaign_copies.ghost_ref: player reference has no key to players", problems)
 
     def test_immutable_player_table_must_be_kept(self):
         catalog = fake_catalog()
