@@ -63,11 +63,6 @@ func (s Service) HeroElementInputsTx(ctx context.Context, q tx.Queryer, scope In
 	if e != nil {
 		return out, e
 	}
-	for _, at := range []time.Time{r.UpdatedAt, pop.UpdatedAt, h.UpdatedAt, f.UpdatedAt} {
-		if scope.ObservedAt.Before(at) {
-			return out, ErrStale
-		}
-	}
 	if e = validateHeroFacts(f.Facts, c, h); e != nil {
 		return out, e
 	}

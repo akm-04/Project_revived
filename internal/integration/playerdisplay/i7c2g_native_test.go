@@ -436,8 +436,13 @@ func TestI7C2GOverflowBackfillNoOverwriteAndStaleTime(t *testing.T) {
 		t.Fatal("semantic UUID used with different fingerprint", e)
 	}
 	exec(t, p, `UPDATE player_element_heroes SET updated_at=clock_timestamp()+interval '1 hour' WHERE player_id=$1 AND partner_id=1`, int64(a.PlayerID))
-	if _, e := s.HeroElementInputsTx(ctx, p, app.InputScope{Player: a.PlayerID, ContentRevision: rev, ObservedAt: time.Now()}, 1); !errors.Is(e, app.ErrStale) {
-		t.Fatal("stale observed instant", e)
+	at := time.Now().UTC()
+	inputs, e := s.HeroElementInputsTx(ctx, p, app.InputScope{Player: a.PlayerID, ContentRevision: rev, ObservedAt: at}, 1)
+	if e != nil {
+		t.Fatalf("backward observation refused: %v", e)
+	}
+	if !inputs.ObservedAt.Equal(at) {
+		t.Fatalf("read rewrote the observation: %v want %v", inputs.ObservedAt, at)
 	}
 }
 
