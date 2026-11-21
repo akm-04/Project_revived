@@ -17,6 +17,9 @@ const (
 	ReceiptClass = "I9_11C_SHOP"
 	// EntropyLabel is the LEAD_SEAMS_I9-11 V2 section 8 stock stream.
 	EntropyLabel = "shop.stock/v1"
+	// CourseBooksShopType is the Electives bookshop (shop_config row 29),
+	// reached from the Course window and never listed by MID 37.
+	CourseBooksShopType int64 = 29
 )
 
 var (

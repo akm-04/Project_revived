@@ -9,9 +9,13 @@ the source's implicit unreachable zero.
 """
 
 SHOP_TYPES = (
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 13, 14, 30, 35,
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 13, 14, 29, 30, 35,
     15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 28, 31, 33, 36,
 )
+
+# shop_config row 29 names courses_shop, which the client ships only as the
+# recovered object_book_shop table (100 identical rows, I7C-2E pinned).
+STOCK_TABLE_ALIASES = {"courses_shop": "object_book_shop"}
 
 # config.lua FuncShopMap: the permanent merchant functions gate the types whose
 # shop_config function_id is 0.
@@ -120,9 +124,10 @@ def build_shop_catalog(shop_config_rows, stock_rows_by_table, dropbox_rows, refr
     total_rows = 0
     for shop_type in SHOP_TYPES:
         row = shops_by_id[shop_type]
-        table = (row.get("shop_table") or "").strip()
+        source_table = (row.get("shop_table") or "").strip()
+        table = STOCK_TABLE_ALIASES.get(source_table, source_table)
         if table not in stock_rows_by_table:
-            raise error(f"shop type {shop_type} names missing stock table {table!r}")
+            raise error(f"shop type {shop_type} names missing stock table {source_table!r}")
         function_id = _int(row.get("function_id", ""), f"shop_config[{shop_type}].function_id", error)
         if function_id == 0:
             function_id = CONFIG_FUNCTION_BY_TYPE.get(shop_type, 0)

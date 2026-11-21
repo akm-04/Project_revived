@@ -668,7 +668,7 @@ func TestI911CCoreShopsCatalogDriftNative(t *testing.T) {
 		t.Fatalf("installed catalog does not qualify: %v", err)
 	}
 	counts := catalog.SourceRowCounts
-	if counts.StockRows != 1317 || counts.DropboxGroupsReferenced != 342 || counts.DropboxRowsReferenced != 2690 || counts.RefreshCostRows != 330 {
+	if counts.StockRows != 1417 || counts.DropboxGroupsReferenced != 348 || counts.DropboxRowsReferenced != 2696 || counts.RefreshCostRows != 330 {
 		t.Fatalf("installed catalog counts: %+v", counts)
 	}
 	groups := 0
