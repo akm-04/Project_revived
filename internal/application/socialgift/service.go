@@ -63,7 +63,7 @@ func (s Service) validate(actor identity.ActorContext) error {
 	}
 	return nil
 }
-func (s Service) read(c context.Context, op operation.Context, body func(context.Context, tx.Queryer) error) error {
+func (s Service) read(c context.Context, op operation.Context, body func(context.Context, tx.Tx) error) error {
 	_, e := s.Reads.Run(c, op, Profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error { return body(c, sc.Tx) })
 	return e
 }
@@ -88,7 +88,7 @@ func bind(op operation.Context, c Content) (operation.Context, error) {
 }
 func (s Service) admit(c context.Context, op operation.Context) (Content, operation.Context, error) {
 	var out Content
-	e := s.read(c, op, func(c context.Context, q tx.Queryer) error {
+	e := s.read(c, op, func(c context.Context, q tx.Tx) error {
 		rev, ok := op.Policies.Get("content")
 		if !ok {
 			var e error
@@ -211,7 +211,7 @@ func (s Service) epoch(c context.Context, t tx.Tx, pid identity.PlayerID, day st
 	e, err = NewEpoch(pid, used, op, at)
 	return e, false, used, err
 }
-func (s Service) sendProof(c context.Context, q tx.Queryer, actor identity.ActorContext, recipient identity.PlayerID, fp string, op operation.Context) (Result, bool, error) {
+func (s Service) sendProof(c context.Context, q tx.Tx, actor identity.ActorContext, recipient identity.PlayerID, fp string, op operation.Context) (Result, bool, error) {
 	v, ok, e := s.Store.ReadSend(c, q, op.ID)
 	if e != nil || !ok {
 		return Result{}, ok, e
@@ -235,7 +235,18 @@ func (s Service) sendProof(c context.Context, q tx.Queryer, actor identity.Actor
 	if e != nil || !exists || socialinbox.MatchGift(n, v.Descriptor()) != nil || n.Active != v.ClaimOperation.IsZero() {
 		return Result{}, false, ErrConflict
 	}
-	return Result{NoticeIDs: []socialinbox.NoticeID{v.NoticeID}, TransferIDs: []string{v.ID.String()}, Revision: v.RewardRevision}, true, nil
+	answer := Result{NoticeIDs: []socialinbox.NoticeID{v.NoticeID}, TransferIDs: []string{v.ID.String()}, Revision: v.RewardRevision}
+	// S28: a retried send must rebuild the same class-pair master_info.
+	if s.ClassInfo != nil {
+		projected, linked, e := s.ClassInfo.GiftBaseInfoTx(c, q, actor.PlayerID, recipient, op.StartedAt)
+		if e != nil {
+			return Result{}, false, e
+		}
+		if linked {
+			answer.MasterInfo = projected
+		}
+	}
+	return answer, true, nil
 }
 func (s Service) claimProof(c context.Context, q tx.Queryer, actor identity.ActorContext, fp string, op operation.Context) (Result, bool, error) {
 	v, ok, e := s.Store.ReadClaim(c, q, op.ID)
@@ -352,7 +363,7 @@ func (s Service) Send(c context.Context, actor identity.ActorContext, recipient 
 	}
 	var answer Result
 	var known bool
-	e = s.read(c, op, func(c context.Context, q tx.Queryer) error {
+	e = s.read(c, op, func(c context.Context, q tx.Tx) error {
 		var e error
 		answer, known, e = s.sendProof(c, q, actor, recipient, fp, op)
 		return e
@@ -522,7 +533,7 @@ func (s Service) Claim(c context.Context, actor identity.ActorContext, input []s
 	}
 	var answer Result
 	var known bool
-	e = s.read(c, op, func(c context.Context, q tx.Queryer) error {
+	e = s.read(c, op, func(c context.Context, q tx.Tx) error {
 		var e error
 		answer, known, e = s.claimProof(c, q, actor, fp, op)
 		if e != nil || known {
@@ -790,7 +801,7 @@ type resolution struct {
 func (r resolution) ResolveTimed(c context.Context, req gen.TimedResolutionRequest) (tx.Resolution, error) {
 	var result Result
 	var found bool
-	e := r.service.read(c, r.original, func(c context.Context, q tx.Queryer) error {
+	e := r.service.read(c, r.original, func(c context.Context, q tx.Tx) error {
 		var e error
 		if r.send {
 			result, found, e = r.service.sendProof(c, q, r.actor, r.recipient, r.fingerprint, r.original)

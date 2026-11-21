@@ -152,6 +152,7 @@
   ],
   "scenarios_naming": [],
   "unit": [
+   "send_proof_test.go",
    "types_test.go"
   ]
  }
