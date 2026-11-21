@@ -3046,7 +3046,7 @@
    "isolation": [
     {
      "file": "internal/application/characterhero/promotion_service.go",
-     "line": 505,
+     "line": 521,
      "value": "serializable"
     }
    ],
@@ -3054,26 +3054,33 @@
    "read_only": [
     {
      "file": "internal/application/characterhero/promotion_service.go",
-     "line": 505,
+     "line": 521,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/characterhero/promotion_service.go:154",
+    "internal/application/characterhero/promotion_service.go:156",
+    "internal/application/i5/mission_facts.go:129",
+    "internal/application/i5/service.go:1411",
     "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
      "file": "internal/application/characterhero/promotion_service.go",
-     "line": 505,
+     "line": 521,
      "value": "3"
     }
    ],
    "state_writes": [
+    "internal/adapters/postgres/adventurestore/store.go:54",
     "internal/adapters/postgres/characterstore/store.go:109",
     "internal/adapters/postgres/characterstore/store.go:263",
     "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
+    "internal/adapters/postgres/i5store/missions.go:14",
+    "internal/adapters/postgres/i5store/missions.go:45",
+    "internal/adapters/postgres/i5store/missions.go:57",
+    "internal/adapters/postgres/i5store/missions.go:65",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
     "internal/adapters/postgres/i5store/store.go:270",
@@ -3085,6 +3092,7 @@
     "internal/adapters/postgres/i5store/store.go:519",
     "internal/adapters/postgres/i5store/store.go:530",
     "internal/adapters/postgres/i5store/store.go:564",
+    "internal/adapters/postgres/i5store/store.go:772",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/store.go:205",
     "internal/adapters/postgres/spiritstore/store.go:43"
@@ -3095,7 +3103,7 @@
      "file": "internal/application/characterhero/promotion_service.go",
      "function": "Service.PowerUpHero",
      "isolation": "serializable",
-     "line": 505,
+     "line": 521,
      "read_only": "false",
      "retry": "3"
     }
@@ -3105,6 +3113,16 @@
      "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
      "line": 184,
      "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/book_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/book_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_book_input_catalogs WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
@@ -3175,6 +3193,16 @@
      "file": "internal/adapters/postgres/contentstore/hero_promotion_restoration.go",
      "line": 64,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('quality',quality,'numerator',numerator,'denominator',denominator) ORDER BY quality),'[]'::jsonb)::text FROM gxb_content_hero_promotion_restoration_fractions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/missions.go",
+     "line": 19,
+     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(d)-ARRAY['revision_id','payload_version'] ORDER BY objective_id),'[]'::jsonb)::text FROM gxb_content_objective_definitions d WHERE revision_id=$1 AND definition_revision='I9_MISSIONS_V1'"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/missions.go",
+     "line": 44,
+     "statement": "SELECT COALESCE(a.payload::text,''),COALESCE(r.manifest->'enabled_capabilities' ? 'MISSION_ACTIVITY_I9_4B',false) FROM gxb_content_revisions r LEFT JOIN content_mission_activity_catalogs a USING(revision_id) WHERE r.revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
@@ -3267,6 +3295,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 797,
+     "statement": "SELECT stock_family,strategy,accepted_fact_kind,target,reward_plan::text,huoyue FROM gxb_content_objective_definitions WHERE revision_id=$1 AND program_id=$2 AND objective_id=$3 AND definition_revision=$4"
+    },
+    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 120,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -3292,6 +3325,16 @@
      "statement": "SELECT payload::text,payload_version FROM mail_tuning"
     },
     {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 700,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',i.player_id,'program_id',i.program_id,'objective_id',i.objective_id,'generation_id',i.generation_id, 'definition_revision',i.definition_revision,'content_revision',COALESCE(i.content_revision,''),'legacy_definition',(i.content_revision IS NULL), 'progress',i.progress,'completed_at',i.completed_at,'claim_state',i.claim_state,'claimed_at',i.claimed_at,'state_version',i.state_version, 'family',COALESCE(d.stock_family,0),'strategy',COALESCE(d.strategy,''),'fact',COALESCE(d.accepted_fact_kind,''),'target',COALESCE(d.target,0), 'reward_plan',COALESCE(d.reward_plan,'{}'::jsonb),'huoyue',COALESCE(d.huoyue,0)) ORDER BY i.objective_id,i.generation_id),'[]'::jsonb)::text FROM locked i LEFT JOIN objective_definitions d ON i.content_revision IS NULL AND d.program_id=i.program_id AND d.objective_id=i.objective_id AND d.definition_revision=i.definition_revision"
+    },
+    {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 700,
+     "statement": "WITH locked AS MATERIALIZED ("
+    },
+    {
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 25,
      "statement": "SELECT EXISTS(SELECT 1 FROM ins) AS inserted"
@@ -3310,7 +3353,7 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/facet_chain.go:39",
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:37",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/promotion_service.go:525",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/promotion_service.go:541",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
@@ -4111,7 +4154,7 @@
    "isolation": [
     {
      "file": "internal/application/characterhero/promotion_service.go",
-     "line": 592,
+     "line": 629,
      "value": "serializable"
     }
    ],
@@ -4119,26 +4162,33 @@
    "read_only": [
     {
      "file": "internal/application/characterhero/promotion_service.go",
-     "line": 592,
+     "line": 629,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/characterhero/promotion_service.go:154",
+    "internal/application/characterhero/promotion_service.go:156",
+    "internal/application/i5/mission_facts.go:129",
+    "internal/application/i5/service.go:1411",
     "internal/application/i5/service.go:727"
    ],
    "retry": [
     {
      "file": "internal/application/characterhero/promotion_service.go",
-     "line": 592,
+     "line": 629,
      "value": "3"
     }
    ],
    "state_writes": [
+    "internal/adapters/postgres/adventurestore/store.go:54",
     "internal/adapters/postgres/characterstore/store.go:109",
     "internal/adapters/postgres/characterstore/store.go:263",
     "internal/adapters/postgres/characterstore/store.go:95",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
+    "internal/adapters/postgres/i5store/missions.go:14",
+    "internal/adapters/postgres/i5store/missions.go:45",
+    "internal/adapters/postgres/i5store/missions.go:57",
+    "internal/adapters/postgres/i5store/missions.go:65",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
     "internal/adapters/postgres/i5store/store.go:270",
@@ -4151,6 +4201,7 @@
     "internal/adapters/postgres/i5store/store.go:519",
     "internal/adapters/postgres/i5store/store.go:530",
     "internal/adapters/postgres/i5store/store.go:564",
+    "internal/adapters/postgres/i5store/store.go:772",
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/store.go:205",
     "internal/adapters/postgres/spiritstore/store.go:43"
@@ -4161,7 +4212,7 @@
      "file": "internal/application/characterhero/promotion_service.go",
      "function": "Service.OneClickJinjie",
      "isolation": "serializable",
-     "line": 592,
+     "line": 629,
      "read_only": "false",
      "retry": "3"
     }
@@ -4171,6 +4222,16 @@
      "file": "internal/adapters/postgres/commerceprivilegestore/store.go",
      "line": 184,
      "statement": "SELECT payload::text,payload_version FROM commerce_recharge_tuning"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/book_inputs.go",
+     "line": 25,
+     "statement": "SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/book_inputs.go",
+     "line": 25,
+     "statement": "SELECT payload::text FROM content_book_input_catalogs WHERE revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/dorm_inputs.go",
@@ -4261,6 +4322,16 @@
      "file": "internal/adapters/postgres/contentstore/hero_promotion_restoration.go",
      "line": 64,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object('quality',quality,'numerator',numerator,'denominator',denominator) ORDER BY quality),'[]'::jsonb)::text FROM gxb_content_hero_promotion_restoration_fractions WHERE revision_id=$1"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/missions.go",
+     "line": 19,
+     "statement": "SELECT COALESCE(jsonb_agg(to_jsonb(d)-ARRAY['revision_id','payload_version'] ORDER BY objective_id),'[]'::jsonb)::text FROM gxb_content_objective_definitions d WHERE revision_id=$1 AND definition_revision='I9_MISSIONS_V1'"
+    },
+    {
+     "file": "internal/adapters/postgres/contentstore/missions.go",
+     "line": 44,
+     "statement": "SELECT COALESCE(a.payload::text,''),COALESCE(r.manifest->'enabled_capabilities' ? 'MISSION_ACTIVITY_I9_4B',false) FROM gxb_content_revisions r LEFT JOIN content_mission_activity_catalogs a USING(revision_id) WHERE r.revision_id=$1"
     },
     {
      "file": "internal/adapters/postgres/contentstore/mode_catalog.go",
@@ -4358,6 +4429,11 @@
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'function_id',function_id,'gate_kind',gate_kind,'required_level',required_level, 'raw_open_value',raw_open_value,'source_fact_key',source_fact_key, 'announcement_capability',announcement_capability ) ORDER BY function_id),'[]'::jsonb)::text FROM gxb_content_function_gates WHERE revision_id=$1"
     },
     {
+     "file": "internal/adapters/postgres/contentstore/store.go",
+     "line": 797,
+     "statement": "SELECT stock_family,strategy,accepted_fact_kind,target,reward_plan::text,huoyue FROM gxb_content_objective_definitions WHERE revision_id=$1 AND program_id=$2 AND objective_id=$3 AND definition_revision=$4"
+    },
+    {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
      "line": 120,
      "statement": "SELECT a.account_id::text,a.account_uid,a.status,a.created_at,a.disabled_at,a.liveness_version, s.session_id::text,s.auth_profile,s.issued_at,s.absolute_expires_at,s.idle_timeout_seconds,s.last_activity_at,s.revoked_at,s.revocation_reason,s.liveness_version, c.context_id::text,c.logical_server_id,c.player_id,c.context_generation,c.created_at,c.ended_at,c.end_reason,c.liveness_version, gc.credential_generation,gc.derivation_key_id FROM gameplay_context_credentials gc JOIN gameplay_contexts c ON c.context_id=gc.context_id JOIN account_sessions s ON s.session_id=c.session_id JOIN accounts a ON a.account_id=c.account_id WHERE gc.digest=$1 AND gc.revoked_at IS NULL AND c.ended_at IS NULL"
@@ -4383,6 +4459,16 @@
      "statement": "SELECT payload::text,payload_version FROM mail_tuning"
     },
     {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 700,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',i.player_id,'program_id',i.program_id,'objective_id',i.objective_id,'generation_id',i.generation_id, 'definition_revision',i.definition_revision,'content_revision',COALESCE(i.content_revision,''),'legacy_definition',(i.content_revision IS NULL), 'progress',i.progress,'completed_at',i.completed_at,'claim_state',i.claim_state,'claimed_at',i.claimed_at,'state_version',i.state_version, 'family',COALESCE(d.stock_family,0),'strategy',COALESCE(d.strategy,''),'fact',COALESCE(d.accepted_fact_kind,''),'target',COALESCE(d.target,0), 'reward_plan',COALESCE(d.reward_plan,'{}'::jsonb),'huoyue',COALESCE(d.huoyue,0)) ORDER BY i.objective_id,i.generation_id),'[]'::jsonb)::text FROM locked i LEFT JOIN objective_definitions d ON i.content_revision IS NULL AND d.program_id=i.program_id AND d.objective_id=i.objective_id AND d.definition_revision=i.definition_revision"
+    },
+    {
+     "file": "internal/adapters/postgres/i5store/store.go",
+     "line": 700,
+     "statement": "WITH locked AS MATERIALIZED ("
+    },
+    {
      "file": "internal/adapters/postgres/kernelstore/store.go",
      "line": 25,
      "statement": "SELECT EXISTS(SELECT 1 FROM ins) AS inserted"
@@ -4401,7 +4487,7 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/facet_chain.go:39",
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:37",
-    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/promotion_service.go:612",
+    "FANOUT LockHeroByPartnerIDTx has 11 implementers, not followed: characterstore.CampaignHeroPort.LockHeroByPartnerIDTx, characterstore.CourseHeroPort.LockHeroByPartnerIDTx, characterstore.ElementHeroPort.LockHeroByPartnerIDTx, characterstore.EvolutionHeroPort.LockHeroByPartnerIDTx, characterstore.GodsTrialHeroPort.LockHeroByPartnerIDTx, characterstore.InscriptionHeroPort.LockHeroByPartnerIDTx, characterstore.LibraryHeroPort.LockHeroByPartnerIDTx, characterstore.MarchHeroPort.LockHeroByPartnerIDTx, characterstore.SpiritHeroPort.LockHeroByPartnerIDTx, characterstore.Store.LockHeroByPartnerIDTx, characterstore.WorkplaceHeroPort.LockHeroByPartnerIDTx at internal/application/characterhero/promotion_service.go:649",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70"
    ],
    "writes": "state"
@@ -7824,7 +7910,7 @@
    "isolation": [
     {
      "file": "internal/application/characterhero/service.go",
-     "line": 268,
+     "line": 269,
      "value": "serializable"
     }
    ],
@@ -7832,17 +7918,17 @@
    "read_only": [
     {
      "file": "internal/application/characterhero/service.go",
-     "line": 268,
+     "line": 269,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/characterhero/service.go:301"
+    "internal/application/characterhero/service.go:302"
    ],
    "retry": [
     {
      "file": "internal/application/characterhero/service.go",
-     "line": 268,
+     "line": 269,
      "value": "3"
     }
    ],
@@ -7855,7 +7941,7 @@
      "file": "internal/application/characterhero/service.go",
      "function": "Service.SaveBackpackSortType",
      "isolation": "serializable",
-     "line": 268,
+     "line": 269,
      "read_only": "false",
      "retry": "3"
     }
@@ -7909,7 +7995,7 @@
    "isolation": [
     {
      "file": "internal/application/characterhero/service.go",
-     "line": 322,
+     "line": 323,
      "value": "serializable"
     }
    ],
@@ -7917,17 +8003,17 @@
    "read_only": [
     {
      "file": "internal/application/characterhero/service.go",
-     "line": 322,
+     "line": 323,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/characterhero/service.go:355"
+    "internal/application/characterhero/service.go:356"
    ],
    "retry": [
     {
      "file": "internal/application/characterhero/service.go",
-     "line": 322,
+     "line": 323,
      "value": "3"
     }
    ],
@@ -7940,7 +8026,7 @@
      "file": "internal/application/characterhero/service.go",
      "function": "Service.SaveSortType",
      "isolation": "serializable",
-     "line": 322,
+     "line": 323,
      "read_only": "false",
      "retry": "3"
     }

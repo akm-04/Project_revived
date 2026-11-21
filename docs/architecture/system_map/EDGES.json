@@ -709,6 +709,7 @@
     "Run"
    ],
    "characterhero": [
+    "Bind",
     "DecisionAt",
     "EffectiveObservation",
     "Operation",
@@ -2936,6 +2937,7 @@
     "*LockBuyTx"
    ],
    "generation": [
+    "Bind",
     "DecisionAt",
     "EffectiveObservation",
     "Operation",

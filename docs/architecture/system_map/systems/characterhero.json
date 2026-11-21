@@ -206,6 +206,14 @@
  ],
  "facts": {
   "consumers": {
+   "HERO_PROMOTED": {
+    "missions": [
+     2
+    ],
+    "stages": [
+     "I9-11"
+    ]
+   },
    "HERO_SKILL_UPGRADED": {
     "missions": [
      107
@@ -216,6 +224,7 @@
    }
   },
   "emits": [
+   "HERO_PROMOTED",
    "HERO_SKILL_UPGRADED"
   ],
   "reads": []

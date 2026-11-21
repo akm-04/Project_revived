@@ -8,13 +8,13 @@ import (
 
 func TestShippedI9NineProducersActivateTheirPinnedRows(t *testing.T) {
 	m := MissionMaterializer{}
-	for _, kind := range []string{"GUILD_ACTIVITY", "TEA_PARTY_DONATED"} {
+	for _, kind := range []string{"GUILD_ACTIVITY", "TEA_PARTY_DONATED", "HERO_LENT"} {
 		d := objective.MissionDefinition{AcceptedFactKind: kind, Presentation: objective.MissionPresentation{DeferredUntil: "I9-9"}}
 		if !m.bindingAvailable(d) {
 			t.Fatalf("shipped I9-9 producer %s stayed deferred", kind)
 		}
 	}
-	for _, kind := range []string{"HERO_LENT", "LESSON_ATTENDED"} {
+	for _, kind := range []string{"LESSON_ATTENDED"} {
 		d := objective.MissionDefinition{AcceptedFactKind: kind, Presentation: objective.MissionPresentation{DeferredUntil: "I9-9"}}
 		if m.bindingAvailable(d) {
 			t.Fatalf("unshipped I9-9 producer %s was activated", kind)

@@ -665,6 +665,9 @@ func heroPromotionResponse(ctx context.Context, got apphero.HeroPromotionResult)
 	if got.ManaAfter != nil {
 		changes.Balance(ctx, "mana", *got.ManaAfter)
 	}
+	for key, value := range changes.RecordedMissions(ctx) {
+		body[key] = value
+	}
 	return body
 }
 
