@@ -874,10 +874,13 @@ func (s Mode) reward(c context.Context, sc gen.TimedScope, a identity.ActorConte
 	}
 	// The assist choice exists only on a Normal first clear (MapDetailWindow
 	// assist story gate); the stones belong to the chosen partner.
+	// The row is a plain item award (owner ruling 2026-11-21): a to_stone row
+	// made the client open the summon window for a girl who never joins
+	// (SelfPlayer.lua:4350-4358); the official server showed plain items.
 	if assistPartner != 0 && outcome.FirstClear {
 		if itemID, count, ok := node.AssistStones(assistPartner); ok {
 			lines = append(lines, grant.Line{Kind: grant.StackItem, ItemID: itemID, Amount: count})
-			body["assist_awards"] = []any{map[string]any{"table_id": itemID, "item_num": count, "to_stone": true}}
+			body["assist_awards"] = []any{map[string]any{"table_id": itemID, "item_num": count}}
 		}
 	}
 	profile, found, err := s.Directory.ProfileTx(c, sc.Tx, a.PlayerID)
