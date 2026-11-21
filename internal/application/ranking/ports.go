@@ -13,6 +13,7 @@ import (
 	"gxb.local/backend/v2/internal/application/publicprofile"
 	dorm "gxb.local/backend/v2/internal/domain/dormhouse"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/occult"
 	"gxb.local/backend/v2/internal/domain/player"
 	d "gxb.local/backend/v2/internal/domain/ranking"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -77,6 +78,17 @@ type TopForceFacts interface {
 	ReadTopForceMetricScopeTx(context.Context, tx.Scope, publicprofile.MetricRequest) (publicprofile.MetricObservation, error)
 }
 
+// BloodAwakenFacts is CharacterHero's raw-awakening count port for subtype 14.
+type BloodAwakenFacts interface {
+	ReadBloodAwakenMetricScopeTx(context.Context, tx.Scope, publicprofile.MetricRequest) (publicprofile.MetricObservation, error)
+}
+
+// OccultFacts is Occult's typed best-chapter-score port for subtypes 28, 29, 35,
+// 36, 40 and 41. It wraps the owner's score read; Ranking never runs its SQL.
+type OccultFacts interface {
+	ChapterBestFactTx(context.Context, tx.Queryer, identity.PlayerID, int64, string, time.Time) (occult.ChapterScoreFact, bool, error)
+}
+
 type Service struct {
 	Timed       gen.TimedRunner
 	Fresh       tx.Queryer
@@ -85,6 +97,8 @@ type Service struct {
 	Metrics     publicprofile.ScopedMetricReader
 	Comfort     ComfortFacts
 	TopForce    TopForceFacts
+	BloodAwaken BloodAwakenFacts
+	Occult      OccultFacts
 	Content     Content
 	Fence       Fence
 	Players     playerroot.TxLocker

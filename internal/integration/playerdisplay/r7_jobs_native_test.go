@@ -15,8 +15,10 @@ import (
 	"time"
 
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
+	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/dormstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
+	"gxb.local/backend/v2/internal/adapters/postgres/occultstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/rankingstore"
 	appgen "gxb.local/backend/v2/internal/application/generation"
@@ -35,10 +37,13 @@ func (f r7FixedTime) Now(context.Context) (time.Time, error) { return f.at.UTC()
 func r7JobService(p *pg.Pool) app.Service {
 	metrics := countingMetrics(p, nil)
 	metrics.Force = rawBirthStats(p)
+	metrics.Awakenings = characterstore.RawAwakeningStore{}
 	service := rankingService(p, p)
 	service.Metrics = metrics
 	service.TopForce = metrics
+	service.BloodAwaken = metrics
 	service.Comfort = dormstore.Store{Queryer: p}
+	service.Occult = occultstore.Store{}
 	service.Presence = nil
 	service.Login = nil
 	return service

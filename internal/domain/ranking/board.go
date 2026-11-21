@@ -28,6 +28,11 @@ const AwakenCountPolicy = "I9_10D_PRIVATE_AWAKEN_COUNT_SERVER_RANKING_V1"
 const TopForcePolicy = "I9_10E_PRIVATE_TOP_FIVE_FORCE_SERVER_RANKING_V1"
 const TopForceSourcePolicy = "I9_10E_PRIVATE_TOP_FIVE_FORCE_V1"
 const TopForceSemantics = "CURRENT_SUM_TOP_FIVE_OWNED_HERO_PUBLIC_FORCE_SELF_V1"
+const BloodAwakenPolicy = "I9_12_PRIVATE_BLOOD_AWAKEN_COUNT_RANKING_V1"
+const BloodAwakenSourcePolicy = "I9_12_PRIVATE_BLOOD_AWAKEN_COUNT_V1"
+const BloodAwakenSemantics = "CURRENT_COUNT_OWNED_HEROES_RAW_AWAKENING_COMPLETE_V1"
+const OccultChapterSourcePolicy = "I9_12_PRIVATE_OCCULT_CHAPTER_BEST_V1"
+const OccultChapterSemantics = "CURRENT_BEST_OCCULT_CHAPTER_SCORE_V1"
 const RosterMetricSourcePolicy = "C4C_PRIVATE_CURRENT_ROSTER_V1"
 const RosterMetricSourceSemantics = "CURRENT_DISTINCT_ORIGIN_HERO_PET_STARS_BEFORE_AWAKEN_V1"
 const ServerCohort = "I4_SERVER_ALL_PLAYERS_V1"
@@ -48,6 +53,9 @@ type Board struct {
 	RowValue string
 	// Limit truncates the published top entries; zero publishes the whole cohort.
 	Limit int64
+	// ChapterID selects the Occult chapter whose best score this board orders;
+	// zero marks a board that is not an Occult chapter.
+	ChapterID int64
 }
 
 var GirlsBoard = Board{Name: "girls", Policy: GirlsPolicy, SourceOwner: "CharacterHero", SourcePolicy: "C4C_PRIVATE_CURRENT_ROSTER_V1", SourceSemantics: "CURRENT_DISTINCT_ORIGIN_HERO_PET_STARS_BEFORE_AWAKEN_V1", FieldID: 1001, SubType: 37, TitleType: 8, TitledRanks: 20, Titles: []int64{100059, 100060, 100061, 100062}, RowValue: "score"}
@@ -75,7 +83,28 @@ var AwakenCountBoard = Board{Name: "awaken-count", Policy: AwakenCountPolicy, So
 // docs/i9/I9_10E_TOP_FIVE_FORCE_POLICY_V1.json.
 var TopForceBoard = Board{Name: "top-five-force", Policy: TopForcePolicy, SourceOwner: "CharacterHero", SourcePolicy: TopForceSourcePolicy, SourceSemantics: TopForceSemantics, FieldID: 1012, SubType: 9, RowValue: "info_val"}
 
-var Boards = []Board{GirlsBoard, AchievementPointBoard, SkinsBoard, DormComfortBoard, StarCountBoard, AwakenCountBoard, TopForceBoard}
+// BloodAwakenBoard is rank 5003 "Blood Awaken" (subtype 14): the count of owned
+// heroes whose raw awakening is complete. It grants no titles.
+var BloodAwakenBoard = Board{Name: "blood-awaken-count", Policy: BloodAwakenPolicy, SourceOwner: "CharacterHero", SourcePolicy: BloodAwakenSourcePolicy, SourceSemantics: BloodAwakenSemantics, FieldID: 1013, SubType: 14, RowValue: "info_val"}
+
+// Sorcery War subtypes 28, 29, 35, 36, 40, 41 order Occult chapters 1-6 in rank
+// table order. 40 (chapter 5) and 41 (chapter 6) are order-only: the client
+// names no chapter for them, so that mapping is UNKNOWN. No titles.
+var OccultChapterBoards = []Board{
+	occultChapterBoard(1, 28),
+	occultChapterBoard(2, 29),
+	occultChapterBoard(3, 35),
+	occultChapterBoard(4, 36),
+	occultChapterBoard(5, 40),
+	occultChapterBoard(6, 41),
+}
+
+func occultChapterBoard(chapter, subtype int64) Board {
+	suffix := strconv.FormatInt(chapter, 10)
+	return Board{Name: "occult-chapter-" + suffix, Policy: "I9_12_PRIVATE_OCCULT_CHAPTER_" + suffix + "_BEST_RANKING_V1", SourceOwner: "Occult", SourcePolicy: OccultChapterSourcePolicy, SourceSemantics: OccultChapterSemantics, FieldID: 3000 + chapter, SubType: subtype, ChapterID: chapter, RowValue: "point"}
+}
+
+var Boards = append([]Board{GirlsBoard, AchievementPointBoard, SkinsBoard, DormComfortBoard, StarCountBoard, AwakenCountBoard, TopForceBoard, BloodAwakenBoard}, OccultChapterBoards...)
 
 func BoardOf(policy string) (Board, bool) {
 	for _, b := range Boards {
@@ -97,7 +126,7 @@ func BoardOfSubType(subtype int64) (Board, bool) {
 // ServedEmptySubTypes are the client's visible rank tabs whose owner is not
 // delivered. They answer a shaped empty rank_list and never a score (N8 user
 // ruling 2026-11-16); no score source exists for them.
-var ServedEmptySubTypes = []int64{5, 13, 14, 28, 29, 35, 36, 40, 41}
+var ServedEmptySubTypes = []int64{5, 13}
 
 func IsServedEmptySubType(subtype int64) bool {
 	for _, served := range ServedEmptySubTypes {

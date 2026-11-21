@@ -140,6 +140,7 @@
   "internal/adapters/postgres/i4store",
   "internal/adapters/postgres/i5store",
   "internal/adapters/postgres/kernelstore",
+  "internal/adapters/postgres/occultstore",
   "internal/adapters/postgres/presencestore",
   "internal/adapters/postgres/rankingstore"
  ],
@@ -161,6 +162,7 @@
    "gxb_content_activation",
    "gxb_content_revisions",
    "gxb_operation_receipts",
+   "occult_players",
    "player_cosmetic_entitlements",
    "player_directory_profiles",
    "player_dorm_heroes",

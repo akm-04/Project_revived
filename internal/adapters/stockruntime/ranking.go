@@ -205,7 +205,11 @@ func (d RankingDispatcher) Dispatch(c context.Context, r httpedge.DispatchReques
 	}
 	mine := map[string]any{}
 	if read.MyRank > 0 {
-		mine = map[string]any{"rank": read.MyRank, "score": read.MyScore}
+		mineKey := "score"
+		if board.RowValue == "point" {
+			mineKey = "point"
+		}
+		mine = map[string]any{"rank": read.MyRank, mineKey: read.MyScore}
 	}
 	body := projection.BoardList(board.SubType, rows, mine)
 	body["error_code"] = int64(0)

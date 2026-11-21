@@ -107617,7 +107617,7 @@
    "state_writes": [
     "internal/adapters/postgres/i5store/store.go:270",
     "internal/adapters/postgres/occultstore/store.go:22",
-    "internal/adapters/postgres/occultstore/store.go:69",
+    "internal/adapters/postgres/occultstore/store.go:79",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:93"
    ],
@@ -107734,7 +107734,7 @@
    "state_writes": [
     "internal/adapters/postgres/i5store/store.go:270",
     "internal/adapters/postgres/occultstore/store.go:22",
-    "internal/adapters/postgres/occultstore/store.go:69",
+    "internal/adapters/postgres/occultstore/store.go:79",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:93"
    ],
@@ -108014,7 +108014,7 @@
    "state_writes": [
     "internal/adapters/postgres/i5store/store.go:270",
     "internal/adapters/postgres/occultstore/store.go:22",
-    "internal/adapters/postgres/occultstore/store.go:69",
+    "internal/adapters/postgres/occultstore/store.go:79",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:71",
     "internal/adapters/postgres/sharedroomstore/store.go:93"
@@ -108617,7 +108617,7 @@
    ],
    "state_writes": [
     "internal/adapters/postgres/occultstore/store.go:22",
-    "internal/adapters/postgres/occultstore/store.go:74",
+    "internal/adapters/postgres/occultstore/store.go:84",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:93"
    ],
@@ -109426,11 +109426,11 @@
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:205",
-    "internal/adapters/postgres/occultstore/store.go:113",
+    "internal/adapters/postgres/occultstore/store.go:123",
     "internal/adapters/postgres/occultstore/store.go:22",
-    "internal/adapters/postgres/occultstore/store.go:55",
-    "internal/adapters/postgres/occultstore/store.go:74",
-    "internal/adapters/postgres/occultstore/store.go:79",
+    "internal/adapters/postgres/occultstore/store.go:65",
+    "internal/adapters/postgres/occultstore/store.go:84",
+    "internal/adapters/postgres/occultstore/store.go:89",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:93",
     "internal/adapters/postgres/spiritstore/store.go:43"
@@ -109860,7 +109860,7 @@
     },
     {
      "file": "internal/adapters/postgres/occultstore/store.go",
-     "line": 86,
+     "line": 96,
      "statement": "SELECT content::text FROM occult_reports WHERE report_id=$1 AND logical_server_id=$2 AND $3=ANY(member_ids) AND expires_at>$4"
     },
     {
@@ -109970,10 +109970,10 @@
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:205",
-    "internal/adapters/postgres/occultstore/store.go:113",
+    "internal/adapters/postgres/occultstore/store.go:123",
     "internal/adapters/postgres/occultstore/store.go:22",
-    "internal/adapters/postgres/occultstore/store.go:55",
-    "internal/adapters/postgres/occultstore/store.go:74",
+    "internal/adapters/postgres/occultstore/store.go:65",
+    "internal/adapters/postgres/occultstore/store.go:84",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:93",
     "internal/adapters/postgres/spiritstore/store.go:43"
@@ -110508,11 +110508,11 @@
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:205",
-    "internal/adapters/postgres/occultstore/store.go:113",
+    "internal/adapters/postgres/occultstore/store.go:123",
     "internal/adapters/postgres/occultstore/store.go:22",
-    "internal/adapters/postgres/occultstore/store.go:55",
-    "internal/adapters/postgres/occultstore/store.go:74",
-    "internal/adapters/postgres/occultstore/store.go:79",
+    "internal/adapters/postgres/occultstore/store.go:65",
+    "internal/adapters/postgres/occultstore/store.go:84",
+    "internal/adapters/postgres/occultstore/store.go:89",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:93",
     "internal/adapters/postgres/spiritstore/store.go:43"
@@ -110942,7 +110942,7 @@
     },
     {
      "file": "internal/adapters/postgres/occultstore/store.go",
-     "line": 86,
+     "line": 96,
      "statement": "SELECT content::text FROM occult_reports WHERE report_id=$1 AND logical_server_id=$2 AND $3=ANY(member_ids) AND expires_at>$4"
     },
     {
@@ -111083,11 +111083,11 @@
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:205",
-    "internal/adapters/postgres/occultstore/store.go:113",
+    "internal/adapters/postgres/occultstore/store.go:123",
     "internal/adapters/postgres/occultstore/store.go:22",
-    "internal/adapters/postgres/occultstore/store.go:55",
-    "internal/adapters/postgres/occultstore/store.go:74",
-    "internal/adapters/postgres/occultstore/store.go:79",
+    "internal/adapters/postgres/occultstore/store.go:65",
+    "internal/adapters/postgres/occultstore/store.go:84",
+    "internal/adapters/postgres/occultstore/store.go:89",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:93",
     "internal/adapters/postgres/spiritstore/store.go:43"
@@ -111517,7 +111517,7 @@
     },
     {
      "file": "internal/adapters/postgres/occultstore/store.go",
-     "line": 86,
+     "line": 96,
      "statement": "SELECT content::text FROM occult_reports WHERE report_id=$1 AND logical_server_id=$2 AND $3=ANY(member_ids) AND expires_at>$4"
     },
     {
@@ -111761,11 +111761,11 @@
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:205",
-    "internal/adapters/postgres/occultstore/store.go:113",
+    "internal/adapters/postgres/occultstore/store.go:123",
     "internal/adapters/postgres/occultstore/store.go:22",
-    "internal/adapters/postgres/occultstore/store.go:55",
-    "internal/adapters/postgres/occultstore/store.go:74",
-    "internal/adapters/postgres/occultstore/store.go:79",
+    "internal/adapters/postgres/occultstore/store.go:65",
+    "internal/adapters/postgres/occultstore/store.go:84",
+    "internal/adapters/postgres/occultstore/store.go:89",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:93",
     "internal/adapters/postgres/spiritstore/store.go:43"
@@ -112195,7 +112195,7 @@
     },
     {
      "file": "internal/adapters/postgres/occultstore/store.go",
-     "line": 86,
+     "line": 96,
      "statement": "SELECT content::text FROM occult_reports WHERE report_id=$1 AND logical_server_id=$2 AND $3=ANY(member_ids) AND expires_at>$4"
     },
     {
@@ -112336,11 +112336,11 @@
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:205",
-    "internal/adapters/postgres/occultstore/store.go:113",
+    "internal/adapters/postgres/occultstore/store.go:123",
     "internal/adapters/postgres/occultstore/store.go:22",
-    "internal/adapters/postgres/occultstore/store.go:55",
-    "internal/adapters/postgres/occultstore/store.go:74",
-    "internal/adapters/postgres/occultstore/store.go:79",
+    "internal/adapters/postgres/occultstore/store.go:65",
+    "internal/adapters/postgres/occultstore/store.go:84",
+    "internal/adapters/postgres/occultstore/store.go:89",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:93",
     "internal/adapters/postgres/spiritstore/store.go:43"
@@ -112770,7 +112770,7 @@
     },
     {
      "file": "internal/adapters/postgres/occultstore/store.go",
-     "line": 86,
+     "line": 96,
      "statement": "SELECT content::text FROM occult_reports WHERE report_id=$1 AND logical_server_id=$2 AND $3=ANY(member_ids) AND expires_at>$4"
     },
     {
@@ -112911,11 +112911,11 @@
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:205",
-    "internal/adapters/postgres/occultstore/store.go:113",
+    "internal/adapters/postgres/occultstore/store.go:123",
     "internal/adapters/postgres/occultstore/store.go:22",
-    "internal/adapters/postgres/occultstore/store.go:55",
-    "internal/adapters/postgres/occultstore/store.go:74",
-    "internal/adapters/postgres/occultstore/store.go:79",
+    "internal/adapters/postgres/occultstore/store.go:65",
+    "internal/adapters/postgres/occultstore/store.go:84",
+    "internal/adapters/postgres/occultstore/store.go:89",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:93",
     "internal/adapters/postgres/spiritstore/store.go:43"
@@ -113345,7 +113345,7 @@
     },
     {
      "file": "internal/adapters/postgres/occultstore/store.go",
-     "line": 86,
+     "line": 96,
      "statement": "SELECT content::text FROM occult_reports WHERE report_id=$1 AND logical_server_id=$2 AND $3=ANY(member_ids) AND expires_at>$4"
     },
     {
@@ -113486,11 +113486,11 @@
     "internal/adapters/postgres/librarystore/logs.go:32",
     "internal/adapters/postgres/librarystore/missions.go:12",
     "internal/adapters/postgres/librarystore/store.go:205",
-    "internal/adapters/postgres/occultstore/store.go:113",
+    "internal/adapters/postgres/occultstore/store.go:123",
     "internal/adapters/postgres/occultstore/store.go:22",
-    "internal/adapters/postgres/occultstore/store.go:55",
-    "internal/adapters/postgres/occultstore/store.go:74",
-    "internal/adapters/postgres/occultstore/store.go:79",
+    "internal/adapters/postgres/occultstore/store.go:65",
+    "internal/adapters/postgres/occultstore/store.go:84",
+    "internal/adapters/postgres/occultstore/store.go:89",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:93",
     "internal/adapters/postgres/spiritstore/store.go:43"
@@ -113920,7 +113920,7 @@
     },
     {
      "file": "internal/adapters/postgres/occultstore/store.go",
-     "line": 86,
+     "line": 96,
      "statement": "SELECT content::text FROM occult_reports WHERE report_id=$1 AND logical_server_id=$2 AND $3=ANY(member_ids) AND expires_at>$4"
     },
     {
@@ -113992,7 +113992,7 @@
    "state_writes": [
     "internal/adapters/postgres/i5store/store.go:270",
     "internal/adapters/postgres/occultstore/store.go:22",
-    "internal/adapters/postgres/occultstore/store.go:69",
+    "internal/adapters/postgres/occultstore/store.go:79",
     "internal/adapters/postgres/sharedroomstore/store.go:144",
     "internal/adapters/postgres/sharedroomstore/store.go:93"
    ],
@@ -114176,7 +114176,7 @@
     },
     {
      "file": "internal/adapters/postgres/occultstore/store.go",
-     "line": 86,
+     "line": 96,
      "statement": "SELECT content::text FROM occult_reports WHERE report_id=$1 AND logical_server_id=$2 AND $3=ANY(member_ids) AND expires_at>$4"
     },
     {

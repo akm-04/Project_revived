@@ -25,6 +25,8 @@ type CanonicalMetricProvider struct {
 	Force    ForceReader
 	Display  DisplayCounts
 	Trophies TrophyCounts
+	// Awakenings serves the subtype 14 blood-awaken count board.
+	Awakenings RawAwakeningReader
 }
 
 // Unscoped consumers retain only the historically qualified creation metric.
