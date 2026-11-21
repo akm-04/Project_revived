@@ -93,7 +93,8 @@ func rentalStarCaps(p guildrentalpolicy.Policy) map[int64]int64 {
 }
 
 func canonicalGuildRental(p *pg.Pool, r tx.Runner, content contentstore.Store, guildDB guildstore.Store, i5db i5store.Store, i5svc i5.Service,
-	privileges i5.PrivilegeSnapshotProvider, stats publicstats.Service, costs i5.MaterialCostDebiter, binding guildrental.Policy) (guildrental.Service, guildrental.Reader) {
+	privileges i5.PrivilegeSnapshotProvider, stats publicstats.Service, costs i5.MaterialCostDebiter, binding guildrental.Policy,
+	partnerMissions guildrental.PartnerMissions) (guildrental.Service, guildrental.Reader) {
 	now := func(c context.Context, q tx.Queryer) (time.Time, error) {
 		return (pg.AuthoritativeTime{Queryer: q}).Now(c)
 	}
@@ -102,7 +103,7 @@ func canonicalGuildRental(p *pg.Pool, r tx.Runner, content contentstore.Store, g
 		Levels: guildrentalread.Levels{}, Workplace: workplace.Mode{Store: workplacestore.Store{}},
 		Privileges: privileges, Values: i5svc, Costs: costs,
 		Facts: i5.ObjectiveFacts{Owner: i5svc, Open: i5db}, Mail: i5.SettlementMail{Store: i5db},
-		Fence: i5db, Players: i4store.PlayerRootLocker{}, Content: content, Policy: binding,
+		Fence: i5db, Players: i4store.PlayerRootLocker{}, Content: content, Policy: binding, PartnerMissions: partnerMissions,
 	}
 	reads := guildrental.Reader{Runner: r, Store: guildDB, Characters: guildrentalread.Characters{Content: content}, Profiles: guildrentalread.Profiles{},
 		Levels: guildrentalread.Levels{}, Mana: guildrentalread.Mana{}, Privileges: privileges,

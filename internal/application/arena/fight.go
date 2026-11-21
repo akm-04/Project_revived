@@ -19,6 +19,7 @@ import (
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
+	lib "gxb.local/backend/v2/internal/domain/librarylocal"
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -651,7 +652,53 @@ func (s Service) settleMatchTx(c context.Context, sc gen.TimedScope, id ids.UUID
 	if !ranked {
 		return nil
 	}
-	return s.BattleCounts.ObserveBattleTx(c, sc.Tx, m.Defender, defenderPartners, at)
+	if err = s.BattleCounts.ObserveBattleTx(c, sc.Tx, m.Defender, defenderPartners, at); err != nil {
+		return err
+	}
+	return s.observePartnerMissionKills(c, sc.Tx, m, outcome.Win, report, at)
+}
+
+// observePartnerMissionKills advances mission 1006 for a ranked match: an owned
+// girl with kills > 0 whose table id also fought on the other side. The report
+// pairs no kill with its victim, so equal table id across sides is the evidenced
+// approximation (UNKNOWN attribution).
+func (s Service) observePartnerMissionKills(c context.Context, t tx.Tx, m d.Match, attackerWon bool, report []byte, at time.Time) error {
+	attackerUses, err := cd.Usage(report, "A", attackerWon)
+	if err != nil {
+		return err
+	}
+	defenderUses, err := cd.Usage(report, "B", !attackerWon)
+	if err != nil {
+		return err
+	}
+	for _, player := range sortedPlayers(m.Attacker, m.Defender) {
+		uses, opposite := attackerUses, defenderUses
+		if player == m.Defender {
+			uses, opposite = defenderUses, attackerUses
+		}
+		for _, partnerID := range missionKillPartners(uses, opposite) {
+			if err = s.PartnerMissions.ObservePartnerMissionTx(c, t, player, partnerID, lib.PvPKillMissionID, at); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// missionKillPartners lists the side's partners that killed at least one enemy
+// and whose table id also appears on the opposite side.
+func missionKillPartners(uses, opposite []cd.PartnerUse) []int64 {
+	oppositeTables := make(map[int64]bool, len(opposite))
+	for _, use := range opposite {
+		oppositeTables[use.TableID] = true
+	}
+	partners := []int64{}
+	for _, use := range uses {
+		if use.Kills > 0 && oppositeTables[use.TableID] {
+			partners = append(partners, use.PartnerID)
+		}
+	}
+	return partners
 }
 
 // reportPartners lists one side's fighting partner ids from the persisted battle report.

@@ -128,7 +128,15 @@ func startChoiceService(at time.Time, room d.TournamentRoom, combat *startChoice
 		Receipts:     startChoiceReceipts{},
 		ReceiptRead:  startChoiceReceiptRead{},
 		BattleCounts: startChoiceBattleCounts{},
+
+		PartnerMissions: startChoicePartnerMissions{},
 	}
+}
+
+type startChoicePartnerMissions struct{}
+
+func (startChoicePartnerMissions) ObservePartnerMissionTx(context.Context, tx.Tx, identity.PlayerID, int64, int64, time.Time) error {
+	return nil
 }
 
 type startChoiceBattleCounts struct{}

@@ -360,7 +360,7 @@ func teaService(p *pg.Pool) guildtea.Service {
 	return guildtea.Service{Runner: tx.Runner{DB: p}, Store: guildstore.Store{Queryer: p}, Directory: i4store.PlayerDirectoryReader{},
 		Content: contentstore.Store{Queryer: p}, Heroes: characterstore.Store{Queryer: p}, Inventory: values,
 		Values: owner, Costs: appi5.MaterialCostDebiter{Store: values, Content: contentstore.Store{Queryer: p}}, Facts: appi5.ObjectiveFacts{Owner: owner, Open: values},
-		Fence: values, Players: i4store.PlayerRootLocker{}, Policy: guildtea.Policy{RequestsPerDay: teaPolicy.Policy.RequestsPerDay, NormalNeed: teaPolicy.Policy.NormalNeed, SXNeed: teaPolicy.Policy.SXNeed, DonorFriendMedalPerScroll: teaPolicy.Policy.DonorFriendMedalPerScroll}}
+		Fence: values, Players: i4store.PlayerRootLocker{}, Policy: guildtea.Policy{RequestsPerDay: teaPolicy.Policy.RequestsPerDay, NormalNeed: teaPolicy.Policy.NormalNeed, SXNeed: teaPolicy.Policy.SXNeed, DonorFriendMedalPerScroll: teaPolicy.Policy.DonorFriendMedalPerScroll}, PartnerMissions: libraryService(p, p)}
 }
 
 func scrollForHero(t *testing.T, p *pg.Pool, revision string, table int64) int64 {

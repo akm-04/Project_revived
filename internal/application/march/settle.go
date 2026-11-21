@@ -4,16 +4,19 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
+	"strconv"
+
 	appcombat "gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
+	lib "gxb.local/backend/v2/internal/domain/librarylocal"
 	d "gxb.local/backend/v2/internal/domain/march"
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/operation"
-	"strconv"
 )
 
 func (s Mode) Result(c context.Context, a identity.ActorContext, q Result, op operation.Context) (map[string]any, error) {
@@ -93,12 +96,34 @@ func (s Mode) Result(c context.Context, a identity.ActorContext, q Result, op op
 		if err = s.BattleCounts.ObserveBattleTx(c, sc.Tx, a.PlayerID, q.Report.Formation, sc.Operation.DecisionAt()); err != nil {
 			return nil, err
 		}
+		// A-206 R7: each owned girl in a winning Champion formation advances
+		// mission 1004. Rented girls never appear in the frozen formation.
+		if q.Report.Win {
+			for _, partnerID := range championMissionPartners(q.Report.Formation) {
+				if err = s.PartnerMissions.ObservePartnerMissionTx(c, sc.Tx, a.PlayerID, partnerID, lib.ChampionMissionID, sc.Operation.DecisionAt()); err != nil {
+					return nil, err
+				}
+			}
+		}
 		return out, nil
 	})
 	if err == nil && (refused || refusalReply(out)) {
 		err = fmt.Errorf("%w: summary rejected or no open attempt", d.ErrRefused)
 	}
 	return out, err
+}
+
+// championMissionPartners lists the formation's owned girl ids in ascending
+// order, skipping empty slots.
+func championMissionPartners(formation []int64) []int64 {
+	partners := make([]int64, 0, len(formation))
+	for _, partnerID := range formation {
+		if partnerID > 0 {
+			partners = append(partners, partnerID)
+		}
+	}
+	slices.Sort(partners)
+	return partners
 }
 
 // refusalReply recognises a committed refusal replayed from its receipt; 30005

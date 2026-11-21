@@ -13,6 +13,7 @@ import (
 	d "gxb.local/backend/v2/internal/domain/arena"
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
+	lib "gxb.local/backend/v2/internal/domain/librarylocal"
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -272,6 +273,26 @@ func (service Service) ResolveTournamentCombat(requestContext context.Context, i
 			for side, player := range current.Selection.Players {
 				if err := service.BattleCounts.ObserveBattleTx(requestContext, scope.Tx, player, current.Selection.Teams[side][round].Heroes, at); err != nil {
 					return err
+				}
+			}
+		}
+		// A-206 R7: each friend-fight participant advances mission 1002 for the
+		// girls that fought the duel, in ascending player id order.
+		if current.IsFriendFight() {
+			for _, player := range sortedPlayers(current.Selection.Players[0], current.Selection.Players[1]) {
+				side := 0
+				if player == current.Selection.Players[1] {
+					side = 1
+				}
+				for _, round := range settledRounds {
+					for _, partnerID := range current.Selection.Teams[side][round].Heroes {
+						if partnerID <= 0 {
+							continue
+						}
+						if err := service.PartnerMissions.ObservePartnerMissionTx(requestContext, scope.Tx, player, partnerID, lib.FriendFightMissionID, at); err != nil {
+							return err
+						}
+					}
 				}
 			}
 		}

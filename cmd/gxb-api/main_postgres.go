@@ -377,7 +377,7 @@ func main() {
 	}
 	guildTeaSvc := appguildtea.Service{Runner: runner, Store: guildDB, Directory: i4store.PlayerDirectoryReader{}, Content: contentDB,
 		Heroes: heroDB, Inventory: i5db, Values: i5svc, Costs: heroMaterialCosts, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db},
-		Fence: i5db, Players: i4store.PlayerRootLocker{}, Policy: appguildtea.Policy{RequestsPerDay: teaPolicy.Policy.RequestsPerDay, NormalNeed: teaPolicy.Policy.NormalNeed, SXNeed: teaPolicy.Policy.SXNeed, DonorFriendMedalPerScroll: teaPolicy.Policy.DonorFriendMedalPerScroll}}
+		Fence: i5db, Players: i4store.PlayerRootLocker{}, Policy: appguildtea.Policy{RequestsPerDay: teaPolicy.Policy.RequestsPerDay, NormalNeed: teaPolicy.Policy.NormalNeed, SXNeed: teaPolicy.Policy.SXNeed, DonorFriendMedalPerScroll: teaPolicy.Policy.DonorFriendMedalPerScroll}, PartnerMissions: librarySvc}
 	vending := appsummon.Mode{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}, Fresh: pool, Store: summonstore.Store{}, Content: contentDB, Fence: i5db,
 		Heroes: heroSvc, HeroWire: heroproj.StockHero, Grants: i5svc, Costs: heroMaterialCosts, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}, Wake: adventureWakeup{}}}, Privileges: privileges, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: pool}, Broadcast: broadcastEmitter, Achievements: achievements}
 	charge := commerceprivilege.Charge{
@@ -509,7 +509,7 @@ func main() {
 		log.Fatalf("I9-9B Guild rental policy: %v", err)
 	}
 	rentalBinding := rentalPolicyBinding(rentalPolicy.Policy)
-	rentalSvc, rentalReads := canonicalGuildRental(pool, runner, contentDB, guildDB, i5db, i5svc, privileges, publicStats, heroMaterialCosts, rentalBinding)
+	rentalSvc, rentalReads := canonicalGuildRental(pool, runner, contentDB, guildDB, i5db, i5svc, privileges, publicStats, heroMaterialCosts, rentalBinding, librarySvc)
 	guildSvc.Rental = rentalSvc
 	fight, fightReady, err := canonicalCombat(pool, runner, contentDB, owners, rentalSvc)
 	if err != nil {
@@ -621,7 +621,7 @@ func main() {
 			mustRegister(mid, observing(authority, achievements, "Hero", stockruntime.WorkplaceDispatcher{Authority: authority, Service: workplace}))
 		}
 
-		march := canonicalMarch(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor, librarySvc)
+		march := canonicalMarch(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor, librarySvc, librarySvc)
 		for _, mid := range stockruntime.MarchMIDs {
 			mustRegister(mid, observing(authority, achievements, "Hero", stockruntime.MarchDispatcher{Authority: authority, Service: march}))
 		}
