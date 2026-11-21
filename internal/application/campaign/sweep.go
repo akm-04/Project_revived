@@ -137,7 +137,15 @@ func (s Mode) Sweep(c context.Context, a identity.ActorContext, q Sweep, op oper
 			if err = s.Facts.RecordTx(c, sc.Tx, current, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "campaign", SourceBusinessKey: key, Kind: kind, Delta: 1}); err != nil {
 				return nil, err
 			}
-			if !trial || group.NextID == 0 {
+			if !trial {
+				continue
+			}
+			if d.VoyageMission(group.ID) {
+				if err = s.Facts.RecordTx(c, sc.Tx, current, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "campaign", SourceBusinessKey: key, Kind: objective.VoyageFinishedKind, Delta: 1}); err != nil {
+					return nil, err
+				}
+			}
+			if group.NextID == 0 {
 				continue
 			}
 			if err = s.Facts.RecordTx(c, sc.Tx, current, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "campaign", SourceBusinessKey: key, Kind: "INFINITY_BOSS_DEFEATED", Delta: 1}); err != nil {

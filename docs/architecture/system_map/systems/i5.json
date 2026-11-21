@@ -652,6 +652,7 @@
    "hero_equipment_resources_test.go",
    "hero_progression_test.go",
    "hero_promotion_resources_test.go",
+   "i9_9_binding_test.go",
    "items_energy_exchange_test.go",
    "level_function_announcement_test.go",
    "level_stack_test.go",
