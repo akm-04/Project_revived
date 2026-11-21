@@ -147,14 +147,14 @@ func TestMidasFloatBoundsArePinned(t *testing.T) {
 func TestBoxResolutionAndFailClosed(t *testing.T) {
 	catalog := testCatalog()
 	plan, err := catalog.ResolveBox(50000001, 100, 2)
-	if err != nil || len(plan.Units) != 2 || len(plan.Units[0]) != 1 {
+	if err != nil || plan.Num != 2 || len(plan.Groups) != 1 {
 		t.Fatalf("resolve = %+v %v", plan, err)
 	}
 	rewards, err := catalog.GiftRewards(plan.Gift, plan.Num)
 	if err != nil || len(rewards.Stacks) != 1 || rewards.Stacks[0].Amount != 6 || rewards.Scalars[0].Amount != 10 {
 		t.Fatalf("fixed rewards = %+v %v", rewards, err)
 	}
-	roll, err := catalog.DrawDrop(plan.Units[0][0], sequenceUniform{0})
+	roll, err := catalog.DrawDrop(plan.Groups[0], sequenceUniform{0})
 	if err != nil || roll.ItemID != 50000003 || roll.ItemNum != 2 {
 		t.Fatalf("draw = %+v %v", roll, err)
 	}
@@ -173,8 +173,11 @@ func TestBoxResolutionAndFailClosed(t *testing.T) {
 	if _, err := catalog.ResolveBox(50000001, 999, 1); !errors.Is(err, ErrRefused) {
 		t.Fatalf("foreign gift id accepted: %v", err)
 	}
-	if _, err := catalog.ResolveBox(50000001, 100, 1000); !errors.Is(err, ErrRefused) {
-		t.Fatalf("stack overflow accepted: %v", err)
+	if _, err := catalog.ResolveBox(50000001, 100, 1000); err != nil {
+		t.Fatalf("a num above the definition stack is bounded by the locked player stack: %v", err)
+	}
+	if _, err := catalog.ResolveBox(50000006, 102, 1); !errors.Is(err, ErrRefused) {
+		t.Fatalf("zero-stack item accepted: %v", err)
 	}
 }
 

@@ -99,6 +99,9 @@ func (p *preparedDisplayValue) ApplyDisplayValueTx(c context.Context, t tx.Tx) (
 		if e != nil {
 			return nil, e
 		}
+		// Debit stamps the raw decision time; keep the forward stored fact that
+		// the prepared balance already clamped to (K3').
+		b.UpdatedAt = gen.EffectiveObservation(p.at, p.balance.UpdatedAt)
 		if e = p.owner.Store.SaveScalarTx(c, t, b, true); e != nil {
 			return nil, e
 		}

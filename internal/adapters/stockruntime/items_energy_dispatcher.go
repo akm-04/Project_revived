@@ -106,7 +106,11 @@ func (o ItemsEnergyDispatcher) Dispatch(ctx context.Context, req httpedge.Dispat
 		giftID, secondErr := requiredInt64(p, "gift_id")
 		num := int64(1)
 		if raw, present := p["num"]; present && raw != nil {
-			num, _ = requiredInt64(p, "num")
+			var numErr error
+			num, numErr = requiredInt64(p, "num")
+			if numErr != nil {
+				return itemsEnergyMalformed()
+			}
 		}
 		if firstErr != nil || secondErr != nil || itemID <= 0 || giftID <= 0 || num <= 0 || !onlyStockGameplayParams(p, "item_id", "gift_id", "num") {
 			return itemsEnergyMalformed()

@@ -1,13 +1,14 @@
 package itemsenergy
 
-// BoxPlan is one validated MID 241 open before entropy is consumed. Units are
-// the gift's repeated boxes in request order; each unit's DropGroups are the
-// gift.drops entries in source order.
+// BoxPlan is one validated MID 241 open before entropy is consumed. Num is the
+// requested repeat count; Groups is the gift's drops entries in source order,
+// repeated once per unit. The plan never expands Num copies: the locked player
+// stack is the only bound (C9) and the caller checks it before RollBox.
 type BoxPlan struct {
-	Item  Item
-	Gift  Gift
-	Num   int64
-	Units [][]Dropbox
+	Item   Item
+	Gift   Gift
+	Num    int64
+	Groups []Dropbox
 }
 
 // StackReward, ScalarReward and TemporalReward are owner-neutral reward rows.
@@ -49,7 +50,7 @@ func (c Catalog) ResolveBox(itemID, giftID, num int64) (BoxPlan, error) {
 	if err != nil {
 		return BoxPlan{}, err
 	}
-	if num <= 0 || item.Stack <= 0 || num > item.Stack {
+	if num <= 0 || item.Stack <= 0 {
 		return BoxPlan{}, ErrRefused
 	}
 	if !containsID(item.Gifts, giftID) && !containsID(item.OneInMore, giftID) {
@@ -65,29 +66,25 @@ func (c Catalog) ResolveBox(itemID, giftID, num int64) (BoxPlan, error) {
 	if len(gift.Items) != len(gift.ItemNums) {
 		return BoxPlan{}, ErrRefused
 	}
-	units := make([][]Dropbox, 0, num)
-	for unit := int64(0); unit < num; unit++ {
-		groups := make([]Dropbox, 0, len(gift.Drops))
-		for _, dropboxID := range gift.Drops {
-			group, ok := c.Dropbox(dropboxID)
-			if !ok || len(group.Rolls) == 0 {
-				return BoxPlan{}, ErrRefused
-			}
-			total := int64(0)
-			for _, roll := range group.Rolls {
-				if roll.RollType != 1 {
-					return BoxPlan{}, ErrRefused
-				}
-				total += roll.Rate
-			}
-			if total <= 0 {
-				return BoxPlan{}, ErrRefused
-			}
-			groups = append(groups, group)
+	groups := make([]Dropbox, 0, len(gift.Drops))
+	for _, dropboxID := range gift.Drops {
+		group, ok := c.Dropbox(dropboxID)
+		if !ok || len(group.Rolls) == 0 {
+			return BoxPlan{}, ErrRefused
 		}
-		units = append(units, groups)
+		total := int64(0)
+		for _, roll := range group.Rolls {
+			if roll.RollType != 1 {
+				return BoxPlan{}, ErrRefused
+			}
+			total += roll.Rate
+		}
+		if total <= 0 {
+			return BoxPlan{}, ErrRefused
+		}
+		groups = append(groups, group)
 	}
-	return BoxPlan{Item: item, Gift: gift, Num: num, Units: units}, nil
+	return BoxPlan{Item: item, Gift: gift, Num: num, Groups: groups}, nil
 }
 
 // RollBox resolves every unit's fixed gift rows and then draws each drop group
@@ -97,8 +94,8 @@ func (c Catalog) RollBox(plan BoxPlan, stream UniformSource) (Rewards, error) {
 	if err != nil {
 		return Rewards{}, err
 	}
-	for _, groups := range plan.Units {
-		for _, group := range groups {
+	for unit := int64(0); unit < plan.Num; unit++ {
+		for _, group := range plan.Groups {
 			roll, err := c.DrawDrop(group, stream)
 			if err != nil {
 				return Rewards{}, err

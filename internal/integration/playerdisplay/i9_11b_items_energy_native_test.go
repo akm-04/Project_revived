@@ -526,10 +526,10 @@ func TestI911BBoxHorcruxRefusesBeforeMutation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("stock horcrux box does not resolve: %v", err)
 	}
-	if len(plan.Units) != 1 || len(plan.Units[0]) != 1 || len(plan.Units[0][0].Rolls) == 0 {
+	if len(plan.Groups) != 1 || len(plan.Groups[0].Rolls) == 0 {
 		t.Fatalf("stock horcrux box plan %+v", plan)
 	}
-	for _, roll := range plan.Units[0][0].Rolls {
+	for _, roll := range plan.Groups[0].Rolls {
 		item, err := catalog.Item(roll.ItemID)
 		if err != nil || item.Type != 24 {
 			t.Fatalf("drop row %d is not a horcrux: %+v %v", roll.ID, item, err)

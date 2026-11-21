@@ -333,7 +333,11 @@ func aggregateItems(items []ItemAmount) ([]ItemAmount, error) {
 		if _, exists := byID[item.ItemID]; !exists {
 			order = append(order, item.ItemID)
 		}
-		byID[item.ItemID] += item.Num
+		total := byID[item.ItemID] + item.Num
+		if total < byID[item.ItemID] {
+			return nil, d.ErrInvalid
+		}
+		byID[item.ItemID] = total
 	}
 	if len(byID) > maxBatchItems {
 		return nil, d.ErrInvalid

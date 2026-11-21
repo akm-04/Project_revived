@@ -20,6 +20,9 @@ const (
 	// CourseBooksShopType is the Electives bookshop (shop_config row 29),
 	// reached from the Course window and never listed by MID 37.
 	CourseBooksShopType int64 = 29
+	// LockRankShopRow is LEAD_SEAMS_I9-11 V2 section 2 rank 460, the
+	// shop_players row locked per (player, shop type).
+	LockRankShopRow uint16 = 460
 )
 
 var (
@@ -219,12 +222,23 @@ func (s Stock) Clone() Stock {
 	return out
 }
 
+const (
+	// scheduleDayStartSeconds is the 05:00 GMT+8 game-day start (modes.Day).
+	scheduleDayStartSeconds = 5 * 3600
+	secondsPerDay           = 24 * 3600
+)
+
 // ScheduledMark returns the game day and the number of source schedule marks
 // that have passed inside that day, in GMT+8 (the schedule-of-day timezone).
+// Before 05:00 GMT+8 the calendar clock has not crossed the game-day boundary,
+// so the marks of the game day still running have already passed.
 func ScheduledMark(shop Shop, now time.Time) (int64, int64) {
 	day := modes.Day(now)
 	gmt8 := now.In(time.FixedZone("GMT+8", 8*3600))
 	seconds := int64(gmt8.Hour()*3600 + gmt8.Minute()*60 + gmt8.Second())
+	if seconds < scheduleDayStartSeconds {
+		seconds += secondsPerDay
+	}
 	var passed int64
 	for _, mark := range shop.RefreshTimes {
 		if mark <= seconds {

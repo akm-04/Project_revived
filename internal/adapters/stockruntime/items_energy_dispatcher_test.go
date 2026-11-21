@@ -2,6 +2,7 @@ package stockruntime
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"testing"
 	"time"
@@ -200,6 +201,10 @@ func TestItemsEnergyDispatcherRefusals(t *testing.T) {
 		if response.HTTPStatus != 400 || response.Body["error"] == nil {
 			t.Fatalf("malformed %v accepted: %+v", params, response)
 		}
+	}
+	overflow := map[string]any{"item_id": 1, "gift_id": 2, "num": json.Number("99999999999999999999")}
+	if response := dispatcher.Dispatch(context.Background(), itemsEnergyRequest(241, overflow, now)); response.HTTPStatus != 400 || response.Body["error"] == nil {
+		t.Fatalf("out-of-range box num was not malformed: %+v", response)
 	}
 	for _, cell := range []struct {
 		err    error

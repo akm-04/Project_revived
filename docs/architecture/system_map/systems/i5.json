@@ -666,6 +666,7 @@
    "occult_ticket_test.go",
    "pet_acquisition_test.go",
    "pet_progression_test.go",
+   "player_display_value_test.go",
    "promotion_restoration_test.go",
    "scalar_daily_floor_test.go",
    "service_test.go",

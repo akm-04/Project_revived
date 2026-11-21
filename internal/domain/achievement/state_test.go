@@ -161,6 +161,31 @@ func TestGreatCustomerOvertakenTimeIsTyped(t *testing.T) {
 	}
 }
 
+func TestObserveDayRollbackKeepsTheStoredTimestamp(t *testing.T) {
+	c := Catalog{SchemaVersion: 1, PolicyID: Policy, SelectedID: SelectedID}
+	for i := int64(0); i < 33; i++ {
+		c.Rows = append(c.Rows, Definition{ID: 100001 + i, Thresholds: [3]int64{1, 10, 20}, Points: [3]int64{1, 1, 1}})
+	}
+	c.Rows[0].Thresholds = [3]int64{3, 6, 10}
+	created := time.Unix(1700000000, 0).UTC()
+	stored := created.Add(2 * time.Hour)
+	lastDay := int64(1)
+	s := Streak{PlayerID: 100001, AchievementID: TopFloorStreakID, ContentRevision: strings.Repeat("a", 64), Current: 1, LastDay: &lastDay, StateVersion: 2, CreatedAt: created, UpdatedAt: stored}
+	if err := s.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	next, changed, err := s.ObserveDay(c, 2, true, created.Add(time.Minute))
+	if err != nil || !changed {
+		t.Fatalf("rollback observation = %+v %v %v", next, changed, err)
+	}
+	if next.UpdatedAt.Before(stored) {
+		t.Fatalf("observe day wrote UpdatedAt %v before the stored %v", next.UpdatedAt, stored)
+	}
+	if next.Current != 2 {
+		t.Fatalf("current = %d, want 2", next.Current)
+	}
+}
+
 func TestTopFloorStreakTiers(t *testing.T) {
 	c := Catalog{SchemaVersion: 1, PolicyID: Policy, SelectedID: SelectedID}
 	for i := int64(0); i < 33; i++ {

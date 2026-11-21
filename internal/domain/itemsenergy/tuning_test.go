@@ -61,6 +61,21 @@ func TestTuneRejectsInvalidOverlay(t *testing.T) {
 	}
 }
 
+// A down-only overlay is valid when the source up bound still covers it; the
+// bounds are compared after the source fallback is applied, not as raw overlay
+// fields.
+func TestTuneDownOnlyOverlayKeepsSourceUpBound(t *testing.T) {
+	catalog := tuneTestCatalog()
+	tuned, err := catalog.Tune(Tuning{BuyEnergyNum: 240, MidasFloatDownBasisPoints: 100})
+	if err != nil {
+		t.Fatalf("down-only overlay rejected: %v", err)
+	}
+	if tuned.Misc.BuyEnergyNum != 240 || tuned.Misc.MidasFloatDownBasisPoints != 100 ||
+		tuned.Misc.MidasFloatUpBasisPoints != catalog.Misc.MidasFloatUpBasisPoints {
+		t.Fatalf("down-only overlay %+v", tuned.Misc)
+	}
+}
+
 func TestTuneInvalidOverlayFallsBackAsAUnit(t *testing.T) {
 	catalog := tuneTestCatalog()
 	tuned, err := catalog.Tune(Tuning{EnergyMaxLimit: -1, BuyEnergyNum: 240})

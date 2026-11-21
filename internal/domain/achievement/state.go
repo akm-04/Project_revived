@@ -274,7 +274,7 @@ func (s Streak) ObserveDay(c Catalog, day int64, top bool, at time.Time) (Streak
 			next = s.Current + 1
 		}
 	}
-	s = s.advance(profile, next, at)
+	s = s.advance(profile, next, s.effectiveObservation(at))
 	s.LastDay = &day
 	return s, true, s.Validate()
 }
