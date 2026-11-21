@@ -59,7 +59,7 @@ func (d DormDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		allowed = []string{"host_id", "house_id", "content"}
 		c.Family = app.CommentHouse
 	case 2524:
-		allowed = []string{"host_id", "house_id", "start", "offset", "comment_num"}
+		allowed = []string{"host_id", "house_id", "start", "offset", "comment_num", "total_num"}
 	case 2525:
 		allowed = []string{"host_id", "house_id", "comment_id"}
 		c.Family = app.PraiseComment
@@ -181,13 +181,11 @@ func (d DormDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		c.ItemID = get("item_id")
 		c.Amount = get("item_num")
 	case 2515:
-		raw, err := json.Marshal(p["furniture_record"])
+		furniture, err := stockFurnitureRecord(p["furniture_record"])
 		if err != nil {
 			return badHero("invalid_dorm_layout")
 		}
-		if err = json.Unmarshal(raw, &c.Furniture); err != nil {
-			return badHero("invalid_dorm_layout")
-		}
+		c.Furniture = furniture
 	case 2517:
 		raw, err := json.Marshal(p["partner_ids"])
 		if err != nil {
@@ -279,4 +277,38 @@ func requiredDormString(m map[string]any, key string) (string, error) {
 		return "", errors.New("invalid " + key)
 	}
 	return text, nil
+}
+
+// stockDormPanelCount is xyd.DormPanelType: the stock client sends
+// furniture_record as its three panel tables (Floor, LeftWall, RightWall).
+const stockDormPanelCount = 3
+
+// stockFurnitureRecord flattens the stock panel-indexed furniture_record array
+// into the placement map the Dorm owner stores. The client builds the array
+// from a Lua table keyed 1..3, so cjson emits a JSON array of panel objects.
+func stockFurnitureRecord(value any) (map[string]string, error) {
+	raw, err := json.Marshal(value)
+	if err != nil {
+		return nil, err
+	}
+	var panels []map[string]string
+	if err = json.Unmarshal(raw, &panels); err != nil {
+		return nil, err
+	}
+	if len(panels) != stockDormPanelCount {
+		return nil, errors.New("furniture_record is not panel indexed")
+	}
+	flat := make(map[string]string)
+	for _, panel := range panels {
+		if panel == nil {
+			return nil, errors.New("furniture_record panel is not an object")
+		}
+		for key, children := range panel {
+			if _, repeated := flat[key]; repeated {
+				return nil, errors.New("furniture_record repeats a placement")
+			}
+			flat[key] = children
+		}
+	}
+	return flat, nil
 }

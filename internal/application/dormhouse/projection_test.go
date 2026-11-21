@@ -6,6 +6,30 @@ import (
 	"testing"
 )
 
+func TestStockHouseRecordGroupsPlacementsByPanel(t *testing.T) {
+	child := "50031013#1#1#0|90031001#1#1#0"
+	layout := map[string]string{
+		"50031013#1#1#0": child,
+		child:            "",
+		"50031002#1#1#0": "",
+	}
+	validated := dorm.LayoutResult{Placements: []dorm.Placement{
+		{Key: "50031013#1#1#0", Panel: 1},
+		{Key: child, Panel: 1},
+		{Key: "50031002#1#1#0", Panel: 2},
+	}}
+	record := stockHouseRecord(layout, validated)
+	if len(record) != dormPanelKinds {
+		t.Fatalf("panel count %d", len(record))
+	}
+	if record[0]["50031013#1#1#0"] != child || record[0][child] != "" {
+		t.Fatalf("floor panel %v", record[0])
+	}
+	if record[1]["50031002#1#1#0"] != "" || len(record[2]) != 0 {
+		t.Fatalf("wall panels %v %v", record[1], record[2])
+	}
+}
+
 func TestRoomWireTwiceAwakeStageKnownAndUnknown(t *testing.T) {
 	room := dorm.Room{ID: 1, TableID: 7, Residents: []int64{10, 11, 12}}
 	heroes := map[int64]character.Hero{

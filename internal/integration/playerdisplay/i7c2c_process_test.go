@@ -159,7 +159,7 @@ func TestI7C2CActualAPIDormAndRestartRoster(t *testing.T) {
 	if code != 200 {
 		t.Fatal("save", code, out)
 	}
-	code, out = post(2515, map[string]any{"house_id": house, "furniture_record": map[string]string{"50031013#999#1#0": ""}})
+	code, out = post(2515, map[string]any{"house_id": house, "furniture_record": []any{map[string]string{"50031013#999#1#0": ""}, map[string]string{}, map[string]string{}}})
 	if code != 400 || out["wrong_key"] != "50031013#999#1#0" {
 		t.Fatal("layout error key", code, out)
 	}
