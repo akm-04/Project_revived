@@ -16,17 +16,16 @@ import (
 	"gxb.local/backend/v2/internal/protocol/wire"
 )
 
-const staleStateRefusalCode int64 = 40002
-
 type fixedBookAuthority struct{ actor identity.ActorContext }
 
 func (f fixedBookAuthority) ResolveGameplayBearer(context.Context, string, time.Time) (identity.ActorContext, error) {
 	return f.actor, nil
 }
 
-// A decision time bound before B's committed research is a typed stale refusal,
-// and the read leaves B's research untouched.
-func TestA131OvertakenBookReadServesStaleRefusal(t *testing.T) {
+// K2' (I9_11_CLOCK_ROLLBACK_V1): a decision time bound before B's committed
+// research settles at the stored job start, so the read is served and leaves
+// B's research untouched.
+func TestA131OvertakenBookReadSettlesAtStoredStart(t *testing.T) {
 	p := pool(t)
 	a, _, s := bookFixture(t, p)
 	seedIdleBookRoot(t, p, a, activeBookRevision(t, s))
@@ -42,7 +41,7 @@ func TestA131OvertakenBookReadServesStaleRefusal(t *testing.T) {
 	for _, mid := range []uint16{1056, 1059} {
 		request := httpedge.DispatchRequest{Envelope: wire.RequestEnvelope{MID: mid, ReceivedAt: time.Now().UTC(), Operation: op(), Claims: wire.CredentialClaims{Token: "bearer", Region: int64(a.LogicalServerID)}}}
 		response := dispatcher.Dispatch(ctx, request)
-		if response.HTTPStatus != http.StatusConflict || response.Body["error_code"] != staleStateRefusalCode {
+		if response.HTTPStatus != http.StatusOK {
 			t.Fatalf("MID %d status=%d body=%#v", mid, response.HTTPStatus, response.Body)
 		}
 	}

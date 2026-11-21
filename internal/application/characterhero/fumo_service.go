@@ -328,7 +328,7 @@ func (s Service) QuickFumo(ctx context.Context, actor identity.ActorContext, par
 			return err
 		}
 		hero.StateVersion++
-		hero.UpdatedAt = scope.Operation.DecisionAt().UTC()
+		hero.UpdatedAt = appgeneration.EffectiveObservation(scope.Operation.DecisionAt(), hero.UpdatedAt, hero.CreatedAt)
 		if err := hero.ValidatePersistent(); err != nil {
 			return err
 		}
