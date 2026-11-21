@@ -255,9 +255,9 @@ func TestI9_9BGuildOffersProjectHeroDetail(t *testing.T) {
 }
 
 // TestI9_9BEmptyListCacheKeysNative drives the production Reader and stock 2768
-// dispatcher over both early-empty answers: a disabled campaign type and a caller
-// without a guild. Each carries the kind/type/empty-rows key a materialized empty
-// list uses; one shared literal would let the client keep another type's list.
+// dispatcher over both early-empty answers: a campaign type with no borrow row and
+// a caller without a guild. Each carries the kind/type/empty-rows key a materialized
+// empty list uses; one shared literal would let the client keep another type's list.
 func TestI9_9BEmptyListCacheKeysNative(t *testing.T) {
 	f := newRentalFixture(t)
 	reads := rentalReader(f, contentstore.Store{Queryer: f.pool}, authoritativeObservation)
@@ -275,29 +275,29 @@ func TestI9_9BEmptyListCacheKeysNative(t *testing.T) {
 		t.Fatalf("materialized empty list key %d rows %d", materialized.RentCount, len(materialized.Rows))
 	}
 
-	disabledKeys := map[int64]int64{}
-	for _, requestedType := range []int64{8, 79} {
+	unlistedKeys := map[int64]int64{}
+	for _, requestedType := range []int64{67, 99} {
 		list, err := reads.GuildOffers(ctx, f.borrower, guild.RentalHero, requestedType, readOp)
 		if err != nil {
-			t.Fatal("disabled type", requestedType, err)
+			t.Fatal("unlisted type", requestedType, err)
 		}
 		if list.RentCount == 1 || list.RentCount == 0 || len(list.Rows) != 0 {
-			t.Fatalf("disabled type %d key %d rows %d", requestedType, list.RentCount, len(list.Rows))
+			t.Fatalf("unlisted type %d key %d rows %d", requestedType, list.RentCount, len(list.Rows))
 		}
 		again, err := reads.GuildOffers(ctx, f.borrower, guild.RentalHero, requestedType, readOp)
 		if err != nil || again.RentCount != list.RentCount {
-			t.Fatalf("disabled type %d key unstable %d %d %v", requestedType, list.RentCount, again.RentCount, err)
+			t.Fatalf("unlisted type %d key unstable %d %d %v", requestedType, list.RentCount, again.RentCount, err)
 		}
-		disabledKeys[requestedType] = list.RentCount
+		unlistedKeys[requestedType] = list.RentCount
 		response := rentalDispatch(t, dispatcher, "borrower", f.borrower, 2768, map[string]any{"campaign_type": requestedType}, readOp)
 		nested := response.Body["guild_rent_heroes"].(map[string]any)
 		if response.HTTPStatus != http.StatusOK || len(nested["partners"].([]any)) != 0 ||
 			response.Body["rent_count"] != list.RentCount || nested["rent_count"] != list.RentCount {
-			t.Fatalf("disabled type %d wire %d %v", requestedType, response.HTTPStatus, response.Body)
+			t.Fatalf("unlisted type %d wire %d %v", requestedType, response.HTTPStatus, response.Body)
 		}
 	}
-	if disabledKeys[8] == disabledKeys[79] {
-		t.Fatalf("disabled types share one cache key %d", disabledKeys[8])
+	if unlistedKeys[67] == unlistedKeys[99] {
+		t.Fatalf("unlisted types share one cache key %d", unlistedKeys[67])
 	}
 
 	guildless, err := reads.GuildOffers(ctx, outsider, guild.RentalHero, 1, readOp)
@@ -477,20 +477,13 @@ func TestI9_9BCampaignBorrowedStarCap(t *testing.T) {
 	}
 }
 
-// C17: with the Gods Trial borrow row on, START accepts a BORROWED actor.
-func TestI9_9BGodsTrialBorrowedStart(t *testing.T) {
+// C17: the shipped Gods Trial borrow row lets START accept a BORROWED actor,
+// and the loan is charged once through a START/RESULT pair. Resending START and
+// settling RESULT never lend a second time.
+func TestI9_9BGodsTrialBorrowedStartAndResult(t *testing.T) {
 	f := newRentalFixture(t)
 	op := opPinned(f.revision)
-	rental := f.service
-	policyCopy := rental.Policy
-	policyCopy.Modes = map[int64]guildrental.ModeRule{}
-	for kind, rule := range rental.Policy.Modes {
-		policyCopy.Modes[kind] = rule
-	}
-	policyCopy.Modes[79] = guildrental.ModeRule{Enabled: true}
-	rental.Policy = policyCopy
-	f.combat.Inputs.Lending = rental
-	if err := rental.Place(ctx, f.lender, guild.RentalHero, f.second, op); err != nil {
+	if err := f.service.Place(ctx, f.lender, guild.RentalHero, f.second, op); err != nil {
 		t.Fatal("place", err)
 	}
 	compositeLevel(t, f.pool, f.borrower, f.revision, 100)
@@ -504,8 +497,32 @@ func TestI9_9BGodsTrialBorrowedStart(t *testing.T) {
 	s.Rules = f.combat.Rules
 	exec(t, f.pool, `UPDATE player_temporal_resources SET stored_amount=180,regen_anchor_at=NULL WHERE player_id=$1 AND resource_key='spirit_energy'`, int64(f.borrower.PlayerID))
 	campaign := int64(dayOfWeek(clock.at))*1000 + 1
-	if _, err := s.Start(ctx, f.borrower, appgodstrial.Fight{Campaign: campaign, Formation: []int64{own.PartnerID}, RentPlayer: int64(f.lender.PlayerID), RentUnit: f.second}, op); err != nil {
+	fight := appgodstrial.Fight{Campaign: campaign, Formation: []int64{own.PartnerID}, RentPlayer: int64(f.lender.PlayerID), RentUnit: f.second}
+	uses := func() int64 {
+		return scalar(t, f.pool, `SELECT count(*) FROM guild_rental_uses WHERE borrower_id=$1 AND lender_id=$2 AND kind='HERO' AND campaign_type=79 AND unit_id=$3`, int64(f.borrower.PlayerID), int64(f.lender.PlayerID), f.second)
+	}
+	award := func() int64 {
+		return scalar(t, f.pool, `SELECT rent_award FROM guild_rental_offers WHERE lender_id=$1 AND kind='HERO' AND unit_id=$2`, int64(f.lender.PlayerID), f.second)
+	}
+	mana := libraryAmount(t, f.pool, f.borrower, "mana")
+	if _, err := s.Start(ctx, f.borrower, fight, op); err != nil {
 		t.Fatal("C17 Gods Trial borrowed START", err)
+	}
+	charged := mana - libraryAmount(t, f.pool, f.borrower, "mana")
+	if charged <= 0 || uses() != 1 || award() != charged {
+		t.Fatalf("C17 loan charged mana %d uses %d award %d", charged, uses(), award())
+	}
+	if _, err := s.Start(ctx, f.borrower, fight, op); err != nil {
+		t.Fatal("C17 Gods Trial START replay", err)
+	}
+	if libraryAmount(t, f.pool, f.borrower, "mana") != mana-charged || uses() != 1 {
+		t.Fatal("C17 START replay charged the loan again")
+	}
+	if _, err := s.Result(ctx, f.borrower, appgodstrial.Result{Campaign: campaign, Star: 1, Formation: []int64{own.PartnerID}}, op); err != nil {
+		t.Fatal("C17 Gods Trial borrowed RESULT", err)
+	}
+	if libraryAmount(t, f.pool, f.borrower, "mana") != mana-charged || uses() != 1 || award() != charged {
+		t.Fatal("C17 RESULT charged the loan again")
 	}
 }
 
@@ -639,9 +656,9 @@ func TestI9_9BRentalNative(t *testing.T) {
 		t.Fatal("C8 cap", err)
 	}
 
-	// C4: a disabled borrow mode refuses at START through Lending.
-	if _, err := f.borrow(t, "gods", 79, f.second, 0); !errors.Is(err, d.ErrLoanRefused) {
-		t.Fatal("C4 disabled mode", err)
+	// C4: a mode with no policy row refuses at START through Lending.
+	if _, err := f.borrowMode(t, "unlisted", 8, 67, f.second, 0); !errors.Is(err, d.ErrLoanRefused) {
+		t.Fatal("C4 unlisted mode", err)
 	}
 
 	// C11: VIP 0 gives no rent level-up, so a level 50 unit is above the level 1 borrower.
