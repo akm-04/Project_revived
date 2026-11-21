@@ -189,6 +189,20 @@ const insertHero = `INSERT INTO player_library_heroes(player_id,partner_id,state
 // InitFreshHeroTx only inserts a unique unpublished facet. It does not take an
 // existing Library root lock after I5 locks; bootstrap must already own its root.
 func (s Store) InitFreshHeroTx(ctx context.Context, t tx.Tx, ref character.HeroRef, now time.Time) error {
+	return s.initFreshHeroTx(ctx, t, ref, now, library.LogAcquired)
+}
+
+// InitFreshHeroSourceTx is InitFreshHeroTx with the stock acquisition source the
+// caller proved (a type-1 sub_id); MID 59 records 10004 instead of the Vending
+// default.
+func (s Store) InitFreshHeroSourceTx(ctx context.Context, t tx.Tx, ref character.HeroRef, now time.Time, logID int64) error {
+	if !library.IsAcquisitionLog(logID) {
+		return library.ErrInvalidFacts
+	}
+	return s.initFreshHeroTx(ctx, t, ref, now, logID)
+}
+
+func (s Store) initFreshHeroTx(ctx context.Context, t tx.Tx, ref character.HeroRef, now time.Time, logID int64) error {
 	if t == nil {
 		return library.ErrInvalidFacts
 	}
@@ -204,8 +218,9 @@ func (s Store) InitFreshHeroTx(ctx context.Context, t tx.Tx, ref character.HeroR
 		return errors.New("library: fresh facet insert count")
 	}
 	// A new hero starts the Girls Log with its acquisition entry (type 1).
-	// PRIVATE_POLICY: every owned creation path records the Vending source.
-	_, e = s.InsertHeroLogTx(ctx, t, library.HeroLogFact{PlayerID: ref.PlayerID, PartnerID: ref.PartnerID, LogID: library.LogAcquired, OccurredAt: now.UTC()})
+	// PRIVATE_POLICY: every owned creation path records a Vending source unless
+	// the caller proves a more specific stock source.
+	_, e = s.InsertHeroLogTx(ctx, t, library.HeroLogFact{PlayerID: ref.PlayerID, PartnerID: ref.PartnerID, LogID: logID, OccurredAt: now.UTC()})
 	return e
 }
 

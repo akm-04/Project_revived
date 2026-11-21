@@ -14,14 +14,25 @@ type HeroLocalFacetInitializer interface {
 	InitFreshHeroTx(context.Context, tx.Tx, character.HeroRef, time.Time) error
 }
 
-func insertFreshHero(ctx context.Context, t tx.Tx, store AcquisitionStore, facets HeroLocalFacetInitializer, h character.Hero) error {
+// HeroAcquisitionFacetInitializer lets the Library facet record the stock
+// acquisition source the caller proved instead of the Vending default.
+type HeroAcquisitionFacetInitializer interface {
+	InitFreshHeroSourceTx(context.Context, tx.Tx, character.HeroRef, time.Time, int64) error
+}
+
+func insertFreshHero(ctx context.Context, t tx.Tx, store AcquisitionStore, facets HeroLocalFacetInitializer, h character.Hero, acquisitionLogID int64) error {
 	if err := store.InsertHeroTx(ctx, t, h); err != nil {
 		return err
 	}
 	// nil is the inherited standalone Character composition before Library activation.
 	// The Library-enabled production composition must supply the owning initializer.
-	if facets != nil {
-		return facets.InitFreshHeroTx(ctx, t, h.Ref(), h.CreatedAt)
+	if facets == nil {
+		return nil
 	}
-	return nil
+	if acquisitionLogID != 0 {
+		if source, ok := facets.(HeroAcquisitionFacetInitializer); ok {
+			return source.InitFreshHeroSourceTx(ctx, t, h.Ref(), h.CreatedAt, acquisitionLogID)
+		}
+	}
+	return facets.InitFreshHeroTx(ctx, t, h.Ref(), h.CreatedAt)
 }

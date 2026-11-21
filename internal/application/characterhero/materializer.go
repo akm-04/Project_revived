@@ -165,7 +165,7 @@ func (m HeroMaterializer) MaterializePartnerEntityBatchTx(ctx context.Context, t
 		if err != nil {
 			return nil, err
 		}
-		if err := insertFreshHero(ctx, t, m.Store, m.FreshFacets, h); err != nil {
+		if err := insertFreshHero(ctx, t, m.Store, m.FreshFacets, h, 0); err != nil {
 			return nil, err
 		}
 		payload, err := json.Marshal(heroMaterializationPayload{PartnerID: h.PartnerID, TableID: h.TableID, OriginTableID: h.OriginTableID})

@@ -4,6 +4,7 @@ package playerdisplay_test
 
 import (
 	"context"
+	"reflect"
 	"testing"
 	"time"
 
@@ -17,6 +18,7 @@ import (
 	appwakeup "gxb.local/backend/v2/internal/application/realtimewakeup"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
+	lib "gxb.local/backend/v2/internal/domain/librarylocal"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -41,6 +43,9 @@ func TestI9_11GLProducersWakeThePartnerLog(t *testing.T) {
 	summon := i911aDispatch(t, dispatcher, a, 59, map[string]any{"table_id": genuineHeroTable, "stone": int64(def.Template.FragmentItemID), "stone_num": int64(def.FragmentCount)}, op())
 	partner := i9glPartner(t, summon.Body)
 	listener.expect(t, a.PlayerID, partner, "acquisition")
+	if ids := heroLogIDs(t, p, a.PlayerID, partner); !reflect.DeepEqual(ids, []int64{lib.LogAcquiredSoulStone}) {
+		t.Fatalf("stone-summon acquisition rows %v want [%d]", ids, lib.LogAcquiredSoulStone)
+	}
 
 	star := i911aDispatch(t, dispatcher, a, 52, map[string]any{"partner_id": partner}, op())
 	if star.HTTPStatus != 200 {
@@ -89,6 +94,27 @@ func TestI9_11GLProducersWakeThePartnerLog(t *testing.T) {
 		t.Fatalf("marriage %d %+v", marriage.HTTPStatus, marriage.Body)
 	}
 	listener.expect(t, a.PlayerID, partner, "marriage")
+}
+
+func heroLogIDs(t *testing.T, p *pg.Pool, player identity.PlayerID, partner int64) []int64 {
+	t.Helper()
+	rows, err := p.Raw().Query(ctx, `SELECT log_id FROM player_library_hero_logs WHERE player_id=$1 AND partner_id=$2 ORDER BY log_id`, int64(player), partner)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rows.Close()
+	var ids []int64
+	for rows.Next() {
+		var id int64
+		if err = rows.Scan(&id); err != nil {
+			t.Fatal(err)
+		}
+		ids = append(ids, id)
+	}
+	if err = rows.Err(); err != nil {
+		t.Fatal(err)
+	}
+	return ids
 }
 
 func i9glPartner(t *testing.T, body map[string]any) int64 {

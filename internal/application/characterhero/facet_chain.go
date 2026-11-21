@@ -24,3 +24,21 @@ func (list FreshFacetChain) InitFreshHeroTx(ctx context.Context, t tx.Tx, ref ch
 	}
 	return nil
 }
+
+func (list FreshFacetChain) InitFreshHeroSourceTx(ctx context.Context, t tx.Tx, ref character.HeroRef, now time.Time, logID int64) error {
+	for _, port := range list {
+		if port == nil {
+			return errors.New("character: missing required fresh facet")
+		}
+		if source, ok := port.(HeroAcquisitionFacetInitializer); ok {
+			if e := source.InitFreshHeroSourceTx(ctx, t, ref, now, logID); e != nil {
+				return e
+			}
+			continue
+		}
+		if e := port.InitFreshHeroTx(ctx, t, ref, now); e != nil {
+			return e
+		}
+	}
+	return nil
+}

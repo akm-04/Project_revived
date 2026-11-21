@@ -505,17 +505,19 @@ func (s Service) readPartnerDialogsOrActs(ctx context.Context, q tx.Queryer, a i
 // without one is dated from its creation time (PRIVATE_POLICY).
 func partnerLogMap(heroLogs []lib.HeroLogFact, partnerID, favor, dialogueCount int64, created, at time.Time) map[string]any {
 	acquiredAt := created
+	explicitAcquisition := false
 	out := map[string]any{}
 	for _, row := range heroLogs {
 		if row.PartnerID != partnerID {
 			continue
 		}
 		out[strconv.FormatInt(row.LogID, 10)] = map[string]any{"time": row.OccurredAt.Unix()}
-		if row.LogID == lib.LogAcquired {
+		if lib.IsAcquisitionLog(row.LogID) && (!explicitAcquisition || row.OccurredAt.Before(acquiredAt)) {
 			acquiredAt = row.OccurredAt
+			explicitAcquisition = true
 		}
 	}
-	if _, present := out[strconv.FormatInt(lib.LogAcquired, 10)]; !present {
+	if !explicitAcquisition {
 		out[strconv.FormatInt(lib.LogAcquired, 10)] = map[string]any{"time": acquiredAt.Unix()}
 	}
 	for _, logID := range lib.FavorLogIDsCrossed(0, favor) {

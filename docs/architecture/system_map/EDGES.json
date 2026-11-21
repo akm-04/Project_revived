@@ -3103,6 +3103,7 @@
     "*PutTx"
    ],
    "store:librarystore": [
+    "*InitFreshHeroSourceTx",
     "*RecordHeroLogTx"
    ],
    "workplace": [
