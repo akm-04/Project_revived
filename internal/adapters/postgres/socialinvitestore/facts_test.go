@@ -75,9 +75,10 @@ func (inviteFactsTx) Exec(context.Context, string, ...any) (tx.CommandTag, error
 func (inviteFactsTx) Commit(context.Context) error                                { return nil }
 func (inviteFactsTx) Rollback(context.Context) error                              { return nil }
 
-// K2': a privilege row stored while the clock was forward is observed at its
-// own instant; the invitation facts must not refuse it after a backward step.
-func TestInviteeFactsAcceptAForwardDatedPrivilegeAtItsObservedTime(t *testing.T) {
+// K2'/K7: a progression row and a privilege row stored while the clock was
+// forward are read at their own instants; the invitation facts must not refuse
+// them after a backward step.
+func TestInviteeFactsAcceptForwardDatedProgressionAndPrivilege(t *testing.T) {
 	const playerID = identity.PlayerID(100001)
 	revision := strings.Repeat("a", 64)
 	at := time.Date(2026, 11, 21, 10, 0, 0, 0, time.UTC)
@@ -104,7 +105,7 @@ func TestInviteeFactsAcceptAForwardDatedPrivilegeAtItsObservedTime(t *testing.T)
 	reader := socialinvitestore.FactsReader{
 		Directory:   inviteFactsDirectory{},
 		Accounts:    inviteFactsAccount{},
-		Progression: inviteFactsProgression{value: player.Progression{PlayerID: playerID, Level: 10, StateVersion: 1, UpdatedAt: at}},
+		Progression: inviteFactsProgression{value: player.Progression{PlayerID: playerID, Level: 10, StateVersion: 1, UpdatedAt: at.Add(time.Hour)}},
 		Heroes:      inviteFactsHeroes{value: characterasset.HeroLevelPopulation{PlayerID: playerID, Revision: revision, ObservedAt: at, RootVersion: 1, OwnedCount: 2, HighestLevel: 10}},
 		Privilege:   inviteFactsPrivilege{value: snapshot},
 		Servers:     inviteFactsServers{},
