@@ -805,6 +805,11 @@ func (s Service) SaveStory(ctx context.Context, actor identity.ActorContext, sto
 				return err
 			}
 		}
+		if functionID, acknowledge := player.AcknowledgedFunction(guideID); acknowledge {
+			if err := s.Store.AcknowledgeFunctionAnnouncementTx(txctx, scope.Tx, actor.PlayerID, functionID, op.StartedAt); err != nil {
+				return err
+			}
+		}
 		if terminal {
 			if err := s.Store.ClearFirstEntryPendingTx(txctx, scope.Tx, actor.PlayerID); err != nil {
 				return err
