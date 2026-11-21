@@ -9,7 +9,7 @@ import (
 
 func TestRankingMID301ServesDeclaredEmptyRankTabs(t *testing.T) {
 	dispatcher := RankingDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: unusedBoardRankingFixture{}}
-	for _, subtype := range []int64{5, 13, 14, 28, 29, 35, 36, 40, 41} {
+	for _, subtype := range []int64{5, 13} {
 		request := env(301, nil, time.Now().UTC())
 		request.Envelope.Params["rank_types"] = []any{subtype}
 		response := dispatcher.Dispatch(context.Background(), request)

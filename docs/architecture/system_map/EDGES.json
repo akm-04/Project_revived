@@ -1774,6 +1774,9 @@
   "occult": {
    "achievement": [
     "*ClearedChapterCountTx"
+   ],
+   "ranking": [
+    "*ChapterBestFactTx"
    ]
   },
   "oneonone": {
@@ -1955,6 +1958,7 @@
     "Validate"
    ],
    "ranking": [
+    "*ReadBloodAwakenMetricScopeTx",
     "*ReadMetricsScopeTx",
     "*ReadTopForceMetricScopeTx"
    ]
@@ -5584,6 +5588,7 @@
     "Validate"
    ],
    "store:characterstore": [
+    "*ListRawAwakeningsTx",
     "*ReadRosterMetricsTx"
    ],
    "store:contentstore": [
@@ -5672,6 +5677,9 @@
     "*FenceActorTx",
     "*ReadDisplayEntitlementsTx"
    ],
+   "occult": [
+    "*ChapterBestFactTx"
+   ],
    "playerdirectory": [
     "Validate"
    ],
@@ -5683,6 +5691,7 @@
     "Validate"
    ],
    "publicprofile": [
+    "*ReadBloodAwakenMetricScopeTx",
     "*ReadMetricsScopeTx",
     "*ReadTopForceMetricScopeTx"
    ],

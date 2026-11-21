@@ -1,9 +1,14 @@
 package occult
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"math"
 	"strconv"
+	"time"
+
+	"gxb.local/backend/v2/internal/domain/identity"
 )
 
 // scoreTenths converts a misc coefficient ("2.5", "1.1", "10") to tenths so the
@@ -111,6 +116,54 @@ func (s Scores) Record(chapterID, score int64) (Scores, bool) {
 	}
 	next[strconv.FormatInt(chapterID, 10)] = score
 	return next, true
+}
+
+const maxFactValue int64 = 9007199254740991
+
+// ChapterScoreFact is the typed per-player best-score input the Ranking owner
+// orders. ReadScoresTx exposes no root version, so SourceVersion is the fixed
+// marker 1 while ScoresDigest witnesses the read content.
+type ChapterScoreFact struct {
+	Player                          identity.PlayerID
+	ChapterID, Value, SourceVersion int64
+	ScoresDigest, Revision          string
+	ObservedAt                      time.Time
+}
+
+func (f ChapterScoreFact) Validate(at time.Time) error {
+	digest, err := hex.DecodeString(f.ScoresDigest)
+	if !f.Player.Valid() || f.ChapterID < 1 || f.Value < 1 || f.Value > maxFactValue || f.SourceVersion != 1 || err != nil || len(digest) != sha256.Size || hex.EncodeToString(digest) != f.ScoresDigest || f.Revision == "" || !f.ObservedAt.Equal(at.UTC()) {
+		return ErrInvalid
+	}
+	return nil
+}
+
+// BuildChapterScoreFact returns found=false when the player has no positive
+// best for the chapter, so Ranking never ranks an invented zero.
+func BuildChapterScoreFact(player identity.PlayerID, chapterID int64, scores Scores, revision string, at time.Time) (ChapterScoreFact, bool, error) {
+	var out ChapterScoreFact
+	if !player.Valid() || chapterID < 1 || revision == "" || at.Unix() <= 0 {
+		return out, false, ErrInvalid
+	}
+	for key, value := range scores {
+		if value < 0 || value > maxFactValue {
+			return out, false, ErrInvalid
+		}
+		if _, err := strconv.ParseInt(key, 10, 64); err != nil {
+			return out, false, ErrInvalid
+		}
+	}
+	best := scores.Best(chapterID)
+	if best <= 0 {
+		return out, false, nil
+	}
+	raw, err := json.Marshal(scores)
+	if err != nil {
+		return out, false, ErrInvalid
+	}
+	digest := sha256.Sum256(raw)
+	out = ChapterScoreFact{Player: player, ChapterID: chapterID, Value: best, SourceVersion: 1, ScoresDigest: hex.EncodeToString(digest[:]), Revision: revision, ObservedAt: at.UTC()}
+	return out, true, out.Validate(at)
 }
 
 func LoadScores(raw json.RawMessage) (Scores, error) {

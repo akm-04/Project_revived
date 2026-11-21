@@ -61,6 +61,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
 	"gxb.local/backend/v2/internal/adapters/postgres/marchstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/mentorstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/occultstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/oneononestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/petcampaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
@@ -500,7 +501,9 @@ func main() {
 	// The title origin route copied above never reads metrics.
 	boardRanking.Metrics = profileMetrics
 	boardRanking.TopForce = profileMetrics
+	boardRanking.BloodAwaken = profileMetrics
 	boardRanking.Comfort = dormstore.Store{Queryer: pool}
+	boardRanking.Occult = occultstore.Store{}
 	boardRanking.Presence = presencestore.Store{}
 	boardRanking.Login = i4store.PlayerLoginActivity{}
 	startRankingJobs(ctx, pool, boardRanking)

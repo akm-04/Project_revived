@@ -11,6 +11,7 @@ import (
 	d "gxb.local/backend/v2/internal/domain/ranking"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 )
 
 func boardReadFromSnapshot(snapshot d.BoardSnapshot, viewer identity.PlayerID) appranking.BoardRead {
@@ -77,7 +78,7 @@ func boardSnapshotForTest(t *testing.T, board d.Board, at time.Time, revision st
 func TestRankingMID301ServesStarAndAwakenCountBoards(t *testing.T) {
 	at := time.Date(2026, 11, 8, 4, 0, 0, 0, time.UTC)
 	revision := strings.Repeat("a", 64)
-	for _, board := range []d.Board{d.StarCountBoard, d.AwakenCountBoard, d.TopForceBoard} {
+	for _, board := range []d.Board{d.StarCountBoard, d.AwakenCountBoard, d.TopForceBoard, d.BloodAwakenBoard} {
 		snapshot := boardSnapshotForTest(t, board, at, revision)
 		dispatcher := RankingDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: boardSnapshotFixture{boards: map[string]appranking.BoardRead{board.Policy: boardReadFromSnapshot(snapshot, 100001)}}}
 		request := env(301, nil, time.Now().UTC())
@@ -99,6 +100,37 @@ func TestRankingMID301ServesStarAndAwakenCountBoards(t *testing.T) {
 		if mine == nil || mine["rank"] != int64(2) || mine["score"] != int64(2) {
 			t.Fatalf("subtype %d my rank %v", board.SubType, mine)
 		}
+	}
+}
+
+func TestRankingMID301ServesOccultChapterBoardsWithPointAndNoTitles(t *testing.T) {
+	at := time.Date(2026, 11, 8, 4, 0, 0, 0, time.UTC)
+	revision := strings.Repeat("a", 64)
+	board, ok := d.BoardOfSubType(35)
+	if !ok || board.ChapterID != 3 || board.RowValue != "point" {
+		t.Fatal(board, ok)
+	}
+	snapshot := boardSnapshotForTest(t, board, at, revision)
+	dispatcher := RankingDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: boardSnapshotFixture{boards: map[string]appranking.BoardRead{board.Policy: boardReadFromSnapshot(snapshot, 100001)}}}
+	request := env(301, nil, time.Now().UTC())
+	request.Envelope.Params["rank_types"] = []any{int64(35)}
+	response := dispatcher.Dispatch(context.Background(), request)
+	if response.HTTPStatus != 200 || response.Body["error_code"] != int64(0) {
+		t.Fatal(response)
+	}
+	replyconformance.Check(t, 301, response.Body)
+	list, _ := response.Body["rank_list"].([]map[string]any)
+	info, _ := list[0]["rank_info"].(map[string]any)
+	rows, _ := info["rank_info"].([]map[string]any)
+	if len(rows) != 2 || rows[0]["player_id"] != int64(100002) || rows[0]["point"] != int64(9) || rows[0]["rank"] != int64(1) {
+		t.Fatalf("occult rows %v", info)
+	}
+	if _, present := rows[0]["info_val"]; present {
+		t.Fatalf("occult row carries the awaken value key: %v", rows[0])
+	}
+	mine, _ := info["my_rank"].(map[string]any)
+	if mine == nil || mine["rank"] != int64(2) || mine["point"] != int64(2) {
+		t.Fatalf("occult my rank %v", mine)
 	}
 }
 

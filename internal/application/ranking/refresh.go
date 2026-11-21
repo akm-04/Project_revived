@@ -24,15 +24,22 @@ var ErrConflict = errors.New("ranking: conflicting scope or immutable proof")
 // boardReceipt keeps each board's receipt names stable so stored receipts replay.
 type boardReceipt struct{ metricPin, settlementClass string }
 
-var boardReceipts = map[string]boardReceipt{
-	d.GirlsPolicy:            {metricPin: "roster-metrics", settlementClass: "I7C4C_GIRLS_RANKING_WEEKLY_TITLES"},
-	d.AchievementPointPolicy: {metricPin: "force-metric", settlementClass: "I7C4FA_AP_RANKING_WEEKLY_TITLES"},
-	d.SkinsPolicy:            {metricPin: "skin-metric", settlementClass: "I7C4FC_SKINS_RANKING_WEEKLY_TITLES"},
-	d.DormComfortPolicy:      {metricPin: "comfort-metric", settlementClass: "I9_10C_DORM_COMFORT_RANKING_WEEKLY_TITLES"},
-	d.StarCountPolicy:        {metricPin: "roster-metrics", settlementClass: "I9_10D_STAR_COUNT_RANKING_WEEKLY_TITLES"},
-	d.AwakenCountPolicy:      {metricPin: "roster-metrics", settlementClass: "I9_10D_AWAKEN_COUNT_RANKING_WEEKLY_TITLES"},
-	d.TopForcePolicy:         {metricPin: "top-force-metric", settlementClass: "I9_10E_TOP_FIVE_FORCE_RANKING_WEEKLY_TITLES"},
-}
+var boardReceipts = func() map[string]boardReceipt {
+	out := map[string]boardReceipt{
+		d.GirlsPolicy:            {metricPin: "roster-metrics", settlementClass: "I7C4C_GIRLS_RANKING_WEEKLY_TITLES"},
+		d.AchievementPointPolicy: {metricPin: "force-metric", settlementClass: "I7C4FA_AP_RANKING_WEEKLY_TITLES"},
+		d.SkinsPolicy:            {metricPin: "skin-metric", settlementClass: "I7C4FC_SKINS_RANKING_WEEKLY_TITLES"},
+		d.DormComfortPolicy:      {metricPin: "comfort-metric", settlementClass: "I9_10C_DORM_COMFORT_RANKING_WEEKLY_TITLES"},
+		d.StarCountPolicy:        {metricPin: "roster-metrics", settlementClass: "I9_10D_STAR_COUNT_RANKING_WEEKLY_TITLES"},
+		d.AwakenCountPolicy:      {metricPin: "roster-metrics", settlementClass: "I9_10D_AWAKEN_COUNT_RANKING_WEEKLY_TITLES"},
+		d.TopForcePolicy:         {metricPin: "top-force-metric", settlementClass: "I9_10E_TOP_FIVE_FORCE_RANKING_WEEKLY_TITLES"},
+		d.BloodAwakenPolicy:      {metricPin: "blood-awaken-metric", settlementClass: "I9_12_BLOOD_AWAKEN_RANKING_WEEKLY_TITLES"},
+	}
+	for _, board := range d.OccultChapterBoards {
+		out[board.Policy] = boardReceipt{metricPin: "occult-chapter-best", settlementClass: "I9_12_OCCULT_RANKING_WEEKLY_TITLES"}
+	}
+	return out
+}()
 
 func Profile() tx.Profile {
 	return tx.Profile{Name: "I7C4C_GIRLS_RANKING", AcquireTimeout: 2 * time.Second, LockTimeout: 2 * time.Second, StatementTimeout: 5 * time.Second, TransactionTimeout: 20 * time.Second, CleanupTimeout: 2 * time.Second, ReconcileTimeout: 5 * time.Second, OperationTimeout: 30 * time.Second}
@@ -54,6 +61,32 @@ func (s Service) boardMetric(c context.Context, b d.Board, scope tx.Scope, playe
 			return d.BoardMetric{}, e
 		}
 		return boardMetricOf(m), nil
+	}
+	if b.Policy == d.BloodAwakenPolicy {
+		if s.BloodAwaken == nil {
+			return d.BoardMetric{}, ErrUnavailable
+		}
+		m, e := s.BloodAwaken.ReadBloodAwakenMetricScopeTx(c, scope, publicprofile.MetricRequest{PlayerID: player, IDs: []int64{b.FieldID}, ContentRevision: rev, ObservedAt: at})
+		if e != nil {
+			return d.BoardMetric{}, e
+		}
+		return boardMetricOf(m), nil
+	}
+	if b.ChapterID > 0 {
+		if s.Occult == nil {
+			return d.BoardMetric{}, ErrUnavailable
+		}
+		fact, found, e := s.Occult.ChapterBestFactTx(c, scope.Tx, player, b.ChapterID, rev, at)
+		if e != nil {
+			return d.BoardMetric{}, e
+		}
+		if !found {
+			return d.BoardMetric{}, nil
+		}
+		if fact.Validate(at) != nil || fact.Player != player || fact.ChapterID != b.ChapterID || fact.Revision != rev {
+			return d.BoardMetric{}, ErrConflict
+		}
+		return d.BoardMetric{Player: fact.Player, Owner: b.SourceOwner, Policy: b.SourcePolicy, Semantics: b.SourceSemantics, Revision: fact.Revision, PopulationDigest: fact.ScoresDigest, FieldID: b.FieldID, Value: fact.Value, SourceVersion: fact.SourceVersion, PopulationVersion: fact.SourceVersion, ObservedAt: fact.ObservedAt}, nil
 	}
 	if b.Policy != d.DormComfortPolicy {
 		ms, e := s.Metrics.ReadMetricsScopeTx(c, scope, publicprofile.MetricRequest{PlayerID: player, IDs: []int64{b.FieldID}, ContentRevision: rev, ObservedAt: at})

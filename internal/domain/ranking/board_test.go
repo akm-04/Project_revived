@@ -204,9 +204,29 @@ func TestI9_10ETopFiveForceBoardUsesCharacterHeroMetric(t *testing.T) {
 	if len(board.Titles) != 0 {
 		t.Fatal("invented titles", board)
 	}
-	for _, subtype := range []int64{13, 14, 28, 29, 35, 36, 40, 41} {
+	for _, subtype := range []int64{13} {
 		if _, ok := BoardOfSubType(subtype); ok {
 			t.Fatal("owner not delivered, board must stay unserved:", subtype)
 		}
+	}
+}
+
+func TestI912BloodAwakenAndOccultChapterBoards(t *testing.T) {
+	blood, ok := BoardOfSubType(14)
+	if !ok || blood.Policy != BloodAwakenPolicy || blood.FieldID != 1013 || blood.SourceOwner != "CharacterHero" || blood.SourcePolicy != BloodAwakenSourcePolicy || blood.SourceSemantics != BloodAwakenSemantics || blood.RowValue != "info_val" || blood.ChapterID != 0 || len(blood.Titles) != 0 {
+		t.Fatal(blood, ok)
+	}
+	want := map[int64]int64{28: 1, 29: 2, 35: 3, 36: 4, 40: 5, 41: 6}
+	for subtype, chapter := range want {
+		board, ok := BoardOfSubType(subtype)
+		if !ok || board.ChapterID != chapter || board.SourceOwner != "Occult" || board.SourcePolicy != OccultChapterSourcePolicy || board.SourceSemantics != OccultChapterSemantics || board.RowValue != "point" || board.FieldID != 3000+chapter || len(board.Titles) != 0 || board.TitledRanks != 0 {
+			t.Fatal(subtype, board, ok)
+		}
+		if _, dup := BoardOf(board.Policy); !dup {
+			t.Fatal("chapter board missing from Boards:", subtype)
+		}
+	}
+	if !IsServedEmptySubType(13) || IsServedEmptySubType(14) || IsServedEmptySubType(28) {
+		t.Fatal("served-empty set must keep only the unbuilt tabs")
 	}
 }

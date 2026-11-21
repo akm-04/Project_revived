@@ -1,8 +1,8 @@
 //go:build postgres
 
-// gxb-ranking-backfill is the explicit one-shot deploy backfill for the seven
-// generic boards. It composes the same owner read providers the API uses for
-// ranking and writes only stored score rows.
+// gxb-ranking-backfill is the explicit one-shot deploy backfill for every
+// registered generic board. It composes the same owner read providers the API
+// uses for ranking and writes only stored score rows.
 package main
 
 import (
@@ -26,6 +26,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/inscriptionstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
+	"gxb.local/backend/v2/internal/adapters/postgres/occultstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/rankingstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/spiritstore"
@@ -114,6 +115,6 @@ func compose(p *pg.Pool) appranking.Service {
 	}
 	publicStats := publicstats.Service{Owned: owned, Pets: heroDB, Content: contentDB, Skills: apphero.RawSkillObservationReader{Store: heroDB, Content: contentDB}, Awakening: apphero.RawAwakeningObservationReader{Heroes: heroDB, Births: characterstore.RawAwakeningStore{}}, Library: librarySvc, Dorm: dormSvc, Book: bookSvc, Courses: courseSvc, Inscription: inscriptionSvc, Element: elementSvc, Spirit: spiritSvc, Evolution: evolutionSvc, Conquer: appconquer.Service{Owner: conquerstore.Store{}, Content: contentDB, Heroes: heroDB, Kinds: contentDB, Players: i4store.PlayerRootLocker{}}}
 	displayService := playerdisplay.Service{Runner: runner, Fresh: p, Time: pg.AuthoritativeTime{Queryer: p}, Players: i4store.PlayerRootLocker{}, Fence: i5db, Store: i5db, Content: contentDB, Receipts: receipts, Privileges: privileges, CosmeticPrivileges: privileges, Inventory: i5db, Population: characterstore.DisplayReader{Store: heroDB, Content: contentDB}, Characters: characterstore.DisplayReader{Store: heroDB, Content: contentDB}, Values: appi5.DisplayValueOwner{Store: i5db, Content: contentDB, Grant: i5svc}, Directory: appdir.Reconciler{Source: i5db, Sink: i4store.DirectoryLevelProjection{}}, SkinItems: contentDB}
-	metrics := apppublicprofile.CanonicalMetricProvider{Roster: characterstore.RosterMetricReader{Store: characterstore.Store{}, Content: contentDB}, Force: publicStats, Display: displayService}
-	return appranking.Service{Timed: timed, Fresh: p, Store: rankingstore.Store{}, Directory: i4store.PlayerDirectoryReader{}, Content: contentDB, Fence: i5db, Players: i4store.PlayerRootLocker{}, Recipient: displayService, Ledger: i5db, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: p}, Metrics: metrics, TopForce: metrics, Comfort: dormstore.Store{Queryer: p}, Presence: presencestore.Store{}, Login: i4store.PlayerLoginActivity{}}
+	metrics := apppublicprofile.CanonicalMetricProvider{Roster: characterstore.RosterMetricReader{Store: characterstore.Store{}, Content: contentDB}, Force: publicStats, Display: displayService, Awakenings: characterstore.RawAwakeningStore{}}
+	return appranking.Service{Timed: timed, Fresh: p, Store: rankingstore.Store{}, Directory: i4store.PlayerDirectoryReader{}, Content: contentDB, Fence: i5db, Players: i4store.PlayerRootLocker{}, Recipient: displayService, Ledger: i5db, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: p}, Metrics: metrics, TopForce: metrics, BloodAwaken: metrics, Comfort: dormstore.Store{Queryer: p}, Occult: occultstore.Store{}, Presence: presencestore.Store{}, Login: i4store.PlayerLoginActivity{}}
 }

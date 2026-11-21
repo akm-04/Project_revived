@@ -223,6 +223,7 @@
    "gxb_operation_receipts",
    "player_directory_profiles",
    "player_function_unlocks",
+   "player_hero_raw_awakening",
    "player_hero_roots",
    "player_heroes",
    "player_pet_roots",
@@ -261,6 +262,7 @@
    "r1_profile_comment.json"
   ],
   "unit": [
+   "blood_awaken_metric_test.go",
    "composition_test.go",
    "media_test.go",
    "rich_records_test.go",

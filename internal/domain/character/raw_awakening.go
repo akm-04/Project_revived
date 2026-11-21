@@ -9,6 +9,11 @@ import (
 
 const RawAwakeningBirthPolicy = "C4C_PRIVATE_CHARACTER_RAW_AWAKENING_BIRTH_V1"
 
+// RawAwakeningCompleteStage is xyd.AwakeTwiceStage.COMPLETE (enums.lua). The
+// lead ruling keeps stage 2 (STAGE_TWO, entered) out; whether the original
+// server counted it is UNKNOWN, so change this constant if evidence surfaces.
+const RawAwakeningCompleteStage int64 = 3
+
 var ErrRawAwakeningUnavailable = errors.New("character hero: raw awakening unavailable")
 
 // RawAwakeningBirth is an explicit intrinsic owner fact, never an inference

@@ -52,6 +52,16 @@ func (Store) ReadScoresTx(ctx context.Context, q tx.Queryer, playerID identity.P
 	return scores, nil
 }
 
+// ChapterBestFactTx supplies the Ranking owner one typed fact. A player with no
+// row or no positive best for the chapter yields no fact, never a zero score.
+func (s Store) ChapterBestFactTx(ctx context.Context, q tx.Queryer, playerID identity.PlayerID, chapterID int64, revision string, at time.Time) (d.ChapterScoreFact, bool, error) {
+	scores, err := s.ReadScoresTx(ctx, q, playerID)
+	if err != nil {
+		return d.ChapterScoreFact{}, false, err
+	}
+	return d.BuildChapterScoreFact(playerID, chapterID, scores, revision, at)
+}
+
 func (Store) SaveScoresTx(ctx context.Context, t tx.Tx, playerID identity.PlayerID, scores d.Scores, at time.Time) error {
 	raw, version, err := payload.Encode(scores)
 	if err != nil {
