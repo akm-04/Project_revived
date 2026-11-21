@@ -3,6 +3,7 @@
 package playerdisplay_test
 
 import (
+	"fmt"
 	"net/http"
 	"testing"
 
@@ -119,5 +120,54 @@ func TestI912Function33AnnouncementReplaysUntilSaveStoryAcknowledgesIt(t *testin
 	after := decorated.Dispatch(tracked, tutorialCampaignRequest(actor, 112, map[string]any{}))
 	if after.HTTPStatus != http.StatusOK || hasFunction(after.Body, 33) {
 		t.Fatalf("acknowledged function 33 still replayed: %d %#v", after.HTTPStatus, after.Body)
+	}
+}
+
+// BUGS #114 follow-up: only functions 31/33/42/48 have an acknowledging guide
+// cursor. A NULL row for any other function can never be cleared, so replaying
+// it makes the client replay its guide on every reply (Backend.lua:775-777,
+// SelfPlayer.lua:487-554).
+func TestI912FunctionAnnouncementWithoutAcknowledgementCursorIsNotReplayed(t *testing.T) {
+	database := pool(t)
+	actor := tutorialPlayerAt100007(t, database)
+	mode := campaignModeWithLevelAnnouncements(t, database)
+	campaign := stockruntime.CampaignDispatcher{Authority: fixedSocialAuthority{actor: actor}, Service: mode}
+	decorated := functionAnnouncementDecorator(database, campaign)
+	tracked := i911aTracked(actor)
+	unacknowledgeable := []int64{1, 5, 7}
+	for _, functionID := range unacknowledgeable {
+		exec(t, database, `INSERT INTO player_function_unlocks(player_id,function_id,opened_at,source_fact_key,state_version,acknowledged_at)VALUES($1,$2,clock_timestamp(),$3,1,NULL) ON CONFLICT(player_id,function_id) DO UPDATE SET acknowledged_at=NULL`, int64(actor.PlayerID), functionID, fmt.Sprintf("i9-12-null-function-%d", functionID))
+	}
+
+	result := decorated.Dispatch(tracked, tutorialCampaignRequest(actor, 112, map[string]any{}))
+	if result.HTTPStatus != http.StatusOK {
+		t.Fatalf("reply %d %#v", result.HTTPStatus, result.Body)
+	}
+	for _, functionID := range unacknowledgeable {
+		if hasFunction(result.Body, functionID) {
+			t.Fatalf("function %d has no acknowledgement cursor but replayed: %#v", functionID, result.Body)
+		}
+	}
+}
+
+// BUGS #114 follow-up: a player whose saved guide cursor has already reached an
+// announcement's cursor never sends that SAVE_STORY, so the pending row must
+// count as acknowledged instead of replaying forever.
+func TestI912FunctionAnnouncementPastItsGuideCursorIsNotReplayed(t *testing.T) {
+	database := pool(t)
+	actor := tutorialPlayerAt100007(t, database)
+	exec(t, database, `UPDATE player_story_cursors SET guide_id=$2 WHERE player_id=$1`, int64(actor.PlayerID), int64(100198))
+	exec(t, database, `INSERT INTO player_function_unlocks(player_id,function_id,opened_at,source_fact_key,state_version,acknowledged_at)VALUES($1,33,clock_timestamp(),'i9-12-null-past-cursor',1,NULL) ON CONFLICT(player_id,function_id) DO UPDATE SET acknowledged_at=NULL`, int64(actor.PlayerID))
+	mode := campaignModeWithLevelAnnouncements(t, database)
+	campaign := stockruntime.CampaignDispatcher{Authority: fixedSocialAuthority{actor: actor}, Service: mode}
+	decorated := functionAnnouncementDecorator(database, campaign)
+	tracked := i911aTracked(actor)
+
+	result := decorated.Dispatch(tracked, tutorialCampaignRequest(actor, 112, map[string]any{}))
+	if result.HTTPStatus != http.StatusOK {
+		t.Fatalf("reply %d %#v", result.HTTPStatus, result.Body)
+	}
+	if hasFunction(result.Body, 33) {
+		t.Fatalf("function 33's guide cursor was already reached but it replayed: %#v", result.Body)
 	}
 }

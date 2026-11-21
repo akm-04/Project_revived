@@ -75,6 +75,22 @@ func AcknowledgedFunction(guideID int64) (int64, bool) {
 	return 0, false
 }
 
+// ReplayableFunctionAnnouncements keeps only the pending announcements the
+// client can still acknowledge at savedGuideID. A function without an
+// acknowledgement cursor never clears, so replaying it loops the client's
+// guide; a row whose cursor the player already reached is treated as seen.
+func ReplayableFunctionAnnouncements(functionIDs []int64, savedGuideID int64) []int64 {
+	out := make([]int64, 0, len(functionIDs))
+	for _, functionID := range functionIDs {
+		cursor, acknowledgeable := FunctionAnnouncementAcknowledgement(functionID)
+		if !acknowledgeable || savedGuideID >= cursor {
+			continue
+		}
+		out = append(out, functionID)
+	}
+	return out
+}
+
 type Profile struct {
 	PlayerID      identity.PlayerID
 	DisplayName   string

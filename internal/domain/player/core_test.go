@@ -134,3 +134,31 @@ func TestFunctionAnnouncementAcknowledgementMapping(t *testing.T) {
 		t.Fatal("the guide end cursor acknowledged a function")
 	}
 }
+
+// BUGS #114 follow-up: only announcements with an acknowledgement cursor that
+// the saved story cursor has not reached may be replayed.
+func TestReplayableFunctionAnnouncements(t *testing.T) {
+	cases := []struct {
+		name   string
+		ids    []int64
+		guide  int64
+		wanted []int64
+	}{
+		{name: "no cursor is never replayed", ids: []int64{1, 5, 7}, guide: 0, wanted: []int64{}},
+		{name: "pending before its cursor", ids: []int64{33}, guide: 0, wanted: []int64{33}},
+		{name: "reached cursor counts as acknowledged", ids: []int64{33}, guide: SkillUpGuideCursor, wanted: []int64{}},
+		{name: "passed cursor counts as acknowledged", ids: []int64{31, 33}, guide: 100500, wanted: []int64{}},
+		{name: "mixed rows keep only replayable", ids: []int64{1, 33, 42}, guide: 100198, wanted: []int64{42}},
+	}
+	for _, tc := range cases {
+		got := ReplayableFunctionAnnouncements(tc.ids, tc.guide)
+		if len(got) != len(tc.wanted) {
+			t.Fatalf("%s: got %v want %v", tc.name, got, tc.wanted)
+		}
+		for index := range got {
+			if got[index] != tc.wanted[index] {
+				t.Fatalf("%s: got %v want %v", tc.name, got, tc.wanted)
+			}
+		}
+	}
+}
