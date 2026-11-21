@@ -172,6 +172,9 @@ func (s ReadService) ReadTx(c context.Context, sc tx.Scope, a identity.ActorCont
 		return nil, e
 	}
 	if sub != 1 && !basic.Eligible[sub] {
+		if reply, hidden := hiddenSectionReply(basic, sub); hidden {
+			return reply, nil
+		}
 		return nil, ErrShowcasePrivate
 	}
 	if sub == 2 || sub == 3 {
@@ -309,6 +312,24 @@ func (s ReadService) ReadTx(c context.Context, sc tx.Scope, a identity.ActorCont
 	}
 	return out, nil
 }
+
+// hide_types filters a section for other viewers without destroying its facts
+// (I7B1_WIRE_PRIVACY_POLICY). The stock window reads a hidden section as an
+// empty table, so an ineligible hidden subtype answers empty; a directed block
+// and the never-public SYSTEM tab stay refusals.
+func hiddenSectionReply(basic BasicResult, sub int16) (map[string]any, bool) {
+	if basic.Relation.Blocked {
+		return nil, false
+	}
+	switch sub {
+	case 2:
+		return map[string]any{"arena_performance": map[string]any{}, "region_arena_performance": map[string]any{}, "super_arena_performance": map[string]any{}}, true
+	case 4:
+		return map[string]any{"best_comments": []any{}, "comment_list": []any{}, "comment_num": int64(0)}, true
+	}
+	return nil, false
+}
+
 func (s ReadService) allShowTypes(c context.Context, sc tx.Scope, pid identity.PlayerID, rev string, at time.Time) (map[string]int64, error) {
 	values := map[string]int64{}
 	for id := int64(1001); id <= 1011; id++ {
