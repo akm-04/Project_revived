@@ -193,18 +193,18 @@
    "campaign_types": [
     79
    ],
-   "enabled": false,
+   "enabled": true,
    "star_cap": null,
-   "source": "not in rule 10; tweakable"
+   "source": "I9-12 carry 5; user ruling 2026-11-20: rental allowed in every mode under the existing rules"
   },
   {
    "key": "fate",
    "campaign_types": [
     8
    ],
-   "enabled": false,
+   "enabled": true,
    "star_cap": null,
-   "source": "not in rule 10; tweakable; CampaignType ELEMENT, domain/worldboss/catalog.go:119"
+   "source": "I9-12 carry 5; user ruling 2026-11-20: rental allowed in every mode under the existing rules; CampaignType ELEMENT, domain/worldboss/catalog.go:119"
   }
  ],
  "guild_campaign": {

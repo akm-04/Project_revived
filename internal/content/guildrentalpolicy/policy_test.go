@@ -26,8 +26,11 @@ func TestBuiltinRentalPolicy(t *testing.T) {
 		t.Fatal("gods trial and champion are uncapped rows", p.StarCap(79), p.StarCap(5))
 	}
 	rules := p.ModeRules()
-	if !rules[1].Enabled || rules[79].Enabled {
-		t.Fatal("mode rules", rules[1], rules[79])
+	if !rules[1].Enabled || !rules[8].Enabled || !rules[79].Enabled {
+		t.Fatal("mode rules", rules[1], rules[8], rules[79])
+	}
+	if _, listed := rules[67]; listed {
+		t.Fatal("Chapter Boss [67] must stay out of the borrow modes")
 	}
 	bad := p
 	bad.Money.GuildSharePercent = 1
