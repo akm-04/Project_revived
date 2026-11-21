@@ -339,6 +339,72 @@ func TestI9_9CFightClaimCarryAttemptsLateAndDuplicate(t *testing.T) {
 	}
 }
 
+// TestI9_9CCopiesOpenInCatalogOrder guards BUGS #134: 603 and 613 report is_open
+// 0 for a copy whose catalog predecessor is not won, and 604/614 refuse it.
+func TestI9_9CCopiesOpenInCatalogOrder(t *testing.T) {
+	f := newCampaignFixture(t)
+	f.seedActivity(t, 40)
+	if _, err := f.mode.Open(ctx, f.leader, 7, f.op()); err != nil {
+		t.Fatal("open", err)
+	}
+	info := f.chapter(t)
+	first, second := info.Copies[0], info.Copies[1]
+
+	mapBefore, err := f.mode.GuildMap(ctx, f.second, f.op())
+	if err != nil {
+		t.Fatal("guild map", err)
+	}
+	if row := campaignCopyRow(t, mapBefore, first); !row.IsOpen {
+		t.Fatal("first copy is locked")
+	}
+	if row := campaignCopyRow(t, mapBefore, second); row.IsOpen {
+		t.Fatal("second copy is open before the first is won")
+	}
+	detail, err := f.mode.MapDetail(ctx, f.second, second, f.op())
+	if err != nil || detail.IsOpen {
+		t.Fatalf("613 second copy is_open=%v err=%v", detail.IsOpen, err)
+	}
+	if _, err := f.mode.Claim(ctx, f.second, second, f.op()); !errors.Is(err, d.ErrRefused) {
+		t.Fatalf("claim of a locked copy: %v", err)
+	}
+	if _, err := f.mode.Start(ctx, f.second, app.Fight{ChapterID: 7, CopyID: second, CampaignType: 7, Formation: "1"}, f.op()); !errors.Is(err, d.ErrRefused) {
+		t.Fatalf("start of a locked copy: %v", err)
+	}
+
+	f.fight(t, f.leader, 7, first, f.leaderHero, 4000, 3, 0, f.at)
+	f.fight(t, f.second, 7, first, f.secondHero, 4000, 3, 0, f.at)
+	f.fight(t, f.third, 7, first, f.thirdHero, 4000, 3, 0, f.at)
+
+	mapAfter, err := f.mode.GuildMap(ctx, f.second, f.op())
+	if err != nil {
+		t.Fatal("guild map after first win", err)
+	}
+	if row := campaignCopyRow(t, mapAfter, first); !row.IsWin {
+		t.Fatal("first copy not won")
+	}
+	if row := campaignCopyRow(t, mapAfter, second); !row.IsOpen {
+		t.Fatal("second copy still locked after the first is won")
+	}
+	detail, err = f.mode.MapDetail(ctx, f.second, second, f.op())
+	if err != nil || !detail.IsOpen {
+		t.Fatalf("613 second copy after first win is_open=%v err=%v", detail.IsOpen, err)
+	}
+	if _, err := f.mode.Claim(ctx, f.second, second, f.op()); err != nil {
+		t.Fatalf("claim of the opened second copy: %v", err)
+	}
+}
+
+func campaignCopyRow(t *testing.T, lists app.Lists, copyID int64) app.CopyRowView {
+	t.Helper()
+	for _, row := range lists.Copies {
+		if row.CopyID == copyID {
+			return row
+		}
+	}
+	t.Fatalf("copy %d missing from 603 copy_list", copyID)
+	return app.CopyRowView{}
+}
+
 // TestI9_9CEnemyHPRecordedForClientCarry guards DL-33b38484: a row that took
 // damage carries health 1 so the client applies the stored hp (BattleCreate.lua
 // 1106) and a later loss lowers the known HP.
@@ -802,11 +868,22 @@ func TestI9_9CReplayLastStrikeAndChapterClear(t *testing.T) {
 	}
 	chapterID, plainCopy := f.copyID(t)
 	copyID := f.bossCopy(t, chapterID)
-	for _, id := range []int64{plainCopy, copyID} {
+	// BUGS #134: copies open in catalog order, so every copy before the boss is
+	// seeded won; plainCopy stays unwon to keep the chapter open for the last strike.
+	for _, id := range f.chapter(t).Copies {
+		if id == plainCopy || id == copyID {
+			f.mutateCopy(t, chapterID, id, func(copy *d.Copy, waves map[int64][]app.EnemyRow) {
+				copy.CurrentIndex = 3
+				copy.Percent = 2.0 / 3
+				killWaves(waves, 1, 2)
+			})
+			continue
+		}
 		f.mutateCopy(t, chapterID, id, func(copy *d.Copy, waves map[int64][]app.EnemyRow) {
+			copy.Win = true
 			copy.CurrentIndex = 3
-			copy.Percent = 2.0 / 3
-			killWaves(waves, 1, 2)
+			copy.Percent = 1
+			killWaves(waves, 1, 2, 3)
 		})
 	}
 	if logs := f.logCount(t, int64(d.LogFinalHit)); logs != 0 {
@@ -821,8 +898,10 @@ func TestI9_9CReplayLastStrikeAndChapterClear(t *testing.T) {
 	if got := f.balance(t, f.leader, "team_dungeon_coin") - beforeCoin; got != f.settings.LastStrikeCoin {
 		t.Fatalf("last strike coin %d, want %d", got, f.settings.LastStrikeCoin)
 	}
-	if logs := f.logCount(t, int64(d.LogFinalHit)); logs != 0 {
-		t.Fatalf("log 7 on a copy clear that did not win the chapter: %d", logs)
+	// BUGS #134: the boss is the last catalog copy, so it can only be fought once
+	// every earlier copy is won; its clear is therefore the chapter clear.
+	if logs := f.logCount(t, int64(d.LogFinalHit)); logs != 1 {
+		t.Fatalf("chapter clear log 7 = %d", logs)
 	}
 	retry, err := f.mode.Settle(ctx, f.leader, resultFor(chapterID, app.Started{CopyID: copyID, CurrentIndex: 3}, 4000, 3, 0), f.opAt(f.at.Add(time.Minute)))
 	if err != nil || !retry.Duplicate || retry.Body["error_code"] != int64(30005) {
@@ -1176,13 +1255,20 @@ func TestI9_9CRankTieBossDoubleAndRecordReward(t *testing.T) {
 	chapterID, _ := f.copyID(t)
 	info := f.chapter(t)
 	bossCopy := f.bossCopy(t, chapterID)
-	plain := make([]int64, 0, len(info.Copies))
+	tieCopy, recordCopy := info.Copies[0], info.Copies[2]
+	// BUGS #134: copies open in catalog order. Seed the copies between them won so
+	// the boss, first and third copies are all open at once.
 	for _, id := range info.Copies {
-		if id != bossCopy {
-			plain = append(plain, id)
+		if id == bossCopy || id == tieCopy || id == recordCopy {
+			continue
 		}
+		f.mutateCopy(t, chapterID, id, func(copy *d.Copy, waves map[int64][]app.EnemyRow) {
+			copy.Win = true
+			copy.CurrentIndex = 3
+			copy.Percent = 1
+			killWaves(waves, 1, 2, 3)
+		})
 	}
-	tieCopy, recordCopy := plain[0], plain[1]
 	bossSettled := f.fight(t, f.second, chapterID, bossCopy, f.secondHero, 1000, 0, 50, f.at)
 	if got := f.damage(t, f.second.PlayerID, chapterID); got != 2000 {
 		t.Fatalf("boss wave rank damage %d, want 2000", got)
@@ -1231,9 +1317,9 @@ func TestI9_9CAttemptCapRestWindowAndLateJoin(t *testing.T) {
 	chapterID, _ := f.copyID(t)
 	info := f.chapter(t)
 	for index := 0; index < 2; index++ {
-		f.fight(t, f.second, chapterID, info.Copies[index], f.secondHero, 5000, 3, 0, f.at.Add(time.Duration(index)*time.Minute))
+		f.fight(t, f.second, chapterID, info.Copies[0], f.secondHero, 5000, 3, 0, f.at.Add(time.Duration(index)*time.Minute))
 	}
-	if _, err := f.mode.Start(ctx, f.second, app.Fight{ChapterID: chapterID, CopyID: info.Copies[2], CampaignType: 7,
+	if _, err := f.mode.Start(ctx, f.second, app.Fight{ChapterID: chapterID, CopyID: info.Copies[0], CampaignType: 7,
 		Formation: strconv.FormatInt(f.secondHero, 10)}, f.op()); !errors.Is(err, d.ErrRefused) {
 		t.Fatalf("third start with no attempts left: %v", err)
 	}

@@ -149,7 +149,9 @@ func (startChoiceChapterStore) LockChapterTx(context.Context, tx.Tx, int64, int6
 
 type startChoiceContent struct{}
 
-func (startChoiceContent) ChapterInfo(int64) (ChapterInfo, bool) { return ChapterInfo{}, true }
+func (startChoiceContent) ChapterInfo(int64) (ChapterInfo, bool) {
+	return ChapterInfo{ChapterID: 1, Copies: []int64{1}}, true
+}
 
 func (startChoiceContent) ChapterOfCopy(int64) (int64, bool) { return 1, true }
 

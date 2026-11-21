@@ -158,6 +158,46 @@ func retry() tx.RetryPolicy {
 	return tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true}
 }
 
+// copyPosition returns the copy's index in catalog order, or -1.
+func copyPosition(copies []int64, copyID int64) int {
+	for index, id := range copies {
+		if id == copyID {
+			return index
+		}
+	}
+	return -1
+}
+
+// lockCopyForOpenRuleTx locks the requested copy and, before it, its catalog
+// predecessor, so copies are always locked in ascending copy-id order. It returns
+// the copy, its catalog position and whether that predecessor is won.
+func (m Mode) lockCopyForOpenRuleTx(c context.Context, t tx.Tx, guildID, chapterID, copyID int64) (d.Copy, int, bool, error) {
+	info, known := m.Content.ChapterInfo(chapterID)
+	if !known {
+		return d.Copy{}, 0, false, d.ErrRefused
+	}
+	position := copyPosition(info.Copies, copyID)
+	if position < 0 {
+		return d.Copy{}, 0, false, d.ErrRefused
+	}
+	predecessorWon := false
+	if position > 0 {
+		predecessor, found, err := m.ModeStore.LockCopyTx(c, t, guildID, chapterID, info.Copies[position-1])
+		if err != nil {
+			return d.Copy{}, 0, false, err
+		}
+		predecessorWon = found && predecessor.Win
+	}
+	copied, found, err := m.ModeStore.LockCopyTx(c, t, guildID, chapterID, copyID)
+	if err != nil {
+		return d.Copy{}, 0, false, err
+	}
+	if !found {
+		return d.Copy{}, 0, false, d.ErrRefused
+	}
+	return copied, position, predecessorWon, nil
+}
+
 // Claim is 614 (C6). A free or expired copy is claimed at stage 1; another
 // holder's live claim is read back without a write.
 func (m Mode) Claim(c context.Context, a identity.ActorContext, copyID int64, op operation.Context) (ClaimView, error) {
@@ -198,11 +238,11 @@ func (m Mode) Claim(c context.Context, a identity.ActorContext, copyID int64, op
 		if !open || chapter.Win {
 			return d.ErrRefused
 		}
-		copy, found, err := m.ModeStore.LockCopyTx(c, sc.Tx, guildID, chapterID, copyID)
+		copy, position, predecessorWon, err := m.lockCopyForOpenRuleTx(c, sc.Tx, guildID, chapterID, copyID)
 		if err != nil {
 			return err
 		}
-		if !found || copy.Win {
+		if !d.CopyOpen(open, chapter.Win, copy.Win, position, predecessorWon) {
 			return d.ErrRefused
 		}
 		if !holderLive(copy, m.Settings, at) {
@@ -284,11 +324,11 @@ func (m Mode) Start(c context.Context, a identity.ActorContext, request Fight, o
 		if !open || chapter.Win {
 			return d.ErrRefused
 		}
-		locked, found, err := m.ModeStore.LockCopyTx(c, sc.Tx, guildID, request.ChapterID, request.CopyID)
+		locked, position, predecessorWon, err := m.lockCopyForOpenRuleTx(c, sc.Tx, guildID, request.ChapterID, request.CopyID)
 		if err != nil {
 			return err
 		}
-		if !found || locked.Win {
+		if !d.CopyOpen(open, chapter.Win, locked.Win, position, predecessorWon) {
 			return d.ErrRefused
 		}
 		if holderLive(locked, m.Settings, at) && locked.HolderID != int64(a.PlayerID) {

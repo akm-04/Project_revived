@@ -186,8 +186,17 @@ func (m Mode) lists(c context.Context, a identity.ActorContext, op operation.Con
 			if err != nil {
 				return err
 			}
+			storedByID := make(map[int64]CopyRow, len(stored))
 			for _, copy := range stored {
-				out.Copies = append(out.Copies, CopyRowView{CopyID: copy.CopyID, IsOpen: !copy.Win, IsWin: copy.Win, Percent: copy.Percent})
+				storedByID[copy.CopyID] = copy
+			}
+			for position, copyID := range info.Copies {
+				copy, found := storedByID[copyID]
+				if !found {
+					continue
+				}
+				predecessorWon := position > 0 && storedByID[info.Copies[position-1]].Win
+				out.Copies = append(out.Copies, CopyRowView{CopyID: copy.CopyID, IsOpen: d.CopyOpen(open, chapter.Win, copy.Win, position, predecessorWon), IsWin: copy.Win, Percent: copy.Percent})
 			}
 		}
 		return nil
@@ -489,6 +498,11 @@ func (m Mode) MapDetail(c context.Context, a identity.ActorContext, copyID int64
 	if !known {
 		return DetailView{}, d.ErrRefused
 	}
+	info, known := m.Content.ChapterInfo(chapterID)
+	if !known {
+		return DetailView{}, d.ErrRefused
+	}
+	position := copyPosition(info.Copies, copyID)
 	var out DetailView
 	_, err := m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
 		at := op.StartedAt.UTC()
@@ -512,8 +526,16 @@ func (m Mode) MapDetail(c context.Context, a identity.ActorContext, copyID int64
 		if err != nil {
 			return err
 		}
+		predecessorWon := false
+		if position > 0 {
+			predecessor, found, err := m.ModeStore.ReadCopyTx(c, sc.Tx, guildID, chapterID, info.Copies[position-1])
+			if err != nil {
+				return err
+			}
+			predecessorWon = found && predecessor.Win
+		}
 		view := DetailView{CopyID: copyID, ChapterID: chapterID, CurrentIndex: currentIndex(copy), Waves: waves,
-			IsOpen: open && !chapter.Win, IsWin: copy.Win, Stage: copy.HolderStage}
+			IsOpen: d.CopyOpen(open, chapter.Win, copy.Win, position, predecessorWon), IsWin: copy.Win, Stage: copy.HolderStage}
 		if copy.LastFightTime != nil {
 			view.LastFight = copy.LastFightTime.Unix()
 		}
