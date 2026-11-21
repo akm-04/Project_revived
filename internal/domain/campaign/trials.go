@@ -4,6 +4,11 @@ import "gxb.local/backend/v2/internal/domain/modes"
 
 func Cloud(kind int64) bool { return kind >= 40 && kind <= 42 }
 
+// VoyageMission is true for a trial group the stock Voyage (time_travel) window
+// lists: source time_travel.lua ids 11..21. Cloud City groups 40..42 are a
+// separate window and do not count as a Voyage mission.
+func VoyageMission(kind int64) bool { return kind >= 11 && kind <= 21 }
+
 type TrialGroup struct {
 	ID         int64   `json:"id"`
 	Nodes      []int64 `json:"nodes"`

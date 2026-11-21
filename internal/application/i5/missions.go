@@ -255,6 +255,7 @@ func (m MissionMaterializer) bindingAvailable(definition objective.MissionDefini
 	return definition.Presentation.DeferredUntil == "" ||
 		definition.Presentation.DeferredUntil == "I9-6" && definition.AcceptedFactKind == "GODS_TRIAL_CLEARED" ||
 		m.Activity != nil && definition.Presentation.DeferredUntil == "I9-4B" ||
+		definition.Presentation.DeferredUntil == "I9-9" && (definition.AcceptedFactKind == "GUILD_ACTIVITY" || definition.AcceptedFactKind == "TEA_PARTY_DONATED") ||
 		definition.Presentation.DeferredUntil == "I9-10" && (definition.AcceptedFactKind == objective.IntimacyImprovedKind || definition.AcceptedFactKind == objective.VoyageFinishedKind) ||
 		definition.Presentation.DeferredUntil == "I9-11" && definition.AcceptedFactKind == "HERO_SKILL_UPGRADED" ||
 		definition.Presentation.DeferredUntil == "I9-5" && (definition.AcceptedFactKind == "MARCH_FINISHED" || definition.AcceptedFactKind == "WORKPLACE_TEAM_SENT" || definition.AcceptedFactKind == "SKY_CITY_BATTLE")
