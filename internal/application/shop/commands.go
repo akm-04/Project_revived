@@ -57,6 +57,9 @@ func (s Service) List(c context.Context, actor identity.ActorContext, op operati
 	return s.run(c, actor, op, true, func(c context.Context, sc gen.TimedScope, catalog d.Catalog) (map[string]any, error) {
 		list := make([]int64, 0, len(catalog.Shops))
 		for _, shop := range catalog.Shops {
+			if shop.Type == d.CourseBooksShopType {
+				continue
+			}
 			eligible, err := s.available(c, sc, actor.PlayerID, shop)
 			if err != nil {
 				return nil, err
@@ -101,7 +104,7 @@ func (s Service) Buy(c context.Context, actor identity.ActorContext, request Buy
 			return nil, d.ErrRefused
 		}
 		slot, disabled := catalog.TunedSlot(shop.Type, stored)
-		if disabled || stored.IsBuy != 0 {
+		if disabled || (!shop.Unlimit && stored.IsBuy != 0) {
 			return nil, d.ErrRefused
 		}
 		if shop.Type == 13 && request.ClientPrice == nil {
@@ -124,7 +127,7 @@ func (s Service) Buy(c context.Context, actor identity.ActorContext, request Buy
 		if err != nil {
 			return nil, err
 		}
-		setBought(&row, request.Index)
+		setBought(&row, request.Index, shop.Unlimit)
 		if err = s.settle(c, sc, actor, "buy", cost, lines); err != nil {
 			return nil, err
 		}
@@ -134,7 +137,8 @@ func (s Service) Buy(c context.Context, actor identity.ActorContext, request Buy
 		if err = s.observePurchase(factContext, sc, actor.PlayerID, crystalDebit(cost)); err != nil {
 			return nil, err
 		}
-		return map[string]any{"shop_type": shop.Type, "index": request.Index, "isbuy": int64(1), "isBuy": int64(1), "buy_times": int64(1)}, nil
+		bought, _ := row.FindSlot(request.Index)
+		return map[string]any{"shop_type": shop.Type, "index": request.Index, "isbuy": bought.IsBuy, "isBuy": bought.IsBuy, "buy_times": bought.BuyTimes}, nil
 	})
 }
 
@@ -173,7 +177,7 @@ func (s Service) MultiBuy(c context.Context, actor identity.ActorContext, reques
 				return nil, d.ErrRefused
 			}
 			slot, disabled := catalog.TunedSlot(shop.Type, stored)
-			if disabled || stored.IsBuy != 0 {
+			if disabled || (!shop.Unlimit && stored.IsBuy != 0) {
 				return nil, d.ErrRefused
 			}
 			price, err := s.priceFor(c, sc, catalog, shop, slot, actor.PlayerID)
@@ -199,7 +203,7 @@ func (s Service) MultiBuy(c context.Context, actor identity.ActorContext, reques
 			return nil, err
 		}
 		for _, index := range request.List {
-			setBought(&row, index)
+			setBought(&row, index, shop.Unlimit)
 		}
 		if err = s.settle(c, sc, actor, "multi_buy", cost, lines); err != nil {
 			return nil, err
@@ -212,9 +216,10 @@ func (s Service) MultiBuy(c context.Context, actor identity.ActorContext, reques
 		}
 		isBuy := make([]int64, len(request.List))
 		buyTimes := make([]int64, len(request.List))
-		for position := range request.List {
-			isBuy[position] = 1
-			buyTimes[position] = 1
+		for position, index := range request.List {
+			bought, _ := row.FindSlot(index)
+			isBuy[position] = bought.IsBuy
+			buyTimes[position] = bought.BuyTimes
 		}
 		return map[string]any{"shop_type": shop.Type, "list": request.List, "isbuy": isBuy, "buy_times": buyTimes}, nil
 	})
@@ -558,13 +563,18 @@ func refreshCurrency(shop d.Shop) (string, bool) {
 	return "crystal", true
 }
 
-func setBought(row *d.Row, index int64) {
+func setBought(row *d.Row, index int64, unlimit bool) {
 	for position := range row.Stock.Slots {
-		if row.Stock.Slots[position].Index == index {
-			row.Stock.Slots[position].IsBuy = 1
-			row.Stock.Slots[position].BuyTimes = 1
+		if row.Stock.Slots[position].Index != index {
+			continue
+		}
+		if unlimit {
+			row.Stock.Slots[position].BuyTimes++
 			return
 		}
+		row.Stock.Slots[position].IsBuy = 1
+		row.Stock.Slots[position].BuyTimes = 1
+		return
 	}
 }
 
