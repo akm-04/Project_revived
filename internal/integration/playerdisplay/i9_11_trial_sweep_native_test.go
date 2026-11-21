@@ -29,8 +29,25 @@ func (c trialSweepClock) Now(context.Context) (time.Time, error) { return c.at, 
 
 func prophecyDay(at time.Time) time.Time {
 	day := modes.Day(at)
-	day += (6 - ((day%6)+6)%6) % 6
+	// Always the next occurrence, never today: the pinned decision instant must
+	// follow the real-clock facts fixtures create (birth, level-up eligibility).
+	day += 6 - ((day%6)+6)%6
 	return modes.DayBegins(day).Add(6 * time.Hour)
+}
+
+// TestProphecyDayIsAlwaysAhead pins the fixture clock on every game-day
+// remainder; a past instant reopens the real-clock eligibility/observation race.
+func TestProphecyDayIsAlwaysAhead(t *testing.T) {
+	for _, base := range []time.Time{
+		time.Date(2026, 11, 21, 6, 0, 0, 0, time.UTC),
+		time.Date(2026, 11, 22, 12, 0, 0, 0, time.UTC),
+		time.Date(2026, 11, 26, 20, 0, 0, 0, time.UTC),
+	} {
+		at := prophecyDay(base)
+		if !at.After(base) || modes.Day(at)%6 != 0 {
+			t.Fatalf("base %s -> prophecy day %s (day %d)", base, at, modes.Day(at))
+		}
+	}
 }
 
 func trialSweepActor(t *testing.T, p *pg.Pool, s app.Mode, at time.Time) (identity.ActorContext, string) {
