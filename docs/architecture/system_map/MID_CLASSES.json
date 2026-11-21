@@ -47788,7 +47788,7 @@
     },
     {
      "file": "internal/application/arena/service.go",
-     "line": 464,
+     "line": 467,
      "value": "repeatable_read"
     }
    ],
@@ -47801,12 +47801,12 @@
     },
     {
      "file": "internal/application/arena/service.go",
-     "line": 464,
+     "line": 467,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/arena/service.go:498",
+    "internal/application/arena/service.go:501",
     "internal/application/i5/service.go:727"
    ],
    "retry": [
@@ -47817,7 +47817,7 @@
     },
     {
      "file": "internal/application/arena/service.go",
-     "line": 464,
+     "line": 467,
      "value": "6"
     }
    ],
@@ -47855,7 +47855,7 @@
      "file": "internal/application/arena/service.go",
      "function": "Service.receipted",
      "isolation": "repeatable_read",
-     "line": 464,
+     "line": 467,
      "read_only": "false",
      "retry": "6"
     }
@@ -48009,7 +48009,7 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "UNRESOLVED apply at internal/application/arena/service.go:477",
+    "UNRESOLVED apply at internal/application/arena/service.go:480",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED run at internal/application/arena/service.go:96"
    ],
@@ -48025,7 +48025,7 @@
     },
     {
      "file": "internal/application/arena/service.go",
-     "line": 283,
+     "line": 286,
      "value": "repeatable_read"
     }
    ],
@@ -48038,7 +48038,7 @@
     },
     {
      "file": "internal/application/arena/service.go",
-     "line": 283,
+     "line": 286,
      "value": "false"
     }
    ],
@@ -48051,7 +48051,7 @@
     },
     {
      "file": "internal/application/arena/service.go",
-     "line": 283,
+     "line": 286,
      "value": "6"
     }
    ],
@@ -48079,7 +48079,7 @@
      "file": "internal/application/arena/service.go",
      "function": "Service.Info",
      "isolation": "repeatable_read",
-     "line": 283,
+     "line": 286,
      "read_only": "false",
      "retry": "6"
     }
@@ -48243,7 +48243,7 @@
     },
     {
      "file": "internal/application/arena/service.go",
-     "line": 382,
+     "line": 385,
      "value": "repeatable_read"
     }
    ],
@@ -48256,7 +48256,7 @@
     },
     {
      "file": "internal/application/arena/service.go",
-     "line": 382,
+     "line": 385,
      "value": "false"
     }
    ],
@@ -48269,7 +48269,7 @@
     },
     {
      "file": "internal/application/arena/service.go",
-     "line": 382,
+     "line": 385,
      "value": "6"
     }
    ],
@@ -48295,7 +48295,7 @@
      "file": "internal/application/arena/service.go",
      "function": "Service.change",
      "isolation": "repeatable_read",
-     "line": 382,
+     "line": 385,
      "read_only": "false",
      "retry": "6"
     }
@@ -48365,7 +48365,7 @@
    "unknown": [
     "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/arena/roster.go:26",
     "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/arena/roster.go:36",
-    "UNRESOLVED apply at internal/application/arena/service.go:395",
+    "UNRESOLVED apply at internal/application/arena/service.go:398",
     "UNRESOLVED base at internal/domain/arena/match.go:78",
     "UNRESOLVED run at internal/application/arena/service.go:96"
    ],
@@ -60237,7 +60237,7 @@
     },
     {
      "file": "internal/application/arena/service.go",
-     "line": 464,
+     "line": 467,
      "value": "repeatable_read"
     }
    ],
@@ -60250,12 +60250,12 @@
     },
     {
      "file": "internal/application/arena/service.go",
-     "line": 464,
+     "line": 467,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/arena/service.go:498"
+    "internal/application/arena/service.go:501"
    ],
    "retry": [
     {
@@ -60265,7 +60265,7 @@
     },
     {
      "file": "internal/application/arena/service.go",
-     "line": 464,
+     "line": 467,
      "value": "6"
     }
    ],
@@ -60295,7 +60295,7 @@
      "file": "internal/application/arena/service.go",
      "function": "Service.receipted",
      "isolation": "repeatable_read",
-     "line": 464,
+     "line": 467,
      "read_only": "false",
      "retry": "6"
     }
@@ -60399,7 +60399,7 @@
    ],
    "unknown": [
     "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/application/arena/roster.go:26",
-    "UNRESOLVED apply at internal/application/arena/service.go:477",
+    "UNRESOLVED apply at internal/application/arena/service.go:480",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED run at internal/application/arena/service.go:96"
    ],
@@ -60415,7 +60415,7 @@
     },
     {
      "file": "internal/application/arena/service.go",
-     "line": 464,
+     "line": 467,
      "value": "repeatable_read"
     }
    ],
@@ -60428,12 +60428,12 @@
     },
     {
      "file": "internal/application/arena/service.go",
-     "line": 464,
+     "line": 467,
      "value": "false"
     }
    ],
    "receipt_writes": [
-    "internal/application/arena/service.go:498",
+    "internal/application/arena/service.go:501",
     "internal/application/i5/service.go:727"
    ],
    "retry": [
@@ -60444,7 +60444,7 @@
     },
     {
      "file": "internal/application/arena/service.go",
-     "line": 464,
+     "line": 467,
      "value": "6"
     }
    ],
@@ -60482,7 +60482,7 @@
      "file": "internal/application/arena/service.go",
      "function": "Service.receipted",
      "isolation": "repeatable_read",
-     "line": 464,
+     "line": 467,
      "read_only": "false",
      "retry": "6"
     }
@@ -60636,7 +60636,7 @@
    ],
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
-    "UNRESOLVED apply at internal/application/arena/service.go:477",
+    "UNRESOLVED apply at internal/application/arena/service.go:480",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "UNRESOLVED run at internal/application/arena/service.go:96"
    ],

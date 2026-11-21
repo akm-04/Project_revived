@@ -630,6 +630,7 @@
    "r1_arena_room_pet.json"
   ],
   "unit": [
+   "clock_rollback_test.go",
    "fight_test.go",
    "partner_stars_test.go",
    "picks_test.go",

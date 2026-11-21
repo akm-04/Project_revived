@@ -264,7 +264,7 @@ func (service Service) ResolveTournamentCombat(requestContext context.Context, i
 				}
 			}
 		}
-		current.Status, current.SettledAt = d.RoomSettled, at
+		current.Status, current.SettledAt = d.RoomSettled, gen.EffectiveObservation(at, current.SettledAt, current.StartsAt)
 		current.StateVersion++
 		current.NoticeVersion++
 		// One count per genuine round per player, from each player's own frozen

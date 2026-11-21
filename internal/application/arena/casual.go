@@ -120,7 +120,7 @@ func (service Service) MatchCasual(requestContext context.Context, operationCont
 		}
 		previousVersion := root.StateVersion
 		root.StateVersion++
-		root.UpdatedAt = at
+		root.UpdatedAt = gen.EffectiveObservation(at, root.UpdatedAt, root.CreatedAt)
 		if err := service.Store.SaveCompetitionTx(requestContext, scope.Tx, root, previousVersion); err != nil {
 			return err
 		}

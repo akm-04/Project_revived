@@ -227,3 +227,10 @@ func TestD507ArenaFightRefusals(t *testing.T) {
 		t.Fatal("a malformed FIGHT stays 400 without reaching the owner", malformed)
 	}
 }
+
+func TestI9_12ArenaCanonicalConflictRefusal(t *testing.T) {
+	response := failArena(d.ErrConflict)
+	if response.HTTPStatus != 409 || response.Body["error_code"] != unprovenRefusalCode {
+		t.Fatalf("a canonical conflict is a permanent 409 refusal (I9_11_CLOCK_ROLLBACK_V1 K5), got %d %#v", response.HTTPStatus, response.Body)
+	}
+}

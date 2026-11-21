@@ -202,7 +202,7 @@ func (s Service) settleSeasonTx(c context.Context, sc gen.TimedScope, season int
 		return err
 	}
 	old := root.StateVersion
-	root.SettledThrough, root.StateVersion, root.UpdatedAt = season, old+1, at
+	root.SettledThrough, root.StateVersion, root.UpdatedAt = season, old+1, gen.EffectiveObservation(at, root.UpdatedAt, root.CreatedAt)
 	return s.Store.SaveCompetitionTx(c, sc.Tx, root, old)
 }
 
@@ -248,7 +248,10 @@ func (s Service) player(c context.Context, sc gen.TimedScope, catalog d.Catalog,
 }
 
 func (s Service) save(c context.Context, t tx.Tx, before, next d.Player, at time.Time) error {
-	next.StateVersion, next.UpdatedAt = before.StateVersion+1, at
+	next.StateVersion = before.StateVersion + 1
+	next.UpdatedAt = gen.EffectiveObservation(at, before.UpdatedAt, before.CreatedAt)
+	next.StarAt = gen.EffectiveObservation(next.StarAt, before.StarAt)
+	next.MissionTime = gen.EffectiveObservation(next.MissionTime, before.MissionTime)
 	return s.Store.SavePlayerTx(c, t, next, before.StateVersion)
 }
 
@@ -315,7 +318,7 @@ func (s Service) Info(c context.Context, a identity.ActorContext, op operation.C
 					return err
 				}
 				old := root.StateVersion
-				root.StateVersion, root.UpdatedAt = old+1, at
+				root.StateVersion, root.UpdatedAt = old+1, gen.EffectiveObservation(at, root.UpdatedAt, root.CreatedAt)
 				if err = s.Store.SaveCompetitionTx(c, sc.Tx, root, old); err != nil {
 					return err
 				}
