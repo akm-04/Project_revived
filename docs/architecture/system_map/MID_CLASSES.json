@@ -18161,12 +18161,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "serializable"
     },
     {
@@ -18219,12 +18219,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "false"
     },
     {
@@ -18279,12 +18279,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "3"
     },
     {
@@ -18398,7 +18398,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 368,
+     "line": 379,
      "read_only": "false",
      "retry": "3"
     },
@@ -18406,7 +18406,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 548,
+     "line": 559,
      "read_only": "false",
      "retry": "3"
     },
@@ -18751,8 +18751,8 @@
     "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
     "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:347",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:513",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
@@ -18799,12 +18799,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "serializable"
     },
     {
@@ -18857,12 +18857,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "false"
     },
     {
@@ -18917,12 +18917,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "3"
     },
     {
@@ -19036,7 +19036,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 368,
+     "line": 379,
      "read_only": "false",
      "retry": "3"
     },
@@ -19044,7 +19044,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 548,
+     "line": 559,
      "read_only": "false",
      "retry": "3"
     },
@@ -19389,8 +19389,8 @@
     "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
     "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:347",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:513",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
@@ -19437,12 +19437,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "serializable"
     },
     {
@@ -19495,12 +19495,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "false"
     },
     {
@@ -19555,12 +19555,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "3"
     },
     {
@@ -19674,7 +19674,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 368,
+     "line": 379,
      "read_only": "false",
      "retry": "3"
     },
@@ -19682,7 +19682,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 548,
+     "line": 559,
      "read_only": "false",
      "retry": "3"
     },
@@ -20027,8 +20027,8 @@
     "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
     "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:347",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:513",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
@@ -20075,12 +20075,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "serializable"
     },
     {
@@ -20133,12 +20133,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "false"
     },
     {
@@ -20193,12 +20193,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "3"
     },
     {
@@ -20312,7 +20312,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 368,
+     "line": 379,
      "read_only": "false",
      "retry": "3"
     },
@@ -20320,7 +20320,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 548,
+     "line": 559,
      "read_only": "false",
      "retry": "3"
     },
@@ -20665,8 +20665,8 @@
     "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
     "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:347",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:513",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
@@ -20713,12 +20713,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "serializable"
     },
     {
@@ -20771,12 +20771,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "false"
     },
     {
@@ -20831,12 +20831,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "3"
     },
     {
@@ -20950,7 +20950,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 368,
+     "line": 379,
      "read_only": "false",
      "retry": "3"
     },
@@ -20958,7 +20958,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 548,
+     "line": 559,
      "read_only": "false",
      "retry": "3"
     },
@@ -21303,8 +21303,8 @@
     "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
     "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:347",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:513",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
@@ -21351,12 +21351,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "serializable"
     },
     {
@@ -21409,12 +21409,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "false"
     },
     {
@@ -21469,12 +21469,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "3"
     },
     {
@@ -21588,7 +21588,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 368,
+     "line": 379,
      "read_only": "false",
      "retry": "3"
     },
@@ -21596,7 +21596,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 548,
+     "line": 559,
      "read_only": "false",
      "retry": "3"
     },
@@ -21941,8 +21941,8 @@
     "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
     "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:347",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:513",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
@@ -21989,12 +21989,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "serializable"
     },
     {
@@ -22047,12 +22047,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "false"
     },
     {
@@ -22107,12 +22107,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "3"
     },
     {
@@ -22226,7 +22226,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 368,
+     "line": 379,
      "read_only": "false",
      "retry": "3"
     },
@@ -22234,7 +22234,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 548,
+     "line": 559,
      "read_only": "false",
      "retry": "3"
     },
@@ -22579,8 +22579,8 @@
     "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
     "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:347",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:513",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
@@ -22627,12 +22627,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "serializable"
     },
     {
@@ -22685,12 +22685,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "false"
     },
     {
@@ -22745,12 +22745,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "3"
     },
     {
@@ -22864,7 +22864,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 368,
+     "line": 379,
      "read_only": "false",
      "retry": "3"
     },
@@ -22872,7 +22872,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 548,
+     "line": 559,
      "read_only": "false",
      "retry": "3"
     },
@@ -23217,8 +23217,8 @@
     "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
     "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:347",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:513",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
@@ -23265,12 +23265,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "serializable"
     },
     {
@@ -23323,12 +23323,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "false"
     },
     {
@@ -23383,12 +23383,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "3"
     },
     {
@@ -23502,7 +23502,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 368,
+     "line": 379,
      "read_only": "false",
      "retry": "3"
     },
@@ -23510,7 +23510,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 548,
+     "line": 559,
      "read_only": "false",
      "retry": "3"
     },
@@ -23855,8 +23855,8 @@
     "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
     "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:347",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:513",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
@@ -23903,12 +23903,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "serializable"
     },
     {
@@ -23961,12 +23961,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "false"
     },
     {
@@ -24021,12 +24021,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "3"
     },
     {
@@ -24140,7 +24140,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 368,
+     "line": 379,
      "read_only": "false",
      "retry": "3"
     },
@@ -24148,7 +24148,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 548,
+     "line": 559,
      "read_only": "false",
      "retry": "3"
     },
@@ -24493,8 +24493,8 @@
     "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
     "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:347",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:513",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
@@ -24541,12 +24541,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "serializable"
     },
     {
@@ -24599,12 +24599,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "false"
     },
     {
@@ -24659,12 +24659,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "3"
     },
     {
@@ -24778,7 +24778,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 368,
+     "line": 379,
      "read_only": "false",
      "retry": "3"
     },
@@ -24786,7 +24786,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 548,
+     "line": 559,
      "read_only": "false",
      "retry": "3"
     },
@@ -25131,8 +25131,8 @@
     "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
     "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:347",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:513",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
@@ -25179,12 +25179,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "serializable"
     },
     {
@@ -25237,12 +25237,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "false"
     },
     {
@@ -25297,12 +25297,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "3"
     },
     {
@@ -25416,7 +25416,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 368,
+     "line": 379,
      "read_only": "false",
      "retry": "3"
     },
@@ -25424,7 +25424,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 548,
+     "line": 559,
      "read_only": "false",
      "retry": "3"
     },
@@ -25769,8 +25769,8 @@
     "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
     "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:347",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:513",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
@@ -25817,12 +25817,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "serializable"
     },
     {
@@ -25875,12 +25875,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "false"
     },
     {
@@ -25935,12 +25935,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "3"
     },
     {
@@ -26054,7 +26054,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 368,
+     "line": 379,
      "read_only": "false",
      "retry": "3"
     },
@@ -26062,7 +26062,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 548,
+     "line": 559,
      "read_only": "false",
      "retry": "3"
     },
@@ -26407,8 +26407,8 @@
     "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
     "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:347",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:513",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
@@ -26455,12 +26455,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "serializable"
     },
     {
@@ -26513,12 +26513,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "false"
     },
     {
@@ -26573,12 +26573,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "3"
     },
     {
@@ -26692,7 +26692,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 368,
+     "line": 379,
      "read_only": "false",
      "retry": "3"
     },
@@ -26700,7 +26700,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 548,
+     "line": 559,
      "read_only": "false",
      "retry": "3"
     },
@@ -27045,8 +27045,8 @@
     "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
     "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:347",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:513",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"
@@ -27093,12 +27093,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "serializable"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "serializable"
     },
     {
@@ -27151,12 +27151,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "false"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "false"
     },
     {
@@ -27211,12 +27211,12 @@
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 368,
+     "line": 379,
      "value": "3"
     },
     {
      "file": "internal/application/socialgift/service.go",
-     "line": 548,
+     "line": 559,
      "value": "3"
     },
     {
@@ -27330,7 +27330,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Send",
      "isolation": "serializable",
-     "line": 368,
+     "line": 379,
      "read_only": "false",
      "retry": "3"
     },
@@ -27338,7 +27338,7 @@
      "file": "internal/application/socialgift/service.go",
      "function": "Service.Claim",
      "isolation": "serializable",
-     "line": 548,
+     "line": 559,
      "read_only": "false",
      "retry": "3"
     },
@@ -27683,8 +27683,8 @@
     "UNRESOLVED body at internal/application/socialgift/service.go:67",
     "UNRESOLVED body at internal/application/socialprojection/service.go:86",
     "UNRESOLVED cancel at internal/adapters/stockruntime/social_dispatcher.go:171",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:336",
-    "UNRESOLVED cancel at internal/application/socialgift/service.go:502",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:347",
+    "UNRESOLVED cancel at internal/application/socialgift/service.go:513",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
     "transaction ReadOnly flag not statically decidable at internal/application/mentor/service.go:132",
     "transaction isolation not statically decidable at internal/application/mentor/service.go:132"

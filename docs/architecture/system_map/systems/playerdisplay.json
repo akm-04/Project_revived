@@ -319,6 +319,7 @@
    "topfloor_battle.json"
   ],
   "unit": [
+   "cosmetic_privilege_clock_test.go",
    "family_origins_test.go",
    "hero_predicate_test.go"
   ]

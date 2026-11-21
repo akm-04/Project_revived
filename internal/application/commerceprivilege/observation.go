@@ -96,6 +96,11 @@ func (p Provider) snapshot(c context.Context, q tx.Queryer, pid identity.PlayerI
 	out = d.Snapshot{State: s, ObservationRevision: revision, ObservedAt: observedAt.UTC(), SkillPointCap: cap, MonthCardActive: cards.MonthCardEnd > at.Unix(), PrivilegeCardActive: privilegeActive, ProviderRevision: d.ManualPolicy + "/" + s.ContentRevision}
 	return out, true, out.Validate(pid, revision, observedAt)
 }
+
+// ReadCosmeticPrivilegeTx returns the pinned cosmetic privilege snapshot. The
+// caller's at is the decision time, but the provider observes at
+// EffectiveObservation(at, stored.UpdatedAt); every caller validates the
+// returned Snapshot at Snapshot.ObservedAt, never at the raw decision time.
 func (p Provider) ReadCosmeticPrivilegeTx(c context.Context, q tx.Queryer, pid identity.PlayerID, revision string, at time.Time) (d.Snapshot, error) {
 	if p.Store == nil || p.Content == nil || q == nil || !pid.Valid() || at.IsZero() || !d.RevisionValid(revision) {
 		return d.Snapshot{}, d.ErrUnavailable

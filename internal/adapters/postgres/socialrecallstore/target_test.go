@@ -121,7 +121,12 @@ func (r *privilegeRecorder) ReadCosmeticPrivilegeTx(_ context.Context, q tx.Quer
 	r.player = player
 	r.revision = revision
 	r.at = at
-	return r.value, r.err
+	out := r.value
+	// Mirror the canonical provider: a stored forward fact is observed at itself.
+	if out.State.UpdatedAt.After(at) {
+		out.ObservedAt = out.State.UpdatedAt.UTC()
+	}
+	return out, r.err
 }
 
 type relationRecorder struct {
@@ -320,6 +325,20 @@ func TestRecallTargetRejectsScopeWithoutRequiredCoherence(t *testing.T) {
 				t.Fatal("invalid scope still reached an owner port")
 			}
 		})
+	}
+}
+
+func TestRecallTargetAcceptsForwardDatedPrivilegeAtItsObservedAt(t *testing.T) {
+	fixture := newTargetFixture(t)
+	forward := targetAt.Add(8 * time.Hour)
+	fixture.privilege.value.State.UpdatedAt = forward
+	fixture.privilege.value.ObservedAt = forward
+	snapshot, err := fixture.read()
+	if err != nil {
+		t.Fatalf("forward-dated privilege refused: %v", err)
+	}
+	if snapshot.Baseline.ChargeTotal != 100 {
+		t.Fatalf("baseline charge = %d", snapshot.Baseline.ChargeTotal)
 	}
 }
 

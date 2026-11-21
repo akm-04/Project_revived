@@ -471,7 +471,14 @@ func parsePlayerID(value string) int64 {
 // dispatcher applies before a friend delete or blacklist: it reports whether an
 // active class relation still binds the actor to the other player.
 func (service Service) ClassRelationActive(ctx context.Context, actor identity.ActorContext, other identity.PlayerID, op operation.Context) (bool, error) {
-	if !service.validForRead() || !other.Valid() || other == actor.PlayerID {
+	if !other.Valid() {
+		return false, ErrInvalid
+	}
+	// A forged self target carries no class relation; the owner refuses it.
+	if other == actor.PlayerID {
+		return false, nil
+	}
+	if !service.validForRead() {
 		return false, ErrInvalid
 	}
 	active := false

@@ -121,7 +121,8 @@ func (reader FactsReader) ReadInviteeFactsTx(ctx context.Context, scope tx.Scope
 	if err != nil {
 		return out, err
 	}
-	if privilegeSnapshot.Validate(player, revision, at) != nil || privilegeSnapshot.State.LogicalServerID != logicalserver.PlayerRegion(player) {
+	// K2': the provider observes at the latest stored fact, so validate there.
+	if privilegeSnapshot.Validate(player, revision, privilegeSnapshot.ObservedAt) != nil || privilegeSnapshot.State.LogicalServerID != logicalserver.PlayerRegion(player) {
 		return out, application.ErrFacts
 	}
 	profile, err := reader.ReadPlayerProfileTx(ctx, scope.Tx, player)
