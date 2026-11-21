@@ -150,7 +150,8 @@ func (s Service) ReadEligibilityTx(c context.Context, sc ca.CoherentReadScope, q
 			return out, e
 		}
 		if e == nil {
-			if v.Validate(q.PlayerID, sc.ContentRevision, sc.ObservedAt) != nil {
+			// K2': the provider observes at the latest stored fact, so validate there.
+			if v.Validate(q.PlayerID, sc.ContentRevision, v.ObservedAt) != nil {
 				return out, ErrConflict
 			}
 			out.Privilege = &v
