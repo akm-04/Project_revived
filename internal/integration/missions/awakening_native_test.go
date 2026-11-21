@@ -14,6 +14,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
+	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	"gxb.local/backend/v2/internal/application/characterhero"
 	"gxb.local/backend/v2/internal/application/characterpet"
 	"gxb.local/backend/v2/internal/application/i5"
@@ -22,13 +23,19 @@ import (
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	"gxb.local/backend/v2/internal/protocol/httpedge"
+	"gxb.local/backend/v2/internal/protocol/wire"
 )
 
 func awakeningNative(t *testing.T) (*pg.Pool, i5.Service, identity.ActorContext, character.Hero, time.Time) {
 	t.Helper()
+	return awakeningNativeAt(t, upcomingOctober27())
+}
+
+func awakeningNativeAt(t *testing.T, at time.Time) (*pg.Pool, i5.Service, identity.ActorContext, character.Hero, time.Time) {
+	t.Helper()
 	p := missionPool(t)
 	ctx := context.Background()
-	at := upcomingOctober27()
 	actor := runtimeActor(t, p, at)
 	s := runtimeService(p, &missionClock{at: at})
 	content := contentstore.Store{Queryer: p}
@@ -175,6 +182,42 @@ func TestAwakeningNativeBloodRawFacetAndConcurrentOpen(t *testing.T) {
 	raw, e = (characterstore.RawAwakeningStore{}).ReadRawAwakeningBirthTx(ctx, p, h.Ref())
 	if e != nil || raw.RawStage != 0 || raw.Version != 3 {
 		t.Fatal(raw, e)
+	}
+}
+
+// A forwarded server clock left this Hero's birth facts after the corrected
+// decision time. The twice-awake open must clamp its write instead of refusing
+// until the wall clock catches up.
+func TestAwakeningNativeBackwardClockKeepsBirthTimestampsMonotone(t *testing.T) {
+	clockAt := time.Now().UTC().Add(2 * time.Minute)
+	p, s, a, h, at := awakeningNativeAt(t, clockAt)
+	ctx := context.Background()
+	forward := at.Add(8 * time.Hour).Truncate(time.Microsecond)
+	if _, e := p.Raw().Exec(ctx, `UPDATE player_heroes SET table_id=11001001,created_at=$3,updated_at=$3 WHERE player_id=$1 AND partner_id=$2`, int64(a.PlayerID), h.PartnerID, forward); e != nil {
+		t.Fatal(e)
+	}
+	if _, e := p.Raw().Exec(ctx, `UPDATE player_hero_raw_awakening SET birth_at=$3,created_at=$3,updated_at=$3 WHERE player_id=$1 AND partner_id=$2`, int64(a.PlayerID), h.PartnerID, forward); e != nil {
+		t.Fatal(e)
+	}
+	dispatcher := stockruntime.I5Dispatcher{Authority: activityFixtureAuthority{a}, Service: s, Awakening: &s}
+	response := dispatcher.Dispatch(ctx, httpedge.DispatchRequest{Envelope: wire.RequestEnvelope{
+		Operation: runtimeOperation(t, at), MID: 167, ReceivedAt: at,
+		Params: map[string]any{"table_id": int64(2001001)},
+		Claims: wire.CredentialClaims{Token: "fixture", Region: 1},
+	}})
+	if response.HTTPStatus != 200 {
+		t.Fatalf("MID167 after backward clock step: status %d body %#v cause %v", response.HTTPStatus, response.Body, response.Cause)
+	}
+	raw, e := (characterstore.RawAwakeningStore{}).ReadRawAwakeningBirthTx(ctx, p, h.Ref())
+	if e != nil || raw.Version != 2 || raw.RawStage != 1 || raw.UpdatedAt.Before(forward) {
+		t.Fatalf("raw awakening after clamp: %+v %v", raw, e)
+	}
+	var created, updated time.Time
+	if e = p.QueryRow(ctx, `SELECT created_at,updated_at FROM player_heroes WHERE player_id=$1 AND partner_id=$2`, int64(a.PlayerID), h.PartnerID).Scan(&created, &updated); e != nil {
+		t.Fatal(e)
+	}
+	if updated.Before(created) {
+		t.Fatalf("hero timestamps inverted: created=%v updated=%v", created, updated)
 	}
 }
 

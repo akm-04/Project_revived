@@ -6,6 +6,7 @@ import (
 	"time"
 
 	ca "gxb.local/backend/v2/internal/application/characterasset"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -28,7 +29,7 @@ func (r RawAwakeningObservationReader) RawAwakeningTx(c context.Context, sc ca.C
 	if e != nil {
 		return out, e
 	}
-	if h.Ref() != ref || h.ValidatePersistent() != nil || h.UpdatedAt.Before(h.CreatedAt) || sc.ObservedAt.Before(h.UpdatedAt) {
+	if h.Ref() != ref || h.ValidatePersistent() != nil || h.UpdatedAt.Before(h.CreatedAt) {
 		return out, character.ErrRawAwakeningUnavailable
 	}
 	f, found, e := r.Births.FindRawAwakeningTx(c, sc.Queryer(), ref)
@@ -45,5 +46,6 @@ func (r RawAwakeningObservationReader) RawAwakeningTx(c context.Context, sc ca.C
 	if f.Version > 1 {
 		producer = f.ProducerReference
 	}
-	return ca.HeroRawAwakeningObservation{Ref: ref, StateVersion: h.StateVersion, ContentRevision: sc.ContentRevision, ObservedAt: sc.ObservedAt, Known: true, RawStage: f.RawStage, ProducerReference: producer}, nil
+	observedAt := gen.EffectiveObservation(sc.ObservedAt, h.UpdatedAt, f.UpdatedAt)
+	return ca.HeroRawAwakeningObservation{Ref: ref, StateVersion: h.StateVersion, ContentRevision: sc.ContentRevision, ObservedAt: observedAt, Known: true, RawStage: f.RawStage, ProducerReference: producer}, nil
 }
