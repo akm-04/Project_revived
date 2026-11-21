@@ -413,8 +413,9 @@ func TestPlanReactionBoundedFacts(t *testing.T) {
 	if _, err = PlanReaction(ReactionFacts{Comment: &comment}, target, target.Owner, 10, at); !errors.Is(err, ErrUnqualified) {
 		t.Fatal("owner reaction must be refused", err)
 	}
-	if _, err = PlanReaction(ReactionFacts{Comment: &comment}, target, socialPlayer(11), 10, comment.CreatedAt.Add(-time.Second)); !errors.Is(err, ErrStaleTime) {
-		t.Fatal("reaction before comment", err)
+	backward, err := PlanReaction(ReactionFacts{Comment: &comment}, target, socialPlayer(11), 10, comment.CreatedAt.Add(-time.Second))
+	if err != nil || !backward.Created || !backward.Reaction.FirstAt.Equal(comment.CreatedAt) {
+		t.Fatal("backward reaction must record at the stored creation", backward, err)
 	}
 	if _, err = PlanReaction(ReactionFacts{Comment: &comment}, target, socialPlayer(11), 10, time.Time{}); !errors.Is(err, ErrInvalidFacts) {
 		t.Fatal("zero time", err)
@@ -454,8 +455,9 @@ func TestPlanDeleteCommentSingleProjection(t *testing.T) {
 	if _, err = PlanDeleteComment(&invalid, target, target.Owner, 10, at); !errors.Is(err, ErrInvalidFacts) {
 		t.Fatal("invalid comment facts", err)
 	}
-	if _, err = PlanDeleteComment(&comment, target, target.Owner, 10, comment.CreatedAt.Add(-time.Second)); !errors.Is(err, ErrStaleTime) {
-		t.Fatal("delete before create", err)
+	backwardDelete, err := PlanDeleteComment(&comment, target, target.Owner, 10, comment.CreatedAt.Add(-time.Second))
+	if err != nil || !backwardDelete.Changed || backwardDelete.Comment.DeletedAt == nil || !backwardDelete.Comment.DeletedAt.Equal(comment.CreatedAt) {
+		t.Fatal("backward delete must record at the stored creation", backwardDelete, err)
 	}
 	if _, err = PlanDeleteComment(&comment, target, 225007, 10, at); !errors.Is(err, ErrInvalidFacts) {
 		t.Fatal("foreign actor", err)

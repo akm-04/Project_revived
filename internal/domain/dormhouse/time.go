@@ -21,7 +21,9 @@ func SettleLounge(anchor, observed time.Time, fraction, comfort int64) (LoungeSe
 		return LoungeSettlement{}, ErrInvalidFacts
 	}
 	if observed.Before(anchor) {
-		return LoungeSettlement{}, ErrStaleTime
+		// A backward clock step settles nothing and keeps the later anchor so the
+		// already-paid span cannot be paid again when the clock returns.
+		return LoungeSettlement{Anchor: anchor.UTC(), Fraction: fraction}, nil
 	}
 	elapsed := observed.Sub(anchor)
 	discarded := elapsed > MaxLoungeElapsed
@@ -57,8 +59,13 @@ func (e Expansion) FinishPrice(observed time.Time) (diamonds int64, complete boo
 	if err != nil {
 		return 0, false, err
 	}
-	if observed.IsZero() || observed.Before(e.StartedAt) {
-		return 0, false, ErrStaleTime
+	if observed.IsZero() {
+		return 0, false, ErrInvalidFacts
+	}
+	// Price at the later of the decision time and the stored start: a backward
+	// step grants no credit for the span it moved back.
+	if observed.Before(e.StartedAt) {
+		observed = e.StartedAt
 	}
 	remain := due.Unix() - observed.Unix()
 	if remain <= 0 {

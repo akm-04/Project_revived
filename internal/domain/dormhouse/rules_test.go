@@ -26,11 +26,24 @@ func TestLoungeFractionsCapAndStale(t *testing.T) {
 	if e != nil || again.WholeEXP != 0 {
 		t.Fatal(again, e)
 	}
-	if _, e = SettleLounge(start, start.Add(-time.Second), 0, 0); e != ErrStaleTime {
-		t.Fatal(e)
+	backward, e := SettleLounge(start, start.Add(-time.Second), 4242, 3)
+	if e != nil || backward.WholeEXP != 0 || backward.Fraction != 4242 || !backward.Anchor.Equal(start) {
+		t.Fatal("backward step must settle nothing and keep the anchor", backward, e)
 	}
 	if _, e = SettleLounge(start, start.Add(10*time.Hour), 0, math.MaxInt64); e != ErrInvalidFacts {
 		t.Fatal("overflow accepted", e)
+	}
+}
+
+func TestLoungeBackwardStepNeverPaysTheSameSpanTwice(t *testing.T) {
+	start := time.Date(2026, 10, 13, 1, 0, 0, 0, time.UTC)
+	backward, e := SettleLounge(start, start.Add(-time.Hour), 0, 0)
+	if e != nil || backward.WholeEXP != 0 || !backward.Anchor.Equal(start) {
+		t.Fatal(backward, e)
+	}
+	forward, e := SettleLounge(backward.Anchor, start.Add(time.Hour), backward.Fraction, 0)
+	if e != nil || forward.WholeEXP != 60 || !forward.Anchor.Equal(start.Add(time.Hour)) {
+		t.Fatal("forward return paid the rolled-back span", forward, e)
 	}
 }
 func TestLoungeSplitSettlementAndOldComfort(t *testing.T) {
@@ -63,8 +76,16 @@ func TestExpansionPriceBoundary(t *testing.T) {
 			t.Fatal(tc, p, c, e)
 		}
 	}
-	if _, _, e := x.FinishPrice(s.Add(-time.Second)); e != ErrStaleTime {
-		t.Fatal(e)
+	// A backward step prices at the stored start: no refusal and no credit for
+	// the span the clock moved back.
+	for _, elapsed := range []time.Duration{-time.Second, -time.Hour} {
+		p, c, e := x.FinishPrice(s.Add(elapsed))
+		if e != nil || p != 500 || c {
+			t.Fatal("backward finish price", elapsed, p, c, e)
+		}
+	}
+	if _, _, e := x.FinishPrice(time.Time{}); e != ErrInvalidFacts {
+		t.Fatal("zero observation accepted", e)
 	}
 }
 func TestGrowthAppliedThresholdsOnly(t *testing.T) {

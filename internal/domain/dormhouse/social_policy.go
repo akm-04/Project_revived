@@ -435,8 +435,11 @@ func PlanReaction(facts ReactionFacts, target RoomTarget, actor identity.PlayerI
 	if facts.Likes < 0 || facts.Likes > MaxWireID {
 		return ReactionPlan{}, ErrInvalidFacts
 	}
-	if at.Before(comment.CreatedAt) {
-		return ReactionPlan{}, ErrStaleTime
+	// A backward step records the reaction at the comment's stored creation,
+	// never before it; the reaction itself still succeeds.
+	effective := at
+	if comment.CreatedAt.After(effective) {
+		effective = comment.CreatedAt
 	}
 	if facts.Actor != nil {
 		if err := facts.Actor.Validate(); err != nil {
@@ -450,7 +453,7 @@ func PlanReaction(facts ReactionFacts, target RoomTarget, actor identity.PlayerI
 	if facts.Likes >= MaxWireID {
 		return ReactionPlan{}, ErrInvalidFacts
 	}
-	reaction := CommentReaction{CommentID: commentID, Actor: actor, FirstAt: at.UTC()}
+	reaction := CommentReaction{CommentID: commentID, Actor: actor, FirstAt: effective.UTC()}
 	if err := reaction.Validate(); err != nil {
 		return ReactionPlan{}, err
 	}
@@ -481,11 +484,14 @@ func PlanDeleteComment(comment *HouseComment, target RoomTarget, actor identity.
 	if comment.DeletedAt != nil {
 		return DeleteCommentPlan{Comment: *comment}, nil
 	}
-	if at.Before(comment.CreatedAt) {
-		return DeleteCommentPlan{}, ErrStaleTime
+	// A backward step records the deletion at the comment's stored creation,
+	// never before it; the deletion itself still succeeds.
+	effective := at
+	if comment.CreatedAt.After(effective) {
+		effective = comment.CreatedAt
 	}
 	updated := *comment
-	deletedAt := at.UTC()
+	deletedAt := effective.UTC()
 	updated.DeletedAt = &deletedAt
 	if err := updated.Validate(); err != nil {
 		return DeleteCommentPlan{}, err

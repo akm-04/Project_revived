@@ -34,8 +34,15 @@ func TestGluePurchaseCounterUsesSourceLadderAndReadOnlyDayReset(t *testing.T) {
 	if _, _, err = rules.PlanPurchase(&second, player, 9, 1, at); err == nil {
 		t.Fatal("unknown VIP accepted")
 	}
-	if _, err = EffectiveGluePurchaseCount(&second, player, 0, at); err == nil {
-		t.Fatal("backwards day accepted")
+	// A backward day step stays on the stored day instead of refusing; it never
+	// grants a second daily reset.
+	if count, err = EffectiveGluePurchaseCount(&second, player, 0, at); err != nil || count != 2 {
+		t.Fatalf("backwards day: count=%d err=%v", count, err)
+	}
+	vipPrevious := GluePurchases{Player: player, GameDay: 2, Count: 1, StateVersion: 4, UpdatedAt: at.Add(time.Minute)}
+	backwardDay, _, err := rules.PlanPurchase(&vipPrevious, player, 1, 0, at.Add(-time.Second))
+	if err != nil || backwardDay.GameDay != 2 || backwardDay.Count != 2 {
+		t.Fatalf("backwards day purchase = %+v %v", backwardDay, err)
 	}
 	// K2/K3: a backwards clock step observes at the stored row and keeps the
 	// written timestamp monotone; it is not a stale-time refusal.
