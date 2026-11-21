@@ -153,6 +153,12 @@ type BattleCounts interface {
 	ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error
 }
 
+// PartnerMissions is the Library producer port (I9_12_CARRY_V1 R7): a settled
+// friend fight or ranked kill advances one partner mission row.
+type PartnerMissions interface {
+	ObservePartnerMissionTx(context.Context, tx.Tx, identity.PlayerID, int64, int64, time.Time) error
+}
+
 type Service struct {
 	Players      playerroot.TxLocker
 	Friendships  socialrelation.FriendFightPrivacyReader
@@ -177,10 +183,12 @@ type Service struct {
 	Receipts     receipt.Store
 	ReceiptRead  receipt.Reader
 	BattleCounts BattleCounts
+
+	PartnerMissions PartnerMissions
 }
 
 func (s Service) ready() bool {
 	return s.Timed.Runner.DB != nil && s.Timed.Binder.Time != nil && s.Fresh != nil && s.Store != nil && s.Content != nil && s.Fence != nil && s.Costs != nil && s.Grants != nil &&
 		s.Values != nil && s.Mail != nil && s.Achievements != nil && s.Facts != nil && s.Combat != nil && s.Heroes != nil && s.Pets != nil && s.OwnedHeroes != nil && s.Directory != nil && s.Guilds != nil && s.Servers != nil &&
-		s.Receipts != nil && s.ReceiptRead != nil && s.BattleCounts != nil
+		s.Receipts != nil && s.ReceiptRead != nil && s.BattleCounts != nil && s.PartnerMissions != nil
 }

@@ -19,6 +19,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/guild"
 	"gxb.local/backend/v2/internal/domain/identity"
+	lib "gxb.local/backend/v2/internal/domain/librarylocal"
 	"gxb.local/backend/v2/internal/domain/mail"
 	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/domain/objective"
@@ -137,6 +138,12 @@ type Content interface {
 	HeroExpPolicyTx(context.Context, tx.Queryer, string, int64) ([]character.HeroExpThreshold, error)
 }
 
+// PartnerMissions advances the lender's Library mission 1003 on a charged loan
+// (I9_12_CARRY_V1 R7).
+type PartnerMissions interface {
+	ObservePartnerMissionTx(context.Context, tx.Tx, identity.PlayerID, int64, int64, time.Time) error
+}
+
 type Service struct {
 	Runner     tx.Runner
 	Store      Store
@@ -152,11 +159,13 @@ type Service struct {
 	Players    playerroot.TxLocker
 	Content    Content
 	Policy     Policy
+
+	PartnerMissions PartnerMissions
 }
 
 func (s Service) validate() error {
 	ready := s.Runner.DB != nil && s.Store != nil && s.Units != nil && s.Levels != nil && s.Workplace != nil && s.Privileges != nil &&
-		s.Values != nil && s.Costs != nil && s.Facts != nil && s.Mail != nil && s.Fence != nil && s.Players != nil && s.Content != nil
+		s.Values != nil && s.Costs != nil && s.Facts != nil && s.Mail != nil && s.Fence != nil && s.Players != nil && s.Content != nil && s.PartnerMissions != nil
 	if !ready {
 		return ErrUnavailable
 	}
@@ -302,6 +311,16 @@ func (s Service) LendTx(c context.Context, t tx.Tx, scope ca.CoherentReadScope, 
 	for _, loan := range paid {
 		key := fmt.Sprintf("rental:%d:%d:%d", int64(borrower), int64(loan.Lender), day)
 		if err := s.Facts.RecordTx(prepared, t, bound, objective.Fact{PlayerID: borrower, SourceDomain: "guildrental", SourceBusinessKey: key, Kind: "HERO_LENT", Delta: 1}); err != nil {
+			return nil, err
+		}
+	}
+	// A-206 R7: a charged hero loan advances the lender's mission 1003 last,
+	// after the borrower's economy debit. Pet loans are not girl missions.
+	for _, loan := range paid {
+		if loan.Kind != d.HeroActor {
+			continue
+		}
+		if err := s.PartnerMissions.ObservePartnerMissionTx(c, t, loan.Lender, loan.Identity, lib.RentalMissionID, scope.ObservedAt); err != nil {
 			return nil, err
 		}
 	}

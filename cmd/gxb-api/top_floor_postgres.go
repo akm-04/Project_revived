@@ -182,7 +182,7 @@ func canonicalArena(p *postgres.Pool, r tx.Runner, content contentstore.Store, i
 	return apparena.Service{Players: i4store.PlayerRootLocker{}, Friendships: socialrelation.FriendFightPrivacyProvider{Store: socialrelationstore.Store{}}, Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: r}, Fresh: p, Store: arenastore.Store{}, Content: content,
 		Fence: i5db, Costs: appi5.MaterialCostDebiter{Store: i5db, Content: content}, Grants: i5svc, Values: i5db, Mail: appi5.SettlementMail{Store: i5db},
 		Achievements: appachievement.Service{Store: achievementstore.Store{}, Content: content, Population: o.library}, Combat: fight, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, OwnedHeroes: characterstore.Store{Queryer: p},
-		Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Servers: i4store.ServerNames{}, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}, Wake: adventureWakeup{}}}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, BattleCounts: o.library}
+		Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Servers: i4store.ServerNames{}, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}, Wake: adventureWakeup{}}}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, BattleCounts: o.library, PartnerMissions: o.library}
 }
 
 // canonicalConquer is the Conquer School mode (client-attested Combat attempt, I8-5D).

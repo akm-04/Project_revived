@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"time"
 
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -17,6 +18,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/guild"
 	"gxb.local/backend/v2/internal/domain/identity"
+	lib "gxb.local/backend/v2/internal/domain/librarylocal"
 	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -149,6 +151,12 @@ type Fence interface {
 	FenceActorTx(context.Context, tx.Tx, identity.ActorContext, time.Time) error
 }
 
+// PartnerMissions advances the donor's Library mission 1005 when the gifted
+// scroll matches an owned girl (I9_12_CARRY_V1 R7).
+type PartnerMissions interface {
+	ObservePartnerMissionTx(context.Context, tx.Tx, identity.PlayerID, int64, int64, time.Time) error
+}
+
 type Service struct {
 	Runner    tx.Runner
 	Store     Store
@@ -162,10 +170,12 @@ type Service struct {
 	Fence     Fence
 	Players   playerroot.TxLocker
 	Policy    Policy
+
+	PartnerMissions PartnerMissions
 }
 
 func (s Service) validate() error {
-	if s.Runner.DB == nil || s.Store == nil || s.Directory == nil || s.Content == nil || s.Heroes == nil || s.Inventory == nil || s.Values == nil || s.Costs == nil || s.Facts == nil || s.Fence == nil || s.Players == nil {
+	if s.Runner.DB == nil || s.Store == nil || s.Directory == nil || s.Content == nil || s.Heroes == nil || s.Inventory == nil || s.Values == nil || s.Costs == nil || s.Facts == nil || s.Fence == nil || s.Players == nil || s.PartnerMissions == nil {
 		return ErrUnavailable
 	}
 	if err := s.Policy.Validate(); err != nil {
@@ -448,10 +458,41 @@ func (s Service) Present(c context.Context, a identity.ActorContext, receiver id
 		if err := s.Facts.RecordTx(prepared, t, bound, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "guildtea", SourceBusinessKey: presentation, Kind: "TEA_PARTY_DONATED", Delta: 1}); err != nil {
 			return err
 		}
+		// A-206 R7: the donor's girl matching the gifted scroll advances mission
+		// 1005 last, after the grant and the scroll debit.
+		if err = s.observePartnerMissionTea(c, t, a.PlayerID, wish.ItemID, revision, op.StartedAt); err != nil {
+			return err
+		}
 		out, err = s.stateTx(c, t, a, day, false)
 		return err
 	})
 	return out, err
+}
+
+// observePartnerMissionTea resolves the scroll's girl template and advances
+// mission 1005 for the donor's matching owned girl, in ascending partner order.
+func (s Service) observePartnerMissionTea(c context.Context, t tx.Tx, donor identity.PlayerID, itemID int64, revision string, at time.Time) error {
+	template, err := s.Content.HeroAcquisitionByItemTx(c, t, revision, itemID)
+	if err != nil {
+		return err
+	}
+	heroes, err := s.Heroes.ListHeroesTx(c, t, donor)
+	if err != nil {
+		return err
+	}
+	partners := []int64{}
+	for _, hero := range heroes {
+		if hero.TableID == template.TableID || hero.OriginTableID == template.TableID {
+			partners = append(partners, hero.PartnerID)
+		}
+	}
+	slices.Sort(partners)
+	for _, partnerID := range partners {
+		if err = s.PartnerMissions.ObservePartnerMissionTx(c, t, donor, partnerID, lib.TeaPartyMissionID, at); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // Confirm is 1811: pays the receiver the wish item per unclaimed gift and clears

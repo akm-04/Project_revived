@@ -102,6 +102,7 @@ func rentalService(t *testing.T, p *postgres.Pool) guildrental.Service {
 		Values: values, Costs: appi5.MaterialCostDebiter{Store: i5store.Store{Queryer: p}, Content: contentstore.Store{Queryer: p}},
 		Facts: appi5.ObjectiveFacts{Owner: values, Open: i5store.Store{Queryer: p}}, Mail: appi5.SettlementMail{Store: i5store.Store{Queryer: p}},
 		Fence: i5store.Store{Queryer: p}, Players: i4store.PlayerRootLocker{}, Content: contentstore.Store{Queryer: p}, Policy: guildrentalPolicy(artifact.Policy),
+		PartnerMissions: libraryService(p, p),
 	}
 }
 

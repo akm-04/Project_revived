@@ -451,6 +451,7 @@
    "inputs_test.go",
    "journal_policy_native_test.go",
    "notice_test.go",
+   "partner_missions_test.go",
    "roll_policy_test.go"
   ]
  }

@@ -87,9 +87,17 @@ type Mode struct {
 	Receipts     receipt.Store
 	ReceiptRead  receipt.Reader
 	BattleCounts BattleCountObserver
+
+	PartnerMissions PartnerMissionObserver
 }
 
 // BattleCountObserver records the Girls Log count of one first settled battle.
 type BattleCountObserver interface {
 	ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error
+}
+
+// PartnerMissionObserver advances one Library partner mission from a settled
+// battle (I9_12_CARRY_V1 R7).
+type PartnerMissionObserver interface {
+	ObservePartnerMissionTx(context.Context, tx.Tx, identity.PlayerID, int64, int64, time.Time) error
 }
