@@ -437,7 +437,7 @@ func (m Mode) Settle(c context.Context, a identity.ActorContext, request Result,
 			return d.ErrRefused
 		}
 		summary := cd.Summary{Star: clampStar(request.Star), Win: request.Star > 0, Damage: maxDamage(request.TotalDamage), Alive: int64(len(nonZero(formation))),
-			Formation: formation, Pet: request.PetID, Enemies: summaryEnemies(request.Enemies)}
+			Formation: formation, Pet: request.PetID, Enemies: summaryEnemies(info.Waves, request.Enemies)}
 		attested, err := m.Combat.AttestSummaryTx(c, sc.Tx, combat.SummaryRequest{Locator: locator(a), GenerationRef: generationRef(request.ChapterID, request.CopyID),
 			TerminalKind: combatKind, At: at, Policy: m.summaryPolicy(), Summary: summary})
 		if err != nil {
@@ -495,10 +495,20 @@ func nonZero(values []int64) []int64 {
 	return out
 }
 
-func summaryEnemies(enemies []ResultEnemy) []cd.EnemyStatus {
+// summaryEnemies maps each reported hero_id (the 604 partner_id) back to the
+// wave monster's table_id: the frozen battle names template enemies by table id,
+// so a summary carrying the partner id would be refused as ENEMY_UNKNOWN.
+func summaryEnemies(waves map[int64][]EnemyRow, enemies []ResultEnemy) []cd.EnemyStatus {
 	out := make([]cd.EnemyStatus, 0, len(enemies))
 	for _, enemy := range enemies {
-		out = append(out, cd.EnemyStatus{Identity: enemy.HeroID, HP: enemy.HP})
+		tableID := enemy.HeroID
+		for _, row := range waves[enemy.Index] {
+			if row.PartnerID == enemy.HeroID {
+				tableID = row.TableID
+				break
+			}
+		}
+		out = append(out, cd.EnemyStatus{Identity: tableID, HP: enemy.HP})
 	}
 	return out
 }
@@ -681,9 +691,9 @@ func clampWaves(waves map[int64][]EnemyRow, index int64, enemies []ResultEnemy, 
 	return waves
 }
 
-func openRow(rows []EnemyRow, taken []bool, tableID int64) int {
+func openRow(rows []EnemyRow, taken []bool, partnerID int64) int {
 	for position, row := range rows {
-		if row.TableID == tableID && !taken[position] {
+		if row.PartnerID == partnerID && !taken[position] {
 			return position
 		}
 	}

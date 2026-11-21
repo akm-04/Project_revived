@@ -45680,7 +45680,7 @@
     }
    ],
    "receipt_writes": [
-    "internal/application/guildcampaign/commands.go:547",
+    "internal/application/guildcampaign/commands.go:557",
     "internal/application/i5/mission_facts.go:129",
     "internal/application/i5/service.go:1411",
     "internal/application/i5/service.go:727"

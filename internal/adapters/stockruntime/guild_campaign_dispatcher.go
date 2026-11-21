@@ -355,7 +355,9 @@ func enemyStatus(waves map[int64][]guildcampaign.EnemyRow) []any {
 			if enemy.HP > 0 {
 				health = 1
 			}
-			row := map[string]any{"table_id": enemy.TableID, "lev": enemy.Lev, "star": enemy.Star, "color": enemy.Color, "health": health}
+			// Hero.populate keeps partner_id as getHeroID (NormalHero.lua:142,493),
+			// and the stock 610 report sends that back as hero_id (BattleCreate.lua:3019).
+			row := map[string]any{"partner_id": enemy.PartnerID, "table_id": enemy.TableID, "lev": enemy.Lev, "star": enemy.Star, "color": enemy.Color, "health": health}
 			if health != 0 {
 				row["hp"] = enemy.HP
 			}

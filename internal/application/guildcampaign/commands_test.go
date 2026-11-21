@@ -66,9 +66,9 @@ func TestReplayBodyAddsFightExistCode(t *testing.T) {
 
 func TestClampWavesMarksRecordedRowsAndKeepsDead(t *testing.T) {
 	waves := map[int64][]EnemyRow{1: {
-		{TableID: 1},
-		{TableID: 2},
-		{TableID: 3},
+		{PartnerID: 1, TableID: 1},
+		{PartnerID: 2, TableID: 2},
+		{PartnerID: 3, TableID: 3},
 	}}
 	waves = clampWaves(waves, 1, []ResultEnemy{
 		{HeroID: 1, HP: 700, Index: 1},
@@ -99,5 +99,34 @@ func TestClampWavesMarksRecordedRowsAndKeepsDead(t *testing.T) {
 	waves = clampWaves(waves, 1, []ResultEnemy{{HeroID: 2, HP: 900, Index: 1}}, false)
 	if rows := waves[1]; rows[1].Health != 1 || rows[1].HP != 0 {
 		t.Fatalf("dead row revived: health=%d hp=%d", rows[1].Health, rows[1].HP)
+	}
+}
+
+func TestSummaryEnemiesMapsPartnerIDBackToFrozenTableID(t *testing.T) {
+	// The frozen battle names template enemies by table_id, while the stock
+	// RESULT carries getHeroID() (the partner_id of the 604 row).
+	waves := map[int64][]EnemyRow{1: {
+		{PartnerID: 1, TableID: 91071010},
+		{PartnerID: 2, TableID: 91071010},
+	}}
+	got := summaryEnemies(waves, []ResultEnemy{{HeroID: 2, HP: 5, Index: 1}, {HeroID: 99, HP: 1, Index: 1}})
+	if len(got) != 2 || got[0].Identity != 91071010 || got[0].HP != 5 || got[1].Identity != 99 {
+		t.Fatalf("summary enemies %+v", got)
+	}
+}
+
+func TestClampWavesMatchesPartnerIDSoIdenticalMonstersDiffer(t *testing.T) {
+	// BattleCreate.lua:3019 reports hero_id = enemy:getHeroID(), the partner_id
+	// of the 604 row, so two copies of one monster table are distinct enemies.
+	waves := map[int64][]EnemyRow{1: {
+		{PartnerID: 1, TableID: 91071010},
+		{PartnerID: 2, TableID: 91071010},
+	}}
+	waves = clampWaves(waves, 1, []ResultEnemy{{HeroID: 2, HP: 500, Index: 1}}, false)
+	if rows := waves[1]; rows[0].Health != 0 || rows[0].HP != 0 {
+		t.Fatalf("first duplicate was hit: health=%d hp=%d", rows[0].Health, rows[0].HP)
+	}
+	if rows := waves[1]; rows[1].Health != 1 || rows[1].HP != 500 {
+		t.Fatalf("second duplicate not matched by partner id: health=%d hp=%d", rows[1].Health, rows[1].HP)
 	}
 }

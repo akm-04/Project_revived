@@ -16,12 +16,15 @@ import (
 var builtinJSON []byte
 
 // Enemy is one wave member at the seeded state; full HP is health 0 with no hp.
+// PartnerID is the enemy's battle identity, unique inside the copy: the stock
+// 604 row's getHeroID() returns it and 610 reports it back as hero_id.
 type Enemy struct {
-	TableID int64 `json:"table_id"`
-	Lev     int64 `json:"lev"`
-	Star    int64 `json:"star"`
-	Color   int64 `json:"color"`
-	Health  int64 `json:"health"`
+	PartnerID int64 `json:"partner_id"`
+	TableID   int64 `json:"table_id"`
+	Lev       int64 `json:"lev"`
+	Star      int64 `json:"star"`
+	Color     int64 `json:"color"`
+	Health    int64 `json:"health"`
 }
 
 // Copy is one mission of a chapter; Waves is keyed "1".."3".
@@ -52,6 +55,8 @@ type Settings struct {
 	FirstRewardCoin      int64   `json:"first_reward_coin"`
 	SourceSelectSHA256   string  `json:"source_select_sha256"`
 	SourceCampaignSHA256 string  `json:"source_campaign_sha256"`
+	SourceBattleSHA256   string  `json:"source_battle_sha256"`
+	SourceMonsterSHA256  string  `json:"source_monster_sha256"`
 	SourceMiscSHA256     string  `json:"source_misc_sha256"`
 }
 
@@ -108,14 +113,16 @@ func (c Catalog) Validate() error {
 				return errors.New("guild campaign copy row")
 			}
 			seen[copy.CopyID] = true
+			partnerIDs := map[int64]bool{}
 			for _, wave := range []string{"1", "2", "3"} {
 				if len(copy.Waves[wave]) == 0 {
 					return errors.New("guild campaign copy wave")
 				}
 				for _, enemy := range copy.Waves[wave] {
-					if enemy.TableID <= 0 || enemy.Lev <= 0 || enemy.Star < 0 || enemy.Color < 0 || enemy.Health != 0 {
+					if enemy.PartnerID <= 0 || partnerIDs[enemy.PartnerID] || enemy.TableID <= 0 || enemy.Lev <= 0 || enemy.Star < 0 || enemy.Color < 0 || enemy.Health != 0 {
 						return errors.New("guild campaign enemy seed")
 					}
+					partnerIDs[enemy.PartnerID] = true
 				}
 			}
 		}
