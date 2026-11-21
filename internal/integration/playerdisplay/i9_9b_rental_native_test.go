@@ -95,7 +95,7 @@ func guildrentalPolicy(p guildrentalpolicy.Policy) guildrental.Policy {
 func rentalService(t *testing.T, p *postgres.Pool) guildrental.Service {
 	t.Helper()
 	artifact := must(guildrentalpolicy.LoadBuiltin())(t, "rental policy")
-	values := activityOwner(p)
+	values := missionOwner(p)
 	return guildrental.Service{
 		Runner: tx.Runner{DB: p}, Store: guildstore.Store{Queryer: p}, Units: rentalUnits{}, Levels: productionLevels{},
 		Workplace: workplace.Mode{Store: workplacestore.Store{}}, Privileges: appi5.BaselinePrivilegeProvider{},
@@ -669,7 +669,7 @@ func TestI9_9BRentalNative(t *testing.T) {
 	}
 	exec(t, f.pool, `UPDATE player_heroes SET level=1 WHERE player_id=$1 AND partner_id=$2`, int64(f.lender.PlayerID), f.second)
 
-	// C3 and C16: one paid borrow debits mana once and adds the offer's rent_award.
+	// C3: one paid borrow debits mana once and adds the offer's rent_award.
 	mana := libraryAmount(t, f.pool, f.borrower, "mana")
 	price := int64(1000)
 	_, err := f.borrow(t, "one", 1, f.hero, 0)
@@ -766,6 +766,65 @@ func TestI9_9BRentalNative(t *testing.T) {
 	}
 	if mail := scalar(t, f.pool, `SELECT count(*) FROM mail_records WHERE recipient_player_id IN ($1,$2) AND source_kind='GUILD_RENTAL_DEPARTURE'`, int64(f.lender.PlayerID), int64(f.petLender.PlayerID)); mail != 2 {
 		t.Fatal("C15 second close mailed again", mail)
+	}
+}
+
+// BUGS #131: daily mission 10018 "Have Fun! Lend 1 battle girl" counts the
+// lender's offer placement (fact 116), not the borrower's paid START.
+func TestI9_12HaveFunLendMissionNative(t *testing.T) {
+	f := newRentalFixture(t)
+	// Mission 10018's prerequisite is player level 32 (mission.lua req "1|32").
+	exec(t, f.pool, `UPDATE player_progression SET level=32,updated_at=clock_timestamp()-interval '1 hour' WHERE player_id=$1`, int64(f.lender.PlayerID))
+	progress := func(player identity.PlayerID) int64 {
+		return scalar(t, f.pool, `SELECT COALESCE((SELECT progress FROM player_mission_instances WHERE player_id=$1 AND objective_id=10018 AND definition_revision='I9_MISSIONS_V1' ORDER BY generation_id LIMIT 1),0)`, int64(player))
+	}
+	started := time.Now().UTC().Truncate(time.Microsecond)
+	firstOp := opPinned(f.revision)
+	firstOp.StartedAt = started
+	if err := f.service.Place(ctx, f.lender, guild.RentalHero, f.hero, firstOp); err != nil {
+		t.Fatal("place hero", err)
+	}
+	if got := progress(f.lender.PlayerID); got != 1 {
+		t.Fatalf("lend mission progress = %d want 1", got)
+	}
+	if rows := scalar(t, f.pool, `SELECT count(*) FROM player_mission_instances WHERE player_id=$1 AND objective_id=10018 AND definition_revision='I9_MISSIONS_V1'`, int64(f.lender.PlayerID)); rows != 1 {
+		t.Fatalf("mission 10018 rows = %d want 1", rows)
+	}
+
+	// The borrower's paid START no longer credits a mission that says "lend".
+	if _, err := f.borrow(t, "havefun", 1, f.hero, 0); err != nil {
+		t.Fatal("borrow", err)
+	}
+	if got := progress(f.borrower.PlayerID); got != 0 {
+		t.Fatalf("borrower lend-mission progress = %d want 0", got)
+	}
+
+	// A pet offer is not a battle girl.
+	if err := f.service.Place(ctx, f.petLender, guild.RentalPet, f.pet, opPinned(f.revision)); err != nil {
+		t.Fatal("place pet", err)
+	}
+	if got := progress(f.petLender.PlayerID); got != 0 {
+		t.Fatalf("pet lend-mission progress = %d want 0", got)
+	}
+
+	// Recall, then place the same girl again at the same operation instant: the
+	// offer business key repeats and the fact is applied once.
+	recallOp := opPinned(f.revision)
+	recallOp.StartedAt = started.Add(1801 * time.Second)
+	if _, _, err := f.service.Recall(ctx, f.lender, guild.RentalHero, f.hero, recallOp); err != nil {
+		t.Fatal("recall", err)
+	}
+	repeatOp := opPinned(f.revision)
+	repeatOp.StartedAt = started
+	if err := f.service.Place(ctx, f.lender, guild.RentalHero, f.hero, repeatOp); err != nil {
+		t.Fatal("repeat place", err)
+	}
+	if got := progress(f.lender.PlayerID); got != 1 {
+		t.Fatalf("repeat lend progress = %d want 1", got)
+	}
+	ownerKey := strconv.FormatInt(int64(f.lender.PlayerID), 10)
+	if facts := scalar(t, f.pool, `SELECT count(*) FROM gxb_operation_receipts WHERE owner_kind='player' AND owner_key=$1 AND domain='objective-fact' AND operation='mission:1' AND semantic_key LIKE '%:10018:%'`, ownerKey); facts != 1 {
+		t.Fatalf("mission fact receipts = %d want 1", facts)
 	}
 }
 
