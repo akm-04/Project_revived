@@ -62,11 +62,8 @@ func Other(s app.SelfGuild) map[string]any {
 
 func Detail2565(g app.GuildInfo) map[string]any {
 	info := Info(g)
-	// I6C does not own Guild rank position. Stock GuildDetailWindow requires a
-	// numeric field, so zero stays an explicit presentation sentinel until a
-	// later provider qualifies it.
 	info["three_huoyue"] = g.ThreeHuoyue
-	info["guild_rank"] = int64(0)
+	info["guild_rank"] = g.GuildRank
 	return map[string]any{"guild_info": info}
 }
 

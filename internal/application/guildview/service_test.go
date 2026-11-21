@@ -175,6 +175,20 @@ func TestGuildRoomRequiresOnlyCanonicalGuildStore(t *testing.T) {
 	}
 }
 
+func TestGuildForPlayerAnswersActivityBoardRank(t *testing.T) {
+	s, a := viewFixture()
+	store := s.Store.(viewStore)
+	store.activityRank = 3
+	s.Store = store
+	info, ok, err := s.GuildForPlayer(context.Background(), a, 100002)
+	if err != nil || !ok {
+		t.Fatalf("ok=%v err=%v", ok, err)
+	}
+	if info.GuildRank != 3 {
+		t.Fatalf("guild_rank=%d, want the board rank 3", info.GuildRank)
+	}
+}
+
 func TestGuildForPlayerIsServerFenced(t *testing.T) {
 	s, a := viewFixture()
 	info, ok, err := s.GuildForPlayer(context.Background(), a, 100002)

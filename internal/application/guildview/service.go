@@ -85,6 +85,7 @@ type GuildInfo struct {
 	MinAllowLevel   int64
 	Vitality        int64
 	ThreeHuoyue     int64
+	GuildRank       int64
 	MemberNum       int64
 	GuildLeader     int64
 	GuildLeaderName string
@@ -355,7 +356,20 @@ func (s Service) GuildForPlayer(ctx context.Context, actor identity.ActorContext
 	if err != nil || !ok {
 		return GuildInfo{}, false, err
 	}
-	return s.GuildInfo(ctx, actor, m.GuildID)
+	out, ok, err := s.GuildInfo(ctx, actor, m.GuildID)
+	if err != nil || !ok {
+		return out, ok, err
+	}
+	day, err := s.day(ctx)
+	if err != nil {
+		return GuildInfo{}, false, err
+	}
+	rank, err := s.Store.ActivityRankOf(ctx, actor.LogicalServerID, day, m.GuildID)
+	if err != nil {
+		return GuildInfo{}, false, err
+	}
+	out.GuildRank = rank
+	return out, true, nil
 }
 
 func (s Service) Other(ctx context.Context, actor identity.ActorContext, gid guild.ID) (SelfGuild, bool, error) {
