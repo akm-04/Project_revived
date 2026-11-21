@@ -172,8 +172,14 @@ func (h AdventureRoomNoticeHandler) ReloadAndDeliver(c context.Context, referenc
 				if !members[player] || !h.Delivered.chatUndelivered(view.RoomID, player, chat.Serial) {
 					continue
 				}
-				if err = h.Delivery.Deliver(c, player, mids.MIDChatFromFriend, frame); err != nil {
-					return err
+				delivered, deliverErr := h.Delivery.DeliverOnce(c, player, mids.MIDChatFromFriend, frame)
+				if deliverErr != nil {
+					return deliverErr
+				}
+				if !delivered {
+					// Keep the serial unmarked so a member who is between chat
+					// sockets receives the line on the next room wakeup.
+					continue
 				}
 				h.Delivered.markChat(view.RoomID, player, chat.Serial)
 			}
