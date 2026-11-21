@@ -31,7 +31,7 @@ func a128DormService(p *pg.Pool) appdorm.Service {
 
 func a128FurnitureDispatcher(t *testing.T, p *pg.Pool, a identity.ActorContext) stockruntime.ComposeDispatcher {
 	t.Helper()
-	return stockruntime.ComposeDispatcher{Authority: fixedBookAuthority{actor: a}, Book: stockruntime.NewCoalescedBookRead(bookService(p, p)), Furniture: a128DormService(p), Equipment: a128HeroService(p)}
+	return stockruntime.ComposeDispatcher{Authority: fixedBookAuthority{actor: a}, Book: stockruntime.NewCoalescedBookRead(bookService(p, p)), Furniture: a128DormService(p), Awakening: a128HeroService(p), Equipment: a128HeroService(p)}
 }
 
 func a128Level(t *testing.T, p *pg.Pool, a identity.ActorContext, level int64) {

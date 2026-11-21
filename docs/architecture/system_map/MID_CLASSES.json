@@ -6862,7 +6862,12 @@
     },
     {
      "file": "internal/application/characterhero/equipment_compose.go",
-     "line": 128,
+     "line": 164,
+     "value": "repeatable_read"
+    },
+    {
+     "file": "internal/application/characterhero/equipment_compose.go",
+     "line": 239,
      "value": "serializable"
     },
     {
@@ -6905,7 +6910,12 @@
     },
     {
      "file": "internal/application/characterhero/equipment_compose.go",
-     "line": 128,
+     "line": 164,
+     "value": "false"
+    },
+    {
+     "file": "internal/application/characterhero/equipment_compose.go",
+     "line": 239,
      "value": "false"
     },
     {
@@ -6951,7 +6961,12 @@
     },
     {
      "file": "internal/application/characterhero/equipment_compose.go",
-     "line": 128,
+     "line": 164,
+     "value": "1"
+    },
+    {
+     "file": "internal/application/characterhero/equipment_compose.go",
+     "line": 239,
      "value": "3"
     },
     {
@@ -7029,9 +7044,17 @@
     },
     {
      "file": "internal/application/characterhero/equipment_compose.go",
-     "function": "Service.ComposeEquipmentItem",
+     "function": "Service.OwnsAwakeningComposeItem",
+     "isolation": "repeatable_read",
+     "line": 164,
+     "read_only": "false",
+     "retry": "1"
+    },
+    {
+     "file": "internal/application/characterhero/equipment_compose.go",
+     "function": "Service.composeRecipeItem",
      "isolation": "serializable",
-     "line": 128,
+     "line": 239,
      "read_only": "false",
      "retry": "3"
     },
@@ -7242,6 +7265,7 @@
    "unknown": [
     "FANOUT InitFreshHeroTx has 9 implementers, not followed: characterhero.FreshFacetChain.InitFreshHeroTx, characterstore.EvolutionStore.InitFreshHeroTx, characterstore.RawAwakeningStore.InitFreshHeroTx, coursestore.Store.InitFreshHeroTx, dormstore.Store.InitFreshHeroTx, elementstore.Store.InitFreshHeroTx, inscriptionstore.Store.InitFreshHeroTx, librarystore.Store.InitFreshHeroTx, spiritstore.Store.InitFreshHeroTx at internal/application/characterhero/fresh_facets.go:24",
     "UNRESOLVED load at internal/adapters/postgres/contentstore/mode_catalog.go:70",
+    "UNRESOLVED recipe at internal/application/characterhero/equipment_compose.go:251",
     "UNRESOLVED validateRestoration at internal/application/i5/material_exchange.go:122"
    ],
    "writes": "state"

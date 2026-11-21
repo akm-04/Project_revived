@@ -26,12 +26,21 @@ type FurnitureComposePort interface {
 	ComposeFurnitureItem(context.Context, identity.ActorContext, int64, int64, operation.Context) (map[string]any, error)
 }
 
+// AwakeningComposePort is the Character-owned MID 83 awakening material
+// category claimed by a compiled recipe on a consumable source item.
+type AwakeningComposePort interface {
+	OwnsAwakeningComposeItem(context.Context, int64, operation.Context) (bool, error)
+	ComposeAwakeningItem(context.Context, identity.ActorContext, int64, int64, operation.Context) (map[string]any, error)
+}
+
 // ComposeDispatcher routes MID 83 by the server-qualified recipe owner: Book,
-// then Dorm furniture/blueprint, then the Character owner's CA4-1 recipe graph.
+// then Dorm furniture/blueprint, then the Character owner's awakening material
+// category, then its CA4-1 equipment recipe graph.
 type ComposeDispatcher struct {
 	Authority rt.GameplayAuthorityPort
 	Book      BookPort
 	Furniture FurnitureComposePort
+	Awakening AwakeningComposePort
 	Equipment EquipmentComposePort
 }
 
@@ -40,7 +49,7 @@ func (d ComposeDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRe
 	if fail != nil {
 		return *fail
 	}
-	if d.Book == nil || d.Furniture == nil || d.Equipment == nil {
+	if d.Book == nil || d.Furniture == nil || d.Awakening == nil || d.Equipment == nil {
 		return failureReply(defect(nil))
 	}
 	if req.Envelope.MID != 83 {
@@ -83,6 +92,17 @@ func (d ComposeDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRe
 		}
 		return okI5(body)
 	}
+	owned, err = d.Awakening.OwnsAwakeningComposeItem(ctx, itemID, req.Envelope.Operation)
+	if err != nil {
+		return failAwakeningCompose(err)
+	}
+	if owned {
+		body, err := d.Awakening.ComposeAwakeningItem(ctx, a, itemID, amount, req.Envelope.Operation)
+		if err != nil {
+			return failAwakeningCompose(err)
+		}
+		return okI5(body)
+	}
 	body, err := d.Equipment.ComposeEquipmentItem(ctx, a, itemID, amount, req.Envelope.Operation)
 	if err != nil {
 		return failEquipmentCompose(err)
@@ -100,6 +120,15 @@ var furnitureComposeFailureRows = []failureRow{
 
 func failFurnitureCompose(err error) httpedge.Response {
 	return failureFromRows(furnitureComposeFailureRows, err)
+}
+
+var awakeningComposeFailureRows = []failureRow{
+	{match: apphero.ErrAwakeningComposeUnqualified, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+}
+
+func failAwakeningCompose(err error) httpedge.Response {
+	return failureFromRows(awakeningComposeFailureRows, err)
 }
 
 var equipmentComposeFailureRows = []failureRow{

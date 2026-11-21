@@ -34,7 +34,7 @@ func a128HeroService(p *pg.Pool) characterhero.Service {
 
 func a128ComposeDispatcher(t *testing.T, p *pg.Pool, a identity.ActorContext) stockruntime.ComposeDispatcher {
 	t.Helper()
-	return stockruntime.ComposeDispatcher{Authority: fixedBookAuthority{actor: a}, Book: stockruntime.NewCoalescedBookRead(bookService(p, p)), Furniture: a128DormService(p), Equipment: a128HeroService(p)}
+	return stockruntime.ComposeDispatcher{Authority: fixedBookAuthority{actor: a}, Book: stockruntime.NewCoalescedBookRead(bookService(p, p)), Furniture: a128DormService(p), Awakening: a128HeroService(p), Equipment: a128HeroService(p)}
 }
 
 func a128ComposeRequest(t *testing.T, a identity.ActorContext, itemID, amount int64, op operation.Context) httpedge.DispatchRequest {
