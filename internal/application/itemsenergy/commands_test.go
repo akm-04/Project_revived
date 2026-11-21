@@ -27,4 +27,8 @@ func TestAggregateItemsMergesAndBounds(t *testing.T) {
 			t.Fatalf("invalid list accepted: %+v", invalid)
 		}
 	}
+	overflow := []ItemAmount{{ItemID: 1, Num: 5_000_000_000_000_000_000}, {ItemID: 1, Num: 5_000_000_000_000_000_000}}
+	if _, err := aggregateItems(overflow); !errors.Is(err, d.ErrInvalid) {
+		t.Fatalf("overflowing item sum accepted: %v", err)
+	}
 }
