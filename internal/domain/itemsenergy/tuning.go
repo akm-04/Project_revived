@@ -61,7 +61,7 @@ func (c Catalog) Tune(t Tuning) (Catalog, error) {
 	if t.MidasFloatDownBasisPoints > 0 {
 		applied.Misc.MidasFloatDownBasisPoints = t.MidasFloatDownBasisPoints
 	}
-	if t.MidasFloatDownBasisPoints > t.MidasFloatUpBasisPoints {
+	if applied.Misc.MidasFloatDownBasisPoints > applied.Misc.MidasFloatUpBasisPoints {
 		return c, errTuning
 	}
 	if err := tuneCrit(&applied, t); err != nil {
