@@ -36,7 +36,18 @@ func (f HeroFacts) Validate() error {
 	return nil
 }
 
-// NewRoom checks the source gallery's six slots per class and the visible floor
+// roomsPerFloor matches the stock floor view (FloorViewWindow.lua:7), whose
+// ground floor shows one slot fewer (checkTopFloorisFull, initCell).
+const roomsPerFloor = 6
+
+func floorRooms(floor int64) int64 {
+	if floor == 1 {
+		return roomsPerFloor - 1
+	}
+	return roomsPerFloor
+}
+
+// NewRoom checks the source gallery's slots per floor and the visible floor
 // frontier. Floor/position are scoped to the particular key's room class.
 func (c Catalog) NewRoom(root Root, rooms map[int64]Room, tableID, floor, pos int64, revision string, now time.Time) (Root, Room, error) {
 	observedAt := now
@@ -47,7 +58,7 @@ func (c Catalog) NewRoom(root Root, rooms map[int64]Room, tableID, floor, pos in
 		return Root{}, Room{}, ErrInvalidFacts
 	}
 	rule, ok := c.Rooms[tableID]
-	if !ok || rule.MainType == LoungeType || pos < 1 || pos > 6 || floor < 1 {
+	if !ok || rule.MainType == LoungeType || pos < 1 || pos > floorRooms(floor) || floor < 1 {
 		return Root{}, Room{}, ErrInvalidFacts
 	}
 	count := int64(0)
@@ -59,7 +70,9 @@ func (c Catalog) NewRoom(root Root, rooms map[int64]Room, tableID, floor, pos in
 			}
 		}
 	}
-	maxFloor := (count + 6) / 6
+	// Floor 1 holds roomsPerFloor-1 rooms, every higher floor roomsPerFloor; the
+	// next floor opens once the floors below are full.
+	maxFloor := 1 + (count+1)/roomsPerFloor
 	if floor > maxFloor {
 		return Root{}, Room{}, ErrInvalidFacts
 	}
