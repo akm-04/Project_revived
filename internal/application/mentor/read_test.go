@@ -7,6 +7,7 @@ import (
 
 	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -30,6 +31,19 @@ func (filterDirectory) ProfilesAfterTx(context.Context, tx.Tx, identity.PlayerID
 
 func (filterDirectory) PlayerIDBoundsTx(context.Context, tx.Tx) (identity.PlayerID, identity.PlayerID, bool, error) {
 	return 0, 0, false, nil
+}
+
+// A forged class-pair request naming the caller must not surface as a defect:
+// the observation reports no relation and the relation owner refuses the target.
+func TestClassRelationActiveTreatsASelfTargetAsNoRelation(t *testing.T) {
+	actor := identity.ActorContext{PlayerID: 100042, LogicalServerID: 1}
+	active, err := (Service{}).ClassRelationActive(context.Background(), actor, actor.PlayerID, operation.Context{})
+	if err != nil {
+		t.Fatalf("self target surfaced as an observation defect: %v", err)
+	}
+	if active {
+		t.Fatal("self target reported an active class relation")
+	}
 }
 
 // C3: the exact-name and numeric-id search paths return same-server candidates
