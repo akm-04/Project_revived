@@ -243,6 +243,7 @@ var dormFailureRows = []failureRow{
 	{match: dorm.ErrInvalidFacts, class: failureMalformed, detail: "dorm_unavailable"},
 	{match: dorm.ErrUnqualified, class: failureRefusal, code: unprovenRefusalCode},
 	{match: dorm.ErrInvalidLayout, class: failureMalformed, detail: "dorm_unavailable"},
+	{match: dorm.ErrStaleTime, class: failureRefusal, code: staleConflictCode},
 }
 
 func failDorm(e error) httpedge.Response {

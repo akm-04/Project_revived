@@ -292,8 +292,18 @@ func TestI7C2CLoungeFractionsCapOldComfortForeignAndNaturalExpansion(t *testing.
 		t.Fatal("cap bank", f, e)
 	}
 	exec(t, p, `UPDATE player_dorm_heroes SET lounge_anchor=clock_timestamp()+interval '1 hour' WHERE player_id=$1`, int64(a.PlayerID))
-	if _, e = s.Read(ctx, a, op(), 2514, 0, 1); e == nil {
-		t.Fatal("backward anchor")
+	backwardAnchor, e := s.Owner.ReadHeroTx(ctx, p, h.Ref())
+	if e != nil {
+		t.Fatal(e)
+	}
+	beforeBackward := skillRead(t, p, a, 1).Exp
+	if _, e = s.Read(ctx, a, op(), 2514, 0, 1); e != nil {
+		t.Fatal("backward anchor", e)
+	}
+	afterBackward := skillRead(t, p, a, 1)
+	f, e = s.Owner.ReadHeroTx(ctx, p, h.Ref())
+	if e != nil || afterBackward.Exp != beforeBackward || !f.LoungeAnchor.Equal(backwardAnchor.LoungeAnchor) {
+		t.Fatal("backward anchor settled or moved", afterBackward.Exp, beforeBackward, f, e)
 	}
 }
 func TestI7C2CUnknownCommitRetainedAdmissionAndConcurrentSlot(t *testing.T) {
