@@ -566,7 +566,21 @@ func main() {
 	if err != nil {
 		log.Fatalf("events hook registry: %v", err)
 	}
-	eventCommands := appevents.Commands{Store: eventstore.Store{}, Coverage: otaServing, Gifts: eventstore.ContentGifts{}, Catalogue: eventstore.ContentCatalogue{}, Hooks: eventHooks}
+	eventCommands := appevents.Commands{Store: eventstore.Store{}, Coverage: otaServing, Gifts: eventstore.ContentGifts{}, Catalogue: eventstore.ContentCatalogue{}, Hooks: eventHooks, OperatorCatalogue: operatorCatalogue, Audit: operatorstore.Store{}}
+	syncResults, syncErr := eventCommands.SyncShipped(ctx, runner, operation.Factory{Clock: clock.System{}})
+	if syncErr != nil {
+		log.Printf("events definition sync: %v", syncErr)
+	}
+	for _, result := range syncResults {
+		if result.Outcome == appevents.SyncUnchanged {
+			continue
+		}
+		if result.Error != "" {
+			log.Printf("events definition sync: file=%s activity=%d revision=%d outcome=%s error=%s", result.File, result.ActivityID, result.Revision, result.Outcome, result.Error)
+			continue
+		}
+		log.Printf("events definition sync: file=%s activity=%d revision=%d outcome=%s", result.File, result.ActivityID, result.Revision, result.Outcome)
+	}
 	eventService := appevents.Service{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: eventstore.Store{}, Clock: clock.System{}}
 	otaModule := bindModule(otaCommands.Module(),
 		map[string]operator.Handler{"ota.settings.set": appotarelease.SettingsSetHandler(otaSettingsFile, otaSettingsValue, otastore.Store{})},

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/application/operator"
+	"gxb.local/backend/v2/internal/application/operatorcatalog"
 	"gxb.local/backend/v2/internal/domain/events"
 	"gxb.local/backend/v2/internal/domain/modes"
 	otadomain "gxb.local/backend/v2/internal/domain/otarelease"
@@ -52,14 +53,16 @@ const (
 // player root 315 and the Guild audit rank 350, before the i5 grant ranks 610+.
 const OccurrenceLockRank uint16 = 355
 
-// DefinitionRecord is one stored immutable revision.
+// DefinitionRecord is one stored immutable revision. SyncConflictSHA256 is the
+// shipped file sha that last conflicted with it (EA-13), empty when none.
 type DefinitionRecord struct {
-	ActivityID        int64
-	Revision          int64
-	Body              events.Definition
-	SHA256            string
-	DeployedByCommand string
-	DeployedAt        time.Time
+	ActivityID         int64
+	Revision           int64
+	Body               events.Definition
+	SHA256             string
+	DeployedByCommand  string
+	DeployedAt         time.Time
+	SyncConflictSHA256 string
 }
 
 // Settings is the per-server event settings row, defaulted when absent.
@@ -197,6 +200,8 @@ type Store interface {
 	LatestDefinitionTx(context.Context, tx.Queryer, int64) (*DefinitionRecord, error)
 	ListDefinitionsTx(context.Context, tx.Queryer, int64, int) ([]DefinitionRecord, error)
 	InsertDefinitionTx(context.Context, tx.Tx, DefinitionRecord, string, time.Time) error
+	RecordDefinitionConflictTx(context.Context, tx.Tx, int64, int64, string, time.Time) error
+	ClearDefinitionConflictTx(context.Context, tx.Tx, int64, int64) error
 
 	LockOccurrencesTx(context.Context, tx.Tx, int64, int64) ([]events.Occurrence, error)
 	OverlapsTx(context.Context, tx.Queryer, int64, int64, time.Time, *time.Time, int64) (bool, error)
@@ -269,13 +274,17 @@ func (registry HookRegistry) Registered(kind string) bool {
 	return ok
 }
 
-// Commands applies the events.* command handlers on the operator bus.
+// Commands applies the events.* command handlers on the operator bus. Audit
+// records the operator_commands row a system-principal sync deploy references
+// (EA-13; the definition command key is a foreign key).
 type Commands struct {
-	Store     Store
-	Coverage  Coverage
-	Gifts     GiftSource
-	Catalogue RewardCatalogue
-	Hooks     HookRegistry
+	Store             Store
+	Coverage          Coverage
+	Gifts             GiftSource
+	Catalogue         RewardCatalogue
+	Hooks             HookRegistry
+	OperatorCatalogue operatorcatalog.Document
+	Audit             operator.Store
 }
 
 // Service serves the bounded reads and the ActiveModifiers seam.

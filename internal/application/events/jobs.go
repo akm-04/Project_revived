@@ -11,7 +11,6 @@ import (
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/mail"
-	otadomain "gxb.local/backend/v2/internal/domain/otarelease"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
@@ -222,14 +221,11 @@ func (jobs Jobs) materialiseSlot(ctx context.Context, transaction tx.Tx, server 
 	if definition == nil {
 		return nil
 	}
-	if hookGate(definition.Body, jobs.Hooks) != nil {
-		return nil
-	}
-	coverage, err := jobs.Coverage.Covers(ctx, definition.Body.ClientRequirements.CoversRequest())
+	readiness, err := EvaluateReadiness(ctx, definition.Body, jobs.Hooks, jobs.Coverage)
 	if err != nil {
 		return err
 	}
-	if coverage.Status != otadomain.CoversCovered {
+	if readiness.State != ReadinessReady {
 		return nil
 	}
 	taken, err := jobs.Store.CycleSlotTakenTx(ctx, transaction, server, slot.StartsAt)

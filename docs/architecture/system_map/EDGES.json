@@ -1824,7 +1824,11 @@
   },
   "operator": {
    "events": [
+    "*ClaimTx",
+    "*FinishTx",
+    "*RetryFailedTx",
     "Bounded",
+    "NewCommand",
     "NewField",
     "Refuse",
     "WithEnum"
@@ -1863,6 +1867,9 @@
   },
   "operatoragent": {},
   "operatorcatalog": {
+   "events": [
+    "Lookup"
+   ],
    "operatorgrant": [
     "GrantLine"
    ]
@@ -3947,10 +3954,17 @@
     "*SettleGrantTx"
    ],
    "operator": [
+    "*ClaimTx",
+    "*FinishTx",
+    "*RetryFailedTx",
     "Bounded",
+    "NewCommand",
     "NewField",
     "Refuse",
     "WithEnum"
+   ],
+   "operatorcatalog": [
+    "Lookup"
    ],
    "otarelease": [
     "*Covers"
@@ -3966,6 +3980,7 @@
     "*CheckRewardsTx",
     "*ClaimOccurrenceTx",
     "*ClaimsForPlayerTx",
+    "*ClearDefinitionConflictTx",
     "*CountOccurrenceClaimsTx",
     "*CycleSlotTakenTx",
     "*DefinitionTx",
@@ -3987,6 +4002,7 @@
     "*OccurrenceTx",
     "*OccurrencesTx",
     "*OverlapsTx",
+    "*RecordDefinitionConflictTx",
     "*SaveOccurrenceTx",
     "*SetCycleBodyTx",
     "*SetCycleModeTx",

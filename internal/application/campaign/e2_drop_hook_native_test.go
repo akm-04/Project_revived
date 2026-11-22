@@ -517,7 +517,7 @@ func TestCampaignDropMultiplier1008Native(t *testing.T) {
 	pool := e2Pool(t)
 	ctx := context.Background()
 	bus := e2Bus(t, pool)
-	raw, err := os.ReadFile("../../../content/events/definitions/1008.json")
+	raw, err := os.ReadFile("../../../internal/content/events/definitions/1008.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -646,7 +646,7 @@ func TestCampaignDropMultiplier1008FightResultNative(t *testing.T) {
 	pool := e2Pool(t)
 	ctx := context.Background()
 	bus := e2Bus(t, pool)
-	raw, err := os.ReadFile("../../../content/events/definitions/1008.json")
+	raw, err := os.ReadFile("../../../internal/content/events/definitions/1008.json")
 	if err != nil {
 		t.Fatal(err)
 	}

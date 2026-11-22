@@ -18,11 +18,13 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/operatorstore"
 	appevents "gxb.local/backend/v2/internal/application/events"
 	"gxb.local/backend/v2/internal/application/operator"
+	eventscontent "gxb.local/backend/v2/internal/content/events"
 	domainevents "gxb.local/backend/v2/internal/domain/events"
 	otadomain "gxb.local/backend/v2/internal/domain/otarelease"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -650,7 +652,7 @@ func TestContentAdaptersExpandShippedRookieGift(t *testing.T) {
 	}
 	commands := appevents.Commands{Store: eventstore.Store{}, Coverage: fakeCoverage{}, Gifts: eventstore.ContentGifts{}, Catalogue: eventstore.ContentCatalogue{}, Hooks: hooks}
 	bus := operator.Bus{Runner: tx.Runner{DB: pool}, Clock: clock.System{}, Store: operatorstore.Store{}, Handlers: commands.Handlers()}
-	definition, err := os.ReadFile("../../../../content/events/definitions/1071.json")
+	definition, err := os.ReadFile("../../../../internal/content/events/definitions/1071.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -761,5 +763,125 @@ func TestSettingsClaimWindowTunable(t *testing.T) {
 	view := result.Occurrences[0]
 	if view.EndsAt == nil || view.ClaimUntil == nil || view.ClaimUntil.Sub(*view.EndsAt) != 2*time.Hour {
 		t.Fatalf("claim window must use the settings row, got %+v", view)
+	}
+}
+
+func e1SyncFiles(t *testing.T, pool *pg.Pool, commands appevents.Commands, files []eventscontent.DefinitionFile) []appevents.SyncResult {
+	t.Helper()
+	at := time.Now().UTC()
+	op, err := (operation.Factory{Clock: clock.System{}}).New(policy.Set{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	profile := tx.Profile{Name: "event-sync-native", AcquireTimeout: time.Second, LockTimeout: 5 * time.Second, StatementTimeout: 20 * time.Second, TransactionTimeout: 60 * time.Second, CleanupTimeout: time.Second, ReconcileTimeout: 5 * time.Second, OperationTimeout: 120 * time.Second}
+	var results []appevents.SyncResult
+	_, err = (tx.Runner{DB: pool}).Run(context.Background(), op, profile, tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, scope tx.Scope) error {
+		loaded, syncErr := commands.SyncFiles(ctx, scope.Tx, at, files)
+		if syncErr == nil {
+			results = loaded
+		}
+		return syncErr
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return results
+}
+
+func TestDefinitionSyncIsIdempotentAndKeepsStoredRevision(t *testing.T) {
+	pool := e1Pool(t)
+	hooks, err := appevents.NewHookRegistry()
+	if err != nil {
+		t.Fatal(err)
+	}
+	commands := appevents.Commands{Store: eventstore.Store{}, Coverage: fakeCoverage{}, Gifts: fakeGifts{}, Catalogue: fakeCatalogue{}, Hooks: hooks, Audit: operatorstore.Store{}}
+	activityID := int64(1195)
+	original := []byte(`{"activity_id":1195,"revision":1,"archetype":"DISPLAY","client_requirements":{},"default_days":3}`)
+	files := []eventscontent.DefinitionFile{{Name: "1195.json", Body: original}}
+
+	first := e1SyncFiles(t, pool, commands, files)
+	if len(first) != 1 || first[0].Outcome != appevents.SyncDeployed {
+		t.Fatalf("first sync = %+v", first)
+	}
+	stored, err := (eventstore.Store{}).DefinitionTx(context.Background(), pool, activityID, 1)
+	if err != nil || stored == nil {
+		t.Fatalf("stored definition = %v %v", stored, err)
+	}
+	second := e1SyncFiles(t, pool, commands, files)
+	if len(second) != 1 || second[0].Outcome != appevents.SyncUnchanged {
+		t.Fatalf("second sync = %+v", second)
+	}
+	afterSecond, err := (eventstore.Store{}).DefinitionTx(context.Background(), pool, activityID, 1)
+	if err != nil || afterSecond == nil || !afterSecond.DeployedAt.Equal(stored.DeployedAt) {
+		t.Fatalf("the second sync must not rewrite the row: %v %v", afterSecond, err)
+	}
+
+	changed := []byte(`{"activity_id":1195,"revision":1,"archetype":"DISPLAY","client_requirements":{},"default_days":9}`)
+	conflict := e1SyncFiles(t, pool, commands, []eventscontent.DefinitionFile{{Name: "1195.json", Body: changed}})
+	if len(conflict) != 1 || conflict[0].Outcome != appevents.SyncConflict {
+		t.Fatalf("conflict sync = %+v", conflict)
+	}
+	kept, err := (eventstore.Store{}).DefinitionTx(context.Background(), pool, activityID, 1)
+	if err != nil || kept == nil || kept.Body.DefaultDays != 3 {
+		t.Fatalf("the conflicting body must not overwrite the stored revision: %v %v", kept, err)
+	}
+	rows, err := (eventstore.Store{}).ListDefinitionsTx(context.Background(), pool, activityID, 10)
+	if err != nil || len(rows) != 1 || rows[0].SyncConflictSHA256 == "" {
+		t.Fatalf("list must carry the conflict sha: %+v %v", rows, err)
+	}
+
+	bus := e1BusFrom(t, pool, fakeCoverage{})
+	e1Deploy(t, bus, activityID, 2, 1)
+	if again := e1SyncFiles(t, pool, commands, files); len(again) != 1 || again[0].Outcome != appevents.SyncUnchanged {
+		t.Fatalf("sync after an operator deploy = %+v", again)
+	}
+	latest, err := (eventstore.Store{}).LatestDefinitionTx(context.Background(), pool, activityID)
+	if err != nil || latest == nil || latest.Revision != 2 {
+		t.Fatalf("an operator-deployed revision absent from the files must stay: %v %v", latest, err)
+	}
+}
+
+func TestDefinitionReloadDeploysShippedFilesThroughTheBus(t *testing.T) {
+	pool := e1Pool(t)
+	hooks, err := appevents.NewHookRegistry(domainevents.HookCampaignDropMultiplier)
+	if err != nil {
+		t.Fatal(err)
+	}
+	commands := appevents.Commands{Store: eventstore.Store{}, Coverage: fakeCoverage{}, Gifts: eventstore.ContentGifts{}, Catalogue: eventstore.ContentCatalogue{}, Hooks: hooks, Audit: operatorstore.Store{}}
+	bus := operator.Bus{Runner: tx.Runner{DB: pool}, Clock: clock.System{}, Store: operatorstore.Store{}, Handlers: commands.Handlers()}
+	outcome := e1Execute(t, bus, e1Command(t, "events.definition.reload", nil, "global", map[string]any{}))
+	if outcome.State != operator.StateApplied {
+		t.Fatalf("reload: %s %s", outcome.State, outcome.Result)
+	}
+	var first struct {
+		Definitions []appevents.SyncResult `json:"definitions"`
+	}
+	if err := json.Unmarshal(outcome.Result, &first); err != nil || len(first.Definitions) == 0 {
+		t.Fatalf("reload result %s: %v", outcome.Result, err)
+	}
+	deployed := map[int64]string{}
+	for _, result := range first.Definitions {
+		if result.Outcome != appevents.SyncDeployed && result.Outcome != appevents.SyncUnchanged {
+			t.Fatalf("first reload %s: %+v", result.File, result)
+		}
+		deployed[result.ActivityID] = result.Outcome
+	}
+	if deployed[1008] != appevents.SyncDeployed || deployed[1071] == "" {
+		t.Fatalf("shipped definitions were not deployed: %+v", deployed)
+	}
+	again := e1Execute(t, bus, e1Command(t, "events.definition.reload", nil, "global", map[string]any{}))
+	if again.State != operator.StateApplied {
+		t.Fatalf("second reload: %s %s", again.State, again.Result)
+	}
+	var second struct {
+		Definitions []appevents.SyncResult `json:"definitions"`
+	}
+	if err := json.Unmarshal(again.Result, &second); err != nil {
+		t.Fatalf("second reload result %s: %v", again.Result, err)
+	}
+	for _, result := range second.Definitions {
+		if result.Outcome != appevents.SyncUnchanged {
+			t.Fatalf("second reload %s: %+v", result.File, result)
+		}
 	}
 }

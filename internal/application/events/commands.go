@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	"gxb.local/backend/v2/internal/application/operator"
@@ -22,6 +23,7 @@ func (commands Commands) Handlers() map[string]operator.Handler {
 	return map[string]operator.Handler{
 		"events.definition.deploy": commands.deployHandler,
 		"events.definition.list":   commands.definitionListHandler,
+		"events.definition.reload": commands.reloadHandler,
 		"events.schedule":          commands.scheduleHandler,
 		"events.cancel":            commands.cancelHandler,
 		"events.end_now":           commands.endNowHandler,
@@ -156,11 +158,16 @@ func (commands Commands) checkRewards(ctx context.Context, q tx.Queryer, definit
 
 // DefinitionSummary is one events.definition.list row.
 type DefinitionSummary struct {
-	ActivityID int64  `json:"activity_id"`
-	Revision   int64  `json:"revision"`
-	Archetype  string `json:"archetype"`
-	SHA256     string `json:"sha256"`
-	DeployedAt string `json:"deployed_at"`
+	ActivityID   int64    `json:"activity_id"`
+	Revision     int64    `json:"revision"`
+	Archetype    string   `json:"archetype"`
+	SHA256       string   `json:"sha256"`
+	DeployedAt   string   `json:"deployed_at"`
+	Readiness    string   `json:"readiness"`
+	MissingPaths []string `json:"missing_paths,omitempty"`
+	DefaultDays  int64    `json:"default_days"`
+	Name         string   `json:"name,omitempty"`
+	Icon         string   `json:"icon,omitempty"`
 }
 
 type definitionListPayload struct {
@@ -190,7 +197,22 @@ func (commands Commands) definitionListHandler(ctx context.Context, scope tx.Sco
 	}
 	result := definitionListResult{Definitions: make([]DefinitionSummary, 0, len(rows))}
 	for _, row := range rows {
-		result.Definitions = append(result.Definitions, DefinitionSummary{ActivityID: row.ActivityID, Revision: row.Revision, Archetype: string(row.Body.Archetype), SHA256: row.SHA256, DeployedAt: row.DeployedAt.UTC().Format(time.RFC3339Nano)})
+		summary := DefinitionSummary{ActivityID: row.ActivityID, Revision: row.Revision, Archetype: string(row.Body.Archetype), SHA256: row.SHA256, DeployedAt: row.DeployedAt.UTC().Format(time.RFC3339Nano), DefaultDays: row.Body.DefaultDays}
+		readiness, err := EvaluateReadiness(ctx, row.Body, commands.Hooks, commands.Coverage)
+		if err != nil {
+			return nil, err
+		}
+		summary.Readiness = readiness.State
+		if readiness.State == ReadinessClientContentMissing {
+			summary.MissingPaths = readiness.MissingPaths
+		}
+		if readiness.State == ReadinessReady && row.SyncConflictSHA256 != "" {
+			summary.Readiness = ReadinessSyncConflict
+		}
+		if entry, found := commands.OperatorCatalogue.Lookup(strconv.FormatInt(row.ActivityID, 10)); found {
+			summary.Name, summary.Icon = entry.Name, entry.Icon
+		}
+		result.Definitions = append(result.Definitions, summary)
 	}
 	return result, nil
 }
@@ -286,17 +308,11 @@ func (commands Commands) Schedule(ctx context.Context, transaction tx.Tx, comman
 	if definition == nil {
 		return scheduleResult{}, operator.Refuse(CodeDefinitionUnknown, "no definition revision is deployed for this activity", map[string]int64{"activity_id": activityID})
 	}
-	if refusal := hookGate(definition.Body, commands.Hooks); refusal != nil {
-		return scheduleResult{}, refusal
-	}
-	if commands.Coverage == nil {
-		return scheduleResult{}, operator.ErrUnavailable
-	}
-	coverage, err := commands.Coverage.Covers(ctx, definition.Body.ClientRequirements.CoversRequest())
+	readiness, err := EvaluateReadiness(ctx, definition.Body, commands.Hooks, commands.Coverage)
 	if err != nil {
 		return scheduleResult{}, err
 	}
-	if refusal := coverageGate(coverage); refusal != nil {
+	if refusal := readiness.Refusal(); refusal != nil {
 		return scheduleResult{}, refusal
 	}
 	result := scheduleResult{Occurrences: make([]OccurrenceView, 0, len(servers))}

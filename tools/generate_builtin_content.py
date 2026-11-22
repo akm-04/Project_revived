@@ -1139,7 +1139,7 @@ def event_definition_gift_ids() -> list[int]:
     """Gift ids named by the shipped event definitions (EA-11). The definitions
     are checked-in server data; the compiler exports the referenced stock gift
     rows so events.definition.deploy can expand them from the content read."""
-    directory = Path(__file__).resolve().parents[1] / "content/events/definitions"
+    directory = Path(__file__).resolve().parents[1] / "internal/content/events/definitions"
     ids: set[int] = set()
     if not directory.is_dir():
         return []

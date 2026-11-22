@@ -90,7 +90,7 @@ func eventFixture(t *testing.T, p *postgres.Pool, a identity.ActorContext) event
 
 func deployRookieGift(t *testing.T, p *postgres.Pool) {
 	t.Helper()
-	raw, err := os.ReadFile("../../../content/events/definitions/1071.json")
+	raw, err := os.ReadFile("../../../internal/content/events/definitions/1071.json")
 	if err != nil {
 		t.Fatal(err)
 	}
