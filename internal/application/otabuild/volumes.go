@@ -41,8 +41,8 @@ func planVolumeSizes(total, cap int64) ([]int64, error) {
 	if cap <= 0 {
 		return nil, fmt.Errorf("%w: volume cap must be positive", ErrVolumeLimit)
 	}
-	if total > maxTotalBytes {
-		return nil, fmt.Errorf("%w: %d bytes exceed the signed-int32 total", ErrVolumeLimit, total)
+	if total >= maxTotalBytes {
+		return nil, fmt.Errorf("%w: %d bytes do not fit under the signed-int32 total", ErrVolumeLimit, total)
 	}
 	full, err := largestFloat32ExactAtMost(cap)
 	if err != nil {

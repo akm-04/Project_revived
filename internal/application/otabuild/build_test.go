@@ -208,17 +208,28 @@ func TestOriginGuard(t *testing.T) {
 	misc := func(value string) []byte {
 		return []byte("return {\n\tkeys = {\"key\",\"value\",\"parse\",\"desc\"},\n\trows = {\n\t\t{\n\t\t\t\"web_api_url\",\n\t\t\t\"" + value + "\",\n\t\t\t\"1\",\n\t\t\t\"NA\"\n\t\t}\n\t}\n}\n")
 	}
+	row := func(value string) string {
+		return "{\"web_api_url\", \"" + value + "\"}"
+	}
+	evil := "https://evil.example/engine"
 	cases := map[string]struct {
 		file    string
 		content []byte
 		origins map[string]string
 		want    error
 	}{
-		"matching origin passes":       {"data/tables/misc.lua", misc(origin), map[string]string{"web_api_url": origin}, nil},
-		"misc1 matching origin passes": {"data/tables/misc1.lua", misc(origin), map[string]string{"web_api_url": origin}, nil},
-		"changed origin refused":       {"data/tables/misc.lua", misc("https://evil.example/engine"), map[string]string{"web_api_url": origin}, ErrOriginMismatch},
-		"empty origins refused":        {"data/tables/misc.lua", misc(origin), map[string]string{}, ErrOriginsMissing},
-		"missing origin row refused":   {"data/tables/misc.lua", []byte("return {\n\trows = {\n\t\t{\"other_key\", \"value\"}\n\t}\n}\n"), map[string]string{"web_api_url": origin}, ErrOriginMismatch},
+		"matching origin passes":                  {"data/tables/misc.lua", misc(origin), map[string]string{"web_api_url": origin}, nil},
+		"misc1 matching origin passes":            {"data/tables/misc1.lua", misc(origin), map[string]string{"web_api_url": origin}, nil},
+		"changed origin refused":                  {"data/tables/misc.lua", misc("https://evil.example/engine"), map[string]string{"web_api_url": origin}, ErrOriginMismatch},
+		"empty origins refused":                   {"data/tables/misc.lua", misc(origin), map[string]string{}, ErrOriginsMissing},
+		"missing origin row refused":              {"data/tables/misc.lua", []byte("return {\n\trows = {\n\t\t{\"other_key\", \"value\"}\n\t}\n}\n"), map[string]string{"web_api_url": origin}, ErrOriginMismatch},
+		"duplicate origin rows refused":           {"data/tables/misc.lua", []byte("return {\n\trows = {\n\t\t" + row(origin) + ",\n\t\t" + row(evil) + "\n\t}\n}\n"), map[string]string{"web_api_url": origin}, ErrOriginMismatch},
+		"duplicate identical rows refused":        {"data/tables/misc.lua", []byte("return {\n\trows = {\n\t\t" + row(origin) + ",\n\t\t" + row(origin) + "\n\t}\n}\n"), map[string]string{"web_api_url": origin}, ErrOriginMismatch},
+		"line-commented good row refused":         {"data/tables/misc.lua", []byte("return {\n\trows = {\n\t\t-- " + row(origin) + ",\n\t\t" + row(evil) + "\n\t}\n}\n"), map[string]string{"web_api_url": origin}, ErrOriginMismatch},
+		"block-commented good row refused":        {"data/tables/misc.lua", []byte("return {\n\t--[[ " + row(origin) + " ]]\n\trows = {\n\t\t" + row(evil) + "\n\t}\n}\n"), map[string]string{"web_api_url": origin}, ErrOriginMismatch},
+		"long-bracket commented good row refused": {"data/tables/misc.lua", []byte("return {\n\t--[==[ " + row(origin) + " ]==]\n\trows = {\n\t\t" + row(evil) + "\n\t}\n}\n"), map[string]string{"web_api_url": origin}, ErrOriginMismatch},
+		"double dash inside a string passes":      {"data/tables/misc.lua", []byte("return {\n\trows = {\n\t\t" + row("https://good--example/engine") + "\n\t}\n}\n"), map[string]string{"web_api_url": "https://good--example/engine"}, nil},
+		"case-folded carrier path passes":         {"Data/Tables/Misc.lua", misc(origin), map[string]string{"web_api_url": origin}, nil},
 	}
 	for name, testCase := range cases {
 		t.Run(name, func(t *testing.T) {
@@ -289,6 +300,13 @@ func TestVolumeSplit(t *testing.T) {
 		}
 		if int64(float32(volume.Size)) != volume.Size {
 			t.Fatalf("volume %d size %d is not float32-exact", index, volume.Size)
+		}
+		onDisk, err := os.ReadFile(filepath.Join(fixture.updates, volume.Name))
+		if err != nil {
+			t.Fatalf("read volume %s: %v", volume.Name, err)
+		}
+		if int64(len(onDisk)) != volume.Size || md5Hex(onDisk) != volume.MD5 || sha256Hex(onDisk) != volume.SHA256 {
+			t.Fatalf("volume %s hashes or size disagree with disk", volume.Name)
 		}
 		total += volume.Size
 	}
@@ -383,6 +401,30 @@ func TestOptInStockBaselineGolden(t *testing.T) {
 	for _, entry := range []string{"src_32/app/common/network/Backend.lua", "src_64/app/common/network/Backend.lua"} {
 		if got := zipEntry(t, assembled, entry); !bytes.Equal(got, golden) {
 			t.Fatalf("%s does not equal the golden fixture", entry)
+		}
+	}
+}
+
+// The pinned base APK's web_api_url; both stock carriers carry it.
+const stockWebAPIURL = "http://203.74.199.17:9000/api/v1"
+
+func TestOptInStockOriginCarrier(t *testing.T) {
+	baseline := os.Getenv("GXB_STOCK_BASELINE")
+	if baseline == "" {
+		t.Skip("GXB_STOCK_BASELINE not set")
+	}
+	stock, closeStock, err := openBaseline(baseline)
+	if err != nil {
+		t.Fatalf("open baseline: %v", err)
+	}
+	defer closeStock()
+	for _, name := range []string{"misc.lua", "misc1.lua"} {
+		content, err := stock.read(stockPrefix64 + "data/tables/" + name)
+		if err != nil {
+			t.Fatalf("read %s: %v", name, err)
+		}
+		if err := checkOriginGuard(map[string][]byte{"data/tables/" + name: content}, map[string]string{"web_api_url": stockWebAPIURL}); err != nil {
+			t.Fatalf("%s: %v", name, err)
 		}
 	}
 }
@@ -509,9 +551,163 @@ func TestPlanVolumeSizesProductionCap(t *testing.T) {
 	if total != 250_000_000 {
 		t.Fatalf("total = %d", total)
 	}
+	if _, err := planVolumeSizes(maxTotalBytes, 99_000_000); !errors.Is(err, ErrVolumeLimit) {
+		t.Fatalf("total at 2^31-1 error = %v, want %v", err, ErrVolumeLimit)
+	}
 	if _, err := planVolumeSizes(maxTotalBytes+1, 99_000_000); !errors.Is(err, ErrVolumeLimit) {
 		t.Fatalf("oversize total error = %v", err)
 	}
+	if _, err := planVolumeSizes(maxTotalBytes-1, 99_000_000); err != nil {
+		t.Fatalf("total under 2^31-1 error = %v", err)
+	}
+}
+
+func TestSameFilesystemHelper(t *testing.T) {
+	root := t.TempDir()
+	left := filepath.Join(root, "left")
+	right := filepath.Join(root, "right")
+	for _, directory := range []string{left, right} {
+		if err := os.MkdirAll(directory, 0o755); err != nil {
+			t.Fatalf("create %s: %v", directory, err)
+		}
+	}
+	same, err := sameFilesystem(left, right)
+	if err != nil {
+		t.Fatalf("sameFilesystem: %v", err)
+	}
+	if !same {
+		t.Fatal("two directories under one temp root are on different filesystems")
+	}
+}
+
+func TestDifferentFilesystemsRefused(t *testing.T) {
+	second, err := os.MkdirTemp("/dev/shm", "l4b-staging-")
+	if err != nil {
+		t.Skipf("no second filesystem available: %v", err)
+	}
+	t.Cleanup(func() { os.RemoveAll(second) })
+
+	fixture := newFixture(t)
+	fixture.addSource(t, "app/example/Feature.lua", []byte("return {}\n"))
+	same, err := sameFilesystem(second, filepath.Dir(fixture.baseline))
+	if err != nil {
+		t.Fatalf("sameFilesystem: %v", err)
+	}
+	if same {
+		t.Skip("the test host cannot make two filesystems")
+	}
+	input := fixture.input("1.631.2")
+	input.StagingDir = second
+	if _, err := Build(context.Background(), input); !errors.Is(err, ErrInvalidInput) {
+		t.Fatalf("error = %v, want %v", err, ErrInvalidInput)
+	}
+}
+
+func TestPatchSymlinkRefused(t *testing.T) {
+	fixture := newFixture(t)
+	stock := []byte(syntheticStockBackend)
+	fixture.addStock(t, "app/common/network/Backend.lua", stock)
+	fixture.addSource(t, "app/example/Feature.lua", []byte("return {}\n"))
+	realPatch := filepath.Join(t.TempDir(), "real_patch")
+	writeTestFile(t, filepath.Join(realPatch, "overlay.lua"), []byte("-- patched\n"))
+	encoded, err := json.Marshal(standardPatch())
+	if err != nil {
+		t.Fatalf("encode patch definition: %v", err)
+	}
+	writeTestFile(t, filepath.Join(realPatch, "patch.json"), encoded)
+	if err := os.Symlink(realPatch, filepath.Join(fixture.clientTree, "patches", "backend_http_poll")); err != nil {
+		t.Skipf("symlinks unsupported: %v", err)
+	}
+	if _, err := Build(context.Background(), fixture.input("1.631.2")); !errors.Is(err, ErrInvalidPatch) {
+		t.Fatalf("error = %v, want %v", err, ErrInvalidPatch)
+	}
+}
+
+func TestPatchStrayFileRefused(t *testing.T) {
+	fixture := newFixture(t)
+	fixture.addSource(t, "app/example/Feature.lua", []byte("return {}\n"))
+	writeTestFile(t, filepath.Join(fixture.clientTree, "patches", "notes.txt"), []byte("not a patch\n"))
+	if _, err := Build(context.Background(), fixture.input("1.631.2")); !errors.Is(err, ErrInvalidPatch) {
+		t.Fatalf("error = %v, want %v", err, ErrInvalidPatch)
+	}
+}
+
+func TestPatchTrailingDataRefused(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "patch.json")
+	document := map[string]any{
+		"target":       "app/example/Feature.lua",
+		"stock_sha256": strings.Repeat("0", 64),
+		"kind":         "insert_before_final_return",
+		"anchor":       "return var_0_1",
+		"insert":       "overlay.lua",
+	}
+	encoded, err := json.Marshal(document)
+	if err != nil {
+		t.Fatalf("encode patch definition: %v", err)
+	}
+	encoded = append(encoded, []byte("\n{\"kind\":\"evil\"}")...)
+	writeTestFile(t, path, encoded)
+	if _, err := readPatchDefinition(path); !errors.Is(err, ErrInvalidPatch) {
+		t.Fatalf("error = %v, want %v", err, ErrInvalidPatch)
+	}
+}
+
+func TestCommitVolumesRollsBack(t *testing.T) {
+	previousLimit := volumeByteLimit
+	volumeByteLimit = 2048
+	t.Cleanup(func() { volumeByteLimit = previousLimit })
+	previousRename := renameFile
+	t.Cleanup(func() { renameFile = previousRename })
+
+	fixture := newFixture(t)
+	large := make([]byte, 20000)
+	state := uint32(2463534242)
+	for index := range large {
+		state ^= state << 13
+		state ^= state >> 17
+		state ^= state << 5
+		large[index] = byte(state)
+	}
+	fixture.addSource(t, "app/example/Large.lua", large)
+
+	calls := 0
+	renameFile = func(oldPath, newPath string) error {
+		calls++
+		if calls == 2 {
+			return errors.New("injected rename failure")
+		}
+		return os.Rename(oldPath, newPath)
+	}
+	if _, err := Build(context.Background(), fixture.input("1.631.2")); err == nil {
+		t.Fatal("build succeeded despite the injected rename failure")
+	}
+	entries, err := os.ReadDir(fixture.updates)
+	if err != nil {
+		t.Fatalf("read updates: %v", err)
+	}
+	if len(entries) != 0 {
+		t.Fatalf("a failed commit left %d entries behind", len(entries))
+	}
+	renameFile = os.Rename
+	fixture.build(t, fixture.input("1.631.2"))
+}
+
+func TestInterruptedBuildCleaned(t *testing.T) {
+	fixture := newFixture(t)
+	fixture.addSource(t, "app/example/Feature.lua", []byte("return {}\n"))
+	marker := "1.631.2-aaaaaaaaaaaa.incomplete"
+	partial := "1.631.2-aaaaaaaaaaaa.zip.001"
+	writeTestFile(t, filepath.Join(fixture.updates, marker), []byte(partial+"\n"))
+	writeTestFile(t, filepath.Join(fixture.updates, partial), []byte("partial volume\n"))
+	writeTestFile(t, filepath.Join(fixture.staging, "build-crashed", "package.zip"), []byte("scratch\n"))
+
+	fixture.build(t, fixture.input("1.631.2"))
+	for _, leftover := range []string{filepath.Join(fixture.updates, marker), filepath.Join(fixture.updates, partial)} {
+		if _, err := os.Lstat(leftover); !errors.Is(err, os.ErrNotExist) {
+			t.Fatalf("%s survived the startup sweep", leftover)
+		}
+	}
+	assertEmptyDirectory(t, fixture.staging)
 }
 
 func padVolume(number int) string {

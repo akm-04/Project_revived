@@ -68,6 +68,9 @@ func Build(ctx context.Context, input Input) (otarelease.BuildRequest, error) {
 	if err != nil {
 		return otarelease.BuildRequest{}, err
 	}
+	if err := sweepInterruptedBuilds(input.UpdatesDir, input.StagingDir); err != nil {
+		return otarelease.BuildRequest{}, err
+	}
 	baseline, closeBaseline, err := openBaseline(input.StockBaseline)
 	if err != nil {
 		return otarelease.BuildRequest{}, err
@@ -124,7 +127,8 @@ func Build(ctx context.Context, input Input) (otarelease.BuildRequest, error) {
 	if _, err := request.Release(); err != nil {
 		return otarelease.BuildRequest{}, fmt.Errorf("otabuild: built row is invalid: %w", err)
 	}
-	if err := commitVolumes(staging, input.UpdatesDir, volumes); err != nil {
+	marker := fmt.Sprintf("%s-%s.incomplete", version.String(), digest.sha256[:12])
+	if err := commitVolumes(staging, input.UpdatesDir, marker, volumes); err != nil {
 		return otarelease.BuildRequest{}, err
 	}
 	return request, nil
@@ -145,7 +149,29 @@ func validateInput(input Input) (otarelease.Lane, otarelease.Version, error) {
 	if input.StockBaseline == "" || input.ClientTree == "" || input.UpdatesDir == "" || input.StagingDir == "" {
 		return "", otarelease.Version{}, fmt.Errorf("%w: baseline, client tree, updates and staging are required", ErrInvalidInput)
 	}
+	if err := requireSameFilesystem(input.StagingDir, input.UpdatesDir); err != nil {
+		return "", otarelease.Version{}, err
+	}
 	return lane, version, nil
+}
+
+// requireSameFilesystem refuses staging the volumes on a filesystem other than
+// the updates directory: the immutable commit renames, and a rename cannot
+// cross devices.
+func requireSameFilesystem(stagingDir, updatesDir string) error {
+	for _, directory := range []string{stagingDir, updatesDir} {
+		if err := os.MkdirAll(directory, 0o755); err != nil {
+			return fmt.Errorf("%w: create %s: %v", ErrInvalidInput, directory, err)
+		}
+	}
+	same, err := sameFilesystem(stagingDir, updatesDir)
+	if err != nil {
+		return fmt.Errorf("%w: compare filesystems: %v", ErrInvalidInput, err)
+	}
+	if !same {
+		return fmt.Errorf("%w: staging and updates are on different filesystems", ErrInvalidInput)
+	}
+	return nil
 }
 
 // collectPackage returns the client-path files the lane ships: every file under
@@ -374,9 +400,16 @@ func writeVolume(source io.Reader, path string, size int64) (otarelease.PackageV
 	}, nil
 }
 
+// renameFile is a variable so a test can inject a rename failure between
+// volumes.
+var renameFile = os.Rename
+
 // commitVolumes refuses an existing artifact before it moves anything, then
 // renames every staged volume into the lane directory (immutable: ruling 2).
-func commitVolumes(staging, updatesDir string, volumes []otarelease.PackageVolume) error {
+// The marker lists the volumes being published; while it exists the set is
+// incomplete, and an error rolls the moved volumes back so no partial set can
+// poison a later build.
+func commitVolumes(staging, updatesDir, marker string, volumes []otarelease.PackageVolume) error {
 	if err := os.MkdirAll(updatesDir, 0o755); err != nil {
 		return fmt.Errorf("otabuild: updates directory: %w", err)
 	}
@@ -388,12 +421,113 @@ func commitVolumes(staging, updatesDir string, volumes []otarelease.PackageVolum
 			return fmt.Errorf("otabuild: check target: %w", err)
 		}
 	}
+	markerPath := filepath.Join(updatesDir, marker)
+	if err := writeIncompleteMarker(markerPath, volumes); err != nil {
+		return err
+	}
+	moved := make([]string, 0, len(volumes))
+	rollback := func() {
+		for _, name := range moved {
+			_ = os.Remove(filepath.Join(updatesDir, name))
+		}
+		_ = os.Remove(markerPath)
+		_ = syncDirectory(updatesDir)
+	}
 	for _, volume := range volumes {
-		if err := os.Rename(filepath.Join(staging, volume.Name), filepath.Join(updatesDir, volume.Name)); err != nil {
+		if err := renameFile(filepath.Join(staging, volume.Name), filepath.Join(updatesDir, volume.Name)); err != nil {
+			rollback()
 			return fmt.Errorf("otabuild: move volume: %w", err)
 		}
+		moved = append(moved, volume.Name)
 	}
-	return syncDirectory(updatesDir)
+	if err := syncDirectory(updatesDir); err != nil {
+		rollback()
+		return err
+	}
+	if err := os.Remove(markerPath); err != nil {
+		rollback()
+		return fmt.Errorf("otabuild: remove incomplete marker: %w", err)
+	}
+	if err := syncDirectory(updatesDir); err != nil {
+		rollback()
+		return err
+	}
+	return nil
+}
+
+func writeIncompleteMarker(path string, volumes []otarelease.PackageVolume) error {
+	names := make([]string, 0, len(volumes))
+	for _, volume := range volumes {
+		names = append(names, volume.Name)
+	}
+	file, err := os.OpenFile(path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0o644)
+	if err != nil {
+		return fmt.Errorf("otabuild: create incomplete marker: %w", err)
+	}
+	if _, err := file.WriteString(strings.Join(names, "\n") + "\n"); err != nil {
+		file.Close()
+		return fmt.Errorf("otabuild: write incomplete marker: %w", err)
+	}
+	if err := file.Sync(); err != nil {
+		file.Close()
+		return fmt.Errorf("otabuild: sync incomplete marker: %w", err)
+	}
+	if err := file.Close(); err != nil {
+		return fmt.Errorf("otabuild: close incomplete marker: %w", err)
+	}
+	return syncDirectory(filepath.Dir(path))
+}
+
+// sweepInterruptedBuilds clears what a crashed earlier build left: the volumes
+// its marker lists and the staging scratch directory. The agent runs one build
+// at a time (I11A_1_PLAN "Agent decisions": long ops), so this sweep cannot
+// race a live build.
+func sweepInterruptedBuilds(updatesDir, stagingDir string) error {
+	markers, err := os.ReadDir(updatesDir)
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		return fmt.Errorf("otabuild: read updates directory: %w", err)
+	}
+	for _, entry := range markers {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".incomplete") {
+			continue
+		}
+		if err := removeIncompleteSet(updatesDir, filepath.Join(updatesDir, entry.Name())); err != nil {
+			return err
+		}
+	}
+	scratch, err := os.ReadDir(stagingDir)
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		return fmt.Errorf("otabuild: read staging directory: %w", err)
+	}
+	for _, entry := range scratch {
+		if !entry.IsDir() || !strings.HasPrefix(entry.Name(), "build-") {
+			continue
+		}
+		if err := os.RemoveAll(filepath.Join(stagingDir, entry.Name())); err != nil {
+			return fmt.Errorf("otabuild: clear staging scratch: %w", err)
+		}
+	}
+	return nil
+}
+
+func removeIncompleteSet(updatesDir, markerPath string) error {
+	content, err := os.ReadFile(markerPath)
+	if err != nil {
+		return fmt.Errorf("otabuild: read incomplete marker: %w", err)
+	}
+	for _, line := range strings.Split(string(content), "\n") {
+		name := strings.TrimSpace(line)
+		if name == "" {
+			continue
+		}
+		if err := os.Remove(filepath.Join(updatesDir, filepath.Base(name))); err != nil && !errors.Is(err, os.ErrNotExist) {
+			return fmt.Errorf("otabuild: remove incomplete volume: %w", err)
+		}
+	}
+	if err := os.Remove(markerPath); err != nil && !errors.Is(err, os.ErrNotExist) {
+		return fmt.Errorf("otabuild: remove incomplete marker: %w", err)
+	}
+	return nil
 }
 
 func syncDirectory(path string) error {

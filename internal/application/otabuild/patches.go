@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -42,8 +43,13 @@ func collectPatches(patchesRoot string, baseline stockBaseline, files map[string
 	}
 	added := 0
 	for _, entry := range entries {
+		// A symlinked patch directory would otherwise be skipped and the release
+		// would ship without its client change.
 		if !entry.IsDir() {
-			continue
+			if isDocumentationFile(entry) {
+				continue
+			}
+			return 0, fmt.Errorf("%w: unexpected entry %q in patches", ErrInvalidPatch, entry.Name())
 		}
 		directory := filepath.Join(patchesRoot, entry.Name())
 		target, content, err := applyPatchDirectory(directory, baseline)
@@ -56,6 +62,15 @@ func collectPatches(patchesRoot string, baseline stockBaseline, files map[string
 		added++
 	}
 	return added, nil
+}
+
+// isDocumentationFile allows the top-level README the old layout keeps beside
+// patch directories; every other non-directory entry is refused.
+func isDocumentationFile(entry os.DirEntry) bool {
+	if !entry.Type().IsRegular() {
+		return false
+	}
+	return entry.Name() == "README" || entry.Name() == "README.md"
 }
 
 func applyPatchDirectory(directory string, baseline stockBaseline) (string, []byte, error) {
@@ -99,6 +114,10 @@ func readPatchDefinition(path string) (patchDefinition, error) {
 	var definition patchDefinition
 	if err := decoder.Decode(&definition); err != nil {
 		return patchDefinition{}, fmt.Errorf("%w: patch.json: %v", ErrInvalidPatch, err)
+	}
+	var trailing json.RawMessage
+	if err := decoder.Decode(&trailing); !errors.Is(err, io.EOF) {
+		return patchDefinition{}, fmt.Errorf("%w: patch.json has trailing data", ErrInvalidPatch)
 	}
 	if definition.Target == "" || definition.Kind == "" || definition.Insert == "" || definition.Anchor == "" {
 		return patchDefinition{}, fmt.Errorf("%w: target, kind, insert and anchor are required", ErrInvalidPatch)
