@@ -8,7 +8,7 @@ the virtual-client scenarios, and two committed inputs: `client_mid_callers.json
 (when a suite has run) `scenario_coverage.json`. Do not edit generated files by hand.
 
 ## Read only what the question needs
-- `show <mid>` gives the registered owner and client references; `show <system>` gives its record and both edge directions.
+- `show <mid>` gives the registered owner and client references; `show <system>` gives its record and both edge directions. Both also join the popup rows of that MID or system from `docs/architecture/popup_catalog/POPUP_CATALOG.json` (see `tools/popup_catalog_readme.md`).
 - `calls[A][B]` means **A calls B**; `called_by[A][B]` means **B calls A**. Edges are direct static call sites, not a request's full dependency list.
 - `trace <mid>` walks a bounded static route with source references. Keep `FANOUT`, `UNRESOLVED` and `BOUND` markers; check source before treating a possibility as fact.
 - `show unhandled` lists client-sent MIDs without an owned, concrete handler. Window file references are not proof of runtime reachability; dead code is not inferred.

@@ -1,0 +1,11 @@
+{
+ "entries": {
+  "REPLY:app/windows/ChapterGachaWindow.lua:237": {
+   "client": "app/windows/ChapterGachaWindow.lua:237",
+   "owner_phase": "I10",
+   "reason": "A-155 adjudicated LATER in work/audit/LEAD_VERDICTS.md; reported, not fixed"
+  }
+ },
+ "note": "seeded only for GAP rows adjudicated LATER; lead reviews",
+ "schema_version": 1
+}

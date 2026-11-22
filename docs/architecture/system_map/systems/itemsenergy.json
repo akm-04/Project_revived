@@ -10,6 +10,14 @@
   },
   {
    "count": 10,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 9,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 10,
    "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
   },
   {

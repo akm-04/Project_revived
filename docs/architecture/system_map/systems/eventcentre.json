@@ -3,6 +3,14 @@
  "content": [],
  "contracts": [
   {
+   "count": 14,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 4,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
    "count": 17,
    "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
   },
