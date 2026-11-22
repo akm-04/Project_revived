@@ -25,12 +25,15 @@ import (
 )
 
 // Input is one build request. StockBaseline is the extracted stock client tree
-// (a directory holding assets/src_32 and assets/src_64) or its zip archive.
+// (a directory holding assets/src_32 and assets/src_64) or its zip archive;
+// it supplies the catalogue and the origin carriers. StockSource is the
+// decompiled stock Lua tree the patches read and hash.
 type Input struct {
 	Lane          string
 	Version       string
 	Rollback      bool
 	StockBaseline string
+	StockSource   string
 	ClientTree    string
 	Origins       map[string]string
 	UpdatesDir    string
@@ -130,7 +133,7 @@ func Build(ctx context.Context, input Input) (Result, error) {
 	if lane == otarelease.LaneAssets {
 		entries, sidecar, report, err = assetsPackage(input.ResPath, version.String(), catalogBaseline)
 	} else {
-		entries, err = codeEntries(input, baseline)
+		entries, err = codeEntries(input)
 		if err == nil && input.LazyRefresh {
 			var lazyBytes []byte
 			lazyBytes, sidecar, report, err = lazyRefreshPackage(input.ResPath, input.AssetsSidecar, version.String())
@@ -206,8 +209,8 @@ func Build(ctx context.Context, input Input) (Result, error) {
 
 // codeEntries collects the cumulative code/catalog package and applies the
 // origin guard.
-func codeEntries(input Input, baseline stockBaseline) ([]packageEntry, error) {
-	files, err := collectPackage(input.ClientTree, baseline)
+func codeEntries(input Input) ([]packageEntry, error) {
+	files, err := collectPackage(input.ClientTree, stockSource{root: input.StockSource})
 	if err != nil {
 		return nil, err
 	}
@@ -249,6 +252,19 @@ func validateInput(input Input) (otarelease.Lane, otarelease.Version, error) {
 			return "", otarelease.Version{}, fmt.Errorf("%w: lazy refresh needs the active assets sidecar", ErrInvalidInput)
 		}
 	}
+	if input.StockSource != "" {
+		info, err := os.Stat(input.StockSource)
+		if err != nil || !info.IsDir() {
+			return "", otarelease.Version{}, fmt.Errorf("%w: stock_source is not a readable directory", ErrInvalidInput)
+		}
+	}
+	patched, err := PatchesPresent(input.ClientTree)
+	if err != nil {
+		return "", otarelease.Version{}, fmt.Errorf("%w: %v", ErrInvalidInput, err)
+	}
+	if patched && input.StockSource == "" {
+		return "", otarelease.Version{}, fmt.Errorf("%w: the client tree has a patch but no stock_source", ErrInvalidInput)
+	}
 	if err := requireSameFilesystem(input.StagingDir, input.UpdatesDir); err != nil {
 		return "", otarelease.Version{}, err
 	}
@@ -277,14 +293,14 @@ func requireSameFilesystem(stagingDir, updatesDir string) error {
 // collectPackage returns the client-path files the lane ships: every file under
 // ClientTree/src plus every pinned patch output. A path shipped twice is
 // refused, because the cumulative code lane must be unambiguous.
-func collectPackage(clientTree string, baseline stockBaseline) (map[string][]byte, error) {
+func collectPackage(clientTree string, source stockSource) (map[string][]byte, error) {
 	files := make(map[string][]byte)
-	source := filepath.Join(clientTree, "src")
-	added, err := collectSource(source, files)
+	sourceTree := filepath.Join(clientTree, "src")
+	added, err := collectSource(sourceTree, files)
 	if err != nil {
 		return nil, err
 	}
-	patched, err := collectPatches(filepath.Join(clientTree, "patches"), baseline, files)
+	patched, err := collectPatches(filepath.Join(clientTree, "patches"), source, files)
 	if err != nil {
 		return nil, err
 	}

@@ -20,22 +20,24 @@ const syntheticStockBackend = "local class = {}\n\nreturn var_0_1\n"
 const syntheticOverlay = "local enabled = __GXB_HTTP_POLL__\n-- GXB_HTTP_POLL marker\n"
 
 type fixture struct {
-	baseline   string
-	clientTree string
-	updates    string
-	staging    string
+	baseline    string
+	stockSource string
+	clientTree  string
+	updates     string
+	staging     string
 }
 
 func newFixture(t *testing.T) *fixture {
 	t.Helper()
 	root := t.TempDir()
 	fixture := &fixture{
-		baseline:   filepath.Join(root, "baseline"),
-		clientTree: filepath.Join(root, "client"),
-		updates:    filepath.Join(root, "updates", "code"),
-		staging:    filepath.Join(root, "staging"),
+		baseline:    filepath.Join(root, "baseline"),
+		stockSource: filepath.Join(root, "stock"),
+		clientTree:  filepath.Join(root, "client"),
+		updates:     filepath.Join(root, "updates", "code"),
+		staging:     filepath.Join(root, "staging"),
 	}
-	for _, directory := range []string{fixture.baseline, filepath.Join(fixture.clientTree, "src"), filepath.Join(fixture.clientTree, "patches")} {
+	for _, directory := range []string{fixture.baseline, fixture.stockSource, filepath.Join(fixture.clientTree, "src"), filepath.Join(fixture.clientTree, "patches")} {
 		if err := os.MkdirAll(directory, 0o755); err != nil {
 			t.Fatalf("create %s: %v", directory, err)
 		}
@@ -48,6 +50,7 @@ func (fixture *fixture) addStock(t *testing.T, clientPath string, content []byte
 	for _, prefix := range []string{"assets/src_32/", "assets/src_64/"} {
 		writeTestFile(t, filepath.Join(fixture.baseline, filepath.FromSlash(prefix+clientPath)), content)
 	}
+	writeTestFile(t, filepath.Join(fixture.stockSource, filepath.FromSlash(clientPath)), content)
 }
 
 func (fixture *fixture) addSource(t *testing.T, clientPath string, content []byte) {
@@ -85,6 +88,7 @@ func (fixture *fixture) input(version string) Input {
 		Lane:          "code",
 		Version:       version,
 		StockBaseline: fixture.baseline,
+		StockSource:   fixture.stockSource,
 		ClientTree:    fixture.clientTree,
 		UpdatesDir:    fixture.updates,
 		StagingDir:    fixture.staging,
@@ -182,16 +186,50 @@ func TestPatchRefusals(t *testing.T) {
 
 func syntheticStockBackendBytes() []byte { return []byte(syntheticStockBackend) }
 
-func TestAbiMismatchRefused(t *testing.T) {
+func TestPatchReadsDecompiledStockSource(t *testing.T) {
 	fixture := newFixture(t)
 	stock := []byte(syntheticStockBackend)
 	fixture.addStock(t, "app/common/network/Backend.lua", stock)
-	writeTestFile(t, filepath.Join(fixture.baseline, "assets/src_32/app/common/network/Backend.lua"), []byte("different\n"))
+	// The APK's ABI trees hold different LuaJIT bytecode; the patch pins the
+	// decompiled source, so the build ignores them.
+	writeTestFile(t, filepath.Join(fixture.baseline, "assets/src_32/app/common/network/Backend.lua"), []byte("\x1bLJ\x02bytecode-32"))
+	writeTestFile(t, filepath.Join(fixture.baseline, "assets/src_64/app/common/network/Backend.lua"), []byte("\x1bLJ\x02bytecode-64"))
 	fixture.addPatch(t, "backend_http_poll", "app/common/network/Backend.lua", stock, standardPatch(), syntheticOverlay)
 
-	_, err := Build(context.Background(), fixture.input("1.631.2"))
-	if !errors.Is(err, ErrAbiMismatch) {
-		t.Fatalf("error = %v, want %v", err, ErrAbiMismatch)
+	request := fixture.build(t, fixture.input("1.631.2"))
+	assembled := readAssembled(t, fixture.updates, request)
+	want := "local class = {}\n\nlocal enabled = true\n-- GXB_HTTP_POLL marker\n\nreturn var_0_1\n"
+	for _, entry := range []string{"src_32/app/common/network/Backend.lua", "src_64/app/common/network/Backend.lua"} {
+		if got := zipEntry(t, assembled, entry); string(got) != want {
+			t.Fatalf("%s:\n got %q\nwant %q", entry, got, want)
+		}
+	}
+}
+
+func TestPatchRequiresStockSource(t *testing.T) {
+	fixture := newFixture(t)
+	stock := []byte(syntheticStockBackend)
+	fixture.addStock(t, "app/common/network/Backend.lua", stock)
+	fixture.addPatch(t, "backend_http_poll", "app/common/network/Backend.lua", stock, standardPatch(), syntheticOverlay)
+
+	input := fixture.input("1.631.2")
+	input.StockSource = ""
+	if _, err := Build(context.Background(), input); !errors.Is(err, ErrInvalidInput) {
+		t.Fatalf("error = %v, want %v", err, ErrInvalidInput)
+	}
+}
+
+func TestPatchMissingStockSourceFileRefused(t *testing.T) {
+	fixture := newFixture(t)
+	stock := []byte(syntheticStockBackend)
+	fixture.addStock(t, "app/common/network/Backend.lua", stock)
+	fixture.addPatch(t, "backend_http_poll", "app/common/network/Backend.lua", stock, standardPatch(), syntheticOverlay)
+	if err := os.Remove(filepath.Join(fixture.stockSource, "app", "common", "network", "Backend.lua")); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := Build(context.Background(), fixture.input("1.631.2")); err == nil {
+		t.Fatal("a patch without its stock source file built")
 	}
 }
 
@@ -392,8 +430,9 @@ func TestEmptyPackageRefused(t *testing.T) {
 
 func TestOptInStockBaselineGolden(t *testing.T) {
 	baseline := os.Getenv("GXB_STOCK_BASELINE")
-	if baseline == "" {
-		t.Skip("GXB_STOCK_BASELINE not set")
+	stockSource := os.Getenv("GXB_STOCK_SOURCE")
+	if baseline == "" || stockSource == "" {
+		t.Skip("GXB_STOCK_BASELINE and GXB_STOCK_SOURCE not set")
 	}
 	golden, err := os.ReadFile(filepath.Join("testdata", "backend_http_poll_golden.lua"))
 	if err != nil {
@@ -404,6 +443,7 @@ func TestOptInStockBaselineGolden(t *testing.T) {
 		Lane:          "code",
 		Version:       "1.631.2",
 		StockBaseline: baseline,
+		StockSource:   stockSource,
 		ClientTree:    filepath.Join("..", "..", "..", "client", "ota"),
 		UpdatesDir:    filepath.Join(root, "updates", "code"),
 		StagingDir:    filepath.Join(root, "staging"),
