@@ -1404,6 +1404,15 @@
    "tables": 1
   },
   {
+   "callees": 0,
+   "callers": 0,
+   "mids": 0,
+   "name": "otabuild",
+   "path": "internal/application/otabuild",
+   "purpose": "materialises the OTA client tree, applies the pinned client patches and writes the immutable volume-split release artifact (I11A_OTA_RELEASE_V1 rulings 2, 3, 5 and 8-10)",
+   "tables": 0
+  },
+  {
    "callees": 2,
    "callers": 0,
    "mids": 3,
