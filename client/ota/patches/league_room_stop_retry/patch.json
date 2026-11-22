@@ -1,0 +1,8 @@
+{
+  "target": "app/common/network/Backend.lua",
+  "stock_sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+  "kind": "replace_exact",
+  "anchor": "\t\telse\n\t\t\tprint(\"enter league error\")\n\t\t\tvar_0_0.performWithDelayGlobal(function()\n\t\t\t\targ_9_0:enterLeagueRoom()\n\t\t\tend, var_0_5)\n\t\tend",
+  "insert": "overlay.lua",
+  "origin": "D473b: a permanent MID 192 refusal (409, stockruntime/http_dispatchers.go:126-134) stopped the 5 s retry; 35033 keeps it (fleet_l5r/01-client-items.md section 2b)"
+}

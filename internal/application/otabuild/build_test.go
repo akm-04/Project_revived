@@ -429,30 +429,31 @@ func TestEmptyPackageRefused(t *testing.T) {
 }
 
 func TestOptInStockBaselineGolden(t *testing.T) {
-	baseline := os.Getenv("GXB_STOCK_BASELINE")
 	stockSource := os.Getenv("GXB_STOCK_SOURCE")
-	if baseline == "" || stockSource == "" {
-		t.Skip("GXB_STOCK_BASELINE and GXB_STOCK_SOURCE not set")
+	if stockSource == "" {
+		t.Skip("GXB_STOCK_SOURCE not set")
+	}
+	const target = "app/common/network/Backend.lua"
+	stock, err := os.ReadFile(filepath.Join(stockSource, filepath.FromSlash(target)))
+	if err != nil {
+		t.Fatalf("read stock Backend.lua: %v", err)
+	}
+	overlay, err := os.ReadFile(filepath.Join("..", "..", "..", "client", "ota", "patches", "backend_http_poll", "backend_http_poll_overlay.lua"))
+	if err != nil {
+		t.Fatalf("read the backend_http_poll overlay: %v", err)
 	}
 	golden, err := os.ReadFile(filepath.Join("testdata", "backend_http_poll_golden.lua"))
 	if err != nil {
 		t.Fatalf("read golden fixture: %v", err)
 	}
-	root := t.TempDir()
-	result, err := Build(context.Background(), Input{
-		Lane:          "code",
-		Version:       "1.631.2",
-		StockBaseline: baseline,
-		StockSource:   stockSource,
-		ClientTree:    filepath.Join("..", "..", "..", "client", "ota"),
-		UpdatesDir:    filepath.Join(root, "updates", "code"),
-		StagingDir:    filepath.Join(root, "staging"),
-	})
-	if err != nil {
-		t.Fatalf("Build: %v", err)
-	}
-	assembled := readAssembled(t, filepath.Join(root, "updates", "code"), result.Request)
-	for _, entry := range []string{"src_32/app/common/network/Backend.lua", "src_64/app/common/network/Backend.lua"} {
+	// One patch on its target must stay byte-identical to the retired generator;
+	// the shipped tree chains the league patches after it.
+	fixture := newFixture(t)
+	fixture.addStock(t, target, stock)
+	fixture.addPatch(t, "backend_http_poll", target, stock, standardPatch(), string(overlay))
+	request := fixture.build(t, fixture.input("1.631.2"))
+	assembled := readAssembled(t, fixture.updates, request)
+	for _, entry := range []string{"src_32/" + target, "src_64/" + target} {
 		if got := zipEntry(t, assembled, entry); !bytes.Equal(got, golden) {
 			t.Fatalf("%s does not equal the golden fixture", entry)
 		}

@@ -1,0 +1,8 @@
+{
+  "target": "app/model/SelfPlayer.lua",
+  "stock_sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+  "kind": "replace_exact",
+  "anchor": "\targ_9_0.funcIDs = arg_9_1.params.func_ids\n",
+  "insert": "overlay.lua",
+  "origin": "D120: gxb_workshop cd4faed0 SelfPlayer.lua:172-174 prefetches the N7GSO abtest group (MID 2864) on LOAD_PLAYER_INFO"
+}

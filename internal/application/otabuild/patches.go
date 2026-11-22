@@ -31,6 +31,7 @@ var stockHashPattern = regexp.MustCompile(`^[0-9a-f]{64}$`)
 // patch.json kind needs a function here, never a script.
 var patchKinds = map[string]func(patchDefinition, []byte, []byte) ([]byte, error){
 	"insert_before_final_return": insertBeforeFinalReturn,
+	"replace_exact":              replaceExact,
 }
 
 // PatchesPresent reports whether clientTree/patches holds at least one patch
@@ -51,6 +52,9 @@ func PatchesPresent(clientTree string) (bool, error) {
 	return false, nil
 }
 
+// collectPatches applies patch directories in directory-name order. Several
+// patches may target one file: every patch pins the same stock sha256 and each
+// later patch applies to the previous output (I11A_1_PLAN "L5 decisions").
 func collectPatches(patchesRoot string, stock stockSource, files map[string][]byte) (int, error) {
 	entries, err := os.ReadDir(patchesRoot)
 	if errors.Is(err, os.ErrNotExist) {
@@ -59,7 +63,8 @@ func collectPatches(patchesRoot string, stock stockSource, files map[string][]by
 	if err != nil {
 		return 0, fmt.Errorf("otabuild: patches directory: %w", err)
 	}
-	added := 0
+	outputs := make(map[string][]byte)
+	targets := make([]string, 0, len(entries))
 	for _, entry := range entries {
 		// A symlinked patch directory would otherwise be skipped and the release
 		// would ship without its client change.
@@ -70,16 +75,21 @@ func collectPatches(patchesRoot string, stock stockSource, files map[string][]by
 			return 0, fmt.Errorf("%w: unexpected entry %q in patches", ErrInvalidPatch, entry.Name())
 		}
 		directory := filepath.Join(patchesRoot, entry.Name())
-		target, content, err := applyPatchDirectory(directory, stock)
+		target, content, err := applyPatchDirectory(directory, stock, outputs)
 		if err != nil {
 			return 0, fmt.Errorf("otabuild: patch %s: %w", entry.Name(), err)
 		}
-		if err := addPackageFile(files, target, content); err != nil {
+		if _, seen := outputs[target]; !seen {
+			targets = append(targets, target)
+		}
+		outputs[target] = content
+	}
+	for _, target := range targets {
+		if err := addPackageFile(files, target, outputs[target]); err != nil {
 			return 0, err
 		}
-		added++
 	}
-	return added, nil
+	return len(targets), nil
 }
 
 // isDocumentationFile allows the top-level README the old layout keeps beside
@@ -91,7 +101,7 @@ func isDocumentationFile(entry os.DirEntry) bool {
 	return entry.Name() == "README" || entry.Name() == "README.md"
 }
 
-func applyPatchDirectory(directory string, source stockSource) (string, []byte, error) {
+func applyPatchDirectory(directory string, source stockSource, outputs map[string][]byte) (string, []byte, error) {
 	definition, err := readPatchDefinition(filepath.Join(directory, "patch.json"))
 	if err != nil {
 		return "", nil, err
@@ -107,6 +117,10 @@ func applyPatchDirectory(directory string, source stockSource) (string, []byte, 
 	if sha256Hex(stock) != definition.StockSHA256 {
 		return "", nil, fmt.Errorf("%w: %s", ErrStockHashMismatch, target)
 	}
+	base, patchedBefore := outputs[target]
+	if !patchedBefore {
+		base = stock
+	}
 	overlay, err := readPatchOverlay(directory, definition.Insert)
 	if err != nil {
 		return "", nil, err
@@ -115,7 +129,7 @@ func applyPatchDirectory(directory string, source stockSource) (string, []byte, 
 	if !ok {
 		return "", nil, fmt.Errorf("%w: %q", ErrPatchKind, definition.Kind)
 	}
-	applied, err := kind(definition, stock, overlay)
+	applied, err := kind(definition, base, overlay)
 	if err != nil {
 		return "", nil, err
 	}
@@ -163,17 +177,12 @@ func readPatchOverlay(directory, insert string) ([]byte, error) {
 // insert it before the single final `return` anchor line.
 func insertBeforeFinalReturn(definition patchDefinition, stockBytes, overlayBytes []byte) ([]byte, error) {
 	stock := []byte(normalizeNewlines(stockBytes))
-	patched := normalizeNewlines(overlayBytes)
-	placeholders := make([]string, 0, len(definition.Substitutions))
-	for placeholder := range definition.Substitutions {
-		placeholders = append(placeholders, placeholder)
+	patched, err := applySubstitutions(definition, normalizeNewlines(overlayBytes))
+	if err != nil {
+		return nil, err
 	}
-	sort.Strings(placeholders)
-	for _, placeholder := range placeholders {
-		if !strings.Contains(patched, placeholder) {
-			return nil, fmt.Errorf("%w: overlay has no substitution %q", ErrInvalidPatch, placeholder)
-		}
-		patched = strings.ReplaceAll(patched, placeholder, definition.Substitutions[placeholder])
+	if patched == "" {
+		return nil, fmt.Errorf("%w: an empty overlay is only allowed for replace_exact", ErrInvalidPatch)
 	}
 	anchor := regexp.QuoteMeta(definition.Anchor)
 	occurrences := regexp.MustCompile(`(?m)^`+anchor+`[ \t\r]*$`).FindAllIndex(stock, -1)
@@ -195,6 +204,38 @@ func insertBeforeFinalReturn(definition patchDefinition, stockBytes, overlayByte
 	output = append(output, definition.Anchor...)
 	output = append(output, trailing...)
 	return output, nil
+}
+
+// replaceExact replaces the anchor text, which may span lines, with the overlay
+// byte for byte; an empty overlay deletes it (I11A_1_PLAN "L5 decisions"). The
+// anchor must occur exactly once in the text it is applied to.
+func replaceExact(definition patchDefinition, stockBytes, overlayBytes []byte) ([]byte, error) {
+	stock := normalizeNewlines(stockBytes)
+	replacement, err := applySubstitutions(definition, normalizeNewlines(overlayBytes))
+	if err != nil {
+		return nil, err
+	}
+	anchor := normalizeNewlines([]byte(definition.Anchor))
+	occurrences := strings.Count(stock, anchor)
+	if occurrences != 1 {
+		return nil, fmt.Errorf("%w: %q appears %d times", ErrPatchAnchor, definition.Anchor, occurrences)
+	}
+	return []byte(strings.Replace(stock, anchor, replacement, 1)), nil
+}
+
+func applySubstitutions(definition patchDefinition, content string) (string, error) {
+	placeholders := make([]string, 0, len(definition.Substitutions))
+	for placeholder := range definition.Substitutions {
+		placeholders = append(placeholders, placeholder)
+	}
+	sort.Strings(placeholders)
+	for _, placeholder := range placeholders {
+		if !strings.Contains(content, placeholder) {
+			return "", fmt.Errorf("%w: overlay has no substitution %q", ErrInvalidPatch, placeholder)
+		}
+		content = strings.ReplaceAll(content, placeholder, definition.Substitutions[placeholder])
+	}
+	return content, nil
 }
 
 // normalizeNewlines matches Python's universal-newline text mode, which the
