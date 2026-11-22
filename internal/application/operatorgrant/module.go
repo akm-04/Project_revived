@@ -37,6 +37,7 @@ func (commands MailCommands) Module() operator.Module {
 			{Name: CommandMailSend, Class: operator.ClassLive, Help: "Send GM mail to players, one server or everyone.", Fields: []operator.Field{
 				operator.NewField("target", operator.FieldObject, true, "exactly one of player_ids, server_id or global"),
 				operator.NewField("title", operator.FieldString, true, "mail title").Bounded(1, MaxMailTitleRunes),
+				operator.NewField("sender", operator.FieldString, false, "sender the client shows; omitted uses the GM name").Bounded(1, MaxMailSenderRunes).WithDefault(DefaultMailSender),
 				operator.NewField("body", operator.FieldString, true, "mail body").Bounded(1, MaxMailBodyRunes),
 				operator.NewField("attachments", operator.FieldArray, false, "up to fifty {id, amount} lines"),
 				operator.NewField("expire", operator.FieldObject, true, "exactly one of fixed (RFC3339), after_read (seconds) or on_read (true)"),

@@ -26,8 +26,12 @@ const (
 	CodeMailExpire = "OPERATOR_MAIL_EXPIRE"
 	CodeMailTarget = "OPERATOR_MAIL_TARGET"
 
-	MaxMailTitleRunes = 64
-	MaxMailBodyRunes  = 2000
+	MaxMailTitleRunes  = 64
+	MaxMailBodyRunes   = 2000
+	MaxMailSenderRunes = 64
+	// DefaultMailSender is the sender the client shows when mail.send names none
+	// (domain mail.go projects it as the wire "from" field).
+	DefaultMailSender = "GM"
 )
 
 // MailOwner is the i5 admin mail command: the job form opens its own
@@ -55,6 +59,7 @@ type mailExpirePayload struct {
 type mailPayload struct {
 	Target      targetPayload     `json:"target"`
 	Title       string            `json:"title"`
+	Sender      string            `json:"sender,omitempty"`
 	Body        string            `json:"body"`
 	Attachments []linePayload     `json:"attachments,omitempty"`
 	Expire      mailExpirePayload `json:"expire"`
@@ -63,6 +68,7 @@ type mailPayload struct {
 // mailDelivery is the frozen delivery every recipient receives.
 type mailDelivery struct {
 	Title     string
+	Sender    string
 	Body      string
 	Lines     []grant.Line
 	Expires   *time.Time
@@ -122,7 +128,7 @@ func (commands MailCommands) sendHandler(ctx context.Context, scope tx.Scope, co
 func (commands MailCommands) applyInline(ctx context.Context, scope tx.Scope, admin appi5.AdminOperator, commandKey string, recipients []int64, delivery mailDelivery) (GrantResult, error) {
 	result := GrantResult{SemanticKey: commandKey, PlayerCount: len(recipients), State: operator.StateApplied}
 	for _, rawID := range recipients {
-		_, err := commands.Mail.AdminSendMailTx(ctx, scope.Tx, admin, identity.PlayerID(rawID), mail.Normal, recipientKey(commandKey, rawID), delivery.Title, "GM", delivery.Body, MailPolicyVersion, delivery.Lines, delivery.Expires, delivery.AfterRead, scope.Operation)
+		_, err := commands.Mail.AdminSendMailTx(ctx, scope.Tx, admin, identity.PlayerID(rawID), mail.Normal, recipientKey(commandKey, rawID), delivery.Title, delivery.Sender, delivery.Body, MailPolicyVersion, delivery.Lines, delivery.Expires, delivery.AfterRead, scope.Operation)
 		if err != nil {
 			// A refused recipient rolls the whole command back; the same key
 			// replays every recipient rather than leaving a partial mailbox.
@@ -142,6 +148,13 @@ func buildMailDelivery(catalogue operatorcatalog.Document, lineCap int64, payloa
 	if !utf8.ValidString(payload.Body) || utf8.RuneCountInString(payload.Body) < 1 || utf8.RuneCountInString(payload.Body) > MaxMailBodyRunes {
 		return mailDelivery{}, operator.Refuse(CodeMailBody, "body must hold one to two thousand characters", map[string]int{"max": MaxMailBodyRunes})
 	}
+	sender := payload.Sender
+	if sender == "" {
+		sender = DefaultMailSender
+	}
+	if !utf8.ValidString(sender) || utf8.RuneCountInString(sender) < 1 || utf8.RuneCountInString(sender) > MaxMailSenderRunes {
+		return mailDelivery{}, operator.Refuse(CodeMailBody, "sender must hold one to sixty-four characters", map[string]int{"max": MaxMailSenderRunes})
+	}
 	var lines []grant.Line
 	if len(payload.Attachments) > 0 {
 		validated, err := validateLines(catalogue, lineCap, payload.Attachments)
@@ -154,7 +167,7 @@ func buildMailDelivery(catalogue operatorcatalog.Document, lineCap int64, payloa
 	if err != nil {
 		return mailDelivery{}, err
 	}
-	return mailDelivery{Title: payload.Title, Body: payload.Body, Lines: lines, Expires: expires, AfterRead: afterRead}, nil
+	return mailDelivery{Title: payload.Title, Sender: sender, Body: payload.Body, Lines: lines, Expires: expires, AfterRead: afterRead}, nil
 }
 
 func deliveryExpiry(expire mailExpirePayload, at time.Time) (*time.Time, *int64, error) {

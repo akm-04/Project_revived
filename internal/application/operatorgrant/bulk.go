@@ -176,7 +176,7 @@ func (applier Applier) recipientAction(target BulkTarget, admin appi5.AdminOpera
 			if delivery.Expires != nil && !delivery.Expires.After(op.StartedAt.UTC()) {
 				return errMailExpired
 			}
-			_, err := applier.Mail.AdminSendMail(ctx, admin, playerID, mail.Normal, key, delivery.Title, "GM", delivery.Body, MailPolicyVersion, delivery.Lines, delivery.Expires, delivery.AfterRead, op)
+			_, err := applier.Mail.AdminSendMail(ctx, admin, playerID, mail.Normal, key, delivery.Title, delivery.Sender, delivery.Body, MailPolicyVersion, delivery.Lines, delivery.Expires, delivery.AfterRead, op)
 			return err
 		}
 		return apply, func(err error) bool { return errors.Is(err, errMailExpired) }, nil
