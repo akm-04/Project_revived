@@ -71,12 +71,6 @@ func PlannedModules() []Module {
 			{Name: "tuning.restore", Class: ClassLive, Help: "Restore one overlay revision."},
 			{Name: "tuning.reset", Class: ClassLive, Help: "Reset one overlay to its factory default."},
 		}},
-		{ID: "backup", Title: "Backups", LogChannel: "backup", Planned: later, Commands: []CommandSpec{
-			{Name: "backup.snapshot", Class: ClassMaintenance, Help: "Take a backup."},
-			{Name: "backup.list", Class: ClassLive, Help: "List snapshots."},
-			{Name: "backup.restore", Class: ClassMaintenance, Help: "Restore a snapshot."},
-			{Name: "backup.prune", Class: ClassMaintenance, Help: "Prune old snapshots."},
-		}},
 		{ID: "logs", Title: "Logs", LogChannel: "logs", Planned: later, Reads: []Read{
 			{Name: "logs.timeline", Help: "Redacted client log timeline by player, account, time, outcome or MID."},
 		}},

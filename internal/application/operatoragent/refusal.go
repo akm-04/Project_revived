@@ -43,6 +43,19 @@ const (
 	CodeBuildConfig                  = "AGENT_BUILD_CONFIG"
 	CodeBuildIO                      = "AGENT_BUILD_IO"
 	CodeBuildNoAssetsRelease         = "AGENT_BUILD_NO_ASSETS_RELEASE"
+
+	// backup refusals (B1-B7): a permanent backup refusal is 409 with one of
+	// these codes; a tool failure is the temporary CodeBackupToolFailed.
+	CodeBackupKindInvalid     = "AGENT_BACKUP_KIND_INVALID"
+	CodeBackupUnknown         = "AGENT_BACKUP_UNKNOWN"
+	CodeBackupDamaged         = "AGENT_BACKUP_DAMAGED"
+	CodeBackupMigrationTooNew = "AGENT_BACKUP_MIGRATION_TOO_NEW"
+	CodeBackupDSNMissing      = "AGENT_BACKUP_DSN_MISSING"
+	CodeBackupDSNInvalid      = "AGENT_BACKUP_DSN_INVALID"
+	CodeBackupToolsMissing    = "AGENT_BACKUP_TOOLS_MISSING"
+	CodeBackupRestoreRefused  = "AGENT_BACKUP_RESTORE_REFUSED"
+	CodeBackupToolFailed      = "AGENT_BACKUP_TOOL_FAILED"
+	CodeBackupFailed          = "AGENT_BACKUP_FAILED"
 )
 
 // Refusal is a permanent agent refusal: the agent API answers 409 with Code.

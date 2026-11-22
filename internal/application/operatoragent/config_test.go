@@ -211,3 +211,75 @@ func TestEnvFileErrorAndLogCarryNoValue(t *testing.T) {
 		t.Fatalf("log line is not JSON: %v", err)
 	}
 }
+
+func TestBackupSettingsDefaultsAndValidation(t *testing.T) {
+	base := `{"listen":"127.0.0.1:8090","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`
+	root := writeAgentConfig(t, base)
+	config, err := LoadConfig(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if config.BackupKeepValue() != DefaultBackupKeep {
+		t.Fatalf("backup_keep default = %d", config.BackupKeepValue())
+	}
+	if config.BackupDirectory(root) != filepath.Join(root, BackupDirectoryName) {
+		t.Fatalf("backup directory = %q", config.BackupDirectory(root))
+	}
+
+	for name, contents := range map[string]string{
+		"zero keep":     `{"listen":"127.0.0.1:8090","backup_keep":0,"backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`,
+		"negative keep": `{"listen":"127.0.0.1:8090","backup_keep":-1,"backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`,
+		"relative path": `{"listen":"127.0.0.1:8090","backup_path":"backups","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`,
+		"unknown keep":  `{"listen":"127.0.0.1:8090","backup_keep":"five","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`,
+	} {
+		t.Run(name, func(t *testing.T) {
+			if _, err := LoadConfig(writeAgentConfig(t, contents)); err == nil {
+				t.Fatal("want a refusal")
+			}
+		})
+	}
+}
+
+func TestBackupPathMustBeWritableAndOutsideTheTrees(t *testing.T) {
+	otaRoot := t.TempDir()
+	inside := filepath.Join(otaRoot, "backups")
+	contents := `{"listen":"127.0.0.1:8090","ota_root":"` + otaRoot + `","backup_path":"` + inside + `","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`
+	if _, err := LoadConfig(writeAgentConfig(t, contents)); err == nil || !strings.Contains(err.Error(), "ota_root") {
+		t.Fatalf("inside ota_root: %v", err)
+	}
+
+	notDirectory := filepath.Join(t.TempDir(), "file")
+	if err := os.WriteFile(notDirectory, []byte("x"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	contents = `{"listen":"127.0.0.1:8090","backup_path":"` + notDirectory + `","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`
+	if _, err := LoadConfig(writeAgentConfig(t, contents)); err == nil || !strings.Contains(err.Error(), "writable") {
+		t.Fatalf("file backup_path: %v", err)
+	}
+
+	writable := filepath.Join(t.TempDir(), "snapshots")
+	contents = `{"listen":"127.0.0.1:8090","backup_path":"` + writable + `","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`
+	config, err := LoadConfig(writeAgentConfig(t, contents))
+	if err != nil {
+		t.Fatalf("a writable backup_path was refused: %v", err)
+	}
+	if config.BackupDirectory("/elsewhere") != writable {
+		t.Fatalf("backup directory = %q", config.BackupDirectory("/elsewhere"))
+	}
+}
+
+func TestToolchainPathMustBeADirectory(t *testing.T) {
+	notDirectory := filepath.Join(t.TempDir(), "file")
+	if err := os.WriteFile(notDirectory, []byte("x"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	contents := `{"listen":"127.0.0.1:8090","toolchain_path":"` + notDirectory + `","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`
+	if _, err := LoadConfig(writeAgentConfig(t, contents)); err == nil {
+		t.Fatal("a file toolchain_path was accepted")
+	}
+	directory := t.TempDir()
+	contents = `{"listen":"127.0.0.1:8090","toolchain_path":"` + directory + `","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`
+	if _, err := LoadConfig(writeAgentConfig(t, contents)); err != nil {
+		t.Fatalf("a directory toolchain_path was refused: %v", err)
+	}
+}

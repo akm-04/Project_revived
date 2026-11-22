@@ -39,6 +39,7 @@ const (
 	logTailPath       = "/agent/v1/log/tail"
 	modulesPath       = "/agent/v1/modules"
 	resPrefix         = "/agent/v1/res/"
+	backupPrefix      = "/agent/v1/backup/"
 
 	maxBodyBytes = 1 << 20
 	// The agent re-marshals a command into a larger envelope, so it accepts
@@ -58,6 +59,7 @@ type Handler struct {
 	Operator    operatoragent.OperatorClient
 	Tokens      *operatoragent.TokenHolder
 	Maintenance operatoragent.Maintenance
+	Backup      *operatoragent.BackupService
 	Operations  *operatoragent.Operations
 	Build       operatoragent.OTAOperationStarter
 	Modules     operatoragent.ModuleLister
@@ -104,6 +106,20 @@ type buildRequest struct {
 	LazyRefresh bool   `json:"lazy_refresh"`
 	Reason      string `json:"reason"`
 	SemanticKey string `json:"semantic_key"`
+}
+
+type backupSnapshotRequest struct {
+	Kind   string `json:"kind"`
+	Reason string `json:"reason"`
+}
+
+type backupReasonRequest struct {
+	Reason string `json:"reason"`
+}
+
+type backupRestoreRequest struct {
+	ID     string `json:"id"`
+	Reason string `json:"reason"`
 }
 
 func (handler Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
@@ -167,6 +183,8 @@ func (handler Handler) ServeHTTP(writer http.ResponseWriter, request *http.Reque
 		handler.serveModules(writer, request)
 	case strings.HasPrefix(request.URL.Path, resPrefix) && request.Method == http.MethodGet:
 		handler.serveRes(writer, request)
+	case strings.HasPrefix(request.URL.Path, backupPrefix):
+		handler.serveBackup(writer, request, strings.TrimPrefix(request.URL.Path, backupPrefix))
 	default:
 		writeRefusal(writer, http.StatusNotFound, operatoragent.CodeNotFound, "no such agent route")
 	}
@@ -469,6 +487,103 @@ func tailLines(path string, count int) ([]string, error) {
 		all = all[len(all)-count:]
 	}
 	return all, nil
+}
+
+// serveBackup runs the backup commands in the agent (B1-B7), so they work
+// while the backend or database is down.
+func (handler Handler) serveBackup(writer http.ResponseWriter, request *http.Request, action string) {
+	if handler.Backup == nil {
+		writeRefusal(writer, http.StatusServiceUnavailable, operatoragent.CodeBackupToolsMissing, "the backup service is not configured")
+		return
+	}
+	switch {
+	case action == "list" && request.Method == http.MethodGet:
+		list, err := handler.Backup.List(request.Context())
+		if err != nil {
+			handler.writeAgentError(writer, "backup.list", err)
+			return
+		}
+		handler.record("backup.list", "list", "ok", map[string]any{"backups": len(list.Backups)})
+		writeJSON(writer, http.StatusOK, list)
+	case action == "snapshot" && request.Method == http.MethodPost:
+		var body backupSnapshotRequest
+		if err := decodeBody(writer, request, maxBodyBytes, &body); err != nil {
+			handler.writeBodyError(writer, err)
+			return
+		}
+		if body.Reason == "" {
+			writeRefusal(writer, http.StatusConflict, operatoragent.CodeBodyInvalid, "reason is required")
+			return
+		}
+		kind := body.Kind
+		if kind == "" {
+			kind = operatoragent.BackupKindManual
+		}
+		operation, err := handler.Backup.Snapshot(request.Context(), kind, body.Reason)
+		if err != nil {
+			handler.record("backup.snapshot", "snapshot", "failed", map[string]any{"operation_id": operation.ID, "failed_step": operation.FailedStep})
+			handler.writeAgentError(writer, "backup.snapshot", err)
+			return
+		}
+		handler.record("backup.snapshot", "snapshot", "ok", map[string]any{"operation_id": operation.ID})
+		writeJSON(writer, http.StatusOK, operation)
+	case action == "prune" && request.Method == http.MethodPost:
+		var body backupReasonRequest
+		if err := decodeBody(writer, request, maxBodyBytes, &body); err != nil {
+			handler.writeBodyError(writer, err)
+			return
+		}
+		if body.Reason == "" {
+			writeRefusal(writer, http.StatusConflict, operatoragent.CodeBodyInvalid, "reason is required")
+			return
+		}
+		operation, err := handler.Backup.Prune(request.Context())
+		if err != nil {
+			handler.record("backup.prune", "prune", "failed", map[string]any{"operation_id": operation.ID, "failed_step": operation.FailedStep})
+			handler.writeAgentError(writer, "backup.prune", err)
+			return
+		}
+		handler.record("backup.prune", "prune", "ok", map[string]any{"operation_id": operation.ID})
+		writeJSON(writer, http.StatusOK, operation)
+	case action == "restore" && request.Method == http.MethodPost:
+		var body backupRestoreRequest
+		if err := decodeBody(writer, request, maxBodyBytes, &body); err != nil {
+			handler.writeBodyError(writer, err)
+			return
+		}
+		if body.ID == "" || body.Reason == "" {
+			writeRefusal(writer, http.StatusConflict, operatoragent.CodeBodyInvalid, "id and reason are required")
+			return
+		}
+		operation, err := handler.Backup.Restore(request.Context(), body.ID, body.Reason)
+		if err != nil {
+			handler.record("backup.restore", "restore", "failed", map[string]any{"operation_id": operation.ID, "failed_step": operation.FailedStep})
+			handler.writeAgentError(writer, "backup.restore", err)
+			return
+		}
+		handler.record("backup.restore", "restore", "ok", map[string]any{"operation_id": operation.ID})
+		writeJSON(writer, http.StatusOK, operation)
+	case action == "update-backend" && request.Method == http.MethodPost:
+		var body backupReasonRequest
+		if err := decodeBody(writer, request, maxBodyBytes, &body); err != nil {
+			handler.writeBodyError(writer, err)
+			return
+		}
+		if body.Reason == "" {
+			writeRefusal(writer, http.StatusConflict, operatoragent.CodeBodyInvalid, "reason is required")
+			return
+		}
+		operation, err := handler.Backup.UpdateBackend(request.Context(), body.Reason)
+		if err != nil {
+			handler.record("backup.update_backend", "update", "failed", map[string]any{"operation_id": operation.ID, "failed_step": operation.FailedStep})
+			handler.writeAgentError(writer, "backup.update_backend", err)
+			return
+		}
+		handler.record("backup.update_backend", "update", "ok", map[string]any{"operation_id": operation.ID})
+		writeJSON(writer, http.StatusOK, operation)
+	default:
+		writeRefusal(writer, http.StatusNotFound, operatoragent.CodeNotFound, "no such agent route")
+	}
 }
 
 func decodeBody(writer http.ResponseWriter, request *http.Request, limit int64, target any) error {

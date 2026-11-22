@@ -1841,6 +1841,7 @@
    "operatoragent": [
     "MergeModules",
     "NewField",
+    "WithDefault",
     "WithEnum"
    ],
    "operatorcatalog": [
@@ -5478,6 +5479,7 @@
    "operator": [
     "MergeModules",
     "NewField",
+    "WithDefault",
     "WithEnum"
    ],
    "otabuild": [

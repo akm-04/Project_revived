@@ -53,6 +53,30 @@ func AgentOTAModule() operator.Module {
 	}
 }
 
+// BackupModule is the agent's backup module (B1-B7): snapshots, listing,
+// pruning, restore and the update-backend maintenance flow all run in the
+// agent, so they work while the backend or database is down.
+func BackupModule() operator.Module {
+	return operator.Module{
+		ID:         "backup",
+		Title:      "Backups",
+		Role:       operator.RoleRoot,
+		LogChannel: "backup",
+		Screen:     operator.Screen{Tab: "Backups", Columns: []string{"id", "kind", "created_at", "size", "migration", "damaged"}},
+		Commands: []operator.CommandSpec{
+			{Name: "backup.snapshot", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Take a database snapshot.", Fields: []operator.Field{
+				operator.NewField("kind", operator.FieldString, false, "manual, safety, pre-update or pre-delete").WithEnum("manual", "safety", "pre-update", "pre-delete").WithDefault("manual"),
+			}},
+			{Name: "backup.list", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "List snapshots newest first, with the newest age and damage state."},
+			{Name: "backup.prune", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Delete all but the newest backup_keep snapshots."},
+			{Name: "backup.restore", Class: operator.ClassMaintenance, Route: operator.RouteAgent, Help: "Restore a snapshot with a safety snapshot and a rename swap.", Fields: []operator.Field{
+				operator.NewField("id", operator.FieldString, true, "snapshot id from backup.list"),
+			}},
+			{Name: "backup.update_backend", Class: operator.ClassMaintenance, Route: operator.RouteAgent, Help: "Snapshot, stop the backend, then swap the binary and start."},
+		},
+	}
+}
+
 // ModuleSource is the agent's outbound module-list port.
 type ModuleSource interface {
 	Modules(context.Context) ([]operator.Module, error)

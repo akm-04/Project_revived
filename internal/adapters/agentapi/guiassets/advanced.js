@@ -359,6 +359,19 @@ function runAgentRoute(name, payload, reason, semanticKey) {
         method: "POST",
         body: { version: payload.version, reason, semantic_key: semanticKey },
       });
+    case "backup.snapshot":
+      return request("/agent/v1/backup/snapshot", {
+        method: "POST",
+        body: { kind: payload.kind, reason },
+      });
+    case "backup.list":
+      return request("/agent/v1/backup/list");
+    case "backup.prune":
+      return request("/agent/v1/backup/prune", { method: "POST", body: { reason } });
+    case "backup.restore":
+      return request("/agent/v1/backup/restore", { method: "POST", body: { id: payload.id, reason } });
+    case "backup.update_backend":
+      return request("/agent/v1/backup/update-backend", { method: "POST", body: { reason } });
     default:
       return Promise.resolve({
         ok: false,

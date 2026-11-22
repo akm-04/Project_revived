@@ -78,6 +78,23 @@ func (client *Client) Read(ctx context.Context, name, query string) (operatorage
 	return client.do(ctx, http.MethodGet, url, nil)
 }
 
+// Version fetches the backend's build and migration facts (ruling 8); a
+// backend refusal passes through unchanged.
+func (client *Client) Version(ctx context.Context) (operator.VersionInfo, error) {
+	response, err := client.do(ctx, http.MethodGet, client.baseURL+"/operator/v1/version", nil)
+	if err != nil {
+		return operator.VersionInfo{}, err
+	}
+	if response.Status != http.StatusOK {
+		return operator.VersionInfo{}, &operatoragent.BackendRefusal{Status: response.Status, Body: response.Body}
+	}
+	var version operator.VersionInfo
+	if err := json.Unmarshal(response.Body, &version); err != nil {
+		return operator.VersionInfo{}, fmt.Errorf("the backend version reply is not JSON: %w", err)
+	}
+	return version, nil
+}
+
 func (client *Client) do(ctx context.Context, method, url string, body []byte) (operatoragent.BackendResponse, error) {
 	token := client.tokens.Get()
 	if token == "" {
