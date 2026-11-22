@@ -124,6 +124,9 @@ func (commands Commands) Deploy(ctx context.Context, transaction tx.Tx, commandK
 		}
 		return DeployResult{}, err
 	}
+	if err := commands.Store.ClearDefinitionConflictTx(ctx, transaction, definition.ActivityID, definition.Revision); err != nil {
+		return DeployResult{}, err
+	}
 	return DeployResult{ActivityID: definition.ActivityID, Revision: definition.Revision, SHA256: sha, Created: true}, nil
 }
 
@@ -158,16 +161,17 @@ func (commands Commands) checkRewards(ctx context.Context, q tx.Queryer, definit
 
 // DefinitionSummary is one events.definition.list row.
 type DefinitionSummary struct {
-	ActivityID   int64    `json:"activity_id"`
-	Revision     int64    `json:"revision"`
-	Archetype    string   `json:"archetype"`
-	SHA256       string   `json:"sha256"`
-	DeployedAt   string   `json:"deployed_at"`
-	Readiness    string   `json:"readiness"`
-	MissingPaths []string `json:"missing_paths,omitempty"`
-	DefaultDays  int64    `json:"default_days"`
-	Name         string   `json:"name,omitempty"`
-	Icon         string   `json:"icon,omitempty"`
+	ActivityID         int64    `json:"activity_id"`
+	Revision           int64    `json:"revision"`
+	Archetype          string   `json:"archetype"`
+	SHA256             string   `json:"sha256"`
+	DeployedAt         string   `json:"deployed_at"`
+	Readiness          string   `json:"readiness"`
+	MissingPaths       []string `json:"missing_paths,omitempty"`
+	MissingCodeVersion string   `json:"missing_code_version,omitempty"`
+	DefaultDays        int64    `json:"default_days"`
+	Name               string   `json:"name,omitempty"`
+	Icon               string   `json:"icon,omitempty"`
 }
 
 type definitionListPayload struct {
@@ -205,6 +209,7 @@ func (commands Commands) definitionListHandler(ctx context.Context, scope tx.Sco
 		summary.Readiness = readiness.State
 		if readiness.State == ReadinessClientContentMissing {
 			summary.MissingPaths = readiness.MissingPaths
+			summary.MissingCodeVersion = readiness.MissingCodeVersion
 		}
 		if readiness.State == ReadinessReady && row.SyncConflictSHA256 != "" {
 			summary.Readiness = ReadinessSyncConflict

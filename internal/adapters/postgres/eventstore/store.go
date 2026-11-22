@@ -156,11 +156,12 @@ FROM (
 	FROM event_definitions d
 	LEFT JOIN event_definition_sync_conflicts c ON c.activity_id=d.activity_id AND c.revision=d.revision
 	WHERE ($1=0 OR d.activity_id=$1)
+	AND d.revision=(SELECT MAX(latest.revision) FROM event_definitions latest WHERE latest.activity_id=d.activity_id)
 	ORDER BY d.activity_id,d.revision DESC LIMIT $2
 ) listed`
 
-// ListDefinitionsTx reads the newest revisions first, optionally for one
-// activity (activityID 0 = every activity).
+// ListDefinitionsTx reads the latest revision of each activity, newest first,
+// optionally for one activity (activityID 0 = every activity).
 func (Store) ListDefinitionsTx(ctx context.Context, query tx.Queryer, activityID int64, limit int) ([]appevents.DefinitionRecord, error) {
 	if query == nil || activityID < 0 || limit < 1 || limit > 200 {
 		return nil, errInvalid
@@ -223,10 +224,11 @@ func (Store) RecordDefinitionConflictTx(ctx context.Context, transaction tx.Tx, 
 	return nil
 }
 
-const clearDefinitionConflict = `DELETE FROM event_definition_sync_conflicts WHERE activity_id=$1 AND revision=$2`
+const clearDefinitionConflict = `DELETE FROM event_definition_sync_conflicts WHERE activity_id=$1 AND revision<=$2`
 
-// ClearDefinitionConflictTx drops a conflict record once the shipped file
-// matches the stored revision again.
+// ClearDefinitionConflictTx drops the conflict records of a revision and its
+// older revisions once that revision deploys or matches its shipped file
+// (EA-14.5).
 func (Store) ClearDefinitionConflictTx(ctx context.Context, transaction tx.Tx, activityID, revision int64) error {
 	if transaction == nil || activityID <= 0 || revision <= 0 {
 		return errInvalid
