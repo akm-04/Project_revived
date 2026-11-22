@@ -10436,6 +10436,104 @@
         "references": [],
         "retention": null
       }
+    },
+    "event_definitions": {
+      "owner": "events",
+      "migration": "migrations/00186_i11a_events.sql",
+      "allowed_query_owners": [
+        "events"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/eventstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/eventstore/"
+      ],
+      "write_exceptions": [],
+      "data": {
+        "scope": "server",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
+    },
+    "event_occurrences": {
+      "owner": "events",
+      "migration": "migrations/00186_i11a_events.sql",
+      "allowed_query_owners": [
+        "events"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/eventstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/eventstore/"
+      ],
+      "write_exceptions": [],
+      "data": {
+        "scope": "server",
+        "owner": [
+          "logical_server_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
+    },
+    "event_cycle_settings": {
+      "owner": "events",
+      "migration": "migrations/00186_i11a_events.sql",
+      "allowed_query_owners": [
+        "events"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/eventstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/eventstore/"
+      ],
+      "write_exceptions": [],
+      "data": {
+        "scope": "server",
+        "owner": [
+          "logical_server_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
+    },
+    "player_event_claims": {
+      "owner": "events",
+      "migration": "migrations/00186_i11a_events.sql",
+      "allowed_query_owners": [
+        "events"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/eventstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/eventstore/"
+      ],
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     }
   }
 }

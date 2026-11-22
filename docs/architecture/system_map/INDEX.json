@@ -648,6 +648,9 @@
    "commerce_recharge_tuning": "commerceprivilege",
    "commerce_vip_awards": "commerceprivilege",
    "dodgeball_players": "dodgeball",
+   "event_cycle_settings": "events",
+   "event_definitions": "events",
+   "event_occurrences": "events",
    "friend_dm_delivery": "frienddm",
    "friend_dm_occurrences": "frienddm",
    "friend_dm_projection_receipts": "frienddm",
@@ -754,6 +757,7 @@
    "player_element_roots": "elementequipment",
    "player_event_centre_board_reports": "eventcentre",
    "player_event_centre_roots": "eventcentre",
+   "player_event_claims": "events",
    "player_gm_questions": "gmquestion",
    "player_guild_activity_days": "guildcore",
    "player_guild_activity_totals": "guildcore",
@@ -1125,6 +1129,15 @@
    "tables": 2
   },
   {
+   "callees": 3,
+   "callers": 0,
+   "mids": 0,
+   "name": "events",
+   "path": "internal/application/events",
+   "purpose": "applies the I11A event owner commands and serves its bounded reads (I11A_EVENTS_V1)",
+   "tables": 4
+  },
+  {
    "callees": 7,
    "callers": 2,
    "mids": 1,
@@ -1396,7 +1409,7 @@
   },
   {
    "callees": 0,
-   "callers": 1,
+   "callers": 2,
    "mids": 0,
    "name": "operator",
    "path": "internal/application/operator",
@@ -1423,7 +1436,7 @@
   },
   {
    "callees": 2,
-   "callers": 0,
+   "callers": 1,
    "mids": 3,
    "name": "otarelease",
    "path": "internal/application/otarelease",

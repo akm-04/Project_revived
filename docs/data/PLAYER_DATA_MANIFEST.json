@@ -606,7 +606,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 102,
+   "restore_order": 106,
    "payload_columns": []
   },
   {
@@ -622,7 +622,7 @@
     "recipient_id"
    ],
    "retention": null,
-   "restore_order": 103,
+   "restore_order": 107,
    "payload_columns": []
   },
   {
@@ -636,7 +636,7 @@
    "backup": false,
    "references": [],
    "retention": null,
-   "restore_order": 104,
+   "restore_order": 108,
    "payload_columns": []
   },
   {
@@ -650,7 +650,7 @@
    "backup": false,
    "references": [],
    "retention": null,
-   "restore_order": 105,
+   "restore_order": 109,
    "payload_columns": [
     "messages"
    ]
@@ -666,7 +666,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 108,
+   "restore_order": 112,
    "payload_columns": [
     "payload"
    ]
@@ -682,7 +682,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 113,
+   "restore_order": 117,
    "payload_columns": [
     "result_payload",
     "operation_policy_refs"
@@ -700,7 +700,7 @@
    "backup": false,
    "references": [],
    "retention": null,
-   "restore_order": 115,
+   "restore_order": 119,
    "payload_columns": []
   },
   {
@@ -714,7 +714,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 116,
+   "restore_order": 120,
    "payload_columns": []
   },
   {
@@ -728,7 +728,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 117,
+   "restore_order": 121,
    "payload_columns": []
   },
   {
@@ -742,7 +742,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 121,
+   "restore_order": 125,
    "payload_columns": []
   },
   {
@@ -756,7 +756,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 124,
+   "restore_order": 128,
    "payload_columns": []
   },
   {
@@ -770,7 +770,7 @@
    "backup": false,
    "references": [],
    "retention": null,
-   "restore_order": 128,
+   "restore_order": 132,
    "payload_columns": []
   },
   {
@@ -786,7 +786,7 @@
     "inviter_player_id"
    ],
    "retention": null,
-   "restore_order": 129,
+   "restore_order": 133,
    "payload_columns": [
     "source_payload"
    ]
@@ -802,7 +802,7 @@
    "backup": false,
    "references": [],
    "retention": null,
-   "restore_order": 130,
+   "restore_order": 134,
    "payload_columns": []
   },
   {
@@ -816,7 +816,7 @@
    "backup": false,
    "references": [],
    "retention": null,
-   "restore_order": 131,
+   "restore_order": 135,
    "payload_columns": [
     "source_payload",
     "cursor_proof"
@@ -833,7 +833,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 136,
+   "restore_order": 140,
    "payload_columns": []
   },
   {
@@ -849,7 +849,7 @@
     "borrower_id"
    ],
    "retention": null,
-   "restore_order": 137,
+   "restore_order": 141,
    "payload_columns": []
   },
   {
@@ -864,7 +864,7 @@
     "receiver_id"
    ],
    "retention": null,
-   "restore_order": 139,
+   "restore_order": 143,
    "payload_columns": []
   },
   {
@@ -878,7 +878,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 188,
+   "restore_order": 192,
    "payload_columns": []
   },
   {
@@ -892,7 +892,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 189,
+   "restore_order": 193,
    "payload_columns": []
   },
   {
@@ -906,7 +906,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 191,
+   "restore_order": 195,
    "payload_columns": []
   },
   {
@@ -920,7 +920,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 193,
+   "restore_order": 197,
    "payload_columns": []
   },
   {
@@ -934,7 +934,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 196,
+   "restore_order": 200,
    "payload_columns": [
     "payload"
    ]
@@ -950,7 +950,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 197,
+   "restore_order": 201,
    "payload_columns": [
     "payload"
    ]
@@ -966,7 +966,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 201,
+   "restore_order": 205,
    "payload_columns": []
   },
   {
@@ -982,7 +982,7 @@
     "author_player_id"
    ],
    "retention": null,
-   "restore_order": 202,
+   "restore_order": 206,
    "payload_columns": []
   },
   {
@@ -996,7 +996,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 203,
+   "restore_order": 207,
    "payload_columns": []
   },
   {
@@ -1010,7 +1010,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 204,
+   "restore_order": 208,
    "payload_columns": []
   },
   {
@@ -1024,7 +1024,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 205,
+   "restore_order": 209,
    "payload_columns": []
   },
   {
@@ -1036,7 +1036,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 206,
+   "restore_order": 210,
    "payload_columns": [
     "metadata"
    ]
@@ -1052,7 +1052,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 207,
+   "restore_order": 211,
    "payload_columns": []
   },
   {
@@ -1066,7 +1066,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 209,
+   "restore_order": 213,
    "payload_columns": [
     "payload"
    ]
@@ -1082,7 +1082,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 210,
+   "restore_order": 214,
    "payload_columns": [
     "payload"
    ]
@@ -1099,7 +1099,7 @@
     "target_id"
    ],
    "retention": null,
-   "restore_order": 212,
+   "restore_order": 216,
    "payload_columns": []
   },
   {
@@ -1113,7 +1113,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 213,
+   "restore_order": 217,
    "payload_columns": [
     "items"
    ]
@@ -1129,7 +1129,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 214,
+   "restore_order": 218,
    "payload_columns": []
   },
   {
@@ -1144,7 +1144,7 @@
     "student_id"
    ],
    "retention": null,
-   "restore_order": 215,
+   "restore_order": 219,
    "payload_columns": []
   },
   {
@@ -1158,7 +1158,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 216,
+   "restore_order": 220,
    "payload_columns": []
   },
   {
@@ -1172,7 +1172,7 @@
    "backup": false,
    "references": [],
    "retention": null,
-   "restore_order": 219,
+   "restore_order": 223,
    "payload_columns": [
     "content"
    ]
@@ -1188,7 +1188,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 220,
+   "restore_order": 224,
    "payload_columns": [
     "scores"
    ]
@@ -1206,7 +1206,7 @@
     "opponent"
    ],
    "retention": null,
-   "restore_order": 223,
+   "restore_order": 227,
    "payload_columns": [
     "teams",
     "offered",
@@ -1227,7 +1227,7 @@
     "defender_id"
    ],
    "retention": null,
-   "restore_order": 224,
+   "restore_order": 228,
    "payload_columns": [
     "attack_teams",
     "defense_teams",
@@ -1245,7 +1245,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 225,
+   "restore_order": 229,
    "payload_columns": []
   },
   {
@@ -1259,7 +1259,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 226,
+   "restore_order": 230,
    "payload_columns": []
   },
   {
@@ -1271,7 +1271,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 227,
+   "restore_order": 231,
    "payload_columns": []
   },
   {
@@ -1285,7 +1285,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 229,
+   "restore_order": 233,
    "payload_columns": []
   },
   {
@@ -1301,7 +1301,7 @@
     "recipient_id"
    ],
    "retention": null,
-   "restore_order": 231,
+   "restore_order": 240,
    "payload_columns": []
   },
   {
@@ -1313,7 +1313,7 @@
    "backup": false,
    "references": [],
    "retention": null,
-   "restore_order": 232,
+   "restore_order": 241,
    "payload_columns": [
     "terminal_receipt"
    ]
@@ -1327,7 +1327,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 233,
+   "restore_order": 242,
    "payload_columns": [
     "payload"
    ]
@@ -1343,7 +1343,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 234,
+   "restore_order": 243,
    "payload_columns": [
     "payload"
    ]
@@ -1359,7 +1359,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 235,
+   "restore_order": 244,
    "payload_columns": [
     "payload"
    ]
@@ -1375,7 +1375,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 236,
+   "restore_order": 245,
    "payload_columns": [
     "facts"
    ]
@@ -1391,7 +1391,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 237,
+   "restore_order": 246,
    "payload_columns": [
     "operation_context"
    ]
@@ -1407,7 +1407,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 238,
+   "restore_order": 247,
    "payload_columns": []
   },
   {
@@ -1421,7 +1421,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 239,
+   "restore_order": 248,
    "payload_columns": []
   },
   {
@@ -1435,7 +1435,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 240,
+   "restore_order": 249,
    "payload_columns": []
   },
   {
@@ -1449,7 +1449,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 241,
+   "restore_order": 250,
    "payload_columns": [
     "facts"
    ]
@@ -1465,7 +1465,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 242,
+   "restore_order": 251,
    "payload_columns": [
     "operation_context"
    ]
@@ -1481,7 +1481,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 243,
+   "restore_order": 252,
    "payload_columns": [
     "facts"
    ]
@@ -1497,7 +1497,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 244,
+   "restore_order": 253,
    "payload_columns": []
   },
   {
@@ -1511,7 +1511,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 245,
+   "restore_order": 254,
    "payload_columns": []
   },
   {
@@ -1525,7 +1525,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 246,
+   "restore_order": 255,
    "payload_columns": []
   },
   {
@@ -1539,7 +1539,7 @@
    "backup": false,
    "references": [],
    "retention": null,
-   "restore_order": 247,
+   "restore_order": 256,
    "payload_columns": []
   },
   {
@@ -1553,7 +1553,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 248,
+   "restore_order": 257,
    "payload_columns": [
     "payload"
    ]
@@ -1569,7 +1569,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 249,
+   "restore_order": 258,
    "payload_columns": []
   },
   {
@@ -1583,7 +1583,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 250,
+   "restore_order": 259,
    "payload_columns": [
     "operation_context",
     "result"
@@ -1600,7 +1600,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 251,
+   "restore_order": 260,
    "payload_columns": []
   },
   {
@@ -1614,7 +1614,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 252,
+   "restore_order": 261,
    "payload_columns": [
     "furniture_record",
     "pending_expansion"
@@ -1633,7 +1633,7 @@
     "author_player_id"
    ],
    "retention": null,
-   "restore_order": 253,
+   "restore_order": 262,
    "payload_columns": []
   },
   {
@@ -1649,7 +1649,7 @@
     "actor_player_id"
    ],
    "retention": null,
-   "restore_order": 254,
+   "restore_order": 263,
    "payload_columns": []
   },
   {
@@ -1663,7 +1663,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 255,
+   "restore_order": 264,
    "payload_columns": []
   },
   {
@@ -1677,7 +1677,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 256,
+   "restore_order": 265,
    "payload_columns": [
     "equipment"
    ]
@@ -1695,7 +1695,7 @@
     "actor_player_id"
    ],
    "retention": null,
-   "restore_order": 257,
+   "restore_order": 266,
    "payload_columns": []
   },
   {
@@ -1709,7 +1709,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 258,
+   "restore_order": 267,
    "payload_columns": []
   },
   {
@@ -1723,7 +1723,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 259,
+   "restore_order": 268,
    "payload_columns": []
   },
   {
@@ -1737,7 +1737,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 260,
+   "restore_order": 269,
    "payload_columns": [
     "facts"
    ]
@@ -1753,7 +1753,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 261,
+   "restore_order": 270,
    "payload_columns": [
     "operation_context"
    ]
@@ -1769,7 +1769,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 262,
+   "restore_order": 271,
    "payload_columns": [
     "facts"
    ]
@@ -1785,7 +1785,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 263,
+   "restore_order": 272,
    "payload_columns": []
   },
   {
@@ -1799,10 +1799,24 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 264,
+   "restore_order": 273,
    "payload_columns": [
     "facts"
    ]
+  },
+  {
+   "table": "player_event_claims",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 274,
+   "payload_columns": []
   },
   {
    "table": "player_function_eligibility",
@@ -1815,7 +1829,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 265,
+   "restore_order": 275,
    "payload_columns": []
   },
   {
@@ -1829,7 +1843,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 266,
+   "restore_order": 276,
    "payload_columns": []
   },
   {
@@ -1843,7 +1857,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 267,
+   "restore_order": 277,
    "payload_columns": []
   },
   {
@@ -1857,7 +1871,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 268,
+   "restore_order": 278,
    "payload_columns": []
   },
   {
@@ -1871,7 +1885,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 269,
+   "restore_order": 279,
    "payload_columns": []
   },
   {
@@ -1885,7 +1899,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 272,
+   "restore_order": 282,
    "payload_columns": []
   },
   {
@@ -1899,7 +1913,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 273,
+   "restore_order": 283,
    "payload_columns": [
     "facts"
    ]
@@ -1915,7 +1929,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 274,
+   "restore_order": 284,
    "payload_columns": [
     "operation_context"
    ]
@@ -1931,7 +1945,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 275,
+   "restore_order": 285,
    "payload_columns": []
   },
   {
@@ -1945,7 +1959,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 276,
+   "restore_order": 286,
    "payload_columns": []
   },
   {
@@ -1959,7 +1973,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 277,
+   "restore_order": 287,
    "payload_columns": []
   },
   {
@@ -1973,7 +1987,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 278,
+   "restore_order": 288,
    "payload_columns": [
     "generation_policy_refs"
    ]
@@ -1989,7 +2003,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 279,
+   "restore_order": 289,
    "payload_columns": []
   },
   {
@@ -2003,7 +2017,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 280,
+   "restore_order": 290,
    "payload_columns": []
   },
   {
@@ -2017,7 +2031,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 281,
+   "restore_order": 291,
    "payload_columns": [
     "facts"
    ]
@@ -2033,7 +2047,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 282,
+   "restore_order": 292,
    "payload_columns": [
     "operation_context"
    ]
@@ -2049,7 +2063,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 283,
+   "restore_order": 293,
    "payload_columns": [
     "facts"
    ]
@@ -2065,7 +2079,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 284,
+   "restore_order": 294,
    "payload_columns": []
   },
   {
@@ -2079,7 +2093,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 285,
+   "restore_order": 295,
    "payload_columns": []
   },
   {
@@ -2093,7 +2107,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 286,
+   "restore_order": 296,
    "payload_columns": [
     "special_claims"
    ]
@@ -2109,7 +2123,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 287,
+   "restore_order": 297,
    "payload_columns": [
     "feed_attrs",
     "pending_candidate"
@@ -2126,7 +2140,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 288,
+   "restore_order": 298,
    "payload_columns": []
   },
   {
@@ -2140,7 +2154,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 289,
+   "restore_order": 299,
    "payload_columns": [
     "operation_context",
     "result"
@@ -2157,7 +2171,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 290,
+   "restore_order": 300,
    "payload_columns": []
   },
   {
@@ -2171,7 +2185,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 291,
+   "restore_order": 301,
    "payload_columns": []
   },
   {
@@ -2185,7 +2199,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 292,
+   "restore_order": 302,
    "payload_columns": []
   },
   {
@@ -2199,7 +2213,7 @@
    "backup": false,
    "references": [],
    "retention": null,
-   "restore_order": 293,
+   "restore_order": 303,
    "payload_columns": []
   },
   {
@@ -2213,7 +2227,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 294,
+   "restore_order": 304,
    "payload_columns": []
   },
   {
@@ -2227,7 +2241,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 295,
+   "restore_order": 305,
    "payload_columns": []
   },
   {
@@ -2241,7 +2255,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 296,
+   "restore_order": 306,
    "payload_columns": []
   },
   {
@@ -2255,7 +2269,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 297,
+   "restore_order": 307,
    "payload_columns": []
   },
   {
@@ -2269,7 +2283,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 298,
+   "restore_order": 308,
    "payload_columns": []
   },
   {
@@ -2283,7 +2297,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 299,
+   "restore_order": 309,
    "payload_columns": [
     "generation_policy_refs"
    ]
@@ -2299,7 +2313,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 300,
+   "restore_order": 310,
    "payload_columns": []
   },
   {
@@ -2313,7 +2327,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 301,
+   "restore_order": 311,
    "payload_columns": []
   },
   {
@@ -2327,7 +2341,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 302,
+   "restore_order": 312,
    "payload_columns": []
   },
   {
@@ -2341,7 +2355,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 303,
+   "restore_order": 313,
    "payload_columns": []
   },
   {
@@ -2357,7 +2371,7 @@
     "actor_player_id"
    ],
    "retention": null,
-   "restore_order": 304,
+   "restore_order": 314,
    "payload_columns": [
     "admission_payload"
    ]
@@ -2375,7 +2389,7 @@
     "author_player_id"
    ],
    "retention": null,
-   "restore_order": 305,
+   "restore_order": 315,
    "payload_columns": []
   },
   {
@@ -2389,7 +2403,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 306,
+   "restore_order": 316,
    "payload_columns": []
   },
   {
@@ -2405,7 +2419,7 @@
     "actor_player_id"
    ],
    "retention": null,
-   "restore_order": 307,
+   "restore_order": 317,
    "payload_columns": []
   },
   {
@@ -2419,7 +2433,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 308,
+   "restore_order": 318,
    "payload_columns": []
   },
   {
@@ -2433,7 +2447,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 309,
+   "restore_order": 319,
    "payload_columns": []
   },
   {
@@ -2447,7 +2461,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 310,
+   "restore_order": 320,
    "payload_columns": [
     "reference"
    ]
@@ -2463,7 +2477,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 311,
+   "restore_order": 321,
    "payload_columns": []
   },
   {
@@ -2477,7 +2491,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 312,
+   "restore_order": 322,
    "payload_columns": []
   },
   {
@@ -2491,7 +2505,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 313,
+   "restore_order": 323,
    "payload_columns": []
   },
   {
@@ -2505,7 +2519,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 314,
+   "restore_order": 324,
    "payload_columns": []
   },
   {
@@ -2519,7 +2533,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 315,
+   "restore_order": 325,
    "payload_columns": []
   },
   {
@@ -2533,7 +2547,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 316,
+   "restore_order": 326,
    "payload_columns": []
   },
   {
@@ -2547,7 +2561,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 317,
+   "restore_order": 327,
    "payload_columns": []
   },
   {
@@ -2561,7 +2575,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 318,
+   "restore_order": 328,
    "payload_columns": []
   },
   {
@@ -2575,7 +2589,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 319,
+   "restore_order": 329,
    "payload_columns": []
   },
   {
@@ -2589,7 +2603,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 320,
+   "restore_order": 330,
    "payload_columns": [
     "facts"
    ]
@@ -2605,7 +2619,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 321,
+   "restore_order": 331,
    "payload_columns": [
     "operation_context"
    ]
@@ -2621,7 +2635,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 322,
+   "restore_order": 332,
    "payload_columns": [
     "facts"
    ]
@@ -2637,7 +2651,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 323,
+   "restore_order": 333,
    "payload_columns": []
   },
   {
@@ -2651,7 +2665,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 324,
+   "restore_order": 334,
    "payload_columns": []
   },
   {
@@ -2665,7 +2679,7 @@
    "backup": false,
    "references": [],
    "retention": null,
-   "restore_order": 325,
+   "restore_order": 335,
    "payload_columns": []
   },
   {
@@ -2679,7 +2693,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 328,
+   "restore_order": 338,
    "payload_columns": []
   },
   {
@@ -2693,7 +2707,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 329,
+   "restore_order": 339,
    "payload_columns": [
     "metric"
    ]
@@ -2709,7 +2723,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 333,
+   "restore_order": 343,
    "payload_columns": []
   },
   {
@@ -2723,7 +2737,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 334,
+   "restore_order": 344,
    "payload_columns": []
   },
   {
@@ -2737,7 +2751,7 @@
    "backup": false,
    "references": [],
    "retention": null,
-   "restore_order": 335,
+   "restore_order": 345,
    "payload_columns": []
   },
   {
@@ -2753,7 +2767,7 @@
     "subject_id"
    ],
    "retention": null,
-   "restore_order": 340,
+   "restore_order": 350,
    "payload_columns": []
   },
   {
@@ -2767,7 +2781,7 @@
    "backup": false,
    "references": [],
    "retention": null,
-   "restore_order": 341,
+   "restore_order": 351,
    "payload_columns": []
   },
   {
@@ -2781,7 +2795,7 @@
    "backup": false,
    "references": [],
    "retention": null,
-   "restore_order": 343,
+   "restore_order": 353,
    "payload_columns": [
     "payload"
    ]
@@ -2797,7 +2811,7 @@
    "backup": false,
    "references": [],
    "retention": null,
-   "restore_order": 344,
+   "restore_order": 354,
    "payload_columns": []
   },
   {
@@ -2813,7 +2827,7 @@
     "player_id"
    ],
    "retention": null,
-   "restore_order": 345,
+   "restore_order": 355,
    "payload_columns": [
     "stock"
    ]
@@ -2830,7 +2844,7 @@
     "blocker_player_id"
    ],
    "retention": null,
-   "restore_order": 347,
+   "restore_order": 357,
    "payload_columns": []
   },
   {
@@ -2845,7 +2859,7 @@
     "target_player_id"
    ],
    "retention": null,
-   "restore_order": 349,
+   "restore_order": 359,
    "payload_columns": []
   },
   {
@@ -2860,7 +2874,7 @@
     "player_low_id"
    ],
    "retention": null,
-   "restore_order": 350,
+   "restore_order": 360,
    "payload_columns": []
   },
   {
@@ -2874,7 +2888,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 351,
+   "restore_order": 361,
    "payload_columns": []
   },
   {
@@ -2888,7 +2902,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 352,
+   "restore_order": 362,
    "payload_columns": [
     "semantic_result"
    ]
@@ -2906,7 +2920,7 @@
     "related_player_id"
    ],
    "retention": null,
-   "restore_order": 353,
+   "restore_order": 363,
    "payload_columns": []
   },
   {
@@ -2922,7 +2936,7 @@
     "sender_player_id"
    ],
    "retention": null,
-   "restore_order": 354,
+   "restore_order": 364,
    "payload_columns": []
   },
   {
@@ -2936,7 +2950,7 @@
    "backup": false,
    "references": [],
    "retention": null,
-   "restore_order": 355,
+   "restore_order": 365,
    "payload_columns": [
     "target_payload"
    ]
@@ -2952,7 +2966,7 @@
    "backup": false,
    "references": [],
    "retention": null,
-   "restore_order": 356,
+   "restore_order": 366,
    "payload_columns": [
     "target_payload"
    ]
@@ -2969,7 +2983,7 @@
     "inviter_player_id"
    ],
    "retention": null,
-   "restore_order": 357,
+   "restore_order": 367,
    "payload_columns": []
   },
   {
@@ -2983,7 +2997,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 358,
+   "restore_order": 368,
    "payload_columns": []
   },
   {
@@ -2997,7 +3011,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 360,
+   "restore_order": 370,
    "payload_columns": []
   },
   {
@@ -3013,7 +3027,7 @@
     "target_player_id"
    ],
    "retention": null,
-   "restore_order": 361,
+   "restore_order": 371,
    "payload_columns": []
   },
   {
@@ -3027,7 +3041,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 362,
+   "restore_order": 372,
    "payload_columns": []
   },
   {
@@ -3041,7 +3055,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 363,
+   "restore_order": 373,
    "payload_columns": [
     "counters"
    ]
@@ -3057,7 +3071,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 367,
+   "restore_order": 377,
    "payload_columns": []
   },
   {
@@ -3071,7 +3085,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 368,
+   "restore_order": 378,
    "payload_columns": [
     "offered",
     "defense"
@@ -3090,7 +3104,7 @@
     "defender_player"
    ],
    "retention": null,
-   "restore_order": 369,
+   "restore_order": 379,
    "payload_columns": [
     "formation",
     "outcome"
@@ -3107,7 +3121,7 @@
    "backup": false,
    "references": [],
    "retention": null,
-   "restore_order": 370,
+   "restore_order": 380,
    "payload_columns": [
     "offers"
    ]
@@ -3123,7 +3137,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 371,
+   "restore_order": 381,
    "payload_columns": []
   },
   {
@@ -3137,7 +3151,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 372,
+   "restore_order": 382,
    "payload_columns": []
   },
   {
@@ -3153,7 +3167,7 @@
     "opponent_player"
    ],
    "retention": null,
-   "restore_order": 373,
+   "restore_order": 383,
    "payload_columns": []
   },
   {
@@ -3167,7 +3181,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 377,
+   "restore_order": 387,
    "payload_columns": [
     "payload"
    ]
@@ -3183,7 +3197,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 378,
+   "restore_order": 388,
    "payload_columns": [
     "payload"
    ]
@@ -3199,7 +3213,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 379,
+   "restore_order": 389,
    "payload_columns": [
     "payload"
    ]
@@ -3215,7 +3229,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 380,
+   "restore_order": 390,
    "payload_columns": []
   },
   {
@@ -3229,7 +3243,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 381,
+   "restore_order": 391,
    "payload_columns": [
     "payload"
    ]
@@ -3245,7 +3259,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 382,
+   "restore_order": 392,
    "payload_columns": [
     "payload"
    ]
@@ -3261,7 +3275,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 383,
+   "restore_order": 393,
    "payload_columns": []
   },
   {
@@ -3275,7 +3289,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 385,
+   "restore_order": 395,
    "payload_columns": []
   },
   {
@@ -3289,7 +3303,7 @@
    "backup": true,
    "references": [],
    "retention": null,
-   "restore_order": 386,
+   "restore_order": 396,
    "payload_columns": []
   }
  ]
