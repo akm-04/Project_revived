@@ -22,8 +22,6 @@ const (
 	LogsDirectoryName   = "logs"
 	OperationsDirectory = "ops"
 	BackupDirectoryName = "backups"
-	ToolLogFileName     = "tool.log"
-	BackendLogFileName  = "backend.log"
 	DefaultAgentListen  = "127.0.0.1:8090"
 	DefaultOperatorAddr = "127.0.0.1:8091"
 
@@ -80,6 +78,12 @@ type Config struct {
 	// Empty until the operator sets them; the dashboard still renders (F1).
 	PublicURLs []string      `json:"public_urls,omitempty"`
 	Backend    BackendConfig `json:"backend"`
+	// ToolLogDays is the age retention of the tool and backend log files (C1);
+	// nil means DefaultToolLogDays.
+	ToolLogDays *int `json:"tool_log_days,omitempty"`
+	// DatabaseLog is the PostgreSQL log file the logs tab reads (C1 c). Empty
+	// means the database source answers ABSENT.
+	DatabaseLog string `json:"database_log,omitempty"`
 	// BackupPath defaults to <agent root>/backups (P3); BackupKeep to 5 (B1).
 	BackupPath string `json:"backup_path,omitempty"`
 	BackupKeep *int   `json:"backup_keep,omitempty"`
@@ -104,6 +108,14 @@ func (config Config) BackupKeepValue() int {
 		return DefaultBackupKeep
 	}
 	return *config.BackupKeep
+}
+
+// ToolLogRetentionDays is tool_log_days with the safe default (F1).
+func (config Config) ToolLogRetentionDays() int {
+	if config.ToolLogDays == nil {
+		return DefaultToolLogDays
+	}
+	return *config.ToolLogDays
 }
 
 // LoadConfig reads and validates <root>/agent.json.
@@ -184,6 +196,9 @@ func (config Config) Validate() error {
 		if err != nil || !info.IsDir() {
 			return errors.New(AgentConfigFileName + ": toolchain_path is not a readable directory")
 		}
+	}
+	if value := config.ToolLogDays; value != nil && (*value < 1 || *value > maximumToolLogDays) {
+		return fmt.Errorf("%s: tool_log_days %d is outside 1..%d", AgentConfigFileName, *value, maximumToolLogDays)
 	}
 	return nil
 }

@@ -20,6 +20,17 @@ const (
 	CodeBackendBusy        = "AGENT_BACKEND_BUSY"
 	CodeFailed             = "AGENT_FAILED"
 
+	// log console refusals (C1-C4).
+	CodeLogSourceInvalid      = "AGENT_LOG_SOURCE_INVALID"
+	CodeLogLevelInvalid       = "AGENT_LOG_LEVEL_INVALID"
+	CodeLogQueryInvalid       = "AGENT_LOG_QUERY_INVALID"
+	CodeLogCursorInvalid      = "AGENT_LOG_CURSOR_INVALID"
+	CodeLogScopeInvalid       = "AGENT_LOG_SCOPE_INVALID"
+	CodeLogToolProtected      = "AGENT_LOG_TOOL_PROTECTED"
+	CodeLogPlayerUnknown      = "AGENT_LOG_PLAYER_UNKNOWN"
+	CodeLogPlayerAmbiguous    = "AGENT_LOG_PLAYER_AMBIGUOUS"
+	CodeLogBackendUnavailable = "AGENT_LOG_BACKEND_UNAVAILABLE"
+
 	// ota build refusals: one stable code per otabuild refusal kind (L4c).
 	CodeVersionExists                = "AGENT_VERSION_EXISTS"
 	CodeBuildLaneInvalid             = "AGENT_BUILD_LANE_INVALID"

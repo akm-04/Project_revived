@@ -283,3 +283,26 @@ func TestToolchainPathMustBeADirectory(t *testing.T) {
 		t.Fatalf("a directory toolchain_path was refused: %v", err)
 	}
 }
+
+func TestLoadConfigToolLogDaysDefaultAndBounds(t *testing.T) {
+	root := writeAgentConfig(t, `{"listen":"127.0.0.1:8090","backend":{"operator_addr":"127.0.0.1:8091"}}`)
+	config, err := LoadConfig(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if config.ToolLogRetentionDays() != DefaultToolLogDays {
+		t.Fatalf("default tool_log_days = %d", config.ToolLogRetentionDays())
+	}
+	root = writeAgentConfig(t, `{"listen":"127.0.0.1:8090","backend":{"operator_addr":"127.0.0.1:8091"},"tool_log_days":0}`)
+	if _, err := LoadConfig(root); err == nil {
+		t.Fatal("zero tool_log_days was accepted")
+	}
+	root = writeAgentConfig(t, `{"listen":"127.0.0.1:8090","backend":{"operator_addr":"127.0.0.1:8091"},"tool_log_days":7,"database_log":"/var/log/postgresql/postgresql.log"}`)
+	config, err = LoadConfig(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if config.ToolLogRetentionDays() != 7 || config.DatabaseLog != "/var/log/postgresql/postgresql.log" {
+		t.Fatalf("config = %+v", config)
+	}
+}

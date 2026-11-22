@@ -44,7 +44,7 @@
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/clientlogstore/store.go:21",
+    "internal/adapters/postgres/clientlogstore/store.go:22",
     "internal/adapters/postgres/dailyresetstore/store.go:36",
     "internal/adapters/postgres/i4store/bootstrap_runtime.go:836",
     "internal/adapters/postgres/i4store/bootstrap_runtime.go:866",

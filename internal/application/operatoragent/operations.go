@@ -166,7 +166,7 @@ func (operations *Operations) execute(ctx context.Context, operation Operation, 
 			operation.FailedStep = step.Name
 			operation.Error = MaskString(stepErr.Error())
 			_ = operations.write(operation)
-			operations.log(operation.Kind, step.Name, "failed", operation.ID)
+			operations.logStep(operation.Kind, step.Name, "failed", operation.ID, startedAt)
 			return operation, stepErr
 		}
 		operation.Steps = append(operation.Steps, entry)
@@ -178,7 +178,7 @@ func (operations *Operations) execute(ctx context.Context, operation Operation, 
 		if err := operations.write(operation); err != nil {
 			return operation, err
 		}
-		operations.log(operation.Kind, step.Name, "done", operation.ID)
+		operations.logStep(operation.Kind, step.Name, "done", operation.ID, startedAt)
 	}
 	operation.State = OperationDone
 	if err := operations.write(operation); err != nil {
@@ -328,8 +328,21 @@ func writeOperationRecord(path string, encoded []byte) error {
 }
 
 func (operations *Operations) log(kind, step, outcome, id string) {
+	operations.logDetail(kind, step, outcome, map[string]any{"operation_id": id})
+}
+
+// logStep records the step's duration; C5 wants every Operations step line to
+// carry a duration.
+func (operations *Operations) logStep(kind, step, outcome, id string, startedAt time.Time) {
+	operations.logDetail(kind, step, outcome, map[string]any{
+		"operation_id": id,
+		"duration_ms":  operations.Now().Sub(startedAt).Milliseconds(),
+	})
+}
+
+func (operations *Operations) logDetail(kind, step, outcome string, detail map[string]any) {
 	if operations.Log == nil {
 		return
 	}
-	operations.Log.Write(kind, step, outcome, map[string]any{"operation_id": id})
+	operations.Log.Write(kind, step, outcome, detail)
 }

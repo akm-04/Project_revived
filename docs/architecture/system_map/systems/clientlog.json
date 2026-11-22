@@ -15,7 +15,12 @@
   "reads": []
  },
  "locks": {
-  "profiles": [],
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "operator-logs-read"
+   }
+  ],
   "ranks": [],
   "row_lock_methods": {},
   "row_locks": [],
@@ -41,7 +46,8 @@
    "accounts",
    "client_log_capabilities",
    "gameplay_context_credentials",
-   "gameplay_contexts"
+   "gameplay_contexts",
+   "request_journal"
   ],
   "written": [
    "client_log_capabilities",
@@ -58,6 +64,7 @@
   "unit": [
    "audit_nested_redaction_test.go",
    "journal_test.go",
+   "operator_test.go",
    "service_test.go"
   ]
  }

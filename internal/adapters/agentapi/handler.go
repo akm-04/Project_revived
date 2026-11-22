@@ -6,14 +6,15 @@
 package agentapi
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"mime"
 	"net"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -49,7 +50,7 @@ const (
 	maxCommandBodyBytes          = operator.MaxCommandBodyBytes - commandEnvelopeHeadroomBytes
 	defaultTail                  = 50
 	maxTailLines                 = 1000
-	tailByteLimit                = 256 << 10
+	exchangeBodyCaptureLimit     = 64 << 10
 )
 
 // Handler serves the agent API. All fields are composed by cmd/gxb-operator.
@@ -66,7 +67,9 @@ type Handler struct {
 	Modules     operatoragent.ModuleLister
 	Dashboard   operatoragent.Dashboard
 	ToolLog     *operatoragent.ToolLog
-	ToolLogPath string
+	// Logs answers the local log sources and the logs.clear command; the client
+	// source is forwarded to the backend read.
+	Logs *operatoragent.LogService
 	// OTARoot holds settings.json, whose res_path the GUI picture route reads.
 	OTARoot string
 	// Listen is the exact host:port the agent listens on; every route refuses
@@ -129,7 +132,17 @@ type backupRestoreRequest struct {
 	Reason string `json:"reason"`
 }
 
+// ServeHTTP records one tool log line per API exchange (C5: route, masked
+// params, status, error code, duration) and then dispatches.
 func (handler Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+	exchange := &exchangeRecorder{ResponseWriter: writer}
+	startedAt := time.Now()
+	capture := startBodyCapture(request)
+	handler.serve(exchange, request)
+	handler.recordExchange(request, exchange, exchangeParams(request, capture), time.Since(startedAt))
+}
+
+func (handler Handler) serve(writer http.ResponseWriter, request *http.Request) {
 	if !handler.allowed(writer, request) {
 		return
 	}
@@ -346,6 +359,10 @@ func (handler Handler) serveCommand(writer http.ResponseWriter, request *http.Re
 		writeRefusal(writer, http.StatusConflict, operatoragent.CodeBodyInvalid, "command, reason and semantic_key are required")
 		return
 	}
+	if name == "logs.clear" && handler.Logs != nil {
+		handler.serveLogsClear(writer, request, body)
+		return
+	}
 	response, err := handler.Operator.Command(request.Context(), operatoragent.OperatorRequest{
 		Name: name,
 		Envelope: operator.Envelope{
@@ -372,6 +389,10 @@ func (handler Handler) serveRead(writer http.ResponseWriter, request *http.Reque
 	}
 	if name == "dashboard.summary" {
 		handler.serveDashboard(writer, request)
+		return
+	}
+	if name == "logs.tail" || name == "logs.search" {
+		handler.serveLogRead(writer, request, name)
 		return
 	}
 	response, err := handler.Operator.Read(request.Context(), name, request.URL.RawQuery)
@@ -462,10 +483,18 @@ func (handler Handler) serveOperation(writer http.ResponseWriter, id string) {
 }
 
 func (handler Handler) serveLogTail(writer http.ResponseWriter, request *http.Request) {
-	lines, err := tailLines(handler.ToolLogPath, requestedTail(request))
+	if handler.Logs == nil {
+		writeRefusal(writer, http.StatusServiceUnavailable, operatoragent.CodeFailed, "the log sources are not configured")
+		return
+	}
+	result, err := handler.Logs.Tail(request.Context(), operatoragent.LogSourceTool, "", "", requestedTail(request))
 	if err != nil {
 		handler.writeAgentError(writer, "log.tail", err)
 		return
+	}
+	lines := make([]string, 0, len(result.Lines))
+	for _, line := range result.Lines {
+		lines = append(lines, line.Text)
 	}
 	handler.record("log.tail", "tail", "ok", map[string]any{"lines": len(lines)})
 	writeJSON(writer, http.StatusOK, map[string]any{"lines": lines})
@@ -500,44 +529,103 @@ func requestedTail(request *http.Request) int {
 	return count
 }
 
-// tailLines reads the last n lines of a file without loading a whole large log:
-// it reads at most the final 256 KiB.
-//
-// shortcut: log tail sees the last 256 KiB, upgrade when tool logs outgrow it.
-func tailLines(path string, count int) ([]string, error) {
-	file, err := os.Open(path)
+// serveLogRead answers logs.tail and logs.search from the agent's own files;
+// the client source is forwarded to the backend journal read.
+func (handler Handler) serveLogRead(writer http.ResponseWriter, request *http.Request, name string) {
+	if handler.Logs == nil {
+		writeRefusal(writer, http.StatusServiceUnavailable, operatoragent.CodeFailed, "the log sources are not configured")
+		return
+	}
+	values := request.URL.Query()
+	limit, err := parseLogLimit(values.Get("limit"))
 	if err != nil {
-		return nil, err
+		handler.writeAgentError(writer, name, err)
+		return
 	}
-	defer file.Close()
-	info, err := file.Stat()
+	var result any
+	if name == "logs.tail" {
+		result, err = handler.Logs.Tail(request.Context(), values.Get("source"), values.Get("after_cursor"), values.Get("level"), limit)
+	} else {
+		result, err = handler.Logs.Search(request.Context(), values.Get("source"), values.Get("player"), values.Get("from"), values.Get("to"), values.Get("level"), limit)
+	}
 	if err != nil {
-		return nil, err
+		handler.writeAgentError(writer, name, err)
+		return
 	}
-	size := info.Size()
-	start := size - tailByteLimit
-	if start < 0 {
-		start = 0
-	}
-	if _, err := file.Seek(start, io.SeekStart); err != nil {
-		return nil, err
-	}
-	contents, err := io.ReadAll(io.LimitReader(file, tailByteLimit))
-	if err != nil {
-		return nil, err
-	}
-	text := strings.TrimRight(string(contents), "\n")
+	handler.record(name, "read", "ok", nil)
+	writeJSON(writer, http.StatusOK, result)
+}
+
+func parseLogLimit(text string) (int, error) {
 	if text == "" {
-		return []string{}, nil
+		return 0, nil
 	}
-	all := strings.Split(text, "\n")
-	if start > 0 && len(all) > 0 {
-		all = all[1:]
+	value, err := strconv.Atoi(text)
+	if err != nil || value < 1 || value > operatoragent.MaxLogTailLimit {
+		return 0, operatoragent.Refuse(operatoragent.CodeLogQueryInvalid, fmt.Sprintf("limit must be between 1 and %d", operatoragent.MaxLogTailLimit))
 	}
-	if len(all) > count {
-		all = all[len(all)-count:]
+	return value, nil
+}
+
+// serveLogsClear runs logs.clear locally. The client source is one typed
+// backend command, so the clear is audited on the bus like every state change.
+func (handler Handler) serveLogsClear(writer http.ResponseWriter, request *http.Request, body commandRequest) {
+	var clear operatoragent.LogClearRequest
+	if err := json.Unmarshal(body.Payload, &clear); err != nil {
+		writeRefusal(writer, http.StatusConflict, operatoragent.CodeBodyInvalid, "the payload is not a logs.clear payload")
+		return
 	}
-	return all, nil
+	if clear.Source == operatoragent.LogSourceClient {
+		handler.forwardLogsClear(writer, request, body, clear)
+		return
+	}
+	result, err := handler.Logs.ClearFiles(clear)
+	if err != nil {
+		handler.writeAgentError(writer, "logs.clear", err)
+		return
+	}
+	handler.record("logs.clear", "clear", "ok", map[string]any{"source": result.Source, "scope": result.Scope, "removed_files": result.RemovedFiles})
+	writeJSON(writer, http.StatusOK, result)
+}
+
+func (handler Handler) forwardLogsClear(writer http.ResponseWriter, request *http.Request, body commandRequest, clear operatoragent.LogClearRequest) {
+	uid, playerID := clear.UID, clear.PlayerID
+	if clear.Scope == "player" && clear.Player != "" {
+		resolvedUID, resolvedPlayerID, err := handler.Logs.ResolvePlayer(request.Context(), clear.Player)
+		if err != nil {
+			handler.writeAgentError(writer, "logs.clear", err)
+			return
+		}
+		uid, playerID = resolvedUID, resolvedPlayerID
+	}
+	payload, err := json.Marshal(map[string]any{
+		"source":     operatoragent.LogSourceClient,
+		"scope":      clear.Scope,
+		"uid":        uid,
+		"player_id":  playerID,
+		"older_than": clear.OlderThan,
+	})
+	if err != nil {
+		handler.writeAgentError(writer, "logs.clear", err)
+		return
+	}
+	response, err := handler.Operator.Command(request.Context(), operatoragent.OperatorRequest{
+		Name: "logs.clear",
+		Envelope: operator.Envelope{
+			Principal:   "root",
+			Role:        operator.RoleRoot,
+			Scope:       "global",
+			Reason:      body.Reason,
+			SemanticKey: body.SemanticKey,
+		},
+		Payload: payload,
+	})
+	if err != nil {
+		handler.writeAgentError(writer, "logs.clear", err)
+		return
+	}
+	handler.record("logs.clear", "command", outcomeWord(response.Status), map[string]any{"status": response.Status})
+	writeBackend(writer, response)
 }
 
 // serveBackup runs the backup commands in the agent (B1-B7), so they work
@@ -750,4 +838,195 @@ func (handler Handler) record(op, step, outcome string, detail any) {
 		return
 	}
 	handler.ToolLog.Write(op, step, outcome, detail)
+}
+
+// exchangeRoute is one agent API route. The coverage test walks this table and
+// proves every route writes a tool log line (C5).
+type exchangeRoute struct {
+	Name   string
+	Method string
+	Sample string
+	Match  func(string) bool
+}
+
+func exactPath(path string) func(string) bool {
+	return func(candidate string) bool { return candidate == path }
+}
+
+func prefixPath(prefix string) func(string) bool {
+	return func(candidate string) bool { return strings.HasPrefix(candidate, prefix) }
+}
+
+var exchangeRoutes = []exchangeRoute{
+	{Name: "setup", Method: http.MethodPost, Sample: setupPath, Match: exactPath(setupPath)},
+	{Name: "login", Method: http.MethodPost, Sample: loginPath, Match: exactPath(loginPath)},
+	{Name: "logout", Method: http.MethodPost, Sample: logoutPath, Match: exactPath(logoutPath)},
+	{Name: "backend.start", Method: http.MethodPost, Sample: backendStartPath, Match: exactPath(backendStartPath)},
+	{Name: "backend.stop", Method: http.MethodPost, Sample: backendStopPath, Match: exactPath(backendStopPath)},
+	{Name: "backend.status", Method: http.MethodGet, Sample: backendStatusPath, Match: exactPath(backendStatusPath)},
+	{Name: "command", Method: http.MethodPost, Sample: commandPrefix + "ota.publish", Match: prefixPath(commandPrefix)},
+	{Name: "read", Method: http.MethodGet, Sample: readPrefix + "player.find", Match: prefixPath(readPrefix)},
+	{Name: "ota.publish", Method: http.MethodPost, Sample: publishPath, Match: exactPath(publishPath)},
+	{Name: "ota.withdraw", Method: http.MethodPost, Sample: withdrawPath, Match: exactPath(withdrawPath)},
+	{Name: "ota.build", Method: http.MethodPost, Sample: buildPath, Match: exactPath(buildPath)},
+	{Name: "operation", Method: http.MethodGet, Sample: operationPrefix + "0123456789abcdef0123456789abcdef", Match: prefixPath(operationPrefix)},
+	{Name: "log.tail", Method: http.MethodGet, Sample: logTailPath, Match: exactPath(logTailPath)},
+	{Name: "modules", Method: http.MethodGet, Sample: modulesPath, Match: exactPath(modulesPath)},
+}
+
+// exchangeRouteName names the exchange for the tool log.
+func exchangeRouteName(method, path string) string {
+	for _, route := range exchangeRoutes {
+		if route.Method == method && route.Match(path) {
+			return route.Name
+		}
+	}
+	return "unknown"
+}
+
+// exchangeRecorder captures the status and a bounded response body for the
+// tool log while streaming the real reply through.
+type exchangeRecorder struct {
+	http.ResponseWriter
+	status int
+	body   bytes.Buffer
+}
+
+func (recorder *exchangeRecorder) WriteHeader(status int) {
+	if recorder.status != 0 {
+		return
+	}
+	recorder.status = status
+	recorder.ResponseWriter.WriteHeader(status)
+}
+
+func (recorder *exchangeRecorder) Write(data []byte) (int, error) {
+	if recorder.status == 0 {
+		recorder.WriteHeader(http.StatusOK)
+	}
+	if remaining := exchangeBodyCaptureLimit - recorder.body.Len(); remaining > 0 {
+		if len(data) < remaining {
+			remaining = len(data)
+		}
+		recorder.body.Write(data[:remaining])
+	}
+	return recorder.ResponseWriter.Write(data)
+}
+
+// bodyCapture records the first bytes of a POST body as the route reads them,
+// so the tool log gets masked params without buffering the whole command cap.
+type bodyCapture struct {
+	buffer    bytes.Buffer
+	truncated bool
+}
+
+func (capture *bodyCapture) Write(data []byte) (int, error) {
+	if remaining := exchangeBodyCaptureLimit - capture.buffer.Len(); remaining > 0 {
+		if len(data) <= remaining {
+			capture.buffer.Write(data)
+		} else {
+			capture.buffer.Write(data[:remaining])
+			capture.truncated = true
+		}
+	} else if len(data) > 0 {
+		capture.truncated = true
+	}
+	return len(data), nil
+}
+
+type teeReadCloser struct {
+	io.Reader
+	closer io.Closer
+}
+
+func (reader teeReadCloser) Close() error { return reader.closer.Close() }
+
+// credentialPaths carry passwords under field names the key masking cannot
+// know (current, new), so their bodies never reach the tool log.
+var credentialPaths = map[string]bool{setupPath: true, loginPath: true, passwordPath: true}
+
+// startBodyCapture tees a POST body into the bounded capture. The route still
+// sees every byte and every size cap still applies.
+func startBodyCapture(request *http.Request) *bodyCapture {
+	capture := &bodyCapture{}
+	if request.Method == http.MethodPost && request.Body != nil && !credentialPaths[request.URL.Path] {
+		request.Body = teeReadCloser{Reader: io.TeeReader(request.Body, capture), closer: request.Body}
+	}
+	return capture
+}
+
+// exchangeParams is the masked detail the tool log keeps: the query string and
+// the parsed JSON body when the capture holds it whole.
+func exchangeParams(request *http.Request, capture *bodyCapture) any {
+	params := map[string]any{}
+	if len(request.URL.Query()) > 0 {
+		params["query"] = request.URL.Query()
+	}
+	if capture != nil && capture.buffer.Len() > 0 {
+		var decoded any
+		if capture.truncated {
+			params["body_truncated"] = true
+			params["body_bytes"] = capture.buffer.Len()
+		} else if json.Unmarshal(capture.buffer.Bytes(), &decoded) == nil {
+			params["body"] = decoded
+		} else {
+			params["body_bytes"] = capture.buffer.Len()
+		}
+	}
+	return params
+}
+
+// recordExchange writes the one line every API route leaves (C5). Static GUI
+// and picture responses are not API exchanges and would flood the log.
+func (handler Handler) recordExchange(request *http.Request, exchange *exchangeRecorder, params any, elapsed time.Duration) {
+	if handler.ToolLog == nil {
+		return
+	}
+	path := request.URL.Path
+	if path == "/" || strings.HasPrefix(path, "/gui/") || strings.HasPrefix(path, resPrefix) {
+		return
+	}
+	status := exchange.status
+	if status == 0 {
+		status = http.StatusOK
+	}
+	detail := map[string]any{
+		"method":      request.Method,
+		"path":        path,
+		"status":      status,
+		"duration_ms": elapsed.Milliseconds(),
+		"params":      operatoragent.MaskValue(params),
+	}
+	if code := responseErrorCode(exchange.body.Bytes()); code != "" {
+		detail["error_code"] = code
+	}
+	handler.ToolLog.Write(exchangeRouteName(request.Method, path), "exchange", exchangeOutcome(status), detail)
+}
+
+func exchangeOutcome(status int) string {
+	switch {
+	case status >= 500:
+		return "failed"
+	case status >= 400:
+		return "refused"
+	default:
+		return "ok"
+	}
+}
+
+func responseErrorCode(body []byte) string {
+	var reply struct {
+		ErrorCode any `json:"error_code"`
+		Code      any `json:"code"`
+	}
+	if json.Unmarshal(body, &reply) != nil {
+		return ""
+	}
+	if text, ok := reply.ErrorCode.(string); ok {
+		return text
+	}
+	if text, ok := reply.Code.(string); ok {
+		return text
+	}
+	return ""
 }

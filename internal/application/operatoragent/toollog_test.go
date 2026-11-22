@@ -57,3 +57,17 @@ func TestMaskStringMasksPostgresQueryPassword(t *testing.T) {
 		t.Fatalf("DSN query was not masked correctly: %s", masked)
 	}
 }
+
+func TestToolLogLineCarriesALevel(t *testing.T) {
+	var buffer bytes.Buffer
+	log := NewToolLog(&buffer, func() time.Time { return time.Unix(0, 0) })
+	log.Write("agent", "exchange", "ok", nil)
+	log.Write("agent", "exchange", "refused", nil)
+	log.Write("agent", "exchange", "failed", nil)
+	levels := []string{`"level":"info"`, `"level":"warn"`, `"level":"error"`}
+	for index, line := range strings.Split(strings.TrimSpace(buffer.String()), "\n") {
+		if !strings.Contains(line, levels[index]) {
+			t.Fatalf("line %d = %s", index, line)
+		}
+	}
+}

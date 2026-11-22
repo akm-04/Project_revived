@@ -150,3 +150,25 @@ func TestOperationsPersistStepsAndRecoverRunning(t *testing.T) {
 		t.Fatalf("recovered = %+v", recovered)
 	}
 }
+
+func TestOperationStepLinesCarryADuration(t *testing.T) {
+	var output bytes.Buffer
+	log := NewToolLog(&output, time.Now)
+	operations := NewOperations(t.TempDir(), log, time.Now)
+	steps := []Step{{Name: "first", Run: func(context.Context) (any, error) { return nil, nil }}}
+	if _, err := operations.Run(context.Background(), "test.kind", steps); err != nil {
+		t.Fatal(err)
+	}
+	var done bool
+	for _, line := range strings.Split(strings.TrimSpace(output.String()), "\n") {
+		if strings.Contains(line, `"step":"first"`) && strings.Contains(line, `"outcome":"done"`) {
+			if !strings.Contains(line, `"duration_ms":`) {
+				t.Fatalf("step line has no duration: %s", line)
+			}
+			done = true
+		}
+	}
+	if !done {
+		t.Fatalf("no done line: %s", output.String())
+	}
+}

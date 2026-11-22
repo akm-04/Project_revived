@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	appclientlog "gxb.local/backend/v2/internal/application/clientlog"
 	appevents "gxb.local/backend/v2/internal/application/events"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/operator"
@@ -325,6 +326,107 @@ func parseEventsFilter(values url.Values) (appevents.OccurrenceFilter, error) {
 		cursor, err := appevents.ParseOccurrenceCursor(rawCursor)
 		if err != nil {
 			return appevents.OccurrenceFilter{}, operator.Refuse(operator.CodeReadInvalid, err.Error(), nil)
+		}
+		filter.Cursor = cursor
+	}
+	return filter, nil
+}
+
+// LogsTimelineService answers logs.timeline from the client log journal.
+type LogsTimelineService interface {
+	Timeline(context.Context, appclientlog.JournalFilter) (appclientlog.JournalPage, error)
+}
+
+// LogsTimeline adapts logs.timeline to the read registry (C1d).
+func LogsTimeline(service LogsTimelineService) Read {
+	return func(ctx context.Context, values url.Values) (any, error) {
+		filter, err := parseJournalFilter(values)
+		if err != nil {
+			return nil, err
+		}
+		return service.Timeline(ctx, filter)
+	}
+}
+
+// LogsTailService answers logs.tail from the client log journal.
+type LogsTailService interface {
+	Tail(context.Context, appclientlog.JournalFilter) (appclientlog.JournalTail, error)
+}
+
+// LogsTail adapts logs.tail to the read registry (C2 live view).
+func LogsTail(service LogsTailService) Read {
+	return func(ctx context.Context, values url.Values) (any, error) {
+		filter, err := parseJournalFilter(values)
+		if err != nil {
+			return nil, err
+		}
+		if rawCursor := values.Get("after_cursor"); rawCursor != "" {
+			cursor, err := appclientlog.ParseJournalCursor(rawCursor)
+			if err != nil {
+				return nil, err
+			}
+			filter.Cursor = cursor
+		}
+		outcomes, err := appclientlog.OutcomesForLevel(values.Get("level"))
+		if err != nil {
+			return nil, err
+		}
+		filter.Outcomes = outcomes
+		return service.Tail(ctx, filter)
+	}
+}
+
+func parseJournalFilter(values url.Values) (appclientlog.JournalFilter, error) {
+	var filter appclientlog.JournalFilter
+	filter.AccountUID = values.Get("uid")
+	if rawPlayer := values.Get("player_id"); rawPlayer != "" {
+		playerID, err := strconv.ParseInt(rawPlayer, 10, 64)
+		if err != nil || playerID <= 0 {
+			return appclientlog.JournalFilter{}, operator.Refuse(operator.CodeReadInvalid, "player_id must be a positive id", nil)
+		}
+		filter.PlayerID = playerID
+	}
+	from, err := parseAuditTime("from", values.Get("from"))
+	if err != nil {
+		return appclientlog.JournalFilter{}, err
+	}
+	to, err := parseAuditTime("to", values.Get("to"))
+	if err != nil {
+		return appclientlog.JournalFilter{}, err
+	}
+	filter.From, filter.To = from, to
+	if outcome := values.Get("outcome"); outcome != "" {
+		switch outcome {
+		case "OK", "CLIENT_ERROR", "SERVER_ERROR", "UNKNOWN_MID", "UNDECODABLE", "INACTIVE_MODE":
+			filter.Outcomes = []string{outcome}
+		default:
+			return appclientlog.JournalFilter{}, operator.Refuse(operator.CodeReadInvalid, "outcome is not a journal outcome", nil)
+		}
+	} else if level := values.Get("level"); level != "" {
+		outcomes, err := appclientlog.OutcomesForLevel(level)
+		if err != nil {
+			return appclientlog.JournalFilter{}, err
+		}
+		filter.Outcomes = outcomes
+	}
+	if rawMID := values.Get("mid"); rawMID != "" {
+		mid, err := strconv.Atoi(rawMID)
+		if err != nil || mid < 0 || mid > 65535 {
+			return appclientlog.JournalFilter{}, operator.Refuse(operator.CodeReadInvalid, "mid must be between 0 and 65535", nil)
+		}
+		filter.MID = mid
+	}
+	if rawLimit := values.Get("limit"); rawLimit != "" {
+		limit, err := strconv.Atoi(rawLimit)
+		if err != nil || limit < 1 || limit > appclientlog.MaxJournalLimit {
+			return appclientlog.JournalFilter{}, operator.Refuse(operator.CodeReadInvalid, "limit must be between 1 and 200", nil)
+		}
+		filter.Limit = limit
+	}
+	if rawCursor := values.Get("cursor"); rawCursor != "" {
+		cursor, err := appclientlog.ParseJournalCursor(rawCursor)
+		if err != nil {
+			return appclientlog.JournalFilter{}, err
 		}
 		filter.Cursor = cursor
 	}

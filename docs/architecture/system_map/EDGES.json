@@ -1824,6 +1824,9 @@
    ]
   },
   "operator": {
+   "clientlog": [
+    "Refuse"
+   ],
    "events": [
     "*ClaimTx",
     "*FinishTx",
@@ -1842,6 +1845,7 @@
    ],
    "operatoragent": [
     "*Version",
+    "Bounded",
     "MergeModules",
     "NewField",
     "WithDefault",
@@ -3437,6 +3441,9 @@
    ]
   },
   "clientlog": {
+   "operator": [
+    "Refuse"
+   ],
    "store:i4store": [
     "*ResolveGameplayBearer"
    ]
@@ -5497,6 +5504,7 @@
   "operatoragent": {
    "operator": [
     "*Version",
+    "Bounded",
     "MergeModules",
     "NewField",
     "WithDefault",

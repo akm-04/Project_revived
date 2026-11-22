@@ -33,6 +33,7 @@ func NewToolLog(writer io.Writer, now func() time.Time) *ToolLog {
 
 type toolLogLine struct {
 	At      time.Time `json:"at"`
+	Level   string    `json:"level"`
 	Op      string    `json:"op"`
 	Step    string    `json:"step"`
 	Outcome string    `json:"outcome"`
@@ -41,7 +42,7 @@ type toolLogLine struct {
 
 // Write appends one masked line.
 func (log *ToolLog) Write(op, step, outcome string, detail any) {
-	line := toolLogLine{At: log.now(), Op: op, Step: step, Outcome: outcome}
+	line := toolLogLine{At: log.now(), Level: outcomeLevel(outcome), Op: op, Step: step, Outcome: outcome}
 	if detail != nil {
 		line.Detail = maskDetail(detail)
 	}
@@ -52,6 +53,19 @@ func (log *ToolLog) Write(op, step, outcome string, detail any) {
 	log.mutex.Lock()
 	defer log.mutex.Unlock()
 	_, _ = log.writer.Write(append(encoded, '\n'))
+}
+
+// outcomeLevel gives every new tool line a level (C3). An old line without one
+// reads as info.
+func outcomeLevel(outcome string) string {
+	switch outcome {
+	case "refused":
+		return "warn"
+	case "failed", "unavailable":
+		return "error"
+	default:
+		return "info"
+	}
 }
 
 func maskDetail(detail any) any {

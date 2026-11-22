@@ -1016,7 +1016,7 @@
    "tables": 3
   },
   {
-   "callees": 1,
+   "callees": 2,
    "callers": 0,
    "mids": 0,
    "name": "clientlog",
@@ -1413,7 +1413,7 @@
   },
   {
    "callees": 3,
-   "callers": 7,
+   "callers": 8,
    "mids": 0,
    "name": "operator",
    "path": "internal/application/operator",

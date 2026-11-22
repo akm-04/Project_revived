@@ -13,6 +13,7 @@ import (
 	apparena "gxb.local/backend/v2/internal/application/arena"
 	appawakeningbattle "gxb.local/backend/v2/internal/application/awakeningbattle"
 	appleague "gxb.local/backend/v2/internal/application/championsleague"
+	appclientlog "gxb.local/backend/v2/internal/application/clientlog"
 	"gxb.local/backend/v2/internal/application/commerceprivilege"
 	"gxb.local/backend/v2/internal/application/dailyconsume"
 	"gxb.local/backend/v2/internal/application/dailyreset"
@@ -47,6 +48,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/campaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterbirth"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/clientlogstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/compatstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/conquerstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
@@ -613,7 +615,15 @@ func main() {
 		map[string]operator.ReadHandler{"operator.audit.list": operatorapi.AuditList(operatorAudit), operatorgrant.BulkShowRead: operatorapi.BulkShow(bulkReads)})
 	redeemModule := bindModule(redeemCommands.Module(), nil,
 		map[string]operator.ReadHandler{"redeem.list": operatorapi.RedeemList(appi5.OperatorRedeemRead{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: i5db})})
-	modules := []operator.Module{otaModule, logoutModule, grantCommands.Module(), mailCommands.Module(), redeemModule, eventsModule, catalogModule, playerModule, serverModule, publicationModule, operatorModule}
+	journalStore := clientlogstore.Store{Pool: pool.Raw()}
+	logsReads := appclientlog.LogsReadService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Reader: journalStore}
+	logsCommands := appclientlog.LogsCommands{Clearer: journalStore}
+	logsModule := bindModule(operator.LogsModule(), logsCommands.Handlers(),
+		map[string]operator.ReadHandler{
+			"logs.timeline": operatorapi.LogsTimeline(logsReads),
+			"logs.tail":     operatorapi.LogsTail(logsReads),
+		})
+	modules := []operator.Module{otaModule, logoutModule, grantCommands.Module(), mailCommands.Module(), redeemModule, eventsModule, catalogModule, playerModule, serverModule, publicationModule, operatorModule, logsModule}
 	modules = append(modules, operator.PlannedModules()...)
 	registry, err := operator.NewRegistry(modules...)
 	if err != nil {
