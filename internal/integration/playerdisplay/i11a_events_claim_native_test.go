@@ -287,6 +287,143 @@ func TestRookieLevelGiftClaims(t *testing.T) {
 	}
 }
 
+func eventOperatorBus(t *testing.T, p *postgres.Pool) operator.Bus {
+	t.Helper()
+	hooks, err := appevents.NewHookRegistry()
+	if err != nil {
+		t.Fatal(err)
+	}
+	commands := appevents.Commands{Store: eventstore.Store{}, Coverage: eventsCoverage{}, Gifts: eventstore.ContentGifts{}, Catalogue: eventstore.ContentCatalogue{}, Hooks: hooks}
+	return operator.Bus{Runner: tx.Runner{DB: p}, Clock: clock.System{}, Store: operatorstore.Store{}, Handlers: commands.Handlers()}
+}
+
+func scheduleOccurrence(t *testing.T, p *postgres.Pool, server, activityID int64, start time.Time, duration string) appevents.OccurrenceView {
+	t.Helper()
+	payload, _ := json.Marshal(map[string]any{"activity_id": activityID, "logical_server_ids": []int64{server}, "duration": duration, "start": start.UTC().Format(time.RFC3339)})
+	key, _ := ids.NewUUID()
+	command, err := operator.NewCommand("events.schedule", operator.Envelope{Principal: "root", Role: operator.RoleRoot, Scope: "global", Reason: "i11a e3 claim native", SemanticKey: key.String()}, json.RawMessage(payload))
+	if err != nil {
+		t.Fatal(err)
+	}
+	outcome, err := eventOperatorBus(t, p).Execute(ctx, command)
+	if err != nil || outcome.State != operator.StateApplied {
+		t.Fatalf("schedule %d: %v %s %s", activityID, err, outcome.State, outcome.Result)
+	}
+	var result struct {
+		Occurrences []appevents.OccurrenceView `json:"occurrences"`
+	}
+	if err := json.Unmarshal(outcome.Result, &result); err != nil || len(result.Occurrences) != 1 {
+		t.Fatalf("schedule result %s: %v", outcome.Result, err)
+	}
+	return result.Occurrences[0]
+}
+
+func endNowOccurrence(t *testing.T, p *postgres.Pool, occurrence appevents.OccurrenceView) {
+	t.Helper()
+	payload, _ := json.Marshal(map[string]any{"occurrence_id": occurrence.ID})
+	revision := occurrence.Revision
+	key, _ := ids.NewUUID()
+	command, err := operator.NewCommand("events.end_now", operator.Envelope{Principal: "root", Role: operator.RoleRoot, Scope: "global", Reason: "i11a e3 claim native", SemanticKey: key.String(), ExpectedRevision: &revision}, json.RawMessage(payload))
+	if err != nil {
+		t.Fatal(err)
+	}
+	outcome, err := eventOperatorBus(t, p).Execute(ctx, command)
+	if err != nil || outcome.State != operator.StateApplied {
+		t.Fatalf("end_now: %v %s %s", err, outcome.State, outcome.Result)
+	}
+}
+
+func activityList(t *testing.T, services eventServices, a identity.ActorContext) []any {
+	t.Helper()
+	response := services.activityFor(a).Dispatch(ctx, playtestRequest(a, 229, map[string]any{}))
+	if response.HTTPStatus != http.StatusOK {
+		t.Fatalf("229: %d %#v", response.HTTPStatus, response.Body)
+	}
+	rows, ok := response.Body["list"].([]any)
+	if !ok {
+		t.Fatalf("229 list = %#v", response.Body)
+	}
+	return rows
+}
+
+// TestClaimWindowVisibilityAndReplay covers the CLAIM_WINDOW occurrence after
+// end_now (EA-7): MID 229 projects it, a claim inside claim_until succeeds, a
+// new claim after claim_until is refused, and the stored reply still replays.
+func TestClaimWindowVisibilityAndReplay(t *testing.T) {
+	p := pool(t)
+	installed(t, p)
+	deployRookieGift(t, p)
+	a := bornActorOn(t, p, 2)
+	exec(t, p, `UPDATE player_directory_profiles SET lev=50 WHERE player_id=$1`, int64(a.PlayerID))
+	services := eventFixture(t, p, a)
+
+	occurrence := scheduleOccurrence(t, p, int64(a.LogicalServerID), 1071, time.Now().UTC().Add(-time.Hour), "1d")
+	endNowOccurrence(t, p, occurrence)
+	if rows := activityList(t, services, a); len(rows) != 1 {
+		t.Fatalf("229 must project the CLAIM_WINDOW row: %#v", rows)
+	}
+	awards := claimTier(t, services, a, 1, 1)
+	var payloadVersion int16
+	if err := p.QueryRow(ctx, `SELECT payload_version FROM player_event_claims WHERE player_id=$1 AND tier=1`, int64(a.PlayerID)).Scan(&payloadVersion); err != nil || payloadVersion != 1 {
+		t.Fatalf("stored reply version = %d, %v; want payload.Encode's 1", payloadVersion, err)
+	}
+
+	exec(t, p, `UPDATE event_occurrences SET ends_at=clock_timestamp()-interval '30 minutes', claim_until=clock_timestamp()-interval '10 minutes', revision=revision+1 WHERE id=$1`, occurrence.ID)
+	if rows := activityList(t, services, a); len(rows) != 0 {
+		t.Fatalf("229 must drop the ended row: %#v", rows)
+	}
+	requireClaimRefused(t, claimResponse(services, a, 2, 1))
+	replay := claimTier(t, services, a, 1, 1)
+	if !bytes.Equal(awards, replay) {
+		t.Fatalf("replay after claim_until answered another body: %s vs %s", awards, replay)
+	}
+}
+
+// TestClaimWithoutStoredReplyRefuses covers a claimed tier whose row carries
+// no stored reply (settlement/E4 writes such rows): a permanent state, 409.
+func TestClaimWithoutStoredReplyRefuses(t *testing.T) {
+	p := pool(t)
+	installed(t, p)
+	deployRookieGift(t, p)
+	a := bornActorOn(t, p, 3)
+	exec(t, p, `UPDATE player_directory_profiles SET lev=50 WHERE player_id=$1`, int64(a.PlayerID))
+	services := eventFixture(t, p, a)
+	scheduleOccurrence(t, p, int64(a.LogicalServerID), 1071, time.Now().UTC().Add(-time.Hour), "permanent")
+
+	claimTier(t, services, a, 1, 1)
+	exec(t, p, `UPDATE player_event_claims SET award_body=NULL, payload_version=0 WHERE player_id=$1 AND tier=1`, int64(a.PlayerID))
+	requireClaimRefused(t, claimResponse(services, a, 1, 1))
+}
+
+// TestClaimChoiceResolution covers EA-7 sub_award_id: absent/zero means the
+// single choice, a multi-choice tier needs an explicit valid choice, and only
+// a non-numeric parameter is 400 (Activities.lua:132-150; Activity1071.lua:190
+// calls getActivityReward2).
+func TestClaimChoiceResolution(t *testing.T) {
+	p := pool(t)
+	installed(t, p)
+	deployRookieGift(t, p)
+	a := bornActorOn(t, p, 4)
+	exec(t, p, `UPDATE player_directory_profiles SET lev=50 WHERE player_id=$1`, int64(a.PlayerID))
+	services := eventFixture(t, p, a)
+	scheduleOccurrence(t, p, int64(a.LogicalServerID), 1071, time.Now().UTC().Add(-time.Hour), "permanent")
+
+	withoutChoice := func(tier int64) httpedge.Response {
+		return services.rewardFor(a).Dispatch(ctx, playtestRequest(a, 231, map[string]any{"activity_id": int64(1071), "award_id": tier}))
+	}
+	if response := withoutChoice(1); response.HTTPStatus != http.StatusOK {
+		t.Fatalf("the one-choice tier must accept an absent choice: %d %#v", response.HTTPStatus, response.Body)
+	}
+	requireClaimRefused(t, withoutChoice(2))
+	requireClaimRefused(t, claimResponse(services, a, 2, 0))
+	requireClaimRefused(t, claimResponse(services, a, 2, -1))
+	malformedChoice := services.rewardFor(a).Dispatch(ctx, playtestRequest(a, 231, map[string]any{"activity_id": int64(1071), "award_id": int64(2), "sub_award_id": "abc"}))
+	if malformedChoice.HTTPStatus != http.StatusBadRequest {
+		t.Fatalf("a non-numeric choice must stay 400: %d %#v", malformedChoice.HTTPStatus, malformedChoice.Body)
+	}
+	claimTier(t, services, a, 2, 2)
+}
+
 func activityRow(t *testing.T, services eventServices, a identity.ActorContext) string {
 	t.Helper()
 	response := services.activityFor(a).Dispatch(ctx, playtestRequest(a, 234, map[string]any{"activity_id": int64(1071)}))

@@ -2,7 +2,6 @@ package events
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -15,6 +14,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -120,7 +120,7 @@ func claimRetry() tx.RetryPolicy {
 // character roster (only when the choice names a hero) and the i5 grant ranks
 // 610+ (EA-9, EA-10). A repeat of the same command re-reads the stored reply.
 func (s ClaimService) Claim(ctx context.Context, actor identity.ActorContext, op operation.Context, activityID, tierID int64, choiceIndex int) (ClaimResult, error) {
-	if !s.ready() || !actor.PlayerID.Valid() || op.ID.IsZero() || op.StartedAt.IsZero() || activityID <= 0 || tierID <= 0 || choiceIndex < 1 {
+	if !s.ready() || !actor.PlayerID.Valid() || op.ID.IsZero() || op.StartedAt.IsZero() || activityID <= 0 || tierID <= 0 {
 		return ClaimResult{}, ErrUnavailable
 	}
 	var out ClaimResult
@@ -135,7 +135,7 @@ func (s ClaimService) Claim(ctx context.Context, actor identity.ActorContext, op
 		if len(roots) != 1 {
 			return claimRejected("the canonical player root is unavailable")
 		}
-		occurrence, err := s.Store.ActiveOccurrenceTx(c, scope.Tx, int64(actor.LogicalServerID), activityID, op.StartedAt)
+		occurrence, err := s.Store.ClaimOccurrenceTx(c, scope.Tx, int64(actor.LogicalServerID), activityID, op.StartedAt)
 		if err != nil {
 			return err
 		}
@@ -146,8 +146,8 @@ func (s ClaimService) Claim(ctx context.Context, actor identity.ActorContext, op
 		if err != nil {
 			return err
 		}
-		if locked == nil || !locked.Active(op.StartedAt) {
-			return claimRejected("the activity is not open for claims")
+		if locked == nil {
+			return claimRejected("the activity is not running on this server")
 		}
 		occurrence = locked
 		definition, err := s.Store.DefinitionTx(c, scope.Tx, occurrence.ActivityID, occurrence.DefinitionRevision)
@@ -164,19 +164,13 @@ func (s ClaimService) Claim(ctx context.Context, actor identity.ActorContext, op
 		if !found {
 			return claimRejected("the tier does not exist")
 		}
-		if choiceIndex > len(tier.Choices) {
-			return claimRejected("the choice does not exist")
-		}
-		level, foundLevel, err := s.Levels.PlayerLevelTx(c, scope.Tx, actor.PlayerID)
+		resolvedChoice, err := resolveChoice(tier, choiceIndex)
 		if err != nil {
 			return err
 		}
-		if !foundLevel || level < tier.Requirement.Value {
-			return claimRejected("the player level requirement is not met")
-		}
 		claim := Claim{
 			PlayerID: int64(actor.PlayerID), OccurrenceID: occurrence.ID, Tier: tierID,
-			Period: ClaimPeriodPermanent, Choice: choiceIndex, ClaimedAt: op.StartedAt.UTC(),
+			Period: ClaimPeriodPermanent, Choice: resolvedChoice, ClaimedAt: op.StartedAt.UTC(),
 			GrantReceipt: claimBusinessKey(occurrence.ID, int64(actor.PlayerID), tierID),
 		}
 		stored, inserted, err := s.Store.InsertClaimTx(c, scope.Tx, claim)
@@ -184,7 +178,17 @@ func (s ClaimService) Claim(ctx context.Context, actor identity.ActorContext, op
 			return err
 		}
 		if !inserted {
-			return replayStoredClaim(stored, choiceIndex, &out)
+			return replayStoredClaim(stored, resolvedChoice, &out)
+		}
+		if !locked.Active(op.StartedAt) {
+			return claimRejected("the activity is not open for claims")
+		}
+		level, foundLevel, err := s.Levels.PlayerLevelTx(c, scope.Tx, actor.PlayerID)
+		if err != nil {
+			return err
+		}
+		if !foundLevel || level < tier.Requirement.Value {
+			return claimRejected("the player level requirement is not met")
 		}
 		revision, pinned := op.Policies.Get("content")
 		if !pinned {
@@ -197,15 +201,16 @@ func (s ClaimService) Claim(ctx context.Context, actor identity.ActorContext, op
 				return err
 			}
 		}
-		awards, err := s.grantChoice(c, scope.Tx, actor, op, occurrence, tier, choiceIndex, revision)
+		awards, err := s.grantChoice(c, scope.Tx, actor, op, occurrence, tier, resolvedChoice, revision)
 		if err != nil {
 			return err
 		}
 		out = ClaimResult{Awards: awards}
-		body, err := json.Marshal(out)
+		body, version, err := payload.Encode(out)
 		if err != nil {
 			return err
 		}
+		claim.PayloadVersion = version
 		return s.Store.UpdateClaimReplyTx(c, scope.Tx, claim, body)
 	})
 	if err != nil {
@@ -219,9 +224,25 @@ func replayStoredClaim(stored Claim, choiceIndex int, out *ClaimResult) error {
 		return claimRejected("the tier is already claimed with another choice")
 	}
 	if len(stored.AwardBody) == 0 {
-		return ErrUnavailable
+		return claimRejected("the tier is already claimed")
 	}
-	return json.Unmarshal(stored.AwardBody, out)
+	return payload.Decode("player_event_claims", stored.PayloadVersion, stored.AwardBody, out)
+}
+
+// resolveChoice maps the stock sub_award_id to a choice: absent or zero means
+// the only choice of a one-choice tier (Activities.lua:132-150; the 1071 window
+// calls getActivityReward2, Activity1071.lua:190).
+func resolveChoice(tier events.Tier, requested int) (int, error) {
+	if requested == 0 {
+		if len(tier.Choices) == 1 {
+			return 1, nil
+		}
+		return 0, claimRejected("the choice is required")
+	}
+	if requested < 0 || requested > len(tier.Choices) {
+		return 0, claimRejected("the choice does not exist")
+	}
+	return requested, nil
 }
 
 func findTier(definition events.Definition, tierID int64) (events.Tier, bool) {

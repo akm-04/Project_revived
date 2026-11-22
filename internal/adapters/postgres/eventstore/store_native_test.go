@@ -614,7 +614,7 @@ func TestOccurrenceShowCountsEveryClaim(t *testing.T) {
 func TestActiveModifiersRead(t *testing.T) {
 	pool := e1Pool(t)
 	bus := e1Bus(t, pool)
-	definition := json.RawMessage(`{"activity_id":1090,"revision":1,"archetype":"RULE_MODIFIER","client_requirements":{},"hooks":[{"hook":"campaign.drop_multiplier","scope":"normal","item_kinds":[1],"multiplier":2}]}`)
+	definition := json.RawMessage(`{"activity_id":1990,"revision":1,"archetype":"RULE_MODIFIER","client_requirements":{},"hooks":[{"hook":"campaign.drop_multiplier","scope":"normal","item_kinds":[1],"multiplier":2}]}`)
 	deployed := e1Execute(t, bus, e1Command(t, "events.definition.deploy", nil, "global", definition))
 	if deployed.State != operator.StateApplied {
 		t.Fatalf("deploy: %s %s", deployed.State, deployed.Result)
@@ -622,7 +622,7 @@ func TestActiveModifiersRead(t *testing.T) {
 	ctx := context.Background()
 	now := time.Now().UTC()
 	if _, err := pool.Raw().Exec(ctx, `INSERT INTO event_occurrences(logical_server_id,activity_id,definition_revision,starts_at,ends_at,claim_until,source,revision,created_at)
-		VALUES(1,1090,1,$1,$2,$3,'CYCLE',1,$4)`, now.Add(-time.Hour), now.Add(time.Hour), now.Add(2*time.Hour), now); err != nil {
+		VALUES(1,1990,1,$1,$2,$3,'CYCLE',1,$4)`, now.Add(-time.Hour), now.Add(time.Hour), now.Add(2*time.Hour), now); err != nil {
 		t.Fatal(err)
 	}
 	service := appevents.Service{Store: eventstore.Store{}}

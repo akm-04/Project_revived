@@ -28832,8 +28832,8 @@
     },
     {
      "file": "internal/adapters/postgres/eventstore/store.go",
-     "line": 676,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',player_id,'occurrence_id',occurrence_id,'tier',tier,'period',period, 'choice',choice,'claimed_at',claimed_at,'grant_receipt',grant_receipt, 'award_body',COALESCE(award_body::text,'')) ORDER BY tier,period),'[]'::jsonb)::text FROM ("
+     "line": 693,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',player_id,'occurrence_id',occurrence_id,'tier',tier,'period',period, 'choice',choice,'claimed_at',claimed_at,'grant_receipt',grant_receipt, 'award_body',COALESCE(award_body::text,''),'payload_version',payload_version) ORDER BY tier,period),'[]'::jsonb)::text FROM ("
     },
     {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",
@@ -29130,8 +29130,8 @@
    "state_writes": [
     "internal/adapters/postgres/characterstore/store.go:109",
     "internal/adapters/postgres/characterstore/store.go:95",
-    "internal/adapters/postgres/eventstore/store.go:613",
-    "internal/adapters/postgres/eventstore/store.go:650",
+    "internal/adapters/postgres/eventstore/store.go:630",
+    "internal/adapters/postgres/eventstore/store.go:667",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -29277,7 +29277,7 @@
     },
     {
      "file": "internal/adapters/postgres/eventstore/store.go",
-     "line": 349,
+     "line": 365,
      "statement": "SELECT jsonb_build_object( 'id',id,'logical_server_id',logical_server_id,'activity_id',activity_id, 'definition_revision',definition_revision,'starts_at',starts_at,'ends_at',ends_at, 'claim_until',claim_until,'source',source,'revision',revision, 'created_by_command',created_by_command,'ended_early_by_command',ended_early_by_command, 'cancelled_by_command',cancelled_by_command,'cancelled_at',cancelled_at, 'settled_at',settled_at,'created_at',created_at) FROM event_occurrences WHERE id=$1 FOR SHARE"
     },
     {
@@ -29403,8 +29403,8 @@
     },
     {
      "file": "internal/adapters/postgres/eventstore/store.go",
-     "line": 676,
-     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',player_id,'occurrence_id',occurrence_id,'tier',tier,'period',period, 'choice',choice,'claimed_at',claimed_at,'grant_receipt',grant_receipt, 'award_body',COALESCE(award_body::text,'')) ORDER BY tier,period),'[]'::jsonb)::text FROM ("
+     "line": 693,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',player_id,'occurrence_id',occurrence_id,'tier',tier,'period',period, 'choice',choice,'claimed_at',claimed_at,'grant_receipt',grant_receipt, 'award_body',COALESCE(award_body::text,''),'payload_version',payload_version) ORDER BY tier,period),'[]'::jsonb)::text FROM ("
     },
     {
      "file": "internal/adapters/postgres/i4store/realtime_authority.go",

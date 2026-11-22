@@ -167,6 +167,7 @@
   ],
   "scenarios_naming": [],
   "unit": [
+   "activity_test.go",
    "commands_test.go"
   ]
  }

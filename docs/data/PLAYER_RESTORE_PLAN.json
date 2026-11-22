@@ -596,6 +596,16 @@
      ]
     },
     {
+     "constraint": "player_event_claims_player_id_fkey",
+     "table": "player_event_claims",
+     "columns": [
+      "player_id"
+     ],
+     "references": [
+      "player_id"
+     ]
+    },
+    {
      "constraint": "player_guild_activity_days_player_id_fkey",
      "table": "player_guild_activity_days",
      "columns": [
@@ -2363,6 +2373,16 @@
    "versioned": {
     "state_version": true,
     "updated_at": true
+   },
+   "inbound": []
+  },
+  {
+   "table": "player_event_claims",
+   "action": "keep",
+   "select": "SELECT * FROM \"player_event_claims\" WHERE \"player_id\" = $1::bigint",
+   "versioned": {
+    "state_version": false,
+    "updated_at": false
    },
    "inbound": []
   },

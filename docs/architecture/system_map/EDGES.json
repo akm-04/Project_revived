@@ -3902,6 +3902,7 @@
     "*ActiveHooksTx",
     "*ActiveOccurrenceTx",
     "*CheckRewardsTx",
+    "*ClaimOccurrenceTx",
     "*ClaimsForPlayerTx",
     "*CountOccurrenceClaimsTx",
     "*DefinitionTx",

@@ -37,9 +37,16 @@ func (d ActivityRewardDispatcher) Dispatch(c context.Context, req httpedge.Dispa
 	}
 	activityID, firstErr := requiredInt64(req.Envelope.Params, "activity_id")
 	tierID, secondErr := requiredInt64(req.Envelope.Params, "award_id")
-	choice, thirdErr := requiredInt64(req.Envelope.Params, "sub_award_id")
-	if firstErr != nil || secondErr != nil || thirdErr != nil || activityID <= 0 || tierID <= 0 || choice <= 0 {
+	if firstErr != nil || secondErr != nil || activityID <= 0 || tierID <= 0 {
 		return failureReply(malformed("invalid_activity_reward_parameter"))
+	}
+	choice := int64(0)
+	if _, present := req.Envelope.Params["sub_award_id"]; present {
+		parsed, choiceErr := requiredInt64(req.Envelope.Params, "sub_award_id")
+		if choiceErr != nil {
+			return failureReply(malformed("invalid_activity_reward_parameter"))
+		}
+		choice = parsed
 	}
 	result, err := d.Service.Claim(c, actor, req.Envelope.Operation, activityID, tierID, int(choice))
 	if err != nil {

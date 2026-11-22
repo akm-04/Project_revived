@@ -92,24 +92,31 @@ func (p ActivityProvider) Project(c context.Context, pc activitydirectory.Projec
 func (p ActivityProvider) activityID() int64 { return p.TableID }
 
 // awardFlags builds the pipe string the 1071 window indexes by tier row id:
-// "0" is claimable, "1" claimed (Activity1071.lua:138,153-158).
+// "0" is claimable, "1" claimed (Activity1071.lua:138,153-158). Positions come
+// from the definition's tier ids, so a sparse or high id keeps its slot.
 func awardFlags(definition events.Definition, claims []Claim) string {
-	maximum := 0
+	tierIDs := make(map[int64]struct{}, len(definition.Tiers))
+	maximum := int64(0)
 	for _, tier := range definition.Tiers {
-		if tier.ID > int64(maximum) && tier.ID <= 100 {
-			maximum = int(tier.ID)
+		tierIDs[tier.ID] = struct{}{}
+		if tier.ID > maximum {
+			maximum = tier.ID
 		}
 	}
 	if maximum == 0 {
 		maximum = 1
 	}
-	flags := make([]string, maximum)
-	for index := range flags {
-		flags[index] = "0"
-	}
+	claimed := make(map[int64]struct{}, len(claims))
 	for _, claim := range claims {
-		if claim.Tier > 0 && claim.Tier <= int64(maximum) {
-			flags[claim.Tier-1] = "1"
+		if _, isTier := tierIDs[claim.Tier]; isTier {
+			claimed[claim.Tier] = struct{}{}
+		}
+	}
+	flags := make([]string, maximum)
+	for id := int64(1); id <= maximum; id++ {
+		flags[id-1] = "0"
+		if _, isClaimed := claimed[id]; isClaimed {
+			flags[id-1] = "1"
 		}
 	}
 	return strings.Join(flags, "|")
