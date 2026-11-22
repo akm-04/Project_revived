@@ -1797,6 +1797,7 @@
     "StaleRevision"
    ]
   },
+  "operatoragent": {},
   "otabuild": {},
   "otarelease": {},
   "petcampaign": {
@@ -5286,6 +5287,7 @@
    ]
   },
   "operator": {},
+  "operatoragent": {},
   "otabuild": {},
   "otarelease": {
    "operator": [
@@ -6628,6 +6630,7 @@
    "cmd/gxb-api/top_floor_postgres.go"
   ],
   "operator": [],
+  "operatoragent": [],
   "otabuild": [],
   "otarelease": [
    "cmd/gxb-api/main_postgres.go"
