@@ -97,6 +97,15 @@ func TestPostCommitExecutorReportsAFailedSettingsCopy(t *testing.T) {
 	}
 }
 
+func TestPostCommitExecutorReportsAMissingSettingsSync(t *testing.T) {
+	executor := postCommitExecutor{
+		Next: fixedExecutor{outcome: operator.Outcome{State: operator.StateApplied, Result: json.RawMessage(`{}`)}},
+	}
+	if _, err := executor.Execute(context.Background(), operator.Command{ModuleCommand: "ota.settings.set"}); err == nil {
+		t.Fatal("a committed settings command without a sync must not report success")
+	}
+}
+
 func TestMirrorActivationWritesTheHistoryFile(t *testing.T) {
 	root := t.TempDir()
 	at := time.Date(2026, 11, 22, 5, 0, 0, 0, time.UTC)

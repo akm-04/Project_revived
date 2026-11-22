@@ -32,6 +32,11 @@ func (f SettingsFile) path() string {
 	return filepath.Join(f.Root, settingsFileName)
 }
 
+// Path is the settings file this SettingsFile owns.
+func (f SettingsFile) Path() string {
+	return f.path()
+}
+
 // Load reads the file; a missing file is the documented default. An empty Root
 // has no file and therefore the same default.
 func (f SettingsFile) Load() (domain.Settings, error) {
@@ -192,15 +197,43 @@ type SettingsSync struct {
 }
 
 func (s *SettingsSync) Reconcile(ctx context.Context) error {
+	_, err := s.reconcile(ctx)
+	return err
+}
+
+// Start is the startup copy. settings.json is only a copy of the committed row,
+// so an invalid file is replaced from the row instead of stopping startup. The
+// bool is false only when the file is invalid and no committed revision (>= 1)
+// exists to replace it.
+func (s *SettingsSync) Start(ctx context.Context) (bool, error) {
+	settings, err := s.File.Load()
+	invalidFile := errors.Is(err, domain.ErrInvalidSettings)
+	if invalidFile {
+		log.Printf("ota settings: %s is invalid, replacing it from the committed row: %v", s.File.Path(), err)
+		settings = domain.DefaultSettings()
+	} else if err != nil {
+		return false, err
+	}
+	s.Live.Set(settings)
+	installed, err := s.reconcile(ctx)
+	if err != nil {
+		return false, err
+	}
+	return installed || !invalidFile, nil
+}
+
+// reconcile is Reconcile reporting whether it installed a committed revision.
+func (s *SettingsSync) reconcile(ctx context.Context) (bool, error) {
 	if s.Store == nil || s.Runner.DB == nil {
-		return ErrUnavailable
+		return false, ErrUnavailable
 	}
 	current, err := s.Operations.New(policy.Set{})
 	if err != nil {
-		return err
+		return false, err
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	before := s.applied
 	var record *SettingsRecord
 	_, err = s.Runner.Run(ctx, current, ReadProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, scope tx.Scope) error {
 		loaded, readErr := s.Store.ReadSettingsTx(ctx, scope.Tx)
@@ -208,9 +241,12 @@ func (s *SettingsSync) Reconcile(ctx context.Context) error {
 		return readErr
 	})
 	if err != nil {
-		return err
+		return false, err
 	}
-	return s.install(record)
+	if err := s.install(record); err != nil {
+		return false, err
+	}
+	return s.applied != before, nil
 }
 
 // install is Reconcile after the read; the caller holds mu.

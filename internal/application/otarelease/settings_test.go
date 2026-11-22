@@ -10,6 +10,8 @@ import (
 
 	"gxb.local/backend/v2/internal/application/operator"
 	domain "gxb.local/backend/v2/internal/domain/otarelease"
+	"gxb.local/backend/v2/internal/foundation/clock"
+	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -152,6 +154,68 @@ func TestSettingsSyncRetriesAFailedCopy(t *testing.T) {
 		t.Fatalf("the next run must make the copy: %v", err)
 	}
 	if live.Get() != record.Settings {
+		t.Fatalf("live=%+v", live.Get())
+	}
+}
+
+func newStartupSync(root string, live *SettingsValue, store SettingsStore) *SettingsSync {
+	return &SettingsSync{Runner: tx.Runner{DB: fakeDB{}}, Operations: operation.Factory{Clock: clock.System{}}, Store: store, File: SettingsFile{Root: root}, Live: live}
+}
+
+func TestSettingsStartReplacesAnInvalidFileFromTheCommittedRow(t *testing.T) {
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, settingsFileName), []byte(`{"lazy_fetch":"nope"}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	committed := domain.Settings{LazyFetch: domain.LazyFetchOff}
+	live := NewSettingsValue(domain.DefaultSettings())
+	sync := newStartupSync(root, live, &fakeSettingsStore{record: &SettingsRecord{Settings: committed, Revision: 1}})
+	usable, err := sync.Start(context.Background())
+	if err != nil || !usable {
+		t.Fatalf("usable=%v err=%v", usable, err)
+	}
+	loaded, err := sync.File.Load()
+	if err != nil || loaded != committed || live.Get() != committed {
+		t.Fatalf("file=%+v live=%+v err=%v", loaded, live.Get(), err)
+	}
+}
+
+func TestSettingsStartRefusesAnInvalidFileWithoutACommittedRow(t *testing.T) {
+	root := t.TempDir()
+	bogus := []byte(`{"lazy_fetch":"nope"}`)
+	if err := os.WriteFile(filepath.Join(root, settingsFileName), bogus, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	live := NewSettingsValue(domain.Settings{LazyFetch: domain.LazyFetchOff})
+	sync := newStartupSync(root, live, &fakeSettingsStore{})
+	usable, err := sync.Start(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if usable {
+		t.Fatal("an invalid file without a committed row must not be usable")
+	}
+	if live.Get() != domain.DefaultSettings() {
+		t.Fatalf("live=%+v", live.Get())
+	}
+	if raw, readErr := os.ReadFile(filepath.Join(root, settingsFileName)); readErr != nil || string(raw) != string(bogus) {
+		t.Fatalf("the startup copy changed the invalid file: %q err=%v", raw, readErr)
+	}
+}
+
+func TestSettingsStartTrustsAValidFileWithoutACommittedRow(t *testing.T) {
+	root := t.TempDir()
+	fileSettings := domain.Settings{LazyFetch: domain.LazyFetchOff}
+	if err := (SettingsFile{Root: root}).Save(fileSettings); err != nil {
+		t.Fatal(err)
+	}
+	live := NewSettingsValue(domain.DefaultSettings())
+	sync := newStartupSync(root, live, &fakeSettingsStore{})
+	usable, err := sync.Start(context.Background())
+	if err != nil || !usable {
+		t.Fatalf("usable=%v err=%v", usable, err)
+	}
+	if live.Get() != fileSettings {
 		t.Fatalf("live=%+v", live.Get())
 	}
 }

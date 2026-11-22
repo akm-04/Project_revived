@@ -20,6 +20,7 @@ import (
 	"gxb.local/backend/v2/internal/application/operator"
 	"gxb.local/backend/v2/internal/application/playerdisplay"
 	apptopfloor "gxb.local/backend/v2/internal/application/topfloor"
+	domain "gxb.local/backend/v2/internal/domain/otarelease"
 	"log"
 	"net/http"
 	"os"
@@ -490,15 +491,15 @@ func main() {
 		log.Fatalf("GXB_OTA_ROOT must be an absolute path, got %q", cfg.OTARoot)
 	}
 	otaSettingsFile := appotarelease.SettingsFile{Root: cfg.OTARoot}
-	otaSettings, err := otaSettingsFile.Load()
-	if err != nil {
-		log.Fatalf("OTA settings: %v", err)
-	}
-	otaSettingsValue := appotarelease.NewSettingsValue(otaSettings)
+	otaSettingsValue := appotarelease.NewSettingsValue(domain.DefaultSettings())
 	otaSettingsSync := &appotarelease.SettingsSync{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: otastore.Store{}, File: otaSettingsFile, Live: otaSettingsValue}
 	if cfg.OTARoot != "" {
-		if err := otaSettingsSync.Reconcile(ctx); err != nil {
+		usable, err := otaSettingsSync.Start(ctx)
+		if err != nil {
 			log.Fatalf("OTA settings: copy the committed settings to settings.json: %v", err)
+		}
+		if !usable {
+			log.Fatalf("OTA settings: %s is invalid and no committed ota_settings row exists; fix the file or send ota.settings.set", otaSettingsFile.Path())
 		}
 	}
 	otaLedger := appotarelease.NewLedger(runner, operation.Factory{Clock: clock.System{}}, otastore.LedgerStore{})

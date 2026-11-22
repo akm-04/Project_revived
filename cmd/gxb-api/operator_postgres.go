@@ -93,6 +93,9 @@ func (executor postCommitExecutor) Execute(ctx context.Context, command operator
 	detached := context.WithoutCancel(ctx)
 	switch command.ModuleCommand {
 	case "ota.settings.set":
+		if executor.OTA.ReconcileSettings == nil {
+			return operator.Outcome{}, errors.New("ota.settings.set is committed but settings.json was not updated; OTA settings sync is not configured")
+		}
 		// A replay reconciles too: it is how a committed change whose copy failed is applied.
 		if syncErr := executor.OTA.ReconcileSettings(detached); syncErr != nil {
 			return operator.Outcome{}, fmt.Errorf("ota.settings.set is committed but settings.json was not updated; send the same command again: %w", syncErr)
