@@ -7,8 +7,10 @@ import (
 	"strconv"
 	"time"
 
+	appevents "gxb.local/backend/v2/internal/application/events"
 	"gxb.local/backend/v2/internal/application/operator"
 	appota "gxb.local/backend/v2/internal/application/otarelease"
+	"gxb.local/backend/v2/internal/domain/events"
 )
 
 // OTAStatusService is the ota.status read.
@@ -79,4 +81,65 @@ func parseAuditTime(name, text string) (*time.Time, error) {
 		return nil, operator.Refuse(operator.CodeReadInvalid, fmt.Sprintf("%s must be RFC3339: %v", name, err), nil)
 	}
 	return &parsed, nil
+}
+
+// EventsListService is the events.list read.
+type EventsListService interface {
+	List(context.Context, appevents.OccurrenceFilter) (appevents.OccurrencePage, error)
+}
+
+// EventsList adapts events.list to the read registry (I11A_EVENTS_V1 ruling 11).
+func EventsList(service EventsListService) Read {
+	return func(ctx context.Context, values url.Values) (any, error) {
+		filter, err := parseEventsFilter(values)
+		if err != nil {
+			return nil, err
+		}
+		return service.List(ctx, filter)
+	}
+}
+
+func parseEventsFilter(values url.Values) (appevents.OccurrenceFilter, error) {
+	var filter appevents.OccurrenceFilter
+	server, err := strconv.ParseInt(values.Get("server"), 10, 64)
+	if err != nil || server <= 0 {
+		return appevents.OccurrenceFilter{}, operator.Refuse(operator.CodeReadInvalid, "server must be a positive logical server id", nil)
+	}
+	filter.LogicalServerID = server
+	if rawState := values.Get("state"); rawState != "" {
+		phase := events.Phase(rawState)
+		switch phase {
+		case events.PhaseScheduled, events.PhaseRunning, events.PhaseClaimWindow, events.PhaseEnded, events.PhaseArchived, events.PhaseCancelled:
+			filter.Phase = &phase
+		default:
+			return appevents.OccurrenceFilter{}, operator.Refuse(operator.CodeReadInvalid, "state is not an event lifecycle state", nil)
+		}
+	}
+	from, err := parseAuditTime("from", values.Get("from"))
+	if err != nil {
+		return appevents.OccurrenceFilter{}, err
+	}
+	to, err := parseAuditTime("to", values.Get("to"))
+	if err != nil {
+		return appevents.OccurrenceFilter{}, err
+	}
+	filter.From, filter.To = from, to
+	if rawLimit := values.Get("limit"); rawLimit != "" {
+		limit, err := strconv.Atoi(rawLimit)
+		if err != nil {
+			return appevents.OccurrenceFilter{}, operator.Refuse(operator.CodeReadInvalid, "limit must be a number", nil)
+		}
+		if limit < 1 || limit > appevents.MaxListLimit {
+			return appevents.OccurrenceFilter{}, operator.Refuse(operator.CodeReadInvalid, fmt.Sprintf("limit must be between 1 and %d", appevents.MaxListLimit), nil)
+		}
+		filter.Limit = limit
+	}
+	if rawCursor := values.Get("cursor"); rawCursor != "" {
+		cursor, err := appevents.ParseOccurrenceCursor(rawCursor)
+		if err != nil {
+			return appevents.OccurrenceFilter{}, operator.Refuse(operator.CodeReadInvalid, err.Error(), nil)
+		}
+		filter.Cursor = cursor
+	}
+	return filter, nil
 }

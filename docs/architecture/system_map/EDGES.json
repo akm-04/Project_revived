@@ -648,6 +648,7 @@
     "*RecycleInfoTx"
    ]
   },
+  "events": {},
   "frienddm": {
    "realtimewakeup": [
     "*ReloadAndDeliver"
@@ -1792,12 +1793,19 @@
    ]
   },
   "operator": {
+   "events": [
+    "Refuse"
+   ],
    "otarelease": [
     "Refuse",
     "StaleRevision"
    ]
   },
-  "otarelease": {},
+  "otarelease": {
+   "events": [
+    "*Covers"
+   ]
+  },
   "petcampaign": {
    "achievement": [
     "*MaxFloorTx"
@@ -3842,6 +3850,34 @@
    "store:kernelstore": [
     "*FindTx",
     "*PutTx"
+   ]
+  },
+  "events": {
+   "operator": [
+    "Refuse"
+   ],
+   "otarelease": [
+    "*Covers"
+   ],
+   "store:eventstore": [
+    "*ActiveHooksTx",
+    "*CheckRewardsTx",
+    "*ClaimsForPlayerTx",
+    "*DefinitionTx",
+    "*GiftTx",
+    "*InsertClaimTx",
+    "*InsertDefinitionTx",
+    "*InsertOccurrenceTx",
+    "*LatestDefinitionTx",
+    "*ListDefinitionsTx",
+    "*LockOccurrenceTx",
+    "*LockOccurrencesTx",
+    "*OccurrenceClaimsTx",
+    "*OccurrenceTx",
+    "*OccurrencesTx",
+    "*OverlapsTx",
+    "*SaveOccurrenceTx",
+    "*SettingsTx"
    ]
   },
   "frienddm": {
@@ -6549,6 +6585,7 @@
   "eventcentre": [
    "cmd/gxb-api/main_postgres.go"
   ],
+  "events": [],
   "frienddm": [
    "cmd/gxb-api/main_postgres.go"
   ],
