@@ -554,6 +554,8 @@ func main() {
 	}
 	operatorVersion := operator.VersionService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Reader: operatorstore.Store{}, BackendVersion: backendVersion, GitCommit: gitCommit, ContentRevision: &operatorCatalogue.ContentRevision}
 	playerReads := operator.PlayerReadService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Directory: i4store.PlayerDirectoryReader{}, Wallet: appi5.OperatorWalletService{Store: i5db, Privileges: privileges}}
+	serverReads := operator.ServerReadService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Servers: i4store.ServerDirectoryReader{}, Online: identitystore.Store{}}
+	sessionReads := operator.SessionReadService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Sessions: identitystore.Store{}, Players: i4store.PlayerDirectoryReader{}}
 	bulkReads := operatorgrant.BulkReadService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: operatorstore.Store{}}
 	operatorVersionReply := func(ctx context.Context) (any, error) {
 		return operatorVersion.Version(ctx)
@@ -598,11 +600,15 @@ func main() {
 		map[string]operator.ReadHandler{"catalog.search": operatorapi.CatalogSearch(operatorCatalogue)})
 	playerModule := bindModule(operator.PlayerModule(), nil,
 		map[string]operator.ReadHandler{"player.find": operatorapi.PlayerFind(playerReads), "player.summary": operatorapi.PlayerSummary(playerReads)})
+	serverModule := bindModule(operator.ServerModule(), nil,
+		map[string]operator.ReadHandler{"server.list": operatorapi.ServerList(serverReads)})
+	logoutModule := bindModule(logoutCommands.Module(), nil,
+		map[string]operator.ReadHandler{"session.online": operatorapi.SessionOnline(sessionReads)})
 	operatorModule := bindModule(operator.OperatorModule(), nil,
 		map[string]operator.ReadHandler{"operator.audit.list": operatorapi.AuditList(operatorAudit), operatorgrant.BulkShowRead: operatorapi.BulkShow(bulkReads)})
 	redeemModule := bindModule(redeemCommands.Module(), nil,
 		map[string]operator.ReadHandler{"redeem.list": operatorapi.RedeemList(appi5.OperatorRedeemRead{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: i5db})})
-	modules := []operator.Module{otaModule, logoutCommands.Module(), grantCommands.Module(), mailCommands.Module(), redeemModule, eventsModule, catalogModule, playerModule, operatorModule}
+	modules := []operator.Module{otaModule, logoutModule, grantCommands.Module(), mailCommands.Module(), redeemModule, eventsModule, catalogModule, playerModule, serverModule, operatorModule}
 	modules = append(modules, operator.PlannedModules()...)
 	registry, err := operator.NewRegistry(modules...)
 	if err != nil {

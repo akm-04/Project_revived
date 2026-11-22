@@ -1411,7 +1411,7 @@
    "tables": 8
   },
   {
-   "callees": 2,
+   "callees": 3,
    "callers": 6,
    "mids": 0,
    "name": "operator",

@@ -46,6 +46,45 @@ func OTARelease(service OTAReleaseService) Read {
 	}
 }
 
+// ServerListService is the server.list read.
+type ServerListService interface {
+	List(context.Context) (operator.ServerListPage, error)
+}
+
+// ServerList adapts server.list to the read registry.
+func ServerList(service ServerListService) Read {
+	return func(ctx context.Context, _ url.Values) (any, error) {
+		return service.List(ctx)
+	}
+}
+
+// SessionOnlineService is the session.online read.
+type SessionOnlineService interface {
+	Online(context.Context, operator.OnlineSessionFilter) (operator.OnlineSessionPage, error)
+}
+
+// SessionOnline adapts session.online to the read registry.
+func SessionOnline(service SessionOnlineService) Read {
+	return func(ctx context.Context, values url.Values) (any, error) {
+		filter := operator.OnlineSessionFilter{After: values.Get("after")}
+		if rawServer := values.Get("server_id"); rawServer != "" {
+			server, err := strconv.ParseInt(rawServer, 10, 64)
+			if err != nil || server <= 0 {
+				return nil, operator.Refuse(operator.CodeReadInvalid, "server_id must be a positive id", nil)
+			}
+			filter.ServerID = &server
+		}
+		if rawLimit := values.Get("limit"); rawLimit != "" {
+			limit, err := strconv.Atoi(rawLimit)
+			if err != nil {
+				return nil, operator.Refuse(operator.CodeReadInvalid, "limit must be a number", nil)
+			}
+			filter.Limit = limit
+		}
+		return service.Online(ctx, filter)
+	}
+}
+
 // AuditListService is the operator.audit.list read.
 type AuditListService interface {
 	List(context.Context, operator.AuditFilter) (operator.AuditPage, error)

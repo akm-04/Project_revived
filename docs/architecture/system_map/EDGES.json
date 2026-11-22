@@ -1835,6 +1835,7 @@
     "WithEnum"
    ],
    "identitylifecycle": [
+    "Bounded",
     "NewField",
     "Refuse"
    ],
@@ -4821,6 +4822,7 @@
   },
   "identitylifecycle": {
    "operator": [
+    "Bounded",
     "NewField",
     "Refuse"
    ],
@@ -5471,7 +5473,13 @@
    ],
    "store:i4store": [
     "*FindPlayersTx",
-    "*OperatorPlayerTx"
+    "*OperatorPlayerTx",
+    "*OperatorServersTx",
+    "*PlayerNamesTx"
+   ],
+   "store:identitystore": [
+    "*ListOnlineSessionsTx",
+    "*OnlineCountsByServerTx"
    ]
   },
   "operatoragent": {
