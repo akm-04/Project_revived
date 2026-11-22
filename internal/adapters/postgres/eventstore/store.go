@@ -98,12 +98,13 @@ func mapWriteError(err error) error {
 const selectDefinition = `SELECT activity_id,revision,body::text,sha256,deployed_by_command,deployed_at FROM event_definitions WHERE activity_id=$1 AND revision=$2`
 
 type definitionRow struct {
-	ActivityID        int64     `json:"activity_id"`
-	Revision          int64     `json:"revision"`
-	Body              string    `json:"body"`
-	SHA256            string    `json:"sha256"`
-	DeployedByCommand string    `json:"deployed_by_command"`
-	DeployedAt        time.Time `json:"deployed_at"`
+	ActivityID         int64     `json:"activity_id"`
+	Revision           int64     `json:"revision"`
+	Body               string    `json:"body"`
+	SHA256             string    `json:"sha256"`
+	DeployedByCommand  string    `json:"deployed_by_command"`
+	DeployedAt         time.Time `json:"deployed_at"`
+	SyncConflictSHA256 string    `json:"sync_conflict_sha256"`
 }
 
 func scanDefinition(row *definitionRow) (*appevents.DefinitionRecord, error) {
@@ -111,7 +112,7 @@ func scanDefinition(row *definitionRow) (*appevents.DefinitionRecord, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &appevents.DefinitionRecord{ActivityID: row.ActivityID, Revision: row.Revision, Body: definition, SHA256: row.SHA256, DeployedByCommand: row.DeployedByCommand, DeployedAt: row.DeployedAt.UTC()}, nil
+	return &appevents.DefinitionRecord{ActivityID: row.ActivityID, Revision: row.Revision, Body: definition, SHA256: row.SHA256, DeployedByCommand: row.DeployedByCommand, DeployedAt: row.DeployedAt.UTC(), SyncConflictSHA256: row.SyncConflictSHA256}, nil
 }
 
 // DefinitionTx reads one immutable revision.
@@ -148,12 +149,14 @@ func (Store) LatestDefinitionTx(ctx context.Context, query tx.Queryer, activityI
 
 const listDefinitions = `SELECT COALESCE(jsonb_agg(jsonb_build_object(
 	'activity_id',activity_id,'revision',revision,'body',body::text,'sha256',sha256,
-	'deployed_by_command',deployed_by_command,'deployed_at',deployed_at) ORDER BY activity_id,revision DESC),'[]'::jsonb)::text
+	'deployed_by_command',deployed_by_command,'deployed_at',deployed_at,
+	'sync_conflict_sha256',COALESCE(sync_conflict_sha256,'')) ORDER BY activity_id,revision DESC),'[]'::jsonb)::text
 FROM (
-	SELECT activity_id,revision,body,sha256,deployed_by_command,deployed_at
-	FROM event_definitions
-	WHERE ($1=0 OR activity_id=$1)
-	ORDER BY activity_id,revision DESC LIMIT $2
+	SELECT d.activity_id,d.revision,d.body,d.sha256,d.deployed_by_command,d.deployed_at,c.shipped_sha256 AS sync_conflict_sha256
+	FROM event_definitions d
+	LEFT JOIN event_definition_sync_conflicts c ON c.activity_id=d.activity_id AND c.revision=d.revision
+	WHERE ($1=0 OR d.activity_id=$1)
+	ORDER BY d.activity_id,d.revision DESC LIMIT $2
 ) listed`
 
 // ListDefinitionsTx reads the newest revisions first, optionally for one
@@ -202,6 +205,34 @@ func (Store) InsertDefinitionTx(ctx context.Context, transaction tx.Tx, record a
 		return errors.New("eventstore: definition insert wrote no row")
 	}
 	return nil
+}
+
+const recordDefinitionConflict = `INSERT INTO event_definition_sync_conflicts(activity_id,revision,shipped_sha256,recorded_at)
+VALUES($1,$2,$3,$4)
+ON CONFLICT (activity_id,revision) DO UPDATE SET shipped_sha256=EXCLUDED.shipped_sha256,recorded_at=EXCLUDED.recorded_at`
+
+// RecordDefinitionConflictTx keeps the last shipped sha that conflicted with a
+// stored revision (EA-13); the stored body is never touched.
+func (Store) RecordDefinitionConflictTx(ctx context.Context, transaction tx.Tx, activityID, revision int64, sha256 string, at time.Time) error {
+	if transaction == nil || activityID <= 0 || revision <= 0 || sha256 == "" || at.IsZero() {
+		return errInvalid
+	}
+	if _, err := transaction.Exec(ctx, recordDefinitionConflict, activityID, revision, sha256, at.UTC()); err != nil {
+		return err
+	}
+	return nil
+}
+
+const clearDefinitionConflict = `DELETE FROM event_definition_sync_conflicts WHERE activity_id=$1 AND revision=$2`
+
+// ClearDefinitionConflictTx drops a conflict record once the shipped file
+// matches the stored revision again.
+func (Store) ClearDefinitionConflictTx(ctx context.Context, transaction tx.Tx, activityID, revision int64) error {
+	if transaction == nil || activityID <= 0 || revision <= 0 {
+		return errInvalid
+	}
+	_, err := transaction.Exec(ctx, clearDefinitionConflict, activityID, revision)
+	return err
 }
 
 const lockOccurrences = `SELECT COALESCE(jsonb_agg(` + occurrenceColumns + ` ORDER BY starts_at,id),'[]'::jsonb)::text

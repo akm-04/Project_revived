@@ -134,7 +134,7 @@ func TestCampaignHookValidation(t *testing.T) {
 }
 
 func TestShipped1008RequirementsCoverOnlyWithLazyAsset(t *testing.T) {
-	raw, err := os.ReadFile("../../../content/events/definitions/1008.json")
+	raw, err := os.ReadFile("../../../internal/content/events/definitions/1008.json")
 	if err != nil {
 		t.Fatal(err)
 	}

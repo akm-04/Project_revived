@@ -98,6 +98,9 @@
    "gameplay_contexts": [
     "i5store.FenceActorTx"
    ],
+   "operator_commands": [
+    "operatorstore.ClaimTx"
+   ],
    "players": [
     "i4store.LockPlayerRootsTx"
    ]
@@ -107,6 +110,7 @@
    "accounts",
    "event_occurrences",
    "gameplay_contexts",
+   "operator_commands",
    "players"
   ],
   "unresolved_methods": []
@@ -128,11 +132,13 @@
   "internal/adapters/postgres/contentstore",
   "internal/adapters/postgres/eventstore",
   "internal/adapters/postgres/i4store",
-  "internal/adapters/postgres/i5store"
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/operatorstore"
  ],
  "tables": {
   "owned": [
    "event_cycle_settings",
+   "event_definition_sync_conflicts",
    "event_definitions",
    "event_occurrences",
    "player_event_claims"
@@ -142,6 +148,7 @@
    "accounts",
    "content_daily_buy_input_catalogs",
    "event_cycle_settings",
+   "event_definition_sync_conflicts",
    "event_definitions",
    "event_occurrences",
    "gameplay_contexts",
@@ -151,14 +158,17 @@
    "gxb_content_resource_definitions",
    "gxb_content_revisions",
    "logical_servers",
+   "operator_commands",
    "player_directory_profiles",
    "player_event_claims",
    "players"
   ],
   "written": [
    "event_cycle_settings",
+   "event_definition_sync_conflicts",
    "event_definitions",
    "event_occurrences",
+   "operator_commands",
    "player_event_claims"
   ]
  },
@@ -172,7 +182,8 @@
    "claim_grant_test.go",
    "commands_test.go",
    "jobs_native_test.go",
-   "module_test.go"
+   "module_test.go",
+   "sync_test.go"
   ]
  }
 }

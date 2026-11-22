@@ -650,6 +650,7 @@
    "commerce_vip_awards": "commerceprivilege",
    "dodgeball_players": "dodgeball",
    "event_cycle_settings": "events",
+   "event_definition_sync_conflicts": "events",
    "event_definitions": "events",
    "event_occurrences": "events",
    "friend_dm_delivery": "frienddm",
@@ -1131,13 +1132,13 @@
    "tables": 2
   },
   {
-   "callees": 8,
+   "callees": 9,
    "callers": 1,
    "mids": 1,
    "name": "events",
    "path": "internal/application/events",
    "purpose": "applies the I11A event owner commands and serves its bounded reads (I11A_EVENTS_V1)",
-   "tables": 4
+   "tables": 5
   },
   {
    "callees": 7,
@@ -1429,7 +1430,7 @@
   },
   {
    "callees": 1,
-   "callers": 1,
+   "callers": 2,
    "mids": 0,
    "name": "operatorcatalog",
    "path": "internal/application/operatorcatalog",

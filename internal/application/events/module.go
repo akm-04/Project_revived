@@ -13,6 +13,7 @@ func (commands Commands) Module() operator.Module {
 		Screen:     operator.Screen{Tab: "Events", Columns: []string{"id", "activity_id", "logical_server_id", "state", "starts_at"}},
 		Commands: []operator.CommandSpec{
 			{Name: "events.definition.deploy", Class: operator.ClassLive, Help: "Validate, gift-expand and store one immutable definition revision.", Fields: definitionFields(), Handler: commands.deployHandler},
+			{Name: "events.definition.reload", Class: operator.ClassMaintenance, Help: "Deploy every shipped definition file and report each outcome.", Handler: commands.reloadHandler},
 			{Name: "events.definition.list", Class: operator.ClassLive, Help: "List the stored definition revisions, newest first.", Fields: []operator.Field{
 				operator.NewField("activity_id", operator.FieldInt, false, "client activity id; omitted lists every activity"),
 				operator.NewField("limit", operator.FieldInt, false, "page size").Bounded(1, MaxListLimit),
