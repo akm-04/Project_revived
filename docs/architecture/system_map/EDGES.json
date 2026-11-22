@@ -2808,6 +2808,7 @@
    "store:contentstore": [
     "*ActiveRevision",
     "*CampaignCatalogTx",
+    "*ItemKindsTx",
     "*ResolveProgressionPolicyTx",
     "*SummonCatalogTx"
    ],

@@ -59,6 +59,14 @@ func (s Mode) Sweep(c context.Context, a identity.ActorContext, q Sweep, op oper
 		if err != nil {
 			return nil, err
 		}
+		multipliers, err := s.dropMultipliersTx(c, sc.Tx, a, n.Type, r.Progress.State(n.ID).Star == 0, sc.Operation.DecisionAt())
+		if err != nil {
+			return nil, err
+		}
+		kinds, err := s.dropItemKindsTx(c, sc.Tx, v.revision, v.catalog, n.RepeatBox, multipliers)
+		if err != nil {
+			return nil, err
+		}
 		current := sc.Operation.Operation()
 		if err = s.debit(c, sc, a.PlayerID, n.EnergyCost*q.Count); err != nil {
 			return nil, err
@@ -98,7 +106,9 @@ func (s Mode) Sweep(c context.Context, a identity.ActorContext, q Sweep, op oper
 				row = append(row, d.Item{ItemID: award[0], Num: award[1]})
 			}
 			stream := cd.NewStream(current.Derive("campaign.drop.sweep/v1", uint64(i)))
-			row = append(row, v.catalog.Drop(n.RepeatBox, stream)...)
+			drops := v.catalog.Drop(n.RepeatBox, stream)
+			applyDropMultiplier(drops, multipliers, kinds)
+			row = append(row, drops...)
 			if frozen != nil {
 				for _, drop := range frozen.Draw(stream).Drops {
 					if drop.Count > 0 {

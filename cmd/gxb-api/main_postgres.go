@@ -155,6 +155,7 @@ import (
 	"gxb.local/backend/v2/internal/content/guildrentalpolicy"
 	"gxb.local/backend/v2/internal/content/guildteapolicy"
 	"gxb.local/backend/v2/internal/content/registry"
+	domainevents "gxb.local/backend/v2/internal/domain/events"
 	domainspirit "gxb.local/backend/v2/internal/domain/spirit"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/config"
@@ -541,7 +542,7 @@ func main() {
 	}
 	operatorHandlers := otaCommands.Handlers()
 	operatorHandlers["ota.settings.set"] = appotarelease.SettingsSetHandler(otaSettingsFile, otaSettingsValue, otastore.Store{})
-	eventHooks, err := appevents.NewHookRegistry()
+	eventHooks, err := appevents.NewHookRegistry(domainevents.HookCampaignDropMultiplier)
 	if err != nil {
 		log.Fatalf("events hook registry: %v", err)
 	}
@@ -747,7 +748,7 @@ func main() {
 		}
 		go runReconcile(ctx, pool, appleague.Reconciler{Service: league})
 		conquer := canonicalConquer(pool, runner, contentDB, i5db, i5svc, privileges, fight, broadcastEmitter, librarySvc)
-		campaign := canonicalCampaign(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, librarySvc)
+		campaign := canonicalCampaign(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, librarySvc, campaignDropHooks{Events: eventService})
 		campaign.StarCaps = rentalStarCaps(rentalPolicy.Policy)
 		blood := appawakeningbattle.Mode{Timed: heroSvc.Timed, Fresh: pool, Content: contentDB, Fence: i5db, Heroes: heroSvc, Missions: i5svc, Combat: fight, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, BattleCounts: librarySvc}
 		for _, mid := range []uint16{866, 867} {
