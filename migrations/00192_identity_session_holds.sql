@@ -1,5 +1,5 @@
--- owner: identity/logicalserver/bootstrap (operator_session_holds)
 -- +goose Up
+-- owner: identity/logicalserver/bootstrap (operator_session_holds)
 CREATE TABLE operator_session_holds (
   hold_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   scope_kind text NOT NULL CHECK (scope_kind IN ('global','server','player')),
