@@ -119,8 +119,10 @@ func TestI9_10HeroRecommendProcessStockMIDs(t *testing.T) {
 		t.Fatalf("2499 nonpositive-table status %d body %+v", status, body)
 	}
 
-	process.stop()
+	// The journal is written in 250 ms batches off the request path; an
+	// interrupted process is not guaranteed to drain them, so wait while it runs.
 	assertI9Journal(t, pool, actor, []int{2496, 2497, 2498, 2499})
+	process.stop()
 }
 
 func seedHeroRecommendSources(t *testing.T, pool *pg.Pool, actor identity.ActorContext, revision string, currentTableID int64) {
