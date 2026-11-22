@@ -44,6 +44,11 @@ func TestI97BCasualQueueConcurrencyNative(t *testing.T) {
 	if !period.OpensAt.After(time.Now().UTC()) {
 		period = d.CasualPeriodAt(period.OpensAt.Add(7 * 24 * time.Hour))
 	}
+	// A casual week is global to the database, so rooms and queue entries other
+	// tests in this package left for the same week day would be matched and
+	// settled by this test; drop them before the week is played.
+	exec(t, database, `DELETE FROM arena_casual_entries WHERE week_day=$1`, period.WeekDay)
+	exec(t, database, `DELETE FROM arena_tournament_rooms WHERE casual_week_day=$1`, period.WeekDay)
 	clock := &workplaceTime{at: period.OpensAt.Add(time.Minute)}
 	service.Timed.Binder.Time = clock
 	for _, actor := range []identity.ActorContext{first, second} {
