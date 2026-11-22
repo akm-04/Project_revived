@@ -38,6 +38,12 @@ func TestEventsModuleRefusesEachDeclaredRequiredFieldWhenMissing(t *testing.T) {
 		"events.extend":          {"occurrence_id": 1, "duration": "1d"},
 		"events.set_permanent":   {"occurrence_id": 1},
 		"events.occurrence.show": {"occurrence_id": 1, "limit": 10},
+		"events.cycle.mode":      {"logical_server_ids": []any{1}, "mode": "AUTO"},
+		"events.cycle.set": {"logical_server_ids": []any{1}, "cycle": map[string]any{
+			"revision": 1, "anchor": "2026-11-23T00:00:00Z",
+			"entries": []any{map[string]any{"activity_id": 1008, "duration": "3d"}},
+		}},
+		"events.cycle.reset": {"logical_server_ids": []any{1}},
 	}
 	for name, fixture := range fixtures {
 		spec := moduleCommand(t, module, name)
@@ -91,4 +97,34 @@ func TestEventsModuleDeclaresEveryCommand(t *testing.T) {
 			t.Fatalf("%s has a bus handler but no module handler", name)
 		}
 	}
+}
+
+func TestEventsCycleDeclarationsMatchTheirHandlers(t *testing.T) {
+	module := Commands{}.Module()
+	mode := moduleCommand(t, module, "events.cycle.mode")
+	servers := fieldNamed(t, mode, "logical_server_ids")
+	if !servers.Required || servers.Type != operator.FieldArray {
+		t.Fatalf("logical_server_ids = %+v", servers)
+	}
+	modeField := fieldNamed(t, mode, "mode")
+	if !modeField.Required || modeField.Type != operator.FieldString || len(modeField.Enum) != 2 || modeField.Enum[0] != CycleModeAuto || modeField.Enum[1] != CycleModeOff {
+		t.Fatalf("mode = %+v", modeField)
+	}
+	if cycle := fieldNamed(t, moduleCommand(t, module, "events.cycle.set"), "cycle"); !cycle.Required || cycle.Type != operator.FieldObject {
+		t.Fatalf("cycle = %+v", cycle)
+	}
+	if reset := fieldNamed(t, moduleCommand(t, module, "events.cycle.reset"), "logical_server_ids"); !reset.Required {
+		t.Fatalf("cycle.reset logical_server_ids = %+v", reset)
+	}
+}
+
+func fieldNamed(t *testing.T, command operator.CommandSpec, name string) operator.Field {
+	t.Helper()
+	for _, field := range command.Fields {
+		if field.Name == name {
+			return field
+		}
+	}
+	t.Fatalf("%s does not declare %s", command.Name, name)
+	return operator.Field{}
 }
