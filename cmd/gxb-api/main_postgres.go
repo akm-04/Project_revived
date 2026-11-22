@@ -64,6 +64,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/mentorstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/occultstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/oneononestore"
+	"gxb.local/backend/v2/internal/adapters/postgres/otastore"
 	"gxb.local/backend/v2/internal/adapters/postgres/petcampaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/publicationstore"
@@ -121,6 +122,7 @@ import (
 	appmentor "gxb.local/backend/v2/internal/application/mentor"
 	"gxb.local/backend/v2/internal/application/missioninputs"
 	appoccult "gxb.local/backend/v2/internal/application/occult"
+	appotarelease "gxb.local/backend/v2/internal/application/otarelease"
 	apppetcampaign "gxb.local/backend/v2/internal/application/petcampaign"
 	apppublication "gxb.local/backend/v2/internal/application/publication"
 	apppublicprofile "gxb.local/backend/v2/internal/application/publicprofile"
@@ -475,7 +477,13 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-	prelogin := stockruntime.PreloginDispatcher{PublicEngineURL: cfg.PublicEngineURL, Tracker: tracker}
+	otaRelease := appotarelease.Service{
+		Runner:          runner,
+		Store:           otastore.Store{},
+		Operations:      operation.Factory{Clock: clock.System{}},
+		PublicEngineURL: cfg.PublicEngineURL,
+	}
+	prelogin := stockruntime.PreloginDispatcher{PublicEngineURL: cfg.PublicEngineURL, Tracker: tracker, Updates: otaRelease}
 	for _, mid := range []uint16{2, 2864, 20480} {
 		mustRegister(mid, prelogin)
 	}

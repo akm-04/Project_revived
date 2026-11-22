@@ -215,6 +215,8 @@
    "192": "realtimeauth",
    "193": "socialrecall",
    "194": "socialrecall",
+   "2": "otarelease",
+   "20480": "otarelease",
    "2064": "campaign",
    "2128": "course",
    "2129": "course",
@@ -371,6 +373,7 @@
    "2852": "elementequipment",
    "2853": "elementequipment",
    "286": "topfloor",
+   "2864": "otarelease",
    "2865": "i5",
    "2866": "i5",
    "287": "topfloor",
@@ -724,6 +727,10 @@
    "one_on_one_settlement_ranks": "oneonone",
    "one_on_one_settlements": "oneonone",
    "operator_commands": "operator",
+   "ota_activations": "otarelease",
+   "ota_asset_misses": "otarelease",
+   "ota_asset_served_daily": "otarelease",
+   "ota_releases": "otarelease",
    "petcampaign_players": "petcampaign",
    "player_book_admissions": "bookskill",
    "player_book_roots": "bookskill",
@@ -1394,6 +1401,15 @@
    "path": "internal/application/operator",
    "purpose": "is the I11A operator command bus (I11A_OPERATOR_COMMANDS_V1): envelope validation, idempotency and the audit row",
    "tables": 1
+  },
+  {
+   "callees": 1,
+   "callers": 0,
+   "mids": 3,
+   "name": "otarelease",
+   "path": "internal/application/otarelease",
+   "purpose": "serves the OTA read side: the MID 2 update plan and the cross-contract ActiveRelease view (I11A_OTA_RELEASE_V1 rulings 4 and 5)",
+   "tables": 4
   },
   {
    "callees": 13,

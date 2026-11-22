@@ -133,14 +133,48 @@
   },
   {
    "handler": "internal/adapters/stockruntime/prelogin.go",
-   "isolation": [],
+   "isolation": [
+    {
+     "file": "internal/application/otarelease/service.go",
+     "line": 63,
+     "value": "repeatable_read"
+    }
+   ],
    "mid": 2,
-   "read_only": [],
+   "read_only": [
+    {
+     "file": "internal/application/otarelease/service.go",
+     "line": 63,
+     "value": "true"
+    }
+   ],
    "receipt_writes": [],
-   "retry": [],
+   "retry": [
+    {
+     "file": "internal/application/otarelease/service.go",
+     "line": 63,
+     "value": "1"
+    }
+   ],
    "state_writes": [],
-   "transactions": [],
-   "unbounded_read": [],
+   "system": "otarelease",
+   "transactions": [
+    {
+     "file": "internal/application/otarelease/service.go",
+     "function": "Service.activeRows",
+     "isolation": "repeatable_read",
+     "line": 63,
+     "read_only": "true",
+     "retry": "1"
+    }
+   ],
+   "unbounded_read": [
+    {
+     "file": "internal/adapters/postgres/otastore/store.go",
+     "line": 33,
+     "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'version',version,'lane',lane,'state',state,'package_files',package_files, 'total_size',total_size,'md5',md5,'sha256',sha256,'manifest',manifest ) ORDER BY version),'[]'::jsonb)::text FROM ("
+    }
+   ],
    "writes": "none"
   },
   {
@@ -145617,6 +145651,7 @@
    "receipt_writes": [],
    "retry": [],
    "state_writes": [],
+   "system": "otarelease",
    "transactions": [],
    "unbounded_read": [],
    "writes": "none"
@@ -152719,6 +152754,7 @@
    "receipt_writes": [],
    "retry": [],
    "state_writes": [],
+   "system": "otarelease",
    "transactions": [],
    "unbounded_read": [],
    "writes": "none"
