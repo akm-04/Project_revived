@@ -103,7 +103,8 @@
  "tests": {
   "integration": [
    "identitylogout",
-   "playerdisplay"
+   "playerdisplay",
+   "publication"
   ],
   "scenarios_naming": [],
   "unit": [

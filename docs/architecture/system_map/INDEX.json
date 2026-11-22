@@ -1412,7 +1412,7 @@
   },
   {
    "callees": 3,
-   "callers": 6,
+   "callers": 7,
    "mids": 0,
    "name": "operator",
    "path": "internal/application/operator",
@@ -1537,7 +1537,7 @@
    "tables": 5
   },
   {
-   "callees": 4,
+   "callees": 5,
    "callers": 0,
    "mids": 4,
    "name": "publication",

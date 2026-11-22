@@ -76,10 +76,6 @@ func PlannedModules() []Module {
 			{Name: "gm.answer", Class: ClassLive, Help: "Answer one stored question."},
 			{Name: "gm.catcher_mode", Class: ClassLive, Help: "Off, allow-list or everyone."},
 		}},
-		{ID: "publication", Title: "Publications", LogChannel: "publication", Planned: later, Commands: []CommandSpec{
-			{Name: "publication.install", Class: ClassLive, Help: "Install a revisioned publication set."},
-			{Name: "publication.clear", Class: ClassLive, Help: "Clear the active publication set."},
-		}},
 		{ID: "tuning", Title: "Tuning overlays", LogChannel: "tuning", Planned: later, Commands: []CommandSpec{
 			{Name: "tuning.get", Class: ClassLive, Help: "Read one overlay (one command per overlay)."},
 			{Name: "tuning.set", Class: ClassLive, Help: "Write one overlay with an expected revision."},

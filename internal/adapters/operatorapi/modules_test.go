@@ -15,6 +15,7 @@ import (
 	"gxb.local/backend/v2/internal/application/operatorgrant"
 	appota "gxb.local/backend/v2/internal/application/otarelease"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
+	apppublication "gxb.local/backend/v2/internal/application/publication"
 )
 
 func TestModulesRouteServesTheRegistry(t *testing.T) {
@@ -65,6 +66,9 @@ func TestEveryReadWithARequirementRefusesEmptyQuery(t *testing.T) {
 		}),
 		bindReads(t, appidentity.LogoutCommands{}.Module(), map[string]operator.ReadHandler{
 			"session.online": SessionOnline(fakeSessionOnline{}),
+		}),
+		bindReads(t, apppublication.OperatorCommands{}.Module(), map[string]operator.ReadHandler{
+			"publication.show": PublicationShow(fakePublicationShow{}),
 		}),
 	}
 	// The adapter itself refuses these when the declared required input is
@@ -135,4 +139,10 @@ type fakeSessionOnline struct{}
 
 func (fakeSessionOnline) Online(context.Context, operator.OnlineSessionFilter) (operator.OnlineSessionPage, error) {
 	return operator.OnlineSessionPage{}, nil
+}
+
+type fakePublicationShow struct{}
+
+func (fakePublicationShow) Show(context.Context, string, int64) (apppublication.ShowReply, error) {
+	return apppublication.ShowReply{}, nil
 }

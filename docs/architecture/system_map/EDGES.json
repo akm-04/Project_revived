@@ -1865,6 +1865,11 @@
     "StaleRevision",
     "WithDefault",
     "WithEnum"
+   ],
+   "publication": [
+    "NewField",
+    "Refuse",
+    "WithEnum"
    ]
   },
   "operatoragent": {},
@@ -5768,6 +5773,11 @@
    ],
    "i5": [
     "*FenceActorTx"
+   ],
+   "operator": [
+    "NewField",
+    "Refuse",
+    "WithEnum"
    ],
    "playerroot": [
     "LockKey"

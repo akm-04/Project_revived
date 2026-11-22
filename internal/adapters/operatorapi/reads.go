@@ -14,6 +14,7 @@ import (
 	"gxb.local/backend/v2/internal/application/operatorgrant"
 	appota "gxb.local/backend/v2/internal/application/otarelease"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
+	apppublication "gxb.local/backend/v2/internal/application/publication"
 	"gxb.local/backend/v2/internal/domain/events"
 )
 
@@ -82,6 +83,26 @@ func SessionOnline(service SessionOnlineService) Read {
 			filter.Limit = limit
 		}
 		return service.Online(ctx, filter)
+	}
+}
+
+// PublicationShowService is the publication.show read.
+type PublicationShowService interface {
+	Show(context.Context, string, int64) (apppublication.ShowReply, error)
+}
+
+// PublicationShow adapts publication.show to the read registry.
+func PublicationShow(service PublicationShowService) Read {
+	return func(ctx context.Context, values url.Values) (any, error) {
+		var serverID int64
+		if rawServer := values.Get("server_id"); rawServer != "" {
+			parsed, err := strconv.ParseInt(rawServer, 10, 64)
+			if err != nil || parsed < 0 {
+				return nil, operator.Refuse(operator.CodeReadInvalid, "server_id must be zero or positive", nil)
+			}
+			serverID = parsed
+		}
+		return service.Show(ctx, values.Get("family"), serverID)
 	}
 }
 

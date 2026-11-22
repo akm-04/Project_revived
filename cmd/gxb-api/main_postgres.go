@@ -556,6 +556,8 @@ func main() {
 	playerReads := operator.PlayerReadService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Directory: i4store.PlayerDirectoryReader{}, Wallet: appi5.OperatorWalletService{Store: i5db, Privileges: privileges}}
 	serverReads := operator.ServerReadService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Servers: i4store.ServerDirectoryReader{}, Online: identitystore.Store{}}
 	sessionReads := operator.SessionReadService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Sessions: identitystore.Store{}, Players: i4store.PlayerDirectoryReader{}}
+	publicationCommands := apppublication.OperatorCommands{Store: publicationstore.Store{}}
+	publicationReads := apppublication.OperatorRead{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: publicationstore.Store{}}
 	bulkReads := operatorgrant.BulkReadService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: operatorstore.Store{}}
 	operatorVersionReply := func(ctx context.Context) (any, error) {
 		return operatorVersion.Version(ctx)
@@ -604,11 +606,13 @@ func main() {
 		map[string]operator.ReadHandler{"server.list": operatorapi.ServerList(serverReads)})
 	logoutModule := bindModule(logoutCommands.Module(), nil,
 		map[string]operator.ReadHandler{"session.online": operatorapi.SessionOnline(sessionReads)})
+	publicationModule := bindModule(publicationCommands.Module(), publicationCommands.Handlers(),
+		map[string]operator.ReadHandler{"publication.show": operatorapi.PublicationShow(publicationReads)})
 	operatorModule := bindModule(operator.OperatorModule(), nil,
 		map[string]operator.ReadHandler{"operator.audit.list": operatorapi.AuditList(operatorAudit), operatorgrant.BulkShowRead: operatorapi.BulkShow(bulkReads)})
 	redeemModule := bindModule(redeemCommands.Module(), nil,
 		map[string]operator.ReadHandler{"redeem.list": operatorapi.RedeemList(appi5.OperatorRedeemRead{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: i5db})})
-	modules := []operator.Module{otaModule, logoutModule, grantCommands.Module(), mailCommands.Module(), redeemModule, eventsModule, catalogModule, playerModule, serverModule, operatorModule}
+	modules := []operator.Module{otaModule, logoutModule, grantCommands.Module(), mailCommands.Module(), redeemModule, eventsModule, catalogModule, playerModule, serverModule, publicationModule, operatorModule}
 	modules = append(modules, operator.PlannedModules()...)
 	registry, err := operator.NewRegistry(modules...)
 	if err != nil {
