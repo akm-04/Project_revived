@@ -115,7 +115,7 @@ func (handler Handler) ServeHTTP(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 	switch {
-	case request.URL.Path == "/" || request.URL.Path == "/gui/app.css" || request.URL.Path == "/gui/app.js":
+	case request.URL.Path == "/" || strings.HasPrefix(request.URL.Path, "/gui/"):
 		handler.serveGUI(writer, request)
 		return
 	case request.URL.Path == setupPath && request.Method == http.MethodPost:

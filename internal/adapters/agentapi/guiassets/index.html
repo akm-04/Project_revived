@@ -4,31 +4,52 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>GXB operator</title>
+<link rel="stylesheet" href="/gui/vendor/tabler-1.7.3/tabler.min.css">
 <link rel="stylesheet" href="/gui/app.css">
-<script src="/gui/app.js" defer></script>
+<script src="/gui/vendor/tabler-1.7.3/tabler.min.js" defer></script>
+<script type="module" src="/gui/app.js"></script>
 </head>
 <body>
-<main class="page">
-<section id="login-view" class="card login">
-<h1>GXB operator</h1>
+<section id="login-view" class="login">
+<div class="card card-md">
+<div class="card-body">
+<h1 class="card-title">GXB operator</h1>
 <form id="login-form">
-<label for="password">Root password</label>
-<input id="password" name="password" type="password" autocomplete="current-password" required>
-<button type="submit">Log in</button>
+<label class="form-label" for="password">Root password</label>
+<input id="password" name="password" type="password" class="form-control" autocomplete="current-password" required>
+<button type="submit" class="btn btn-primary w-100 mt-3">Log in</button>
 </form>
-<p id="login-status" class="status" role="status"></p>
+<p id="login-status" class="status mt-2" role="status"></p>
 <p class="hint">First start: set the password with <code>gxb-operator setup</code>.</p>
+</div>
+</div>
 </section>
 
-<section id="app-view" hidden>
-<div class="toolbar">
-<h1>GXB operator</h1>
-<button id="logout-button" type="button" class="secondary">Log out</button>
+<div id="app-view" hidden>
+<header class="navbar navbar-expand-md d-print-none">
+<div class="container-xl">
+<div class="navbar-brand">GXB operator</div>
+<div class="navbar-nav flex-row ms-auto align-items-center gap-2">
+<span id="backend-state" class="nav-link" role="status"></span>
+<button id="logout-button" type="button" class="btn btn-sm btn-outline-secondary">Log out</button>
 </div>
+</div>
+</header>
+<div class="page-wrapper">
+<div class="page-body">
+<div class="container-xl">
+<div class="row g-3">
+<aside class="col-md-3 col-lg-2">
+<nav id="nav" class="nav nav-pills flex-column" aria-label="Sections"></nav>
+</aside>
+<main class="col-md-9 col-lg-10">
 <p id="backend-error" class="status" role="status"></p>
-<nav id="tabs" class="tabs" aria-label="Modules"></nav>
-<div id="module-view" class="module"></div>
-</section>
+<div id="page-view"></div>
 </main>
+</div>
+</div>
+</div>
+</div>
+</div>
 </body>
 </html>
