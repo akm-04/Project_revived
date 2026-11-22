@@ -1,0 +1,55 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "operator-command"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "operator_commands": [
+    "operatorstore.ClaimTx"
+   ]
+  },
+  "row_locks": [
+   "operator_commands"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [],
+ "name": "operator",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/operatorstore"
+ ],
+ "tables": {
+  "owned": [
+   "operator_commands"
+  ],
+  "read": [
+   "operator_commands"
+  ],
+  "written": [
+   "operator_commands"
+  ]
+ },
+ "tests": {
+  "integration": [],
+  "scenarios_naming": [],
+  "unit": [
+   "envelope_test.go"
+  ]
+ }
+}

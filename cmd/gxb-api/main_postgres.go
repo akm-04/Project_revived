@@ -17,6 +17,7 @@ import (
 	"gxb.local/backend/v2/internal/application/dailyconsume"
 	"gxb.local/backend/v2/internal/application/dailyreset"
 	apponeonone "gxb.local/backend/v2/internal/application/oneonone"
+	"gxb.local/backend/v2/internal/application/operator"
 	"gxb.local/backend/v2/internal/application/playerdisplay"
 	apptopfloor "gxb.local/backend/v2/internal/application/topfloor"
 	"log"
@@ -480,6 +481,8 @@ func main() {
 	}
 	energyDispatcher := stockruntime.ItemsEnergyDispatcher{Authority: authority, Service: itemsEnergy.Service}
 	mux := http.NewServeMux()
+	// The OTA leaves (I11A_1_PLAN L1-L3) register their ota.* handlers here.
+	startOperator(ctx, runner, map[string]operator.Handler{})
 	clientLogs, journal := startClientLog(ctx, pool, authority, cfg.ClientLogURL, retentionPolicies.RetentionDays, txMetrics, mux, handlerConcurrency("GXB_CLIENT_LOG_MAX_CONCURRENT", 4, poolConnections))
 	dailyReset := dailyreset.Service{Markers: dailyresetstore.Store{Queryer: pool}, Counters: itemsEnergy.Counters}
 	boot := stockruntime.BootstrapDispatcher{Bootstrap: bootstrap, Tracker: tracker, LogURLs: clientLogs, DailyReset: dailyReset}

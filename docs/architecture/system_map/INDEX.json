@@ -723,6 +723,7 @@
    "one_on_one_rounds": "oneonone",
    "one_on_one_settlement_ranks": "oneonone",
    "one_on_one_settlements": "oneonone",
+   "operator_commands": "operator",
    "petcampaign_players": "petcampaign",
    "player_book_admissions": "bookskill",
    "player_book_roots": "bookskill",
@@ -1384,6 +1385,15 @@
    "path": "internal/application/oneonone",
    "purpose": "composes the 1 on 1 owner (C5C_ONE_ON_ONE_MODE_V1): entry, teams, candidates, multi-round START through the Combat foundation, terminal slot/points settlement, promotion, Wednesday/Sunday mail settlement, titles and history facts",
    "tables": 8
+  },
+  {
+   "callees": 0,
+   "callers": 0,
+   "mids": 0,
+   "name": "operator",
+   "path": "internal/application/operator",
+   "purpose": "is the I11A operator command bus (I11A_OPERATOR_COMMANDS_V1): envelope validation, idempotency and the audit row",
+   "tables": 1
   },
   {
    "callees": 13,

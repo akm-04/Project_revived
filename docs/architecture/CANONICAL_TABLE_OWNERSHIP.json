@@ -10284,6 +10284,121 @@
         "references": [],
         "retention": null
       }
+    },
+    "operator_commands": {
+      "owner": "operator",
+      "allowed_query_owners": [
+        "operator"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/operatorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/operatorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00184_i11a_operator_ota.sql",
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
+    },
+    "ota_releases": {
+      "owner": "otarelease",
+      "allowed_query_owners": [
+        "otarelease"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/otastore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/otastore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00184_i11a_operator_ota.sql",
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
+    },
+    "ota_activations": {
+      "owner": "otarelease",
+      "allowed_query_owners": [
+        "otarelease"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/otastore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/otastore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00184_i11a_operator_ota.sql",
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
+    },
+    "ota_asset_misses": {
+      "owner": "otarelease",
+      "allowed_query_owners": [
+        "otarelease"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/otastore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/otastore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00184_i11a_operator_ota.sql",
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "report",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
+    },
+    "ota_asset_served_daily": {
+      "owner": "otarelease",
+      "allowed_query_owners": [
+        "otarelease"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/otastore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/otastore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00184_i11a_operator_ota.sql",
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "report",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
     }
   }
 }

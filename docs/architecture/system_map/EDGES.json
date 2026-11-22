@@ -1791,6 +1791,7 @@
     "*PublicHistoryTx"
    ]
   },
+  "operator": {},
   "petcampaign": {
    "achievement": [
     "*MaxFloorTx"
@@ -5277,6 +5278,7 @@
     "*Now"
    ]
   },
+  "operator": {},
   "petcampaign": {
    "characterasset": [
     "NewCoherentReadScope"
@@ -6596,6 +6598,7 @@
   "oneonone": [
    "cmd/gxb-api/top_floor_postgres.go"
   ],
+  "operator": [],
   "petcampaign": [
    "cmd/gxb-api/petcampaign_postgres.go"
   ],
