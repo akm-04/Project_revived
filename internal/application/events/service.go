@@ -285,6 +285,9 @@ type Commands struct {
 	Hooks             HookRegistry
 	OperatorCatalogue operatorcatalog.Document
 	Audit             operator.Store
+	// Shipped are the definition files compiled into the API (EA-13); composition
+	// loads them from the content layer.
+	Shipped []DefinitionFile
 }
 
 // Service serves the bounded reads and the ActiveModifiers seam.

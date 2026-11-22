@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/application/operator"
-	eventscontent "gxb.local/backend/v2/internal/content/events"
 	domainevents "gxb.local/backend/v2/internal/domain/events"
 	otadomain "gxb.local/backend/v2/internal/domain/otarelease"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -132,7 +131,7 @@ func TestSyncFilesDeploysThenIsIdempotent(t *testing.T) {
 	store := newSyncMemoryStore()
 	commands := syncCommands(store, newSyncMemoryAudit(), hooks, syncCoverage{covered: true})
 	at := time.Date(2026, 11, 22, 12, 0, 0, 0, time.UTC)
-	files := []eventscontent.DefinitionFile{{Name: "1099.json", Body: syncDefinition(1099, 1, 3)}}
+	files := []DefinitionFile{{Name: "1099.json", Body: syncDefinition(1099, 1, 3)}}
 
 	first, err := commands.SyncFiles(context.Background(), stubTx{}, at, files)
 	if err != nil || len(first) != 1 || first[0].Outcome != SyncDeployed {
@@ -156,11 +155,11 @@ func TestSyncFilesConflictKeepsStoredBody(t *testing.T) {
 	commands := syncCommands(store, newSyncMemoryAudit(), hooks, syncCoverage{covered: true})
 	at := time.Date(2026, 11, 22, 12, 0, 0, 0, time.UTC)
 	original := syncDefinition(1099, 1, 3)
-	if _, err := commands.SyncFiles(context.Background(), stubTx{}, at, []eventscontent.DefinitionFile{{Name: "1099.json", Body: original}}); err != nil {
+	if _, err := commands.SyncFiles(context.Background(), stubTx{}, at, []DefinitionFile{{Name: "1099.json", Body: original}}); err != nil {
 		t.Fatal(err)
 	}
 	changed := syncDefinition(1099, 1, 9)
-	results, err := commands.SyncFiles(context.Background(), stubTx{}, at.Add(time.Hour), []eventscontent.DefinitionFile{{Name: "1099.json", Body: changed}})
+	results, err := commands.SyncFiles(context.Background(), stubTx{}, at.Add(time.Hour), []DefinitionFile{{Name: "1099.json", Body: changed}})
 	if err != nil || len(results) != 1 || results[0].Outcome != SyncConflict {
 		t.Fatalf("conflict sync = %+v %v", results, err)
 	}
@@ -171,7 +170,7 @@ func TestSyncFilesConflictKeepsStoredBody(t *testing.T) {
 	if store.conflicts[syncStoreKey(1099, 1)] == "" {
 		t.Fatal("the conflicting sha was not recorded")
 	}
-	if _, err := commands.SyncFiles(context.Background(), stubTx{}, at.Add(2*time.Hour), []eventscontent.DefinitionFile{{Name: "1099.json", Body: changed}}); err != nil {
+	if _, err := commands.SyncFiles(context.Background(), stubTx{}, at.Add(2*time.Hour), []DefinitionFile{{Name: "1099.json", Body: changed}}); err != nil {
 		t.Fatal(err)
 	}
 	if store.conflicts[syncStoreKey(1099, 1)] == "" {
@@ -190,7 +189,7 @@ func TestSyncFilesRejectsInvalidFileAndKeepsOperatorRevision(t *testing.T) {
 	commands := syncCommands(store, newSyncMemoryAudit(), hooks, syncCoverage{covered: true})
 	at := time.Date(2026, 11, 22, 12, 0, 0, 0, time.UTC)
 
-	results, err := commands.SyncFiles(context.Background(), stubTx{}, at, []eventscontent.DefinitionFile{
+	results, err := commands.SyncFiles(context.Background(), stubTx{}, at, []DefinitionFile{
 		{Name: "broken.json", Body: []byte(`{"activity_id":`)},
 		{Name: "1099.json", Body: syncDefinition(1099, 1, 3)},
 	})
@@ -213,7 +212,7 @@ func TestSyncFilesReportsAnUnexpandableGiftAsInvalid(t *testing.T) {
 	store := newSyncMemoryStore()
 	commands := syncCommands(store, newSyncMemoryAudit(), hooks, syncCoverage{covered: true})
 	body := []byte(`{"activity_id":1098,"revision":1,"archetype":"TIERED_CLAIM","client_requirements":{},"default_days":-1,"tiers":[{"id":1,"requirement":{"kind":"player_level","value":10},"choices":[{"gift_id":90001428}]}]}`)
-	results, err := commands.SyncFiles(context.Background(), stubTx{}, time.Now().UTC(), []eventscontent.DefinitionFile{{Name: "1098.json", Body: body}})
+	results, err := commands.SyncFiles(context.Background(), stubTx{}, time.Now().UTC(), []DefinitionFile{{Name: "1098.json", Body: body}})
 	if err != nil || len(results) != 1 || results[0].Outcome != SyncInvalid || results[0].Error == "" {
 		t.Fatalf("results = %+v %v", results, err)
 	}

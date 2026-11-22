@@ -566,7 +566,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("events hook registry: %v", err)
 	}
+	shippedDefinitions, err := eventscontent.Definitions()
+	if err != nil {
+		log.Printf("events shipped definitions: %v", err)
+	}
 	eventCommands := appevents.Commands{Store: eventstore.Store{}, Coverage: otaServing, Gifts: eventstore.ContentGifts{}, Catalogue: eventstore.ContentCatalogue{}, Hooks: eventHooks, OperatorCatalogue: operatorCatalogue, Audit: operatorstore.Store{}}
+	for _, file := range shippedDefinitions {
+		eventCommands.Shipped = append(eventCommands.Shipped, appevents.DefinitionFile{Name: file.Name, Body: file.Body})
+	}
 	syncResults, syncErr := eventCommands.SyncShipped(ctx, runner, operation.Factory{Clock: clock.System{}})
 	if syncErr != nil {
 		log.Printf("events definition sync: %v", syncErr)

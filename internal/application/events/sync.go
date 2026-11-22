@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/application/operator"
-	eventscontent "gxb.local/backend/v2/internal/content/events"
 	domainevents "gxb.local/backend/v2/internal/domain/events"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
@@ -31,6 +30,12 @@ const (
 	SyncSystemReason    = "shipped definition sync"
 )
 
+// DefinitionFile is one shipped event definition file (EA-13).
+type DefinitionFile struct {
+	Name string
+	Body []byte
+}
+
 // SyncResult is one definition file's sync outcome.
 type SyncResult struct {
 	File       string `json:"file"`
@@ -45,11 +50,7 @@ type reloadResult struct {
 }
 
 func (commands Commands) reloadHandler(ctx context.Context, scope tx.Scope, command operator.Command) (any, error) {
-	files, err := eventscontent.Definitions()
-	if err != nil {
-		return nil, err
-	}
-	results, err := commands.SyncFiles(ctx, scope.Tx, scope.Operation.StartedAt.UTC(), files)
+	results, err := commands.SyncFiles(ctx, scope.Tx, scope.Operation.StartedAt.UTC(), commands.Shipped)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +60,7 @@ func (commands Commands) reloadHandler(ctx context.Context, scope tx.Scope, comm
 // SyncFiles deploys every file through the deploy path in the caller's
 // transaction. A file's refusal is data (SYNC_CONFLICT or invalid); an
 // infrastructure fault aborts so the transaction rolls back.
-func (commands Commands) SyncFiles(ctx context.Context, transaction tx.Tx, at time.Time, files []eventscontent.DefinitionFile) ([]SyncResult, error) {
+func (commands Commands) SyncFiles(ctx context.Context, transaction tx.Tx, at time.Time, files []DefinitionFile) ([]SyncResult, error) {
 	if transaction == nil || at.IsZero() || commands.Store == nil || commands.Audit == nil {
 		return nil, ErrUnavailable
 	}
@@ -74,7 +75,7 @@ func (commands Commands) SyncFiles(ctx context.Context, transaction tx.Tx, at ti
 	return results, nil
 }
 
-func (commands Commands) syncFile(ctx context.Context, transaction tx.Tx, at time.Time, file eventscontent.DefinitionFile) (SyncResult, error) {
+func (commands Commands) syncFile(ctx context.Context, transaction tx.Tx, at time.Time, file DefinitionFile) (SyncResult, error) {
 	definition, err := domainevents.ParseDefinition(file.Body)
 	if err != nil {
 		return SyncResult{File: file.Name, Outcome: SyncInvalid, Error: err.Error()}, nil
@@ -181,17 +182,13 @@ func (commands Commands) SyncShipped(ctx context.Context, runner tx.Runner, oper
 	if commands.Store == nil || commands.Audit == nil || runner.DB == nil || operations.Clock == nil {
 		return nil, ErrUnavailable
 	}
-	files, err := eventscontent.Definitions()
-	if err != nil {
-		return nil, err
-	}
 	current, err := operations.New(policy.Set{})
 	if err != nil {
 		return nil, err
 	}
 	var results []SyncResult
 	_, err = runner.Run(ctx, current, syncProfile("events-definition-sync"), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true}, nil, func(ctx context.Context, scope tx.Scope) error {
-		loaded, syncErr := commands.SyncFiles(ctx, scope.Tx, current.StartedAt.UTC(), files)
+		loaded, syncErr := commands.SyncFiles(ctx, scope.Tx, current.StartedAt.UTC(), commands.Shipped)
 		if syncErr == nil {
 			results = loaded
 		}

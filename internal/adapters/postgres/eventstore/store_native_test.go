@@ -766,7 +766,7 @@ func TestSettingsClaimWindowTunable(t *testing.T) {
 	}
 }
 
-func e1SyncFiles(t *testing.T, pool *pg.Pool, commands appevents.Commands, files []eventscontent.DefinitionFile) []appevents.SyncResult {
+func e1SyncFiles(t *testing.T, pool *pg.Pool, commands appevents.Commands, files []appevents.DefinitionFile) []appevents.SyncResult {
 	t.Helper()
 	at := time.Now().UTC()
 	op, err := (operation.Factory{Clock: clock.System{}}).New(policy.Set{})
@@ -797,7 +797,7 @@ func TestDefinitionSyncIsIdempotentAndKeepsStoredRevision(t *testing.T) {
 	commands := appevents.Commands{Store: eventstore.Store{}, Coverage: fakeCoverage{}, Gifts: fakeGifts{}, Catalogue: fakeCatalogue{}, Hooks: hooks, Audit: operatorstore.Store{}}
 	activityID := int64(1195)
 	original := []byte(`{"activity_id":1195,"revision":1,"archetype":"DISPLAY","client_requirements":{},"default_days":3}`)
-	files := []eventscontent.DefinitionFile{{Name: "1195.json", Body: original}}
+	files := []appevents.DefinitionFile{{Name: "1195.json", Body: original}}
 
 	first := e1SyncFiles(t, pool, commands, files)
 	if len(first) != 1 || first[0].Outcome != appevents.SyncDeployed {
@@ -817,7 +817,7 @@ func TestDefinitionSyncIsIdempotentAndKeepsStoredRevision(t *testing.T) {
 	}
 
 	changed := []byte(`{"activity_id":1195,"revision":1,"archetype":"DISPLAY","client_requirements":{},"default_days":9}`)
-	conflict := e1SyncFiles(t, pool, commands, []eventscontent.DefinitionFile{{Name: "1195.json", Body: changed}})
+	conflict := e1SyncFiles(t, pool, commands, []appevents.DefinitionFile{{Name: "1195.json", Body: changed}})
 	if len(conflict) != 1 || conflict[0].Outcome != appevents.SyncConflict {
 		t.Fatalf("conflict sync = %+v", conflict)
 	}
@@ -847,7 +847,7 @@ func TestDefinitionReloadDeploysShippedFilesThroughTheBus(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	commands := appevents.Commands{Store: eventstore.Store{}, Coverage: fakeCoverage{}, Gifts: eventstore.ContentGifts{}, Catalogue: eventstore.ContentCatalogue{}, Hooks: hooks, Audit: operatorstore.Store{}}
+	commands := appevents.Commands{Store: eventstore.Store{}, Coverage: fakeCoverage{}, Gifts: eventstore.ContentGifts{}, Catalogue: eventstore.ContentCatalogue{}, Hooks: hooks, Audit: operatorstore.Store{}, Shipped: e1ShippedFiles(t)}
 	bus := operator.Bus{Runner: tx.Runner{DB: pool}, Clock: clock.System{}, Store: operatorstore.Store{}, Handlers: commands.Handlers()}
 	outcome := e1Execute(t, bus, e1Command(t, "events.definition.reload", nil, "global", map[string]any{}))
 	if outcome.State != operator.StateApplied {
@@ -884,4 +884,17 @@ func TestDefinitionReloadDeploysShippedFilesThroughTheBus(t *testing.T) {
 			t.Fatalf("second reload %s: %+v", result.File, result)
 		}
 	}
+}
+
+func e1ShippedFiles(t *testing.T) []appevents.DefinitionFile {
+	t.Helper()
+	embedded, err := eventscontent.Definitions()
+	if err != nil {
+		t.Fatal(err)
+	}
+	files := make([]appevents.DefinitionFile, 0, len(embedded))
+	for _, file := range embedded {
+		files = append(files, appevents.DefinitionFile{Name: file.Name, Body: file.Body})
+	}
+	return files
 }
