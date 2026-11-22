@@ -575,6 +575,15 @@ func main() {
 	for name, handler := range grantCommands.Handlers() {
 		operatorHandlers[name] = handler
 	}
+	mailCommands := operatorgrant.MailCommands{Catalogue: operatorCatalogue, Store: operatorstore.Store{}, Directory: i4store.PlayerDirectoryReader{}, Mail: i5svc, LineCap: grantLineCap}
+	for name, handler := range mailCommands.Handlers() {
+		operatorHandlers[name] = handler
+	}
+	redeemCommands := operatorgrant.RedeemCommands{Catalogue: operatorCatalogue, Redeem: i5svc, LineCap: grantLineCap}
+	for name, handler := range redeemCommands.Handlers() {
+		operatorHandlers[name] = handler
+	}
+	operatorReads["redeem.list"] = operatorapi.RedeemList(appi5.OperatorRedeemRead{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: i5db})
 	eventHooks, err := appevents.NewHookRegistry(domainevents.HookCampaignDropMultiplier)
 	if err != nil {
 		log.Fatalf("events hook registry: %v", err)
@@ -586,7 +595,7 @@ func main() {
 	eventService := appevents.Service{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: eventstore.Store{}, Clock: clock.System{}}
 	operatorReads["events.list"] = operatorapi.EventsList(eventService)
 	startOperator(ctx, runner, operatorHandlers, operatorReads, operatorVersionReply, otaAfterCommit{Root: cfg.OTARoot, ReconcileSettings: otaSettingsSync.Reconcile, Serving: otaServing})
-	startOperatorBulkJob(ctx, pool, operatorgrant.Applier{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: operatorstore.Store{}, Grants: i5svc, Catalogue: operatorCatalogue, LineCap: grantLineCap})
+	startOperatorBulkJob(ctx, pool, operatorgrant.Applier{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: operatorstore.Store{}, Grants: i5svc, Mail: i5svc, Catalogue: operatorCatalogue, LineCap: grantLineCap})
 	clientLogs, journal := startClientLog(ctx, pool, authority, cfg.ClientLogURL, retentionPolicies.RetentionDays, txMetrics, mux, handlerConcurrency("GXB_CLIENT_LOG_MAX_CONCURRENT", 4, poolConnections))
 	dailyReset := dailyreset.Service{Markers: dailyresetstore.Store{Queryer: pool}, Counters: itemsEnergy.Counters}
 	boot := stockruntime.BootstrapDispatcher{Bootstrap: bootstrap, Tracker: tracker, LogURLs: clientLogs, DailyReset: dailyReset}

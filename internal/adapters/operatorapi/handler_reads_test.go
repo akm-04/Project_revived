@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/operator"
 	appota "gxb.local/backend/v2/internal/application/otarelease"
 )
@@ -104,5 +105,31 @@ func TestAuditReadRefusesAMalformedLimit(t *testing.T) {
 	recorder := get(t, handler, "secret", "/operator/v1/reads/operator.audit.list?limit=nope")
 	if recorder.Code != http.StatusConflict || errorCode(t, recorder) != operator.CodeReadInvalid {
 		t.Fatalf("malformed limit: %d %s", recorder.Code, recorder.Body)
+	}
+}
+
+type fakeRedeemList struct {
+	after string
+	limit int
+}
+
+func (f *fakeRedeemList) List(_ context.Context, after string, limit int) (appi5.RedeemPage, error) {
+	f.after, f.limit = after, limit
+	return appi5.RedeemPage{}, nil
+}
+
+func TestRedeemListParsesTheBoundedQuery(t *testing.T) {
+	service := &fakeRedeemList{}
+	handler := Handler{Token: "secret", Reads: map[string]Read{"redeem.list": RedeemList(service)}}
+	recorder := get(t, handler, "secret", "/operator/v1/reads/redeem.list?after=00000000-0000-4000-8000-000000000001&limit=25")
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("redeem read: %d %s", recorder.Code, recorder.Body)
+	}
+	if service.after != "00000000-0000-4000-8000-000000000001" || service.limit != 25 {
+		t.Fatalf("after=%q limit=%d", service.after, service.limit)
+	}
+	recorder = get(t, handler, "secret", "/operator/v1/reads/redeem.list?limit=201")
+	if recorder.Code != http.StatusConflict || errorCode(t, recorder) != operator.CodeReadInvalid {
+		t.Fatalf("limit over cap: %d %s", recorder.Code, recorder.Body)
 	}
 }

@@ -1,6 +1,7 @@
-// Package operatorgrant is the operator grant module (I11A_OPERATOR_COMMANDS_V1
-// M2/M8, ruling 5): catalogue-checked grant.items with the shared bulk target
-// core, the progress read, and the resumable per-recipient settlement job.
+// Package operatorgrant is the operator entitlement module
+// (I11A_OPERATOR_COMMANDS_V1 M1/M2/M4/M8/M11, ruling 5): catalogue-checked
+// grant.items and mail.send, the redeem campaign commands, the shared bulk
+// target core, and the resumable per-recipient settlement job.
 package operatorgrant
 
 import (
@@ -72,6 +73,7 @@ type BulkTarget struct {
 	Refused         int
 	State           string
 	FailedReason    string
+	LastError       string
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 	FinishedAt      *time.Time
@@ -83,7 +85,7 @@ type BulkStore interface {
 	InsertBulkTx(context.Context, tx.Tx, BulkTarget) error
 	ReadBulkTx(context.Context, tx.Queryer, string) (*BulkTarget, error)
 	ListPendingBulkTx(context.Context, tx.Queryer, int) ([]BulkTarget, error)
-	SaveBulkProgressTx(context.Context, tx.Tx, string, int, int, int, string, string, time.Time) error
+	SaveBulkProgressTx(context.Context, tx.Tx, string, int, int, int, string, string, string, time.Time) error
 }
 
 // GrantOwner is the i5 admin settlement command: the job form opens its own
@@ -148,6 +150,7 @@ type BulkProgress struct {
 	Refused       int        `json:"refused"`
 	State         string     `json:"state"`
 	FailedReason  string     `json:"failed_reason,omitempty"`
+	LastError     string     `json:"last_error,omitempty"`
 	CreatedAt     time.Time  `json:"created_at"`
 	FinishedAt    *time.Time `json:"finished_at"`
 }
@@ -237,7 +240,7 @@ func (service BulkReadService) Show(ctx context.Context, semanticKey string) (Bu
 }
 
 func progressOf(target BulkTarget) BulkProgress {
-	return BulkProgress{SemanticKey: target.SemanticKey, ModuleCommand: target.ModuleCommand, Selector: target.Selector, PlayerCount: target.PlayerCount, Processed: target.Processed, Applied: target.Applied, Refused: target.Refused, State: target.State, FailedReason: target.FailedReason, CreatedAt: target.CreatedAt, FinishedAt: target.FinishedAt}
+	return BulkProgress{SemanticKey: target.SemanticKey, ModuleCommand: target.ModuleCommand, Selector: target.Selector, PlayerCount: target.PlayerCount, Processed: target.Processed, Applied: target.Applied, Refused: target.Refused, State: target.State, FailedReason: target.FailedReason, LastError: target.LastError, CreatedAt: target.CreatedAt, FinishedAt: target.FinishedAt}
 }
 
 func readBulkProfile() tx.Profile {
@@ -299,6 +302,10 @@ func validateLines(catalogue operatorcatalog.Document, lineCap int64, lines []li
 }
 
 func (commands Commands) resolveTarget(ctx context.Context, q tx.Queryer, target targetPayload) (string, []int64, error) {
+	return resolveTarget(ctx, q, commands.Directory, target)
+}
+
+func resolveTarget(ctx context.Context, q tx.Queryer, directory playerdirectory.OperatorRecipients, target targetPayload) (string, []int64, error) {
 	selector, err := target.selector()
 	if err != nil {
 		return "", nil, operator.Refuse(CodeGrantTarget, err.Error(), nil)
@@ -311,19 +318,19 @@ func (commands Commands) resolveTarget(ctx context.Context, q tx.Queryer, target
 		}
 		recipients = target.PlayerIDs
 	case "server":
-		if commands.Directory == nil {
+		if directory == nil {
 			return "", nil, operator.ErrUnavailable
 		}
-		ids, readErr := commands.Directory.ServerPlayerIDsTx(ctx, q, identity.LogicalServerID(target.ServerID), MaxRecipients+1)
+		ids, readErr := directory.ServerPlayerIDsTx(ctx, q, identity.LogicalServerID(target.ServerID), MaxRecipients+1)
 		if readErr != nil {
 			return "", nil, readErr
 		}
 		recipients = rawIDs(ids)
 	case "global":
-		if commands.Directory == nil {
+		if directory == nil {
 			return "", nil, operator.ErrUnavailable
 		}
-		ids, readErr := commands.Directory.AllPlayerIDsTx(ctx, q, MaxRecipients+1)
+		ids, readErr := directory.AllPlayerIDsTx(ctx, q, MaxRecipients+1)
 		if readErr != nil {
 			return "", nil, readErr
 		}

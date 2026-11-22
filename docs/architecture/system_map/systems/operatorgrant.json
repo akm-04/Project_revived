@@ -94,7 +94,9 @@
   ],
   "scenarios_naming": [],
   "unit": [
-   "commands_test.go"
+   "commands_test.go",
+   "mail_test.go",
+   "redeem_test.go"
   ]
  }
 }

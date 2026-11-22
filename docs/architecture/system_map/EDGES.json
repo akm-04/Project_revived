@@ -1521,6 +1521,10 @@
    "operatorgrant": [
     "*AdminGrant",
     "*AdminGrantTx",
+    "*AdminSendMail",
+    "*AdminSendMailTx",
+    "*OperatorCreateRedeemTx",
+    "*OperatorDisableRedeemTx",
     "IsPermanentGrantRefusal"
    ],
    "petcampaign": [
@@ -5431,6 +5435,10 @@
    "i5": [
     "*AdminGrant",
     "*AdminGrantTx",
+    "*AdminSendMail",
+    "*AdminSendMailTx",
+    "*OperatorCreateRedeemTx",
+    "*OperatorDisableRedeemTx",
     "IsPermanentGrantRefusal"
    ],
    "operator": [

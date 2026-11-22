@@ -8,6 +8,7 @@ import (
 	"time"
 
 	appevents "gxb.local/backend/v2/internal/application/events"
+	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/operator"
 	"gxb.local/backend/v2/internal/application/operatorcatalog"
 	"gxb.local/backend/v2/internal/application/operatorgrant"
@@ -116,6 +117,26 @@ func EventsList(service EventsListService) Read {
 			return nil, err
 		}
 		return service.List(ctx, filter)
+	}
+}
+
+// RedeemListService is the redeem.list read.
+type RedeemListService interface {
+	List(context.Context, string, int) (appi5.RedeemPage, error)
+}
+
+// RedeemList adapts redeem.list to the read registry (bounded to 200 rows).
+func RedeemList(service RedeemListService) Read {
+	return func(ctx context.Context, values url.Values) (any, error) {
+		limit := 0
+		if rawLimit := values.Get("limit"); rawLimit != "" {
+			parsed, err := strconv.Atoi(rawLimit)
+			if err != nil || parsed < 1 || parsed > appi5.MaxRedeemListLimit {
+				return nil, operator.Refuse(operator.CodeReadInvalid, fmt.Sprintf("limit must be between 1 and %d", appi5.MaxRedeemListLimit), nil)
+			}
+			limit = parsed
+		}
+		return service.List(ctx, values.Get("after"), limit)
 	}
 }
 

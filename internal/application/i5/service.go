@@ -35,6 +35,8 @@ var (
 	ErrMailStackFull               = errors.New("mail attachment would exceed canonical stack capacity")
 	ErrObjectiveNotFound           = errors.New("objective not found")
 	ErrRedeemInvalid               = errors.New("invalid redeem code")
+	ErrRedeemCodeTaken             = errors.New("redeem code already exists")
+	ErrRedeemUnknown               = errors.New("redeem code not found")
 )
 
 type Award struct {
@@ -503,7 +505,7 @@ func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identi
 						at := now.Add(mailTuning(ctx, t, s.Store).OverflowAfterLogin())
 						expires = &at
 					}
-					if _, err := s.createMailTx(ctx, t, plan.PlayerID, mail.Normal, "GRANT_OVERFLOW", sourceKey, overflowMailTitle, overflowMailSender, overflowMailBody, []grant.Line{over}, now, expires, plan.Source.PolicyVersion); err != nil {
+					if _, err := s.createMailTx(ctx, t, plan.PlayerID, mail.Normal, "GRANT_OVERFLOW", sourceKey, overflowMailTitle, overflowMailSender, overflowMailBody, []grant.Line{over}, now, expires, nil, plan.Source.PolicyVersion); err != nil {
 						return GrantResult{}, err
 					}
 				}
@@ -734,8 +736,8 @@ func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identi
 	return out, nil
 }
 
-func (s Service) createMailTx(ctx context.Context, t tx.Tx, playerID identity.PlayerID, ns mail.Namespace, sourceKind, sourceKey, title, sender, body string, lines []grant.Line, now time.Time, expires *time.Time, policyVersion string) (mail.Record, error) {
-	return createMailTx(ctx, t, s.Store, playerID, ns, sourceKind, sourceKey, title, sender, body, lines, now, expires, policyVersion)
+func (s Service) createMailTx(ctx context.Context, t tx.Tx, playerID identity.PlayerID, ns mail.Namespace, sourceKind, sourceKey, title, sender, body string, lines []grant.Line, now time.Time, expires *time.Time, expireAfterReadSeconds *int64, policyVersion string) (mail.Record, error) {
+	return createMailTx(ctx, t, s.Store, playerID, ns, sourceKind, sourceKey, title, sender, body, lines, now, expires, expireAfterReadSeconds, policyVersion)
 }
 
 type mailWriter interface {
@@ -743,7 +745,7 @@ type mailWriter interface {
 	InsertMailTx(context.Context, tx.Tx, mail.Record) error
 }
 
-func createMailTx(ctx context.Context, t tx.Tx, store mailWriter, playerID identity.PlayerID, ns mail.Namespace, sourceKind, sourceKey, title, sender, body string, lines []grant.Line, now time.Time, expires *time.Time, policyVersion string) (mail.Record, error) {
+func createMailTx(ctx context.Context, t tx.Tx, store mailWriter, playerID identity.PlayerID, ns mail.Namespace, sourceKind, sourceKey, title, sender, body string, lines []grant.Line, now time.Time, expires *time.Time, expireAfterReadSeconds *int64, policyVersion string) (mail.Record, error) {
 	if strings.TrimSpace(title) == "" || strings.TrimSpace(body) == "" {
 		return mail.Record{}, errors.New("i5: mail title and body required")
 	}
@@ -759,7 +761,7 @@ func createMailTx(ctx context.Context, t tx.Tx, store mailWriter, playerID ident
 	for i, line := range lines {
 		attachments = append(attachments, mail.Attachment{Ordinal: i, Line: line})
 	}
-	r := mail.Record{MailUUID: uid, Recipient: playerID, Address: mail.Address{Namespace: ns, WireID: wireID}, SourceKind: sourceKind, SourceKey: sourceKey, Title: title, Sender: sender, Body: body, CreatedAt: now.UTC(), ExpiresAt: expires, Shown: true, Platform: mail.AnyPlatform, CompatibilityPolicyVersion: policyVersion, StateVersion: 1, Attachments: attachments}
+	r := mail.Record{MailUUID: uid, Recipient: playerID, Address: mail.Address{Namespace: ns, WireID: wireID}, SourceKind: sourceKind, SourceKey: sourceKey, Title: title, Sender: sender, Body: body, CreatedAt: now.UTC(), ExpiresAt: expires, ExpireAfterReadSeconds: expireAfterReadSeconds, Shown: true, Platform: mail.AnyPlatform, CompatibilityPolicyVersion: policyVersion, StateVersion: 1, Attachments: attachments}
 	if err := r.Validate(); err != nil {
 		return mail.Record{}, err
 	}
@@ -978,6 +980,11 @@ func (s Service) ClaimMail(ctx context.Context, actor identity.ActorContext, add
 			t := now
 			r.ReadAt = &t
 		}
+		if wasNew {
+			if expiry := r.ReadExpiry(now); expiry != nil {
+				r.ExpiresAt = expiry
+			}
+		}
 		if r.ReadAt != nil || r.ClaimedAt != nil {
 			r.StateVersion++
 			if err := s.Store.SaveMailStateTx(txctx, scope.Tx, r, oldVersion); err != nil {
@@ -1087,6 +1094,9 @@ func (s Service) ClaimMailBatch(ctx context.Context, actor identity.ActorContext
 			old := r.StateVersion
 			t := op.StartedAt.UTC()
 			r.ReadAt, r.ClaimedAt, r.Shown, r.StateVersion = &t, &t, false, r.StateVersion+1
+			if expiry := r.ReadExpiry(t); expiry != nil {
+				r.ExpiresAt = expiry
+			}
 			if err := s.Store.SaveMailStateTx(txctx, scope.Tx, r, old); err != nil {
 				return err
 			}
@@ -1660,60 +1670,22 @@ func (s Service) AdminGrant(ctx context.Context, admin AdminOperator, target ide
 // AdminSendMail creates the durable entitlement through the Mail owner. Bulk or
 // cross-server recipient resolution belongs to I11; each resolved recipient is
 // delivered through this same semantic command.
-func (s Service) AdminSendMail(ctx context.Context, admin AdminOperator, target identity.PlayerID, ns mail.Namespace, commandKey, title, sender, body, policyVersion string, lines []grant.Line, expires *time.Time, op operation.Context) (AdminMailResult, error) {
-	if err := admin.Validate(); err != nil {
-		return AdminMailResult{}, err
-	}
+func (s Service) AdminSendMail(ctx context.Context, admin AdminOperator, target identity.PlayerID, ns mail.Namespace, commandKey, title, sender, body, policyVersion string, lines []grant.Line, expires *time.Time, expireAfterReadSeconds *int64, op operation.Context) (AdminMailResult, error) {
 	if err := s.validate(); err != nil {
 		return AdminMailResult{}, err
 	}
-	if !target.Valid() || !ns.Valid() || strings.TrimSpace(commandKey) == "" || strings.TrimSpace(policyVersion) == "" || s.Audit == nil {
-		return AdminMailResult{}, errors.New("admin mail command incomplete or audit unavailable")
+	if s.Audit == nil {
+		return AdminMailResult{}, errors.New("admin mail audit unavailable")
 	}
-	for _, line := range lines {
-		if err := line.Validate(); err != nil {
-			return AdminMailResult{}, err
-		}
-	}
-	semanticRaw := admin.ID + "\x00" + commandKey
-	semanticHash := sha256.Sum256([]byte(semanticRaw))
-	id := receipt.Identity{OwnerKind: "player", OwnerKey: strconv.FormatInt(int64(target), 10), Domain: "admin-mail", Operation: "deliver", SemanticKey: hex.EncodeToString(semanticHash[:])}
-	fp, err := receipt.FingerprintRequest(map[string]any{"admin": admin.ID, "target": int64(target), "namespace": ns.String(), "title": title, "sender": sender, "body": body, "policy_version": policyVersion, "lines": lines, "expires": expires})
+	id, fp, err := adminMailIdentity(admin, target, ns, commandKey, title, sender, body, policyVersion, lines, expires, expireAfterReadSeconds)
 	if err != nil {
 		return AdminMailResult{}, err
 	}
 	var out AdminMailResult
 	res, err := s.Runner.Run(ctx, op, s.profile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true, AllowReplayAfterAuthoritativeNegative: true}, receipt.Resolver{Reader: s.ReceiptRead, Identity: id, Fingerprint: fp}, func(txctx context.Context, scope tx.Scope) error {
-		if prior, ok, err := s.Receipts.FindTx(txctx, scope.Tx, id); err != nil {
-			return err
-		} else if ok {
-			if !bytes.Equal(prior.RequestFingerprint[:], fp[:]) {
-				return &receipt.ConflictError{Identity: id}
-			}
-			return json.Unmarshal(prior.ResultPayload, &out)
-		}
-		r, err := s.createMailTx(txctx, scope.Tx, target, ns, "ADMIN", "admin:"+admin.ID+":"+commandKey, title, sender, body, lines, op.StartedAt.UTC(), expires, policyVersion)
-		if err != nil {
-			return err
-		}
-		rr, err := receipt.New(op, id, "I5_ADMIN_MAIL", "gxb.i5.admin-mail.v1", json.RawMessage(`{"pending":true}`), fp)
-		if err != nil {
-			return err
-		}
-		out = AdminMailResult{MailUUID: r.MailUUID.String(), Address: r.Address, ReceiptID: rr.ID.String()}
-		raw, err := json.Marshal(out)
-		if err != nil {
-			return err
-		}
-		rr.ResultPayload, rr.PolicyVersion = raw, policyVersion
-		put, err := s.Receipts.PutTx(txctx, scope.Tx, rr)
-		if err != nil {
-			return err
-		}
-		if !put.Inserted {
-			return json.Unmarshal(put.Receipt.ResultPayload, &out)
-		}
-		return nil
+		var mailErr error
+		out, mailErr = s.AdminSendMailTx(txctx, scope.Tx, admin, target, ns, commandKey, title, sender, body, policyVersion, lines, expires, expireAfterReadSeconds, op)
+		return mailErr
 	})
 	if err == nil && res.Reconciled {
 		if r, ok := res.Evidence.(receipt.Receipt); ok {
@@ -1726,6 +1698,75 @@ func (s Service) AdminSendMail(ctx context.Context, admin AdminOperator, target 
 	}
 	s.Audit.Emit(context.WithoutCancel(ctx), audit.Event{OccurredAt: op.StartedAt.UTC(), ActorKind: "AdminOperator", ActorID: admin.ID, Action: "mail.deliver", TargetKind: "player", TargetKey: strconv.FormatInt(int64(target), 10), Outcome: outcome, ReasonCode: admin.ReasonCode, CorrelationID: op.ID.String()})
 	return out, err
+}
+
+// AdminSendMailTx is the caller-transaction form of AdminSendMail for the
+// operator bus inline path.
+func (s Service) AdminSendMailTx(ctx context.Context, transaction tx.Tx, admin AdminOperator, target identity.PlayerID, ns mail.Namespace, commandKey, title, sender, body, policyVersion string, lines []grant.Line, expires *time.Time, expireAfterReadSeconds *int64, op operation.Context) (AdminMailResult, error) {
+	if err := s.validate(); err != nil {
+		return AdminMailResult{}, err
+	}
+	id, fp, err := adminMailIdentity(admin, target, ns, commandKey, title, sender, body, policyVersion, lines, expires, expireAfterReadSeconds)
+	if err != nil {
+		return AdminMailResult{}, err
+	}
+	if transaction == nil {
+		return AdminMailResult{}, errors.New("admin mail transaction command incomplete")
+	}
+	if prior, ok, err := s.Receipts.FindTx(ctx, transaction, id); err != nil {
+		return AdminMailResult{}, err
+	} else if ok {
+		if !bytes.Equal(prior.RequestFingerprint[:], fp[:]) {
+			return AdminMailResult{}, &receipt.ConflictError{Identity: id}
+		}
+		var out AdminMailResult
+		return out, json.Unmarshal(prior.ResultPayload, &out)
+	}
+	r, err := s.createMailTx(ctx, transaction, target, ns, "ADMIN", "admin:"+admin.ID+":"+commandKey, title, sender, body, lines, op.StartedAt.UTC(), expires, expireAfterReadSeconds, policyVersion)
+	if err != nil {
+		return AdminMailResult{}, err
+	}
+	rr, err := receipt.New(op, id, "I5_ADMIN_MAIL", "gxb.i5.admin-mail.v1", json.RawMessage(`{"pending":true}`), fp)
+	if err != nil {
+		return AdminMailResult{}, err
+	}
+	out := AdminMailResult{MailUUID: r.MailUUID.String(), Address: r.Address, ReceiptID: rr.ID.String()}
+	raw, err := json.Marshal(out)
+	if err != nil {
+		return AdminMailResult{}, err
+	}
+	rr.ResultPayload, rr.PolicyVersion = raw, policyVersion
+	put, err := s.Receipts.PutTx(ctx, transaction, rr)
+	if err != nil {
+		return AdminMailResult{}, err
+	}
+	if !put.Inserted {
+		return out, json.Unmarshal(put.Receipt.ResultPayload, &out)
+	}
+	return out, nil
+}
+
+func adminMailIdentity(admin AdminOperator, target identity.PlayerID, ns mail.Namespace, commandKey, title, sender, body, policyVersion string, lines []grant.Line, expires *time.Time, expireAfterReadSeconds *int64) (receipt.Identity, [32]byte, error) {
+	var zero [32]byte
+	if err := admin.Validate(); err != nil {
+		return receipt.Identity{}, zero, err
+	}
+	if !target.Valid() || !ns.Valid() || strings.TrimSpace(commandKey) == "" || strings.TrimSpace(policyVersion) == "" {
+		return receipt.Identity{}, zero, errors.New("admin mail command incomplete")
+	}
+	for _, line := range lines {
+		if err := line.Validate(); err != nil {
+			return receipt.Identity{}, zero, err
+		}
+	}
+	semanticRaw := admin.ID + "\x00" + commandKey
+	semanticHash := sha256.Sum256([]byte(semanticRaw))
+	id := receipt.Identity{OwnerKind: "player", OwnerKey: strconv.FormatInt(int64(target), 10), Domain: "admin-mail", Operation: "deliver", SemanticKey: hex.EncodeToString(semanticHash[:])}
+	fp, err := receipt.FingerprintRequest(map[string]any{"admin": admin.ID, "target": int64(target), "namespace": ns.String(), "title": title, "sender": sender, "body": body, "policy_version": policyVersion, "lines": lines, "expires": expires, "expire_after_read_seconds": expireAfterReadSeconds})
+	if err != nil {
+		return receipt.Identity{}, zero, err
+	}
+	return id, fp, nil
 }
 
 func boolInt(v bool) int64 {

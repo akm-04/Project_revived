@@ -5,6 +5,7 @@ package operatorstore_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"os"
 	"testing"
 	"time"
@@ -205,5 +206,77 @@ func TestO2BulkFailedReasonNative(t *testing.T) {
 	}
 	if len(grants.effects) != 0 {
 		t.Fatalf("a failed target granted %v", grants.effects)
+	}
+}
+
+type o2FlakyGrants struct {
+	failAt       int64
+	failuresLeft int
+	err          error
+	calls        map[string]int
+}
+
+func (g *o2FlakyGrants) AdminGrantTx(ctx context.Context, _ tx.Tx, admin appi5.AdminOperator, target identity.PlayerID, key, policy string, lines []grant.Line, op operation.Context) (appi5.GrantResult, error) {
+	return g.AdminGrant(ctx, admin, target, key, policy, lines, op)
+}
+
+func (g *o2FlakyGrants) AdminGrant(_ context.Context, _ appi5.AdminOperator, target identity.PlayerID, key, _ string, _ []grant.Line, _ operation.Context) (appi5.GrantResult, error) {
+	if g.calls == nil {
+		g.calls = map[string]int{}
+	}
+	g.calls[key]++
+	if int64(target) == g.failAt && g.failuresLeft > 0 {
+		g.failuresLeft--
+		return appi5.GrantResult{}, g.err
+	}
+	return appi5.GrantResult{}, nil
+}
+
+// TestO2BulkLastErrorNative proves a transient recipient fault is persisted as
+// last_error while the target stays PENDING and is cleared when it moves on.
+func TestO2BulkLastErrorNative(t *testing.T) {
+	pool := o2Pool(t)
+	store := operatorstore.Store{}
+	grants := &o2FlakyGrants{failAt: 25, failuresLeft: 1, err: errors.New("connection reset")}
+	catalogue := o2Catalogue(t)
+	commands := operatorgrant.Commands{Catalogue: catalogue, Store: store, Grants: grants, LineCap: 1000}
+	bus := operator.Bus{Runner: tx.Runner{DB: pool}, Clock: clock.System{}, Store: store, Handlers: commands.Handlers()}
+	key := o2Key(t)
+	ids := make([]int64, 0, operatorgrant.InlineRecipientLimit+1)
+	for i := 1; i <= operatorgrant.InlineRecipientLimit+1; i++ {
+		ids = append(ids, int64(i))
+	}
+	payload := map[string]any{"target": map[string]any{"player_ids": ids}, "lines": []map[string]any{{"id": "stack_item:50001010", "amount": 1}}}
+	if _, err := bus.Execute(context.Background(), o2Command(t, key, payload)); err != nil {
+		t.Fatal(err)
+	}
+	applier := operatorgrant.Applier{Runner: tx.Runner{DB: pool}, Operations: operation.Factory{Clock: clock.System{}}, Store: store, Grants: grants, Catalogue: catalogue, LineCap: 1000}
+	if _, err := applier.ApplyPending(context.Background()); err == nil {
+		t.Fatal("the transient recipient fault did not stop the run")
+	}
+	target := o2Read(t, pool, store, key)
+	if target == nil || target.State != operatorgrant.StatePending || target.LastError != "connection reset" {
+		t.Fatalf("target after the transient fault = %+v", target)
+	}
+	read := operatorgrant.BulkReadService{Runner: tx.Runner{DB: pool}, Operations: operation.Factory{Clock: clock.System{}}, Store: store}
+	progress, err := read.Show(context.Background(), key)
+	if err != nil || progress.LastError != "connection reset" {
+		t.Fatalf("bulk.show = %+v err=%v", progress, err)
+	}
+	for {
+		finished, err := applier.ApplyPending(context.Background())
+		if err != nil {
+			t.Fatal(err)
+		}
+		done := o2Read(t, pool, store, key)
+		if done.State == operatorgrant.StateDone {
+			break
+		}
+		if finished != 0 {
+			t.Fatalf("finished=%d without DONE: %+v", finished, done)
+		}
+	}
+	if done := o2Read(t, pool, store, key); done.LastError != "" {
+		t.Fatalf("last_error was not cleared: %+v", done)
 	}
 }

@@ -27,7 +27,9 @@
   "written": []
  },
  "tests": {
-  "integration": [],
+  "integration": [
+   "playerdisplay"
+  ],
   "scenarios_naming": [],
   "unit": [
    "catalogue_test.go"

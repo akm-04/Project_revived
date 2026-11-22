@@ -81,9 +81,9 @@ func (f *fakeStore) ListPendingBulkTx(_ context.Context, _ tx.Queryer, _ int) ([
 	return out, nil
 }
 
-func (f *fakeStore) SaveBulkProgressTx(_ context.Context, _ tx.Tx, key string, processed, applied, refused int, state, failedReason string, _ time.Time) error {
+func (f *fakeStore) SaveBulkProgressTx(_ context.Context, _ tx.Tx, key string, processed, applied, refused int, state, failedReason, lastError string, _ time.Time) error {
 	target := f.rows[key]
-	target.Processed, target.Applied, target.Refused, target.State, target.FailedReason = processed, applied, refused, state, failedReason
+	target.Processed, target.Applied, target.Refused, target.State, target.FailedReason, target.LastError = processed, applied, refused, state, failedReason, lastError
 	if state != StatePending {
 		at := time.Unix(1, 0).UTC()
 		target.FinishedAt = &at
