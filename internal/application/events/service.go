@@ -175,15 +175,19 @@ type OccurrencePage struct {
 	NextCursor  string           `json:"next_cursor,omitempty"`
 }
 
-// Claim is one claim-ledger row (ruling 12); kept forever (P4).
+// Claim is one claim-ledger row (ruling 12); kept forever (P4). AwardBody is
+// the stored MID 231 reply, so a repeat of the same claim re-answers exactly
+// what the first command granted (EA-7).
 type Claim struct {
-	PlayerID     int64
-	OccurrenceID int64
-	Tier         int64
-	Period       string
-	Choice       int
-	ClaimedAt    time.Time
-	GrantReceipt string
+	PlayerID       int64
+	OccurrenceID   int64
+	Tier           int64
+	Period         string
+	Choice         int
+	ClaimedAt      time.Time
+	GrantReceipt   string
+	AwardBody      json.RawMessage
+	PayloadVersion int16
 }
 
 // Store is the events owner persistence port. Every write method takes the
@@ -199,6 +203,8 @@ type Store interface {
 	InsertOccurrenceTx(context.Context, tx.Tx, events.Occurrence, string, time.Time) (int64, error)
 	LockOccurrenceTx(context.Context, tx.Tx, int64) (*events.Occurrence, error)
 	LockOccurrenceSharedTx(context.Context, tx.Tx, int64) (*events.Occurrence, error)
+	ActiveOccurrenceTx(context.Context, tx.Queryer, int64, int64, time.Time) (*events.Occurrence, error)
+	ClaimOccurrenceTx(context.Context, tx.Queryer, int64, int64, time.Time) (*events.Occurrence, error)
 	OccurrenceTx(context.Context, tx.Queryer, int64) (*events.Occurrence, error)
 	SaveOccurrenceTx(context.Context, tx.Tx, events.Occurrence) error
 	OccurrencesTx(context.Context, tx.Queryer, OccurrenceFilter) ([]events.Occurrence, error)
@@ -209,6 +215,7 @@ type Store interface {
 	ActiveHooksTx(context.Context, tx.Queryer, int64, time.Time, string) ([]json.RawMessage, error)
 
 	InsertClaimTx(context.Context, tx.Tx, Claim) (Claim, bool, error)
+	UpdateClaimReplyTx(context.Context, tx.Tx, Claim, json.RawMessage) error
 	ClaimsForPlayerTx(context.Context, tx.Queryer, int64, int64, int) ([]Claim, error)
 }
 

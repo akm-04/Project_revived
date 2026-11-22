@@ -31,7 +31,11 @@
     "*ObserveTopFloorDayTx"
    ]
   },
-  "activitydirectory": {},
+  "activitydirectory": {
+   "events": [
+    "QueryerValue"
+   ]
+  },
   "adventure": {
    "i5": [
     "*ObserveTx"
@@ -276,6 +280,11 @@
    "dormhouse": [
     "*ApplyDormEXPLockedTx",
     "*RawAwakeningTx"
+   ],
+   "events": [
+    "*AwardStoryPartnerTx",
+    "*LockStoryRosterTx",
+    "*OwnsOriginTx"
    ],
    "godstrial": [
     "*LockStoryRosterTx"
@@ -648,7 +657,11 @@
     "*RecycleInfoTx"
    ]
   },
-  "events": {},
+  "events": {
+   "activitydirectory": [
+    "*Project"
+   ]
+  },
   "frienddm": {
    "realtimewakeup": [
     "*ReloadAndDeliver"
@@ -1331,6 +1344,10 @@
     "*PrepareTx",
     "*ReadProgressionTx",
     "*RecordTx",
+    "*SettleGrantTx"
+   ],
+   "events": [
+    "*FenceActorTx",
     "*SettleGrantTx"
    ],
    "frienddm": [
@@ -2496,6 +2513,9 @@
    ]
   },
   "activitydirectory": {
+   "events": [
+    "*Project"
+   ],
    "workplace": [
     "*Now"
    ],
@@ -3867,15 +3887,34 @@
    ]
   },
   "events": {
+   "activitydirectory": [
+    "QueryerValue"
+   ],
+   "characterhero": [
+    "*AwardStoryPartnerTx",
+    "*LockStoryRosterTx",
+    "*OwnsOriginTx"
+   ],
+   "i5": [
+    "*FenceActorTx",
+    "*SettleGrantTx"
+   ],
    "operator": [
     "Refuse"
    ],
    "otarelease": [
     "*Covers"
    ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*HeroFragmentsTx",
+    "*HeroNormalSummonTx"
+   ],
    "store:eventstore": [
     "*ActiveHooksTx",
+    "*ActiveOccurrenceTx",
     "*CheckRewardsTx",
+    "*ClaimOccurrenceTx",
     "*ClaimsForPlayerTx",
     "*CountOccurrenceClaimsTx",
     "*DefinitionTx",
@@ -3893,7 +3932,12 @@
     "*OccurrenceTx",
     "*OccurrencesTx",
     "*OverlapsTx",
-    "*SaveOccurrenceTx"
+    "*SaveOccurrenceTx",
+    "*UpdateClaimReplyTx"
+   ],
+   "store:i4store": [
+    "*LockPlayerRootsTx",
+    "*PlayerLevelTx"
    ]
   },
   "frienddm": {
@@ -6619,7 +6663,9 @@
   "eventcentre": [
    "cmd/gxb-api/main_postgres.go"
   ],
-  "events": [],
+  "events": [
+   "cmd/gxb-api/main_postgres.go"
+  ],
   "frienddm": [
    "cmd/gxb-api/main_postgres.go"
   ],

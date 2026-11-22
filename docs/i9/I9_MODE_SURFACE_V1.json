@@ -19,10 +19,10 @@
  },
  "counts": {
   "by_disposition": {
-   "DELIVERED": 196,
+   "DELIVERED": 197,
    "ACTIVE": 371,
    "INACTIVE_SUPERSEDED": 102,
-   "LATER": 502,
+   "LATER": 501,
    "INACTIVE_D79": 21
   },
   "active_by_stage": {
@@ -1352,9 +1352,9 @@
    "mid": 231,
    "name": "GET_ACTIVITY_REWARD",
    "family": "SAKURA",
-   "disposition": "LATER",
-   "target": "I10/I10.5",
-   "v2": "unimplemented",
+   "disposition": "DELIVERED",
+   "target": null,
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {

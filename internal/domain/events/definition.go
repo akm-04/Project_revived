@@ -42,7 +42,15 @@ type Requirement struct {
 	Value int64           `json:"value"`
 }
 
-// RewardLine is one grant line of a choice. Kind is "item" or "currency".
+const (
+	RewardKindItem     = "item"
+	RewardKindCurrency = "currency"
+	// RewardKindHero grants the character entity of a hero acquisition item
+	// (client item type -1), not the scroll item itself (EA-3, 1071 tiers).
+	RewardKindHero = "hero"
+)
+
+// RewardLine is one grant line of a choice.
 type RewardLine struct {
 	Kind        string `json:"kind"`
 	ItemID      int64  `json:"item_id,omitempty"`
@@ -55,13 +63,17 @@ func (line RewardLine) validate() error {
 		return fmt.Errorf("%w: reward amount must be positive", ErrInvalidDefinition)
 	}
 	switch line.Kind {
-	case "item":
+	case RewardKindItem:
 		if line.ItemID <= 0 || line.ResourceKey != "" {
 			return fmt.Errorf("%w: an item reward needs item_id and no resource_key", ErrInvalidDefinition)
 		}
-	case "currency":
+	case RewardKindCurrency:
 		if strings.TrimSpace(line.ResourceKey) == "" || line.ItemID != 0 {
 			return fmt.Errorf("%w: a currency reward needs resource_key and no item_id", ErrInvalidDefinition)
+		}
+	case RewardKindHero:
+		if line.ItemID <= 0 || line.ResourceKey != "" || line.Amount != 1 {
+			return fmt.Errorf("%w: a hero reward needs one acquisition item and no resource_key", ErrInvalidDefinition)
 		}
 	default:
 		return fmt.Errorf("%w: unknown reward kind %q", ErrInvalidDefinition, line.Kind)

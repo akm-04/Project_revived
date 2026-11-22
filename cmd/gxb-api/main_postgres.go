@@ -252,7 +252,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("I6B content capability set: %v", err)
 	}
-	activityProviders, err := appactivity.NewRegistry([]appactivity.Registration{{Name: "worldboss", TableID: 1026, RuntimeCapability: "activity.worldboss", Provider: appworldboss.ActivityProvider{Queryer: pool, Directory: i4store.PlayerDirectoryReader{}}}}, activityContentCapabilities)
+	activityRegistrations := []appactivity.Registration{{Name: "worldboss", TableID: 1026, RuntimeCapability: "activity.worldboss", Provider: appworldboss.ActivityProvider{Queryer: pool, Directory: i4store.PlayerDirectoryReader{}}}}
+	activityRegistrations = append(activityRegistrations, appevents.ActivityRegistrations(eventstore.Store{}, pool)...)
+	activityProviders, err := appactivity.NewRegistry(activityRegistrations, activityContentCapabilities)
 	if err != nil {
 		log.Fatalf("I6B Activity provider registry: %v", err)
 	}
@@ -964,6 +966,15 @@ func main() {
 	activityD := stockruntime.ActivityDispatcher{Authority: authority, Service: activityRuntime, Reads: runner, Levels: i4store.PlayerDirectoryReader{}}
 	for _, mid := range []uint16{229, 234} {
 		mustRegister(mid, activityD)
+	}
+	eventClaims := appevents.ClaimService{
+		Runner: runner, Store: eventstore.Store{}, Fence: i5db, Players: i4store.PlayerRootLocker{},
+		Levels: i4store.PlayerDirectoryReader{}, Grants: i5svc, Content: contentDB,
+		HeroContent: contentDB, Heroes: heroSvc, Fragments: contentDB, HeroWire: heroproj.StockHero,
+	}
+	eventRewardD := stockruntime.ActivityRewardDispatcher{Authority: authority, Service: eventClaims}
+	for _, mid := range stockruntime.ActivityRewardMIDs {
+		mustRegister(mid, eventRewardD)
 	}
 	savedPresetD := stockruntime.SavedPresetDispatcher{Authority: authority, Service: savedPresetSvc}
 	mustRegister(1793, savedPresetD)

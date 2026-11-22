@@ -47,7 +47,8 @@
  },
  "tests": {
   "integration": [
-   "identitylogout"
+   "identitylogout",
+   "playerdisplay"
   ],
   "scenarios_naming": [],
   "unit": [
