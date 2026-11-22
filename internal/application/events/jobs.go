@@ -33,7 +33,6 @@ const SettlementMailSourceKind = "EVENT_SETTLEMENT"
 const SettlementPolicyVersion = "I11A_EVENTS_V1"
 
 const (
-	settlementClaimPeriod = "once"
 	settlementMailTitle   = "Event reward"
 	settlementMailSender  = "Event"
 	settlementMailBody    = "An event reward you did not claim is attached."
@@ -231,6 +230,13 @@ func (jobs Jobs) materialiseSlot(ctx context.Context, transaction tx.Tx, server 
 	if coverage.Status != otadomain.CoversCovered {
 		return nil
 	}
+	taken, err := jobs.Store.CycleSlotTakenTx(ctx, transaction, server, slot.StartsAt)
+	if err != nil {
+		return err
+	}
+	if taken {
+		return nil
+	}
 	overlaps, err := jobs.Store.OverlapsTx(ctx, transaction, server, slot.ActivityID, slot.StartsAt, &slot.ClaimUntil, 0)
 	if err != nil {
 		return err
@@ -378,12 +384,19 @@ func (jobs Jobs) deliverTierPage(ctx context.Context, op operation.Context, occu
 }
 
 func (jobs Jobs) deliverTier(ctx context.Context, transaction tx.Tx, occurrence events.Occurrence, player PlayerRef, tier events.Tier, at time.Time) error {
+	claimed, err := jobs.Store.HasClaimTx(ctx, transaction, int64(player.PlayerID), occurrence.ID, tier.ID)
+	if err != nil {
+		return err
+	}
+	if claimed {
+		return nil
+	}
 	lines, err := choiceGrantLines(tier)
 	if err != nil {
 		return err
 	}
 	key := settlementSourceKey(occurrence.ID, player.PlayerID, tier.ID)
-	claim := Claim{PlayerID: int64(player.PlayerID), OccurrenceID: occurrence.ID, Tier: tier.ID, Period: settlementClaimPeriod, Choice: 1, ClaimedAt: at.UTC(), GrantReceipt: key}
+	claim := Claim{PlayerID: int64(player.PlayerID), OccurrenceID: occurrence.ID, Tier: tier.ID, Period: ClaimPeriodPermanent, Choice: 1, ClaimedAt: at.UTC(), GrantReceipt: key}
 	if _, inserted, err := jobs.Store.InsertClaimTx(ctx, transaction, claim); err != nil {
 		return err
 	} else if !inserted {

@@ -60,6 +60,26 @@ func isSkippedCycleSlot(err error) bool {
 	return false
 }
 
+const cycleSlotTaken = `SELECT EXISTS(
+	SELECT 1 FROM event_occurrences
+	WHERE logical_server_id=$1 AND source='CYCLE' AND cancelled_at IS NULL AND starts_at=$2
+)`
+
+// CycleSlotTakenTx reports whether any non-cancelled CYCLE occurrence of any
+// activity already starts at the instant. Such a slot stays taken, so a new
+// cycle body never doubles it and a cancelled slot is never recreated (E4b
+// decision 2).
+func (Store) CycleSlotTakenTx(ctx context.Context, query tx.Queryer, server int64, startsAt time.Time) (bool, error) {
+	if query == nil || server <= 0 || startsAt.IsZero() {
+		return false, errInvalid
+	}
+	var taken bool
+	if err := query.QueryRow(ctx, cycleSlotTaken, server, startsAt.UTC()).Scan(&taken); err != nil {
+		return false, err
+	}
+	return taken, nil
+}
+
 const setCycleMode = `UPDATE event_cycle_settings SET mode=$2,command_key=$3,updated_at=$4 WHERE logical_server_id=$1`
 
 // SetCycleModeTx writes AUTO or OFF for one server (F1: OFF stops new rows only).

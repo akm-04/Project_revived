@@ -15,14 +15,16 @@ import (
 // players or directory tables itself.
 type EventPlayerSource struct{}
 
-const eventPlayersAfter = `SELECT COALESCE(jsonb_agg(jsonb_build_object('player',p.player_id,'level',COALESCE(d.lev,0)) ORDER BY p.player_id),'[]'::jsonb)::text
+const eventPlayersAfter = `SELECT COALESCE(jsonb_agg(jsonb_build_object('player',p.player_id,'level',d.lev) ORDER BY p.player_id),'[]'::jsonb)::text
 FROM (
 	SELECT player_id FROM players WHERE logical_server_id=$1 AND player_id>$2 ORDER BY player_id LIMIT $3
 ) p
-LEFT JOIN player_directory_profiles d ON d.player_id=p.player_id`
+JOIN player_directory_profiles d ON d.player_id=p.player_id`
 
 // PlayersOfServerAfterTx reads at most limit players of one server after a
-// player id, joined with the directory level settlement compares to a tier.
+// player id, joined with the directory level settlement compares to a tier. A
+// player without a directory row is not enumerated, so settlement never reads
+// it as level 0 (E4b decision 5; MID 231 refuses the same player).
 func (EventPlayerSource) PlayersOfServerAfterTx(ctx context.Context, query tx.Queryer, server identity.LogicalServerID, after identity.PlayerID, limit int) ([]appevents.PlayerRef, error) {
 	if query == nil || !server.Valid() || limit < 1 || limit > 500 {
 		return nil, errors.New("invalid event player page request")

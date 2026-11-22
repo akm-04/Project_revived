@@ -429,14 +429,80 @@ func TestCycleSetChangesLaterSlotsOnly(t *testing.T) {
 		t.Fatal(err)
 	}
 	after := e4CycleRows(t, pool, e4Server)
+	if len(after) != 2 {
+		t.Fatalf("a set must not double an occupied window, got %+v", after)
+	}
+	later := e4Jobs(t, pool, e4Clock{at: e4Anchor.Add(36*24*time.Hour - time.Hour)})
+	if err := later.MaterialiseServer(ctx, e4Operation(t, later), identity.LogicalServerID(e4Server)); err != nil {
+		t.Fatal(err)
+	}
+	after = e4CycleRows(t, pool, e4Server)
 	if len(after) != 4 {
-		t.Fatalf("later slots must use the new body, got %+v", after)
+		t.Fatalf("later windows must use the new body, got %+v", after)
 	}
 	want := map[int64]time.Time{
 		1008: e4Anchor.Add(30 * 24 * time.Hour),
 		1009: e4Anchor.Add(33 * 24 * time.Hour),
-		1010: e4Anchor.Add(30 * 24 * time.Hour),
-		1016: e4Anchor.Add(33 * 24 * time.Hour),
+		1010: e4Anchor.Add(36 * 24 * time.Hour),
+		1016: e4Anchor.Add(39 * 24 * time.Hour),
+	}
+	for _, row := range after {
+		start, ok := want[row.ActivityID]
+		if !ok || !row.StartsAt.Equal(start) || row.CancelledAt != nil {
+			t.Fatalf("unexpected slot %+v, want %v", row, want)
+		}
+		delete(want, row.ActivityID)
+	}
+	if len(want) != 0 {
+		t.Fatalf("missing slots %v", want)
+	}
+}
+
+func TestCycleResetChangesLaterSlotsOnly(t *testing.T) {
+	pool := e4Pool(t)
+	bus := e4Bus(t, pool)
+	e4ResetServer(t, pool, e4Server)
+	e4SeedPlayer(t, pool, e4Server, 400001, 1, "e4-cycle")
+	e4CycleDefinitions(t, bus)
+	jobs := e4Jobs(t, pool, e4Clock{at: e4Anchor.Add(30*24*time.Hour - time.Hour)})
+	ctx := context.Background()
+	if err := jobs.MaterialiseServer(ctx, e4Operation(t, jobs), identity.LogicalServerID(e4Server)); err != nil {
+		t.Fatal(err)
+	}
+	if before := e4CycleRows(t, pool, e4Server); len(before) != 2 {
+		t.Fatalf("first run = %+v", before)
+	}
+	body := map[string]any{"revision": 1, "anchor": e4Anchor.Format(time.RFC3339), "entries": []map[string]any{
+		{"activity_id": 1010, "duration": "3d"},
+		{"activity_id": 1016, "duration": "3d"},
+	}}
+	e4Applied(t, bus, e4Command(t, "events.cycle.set", int64Ptr(0), "global", map[string]any{"logical_server_ids": []int64{e4Server}, "cycle": body}))
+	reset := e4Applied(t, bus, e4Command(t, "events.cycle.reset", int64Ptr(1), "global", map[string]any{"logical_server_ids": []int64{e4Server}}))
+	var result struct {
+		Settings []appevents.CycleSettingView `json:"settings"`
+	}
+	if err := json.Unmarshal(reset.Result, &result); err != nil || len(result.Settings) != 1 || result.Settings[0].CycleRevision != 0 {
+		t.Fatalf("reset must return to the shipped body: %s %v", reset.Result, err)
+	}
+	if err := jobs.MaterialiseServer(ctx, e4Operation(t, jobs), identity.LogicalServerID(e4Server)); err != nil {
+		t.Fatal(err)
+	}
+	if after := e4CycleRows(t, pool, e4Server); len(after) != 2 {
+		t.Fatalf("a reset must not double an occupied window, got %+v", after)
+	}
+	later := e4Jobs(t, pool, e4Clock{at: e4Anchor.Add(36*24*time.Hour - time.Hour)})
+	if err := later.MaterialiseServer(ctx, e4Operation(t, later), identity.LogicalServerID(e4Server)); err != nil {
+		t.Fatal(err)
+	}
+	after := e4CycleRows(t, pool, e4Server)
+	if len(after) != 4 {
+		t.Fatalf("later windows must return to the shipped body, got %+v", after)
+	}
+	want := map[int64]time.Time{
+		1008: e4Anchor.Add(30 * 24 * time.Hour),
+		1009: e4Anchor.Add(33 * 24 * time.Hour),
+		1007: e4Anchor.Add(36 * 24 * time.Hour),
+		1010: e4Anchor.Add(39 * 24 * time.Hour),
 	}
 	for _, row := range after {
 		start, ok := want[row.ActivityID]
@@ -499,6 +565,25 @@ func e4ClaimCount(t *testing.T, pool *pg.Pool, occurrenceID int64) int {
 	t.Helper()
 	var count int
 	if err := pool.Raw().QueryRow(context.Background(), `SELECT COUNT(*) FROM player_event_claims WHERE occurrence_id=$1`, occurrenceID).Scan(&count); err != nil {
+		t.Fatal(err)
+	}
+	return count
+}
+
+func e4PlayerClaimCount(t *testing.T, pool *pg.Pool, occurrenceID, playerID int64) int {
+	t.Helper()
+	var count int
+	if err := pool.Raw().QueryRow(context.Background(), `SELECT COUNT(*) FROM player_event_claims WHERE occurrence_id=$1 AND player_id=$2`, occurrenceID, playerID).Scan(&count); err != nil {
+		t.Fatal(err)
+	}
+	return count
+}
+
+func e4MailCountForOccurrence(t *testing.T, pool *pg.Pool, occurrenceID int64) int {
+	t.Helper()
+	var count int
+	if err := pool.Raw().QueryRow(context.Background(), `SELECT COUNT(*) FROM mail_records WHERE source_kind=$1 AND source_key LIKE $2`,
+		appevents.SettlementMailSourceKind, fmt.Sprintf("%d:%%", occurrenceID)).Scan(&count); err != nil {
 		t.Fatal(err)
 	}
 	return count
@@ -594,6 +679,97 @@ func TestPermanentOccurrenceNeverSettles(t *testing.T) {
 	}
 	if settled := e4SettledAt(t, pool, timed.ID); settled == nil {
 		t.Fatal("the scan must still settle a timed occurrence")
+	}
+}
+
+func TestSettlementSkipsCancelledOccurrence(t *testing.T) {
+	pool := e4Pool(t)
+	bus := e4Bus(t, pool)
+	e4ResetServer(t, pool, e4Server)
+	e4SeedPlayer(t, pool, e4Server, 400010, 10, "e4-settle-cancelled")
+	e4DeployTiered(t, bus, 2086)
+	now := time.Now().UTC()
+	occurrence := e4Schedule(t, bus, e4Server, 2086, now.Add(time.Hour), "1d")
+	e4Applied(t, bus, e4Command(t, "events.cancel", &occurrence.Revision, "global", map[string]any{"occurrence_id": occurrence.ID}))
+	if _, err := pool.Raw().Exec(context.Background(), `UPDATE event_occurrences
+		SET starts_at=$2::timestamptz- interval '72 hours', ends_at=$2::timestamptz- interval '48 hours', claim_until=$2::timestamptz- interval '24 hours'
+		WHERE id=$1 AND cancelled_at IS NOT NULL`, occurrence.ID, now); err != nil {
+		t.Fatalf("make the cancelled occurrence due: %v", err)
+	}
+	jobs := e4SettlementJobs(t, pool, now, 10)
+	if err := jobs.SettleDue(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if settled := e4SettledAt(t, pool, occurrence.ID); settled != nil {
+		t.Fatalf("a cancelled occurrence must never settle: %s", settled)
+	}
+	if mails := e4MailCountForOccurrence(t, pool, occurrence.ID); mails != 0 {
+		t.Fatalf("a cancelled occurrence must mail nothing, got %d", mails)
+	}
+	if claims := e4ClaimCount(t, pool, occurrence.ID); claims != 0 {
+		t.Fatalf("a cancelled occurrence must write no claim, got %d", claims)
+	}
+}
+
+func TestSettlementMailsOnlyTheOccurrenceServer(t *testing.T) {
+	const secondServer = 3
+	pool := e4Pool(t)
+	bus := e4Bus(t, pool)
+	e4ResetServer(t, pool, e4Server)
+	e4ResetServer(t, pool, secondServer)
+	e4SeedPlayer(t, pool, e4Server, 400011, 10, "e4-settle-here")
+	e4SeedPlayer(t, pool, secondServer, 300012, 10, "e4-settle-elsewhere")
+	e4DeployTiered(t, bus, 2087)
+	now := time.Now().UTC()
+	occurrence := e4Schedule(t, bus, e4Server, 2087, now.Add(-72*time.Hour), "1d")
+	jobs := e4SettlementJobs(t, pool, now, 10)
+	if err := jobs.SettleDue(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	mails := e4MailRows(t, pool, []int64{400011, 300012})
+	if mails[fmt.Sprintf("400011|%d:400011:1", occurrence.ID)] != 1 {
+		t.Fatalf("the occurrence server's player must be mailed once, got %v", mails)
+	}
+	if mails[fmt.Sprintf("300012|%d:300012:1", occurrence.ID)] != 0 {
+		t.Fatalf("another server's player must not be mailed, got %v", mails)
+	}
+	if claims := e4PlayerClaimCount(t, pool, occurrence.ID, 400011); claims != 1 {
+		t.Fatalf("the occurrence server's player must hold one claim, got %d", claims)
+	}
+	if claims := e4PlayerClaimCount(t, pool, occurrence.ID, 300012); claims != 0 {
+		t.Fatalf("another server's player must hold no claim, got %d", claims)
+	}
+}
+
+func TestSettlementSkipsPlayerWithoutDirectoryRow(t *testing.T) {
+	pool := e4Pool(t)
+	bus := e4Bus(t, pool)
+	e4ResetServer(t, pool, e4Server)
+	e4SeedPlayer(t, pool, e4Server, 400013, 1, "e4-settle-with-directory")
+	e4SeedPlayer(t, pool, e4Server, 400014, 1, "e4-settle-without-directory")
+	if _, err := pool.Raw().Exec(context.Background(), `DELETE FROM player_directory_profiles WHERE player_id=$1`, int64(400014)); err != nil {
+		t.Fatalf("drop the directory row: %v", err)
+	}
+	e4Deploy(t, bus, `{"activity_id":2088,"revision":1,"archetype":"TIERED_CLAIM","client_requirements":{},"default_days":-1,"tiers":[`+
+		`{"id":1,"requirement":{"kind":"player_level","value":0},"choices":[{"lines":[{"kind":"item","item_id":50001003,"amount":1}]}]}]}`)
+	now := time.Now().UTC()
+	occurrence := e4Schedule(t, bus, e4Server, 2088, now.Add(-72*time.Hour), "1d")
+	jobs := e4SettlementJobs(t, pool, now, 10)
+	if err := jobs.SettleDue(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	mails := e4MailRows(t, pool, []int64{400013, 400014})
+	if mails[fmt.Sprintf("400013|%d:400013:1", occurrence.ID)] != 1 {
+		t.Fatalf("a player with a directory row must be mailed, got %v", mails)
+	}
+	if mails[fmt.Sprintf("400014|%d:400014:1", occurrence.ID)] != 0 {
+		t.Fatalf("a player without a directory row must not be mailed, got %v", mails)
+	}
+	if claims := e4PlayerClaimCount(t, pool, occurrence.ID, 400013); claims != 1 {
+		t.Fatalf("a player with a directory row must hold one claim, got %d", claims)
+	}
+	if claims := e4PlayerClaimCount(t, pool, occurrence.ID, 400014); claims != 0 {
+		t.Fatalf("a player without a directory row must hold no claim, got %d", claims)
 	}
 }
 

@@ -200,6 +200,7 @@ type Store interface {
 
 	LockOccurrencesTx(context.Context, tx.Tx, int64, int64) ([]events.Occurrence, error)
 	OverlapsTx(context.Context, tx.Queryer, int64, int64, time.Time, *time.Time, int64) (bool, error)
+	CycleSlotTakenTx(context.Context, tx.Queryer, int64, time.Time) (bool, error)
 	InsertOccurrenceTx(context.Context, tx.Tx, events.Occurrence, string, time.Time) (int64, error)
 	InsertCycleOccurrenceTx(context.Context, tx.Tx, events.Occurrence, time.Time) (bool, error)
 	LockOccurrenceTx(context.Context, tx.Tx, int64) (*events.Occurrence, error)
@@ -220,6 +221,7 @@ type Store interface {
 	ActiveHooksTx(context.Context, tx.Queryer, int64, time.Time, string) ([]json.RawMessage, error)
 
 	InsertClaimTx(context.Context, tx.Tx, Claim) (Claim, bool, error)
+	HasClaimTx(context.Context, tx.Queryer, int64, int64, int64) (bool, error)
 	UpdateClaimReplyTx(context.Context, tx.Tx, Claim, json.RawMessage) error
 	ClaimsForPlayerTx(context.Context, tx.Queryer, int64, int64, int) ([]Claim, error)
 }

@@ -23,8 +23,8 @@ import (
 // business key is occurrence + player + tier (I11A-2 E3).
 const ClaimPolicyVersion = "I11A_EVENTS_CLAIM_V1"
 
-// ClaimPeriodPermanent is the claim-ledger period of a permanent occurrence
-// (EA-1); a timed TIERED_CLAIM needs its own period policy before it is served.
+// ClaimPeriodPermanent is the one claim-ledger period of every event tier
+// claim, permanent or timed; settlement writes the same period (E4b decision 1).
 const ClaimPeriodPermanent = "permanent"
 
 // ErrClaimRejected is every permanent MID 231 refusal (EA-7). The dispatcher

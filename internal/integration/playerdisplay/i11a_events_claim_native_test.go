@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"sync"
@@ -32,6 +33,8 @@ import (
 	otadomain "gxb.local/backend/v2/internal/domain/otarelease"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"gxb.local/backend/v2/internal/projection/hero"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -151,7 +154,11 @@ func claimResponse(services eventServices, a identity.ActorContext, tier, choice
 }
 
 func claimRequest(a identity.ActorContext, tier, choice int64) httpedge.DispatchRequest {
-	return playtestRequest(a, 231, map[string]any{"activity_id": int64(1071), "award_id": tier, "sub_award_id": choice})
+	return claimRequestFor(a, 1071, tier, choice)
+}
+
+func claimRequestFor(a identity.ActorContext, activityID, tier, choice int64) httpedge.DispatchRequest {
+	return playtestRequest(a, 231, map[string]any{"activity_id": activityID, "award_id": tier, "sub_award_id": choice})
 }
 
 func dispatchAwards(t *testing.T, services eventServices, a identity.ActorContext, tier, choice int64) (httpedge.Response, []byte) {
@@ -169,11 +176,20 @@ func dispatchAwards(t *testing.T, services eventServices, a identity.ActorContex
 
 func claimTier(t *testing.T, services eventServices, a identity.ActorContext, tier, choice int64) []byte {
 	t.Helper()
-	response, awards := dispatchAwards(t, services, a, tier, choice)
+	return claimActivityTier(t, services, a, 1071, tier, choice)
+}
+
+func claimActivityTier(t *testing.T, services eventServices, a identity.ActorContext, activityID, tier, choice int64) []byte {
+	t.Helper()
+	response := services.rewardFor(a).Dispatch(ctx, claimRequestFor(a, activityID, tier, choice))
 	if response.HTTPStatus != http.StatusOK {
-		t.Fatalf("claim tier %d/%d: %d %#v", tier, choice, response.HTTPStatus, response.Body)
+		t.Fatalf("claim activity %d tier %d/%d: %d %#v", activityID, tier, choice, response.HTTPStatus, response.Body)
 	}
-	return awards
+	raw, err := json.Marshal(response.Body["awards"])
+	if err != nil {
+		t.Fatal(err)
+	}
+	return raw
 }
 
 func requireClaimRefused(t *testing.T, response httpedge.Response) {
@@ -422,6 +438,89 @@ func TestClaimChoiceResolution(t *testing.T) {
 		t.Fatalf("a non-numeric choice must stay 400: %d %#v", malformedChoice.HTTPStatus, malformedChoice.Body)
 	}
 	claimTier(t, services, a, 2, 2)
+}
+
+func deploySingleTier(t *testing.T, p *postgres.Pool, activityID int64) {
+	t.Helper()
+	raw := []byte(fmt.Sprintf(`{"activity_id":%d,"revision":1,"archetype":"TIERED_CLAIM","client_requirements":{},"default_days":-1,"tiers":[`+
+		`{"id":1,"requirement":{"kind":"player_level","value":10},"choices":[{"lines":[{"kind":"item","item_id":50001003,"amount":1}]}]}]}`, activityID))
+	key, err := ids.NewUUID()
+	if err != nil {
+		t.Fatal(err)
+	}
+	command, err := operator.NewCommand("events.definition.deploy", operator.Envelope{Principal: "root", Role: operator.RoleRoot, Scope: "global", Reason: "i11a e4b settlement native", SemanticKey: key.String()}, json.RawMessage(raw))
+	if err != nil {
+		t.Fatal(err)
+	}
+	outcome, err := eventOperatorBus(t, p).Execute(ctx, command)
+	if err != nil || outcome.State != operator.StateApplied {
+		t.Fatalf("deploy %d: %v %s %s", activityID, err, outcome.State, outcome.Result)
+	}
+}
+
+func settlementJobs(p *postgres.Pool, at time.Time) appevents.Jobs {
+	return appevents.Jobs{
+		Runner:          tx.Runner{DB: p},
+		Operations:      operation.Factory{Clock: clock.Fixed{T: at}},
+		Store:           eventstore.Store{},
+		Clock:           clock.Fixed{T: at},
+		Players:         i4store.EventPlayerSource{},
+		Mail:            appi5.SettlementMail{Store: i5store.Store{}},
+		OccurrenceBatch: 10,
+	}
+}
+
+// TestSettlementDoesNotPayAClaimedTierTwice covers E4b decision 1: a MID 231
+// claim inside the claim window and the settlement job share one claim period,
+// so settlement finds the claim and grants nothing a second time.
+func TestSettlementDoesNotPayAClaimedTierTwice(t *testing.T) {
+	p := pool(t)
+	installed(t, p)
+	exec(t, p, `DELETE FROM player_event_claims WHERE occurrence_id IN (SELECT id FROM event_occurrences WHERE activity_id=$1)`, int64(2099))
+	exec(t, p, `DELETE FROM event_occurrences WHERE activity_id=$1`, int64(2099))
+	a := bornActorOn(t, p, 3)
+	exec(t, p, `UPDATE player_directory_profiles SET lev=50 WHERE player_id=$1`, int64(a.PlayerID))
+	services := eventFixture(t, p, a)
+	deploySingleTier(t, p, 2099)
+	occurrence := scheduleOccurrence(t, p, int64(a.LogicalServerID), 2099, time.Now().UTC().Add(-25*time.Hour), "1d")
+	if occurrence.ClaimUntil == nil || !occurrence.ClaimUntil.After(time.Now().UTC()) {
+		t.Fatalf("the occurrence must be in its claim window: %+v", occurrence)
+	}
+	claimActivityTier(t, services, a, 2099, 1, 1)
+	due := occurrence.ClaimUntil.Add(time.Hour)
+	stored, err := (eventstore.Store{}).OccurrenceTx(ctx, p, occurrence.ID)
+	if err != nil || stored == nil {
+		t.Fatalf("read the occurrence: %v", err)
+	}
+	current, err := (operation.Factory{Clock: clock.Fixed{T: due}}).New(policy.Set{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := settlementJobs(p, due).SettleOccurrence(ctx, current, *stored, due); err != nil {
+		t.Fatal(err)
+	}
+	var claims int
+	if err := p.QueryRow(ctx, `SELECT COUNT(*) FROM player_event_claims WHERE player_id=$1 AND occurrence_id=$2 AND tier=1`, int64(a.PlayerID), occurrence.ID).Scan(&claims); err != nil {
+		t.Fatal(err)
+	}
+	if claims != 1 {
+		t.Fatalf("one claim row expected, got %d", claims)
+	}
+	var mails int
+	if err := p.QueryRow(ctx, `SELECT COUNT(*) FROM mail_records WHERE source_kind=$1 AND recipient_player_id=$2 AND source_key=$3`,
+		appevents.SettlementMailSourceKind, int64(a.PlayerID), fmt.Sprintf("%d:%d:1", occurrence.ID, int64(a.PlayerID))).Scan(&mails); err != nil {
+		t.Fatal(err)
+	}
+	if mails != 0 {
+		t.Fatalf("a claimed tier must not be mailed again, got %d", mails)
+	}
+	var settled *time.Time
+	if err := p.QueryRow(ctx, `SELECT settled_at FROM event_occurrences WHERE id=$1`, occurrence.ID).Scan(&settled); err != nil {
+		t.Fatal(err)
+	}
+	if settled == nil {
+		t.Fatal("the occurrence must be settled after the claim window closes")
+	}
 }
 
 func activityRow(t *testing.T, services eventServices, a identity.ActorContext) string {

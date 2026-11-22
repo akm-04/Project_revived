@@ -28842,7 +28842,7 @@
     },
     {
      "file": "internal/adapters/postgres/eventstore/store.go",
-     "line": 693,
+     "line": 711,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',player_id,'occurrence_id',occurrence_id,'tier',tier,'period',period, 'choice',choice,'claimed_at',claimed_at,'grant_receipt',grant_receipt, 'award_body',COALESCE(award_body::text,''),'payload_version',payload_version) ORDER BY tier,period),'[]'::jsonb)::text FROM ("
     },
     {
@@ -29140,8 +29140,8 @@
    "state_writes": [
     "internal/adapters/postgres/characterstore/store.go:109",
     "internal/adapters/postgres/characterstore/store.go:95",
-    "internal/adapters/postgres/eventstore/store.go:630",
-    "internal/adapters/postgres/eventstore/store.go:667",
+    "internal/adapters/postgres/eventstore/store.go:648",
+    "internal/adapters/postgres/eventstore/store.go:685",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:249",
@@ -29413,7 +29413,7 @@
     },
     {
      "file": "internal/adapters/postgres/eventstore/store.go",
-     "line": 693,
+     "line": 711,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',player_id,'occurrence_id',occurrence_id,'tier',tier,'period',period, 'choice',choice,'claimed_at',claimed_at,'grant_receipt',grant_receipt, 'award_body',COALESCE(award_body::text,''),'payload_version',payload_version) ORDER BY tier,period),'[]'::jsonb)::text FROM ("
     },
     {
