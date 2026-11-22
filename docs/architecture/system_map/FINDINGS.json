@@ -8952,6 +8952,22 @@
    "declared": true
   },
   {
+   "table": "ota_asset_misses",
+   "packages": [
+    "internal/adapters/postgres/otastore",
+    "internal/adapters/postgres/retentionstore"
+   ],
+   "declared": true
+  },
+  {
+   "table": "ota_asset_served_daily",
+   "packages": [
+    "internal/adapters/postgres/otastore",
+    "internal/adapters/postgres/retentionstore"
+   ],
+   "declared": true
+  },
+  {
    "table": "player_guild_activity_days",
    "packages": [
     "internal/adapters/postgres/guildstore",

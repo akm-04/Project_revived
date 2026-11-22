@@ -5,6 +5,7 @@ package otarelease
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	domain "gxb.local/backend/v2/internal/domain/otarelease"
@@ -44,6 +45,36 @@ func (s Service) Plan(ctx context.Context, request domain.PlanRequest) (domain.U
 		return domain.UpdatePlan{}, err
 	}
 	return domain.PlanUpdate(request, s.PublicEngineURL, rows)
+}
+
+// ActiveRows exposes the manifest read to the serving view, which needs both
+// the union of shipped paths and each release's package volumes.
+func (s Service) ActiveRows(ctx context.Context) ([]domain.RawRelease, error) {
+	if s.Store == nil {
+		return nil, ErrUnavailable
+	}
+	return s.activeRows(ctx, s.Store.ListActiveTx)
+}
+
+// StartupCheck refuses to start when ACTIVE rows exist without an OTA root, or
+// when an ACTIVE volume is missing or differs from its registered size.
+func (s Service) StartupCheck(ctx context.Context, root string) error {
+	rows, err := s.ActiveRows(ctx)
+	if err != nil {
+		return err
+	}
+	releases, err := domain.ParseReleases(rows)
+	if err != nil {
+		return err
+	}
+	if root == "" {
+		if len(releases) == 0 {
+			return nil
+		}
+		release := releases[0]
+		return fmt.Errorf("OTA root (GXB_OTA_ROOT) is not configured but ACTIVE release %s volume %s exists", release.Version, release.Volumes[0].Name)
+	}
+	return VerifyActiveVolumes(releases, root)
 }
 
 // ActiveRelease is the ARCHITECTURE section 4 seam for EVENTS and OPERATOR.

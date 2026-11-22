@@ -10360,12 +10360,19 @@
         "otarelease"
       ],
       "allowed_read_paths": [
-        "internal/adapters/postgres/otastore/"
+        "internal/adapters/postgres/otastore/",
+        "internal/adapters/postgres/retentionstore/"
       ],
       "allowed_write_paths": [
         "internal/adapters/postgres/otastore/"
       ],
-      "write_exceptions": [],
+      "write_exceptions": [
+        {
+          "finding_id": null,
+          "path": "internal/adapters/postgres/retentionstore/",
+          "reason": "I11A_OTA_RELEASE_V1 ruling 7: the R8 retention sweep applies the 15-day ANOMALY window to the OTA asset-miss ledger."
+        }
+      ],
       "migration": "migrations/00184_i11a_operator_ota.sql",
       "data": {
         "scope": "infrastructure",
@@ -10383,12 +10390,19 @@
         "otarelease"
       ],
       "allowed_read_paths": [
-        "internal/adapters/postgres/otastore/"
+        "internal/adapters/postgres/otastore/",
+        "internal/adapters/postgres/retentionstore/"
       ],
       "allowed_write_paths": [
         "internal/adapters/postgres/otastore/"
       ],
-      "write_exceptions": [],
+      "write_exceptions": [
+        {
+          "finding_id": null,
+          "path": "internal/adapters/postgres/retentionstore/",
+          "reason": "I11A_OTA_RELEASE_V1 ruling 7: the R8 retention sweep applies the 15-day ANOMALY window to the OTA daily served counters."
+        }
+      ],
       "migration": "migrations/00184_i11a_operator_ota.sql",
       "data": {
         "scope": "infrastructure",

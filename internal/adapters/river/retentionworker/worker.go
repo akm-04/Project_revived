@@ -24,6 +24,10 @@ const Kind = "data_retention_sweep"
 const PhysicalQueue = "retention_maintenance"
 const Period = 10 * time.Minute
 
+// otaObservabilityRetentionDays is fixed by ruling 7 (OA-5): the two OTA
+// observability tables do not follow GXB_RETENTION_DAYS.
+const otaObservabilityRetentionDays = 15
+
 var uniqueWhileQueued = river.UniqueOpts{ByArgs: true, ByState: []rivertype.JobState{
 	rivertype.JobStateAvailable, rivertype.JobStatePending, rivertype.JobStateRunning,
 	rivertype.JobStateRetryable, rivertype.JobStateScheduled}}
@@ -53,6 +57,7 @@ func NewRules(policies retentionstore.Policies) func(time.Time) []Rule {
 	retentionDays := time.Duration(policies.RetentionDays) * 24 * time.Hour
 	cacheDays := time.Duration(policies.CacheRetentionDays) * 24 * time.Hour
 	mediaDays := time.Duration(policies.ProfileMediaHistoryDays) * 24 * time.Hour
+	otaDays := time.Duration(otaObservabilityRetentionDays) * 24 * time.Hour
 	return func(now time.Time) []Rule {
 		return []Rule{
 			{Name: "receipts", Delete: func(c context.Context, t tx.Tx) (int64, error) {
@@ -75,6 +80,12 @@ func NewRules(policies retentionstore.Policies) func(time.Time) []Rule {
 			}},
 			{Name: "media-history", Delete: func(c context.Context, t tx.Tx) (int64, error) {
 				return store.DeleteExpiredMediaHistory(c, t, now.Add(-mediaDays))
+			}},
+			{Name: "ota-asset-misses", Delete: func(c context.Context, t tx.Tx) (int64, error) {
+				return store.DeleteExpiredOTAAssetMisses(c, t, now.Add(-otaDays))
+			}},
+			{Name: "ota-asset-served", Delete: func(c context.Context, t tx.Tx) (int64, error) {
+				return store.DeleteExpiredOTAAssetServedDaily(c, t, now.Add(-otaDays))
 			}},
 		}
 	}

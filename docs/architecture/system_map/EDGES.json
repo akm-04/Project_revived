@@ -5293,6 +5293,7 @@
    "store:otastore": [
     "*ActivateTx",
     "*ActiveRevisionTx",
+    "*FlushTx",
     "*InsertActivationTx",
     "*InsertBuildTx",
     "*LockLaneTx",

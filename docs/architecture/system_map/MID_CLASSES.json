@@ -136,7 +136,7 @@
    "isolation": [
     {
      "file": "internal/application/otarelease/service.go",
-     "line": 72,
+     "line": 103,
      "value": "repeatable_read"
     }
    ],
@@ -144,7 +144,7 @@
    "read_only": [
     {
      "file": "internal/application/otarelease/service.go",
-     "line": 72,
+     "line": 103,
      "value": "true"
     }
    ],
@@ -152,7 +152,7 @@
    "retry": [
     {
      "file": "internal/application/otarelease/service.go",
-     "line": 72,
+     "line": 103,
      "value": "1"
     }
    ],
@@ -163,14 +163,14 @@
      "file": "internal/application/otarelease/service.go",
      "function": "Service.activeRows",
      "isolation": "repeatable_read",
-     "line": 72,
+     "line": 103,
      "read_only": "true",
      "retry": "1"
     }
    ],
    "unbounded_read": [],
    "unknown": [
-    "UNRESOLVED read at internal/application/otarelease/service.go:73"
+    "UNRESOLVED read at internal/application/otarelease/service.go:104"
    ],
    "writes": "UNKNOWN"
   },

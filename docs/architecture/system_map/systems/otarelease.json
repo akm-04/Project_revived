@@ -235,7 +235,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/prelogin.go",
-    "line": 31
+    "line": 34
    },
    "mid": 2,
    "name": ""
@@ -243,7 +243,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/prelogin.go",
-    "line": 31
+    "line": 34
    },
    "mid": 2864,
    "name": "GET_PLAYER_GROUP_BY_KEY"
@@ -251,7 +251,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/prelogin.go",
-    "line": 31
+    "line": 34
    },
    "mid": 20480,
    "name": ""
@@ -277,6 +277,8 @@
   ],
   "written": [
    "ota_activations",
+   "ota_asset_misses",
+   "ota_asset_served_daily",
    "ota_releases"
   ]
  },
@@ -287,6 +289,8 @@
   ],
   "unit": [
    "commands_test.go",
+   "serving_test.go",
+   "settings_test.go",
    "status_test.go"
   ]
  }
