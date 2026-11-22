@@ -19,10 +19,12 @@ import (
 )
 
 const (
-	commandPrefix  = "/operator/v1/commands/"
-	readPrefix     = "/operator/v1/reads/"
-	versionPath    = "/operator/v1/version"
-	maxRequestBody = 1 << 20
+	commandPrefix = "/operator/v1/commands/"
+	readPrefix    = "/operator/v1/reads/"
+	versionPath   = "/operator/v1/version"
+	// ota.register_build carries the release manifest: one row per shipped file, about 3 MB for the
+	// full 1.631 res set. The listener is loopback-only and token-gated, so the cap only bounds a bug.
+	maxRequestBody = 32 << 20
 
 	codeUnauthorized = "OPERATOR_UNAUTHORIZED"
 	codeBadRequest   = "OPERATOR_BAD_REQUEST"

@@ -82,3 +82,15 @@ func TestHandlerOutcomes(t *testing.T) {
 		t.Fatalf("replayed refusal: %d", recorder.Code)
 	}
 }
+
+func TestHandlerAcceptsAFullReleaseManifest(t *testing.T) {
+	rows := strings.Repeat(`{"path":"res/web/images/vip_recharge/90002309.png","md5":"0123456789abcdef0123456789abcdef","size":123456},`, 30000)
+	body := `{"envelope":{"principal":"root","role":"root","scope":"global","reason":"test","semantic_key":"k1"},"payload":{"manifest":[` + strings.TrimSuffix(rows, ",") + `]}}`
+	if len(body) <= 1<<20 {
+		t.Fatalf("fixture is %d bytes; it must exceed the old 1 MiB cap", len(body))
+	}
+	bus := &fakeBus{outcome: operator.Outcome{State: operator.StateApplied, Result: json.RawMessage(`{}`)}}
+	if recorder := serve(t, bus, "127.0.0.1:1", "secret", "/operator/v1/commands/ota.register_build", body); recorder.Code != http.StatusOK || bus.calls != 1 {
+		t.Fatalf("manifest body: %d %s", recorder.Code, recorder.Body)
+	}
+}

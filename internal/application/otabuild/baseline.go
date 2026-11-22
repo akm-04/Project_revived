@@ -77,24 +77,39 @@ func (baseline zipBaseline) read(member string) ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-// stockFile reads the src_64 copy of a client path and checks the src_32 copy
-// is byte-identical (ruling 8). A real ABI difference needs a new owner
-// decision, so the build refuses it.
-func stockFile(baseline stockBaseline, clientPath string) ([]byte, error) {
-	path64 := stockPrefix64 + clientPath
-	path32 := stockPrefix32 + clientPath
-	content64, err := baseline.read(path64)
+// stockSource is the decompiled stock Lua tree at client paths. Patch pins are
+// hashes of this source, never of the APK's src_32/src_64 LuaJIT bytecode,
+// which differs by ABI (I11A_OTA_RELEASE_V1 ruling 8).
+type stockSource struct {
+	root string
+}
+
+func (source stockSource) read(clientPath string) ([]byte, error) {
+	target := filepath.Join(source.root, filepath.FromSlash(clientPath))
+	info, err := os.Lstat(target)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("otabuild: stock source %s: %w", clientPath, err)
 	}
-	content32, err := baseline.read(path32)
+	if info.Mode()&os.ModeSymlink != 0 {
+		return nil, fmt.Errorf("%w: stock source %s is a symlink", ErrInvalidInput, clientPath)
+	}
+	resolvedRoot, err := filepath.EvalSymlinks(source.root)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: stock source root: %v", ErrInvalidInput, err)
 	}
-	if !bytes.Equal(content64, content32) {
-		return nil, fmt.Errorf("%w: %s", ErrAbiMismatch, clientPath)
+	resolved, err := filepath.EvalSymlinks(target)
+	if err != nil {
+		return nil, fmt.Errorf("otabuild: stock source %s: %w", clientPath, err)
 	}
-	return content64, nil
+	relative, err := filepath.Rel(resolvedRoot, resolved)
+	if err != nil || relative == ".." || strings.HasPrefix(relative, ".."+string(os.PathSeparator)) {
+		return nil, fmt.Errorf("%w: stock source %s escapes its root", ErrInvalidInput, clientPath)
+	}
+	content, err := os.ReadFile(resolved)
+	if err != nil {
+		return nil, fmt.Errorf("otabuild: stock source %s: %w", clientPath, err)
+	}
+	return content, nil
 }
 
 // cleanStockMember normalises a patch target and rejects anything that could

@@ -9,6 +9,8 @@ import (
 	"net"
 	"os"
 	"strings"
+
+	"gxb.local/backend/v2/internal/application/otabuild"
 )
 
 const (
@@ -36,6 +38,7 @@ type Config struct {
 	Listen        string            `json:"listen"`
 	OTARoot       string            `json:"ota_root"`
 	StockBaseline string            `json:"stock_baseline"`
+	StockSource   string            `json:"stock_source,omitempty"`
 	StockCatalog  string            `json:"stock_catalog,omitempty"`
 	ClientTree    string            `json:"client_tree"`
 	Origins       map[string]string `json:"origins"`
@@ -94,6 +97,21 @@ func (config Config) Validate() error {
 	}
 	if !isLoopbackAddress(config.Backend.OperatorAddr) {
 		return errors.New(AgentConfigFileName + ": backend.operator_addr must be a loopback address")
+	}
+	if config.StockSource != "" {
+		info, err := os.Stat(config.StockSource)
+		if err != nil || !info.IsDir() {
+			return errors.New(AgentConfigFileName + ": stock_source is not a readable directory")
+		}
+	}
+	if config.ClientTree != "" {
+		patched, err := otabuild.PatchesPresent(config.ClientTree)
+		if err != nil {
+			return fmt.Errorf("%s: %v", AgentConfigFileName, err)
+		}
+		if patched && config.StockSource == "" {
+			return errors.New(AgentConfigFileName + ": stock_source is required while the client tree has a patch")
+		}
 	}
 	return nil
 }

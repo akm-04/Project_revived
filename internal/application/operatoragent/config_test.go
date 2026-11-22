@@ -53,6 +53,53 @@ func TestLoadConfigAcceptsLoopback(t *testing.T) {
 	}
 }
 
+func TestLoadConfigStockSource(t *testing.T) {
+	root := t.TempDir()
+	clientTree := filepath.Join(root, "client")
+	if err := os.MkdirAll(filepath.Join(clientTree, "patches", "backend_http_poll"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	stockSource := filepath.Join(root, "stock")
+	if err := os.MkdirAll(stockSource, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	document := map[string]any{
+		"listen":      "127.0.0.1:8090",
+		"client_tree": clientTree,
+		"backend":     map[string]any{"binary": "/bin/x", "operator_addr": "127.0.0.1:8091"},
+	}
+	load := func(t *testing.T) (Config, error) {
+		t.Helper()
+		encoded, err := json.Marshal(document)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return LoadConfig(writeAgentConfig(t, string(encoded)))
+	}
+
+	if _, err := load(t); err == nil || !strings.Contains(err.Error(), "stock_source") {
+		t.Fatalf("a patch without stock_source: error = %v", err)
+	}
+
+	notDirectory := filepath.Join(root, "not-a-directory")
+	if err := os.WriteFile(notDirectory, []byte("x"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	document["stock_source"] = notDirectory
+	if _, err := load(t); err == nil || !strings.Contains(err.Error(), "stock_source") {
+		t.Fatalf("stock_source naming a file: error = %v", err)
+	}
+
+	document["stock_source"] = stockSource
+	config, err := load(t)
+	if err != nil {
+		t.Fatalf("a readable stock_source was refused: %v", err)
+	}
+	if config.StockSource != stockSource {
+		t.Fatalf("stock_source = %q, want %q", config.StockSource, stockSource)
+	}
+}
+
 func TestLoadConfigErrorCarriesNoValue(t *testing.T) {
 	root := writeAgentConfig(t, `{"listen":5,"ota_root":"postgres://alice:hunter2@db/x","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`)
 	_, err := LoadConfig(root)

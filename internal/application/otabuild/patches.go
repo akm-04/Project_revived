@@ -33,7 +33,25 @@ var patchKinds = map[string]func(patchDefinition, []byte, []byte) ([]byte, error
 	"insert_before_final_return": insertBeforeFinalReturn,
 }
 
-func collectPatches(patchesRoot string, baseline stockBaseline, files map[string][]byte) (int, error) {
+// PatchesPresent reports whether clientTree/patches holds at least one patch
+// directory.
+func PatchesPresent(clientTree string) (bool, error) {
+	entries, err := os.ReadDir(filepath.Join(clientTree, "patches"))
+	if errors.Is(err, os.ErrNotExist) {
+		return false, nil
+	}
+	if err != nil {
+		return false, fmt.Errorf("otabuild: patches directory: %w", err)
+	}
+	for _, entry := range entries {
+		if entry.IsDir() {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func collectPatches(patchesRoot string, stock stockSource, files map[string][]byte) (int, error) {
 	entries, err := os.ReadDir(patchesRoot)
 	if errors.Is(err, os.ErrNotExist) {
 		return 0, nil
@@ -52,7 +70,7 @@ func collectPatches(patchesRoot string, baseline stockBaseline, files map[string
 			return 0, fmt.Errorf("%w: unexpected entry %q in patches", ErrInvalidPatch, entry.Name())
 		}
 		directory := filepath.Join(patchesRoot, entry.Name())
-		target, content, err := applyPatchDirectory(directory, baseline)
+		target, content, err := applyPatchDirectory(directory, stock)
 		if err != nil {
 			return 0, fmt.Errorf("otabuild: patch %s: %w", entry.Name(), err)
 		}
@@ -73,7 +91,7 @@ func isDocumentationFile(entry os.DirEntry) bool {
 	return entry.Name() == "README" || entry.Name() == "README.md"
 }
 
-func applyPatchDirectory(directory string, baseline stockBaseline) (string, []byte, error) {
+func applyPatchDirectory(directory string, source stockSource) (string, []byte, error) {
 	definition, err := readPatchDefinition(filepath.Join(directory, "patch.json"))
 	if err != nil {
 		return "", nil, err
@@ -82,7 +100,7 @@ func applyPatchDirectory(directory string, baseline stockBaseline) (string, []by
 	if err != nil {
 		return "", nil, err
 	}
-	stock, err := stockFile(baseline, target)
+	stock, err := source.read(target)
 	if err != nil {
 		return "", nil, err
 	}

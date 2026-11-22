@@ -1804,7 +1804,8 @@
   "operatoragent": {},
   "otabuild": {
    "operatoragent": [
-    "Build"
+    "Build",
+    "PatchesPresent"
    ]
   },
   "otarelease": {
@@ -5335,7 +5336,8 @@
   "operator": {},
   "operatoragent": {
    "otabuild": [
-    "Build"
+    "Build",
+    "PatchesPresent"
    ],
    "otarelease": [
     "Load"
