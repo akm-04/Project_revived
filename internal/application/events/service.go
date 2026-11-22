@@ -197,12 +197,17 @@ type Store interface {
 	LockOccurrencesTx(context.Context, tx.Tx, int64, int64) ([]events.Occurrence, error)
 	OverlapsTx(context.Context, tx.Queryer, int64, int64, time.Time, *time.Time, int64) (bool, error)
 	InsertOccurrenceTx(context.Context, tx.Tx, events.Occurrence, string, time.Time) (int64, error)
+	InsertCycleOccurrenceTx(context.Context, tx.Tx, events.Occurrence, time.Time) (bool, error)
 	LockOccurrenceTx(context.Context, tx.Tx, int64) (*events.Occurrence, error)
 	LockOccurrenceSharedTx(context.Context, tx.Tx, int64) (*events.Occurrence, error)
 	OccurrenceTx(context.Context, tx.Queryer, int64) (*events.Occurrence, error)
 	SaveOccurrenceTx(context.Context, tx.Tx, events.Occurrence) error
 	OccurrencesTx(context.Context, tx.Queryer, OccurrenceFilter) ([]events.Occurrence, error)
+	DueOccurrencesAfterTx(context.Context, tx.Queryer, time.Time, int64, int) ([]events.Occurrence, error)
+	MarkSettledTx(context.Context, tx.Tx, int64, time.Time) (bool, error)
 	EnsureSettingsTx(context.Context, tx.Tx, int64, time.Time) (Settings, error)
+	SetCycleModeTx(context.Context, tx.Tx, int64, string, string, time.Time) (Settings, error)
+	SetCycleBodyTx(context.Context, tx.Tx, int64, int64, int64, json.RawMessage, string, time.Time) (Settings, bool, error)
 	OccurrenceClaimsTx(context.Context, tx.Queryer, int64, int) ([]Claim, error)
 	CountOccurrenceClaimsTx(context.Context, tx.Queryer, int64) (int, error)
 
@@ -373,35 +378,15 @@ func (ledger ClaimLedger) ClaimsForPlayerTx(ctx context.Context, q tx.Queryer, p
 	return ledger.Store.ClaimsForPlayerTx(ctx, q, playerID, occurrenceID, bounded)
 }
 
-// Duration is a schedule/extend span (ruling 5, EA-1).
-type Duration struct {
-	Permanent bool
-	Span      time.Duration
-	Text      string
-}
+// Duration is a schedule/extend span (ruling 5, EA-1), parsed by the domain.
+type Duration = events.Duration
 
-var ErrInvalidDuration = errors.New("events: invalid duration")
+var ErrInvalidDuration = events.ErrInvalidDuration
 
 // ParseDuration accepts the five shipped spans, custom whole hours and
 // "permanent".
 func ParseDuration(text string) (Duration, error) {
-	if text == "permanent" {
-		return Duration{Permanent: true, Text: text}, nil
-	}
-	switch text {
-	case "1d", "3d", "7d", "14d", "30d":
-		days, _ := strconv.Atoi(strings.TrimSuffix(text, "d"))
-		return Duration{Span: time.Duration(days) * 24 * time.Hour, Text: text}, nil
-	}
-	hoursText, found := strings.CutSuffix(text, "h")
-	if !found {
-		return Duration{}, fmt.Errorf("%w: %q is not 1d, 3d, 7d, 14d, 30d, <hours>h or permanent", ErrInvalidDuration, text)
-	}
-	hours, err := strconv.Atoi(hoursText)
-	if err != nil || hours < 1 || hours > 24*365 {
-		return Duration{}, fmt.Errorf("%w: custom hours must be 1 to %d", ErrInvalidDuration, 24*365)
-	}
-	return Duration{Span: time.Duration(hours) * time.Hour, Text: text}, nil
+	return events.ParseDuration(text)
 }
 
 // NextDayBoundary is the default start: the next 05:00 GMT+8 day boundary

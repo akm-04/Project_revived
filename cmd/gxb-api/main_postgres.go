@@ -149,12 +149,14 @@ import (
 	appspirit "gxb.local/backend/v2/internal/application/spirit"
 	appsummon "gxb.local/backend/v2/internal/application/summon"
 	appworldboss "gxb.local/backend/v2/internal/application/worldboss"
+	eventscontent "gxb.local/backend/v2/internal/content/events"
 	"gxb.local/backend/v2/internal/content/guildcampaigncatalog"
 	"gxb.local/backend/v2/internal/content/guildcampaignpolicy"
 	"gxb.local/backend/v2/internal/content/guildpolicy"
 	"gxb.local/backend/v2/internal/content/guildrentalpolicy"
 	"gxb.local/backend/v2/internal/content/guildteapolicy"
 	"gxb.local/backend/v2/internal/content/registry"
+	domainevents "gxb.local/backend/v2/internal/domain/events"
 	domainspirit "gxb.local/backend/v2/internal/domain/spirit"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/config"
@@ -551,6 +553,12 @@ func main() {
 	}
 	eventService := appevents.Service{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: eventstore.Store{}, Clock: clock.System{}}
 	operatorReads["events.list"] = operatorapi.EventsList(eventService)
+	defaultCycle, err := domainevents.ParseCycle(eventscontent.DefaultCycle())
+	if err != nil {
+		log.Fatalf("events default cycle: %v", err)
+	}
+	eventJobs := appevents.Jobs{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: eventstore.Store{}, Coverage: otaServing, Hooks: eventHooks, Clock: clock.System{}, DefaultCycle: defaultCycle, Servers: i4store.PlayerRootLocker{}, Players: i4store.EventPlayerSource{}, Mail: appi5.SettlementMail{Store: i5db}}
+	startEventsJobs(ctx, pool, eventJobs)
 	startOperator(ctx, runner, operatorHandlers, operatorReads, operatorVersionReply, otaAfterCommit{Root: cfg.OTARoot, ReconcileSettings: otaSettingsSync.Reconcile, Serving: otaServing})
 	clientLogs, journal := startClientLog(ctx, pool, authority, cfg.ClientLogURL, retentionPolicies.RetentionDays, txMetrics, mux, handlerConcurrency("GXB_CLIENT_LOG_MAX_CONCURRENT", 4, poolConnections))
 	dailyReset := dailyreset.Service{Markers: dailyresetstore.Store{Queryer: pool}, Counters: itemsEnergy.Counters}

@@ -1333,6 +1333,9 @@
     "*RecordTx",
     "*SettleGrantTx"
    ],
+   "events": [
+    "*DeliverTx"
+   ],
    "frienddm": [
     "*PrepareEmoticonEntitlementTx"
    ],
@@ -3855,6 +3858,9 @@
    ]
   },
   "events": {
+   "i5": [
+    "*DeliverTx"
+   ],
    "operator": [
     "Refuse"
    ],
@@ -3867,9 +3873,11 @@
     "*ClaimsForPlayerTx",
     "*CountOccurrenceClaimsTx",
     "*DefinitionTx",
+    "*DueOccurrencesAfterTx",
     "*EnsureSettingsTx",
     "*GiftTx",
     "*InsertClaimTx",
+    "*InsertCycleOccurrenceTx",
     "*InsertDefinitionTx",
     "*InsertOccurrenceTx",
     "*LatestDefinitionTx",
@@ -3877,11 +3885,18 @@
     "*LockOccurrenceSharedTx",
     "*LockOccurrenceTx",
     "*LockOccurrencesTx",
+    "*MarkSettledTx",
     "*OccurrenceClaimsTx",
     "*OccurrenceTx",
     "*OccurrencesTx",
     "*OverlapsTx",
-    "*SaveOccurrenceTx"
+    "*SaveOccurrenceTx",
+    "*SetCycleBodyTx",
+    "*SetCycleModeTx"
+   ],
+   "store:i4store": [
+    "*ListLogicalServersAfterTx",
+    "*PlayersOfServerAfterTx"
    ]
   },
   "frienddm": {

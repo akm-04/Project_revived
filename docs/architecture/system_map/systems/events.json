@@ -6,10 +6,50 @@
  "contracts": [
   {
    "count": 1,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
    "file": "docs/i9/I9_11B_ITEMS_ENERGY_V2.json"
   },
   {
    "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 2,
    "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
   }
  ],
@@ -45,7 +85,8 @@
  "name": "events",
  "pushes": [],
  "stores": [
-  "internal/adapters/postgres/eventstore"
+  "internal/adapters/postgres/eventstore",
+  "internal/adapters/postgres/i4store"
  ],
  "tables": {
   "owned": [
@@ -62,7 +103,10 @@
    "gxb_content_activation",
    "gxb_content_resource_definitions",
    "gxb_content_revisions",
-   "player_event_claims"
+   "logical_servers",
+   "player_directory_profiles",
+   "player_event_claims",
+   "players"
   ],
   "written": [
    "event_cycle_settings",
@@ -75,7 +119,8 @@
   "integration": [],
   "scenarios_naming": [],
   "unit": [
-   "commands_test.go"
+   "commands_test.go",
+   "jobs_native_test.go"
   ]
  }
 }
