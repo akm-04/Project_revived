@@ -1403,7 +1403,7 @@
    "tables": 1
   },
   {
-   "callees": 1,
+   "callees": 0,
    "callers": 0,
    "mids": 3,
    "name": "otarelease",

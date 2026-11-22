@@ -5280,11 +5280,7 @@
    ]
   },
   "operator": {},
-  "otarelease": {
-   "store:otastore": [
-    "*ListActiveTx"
-   ]
-  },
+  "otarelease": {},
   "petcampaign": {
    "characterasset": [
     "NewCoherentReadScope"

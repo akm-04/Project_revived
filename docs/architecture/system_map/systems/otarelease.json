@@ -253,9 +253,7 @@
  ],
  "name": "otarelease",
  "pushes": [],
- "stores": [
-  "internal/adapters/postgres/otastore"
- ],
+ "stores": [],
  "tables": {
   "owned": [
    "ota_activations",
@@ -263,9 +261,7 @@
    "ota_asset_served_daily",
    "ota_releases"
   ],
-  "read": [
-   "ota_releases"
-  ],
+  "read": [],
   "written": []
  },
  "tests": {

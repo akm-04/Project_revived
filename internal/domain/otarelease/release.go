@@ -121,8 +121,24 @@ func ParseReleases(rows []RawRelease) ([]Release, error) {
 	return releases, nil
 }
 
-// ParseRelease validates one ota_releases row against the lead's row shape.
+// ParseRelease validates one ota_releases row against the lead's row shape,
+// including its manifest.
 func ParseRelease(row RawRelease) (Release, error) {
+	release, err := ParseReleaseWithoutManifest(row)
+	if err != nil {
+		return Release{}, err
+	}
+	manifest, err := parseManifest(row.Manifest)
+	if err != nil {
+		return Release{}, err
+	}
+	release.Manifest = manifest
+	return release, nil
+}
+
+// ParseReleaseWithoutManifest validates only the columns the MID 2 plan reads;
+// the manifest is read by the ActiveRelease path only.
+func ParseReleaseWithoutManifest(row RawRelease) (Release, error) {
 	version, err := ParseVersion(row.Version)
 	if err != nil {
 		return Release{}, invalid(err)
@@ -149,10 +165,6 @@ func ParseRelease(row RawRelease) (Release, error) {
 	if row.TotalSize <= 0 || row.TotalSize >= maxTotalBytes || total != row.TotalSize {
 		return Release{}, invalid(fmt.Errorf("volumes total %d do not match total_size %d", total, row.TotalSize))
 	}
-	manifest, err := parseManifest(row.Manifest)
-	if err != nil {
-		return Release{}, err
-	}
 	return Release{
 		Version:     version,
 		Lane:        lane,
@@ -162,7 +174,6 @@ func ParseRelease(row RawRelease) (Release, error) {
 		TotalSize:   row.TotalSize,
 		MD5:         row.MD5,
 		SHA256:      row.SHA256,
-		Manifest:    manifest,
 	}, nil
 }
 
@@ -194,6 +205,9 @@ func parseVolumes(raw json.RawMessage, version Version, sha256 string) ([]Packag
 		}
 		if volume.Size <= 0 || volume.Size > maxVolumeBytes {
 			return nil, "", invalid(fmt.Errorf("volume %q size %d is outside the stock limit", volume.Name, volume.Size))
+		}
+		if int64(float32(volume.Size)) != volume.Size {
+			return nil, "", invalid(fmt.Errorf("volume %q size %d is not float32-exact", volume.Name, volume.Size))
 		}
 		if !md5Pattern.MatchString(volume.MD5) || !sha256Pattern.MatchString(volume.SHA256) {
 			return nil, "", invalid(fmt.Errorf("volume %q hashes are not lowercase hex", volume.Name))
@@ -236,7 +250,7 @@ func parseManifest(raw json.RawMessage) ([]ManifestEntry, error) {
 		if entry.Path == "" || (previous != "" && entry.Path <= previous) {
 			return nil, invalid(fmt.Errorf("manifest path %q is empty, unsorted or duplicated", entry.Path))
 		}
-		if entry.Size <= 0 || !md5Pattern.MatchString(entry.MD5) {
+		if entry.Size < 0 || !md5Pattern.MatchString(entry.MD5) {
 			return nil, invalid(fmt.Errorf("manifest entry %q is not a file with a lowercase md5", entry.Path))
 		}
 		previous = entry.Path

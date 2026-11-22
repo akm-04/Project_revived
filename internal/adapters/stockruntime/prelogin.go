@@ -114,9 +114,10 @@ func tutorialGroup(key string) string {
 const maxAnomalyAppVersions = 64
 
 type anomalyLimiter struct {
-	mu   sync.Mutex
-	day  string
-	seen map[string]struct{}
+	mu                sync.Mutex
+	day               string
+	seen              map[string]struct{}
+	suppressionLogged bool
 }
 
 var otaAnomalies anomalyLimiter
@@ -128,11 +129,16 @@ func (l *anomalyLimiter) shouldLog(appVersion string, at time.Time) bool {
 	if l.day != day {
 		l.day = day
 		l.seen = map[string]struct{}{}
+		l.suppressionLogged = false
 	}
 	if _, logged := l.seen[appVersion]; logged {
 		return false
 	}
 	if len(l.seen) >= maxAnomalyAppVersions {
+		if !l.suppressionLogged {
+			l.suppressionLogged = true
+			log.Printf("ANOMALY ota anomaly log limit reached: %d distinct app_v values today, further lines suppressed", len(l.seen)+1)
+		}
 		return false
 	}
 	l.seen[appVersion] = struct{}{}

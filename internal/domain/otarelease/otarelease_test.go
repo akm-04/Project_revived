@@ -212,3 +212,71 @@ func TestActiveSetUnionsManifestPaths(t *testing.T) {
 		t.Fatalf("paths=%v want %v", active.ClientPaths, want)
 	}
 }
+
+func TestPlanUpdateRefusesVolumeNotFloat32Exact(t *testing.T) {
+	rows := []RawRelease{testRow(t, "1.631.2", "code", 16_777_217)}
+	if _, err := PlanUpdate(stockRequest("1.631.0"), testEngine, rows); !errors.Is(err, ErrInvalidRelease) {
+		t.Fatalf("err=%v", err)
+	}
+}
+
+func TestPlanUpdateAcceptsFloat32ExactVolumeLimits(t *testing.T) {
+	for _, size := range []int64{16_777_216, 99_000_000} {
+		rows := []RawRelease{testRow(t, "1.631.2", "code", size)}
+		plan, err := PlanUpdate(stockRequest("1.631.0"), testEngine, rows)
+		if err != nil || len(plan.Descriptors) != 1 || plan.Descriptors[0].Size != size {
+			t.Fatalf("size %d: plan=%+v err=%v", size, plan, err)
+		}
+	}
+}
+
+func TestParseReleaseAcceptsZeroByteManifestEntry(t *testing.T) {
+	row := testRow(t, "1.631.2", "code", 2000)
+	manifest, err := json.Marshal(map[string]any{"files": []ManifestEntry{{Path: "src_64/app/empty.lua", Size: 0, MD5: testMD5}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	row.Manifest = manifest
+	release, err := ParseRelease(row)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(release.Manifest) != 1 || release.Manifest[0].Size != 0 {
+		t.Fatalf("manifest=%+v", release.Manifest)
+	}
+}
+
+func TestParseReleaseRefusesNegativeManifestSize(t *testing.T) {
+	row := testRow(t, "1.631.2", "code", 2000)
+	manifest, err := json.Marshal(map[string]any{"files": []ManifestEntry{{Path: "src_64/app/a.lua", Size: -1, MD5: testMD5}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	row.Manifest = manifest
+	if _, err := ParseRelease(row); !errors.Is(err, ErrInvalidRelease) {
+		t.Fatalf("err=%v", err)
+	}
+}
+
+func TestPlanUpdateIgnoresUnselectedMalformedRelease(t *testing.T) {
+	code := testRow(t, "1.631.2", "code", 2000)
+	catalog := testRow(t, "1.631.5", "catalog", 4000, "src_64/b.lua", "src_64/a.lua")
+	plan, err := PlanUpdate(stockRequest("1.631.9"), testEngine, []RawRelease{code, catalog})
+	if err != nil || len(plan.Descriptors) != 0 {
+		t.Fatalf("plan=%+v err=%v", plan, err)
+	}
+	if _, err := ActiveSet([]RawRelease{code, catalog}); !errors.Is(err, ErrInvalidRelease) {
+		t.Fatalf("ActiveSet err=%v", err)
+	}
+}
+
+func TestParseReleaseWithoutManifestSkipsManifestValidation(t *testing.T) {
+	row := testRow(t, "1.631.2", "code", 2000, "src_64/b.lua", "src_64/a.lua")
+	if _, err := ParseRelease(row); !errors.Is(err, ErrInvalidRelease) {
+		t.Fatalf("ParseRelease err=%v", err)
+	}
+	release, err := ParseReleaseWithoutManifest(row)
+	if err != nil || release.Manifest != nil {
+		t.Fatalf("release=%+v err=%v", release, err)
+	}
+}

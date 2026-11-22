@@ -18,6 +18,7 @@ var ErrUnavailable = errors.New("ota release: unavailable")
 // ActiveStore is the read side of ota_releases.
 type ActiveStore interface {
 	ListActiveTx(context.Context, tx.Queryer) ([]domain.RawRelease, error)
+	ListActiveDescriptorsTx(context.Context, tx.Queryer) ([]domain.RawRelease, error)
 }
 
 // Service plans MID 2 and summarizes the active release set.
@@ -35,7 +36,10 @@ func ReadProfile() tx.Profile {
 // Plan is the MID 2 scheduler. A database failure reaches the caller as a
 // fault, never as a fake no-update.
 func (s Service) Plan(ctx context.Context, request domain.PlanRequest) (domain.UpdatePlan, error) {
-	rows, err := s.activeRows(ctx)
+	if s.Store == nil {
+		return domain.UpdatePlan{}, ErrUnavailable
+	}
+	rows, err := s.activeRows(ctx, s.Store.ListActiveDescriptorsTx)
 	if err != nil {
 		return domain.UpdatePlan{}, err
 	}
@@ -44,14 +48,19 @@ func (s Service) Plan(ctx context.Context, request domain.PlanRequest) (domain.U
 
 // ActiveRelease is the ARCHITECTURE section 4 seam for EVENTS and OPERATOR.
 func (s Service) ActiveRelease(ctx context.Context) (domain.ActiveRelease, error) {
-	rows, err := s.activeRows(ctx)
+	if s.Store == nil {
+		return domain.ActiveRelease{}, ErrUnavailable
+	}
+	rows, err := s.activeRows(ctx, s.Store.ListActiveTx)
 	if err != nil {
 		return domain.ActiveRelease{}, err
 	}
 	return domain.ActiveSet(rows)
 }
 
-func (s Service) activeRows(ctx context.Context) ([]domain.RawRelease, error) {
+// activeRows runs the read-only RepeatableRead transaction over one active-set
+// read; Plan passes the descriptor read, ActiveRelease the manifest read.
+func (s Service) activeRows(ctx context.Context, read func(context.Context, tx.Queryer) ([]domain.RawRelease, error)) ([]domain.RawRelease, error) {
 	if s.Store == nil || s.Runner.DB == nil {
 		return nil, ErrUnavailable
 	}
@@ -61,7 +70,7 @@ func (s Service) activeRows(ctx context.Context) ([]domain.RawRelease, error) {
 	}
 	var rows []domain.RawRelease
 	_, err = s.Runner.Run(ctx, op, ReadProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, scope tx.Scope) error {
-		loaded, readErr := s.Store.ListActiveTx(ctx, scope.Tx)
+		loaded, readErr := read(ctx, scope.Tx)
 		if readErr == nil {
 			rows = loaded
 		}

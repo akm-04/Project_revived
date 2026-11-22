@@ -35,19 +35,23 @@ type UpdatePlan struct {
 	UnknownAppVersion bool
 }
 
-// PlanUpdate is the pure MID 2 scheduler of ruling 4. It fails closed with
-// ErrInvalidRelease when an active row is malformed, so no partial plan is
-// ever served (local_update.py:395-400).
+// PlanUpdate is the pure MID 2 scheduler of ruling 4. Selection runs before
+// validation: a defect in a selected release fails the whole plan, while an
+// unselected row never affects MID 2. The manifest is not read on this path.
 func PlanUpdate(request PlanRequest, publicEngineURL string, rows []RawRelease) (UpdatePlan, error) {
 	if request.AppVersion != StockAppVersion {
 		return UpdatePlan{UnknownAppVersion: true}, nil
 	}
-	releases, err := ParseReleases(rows)
-	if err != nil {
-		return UpdatePlan{}, err
-	}
 	current, hasCurrent := parseClientVersion(request.ClientVersion)
-	selected := selectReleases(releases, current, hasCurrent)
+	selectedIndexes := selectReleaseIndexes(rows, current, hasCurrent)
+	selected := make([]Release, 0, len(selectedIndexes))
+	for _, index := range selectedIndexes {
+		release, err := ParseReleaseWithoutManifest(rows[index])
+		if err != nil {
+			return UpdatePlan{}, err
+		}
+		selected = append(selected, release)
+	}
 	plan := UpdatePlan{Descriptors: make([]Descriptor, 0, len(selected))}
 	for _, release := range selected {
 		plan.Descriptors = append(plan.Descriptors, descriptorFor(release, publicEngineURL))
@@ -104,37 +108,71 @@ func keepNewest(current **Version, candidate Version) {
 	}
 }
 
-// selectReleases applies ruling 4: the asset bootstrap when the client is
+// releaseCandidate is the selection view of one row. A row whose version, lane
+// or state does not parse cannot be selected, so selection skips it.
+type releaseCandidate struct {
+	index   int
+	version Version
+	lane    Lane
+	state   State
+}
+
+func releaseCandidates(rows []RawRelease) []releaseCandidate {
+	candidates := make([]releaseCandidate, 0, len(rows))
+	for index, row := range rows {
+		version, err := ParseVersion(row.Version)
+		if err != nil {
+			continue
+		}
+		lane, err := ParseLane(row.Lane)
+		if err != nil {
+			continue
+		}
+		state, err := ParseState(row.State)
+		if err != nil {
+			continue
+		}
+		candidates = append(candidates, releaseCandidate{index: index, version: version, lane: lane, state: state})
+	}
+	return candidates
+}
+
+// selectReleaseIndexes applies ruling 4: the asset bootstrap when the client is
 // below it, the newest cumulative code release when newer than the client, and
 // every newer catalog release, all in ascending version order.
-func selectReleases(releases []Release, current Version, hasCurrent bool) []Release {
-	selected := make([]Release, 0, 3)
-	if asset, found := newestActive(releases, LaneAssets); found && newerThan(asset.Version, current, hasCurrent) {
+func selectReleaseIndexes(rows []RawRelease, current Version, hasCurrent bool) []int {
+	candidates := releaseCandidates(rows)
+	selected := make([]releaseCandidate, 0, 3)
+	if asset, found := newestActiveCandidate(candidates, LaneAssets); found && newerThan(asset.version, current, hasCurrent) {
 		selected = append(selected, asset)
 	}
-	if code, found := newestActive(releases, LaneCode); found && newerThan(code.Version, current, hasCurrent) {
+	if code, found := newestActiveCandidate(candidates, LaneCode); found && newerThan(code.version, current, hasCurrent) {
 		selected = append(selected, code)
 	}
-	for _, release := range releases {
-		if release.Lane == LaneCatalog && release.State == StateActive && newerThan(release.Version, current, hasCurrent) {
-			selected = append(selected, release)
+	for _, candidate := range candidates {
+		if candidate.lane == LaneCatalog && candidate.state == StateActive && newerThan(candidate.version, current, hasCurrent) {
+			selected = append(selected, candidate)
 		}
 	}
 	sort.SliceStable(selected, func(left, right int) bool {
-		return selected[left].Version.Compare(selected[right].Version) < 0
+		return selected[left].version.Compare(selected[right].version) < 0
 	})
-	return selected
+	indexes := make([]int, 0, len(selected))
+	for _, candidate := range selected {
+		indexes = append(indexes, candidate.index)
+	}
+	return indexes
 }
 
-func newestActive(releases []Release, lane Lane) (Release, bool) {
-	var newest Release
+func newestActiveCandidate(candidates []releaseCandidate, lane Lane) (releaseCandidate, bool) {
+	var newest releaseCandidate
 	found := false
-	for _, release := range releases {
-		if release.Lane != lane || release.State != StateActive {
+	for _, candidate := range candidates {
+		if candidate.lane != lane || candidate.state != StateActive {
 			continue
 		}
-		if !found || release.Version.Compare(newest.Version) > 0 {
-			newest = release
+		if !found || candidate.version.Compare(newest.version) > 0 {
+			newest = candidate
 			found = true
 		}
 	}

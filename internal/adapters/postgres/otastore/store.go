@@ -25,17 +25,35 @@ const selectActiveReleases = `SELECT COALESCE(jsonb_agg(jsonb_build_object(
 	FROM ota_releases WHERE state='ACTIVE' ORDER BY version LIMIT $1
 ) active`
 
+const selectActiveDescriptors = `SELECT COALESCE(jsonb_agg(jsonb_build_object(
+	'version',version,'lane',lane,'state',state,'package_files',package_files,
+	'total_size',total_size,'md5',md5,'sha256',sha256
+) ORDER BY version),'[]'::jsonb)::text FROM (
+	SELECT version,lane,state,package_files,total_size,md5,sha256
+	FROM ota_releases WHERE state='ACTIVE' ORDER BY version LIMIT $1
+) active`
+
 // Store reads ota_releases rows.
 type Store struct{}
 
 // ListActiveTx reads every ACTIVE release of every lane through the caller's
-// read-only transaction.
+// read-only transaction, including manifests.
 func (Store) ListActiveTx(ctx context.Context, query tx.Queryer) ([]otarelease.RawRelease, error) {
+	return listActive(ctx, query, selectActiveReleases)
+}
+
+// ListActiveDescriptorsTx reads every ACTIVE release of every lane without the
+// manifest column, which the MID 2 plan never uses.
+func (Store) ListActiveDescriptorsTx(ctx context.Context, query tx.Queryer) ([]otarelease.RawRelease, error) {
+	return listActive(ctx, query, selectActiveDescriptors)
+}
+
+func listActive(ctx context.Context, query tx.Queryer, statement string) ([]otarelease.RawRelease, error) {
 	if query == nil {
 		return nil, errInvalid
 	}
 	var raw string
-	if err := query.QueryRow(ctx, selectActiveReleases, maxActiveReleases).Scan(&raw); err != nil {
+	if err := query.QueryRow(ctx, statement, maxActiveReleases).Scan(&raw); err != nil {
 		return nil, err
 	}
 	var rows []otarelease.RawRelease
