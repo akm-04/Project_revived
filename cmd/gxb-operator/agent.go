@@ -33,30 +33,33 @@ func runAgent(root string, args []string) error {
 			return err
 		}
 	}
-	logFile, err := os.OpenFile(filepath.Join(logsDirectory, operatoragent.ToolLogFileName), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
-	if err != nil {
-		return err
-	}
-	defer logFile.Close()
-	toolLog := operatoragent.NewToolLog(logFile, time.Now)
+	logWriter := operatoragent.NewDatedLogWriter(logsDirectory, operatoragent.ToolLogPrefix, time.Now)
+	defer logWriter.Close()
+	toolLog := operatoragent.NewToolLog(logWriter, time.Now)
 	operations := operatoragent.NewOperations(operationsDirectory, toolLog, time.Now)
 	if err := operations.Recover(); err != nil {
 		return err
 	}
 	tokens := &operatoragent.TokenHolder{}
 	backend := processcontrol.New(processcontrol.Options{
-		Binary:       config.Backend.Binary,
-		EnvFile:      config.Backend.EnvFile,
-		OperatorAddr: config.Backend.OperatorAddr,
-		OTARoot:      config.OTARoot,
-		LogPath:      filepath.Join(logsDirectory, operatoragent.BackendLogFileName),
-		ReadyTimeout: config.Backend.ReadyTimeout(),
-		StopGrace:    config.Backend.StopGrace(),
+		Binary:        config.Backend.Binary,
+		EnvFile:       config.Backend.EnvFile,
+		OperatorAddr:  config.Backend.OperatorAddr,
+		OTARoot:       config.OTARoot,
+		LogsDirectory: logsDirectory,
+		ReadyTimeout:  config.Backend.ReadyTimeout(),
+		StopGrace:     config.Backend.StopGrace(),
 	})
 	operator := operatorclient.New(config.Backend.OperatorAddr, tokens)
+	logService := &operatoragent.LogService{
+		Directory:       logsDirectory,
+		DatabaseLogPath: config.DatabaseLog,
+		Operator:        operator,
+		Now:             time.Now,
+	}
 	backendGuard := &operatoragent.BackendGuard{}
 	buildOperation := operatoragent.Build{Config: config, Operator: operator, Operations: operations}
-	moduleCatalog := operatoragent.ModuleCatalog{Backend: operator, Local: []appoperator.Module{operatoragent.ServerModule(), operatoragent.AgentOTAModule()}}
+	moduleCatalog := operatoragent.ModuleCatalog{Backend: operator, Local: []appoperator.Module{operatoragent.ServerModule(), operatoragent.AgentOTAModule(), operatoragent.AgentLogsModule()}}
 	handler := agentapi.Handler{
 		Credentials: operatoragent.NewCredentials(root),
 		Sessions:    operatoragent.NewSessions(time.Now),
@@ -68,7 +71,7 @@ func runAgent(root string, args []string) error {
 		Build:       buildOperation,
 		Modules:     moduleCatalog,
 		ToolLog:     toolLog,
-		ToolLogPath: filepath.Join(logsDirectory, operatoragent.ToolLogFileName),
+		Logs:        logService,
 		OTARoot:     config.OTARoot,
 		Listen:      config.Listen,
 		Guard:       backendGuard,
@@ -80,6 +83,7 @@ func runAgent(root string, args []string) error {
 	server := &http.Server{Handler: handler, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 5 * time.Minute, WriteTimeout: 30 * time.Minute, IdleTimeout: time.Minute}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
+	go operatoragent.RunLogRetention(ctx, logsDirectory, config.ToolLogRetentionDays(), time.Now, time.Hour)
 	toolLog.Write("agent", "start", "ok", map[string]any{"listen": config.Listen})
 	if err := agentapi.Serve(ctx, server, listener, backend); err != nil {
 		return err

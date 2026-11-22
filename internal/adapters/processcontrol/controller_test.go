@@ -16,6 +16,7 @@ const fakeBackendSource = `package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"strconv"
@@ -31,6 +32,9 @@ func main() {
 			"listener": os.Getenv("GXB_GAME_LISTENER"),
 		})
 		_ = os.WriteFile(record, encoded, 0o600)
+	}
+	if os.Getenv("GXB_TEST_PRINT") == "1" {
+		fmt.Println("backend-line")
 	}
 	if os.Getenv("GXB_TEST_EXIT_EARLY") == "1" {
 		os.Exit(3)
@@ -111,13 +115,13 @@ func readRecord(t *testing.T, path string) childRecord {
 func newController(t *testing.T, binary, envFile, address string) *Controller {
 	t.Helper()
 	return New(Options{
-		Binary:       binary,
-		EnvFile:      envFile,
-		OperatorAddr: address,
-		OTARoot:      t.TempDir(),
-		LogPath:      filepath.Join(t.TempDir(), "backend.log"),
-		ReadyTimeout: 10 * time.Second,
-		StopGrace:    2 * time.Second,
+		Binary:        binary,
+		EnvFile:       envFile,
+		OperatorAddr:  address,
+		OTARoot:       t.TempDir(),
+		LogsDirectory: t.TempDir(),
+		ReadyTimeout:  10 * time.Second,
+		StopGrace:     2 * time.Second,
 	})
 }
 
@@ -229,5 +233,33 @@ func TestConcurrentStartAndStopStayConsistent(t *testing.T) {
 		if child != nil {
 			t.Fatal("a stopped controller still holds a child")
 		}
+	}
+}
+
+func TestBackendOutputIsCapturedInADatedFile(t *testing.T) {
+	binary := buildFakeBackend(t)
+	logsDirectory := t.TempDir()
+	controller := New(Options{
+		Binary:        binary,
+		EnvFile:       writeEnvFile(t, "GXB_TEST_PRINT=1"),
+		OperatorAddr:  freeAddress(t),
+		OTARoot:       t.TempDir(),
+		LogsDirectory: logsDirectory,
+		ReadyTimeout:  10 * time.Second,
+		StopGrace:     2 * time.Second,
+	})
+	if err := controller.Start(false, "token"); err != nil {
+		t.Fatal(err)
+	}
+	if err := controller.Stop(); err != nil {
+		t.Fatal(err)
+	}
+	name := "backend-" + time.Now().UTC().Format("2006-01-02") + ".log"
+	contents, err := os.ReadFile(filepath.Join(logsDirectory, name))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(contents), "backend-line") {
+		t.Fatalf("stdout missing from %s: %q", name, contents)
 	}
 }

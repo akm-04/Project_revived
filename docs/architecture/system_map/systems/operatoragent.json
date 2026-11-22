@@ -32,6 +32,8 @@
   "unit": [
    "config_test.go",
    "credentials_test.go",
+   "logfiles_test.go",
+   "logs_test.go",
    "maintenance_test.go",
    "modules_test.go",
    "operations_test.go",

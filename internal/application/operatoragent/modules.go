@@ -53,6 +53,43 @@ func AgentOTAModule() operator.Module {
 	}
 }
 
+// AgentLogsModule is the agent half of the logs module (L1-L4): the file
+// sources, the live tail cursor and the clear command. The backend contributes
+// logs.timeline and the client source reads; MergeModules keeps both halves.
+func AgentLogsModule() operator.Module {
+	return operator.Module{
+		ID:         "logs",
+		Title:      "Logs",
+		Role:       operator.RoleRoot,
+		LogChannel: "logs",
+		Screen:     operator.Screen{Tab: "Logs", Columns: []string{"at", "level", "text"}},
+		Reads: []operator.Read{
+			{Name: "logs.tail", Help: "Tail one log source with a cursor; poll every 2 s for the live view.", Fields: []operator.Field{
+				operator.NewField("source", operator.FieldString, true, "tool, backend, database or client").WithEnum(LogSourceTool, LogSourceBackend, LogSourceDatabase, LogSourceClient),
+				operator.NewField("after_cursor", operator.FieldString, false, "next_cursor of the previous poll"),
+				operator.NewField("level", operator.FieldString, false, "info, warn or error").WithEnum("info", "warn", "error"),
+				operator.NewField("limit", operator.FieldInt, false, "page size").Bounded(1, MaxLogTailLimit).WithDefault(DefaultLogTailLimit),
+			}},
+			{Name: "logs.search", Help: "Search one log source, newest first; the client source takes a player id or name.", Fields: []operator.Field{
+				operator.NewField("source", operator.FieldString, true, "tool, backend, database or client").WithEnum(LogSourceTool, LogSourceBackend, LogSourceDatabase, LogSourceClient),
+				operator.NewField("player", operator.FieldString, false, "player id or name (client source)"),
+				operator.NewField("from", operator.FieldString, false, "RFC3339 lower bound"),
+				operator.NewField("to", operator.FieldString, false, "RFC3339 upper bound"),
+				operator.NewField("level", operator.FieldString, false, "info, warn or error").WithEnum("info", "warn", "error"),
+				operator.NewField("limit", operator.FieldInt, false, "page size").Bounded(1, MaxLogTailLimit).WithDefault(DefaultLogTailLimit),
+			}},
+		},
+		Commands: []operator.CommandSpec{
+			{Name: "logs.clear", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Clear client logs through the backend or the backend process log; the tool log is never cleared.", Fields: []operator.Field{
+				operator.NewField("source", operator.FieldString, true, "client or backend").WithEnum(LogSourceClient, LogSourceBackend),
+				operator.NewField("scope", operator.FieldString, true, "all, player or older_than").WithEnum("all", "player", "older_than"),
+				operator.NewField("player", operator.FieldString, false, "player id or name (client source)"),
+				operator.NewField("older_than", operator.FieldString, false, "RFC3339 boundary for the older_than scope"),
+			}},
+		},
+	}
+}
+
 // ModuleSource is the agent's outbound module-list port.
 type ModuleSource interface {
 	Modules(context.Context) ([]operator.Module, error)

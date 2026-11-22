@@ -1824,6 +1824,9 @@
    ]
   },
   "operator": {
+   "clientlog": [
+    "Refuse"
+   ],
    "events": [
     "*ClaimTx",
     "*FinishTx",
@@ -1839,8 +1842,10 @@
     "Refuse"
    ],
    "operatoragent": [
+    "Bounded",
     "MergeModules",
     "NewField",
+    "WithDefault",
     "WithEnum"
    ],
    "operatorcatalog": [
@@ -3427,6 +3432,9 @@
    ]
   },
   "clientlog": {
+   "operator": [
+    "Refuse"
+   ],
    "store:i4store": [
     "*ResolveGameplayBearer"
    ]
@@ -5476,8 +5484,10 @@
   },
   "operatoragent": {
    "operator": [
+    "Bounded",
     "MergeModules",
     "NewField",
+    "WithDefault",
     "WithEnum"
    ],
    "otabuild": [

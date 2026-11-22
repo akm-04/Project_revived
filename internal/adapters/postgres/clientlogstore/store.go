@@ -14,6 +14,7 @@ import (
 
 	app "gxb.local/backend/v2/internal/application/clientlog"
 	domain "gxb.local/backend/v2/internal/domain/clientlog"
+	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
 type Store struct{ Pool *pgxpool.Pool }
@@ -164,4 +165,163 @@ func (s Store) Timeline(ctx context.Context, accountUID string, since time.Time,
 		out = append(out, entry)
 	}
 	return out, rows.Err()
+}
+
+const journalEntryColumns = `journal_id,received_at,player_id,session_ref,mid,outcome,error_code,http_status,latency_microseconds,error_class,cause,raw_envelope,replay`
+
+// rawPGXTransaction is the pgx view of the foundation transaction. The port only
+// exposes QueryRow, and this owner needs a bounded multi-row read.
+type rawPGXTransaction interface{ RawPGX() pgx.Tx }
+
+func rawTransaction(transaction tx.Tx) (pgx.Tx, error) {
+	raw, ok := transaction.(rawPGXTransaction)
+	if !ok {
+		return nil, errors.New("clientlogstore: the transaction does not expose pgx")
+	}
+	return raw.RawPGX(), nil
+}
+
+func scanJournalEntry(row pgx.Row) (app.JournalEntry, error) {
+	var entry app.JournalEntry
+	var playerID *int64
+	var sessionRef, errorClass, cause *string
+	var mid *int
+	var errorCode *int64
+	var rawEnvelope []byte
+	err := row.Scan(&entry.JournalID, &entry.ReceivedAt, &playerID, &sessionRef, &mid, &entry.Outcome, &errorCode,
+		&entry.HTTPStatus, &entry.LatencyMicroseconds, &errorClass, &cause, &rawEnvelope, &entry.Replay)
+	if err != nil {
+		return app.JournalEntry{}, err
+	}
+	entry.PlayerID = playerID
+	entry.SessionRef = sessionRef
+	entry.MID = mid
+	entry.ErrorCode = errorCode
+	if errorClass != nil {
+		entry.ErrorClass = *errorClass
+	}
+	if cause != nil {
+		entry.Cause = *cause
+	}
+	entry.RawEnvelope = string(rawEnvelope)
+	return entry, nil
+}
+
+// JournalPage returns one newest-first page of the request journal, bounded by
+// the filter and the cursor (I85_REQUEST_JOURNAL_V1 R5, operator logs.timeline).
+func (s Store) JournalPage(ctx context.Context, transaction tx.Tx, filter app.JournalFilter) ([]app.JournalEntry, error) {
+	raw, err := rawTransaction(transaction)
+	if err != nil {
+		return nil, err
+	}
+	var cursorTime *time.Time
+	if filter.Cursor.Present {
+		cursorTime = &filter.Cursor.ReceivedAt
+	}
+	rows, err := raw.Query(ctx, `SELECT `+journalEntryColumns+`
+FROM request_journal
+WHERE ($1 = '' OR account_uid = $1)
+AND ($2 = 0 OR player_id = $2)
+AND ($3::timestamptz IS NULL OR received_at >= $3)
+AND ($4::timestamptz IS NULL OR received_at <= $4)
+AND (coalesce(cardinality($5::text[]), 0) = 0 OR outcome = ANY($5))
+AND ($6 = 0 OR mid = $6)
+AND ($7::timestamptz IS NULL OR (received_at, journal_id) < ($7::timestamptz, $8))
+ORDER BY received_at DESC, journal_id DESC
+LIMIT $9`,
+		filter.AccountUID, filter.PlayerID, filter.From, filter.To, filter.Outcomes, filter.MID, cursorTime, filter.Cursor.JournalID, filter.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	entries := make([]app.JournalEntry, 0, filter.Limit)
+	for rows.Next() {
+		entry, scanErr := scanJournalEntry(rows)
+		if scanErr != nil {
+			return nil, scanErr
+		}
+		entries = append(entries, entry)
+	}
+	return entries, rows.Err()
+}
+
+// JournalTail returns the rows newer than the cursor, oldest first for the live
+// view (operator logs.tail).
+func (s Store) JournalTail(ctx context.Context, transaction tx.Tx, filter app.JournalFilter) ([]app.JournalEntry, error) {
+	raw, err := rawTransaction(transaction)
+	if err != nil {
+		return nil, err
+	}
+	var cursorTime *time.Time
+	if filter.Cursor.Present {
+		cursorTime = &filter.Cursor.ReceivedAt
+	}
+	rows, err := raw.Query(ctx, `SELECT `+journalEntryColumns+`
+FROM request_journal
+WHERE ($1 = '' OR account_uid = $1)
+AND ($2 = 0 OR player_id = $2)
+AND (coalesce(cardinality($3::text[]), 0) = 0 OR outcome = ANY($3))
+AND ($4::timestamptz IS NULL OR (received_at, journal_id) > ($4::timestamptz, $5))
+ORDER BY received_at ASC, journal_id ASC
+LIMIT $6`,
+		filter.AccountUID, filter.PlayerID, filter.Outcomes, cursorTime, filter.Cursor.JournalID, filter.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	entries := make([]app.JournalEntry, 0, filter.Limit)
+	for rows.Next() {
+		entry, scanErr := scanJournalEntry(rows)
+		if scanErr != nil {
+			return nil, scanErr
+		}
+		entries = append(entries, entry)
+	}
+	return entries, rows.Err()
+}
+
+// ClearJournalTx deletes matching journal, upload and client rows in bounded
+// batches, so an operator clear never runs one unbounded delete.
+//
+// shortcut: at most clearBatchSize batches per table per call, upgrade when logs outgrow that.
+func (s Store) ClearJournalTx(ctx context.Context, transaction tx.Tx, filter app.ClearFilter, batch int) (int64, error) {
+	if batch <= 0 {
+		batch = 5000
+	}
+	tables := []string{"request_journal", "client_log_rows", "client_log_uploads"}
+	var total int64
+	for _, table := range tables {
+		condition, arguments := clearCondition(filter)
+		for range app.MaxClearBatches {
+			query := fmt.Sprintf(`DELETE FROM %[1]s WHERE ctid IN (SELECT ctid FROM %[1]s WHERE %[2]s LIMIT $%[3]d)`, table, condition, len(arguments)+1)
+			limited := append(append([]any(nil), arguments...), batch)
+			tag, err := transaction.Exec(ctx, query, limited...)
+			if err != nil {
+				return total, err
+			}
+			total += tag.RowsAffected()
+			if tag.RowsAffected() < int64(batch) {
+				break
+			}
+		}
+	}
+	return total, nil
+}
+
+// clearCondition builds the shared delete predicate; all three log tables carry
+// account_uid, player_id and received_at.
+func clearCondition(filter app.ClearFilter) (string, []any) {
+	if filter.Before != nil {
+		return "received_at < $1", []any{*filter.Before}
+	}
+	if filter.AccountUID != "" && filter.PlayerID != 0 {
+		return "(account_uid = $1 OR player_id = $2)", []any{filter.AccountUID, filter.PlayerID}
+	}
+	if filter.AccountUID != "" {
+		return "account_uid = $1", []any{filter.AccountUID}
+	}
+	if filter.PlayerID != 0 {
+		return "player_id = $1", []any{filter.PlayerID}
+	}
+	return "true", nil
 }

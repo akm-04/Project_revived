@@ -50,6 +50,47 @@ func OperatorModule() Module {
 	}
 }
 
+// LogsModule is the backend half of the logs module (OPERATOR_BACKUPS_LOGS_DESIGN
+// C1d, C2, C4): the redacted client journal timeline and live tail, plus the
+// client clear command. The agent merges its file-source reads and command into
+// the same module id.
+func LogsModule() Module {
+	return Module{
+		ID:         "logs",
+		Title:      "Logs",
+		Role:       RoleRoot,
+		LogChannel: "logs",
+		Screen:     Screen{Tab: "Logs", Columns: []string{"received_at", "player_id", "mid", "outcome", "http_status"}},
+		Reads: []Read{
+			{Name: "logs.timeline", Help: "Redacted client log timeline by player, account, time, outcome or MID; newest first.", Fields: []Field{
+				NewField("uid", FieldString, false, "account uid"),
+				NewField("player_id", FieldInt, false, "player id"),
+				NewField("from", FieldString, false, "RFC3339 lower bound"),
+				NewField("to", FieldString, false, "RFC3339 upper bound"),
+				NewField("outcome", FieldString, false, "journal outcome").WithEnum("OK", "CLIENT_ERROR", "SERVER_ERROR", "UNKNOWN_MID", "UNDECODABLE", "INACTIVE_MODE"),
+				NewField("level", FieldString, false, "info, warn or error; ignored when outcome is set").WithEnum("info", "warn", "error"),
+				NewField("mid", FieldInt, false, "stock MID"),
+				NewField("limit", FieldInt, false, "page size").Bounded(1, 200).WithDefault(50),
+				NewField("cursor", FieldString, false, "next_cursor of the previous page"),
+			}},
+			{Name: "logs.tail", Help: "Client journal rows newer than the cursor, oldest first for the live view.", Fields: []Field{
+				NewField("after_cursor", FieldString, false, "cursor of the previous poll"),
+				NewField("level", FieldString, false, "info, warn or error").WithEnum("info", "warn", "error"),
+				NewField("limit", FieldInt, false, "page size").Bounded(1, 200).WithDefault(100),
+			}},
+		},
+		Commands: []CommandSpec{
+			{Name: "logs.clear", Class: ClassLive, Help: "Clear client journal logs by scope; the tool log is never cleared.", Fields: []Field{
+				NewField("source", FieldString, true, "the client source").WithEnum("client"),
+				NewField("scope", FieldString, true, "all, player or older_than").WithEnum("all", "player", "older_than"),
+				NewField("uid", FieldString, false, "account uid for the player scope"),
+				NewField("player_id", FieldInt, false, "player id for the player scope"),
+				NewField("older_than", FieldString, false, "RFC3339 boundary for the older_than scope"),
+			}},
+		},
+	}
+}
+
 // PlannedModules are registered modules whose owner slot is not built yet
 // (I11A_OPERATOR_COMMANDS_V1 ruling 4: an unbuilt owner is not registered).
 // Their commands are declarations only and cannot be called.
@@ -76,9 +117,6 @@ func PlannedModules() []Module {
 			{Name: "backup.list", Class: ClassLive, Help: "List snapshots."},
 			{Name: "backup.restore", Class: ClassMaintenance, Help: "Restore a snapshot."},
 			{Name: "backup.prune", Class: ClassMaintenance, Help: "Prune old snapshots."},
-		}},
-		{ID: "logs", Title: "Logs", LogChannel: "logs", Planned: later, Reads: []Read{
-			{Name: "logs.timeline", Help: "Redacted client log timeline by player, account, time, outcome or MID."},
 		}},
 		{ID: "apk", Title: "APK build", LogChannel: "apk", Planned: later, Commands: []CommandSpec{
 			{Name: "apk.build", Class: ClassMaintenance, Help: "Build the Android client APK."},

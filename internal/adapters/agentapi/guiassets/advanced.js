@@ -360,10 +360,9 @@ function runAgentRoute(name, payload, reason, semanticKey) {
         body: { version: payload.version, reason, semantic_key: semanticKey },
       });
     default:
-      return Promise.resolve({
-        ok: false,
-        status: 0,
-        body: { error_code: "GUI_ROUTE_UNKNOWN", message: "the CLI has no agent route for " + name },
+      return request("/agent/v1/commands/" + encodeURIComponent(name), {
+        method: "POST",
+        body: { reason, semantic_key: semanticKey, payload },
       });
   }
 }

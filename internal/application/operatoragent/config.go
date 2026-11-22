@@ -20,8 +20,6 @@ const (
 	SessionFileName     = "cli.session"
 	LogsDirectoryName   = "logs"
 	OperationsDirectory = "ops"
-	ToolLogFileName     = "tool.log"
-	BackendLogFileName  = "backend.log"
 	DefaultAgentListen  = "127.0.0.1:8090"
 	DefaultOperatorAddr = "127.0.0.1:8091"
 
@@ -71,6 +69,20 @@ type Config struct {
 	ClientTree    string            `json:"client_tree"`
 	Origins       map[string]string `json:"origins"`
 	Backend       BackendConfig     `json:"backend"`
+	// ToolLogDays is the age retention of the tool and backend log files (C1);
+	// nil means DefaultToolLogDays.
+	ToolLogDays *int `json:"tool_log_days,omitempty"`
+	// DatabaseLog is the PostgreSQL log file the logs tab reads (C1 c). Empty
+	// means the database source answers ABSENT.
+	DatabaseLog string `json:"database_log,omitempty"`
+}
+
+// ToolLogRetentionDays is tool_log_days with the safe default (F1).
+func (config Config) ToolLogRetentionDays() int {
+	if config.ToolLogDays == nil {
+		return DefaultToolLogDays
+	}
+	return *config.ToolLogDays
 }
 
 // LoadConfig reads and validates <root>/agent.json.
@@ -129,6 +141,9 @@ func (config Config) Validate() error {
 	}
 	if value := config.Backend.StopGraceSeconds; value != nil && (*value < minStopGraceSeconds || *value > maxStopGraceSeconds) {
 		return fmt.Errorf("%s: backend.stop_grace_seconds %d is outside %d..%d", AgentConfigFileName, *value, minStopGraceSeconds, maxStopGraceSeconds)
+	}
+	if value := config.ToolLogDays; value != nil && (*value < 1 || *value > maximumToolLogDays) {
+		return fmt.Errorf("%s: tool_log_days %d is outside 1..%d", AgentConfigFileName, *value, maximumToolLogDays)
 	}
 	return nil
 }

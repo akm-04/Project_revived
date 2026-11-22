@@ -30,9 +30,11 @@ type Options struct {
 	EnvFile      string
 	OperatorAddr string
 	OTARoot      string
-	LogPath      string
-	ReadyTimeout time.Duration
-	StopGrace    time.Duration
+	// LogsDirectory receives the backend's stdout/stderr in dated files
+	// (C1 b: backend-<UTC date>.log, rotated daily).
+	LogsDirectory string
+	ReadyTimeout  time.Duration
+	StopGrace     time.Duration
 }
 
 // Controller owns the single backend child.
@@ -101,24 +103,21 @@ func (controller *Controller) Start(closed bool, token string) error {
 	if err != nil {
 		return err
 	}
-	logFile, err := os.OpenFile(controller.options.LogPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
-	if err != nil {
-		return fmt.Errorf("open the backend log: %w", err)
-	}
+	logWriter := operatoragent.NewDatedLogWriter(controller.options.LogsDirectory, operatoragent.BackendLogPrefix, time.Now)
 	command := exec.Command(controller.options.Binary)
 	command.Env = environment
-	command.Stdout = logFile
-	command.Stderr = logFile
+	command.Stdout = logWriter
+	command.Stderr = logWriter
 	prepare(command)
 	if err := command.Start(); err != nil {
-		_ = logFile.Close()
+		_ = logWriter.Close()
 		return fmt.Errorf("start the backend: %w", err)
 	}
 	child := &childProcess{command: command, done: make(chan struct{})}
 	go func() {
 		waitErr := command.Wait()
 		child.markExited(waitErr)
-		_ = logFile.Close()
+		_ = logWriter.Close()
 		close(child.done)
 	}()
 

@@ -65,3 +65,26 @@ func TestModuleCatalogStillAnswersTheAgentModulesWithoutTheBackend(t *testing.T)
 		t.Fatalf("modules = %+v", list.Modules)
 	}
 }
+
+func TestLogsModuleMergesTheAgentAndBackendHalves(t *testing.T) {
+	catalog := ModuleCatalog{
+		Backend: fakeBackendModules{modules: []operator.Module{operator.LogsModule()}},
+		Local:   []operator.Module{AgentLogsModule()},
+	}
+	list := catalog.List(context.Background())
+	if len(list.Modules) != 1 || list.Modules[0].ID != "logs" {
+		t.Fatalf("modules = %+v", list.Modules)
+	}
+	reads := map[string]bool{}
+	for _, read := range list.Modules[0].Reads {
+		reads[read.Name] = true
+	}
+	for _, name := range []string{"logs.tail", "logs.search", "logs.timeline"} {
+		if !reads[name] {
+			t.Fatalf("missing read %s in %+v", name, list.Modules[0].Reads)
+		}
+	}
+	if len(list.Modules[0].Commands) != 1 || list.Modules[0].Commands[0].Name != "logs.clear" || list.Modules[0].Commands[0].Route != operator.RouteAgent {
+		t.Fatalf("logs commands = %+v", list.Modules[0].Commands)
+	}
+}
