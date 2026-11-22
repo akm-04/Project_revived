@@ -195,7 +195,10 @@ func TestOTACommandLifecycleThroughRealStore(t *testing.T) {
 	if withdrawn.State != operator.StateApplied || l3State(t, pool, "9.300.2") != "WITHDRAWN" {
 		t.Fatalf("withdraw: %s %s state=%s", withdrawn.State, withdrawn.Result, l3State(t, pool, "9.300.2"))
 	}
-	if plan := l3PlanVersions(t, pool); l3Contains(plan, "9.300.2") {
+	if l3State(t, pool, "9.300.1") != "SUPERSEDED" {
+		t.Fatalf("withdraw reactivated the superseded release: %s", l3State(t, pool, "9.300.1"))
+	}
+	if plan := l3PlanVersions(t, pool); l3Contains(plan, "9.300.1") || l3Contains(plan, "9.300.2") {
 		t.Fatalf("plan after withdraw = %v", plan)
 	}
 
@@ -224,6 +227,105 @@ func TestOTACommandLifecycleThroughRealStore(t *testing.T) {
 	var refusal operator.Refusal
 	if refused.State != operator.StateRefused || json.Unmarshal(refused.Result, &refusal) != nil || refusal.Code != appota.CodeVersionExists {
 		t.Fatalf("equal number: %s %s", refused.State, refused.Result)
+	}
+}
+
+func TestPublishNeedsTheGlobalRevisionAcrossACatalogPublish(t *testing.T) {
+	pool := l3Pool(t)
+	versions := []string{"9.320.1", "9.320.2", "9.320.3"}
+	resetL3Releases(t, pool, versions)
+	first := l3BuildRequest(t, "9.320.1", "code")
+	catalog := l3BuildRequest(t, "9.320.2", "catalog")
+	second := l3BuildRequest(t, "9.320.3", "code")
+	bus := l3Bus(pool, l3Root(t, first, catalog, second))
+	for _, request := range []otarelease.BuildRequest{first, catalog, second} {
+		if outcome := l3Execute(t, bus, l3Command(t, "ota.register_build", nil, request)); outcome.State != operator.StateApplied {
+			t.Fatalf("register %s: %s %s", request.Version, outcome.State, outcome.Result)
+		}
+	}
+	revision := l3Revision(t, pool)
+	if outcome := l3Execute(t, bus, l3Command(t, "ota.publish", &revision, map[string]string{"version": "9.320.1"})); outcome.State != operator.StateApplied {
+		t.Fatalf("publish code: %s %s", outcome.State, outcome.Result)
+	}
+	stale := l3Revision(t, pool)
+	revision = stale
+	if outcome := l3Execute(t, bus, l3Command(t, "ota.publish", &revision, map[string]string{"version": "9.320.2"})); outcome.State != operator.StateApplied {
+		t.Fatalf("publish catalog: %s %s", outcome.State, outcome.Result)
+	}
+	current := l3Revision(t, pool)
+	if current == stale {
+		t.Fatal("the catalog publish did not advance the active revision")
+	}
+	refused := l3Execute(t, bus, l3Command(t, "ota.publish", &stale, map[string]string{"version": "9.320.3"}))
+	if refused.State != operator.StateRefused {
+		t.Fatalf("stale publish: %s %s", refused.State, refused.Result)
+	}
+	var refusal struct {
+		Code   string `json:"error_code"`
+		Detail struct {
+			CurrentRevision int64 `json:"current_revision"`
+		} `json:"detail"`
+	}
+	if err := json.Unmarshal(refused.Result, &refusal); err != nil || refusal.Code != operator.CodeRevisionStale || refusal.Detail.CurrentRevision != current {
+		t.Fatalf("refusal=%s err=%v want current=%d", refused.Result, err, current)
+	}
+	if state := l3State(t, pool, "9.320.3"); state != "BUILT" {
+		t.Fatalf("stale publish changed state: %s", state)
+	}
+}
+
+func TestConcurrentRegisterOfOneVersionRefusesTheLoser(t *testing.T) {
+	pool := l3Pool(t)
+	const version = "9.330.1"
+	resetL3Releases(t, pool, []string{version})
+	request := l3BuildRequest(t, version, "code")
+	bus := l3Bus(pool, l3Root(t, request))
+	commands := []operator.Command{
+		l3Command(t, "ota.register_build", nil, request),
+		l3Command(t, "ota.register_build", nil, request),
+	}
+	type attempt struct {
+		outcome operator.Outcome
+		err     error
+	}
+	results := make(chan attempt, len(commands))
+	start := make(chan struct{})
+	for _, command := range commands {
+		go func(command operator.Command) {
+			<-start
+			outcome, err := bus.Execute(context.Background(), command)
+			results <- attempt{outcome: outcome, err: err}
+		}(command)
+	}
+	close(start)
+	applied, refused := 0, 0
+	for range commands {
+		result := <-results
+		if result.err != nil {
+			t.Fatalf("concurrent register returned an error instead of a refusal: %v", result.err)
+		}
+		switch result.outcome.State {
+		case operator.StateApplied:
+			applied++
+		case operator.StateRefused:
+			var refusal operator.Refusal
+			if err := json.Unmarshal(result.outcome.Result, &refusal); err != nil || refusal.Code != appota.CodeVersionExists {
+				t.Fatalf("refusal=%s err=%v", result.outcome.Result, err)
+			}
+			refused++
+		default:
+			t.Fatalf("unexpected state %q result=%s", result.outcome.State, result.outcome.Result)
+		}
+	}
+	if applied != 1 || refused != 1 {
+		t.Fatalf("applied=%d refused=%d", applied, refused)
+	}
+	var count int
+	if err := pool.QueryRow(context.Background(), `SELECT count(*) FROM ota_releases WHERE version=$1`, version).Scan(&count); err != nil {
+		t.Fatal(err)
+	}
+	if count != 1 {
+		t.Fatalf("release rows=%d", count)
 	}
 }
 

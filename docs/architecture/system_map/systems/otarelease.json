@@ -286,7 +286,8 @@
    "i9_tutorial_switches.json"
   ],
   "unit": [
-   "commands_test.go"
+   "commands_test.go",
+   "status_test.go"
   ]
  }
 }

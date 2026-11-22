@@ -40,17 +40,19 @@ const lockLane = `SELECT COALESCE(jsonb_agg(jsonb_build_object(
 	'total_size',total_size,'md5',md5,'sha256',sha256) ORDER BY version),'[]'::jsonb)::text
 FROM (
 	SELECT version,lane,state,package_files,total_size,md5,sha256
-	FROM ota_releases WHERE lane=$1 ORDER BY version FOR UPDATE
+	FROM ota_releases
+	WHERE lane=$1 AND (state='ACTIVE' OR version=$2)
+	ORDER BY version FOR UPDATE
 ) locked`
 
-// LockLaneTx locks every release row of the lane, ordered by version (the
-// plan's lock order after the bus row).
-func (Store) LockLaneTx(ctx context.Context, transaction tx.Tx, lane otarelease.Lane) ([]otarelease.RawRelease, error) {
-	if transaction == nil || lane == "" {
+// LockLaneTx locks the lane's ACTIVE rows and the target version row, ordered
+// by version (the plan's lock order after the bus row).
+func (Store) LockLaneTx(ctx context.Context, transaction tx.Tx, lane otarelease.Lane, version string) ([]otarelease.RawRelease, error) {
+	if transaction == nil || lane == "" || version == "" {
 		return nil, errInvalid
 	}
 	var raw string
-	if err := transaction.QueryRow(ctx, lockLane, string(lane)).Scan(&raw); err != nil {
+	if err := transaction.QueryRow(ctx, lockLane, string(lane), version).Scan(&raw); err != nil {
 		return nil, err
 	}
 	var rows []otarelease.RawRelease
@@ -160,25 +162,29 @@ func (Store) InsertActivationTx(ctx context.Context, transaction tx.Tx, activati
 const readStatus = `SELECT jsonb_build_object(
 	'revision',(SELECT COALESCE(max(id),0) FROM ota_activations),
 	'active',(SELECT COALESCE(jsonb_agg(jsonb_build_object('version',version,'lane',lane) ORDER BY version),'[]'::jsonb)
-		FROM (SELECT version,lane FROM ota_releases WHERE state='ACTIVE' ORDER BY version LIMIT 64) active),
+		FROM (SELECT version,lane FROM ota_releases WHERE state='ACTIVE' ORDER BY version LIMIT $1) active),
 	'built',(SELECT COALESCE(jsonb_agg(jsonb_build_object('version',version,'lane',lane,'total_size',total_size,'built_at',built_at) ORDER BY version),'[]'::jsonb)
-		FROM (SELECT version,lane,total_size,built_at FROM ota_releases WHERE state='BUILT' ORDER BY version LIMIT 200) built),
+		FROM (SELECT version,lane,total_size,built_at FROM ota_releases WHERE state='BUILT' ORDER BY version LIMIT $2) built),
 	'activations',(SELECT COALESCE(jsonb_agg(jsonb_build_object('id',id,'version',version,'action',action,'command_key',command_key,'at',at) ORDER BY id DESC),'[]'::jsonb)
-		FROM (SELECT id,version,action,command_key,at FROM ota_activations ORDER BY id DESC LIMIT 20) recent),
+		FROM (SELECT id,version,action,command_key,at FROM ota_activations ORDER BY id DESC LIMIT $3) recent),
 	'served',(SELECT COALESCE(jsonb_agg(jsonb_build_object('path',path,'hits',hits) ORDER BY hits DESC, path),'[]'::jsonb)
-		FROM (SELECT path,sum(hits) AS hits FROM ota_asset_served_daily GROUP BY path ORDER BY hits DESC, path LIMIT 50) served),
+		FROM (SELECT path,sum(hits) AS hits FROM ota_asset_served_daily GROUP BY path ORDER BY hits DESC, path LIMIT $4) served),
 	'misses',(SELECT COALESCE(jsonb_agg(jsonb_build_object('path',path,'md5',md5,'first_seen',first_seen,'last_seen',last_seen,'hits',hits,'first_uid',first_uid) ORDER BY hits DESC, path),'[]'::jsonb)
-		FROM (SELECT path,md5,first_seen,last_seen,hits,first_uid FROM ota_asset_misses ORDER BY hits DESC, path LIMIT 50) misses)
+		FROM (SELECT path,md5,first_seen,last_seen,hits,first_uid FROM ota_asset_misses ORDER BY hits DESC, path LIMIT $5) misses)
 )::text`
 
-// ReadStatusTx reads the bounded ota.status snapshot; the miss and counter
-// tables are only read, never seeded here.
+// ReadStatusTx reads the bounded ota.status snapshot; each list is asked for
+// its bound plus one row so the fold can report truncation. The miss and
+// counter tables are only read, never seeded here.
 func (Store) ReadStatusTx(ctx context.Context, query tx.Queryer) (appota.StatusSnapshot, error) {
 	if query == nil {
 		return appota.StatusSnapshot{}, errInvalid
 	}
 	var raw string
-	if err := query.QueryRow(ctx, readStatus).Scan(&raw); err != nil {
+	if err := query.QueryRow(ctx, readStatus,
+		appota.StatusActiveLimit+1, appota.StatusBuiltLimit+1, appota.StatusActivationLimit+1,
+		appota.StatusServedLimit+1, appota.StatusMissesLimit+1,
+	).Scan(&raw); err != nil {
 		return appota.StatusSnapshot{}, err
 	}
 	var snapshot appota.StatusSnapshot

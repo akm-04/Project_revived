@@ -11,6 +11,16 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
+// Status list bounds; the store asks for one more row so the fold can report
+// a truncated list (I11A_OPERATOR_COMMANDS_V1 ruling 3, bounded reads).
+const (
+	StatusActiveLimit     = 64
+	StatusBuiltLimit      = 200
+	StatusActivationLimit = 20
+	StatusServedLimit     = 50
+	StatusMissesLimit     = 50
+)
+
 // StatusStore is the ota.status read side.
 type StatusStore interface {
 	ReadStatusTx(context.Context, tx.Queryer) (StatusSnapshot, error)
@@ -39,6 +49,16 @@ type Status struct {
 	Activations []ActivationStatus `json:"activations"`
 	Served      []ServedCounter    `json:"served"`
 	Misses      []AssetMiss        `json:"misses"`
+	Truncated   TruncatedLists     `json:"truncated"`
+}
+
+// TruncatedLists says which ota.status list hit its bound and was cut.
+type TruncatedLists struct {
+	Active      bool `json:"active"`
+	Built       bool `json:"built"`
+	Activations bool `json:"activations"`
+	Served      bool `json:"served"`
+	Misses      bool `json:"misses"`
 }
 
 type ActiveStatus struct {
@@ -106,16 +126,28 @@ func (s StatusService) Status(ctx context.Context) (Status, error) {
 }
 
 func foldStatus(snapshot StatusSnapshot) (Status, error) {
+	active, activeTruncated := bounded(snapshot.Active, StatusActiveLimit)
+	built, builtTruncated := bounded(snapshot.Built, StatusBuiltLimit)
+	activations, activationsTruncated := bounded(snapshot.Activations, StatusActivationLimit)
+	served, servedTruncated := bounded(snapshot.Served, StatusServedLimit)
+	misses, missesTruncated := bounded(snapshot.Misses, StatusMissesLimit)
 	status := Status{
 		Revision:    snapshot.Revision,
-		Built:       orEmpty(snapshot.Built),
-		Activations: orEmpty(snapshot.Activations),
-		Served:      orEmpty(snapshot.Served),
-		Misses:      orEmpty(snapshot.Misses),
+		Built:       orEmpty(built),
+		Activations: orEmpty(activations),
+		Served:      orEmpty(served),
+		Misses:      orEmpty(misses),
 		Active:      ActiveStatus{Catalog: []string{}},
+		Truncated: TruncatedLists{
+			Active:      activeTruncated,
+			Built:       builtTruncated,
+			Activations: activationsTruncated,
+			Served:      servedTruncated,
+			Misses:      missesTruncated,
+		},
 	}
-	catalog := make([]domain.Version, 0, len(snapshot.Active))
-	for _, row := range snapshot.Active {
+	catalog := make([]domain.Version, 0, len(active))
+	for _, row := range active {
 		version, err := domain.ParseVersion(row.Version)
 		if err != nil {
 			return Status{}, err
@@ -158,4 +190,11 @@ func orEmpty[T any](values []T) []T {
 		return []T{}
 	}
 	return values
+}
+
+func bounded[T any](values []T, bound int) ([]T, bool) {
+	if len(values) <= bound {
+		return values, false
+	}
+	return values[:bound], true
 }

@@ -24,14 +24,19 @@ const (
 	CodeStateInvalid     = "OTA_STATE_INVALID"
 	CodeRevisionRequired = "OTA_REVISION_REQUIRED"
 	CodeRootUnavailable  = "OTA_ROOT_UNAVAILABLE"
+	CodeActiveLimit      = "OTA_ACTIVE_LIMIT"
 )
+
+// maxActiveCatalogReleases keeps one ACTIVE read at 16 rows: one code, one
+// assets and at most this many catalog releases (OTA_AMENDMENTS OA-1).
+const maxActiveCatalogReleases = 14
 
 // CommandStore is the write side of ota_releases and ota_activations. Every
 // method runs in the bus transaction, so lock order is the bus row first, then
 // the lane's release rows ordered by version, then the activation insert.
 type CommandStore interface {
 	ReleaseTx(context.Context, tx.Queryer, string) (*domain.RawRelease, error)
-	LockLaneTx(context.Context, tx.Tx, domain.Lane) ([]domain.RawRelease, error)
+	LockLaneTx(context.Context, tx.Tx, domain.Lane, string) ([]domain.RawRelease, error)
 	ActiveRevisionTx(context.Context, tx.Queryer) (int64, error)
 	InsertBuildTx(context.Context, tx.Tx, domain.Release, string, time.Time) error
 	SupersedeLaneTx(context.Context, tx.Tx, domain.Lane, time.Time) ([]string, error)
@@ -144,7 +149,7 @@ func (commands Commands) RegisterBuild(ctx context.Context, transaction tx.Tx, c
 	if existing != nil {
 		return BuildResult{}, operator.Refuse(CodeVersionExists, "the release number already exists", map[string]string{"version": release.Version.String()})
 	}
-	rows, err := commands.Store.LockLaneTx(ctx, transaction, release.Lane)
+	rows, err := commands.Store.LockLaneTx(ctx, transaction, release.Lane, release.Version.String())
 	if err != nil {
 		return BuildResult{}, err
 	}
@@ -170,7 +175,7 @@ func (commands Commands) RegisterBuild(ctx context.Context, transaction tx.Tx, c
 
 // Publish activates a BUILT release (I11A_1_PLAN "Command semantics").
 func (commands Commands) Publish(ctx context.Context, transaction tx.Tx, commandKey string, expectedRevision *int64, versionText string, at time.Time) (Activation, error) {
-	locked, lane, err := commands.lockTarget(ctx, transaction, versionText)
+	locked, lane, laneRows, err := commands.lockTarget(ctx, transaction, versionText)
 	if err != nil {
 		return Activation{}, err
 	}
@@ -186,6 +191,9 @@ func (commands Commands) Publish(ctx context.Context, transaction tx.Tx, command
 	}
 	if err := commands.verifyVolumes(release); err != nil {
 		return Activation{}, err
+	}
+	if lane == domain.LaneCatalog && countActive(laneRows) >= maxActiveCatalogReleases {
+		return Activation{}, operator.Refuse(CodeActiveLimit, "the catalog lane already has the maximum number of ACTIVE releases; withdraw one first", map[string]int{"limit": maxActiveCatalogReleases})
 	}
 	var superseded []string
 	if lane != domain.LaneCatalog {
@@ -206,7 +214,7 @@ func (commands Commands) Publish(ctx context.Context, transaction tx.Tx, command
 
 // Withdraw stops advertising an ACTIVE release; nothing is reactivated.
 func (commands Commands) Withdraw(ctx context.Context, transaction tx.Tx, commandKey string, expectedRevision *int64, versionText string, at time.Time) (Activation, error) {
-	locked, _, err := commands.lockTarget(ctx, transaction, versionText)
+	locked, _, _, err := commands.lockTarget(ctx, transaction, versionText)
 	if err != nil {
 		return Activation{}, err
 	}
@@ -230,34 +238,45 @@ func (commands Commands) Withdraw(ctx context.Context, transaction tx.Tx, comman
 	return Activation{ActivationID: activationID, Version: release.Version.String(), Action: "WITHDRAW", State: string(domain.StateWithdrawn), At: at}, nil
 }
 
-// lockTarget reads the target to find its lane, then locks that lane's rows
-// ordered by version and returns the target row from the locked set.
-func (commands Commands) lockTarget(ctx context.Context, transaction tx.Tx, versionText string) (domain.RawRelease, domain.Lane, error) {
+// lockTarget reads the target to find its lane, then locks that lane's ACTIVE
+// rows plus the target, ordered by version, and returns the target row and the
+// locked set.
+func (commands Commands) lockTarget(ctx context.Context, transaction tx.Tx, versionText string) (domain.RawRelease, domain.Lane, []domain.RawRelease, error) {
 	version, err := domain.ParseVersion(versionText)
 	if err != nil {
-		return domain.RawRelease{}, "", operator.Refuse(CodePayloadInvalid, err.Error(), nil)
+		return domain.RawRelease{}, "", nil, operator.Refuse(CodePayloadInvalid, err.Error(), nil)
 	}
 	target, err := commands.Store.ReleaseTx(ctx, transaction, version.String())
 	if err != nil {
-		return domain.RawRelease{}, "", err
+		return domain.RawRelease{}, "", nil, err
 	}
 	if target == nil {
-		return domain.RawRelease{}, "", operator.Refuse(CodeReleaseUnknown, "the release number does not exist", map[string]string{"version": version.String()})
+		return domain.RawRelease{}, "", nil, operator.Refuse(CodeReleaseUnknown, "the release number does not exist", map[string]string{"version": version.String()})
 	}
 	lane, err := domain.ParseLane(target.Lane)
 	if err != nil {
-		return domain.RawRelease{}, "", err
+		return domain.RawRelease{}, "", nil, err
 	}
-	rows, err := commands.Store.LockLaneTx(ctx, transaction, lane)
+	rows, err := commands.Store.LockLaneTx(ctx, transaction, lane, version.String())
 	if err != nil {
-		return domain.RawRelease{}, "", err
+		return domain.RawRelease{}, "", nil, err
 	}
 	for _, row := range rows {
 		if row.Version == version.String() {
-			return row, lane, nil
+			return row, lane, rows, nil
 		}
 	}
-	return domain.RawRelease{}, "", operator.Refuse(CodeReleaseUnknown, "the release number does not exist", map[string]string{"version": version.String()})
+	return domain.RawRelease{}, "", nil, operator.Refuse(CodeReleaseUnknown, "the release number does not exist", map[string]string{"version": version.String()})
+}
+
+func countActive(rows []domain.RawRelease) int {
+	count := 0
+	for _, row := range rows {
+		if row.State == string(domain.StateActive) {
+			count++
+		}
+	}
+	return count
 }
 
 func (commands Commands) checkRevision(ctx context.Context, transaction tx.Queryer, expected *int64) error {

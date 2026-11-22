@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
@@ -53,10 +54,10 @@ func (store *fakeStore) ReleaseTx(_ context.Context, _ tx.Queryer, version strin
 	return &copy, nil
 }
 
-func (store *fakeStore) LockLaneTx(_ context.Context, _ tx.Tx, lane domain.Lane) ([]domain.RawRelease, error) {
+func (store *fakeStore) LockLaneTx(_ context.Context, _ tx.Tx, lane domain.Lane, version string) ([]domain.RawRelease, error) {
 	rows := make([]domain.RawRelease, 0)
 	for _, row := range store.releases {
-		if row.Lane == string(lane) {
+		if row.Lane == string(lane) && (row.State == string(domain.StateActive) || row.Version == version) {
 			rows = append(rows, *row)
 		}
 	}
@@ -285,6 +286,59 @@ func TestPublishRefusesNonBuiltAndStaleRevision(t *testing.T) {
 	}
 	if _, err := commands.Publish(ctx, noTx{}, "cmd", &revision, "9.9.9", at); refusalCode(t, err) != CodeReleaseUnknown {
 		t.Fatalf("unknown release err=%v", err)
+	}
+}
+
+func TestPublishRefusesMissingVolumeAndChangesNothing(t *testing.T) {
+	ctx := context.Background()
+	at := time.Unix(1000, 0).UTC()
+	request := buildPayload(t, "1.631.2", "code", 4096)
+	store := newFakeStore()
+	root := rootWithVolumes(t, request)
+	commands := Commands{Store: store, Root: root}
+	if _, err := commands.RegisterBuild(ctx, noTx{}, "cmd", request, at); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Remove(filepath.Join(root, "updates", "code", "1.631.2-"+commandSHA[:12]+".zip.001")); err != nil {
+		t.Fatal(err)
+	}
+	revision := int64(0)
+	if _, err := commands.Publish(ctx, noTx{}, "cmd", &revision, "1.631.2", at); refusalCode(t, err) != CodeVolumeMissing {
+		t.Fatalf("err=%v", err)
+	}
+	if store.releases["1.631.2"].State != string(domain.StateBuilt) || store.nextID != 0 || len(store.activations) != 0 {
+		t.Fatalf("publish changed state: state=%s nextID=%d activations=%d", store.releases["1.631.2"].State, store.nextID, len(store.activations))
+	}
+}
+
+func TestPublishRefusesTheFifteenthActiveCatalog(t *testing.T) {
+	ctx := context.Background()
+	at := time.Unix(1000, 0).UTC()
+	requests := make([]domain.BuildRequest, 0, maxActiveCatalogReleases+1)
+	for index := 0; index <= maxActiveCatalogReleases; index++ {
+		requests = append(requests, buildPayload(t, fmt.Sprintf("1.640.%d", index+1), "catalog", 2000))
+	}
+	store := newFakeStore()
+	commands := Commands{Store: store, Root: rootWithVolumes(t, requests...)}
+	for _, request := range requests {
+		if _, err := commands.RegisterBuild(ctx, noTx{}, "cmd-"+request.Version, request, at); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for index := 0; index < maxActiveCatalogReleases; index++ {
+		revision := store.nextID
+		if _, err := commands.Publish(ctx, noTx{}, "cmd-publish-"+requests[index].Version, &revision, requests[index].Version, at); err != nil {
+			t.Fatal(err)
+		}
+	}
+	revision := store.nextID
+	_, err := commands.Publish(ctx, noTx{}, "cmd-publish-over-limit", &revision, requests[maxActiveCatalogReleases].Version, at)
+	if refusalCode(t, err) != CodeActiveLimit {
+		t.Fatalf("err=%v", err)
+	}
+	target := requests[maxActiveCatalogReleases].Version
+	if store.releases[target].State != string(domain.StateBuilt) || store.nextID != int64(maxActiveCatalogReleases) || len(store.activations) != maxActiveCatalogReleases {
+		t.Fatalf("refused publish changed state: state=%s nextID=%d activations=%d", store.releases[target].State, store.nextID, len(store.activations))
 	}
 }
 

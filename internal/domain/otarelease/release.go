@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
-	"strconv"
 	"strings"
 )
 
@@ -226,11 +225,7 @@ func volumeBase(name string, position int) (string, error) {
 		return "", invalid(fmt.Errorf("volume name %q has no .NNN suffix", name))
 	}
 	suffix := name[dot+1:]
-	if len(suffix) != 3 {
-		return "", invalid(fmt.Errorf("volume name %q does not end in .NNN", name))
-	}
-	number, err := strconv.Atoi(suffix)
-	if err != nil || number != position {
+	if suffix != fmt.Sprintf("%03d", position) {
 		return "", invalid(fmt.Errorf("volume name %q is not volume %03d", name, position))
 	}
 	return name[:dot], nil
