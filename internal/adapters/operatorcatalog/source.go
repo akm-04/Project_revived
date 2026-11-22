@@ -25,12 +25,13 @@ func Load(generatedAt time.Time) (appcatalog.Document, error) {
 			Class:         definition.Class,
 			Activation:    definition.SettlementActivation,
 			ItemID:        definition.ItemID,
+			ResourceKey:   definition.ResourceKey,
 			Reason:        definition.Reason,
 		})
 	}
 	items := make([]appcatalog.ItemPresentation, 0, len(catalog.ItemPresentation.Items))
 	for _, item := range catalog.ItemPresentation.Items {
-		items = append(items, appcatalog.ItemPresentation{ID: item.ID, Name: item.Name, Icon: item.Icon})
+		items = append(items, appcatalog.ItemPresentation{ID: item.ID, Name: item.Name, Icon: item.Icon, Quality: item.Quality})
 	}
 	if len(items) == 0 {
 		return appcatalog.Document{}, errors.New("operator catalogue: compiled client item rows are missing")

@@ -76,6 +76,46 @@ func TestGrantLineUsesTheCatalogueKind(t *testing.T) {
 	}
 }
 
+func TestScalarPresentationAndRarity(t *testing.T) {
+	resources := []Resource{
+		{DefinitionKey: "stack_item:1", Class: "STACK_ITEM", Activation: "ENABLED_R4", ItemID: 1},
+		{DefinitionKey: "scalar_currency:mana", Class: "SCALAR_CURRENCY", Activation: "ENABLED_R4", ResourceKey: "mana"},
+		{DefinitionKey: "player_exp:exp", Class: "PLAYER_EXP", Activation: "ENABLED_R5", ResourceKey: "exp"},
+		{DefinitionKey: "scalar_currency:degree_cer", Class: "SCALAR_CURRENCY", Activation: "ENABLED_R4", ResourceKey: "degree_cer"},
+	}
+	items := []ItemPresentation{{ID: 1, Name: "Item", Icon: "images/icon/1.png", Quality: 5}}
+	document, err := Build(resources, items, time.Unix(100, 0))
+	if err != nil {
+		t.Fatal(err)
+	}
+	item, _ := document.Lookup("stack_item:1")
+	if item.Rarity != 5 || item.Icon == "" {
+		t.Fatalf("item entry = %+v", item)
+	}
+	mana, _ := document.Lookup("scalar_currency:mana")
+	if mana.Name != "Coin(s)" || mana.Icon != "images/icon/eco/jinbi.png" {
+		t.Fatalf("mana entry = %+v", mana)
+	}
+	exp, _ := document.Lookup("player_exp:exp")
+	if exp.Name != "" || exp.Icon != "images/icon/eco/exp.png" {
+		t.Fatalf("exp entry = %+v", exp)
+	}
+	unnamed, _ := document.Lookup("scalar_currency:degree_cer")
+	if unnamed.Name != "" || unnamed.Icon != "" {
+		t.Fatalf("a resource the client does not present carries %+v", unnamed)
+	}
+	rarity := int64(5)
+	page, err := document.Search(SearchFilter{Rarity: &rarity})
+	if err != nil || len(page.Entries) != 1 || page.Entries[0].ID != "stack_item:1" {
+		t.Fatalf("rarity search = %+v err=%v", page, err)
+	}
+	absent := int64(3)
+	page, err = document.Search(SearchFilter{Rarity: &absent})
+	if err != nil || len(page.Entries) != 0 {
+		t.Fatalf("absent rarity search = %+v err=%v", page, err)
+	}
+}
+
 func TestSearchPagesAndFilters(t *testing.T) {
 	document, err := Build([]Resource{
 		{DefinitionKey: "stack_item:1", Class: "STACK_ITEM", Activation: "ENABLED_R4", ItemID: 1},

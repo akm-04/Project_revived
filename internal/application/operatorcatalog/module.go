@@ -13,9 +13,10 @@ func Module() operator.Module {
 		LogChannel: "catalog",
 		Screen:     operator.Screen{Tab: "Catalogue", Columns: []string{"id", "kind", "grantable", "name", "icon"}},
 		Reads: []operator.Read{
-			{Name: "catalog.search", Help: "Search the operator catalogue by kind and text.", Fields: []operator.Field{
+			{Name: "catalog.search", Help: "Search the operator catalogue by kind, text and item rarity.", Fields: []operator.Field{
 				operator.NewField("kind", operator.FieldString, false, "kind filter"),
 				operator.NewField("query", operator.FieldString, false, "id or name text"),
+				operator.NewField("rarity", operator.FieldInt, false, "item quality 1..6").Bounded(1, 6),
 				operator.NewField("after", operator.FieldString, false, "last id of the previous page"),
 				operator.NewField("limit", operator.FieldInt, false, "page size").Bounded(1, MaxSearchLimit),
 			}},

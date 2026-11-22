@@ -73,6 +73,9 @@ type ItemPresentation struct {
 	ID   int64  `json:"id"`
 	Name string `json:"name"`
 	Icon string `json:"icon"`
+	// Quality is item.lua's quality column (0 means unset, 1..6 is the star
+	// rarity the client draws).
+	Quality int64 `json:"quality"`
 }
 
 type ItemPresentationCatalog struct {
@@ -87,7 +90,7 @@ func (c ItemPresentationCatalog) Validate() error {
 	}
 	last := int64(0)
 	for _, item := range c.Items {
-		if item.ID <= last || item.Name == "" {
+		if item.ID <= last || item.Name == "" || item.Quality < 0 || item.Quality > 6 {
 			return errors.New("builtin content: invalid item presentation row")
 		}
 		last = item.ID

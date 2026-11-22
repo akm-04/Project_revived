@@ -615,14 +615,23 @@
       "revision_id": "b04cfdc7d5e3b8e8a97f7423d99cac7c478541eee8a50ee9e8fff55e3421101b",
       "scope": "New item_presentation_catalog.json artifact (item.lua id, name, icon) for the operator catalogue; every other artifact byte-identical. Merged onto I11A-2 Events Gifts (lead, O2 merge): revision recomputed over both artifact sets.",
       "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
+    },
+    {
+      "ordinal": 79,
+      "stage": "I11A-3 Operator Catalogue Rarity",
+      "compiler_version": "i11a-operator-catalogue",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "452d053b66a78451eccd4a423b3c6cb3f0b5c52b57a90f42834cc05c53ee67a7",
+      "scope": "item_presentation_catalog.json gains item.lua's quality column as the operator catalogue rarity; every other artifact byte-identical.",
+      "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
     }
   ],
   "current": {
-    "stage": "I11A-3 Operator Catalogue",
+    "stage": "I11A-3 Operator Catalogue Rarity",
     "compiler_version": "i11a-operator-catalogue",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "b04cfdc7d5e3b8e8a97f7423d99cac7c478541eee8a50ee9e8fff55e3421101b",
-    "scope": "New item_presentation_catalog.json artifact (item.lua id, name, icon) for the operator catalogue; every other artifact byte-identical. Merged onto I11A-2 Events Gifts (lead, O2 merge): revision recomputed over both artifact sets.",
+    "revision_id": "452d053b66a78451eccd4a423b3c6cb3f0b5c52b57a90f42834cc05c53ee67a7",
+    "scope": "item_presentation_catalog.json gains item.lua's quality column as the operator catalogue rarity; every other artifact byte-identical.",
     "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
   }
 }

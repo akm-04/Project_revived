@@ -205,6 +205,13 @@ func RedeemList(service RedeemListService) Read {
 func CatalogSearch(document operatorcatalog.Document) Read {
 	return func(_ context.Context, values url.Values) (any, error) {
 		filter := operatorcatalog.SearchFilter{Kind: values.Get("kind"), Query: values.Get("query"), After: values.Get("after")}
+		if rawRarity := values.Get("rarity"); rawRarity != "" {
+			rarity, err := strconv.ParseInt(rawRarity, 10, 64)
+			if err != nil || rarity < 1 || rarity > 6 {
+				return nil, operator.Refuse(operator.CodeReadInvalid, "rarity must be between 1 and 6", nil)
+			}
+			filter.Rarity = &rarity
+		}
 		if rawLimit := values.Get("limit"); rawLimit != "" {
 			limit, err := strconv.Atoi(rawLimit)
 			if err != nil || limit < 1 || limit > operatorcatalog.MaxSearchLimit {
