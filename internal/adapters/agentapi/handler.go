@@ -38,6 +38,7 @@ const (
 	operationPrefix   = "/agent/v1/ops/"
 	logTailPath       = "/agent/v1/log/tail"
 	modulesPath       = "/agent/v1/modules"
+	resPrefix         = "/agent/v1/res/"
 
 	maxBodyBytes = 1 << 20
 	// The agent re-marshals a command into a larger envelope, so it accepts
@@ -62,6 +63,8 @@ type Handler struct {
 	Modules     operatoragent.ModuleLister
 	ToolLog     *operatoragent.ToolLog
 	ToolLogPath string
+	// OTARoot holds settings.json, whose res_path the GUI picture route reads.
+	OTARoot string
 	// Listen is the exact host:port the agent listens on; every route refuses
 	// any other Host header (a browser must not reach the loopback API).
 	Listen string
@@ -112,6 +115,9 @@ func (handler Handler) ServeHTTP(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 	switch {
+	case request.URL.Path == "/" || request.URL.Path == "/gui/app.css" || request.URL.Path == "/gui/app.js":
+		handler.serveGUI(writer, request)
+		return
 	case request.URL.Path == setupPath && request.Method == http.MethodPost:
 		handler.serveSetup(writer, request)
 		return
@@ -159,20 +165,25 @@ func (handler Handler) ServeHTTP(writer http.ResponseWriter, request *http.Reque
 		handler.serveLogTail(writer, request)
 	case request.URL.Path == modulesPath && request.Method == http.MethodGet:
 		handler.serveModules(writer, request)
+	case strings.HasPrefix(request.URL.Path, resPrefix) && request.Method == http.MethodGet:
+		handler.serveRes(writer, request)
 	default:
 		writeRefusal(writer, http.StatusNotFound, operatoragent.CodeNotFound, "no such agent route")
 	}
 }
 
 // allowed is the browser boundary: the request must name the configured
-// listen address exactly, carry no Origin, and POST application/json.
+// listen address exactly, carry no foreign Origin, and POST application/json.
+// The GUI is served by this process, so its own origin is the one exception;
+// any other page still cannot drive the loopback API.
 func (handler Handler) allowed(writer http.ResponseWriter, request *http.Request) bool {
 	if request.Host != handler.Listen {
 		writeRefusal(writer, http.StatusForbidden, operatoragent.CodeForbidden, "the agent API answers only its configured address")
 		return false
 	}
-	if len(request.Header.Values("Origin")) > 0 {
-		writeRefusal(writer, http.StatusForbidden, operatoragent.CodeForbidden, "the agent API refuses browser origins")
+	origins := request.Header.Values("Origin")
+	if len(origins) > 1 || (len(origins) == 1 && origins[0] != "http://"+handler.Listen) {
+		writeRefusal(writer, http.StatusForbidden, operatoragent.CodeForbidden, "the agent API refuses foreign browser origins")
 		return false
 	}
 	if request.Method == http.MethodPost {

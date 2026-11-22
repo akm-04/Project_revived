@@ -69,6 +69,7 @@ func runAgent(root string, args []string) error {
 		Modules:     moduleCatalog,
 		ToolLog:     toolLog,
 		ToolLogPath: filepath.Join(logsDirectory, operatoragent.ToolLogFileName),
+		OTARoot:     config.OTARoot,
 		Listen:      config.Listen,
 		Guard:       backendGuard,
 	}

@@ -1,0 +1,222 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.4;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  background: #f4f5f7;
+  color: #1d2330;
+}
+
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+h1 {
+  font-size: 1.4rem;
+  margin: 0 0 16px;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #d8dce4;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.login {
+  max-width: 420px;
+  margin: 10vh auto 0;
+}
+
+form label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 7px 9px;
+  border: 1px solid #b9c0cc;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #1d2330;
+}
+
+textarea {
+  min-height: 92px;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.9rem;
+}
+
+button {
+  padding: 7px 14px;
+  border: 1px solid #1f4fa8;
+  border-radius: 6px;
+  background: #2463c8;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+button.secondary {
+  background: #ffffff;
+  color: #1f4fa8;
+}
+
+button:hover {
+  filter: brightness(1.05);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tabs button {
+  background: #ffffff;
+  color: #1f4fa8;
+  border-color: #c4cddd;
+}
+
+.tabs button.active {
+  background: #2463c8;
+  color: #ffffff;
+  border-color: #1f4fa8;
+}
+
+.module-title {
+  font-size: 1.15rem;
+  margin: 0 0 4px;
+}
+
+.module-help {
+  color: #5a6475;
+  margin: 0 0 12px;
+}
+
+.command-class {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.command-class.live {
+  background: #dff3e2;
+  color: #1f6b32;
+}
+
+.command-class.maintenance {
+  background: #fdeccd;
+  color: #7a4a00;
+}
+
+.field {
+  margin-bottom: 10px;
+}
+
+.field label {
+  font-weight: 600;
+}
+
+.field .help {
+  color: #5a6475;
+  font-size: 0.85rem;
+}
+
+.status {
+  color: #8a1f1f;
+  white-space: pre-wrap;
+}
+
+.hint {
+  color: #5a6475;
+  font-size: 0.88rem;
+}
+
+.result {
+  margin-top: 12px;
+}
+
+.result pre {
+  background: #111827;
+  color: #e5e7eb;
+  padding: 12px;
+  border-radius: 6px;
+  overflow: auto;
+  max-height: 420px;
+  font-size: 0.85rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-size: 0.88rem;
+}
+
+th,
+td {
+  border: 1px solid #d8dce4;
+  padding: 6px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  background: #eef1f6;
+}
+
+.picture {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  display: block;
+}
+
+.placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border: 1px dashed #b9c0cc;
+  border-radius: 6px;
+  color: #5a6475;
+}
