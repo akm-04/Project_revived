@@ -7,6 +7,8 @@ const (
 	CodeAlreadySetUp       = "AGENT_ALREADY_SET_UP"
 	CodeLoginRefused       = "AGENT_LOGIN_REFUSED"
 	CodeUnauthorized       = "AGENT_UNAUTHORIZED"
+	CodePasswordTooShort   = "AGENT_PASSWORD_TOO_SHORT"
+	CodePasswordSame       = "AGENT_PASSWORD_SAME"
 	CodeForbidden          = "AGENT_FORBIDDEN"
 	CodeBodyInvalid        = "AGENT_BODY_INVALID"
 	CodeBodyTooLarge       = "AGENT_BODY_TOO_LARGE"

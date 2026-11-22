@@ -31,7 +31,13 @@
 <div class="navbar-brand">GXB operator</div>
 <div class="navbar-nav flex-row ms-auto align-items-center gap-2">
 <span id="backend-state" class="nav-link" role="status"></span>
-<button id="logout-button" type="button" class="btn btn-sm btn-outline-secondary">Log out</button>
+<div id="account-menu" class="dropdown">
+<button id="account-button" type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" aria-haspopup="menu" aria-expanded="false">Account</button>
+<div id="account-dropdown" class="dropdown-menu dropdown-menu-end" role="menu" hidden>
+<button id="change-password-button" type="button" class="dropdown-item" role="menuitem">Change password</button>
+<button id="logout-button" type="button" class="dropdown-item" role="menuitem">Log out</button>
+</div>
+</div>
 </div>
 </div>
 </header>
@@ -48,6 +54,27 @@
 </main>
 </div>
 </div>
+</div>
+</div>
+</div>
+
+<div id="password-modal" class="account-modal" hidden role="dialog" aria-modal="true" aria-labelledby="password-modal-title">
+<div class="card card-md">
+<div class="card-body">
+<h2 id="password-modal-title" class="card-title">Change password</h2>
+<form id="password-form">
+<label class="form-label" for="current-password">Current password</label>
+<input id="current-password" type="password" class="form-control" autocomplete="current-password" required>
+<label class="form-label" for="new-password">New password</label>
+<input id="new-password" type="password" class="form-control" autocomplete="new-password" required>
+<label class="form-label" for="repeat-password">Repeat new password</label>
+<input id="repeat-password" type="password" class="form-control" autocomplete="new-password" required>
+<p id="password-status" class="status mt-2" role="status"></p>
+<div class="d-flex gap-2 mt-3">
+<button id="password-save" type="submit" class="btn btn-primary">Change password</button>
+<button id="password-cancel" type="button" class="btn btn-link">Cancel</button>
+</div>
+</form>
 </div>
 </div>
 </div>

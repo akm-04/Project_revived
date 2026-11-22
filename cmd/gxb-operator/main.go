@@ -26,7 +26,7 @@ func run(args []string) error {
 	switch invocation.command {
 	case "agent":
 		return runAgent(invocation.root, invocation.arguments)
-	case "setup", "login", "logout", "backend", "cmd", "read", "ota", "op", "modules", "log":
+	case "setup", "login", "logout", "reset-password", "backend", "cmd", "read", "ota", "op", "modules", "log":
 		return runClientCommand(invocation.root, invocation.command, invocation.arguments)
 	default:
 		usage()
@@ -59,6 +59,7 @@ func usage() {
   gxb-operator setup
   gxb-operator login
   gxb-operator logout
+  gxb-operator reset-password
   gxb-operator backend start [--closed] | stop | status
   gxb-operator cmd <module.command> --reason <text> [--key <key>] [json payload]
   gxb-operator read <module.read> [k=v ...]

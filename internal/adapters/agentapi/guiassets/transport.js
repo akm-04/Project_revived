@@ -3,20 +3,23 @@
 const agentTokenKey = "gxbOperatorToken";
 const loginPath = "/agent/v1/login";
 
-let token = sessionStorage.getItem(agentTokenKey) || "";
 let unauthorizedHandler = () => {};
 
+// sessionStorage is the token's single home: a token removed there is gone on
+// the next request, so an expired session needs no page reload (G16).
+function currentToken() {
+  return sessionStorage.getItem(agentTokenKey) || "";
+}
+
 export function getToken() {
-  return token;
+  return currentToken();
 }
 
 export function setToken(value) {
-  token = value;
   sessionStorage.setItem(agentTokenKey, value);
 }
 
 export function clearToken() {
-  token = "";
   sessionStorage.removeItem(agentTokenKey);
 }
 
@@ -30,6 +33,7 @@ export function setUnauthorizedHandler(handler) {
 export async function request(targetPath, options) {
   const settings = options || {};
   const headers = {};
+  const token = currentToken();
   if (token !== "") {
     headers.Authorization = "Bearer " + token;
   }
@@ -53,8 +57,9 @@ export async function request(targetPath, options) {
       parsed = text;
     }
   }
-  const reply = { ok: response.ok, status: response.status, body: parsed };
+  const reply = { ok: response.ok, status: response.status, body: parsed, unauthorized: false };
   if (response.status === 401 && targetPath !== loginPath) {
+    reply.unauthorized = true;
     clearToken();
     unauthorizedHandler();
   }
@@ -64,6 +69,7 @@ export async function request(targetPath, options) {
 // loadPicture fetches one image through the same session and answers an object
 // URL, or null when the picture is unavailable.
 export async function loadPicture(targetPath) {
+  const token = currentToken();
   let response;
   try {
     response = await fetch(targetPath, { headers: token === "" ? {} : { Authorization: "Bearer " + token } });

@@ -20,8 +20,9 @@ type Sessions struct {
 }
 
 type session struct {
-	hash      [sha256.Size]byte
-	expiresAt time.Time
+	hash       [sha256.Size]byte
+	generation string
+	expiresAt  time.Time
 }
 
 // NewSessions takes the clock so expiry is testable.
@@ -29,8 +30,9 @@ func NewSessions(now func() time.Time) *Sessions {
 	return &Sessions{tokens: map[[sha256.Size]byte]session{}, now: now}
 }
 
-// Login mints a session token and returns its expiry.
-func (sessions *Sessions) Login() (string, time.Time, error) {
+// Login mints a session token bound to the password generation it logged in
+// with and returns its expiry.
+func (sessions *Sessions) Login(generation string) (string, time.Time, error) {
 	token, err := NewToken()
 	if err != nil {
 		return "", time.Time{}, err
@@ -39,12 +41,13 @@ func (sessions *Sessions) Login() (string, time.Time, error) {
 	expiresAt := sessions.now().Add(SessionLifetime)
 	sessions.mutex.Lock()
 	defer sessions.mutex.Unlock()
-	sessions.tokens[hash] = session{hash: hash, expiresAt: expiresAt}
+	sessions.tokens[hash] = session{hash: hash, generation: generation, expiresAt: expiresAt}
 	return token, expiresAt, nil
 }
 
-// Authorize accepts only an unexpired token.
-func (sessions *Sessions) Authorize(token string) bool {
+// Authorize accepts only an unexpired token whose password generation still
+// matches; a password change or offline reset therefore ends every live session.
+func (sessions *Sessions) Authorize(token, generation string) bool {
 	if token == "" {
 		return false
 	}
@@ -56,6 +59,9 @@ func (sessions *Sessions) Authorize(token string) bool {
 		return false
 	}
 	if subtle.ConstantTimeCompare(record.hash[:], hash[:]) != 1 {
+		return false
+	}
+	if subtle.ConstantTimeCompare([]byte(record.generation), []byte(generation)) != 1 {
 		return false
 	}
 	if !sessions.now().Before(record.expiresAt) {

@@ -42,20 +42,24 @@ func TestCredentialsSetupLoginAndExpiry(t *testing.T) {
 		t.Fatalf("right password: %v", err)
 	}
 
+	generation, err := credentials.Generation()
+	if err != nil {
+		t.Fatal(err)
+	}
 	now := time.Date(2026, 11, 22, 10, 0, 0, 0, time.UTC)
 	sessions := NewSessions(func() time.Time { return now })
-	token, expiresAt, err := sessions.Login()
+	token, expiresAt, err := sessions.Login(generation)
 	if err != nil || token == "" {
 		t.Fatalf("login: %q %v", token, err)
 	}
 	if !expiresAt.Equal(now.Add(SessionLifetime)) {
 		t.Fatalf("expires at %v", expiresAt)
 	}
-	if !sessions.Authorize(token) {
+	if !sessions.Authorize(token, generation) {
 		t.Fatal("a fresh token must be authorized")
 	}
 	now = now.Add(SessionLifetime + time.Minute)
-	if sessions.Authorize(token) {
+	if sessions.Authorize(token, generation) {
 		t.Fatal("an expired token must be refused")
 	}
 }

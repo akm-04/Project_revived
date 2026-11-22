@@ -1,6 +1,7 @@
 package agentapi
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"net/http"
@@ -27,7 +28,11 @@ func newForwardingHandler(t *testing.T) (Handler, *backendRecorder, string) {
 		t.Fatal(err)
 	}
 	sessions := operatoragent.NewSessions(time.Now)
-	session, _, err := sessions.Login()
+	generation, err := credentials.Generation()
+	if err != nil {
+		t.Fatal(err)
+	}
+	session, _, err := sessions.Login(generation)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -154,6 +159,98 @@ func TestForwardedReadPassesBackendNotFound(t *testing.T) {
 	}
 }
 
+func newPasswordHandler(t *testing.T) (Handler, *operatoragent.Credentials, string, *bytes.Buffer) {
+	t.Helper()
+	credentials := operatoragent.NewCredentials(t.TempDir())
+	if err := credentials.Setup("original-password"); err != nil {
+		t.Fatal(err)
+	}
+	sessions := operatoragent.NewSessions(time.Now)
+	generation, err := credentials.Generation()
+	if err != nil {
+		t.Fatal(err)
+	}
+	session, _, err := sessions.Login(generation)
+	if err != nil {
+		t.Fatal(err)
+	}
+	buffer := &bytes.Buffer{}
+	handler := Handler{
+		Credentials: credentials,
+		Sessions:    sessions,
+		ToolLog:     operatoragent.NewToolLog(buffer, time.Now),
+		Listen:      testListen,
+	}
+	return handler, credentials, session, buffer
+}
+
+func TestPasswordChangeRouteRefusesAndThenEndsSessions(t *testing.T) {
+	handler, credentials, session, toolLog := newPasswordHandler(t)
+	cases := []struct {
+		name string
+		body string
+		code string
+	}{
+		{name: "wrong current", body: `{"current":"wrong-password","new":"replacement-password"}`, code: operatoragent.CodeLoginRefused},
+		{name: "too short", body: `{"current":"original-password","new":"short"}`, code: operatoragent.CodePasswordTooShort},
+		{name: "same", body: `{"current":"original-password","new":"original-password"}`, code: operatoragent.CodePasswordSame},
+	}
+	for _, testCase := range cases {
+		t.Run(testCase.name, func(t *testing.T) {
+			recorder := serveAgent(handler, http.MethodPost, "/agent/v1/password", session, testCase.body)
+			if recorder.Code != http.StatusConflict || refusalCodeOf(t, recorder) != testCase.code {
+				t.Fatalf("status = %d, body = %s", recorder.Code, recorder.Body)
+			}
+		})
+	}
+
+	recorder := serveAgent(handler, http.MethodPost, "/agent/v1/password", session, `{"current":"original-password","new":"replacement-password"}`)
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("change: %d %s", recorder.Code, recorder.Body)
+	}
+	if strings.Contains(toolLog.String(), "original-password") || strings.Contains(toolLog.String(), "replacement-password") {
+		t.Fatalf("the tool log leaked a password: %s", toolLog.String())
+	}
+	if !strings.Contains(toolLog.String(), `"step":"password changed"`) {
+		t.Fatalf("the tool log has no password change line: %s", toolLog.String())
+	}
+
+	stale := serveAgent(handler, http.MethodGet, "/agent/v1/modules", session, "")
+	if stale.Code != http.StatusUnauthorized {
+		t.Fatalf("the pre-change session survived: %d %s", stale.Code, stale.Body)
+	}
+	oldLogin := serveAgent(handler, http.MethodPost, "/agent/v1/login", "", `{"password":"original-password"}`)
+	if oldLogin.Code != http.StatusConflict {
+		t.Fatalf("the old password logged in: %d %s", oldLogin.Code, oldLogin.Body)
+	}
+	newLogin := serveAgent(handler, http.MethodPost, "/agent/v1/login", "", `{"password":"replacement-password"}`)
+	if newLogin.Code != http.StatusOK {
+		t.Fatalf("the new password did not log in: %d %s", newLogin.Code, newLogin.Body)
+	}
+	if err := credentials.Verify("replacement-password"); err != nil {
+		t.Fatalf("the stored password is not the new one: %v", err)
+	}
+}
+
+func TestOfflineResetEndsTheSessionOnTheNextRequest(t *testing.T) {
+	handler, credentials, session, _ := newPasswordHandler(t)
+	if err := credentials.ResetPassword("offline-reset-password"); err != nil {
+		t.Fatal(err)
+	}
+	recorder := serveAgent(handler, http.MethodGet, "/agent/v1/modules", session, "")
+	if recorder.Code != http.StatusUnauthorized {
+		t.Fatalf("an offline reset left the session alive: %d %s", recorder.Code, recorder.Body)
+	}
+}
+
+func TestPasswordChangeRouteNeedsTheSession(t *testing.T) {
+	handler, _, _, _ := newPasswordHandler(t)
+	recorder := serveAgent(handler, http.MethodPost, "/agent/v1/password", "", `{"current":"original-password","new":"replacement-password"}`)
+	if recorder.Code != http.StatusUnauthorized {
+		t.Fatalf("status = %d, body = %s", recorder.Code, recorder.Body)
+	}
+}
+
 func TestAgentSetupRequiredAndUnauthorized(t *testing.T) {
 	handler := Handler{Credentials: operatoragent.NewCredentials(t.TempDir()), Sessions: operatoragent.NewSessions(time.Now), Listen: testListen}
 	recorder := serveAgent(handler, http.MethodGet, "/agent/v1/backend/status", "", "")
@@ -267,7 +364,11 @@ func newBuildHandler(t *testing.T) (Handler, *fakeBuildStarter, string) {
 		t.Fatal(err)
 	}
 	sessions := operatoragent.NewSessions(time.Now)
-	session, _, err := sessions.Login()
+	generation, err := credentials.Generation()
+	if err != nil {
+		t.Fatal(err)
+	}
+	session, _, err := sessions.Login(generation)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -345,7 +446,11 @@ func TestBackendStartRefusedWhileMaintenanceRuns(t *testing.T) {
 		t.Fatal(err)
 	}
 	sessions := operatoragent.NewSessions(time.Now)
-	session, _, err := sessions.Login()
+	generation, err := credentials.Generation()
+	if err != nil {
+		t.Fatal(err)
+	}
+	session, _, err := sessions.Login(generation)
 	if err != nil {
 		t.Fatal(err)
 	}
