@@ -5,6 +5,8 @@
 package otabuild
 
 import (
+	"archive/zip"
+	"bytes"
 	"context"
 	"crypto/md5"
 	"crypto/sha256"
@@ -32,27 +34,40 @@ type Input struct {
 	Origins       map[string]string
 	UpdatesDir    string
 	StagingDir    string
+	// ResPath is the P1 asset folder settings.json names; the assets lane reads
+	// its exact-current files there (I11A_1_PLAN "L4c decisions").
+	ResPath string
+}
+
+// Result is one finished build: the ota.register_build payload plus the report
+// the agent records in the operation.
+type Result struct {
+	Request otarelease.BuildRequest
+	Report  Report
 }
 
 // Refusal kinds the agent maps to AGENT_* errors. Every refusal wraps exactly
 // one of them so callers can use errors.Is.
 var (
-	ErrAssetsLaneUnsupported = errors.New("otabuild: the assets lane is not built yet")
-	ErrInvalidLane           = errors.New("otabuild: unknown lane")
-	ErrInvalidVersion        = errors.New("otabuild: invalid version")
-	ErrInvalidInput          = errors.New("otabuild: invalid build input")
-	ErrEmptyPackage          = errors.New("otabuild: the release package has no file")
-	ErrDuplicatePath         = errors.New("otabuild: a client path is shipped twice")
-	ErrUpdateSceneForbidden  = errors.New("otabuild: UpdateScene.lua stays in the APK")
-	ErrOriginMismatch        = errors.New("otabuild: a packaged origin differs from the configured origins")
-	ErrOriginsMissing        = errors.New("otabuild: an origin carrier is packaged without configured origins")
-	ErrAbiMismatch           = errors.New("otabuild: the stock src_32 and src_64 copies differ")
-	ErrStockHashMismatch     = errors.New("otabuild: the stock target does not match its pinned sha256")
-	ErrPatchKind             = errors.New("otabuild: unknown patch kind")
-	ErrInvalidPatch          = errors.New("otabuild: invalid patch definition")
-	ErrPatchAnchor           = errors.New("otabuild: patch anchor is missing or not unique")
-	ErrVolumeLimit           = errors.New("otabuild: the package does not fit the stock volume limits")
-	ErrTargetExists          = errors.New("otabuild: the release artifact already exists")
+	ErrInvalidLane          = errors.New("otabuild: unknown lane")
+	ErrInvalidVersion       = errors.New("otabuild: invalid version")
+	ErrInvalidInput         = errors.New("otabuild: invalid build input")
+	ErrEmptyPackage         = errors.New("otabuild: the release package has no file")
+	ErrDuplicatePath        = errors.New("otabuild: a client path is shipped twice")
+	ErrUpdateSceneForbidden = errors.New("otabuild: UpdateScene.lua stays in the APK")
+	ErrOriginMismatch       = errors.New("otabuild: a packaged origin differs from the configured origins")
+	ErrOriginsMissing       = errors.New("otabuild: an origin carrier is packaged without configured origins")
+	ErrAbiMismatch          = errors.New("otabuild: the stock src_32 and src_64 copies differ")
+	ErrStockHashMismatch    = errors.New("otabuild: the stock target does not match its pinned sha256")
+	ErrPatchKind            = errors.New("otabuild: unknown patch kind")
+	ErrInvalidPatch         = errors.New("otabuild: invalid patch definition")
+	ErrPatchAnchor          = errors.New("otabuild: patch anchor is missing or not unique")
+	ErrVolumeLimit          = errors.New("otabuild: the package does not fit the stock volume limits")
+	ErrTargetExists         = errors.New("otabuild: the release artifact already exists")
+	ErrCatalogInvalid       = errors.New("otabuild: the stock version.json is not usable")
+	ErrResPathMissing       = errors.New("otabuild: the res_path is empty or not a readable folder")
+	ErrNoExactAssets        = errors.New("otabuild: no exact-current asset file was found")
+	ErrAssetCollision       = errors.New("otabuild: two asset rows land on one zip name")
 )
 
 // volumeByteLimit is ruling 5's per-volume cap; tests lower it to exercise the
@@ -61,77 +76,113 @@ var volumeByteLimit int64 = 99_000_000
 
 const maxTotalBytes int64 = 2_147_483_647
 
-// Build validates the input, assembles the package, splits it into volumes and
-// renames them into UpdatesDir. It returns the ota.register_build payload.
-func Build(ctx context.Context, input Input) (otarelease.BuildRequest, error) {
+// Build validates the input, assembles the lane's package, splits it into
+// volumes and commits the immutable artifacts into UpdatesDir. It returns the
+// ota.register_build payload plus the build report.
+func Build(ctx context.Context, input Input) (Result, error) {
 	lane, version, err := validateInput(input)
 	if err != nil {
-		return otarelease.BuildRequest{}, err
+		return Result{}, err
 	}
 	if err := sweepInterruptedBuilds(input.UpdatesDir, input.StagingDir); err != nil {
-		return otarelease.BuildRequest{}, err
+		return Result{}, err
 	}
 	baseline, closeBaseline, err := openBaseline(input.StockBaseline)
 	if err != nil {
-		return otarelease.BuildRequest{}, err
+		return Result{}, err
 	}
 	defer closeBaseline()
 
-	files, err := collectPackage(input.ClientTree, baseline)
-	if err != nil {
-		return otarelease.BuildRequest{}, err
+	report := Report{Lane: string(lane), Version: version.String(), MissingSample: []string{}, MismatchSample: []string{}}
+	var entries []packageEntry
+	var sidecar []resSidecarEntry
+	if lane == otarelease.LaneAssets {
+		entries, sidecar, report, err = assetsPackage(input.ResPath, version.String(), baseline)
+	} else {
+		entries, err = codeEntries(input, baseline)
 	}
-	if err := checkOriginGuard(files, input.Origins); err != nil {
-		return otarelease.BuildRequest{}, err
+	if err != nil {
+		return Result{}, err
 	}
 	if err := ctx.Err(); err != nil {
-		return otarelease.BuildRequest{}, err
+		return Result{}, err
 	}
 
-	entries := packageEntries(files)
 	if err := os.MkdirAll(input.StagingDir, 0o755); err != nil {
-		return otarelease.BuildRequest{}, fmt.Errorf("otabuild: staging directory: %w", err)
+		return Result{}, fmt.Errorf("otabuild: staging directory: %w", err)
 	}
 	staging, err := os.MkdirTemp(input.StagingDir, "build-*")
 	if err != nil {
-		return otarelease.BuildRequest{}, fmt.Errorf("otabuild: staging directory: %w", err)
+		return Result{}, fmt.Errorf("otabuild: staging directory: %w", err)
 	}
 	defer os.RemoveAll(staging)
 
 	assembled := filepath.Join(staging, "package.zip")
-	totalSize, err := writeAssembled(assembled, entries)
+	totalSize, err := writeAssembled(assembled, entries, archiveMethod(lane))
 	if err != nil {
-		return otarelease.BuildRequest{}, err
+		return Result{}, err
 	}
 	if err := ctx.Err(); err != nil {
-		return otarelease.BuildRequest{}, err
+		return Result{}, err
 	}
 	digest, err := fileDigest(assembled)
 	if err != nil {
-		return otarelease.BuildRequest{}, err
+		return Result{}, err
 	}
 
 	sizes, err := planVolumeSizes(totalSize, volumeByteLimit)
 	if err != nil {
-		return otarelease.BuildRequest{}, err
+		return Result{}, err
 	}
 	volumes, err := writeVolumes(staging, version.String(), digest.sha256, sizes)
 	if err != nil {
-		return otarelease.BuildRequest{}, err
+		return Result{}, err
 	}
 
 	request, err := buildRequest(lane, version, input.Rollback, volumes, digest, totalSize, entries)
 	if err != nil {
-		return otarelease.BuildRequest{}, err
+		return Result{}, err
 	}
 	if _, err := request.Release(); err != nil {
-		return otarelease.BuildRequest{}, fmt.Errorf("otabuild: built row is invalid: %w", err)
+		return Result{}, fmt.Errorf("otabuild: built row is invalid: %w", err)
+	}
+	packageBase := fmt.Sprintf("%s-%s.zip", version.String(), digest.sha256[:12])
+	artifacts, err := volumeArtifacts(volumes)
+	if err != nil {
+		return Result{}, err
+	}
+	if lane == otarelease.LaneAssets {
+		sidecarArtifact, err := stageSidecar(staging, packageBase, sidecar)
+		if err != nil {
+			return Result{}, err
+		}
+		artifacts = append(artifacts, sidecarArtifact)
 	}
 	marker := fmt.Sprintf("%s-%s.incomplete", version.String(), digest.sha256[:12])
-	if err := commitVolumes(staging, input.UpdatesDir, marker, volumes); err != nil {
-		return otarelease.BuildRequest{}, err
+	if err := commitArtifacts(staging, input.UpdatesDir, marker, artifacts); err != nil {
+		return Result{}, err
 	}
-	return request, nil
+	return Result{Request: request, Report: report}, nil
+}
+
+// codeEntries collects the cumulative code/catalog package and applies the
+// origin guard.
+func codeEntries(input Input, baseline stockBaseline) ([]packageEntry, error) {
+	files, err := collectPackage(input.ClientTree, baseline)
+	if err != nil {
+		return nil, err
+	}
+	if err := checkOriginGuard(files, input.Origins); err != nil {
+		return nil, err
+	}
+	return packageEntries(files), nil
+}
+
+func archiveMethod(lane otarelease.Lane) uint16 {
+	if lane == otarelease.LaneAssets {
+		return zip.Store
+	}
+	return zip.Deflate
 }
 
 func validateInput(input Input) (otarelease.Lane, otarelease.Version, error) {
@@ -139,15 +190,17 @@ func validateInput(input Input) (otarelease.Lane, otarelease.Version, error) {
 	if err != nil {
 		return "", otarelease.Version{}, fmt.Errorf("%w: %v", ErrInvalidLane, err)
 	}
-	if lane == otarelease.LaneAssets {
-		return "", otarelease.Version{}, ErrAssetsLaneUnsupported
-	}
 	version, err := otarelease.ParseVersion(input.Version)
 	if err != nil {
 		return "", otarelease.Version{}, fmt.Errorf("%w: %v", ErrInvalidVersion, err)
 	}
 	if input.StockBaseline == "" || input.ClientTree == "" || input.UpdatesDir == "" || input.StagingDir == "" {
 		return "", otarelease.Version{}, fmt.Errorf("%w: baseline, client tree, updates and staging are required", ErrInvalidInput)
+	}
+	if lane == otarelease.LaneAssets {
+		if _, err := resolveResRoot(input.ResPath); err != nil {
+			return "", otarelease.Version{}, err
+		}
 	}
 	if err := requireSameFilesystem(input.StagingDir, input.UpdatesDir); err != nil {
 		return "", otarelease.Version{}, err
@@ -271,9 +324,26 @@ func safeClientPath(clientPath string) bool {
 	return true
 }
 
+// packageEntry is one file inside the assembled zip. The code lane carries the
+// bytes in memory; the assets lane streams a file from disk so a 1 GB bootstrap
+// never has to fit in RAM.
 type packageEntry struct {
 	path    string
 	content []byte
+	source  string
+	size    int64
+	md5     string
+}
+
+func (entry packageEntry) open() (io.ReadCloser, error) {
+	if entry.source == "" {
+		return io.NopCloser(bytes.NewReader(entry.content)), nil
+	}
+	file, err := os.Open(entry.source)
+	if err != nil {
+		return nil, fmt.Errorf("otabuild: open %s: %w", entry.source, err)
+	}
+	return file, nil
 }
 
 // packageEntries writes every client file under both stock prefixes in sorted
@@ -287,7 +357,8 @@ func packageEntries(files map[string][]byte) []packageEntry {
 	entries := make([]packageEntry, 0, 2*len(paths))
 	for _, prefix := range []string{"src_32/", "src_64/"} {
 		for _, path := range paths {
-			entries = append(entries, packageEntry{path: prefix + path, content: files[path]})
+			content := files[path]
+			entries = append(entries, packageEntry{path: prefix + path, content: content, size: int64(len(content)), md5: md5Hex(content)})
 		}
 	}
 	sort.Slice(entries, func(left, right int) bool { return entries[left].path < entries[right].path })
@@ -300,11 +371,17 @@ type digestSet struct {
 }
 
 func fileDigest(path string) (digestSet, error) {
-	content, err := os.ReadFile(path)
+	file, err := os.Open(path)
 	if err != nil {
 		return digestSet{}, fmt.Errorf("otabuild: read assembled package: %w", err)
 	}
-	return digestSet{md5: md5Hex(content), sha256: sha256Hex(content)}, nil
+	defer file.Close()
+	md5Hash := md5.New()
+	sha256Hash := sha256.New()
+	if _, err := io.Copy(io.MultiWriter(md5Hash, sha256Hash), file); err != nil {
+		return digestSet{}, fmt.Errorf("otabuild: read assembled package: %w", err)
+	}
+	return digestSet{md5: hex.EncodeToString(md5Hash.Sum(nil)), sha256: hex.EncodeToString(sha256Hash.Sum(nil))}, nil
 }
 
 func md5Hex(content []byte) string {
@@ -326,8 +403,8 @@ func buildRequest(lane otarelease.Lane, version otarelease.Version, rollback boo
 	for _, entry := range entries {
 		manifest = append(manifest, otarelease.ManifestEntry{
 			Path: entry.path,
-			Size: int64(len(entry.content)),
-			MD5:  md5Hex(entry.content),
+			Size: entry.size,
+			MD5:  entry.md5,
 		})
 	}
 	manifestDocument, err := json.Marshal(struct {
@@ -404,28 +481,58 @@ func writeVolume(source io.Reader, path string, size int64) (otarelease.PackageV
 // volumes.
 var renameFile = os.Rename
 
-// commitVolumes refuses an existing artifact before it moves anything, then
-// renames every staged volume into the lane directory (immutable: ruling 2).
-// The marker lists the volumes being published; while it exists the set is
-// incomplete, and an error rolls the moved volumes back so no partial set can
-// poison a later build.
-func commitVolumes(staging, updatesDir, marker string, volumes []otarelease.PackageVolume) error {
+// artifact is one immutable file to commit: its name under UpdatesDir, its
+// exact size and sha256. Content-addressed names make a rebuild of the same
+// inputs repeat the same names.
+type artifact struct {
+	Name   string
+	Size   int64
+	SHA256 string
+}
+
+func volumeArtifacts(volumes []otarelease.PackageVolume) ([]artifact, error) {
+	artifacts := make([]artifact, 0, len(volumes))
+	for _, volume := range volumes {
+		if len(volume.SHA256) != 64 {
+			return nil, fmt.Errorf("%w: volume %s has no sha256", ErrVolumeLimit, volume.Name)
+		}
+		artifacts = append(artifacts, artifact{Name: volume.Name, Size: volume.Size, SHA256: volume.SHA256})
+	}
+	return artifacts, nil
+}
+
+// commitArtifacts refuses a target that differs from the staged file, counts an
+// identical target (same size and full sha256) as already written, and renames
+// the rest into the lane directory (ruling 2; idempotent retry in "L4c
+// decisions"). The marker lists only the files being moved; while it exists the
+// set is incomplete, and an error rolls the moved files back so no partial set
+// can poison a later build.
+func commitArtifacts(staging, updatesDir, marker string, artifacts []artifact) error {
 	if err := os.MkdirAll(updatesDir, 0o755); err != nil {
 		return fmt.Errorf("otabuild: updates directory: %w", err)
 	}
-	for _, volume := range volumes {
-		target := filepath.Join(updatesDir, volume.Name)
-		if _, err := os.Lstat(target); err == nil {
-			return fmt.Errorf("%w: %s", ErrTargetExists, volume.Name)
-		} else if !errors.Is(err, os.ErrNotExist) {
+	pending := make([]artifact, 0, len(artifacts))
+	for _, candidate := range artifacts {
+		matches, err := fileMatches(filepath.Join(updatesDir, candidate.Name), candidate.Size, candidate.SHA256)
+		if err != nil && !errors.Is(err, os.ErrNotExist) {
 			return fmt.Errorf("otabuild: check target: %w", err)
 		}
+		if err != nil {
+			pending = append(pending, candidate)
+			continue
+		}
+		if !matches {
+			return fmt.Errorf("%w: %s", ErrTargetExists, candidate.Name)
+		}
+	}
+	if len(pending) == 0 {
+		return nil
 	}
 	markerPath := filepath.Join(updatesDir, marker)
-	if err := writeIncompleteMarker(markerPath, volumes); err != nil {
+	if err := writeIncompleteMarker(markerPath, pending); err != nil {
 		return err
 	}
-	moved := make([]string, 0, len(volumes))
+	moved := make([]string, 0, len(pending))
 	rollback := func() {
 		for _, name := range moved {
 			_ = os.Remove(filepath.Join(updatesDir, name))
@@ -433,12 +540,12 @@ func commitVolumes(staging, updatesDir, marker string, volumes []otarelease.Pack
 		_ = os.Remove(markerPath)
 		_ = syncDirectory(updatesDir)
 	}
-	for _, volume := range volumes {
-		if err := renameFile(filepath.Join(staging, volume.Name), filepath.Join(updatesDir, volume.Name)); err != nil {
+	for _, candidate := range pending {
+		if err := renameFile(filepath.Join(staging, candidate.Name), filepath.Join(updatesDir, candidate.Name)); err != nil {
 			rollback()
-			return fmt.Errorf("otabuild: move volume: %w", err)
+			return fmt.Errorf("otabuild: move artifact: %w", err)
 		}
-		moved = append(moved, volume.Name)
+		moved = append(moved, candidate.Name)
 	}
 	if err := syncDirectory(updatesDir); err != nil {
 		rollback()
@@ -455,10 +562,32 @@ func commitVolumes(staging, updatesDir, marker string, volumes []otarelease.Pack
 	return nil
 }
 
-func writeIncompleteMarker(path string, volumes []otarelease.PackageVolume) error {
-	names := make([]string, 0, len(volumes))
-	for _, volume := range volumes {
-		names = append(names, volume.Name)
+// fileMatches reports whether path holds exactly size bytes with the given
+// sha256. A missing file is os.ErrNotExist; a size mismatch is a cheap false.
+func fileMatches(path string, size int64, expectedSHA256 string) (bool, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return false, err
+	}
+	defer file.Close()
+	info, err := file.Stat()
+	if err != nil {
+		return false, err
+	}
+	if !info.Mode().IsRegular() || info.Size() != size {
+		return false, nil
+	}
+	digest := sha256.New()
+	if _, err := io.Copy(digest, file); err != nil {
+		return false, err
+	}
+	return hex.EncodeToString(digest.Sum(nil)) == expectedSHA256, nil
+}
+
+func writeIncompleteMarker(path string, artifacts []artifact) error {
+	names := make([]string, 0, len(artifacts))
+	for _, candidate := range artifacts {
+		names = append(names, candidate.Name)
 	}
 	file, err := os.OpenFile(path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0o644)
 	if err != nil {

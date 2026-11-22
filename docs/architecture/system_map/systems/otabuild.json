@@ -30,6 +30,7 @@
   "integration": [],
   "scenarios_naming": [],
   "unit": [
+   "assets_test.go",
    "build_test.go"
   ]
  }

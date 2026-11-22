@@ -52,6 +52,7 @@ func runAgent(root string, args []string) error {
 	})
 	operator := operatorclient.New(config.Backend.OperatorAddr, tokens)
 	backendGuard := &operatoragent.BackendGuard{}
+	buildOperation := operatoragent.Build{Config: config, Operator: operator, Operations: operations}
 	handler := agentapi.Handler{
 		Credentials: operatoragent.NewCredentials(root),
 		Sessions:    operatoragent.NewSessions(time.Now),
@@ -60,6 +61,7 @@ func runAgent(root string, args []string) error {
 		Tokens:      tokens,
 		Maintenance: operatoragent.Maintenance{Backend: backend, Operator: operator, Tokens: tokens, Operations: operations, Guard: backendGuard},
 		Operations:  operations,
+		Build:       buildOperation,
 		ToolLog:     toolLog,
 		ToolLogPath: filepath.Join(logsDirectory, operatoragent.ToolLogFileName),
 		Listen:      config.Listen,

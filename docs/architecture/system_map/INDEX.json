@@ -1404,7 +1404,7 @@
    "tables": 1
   },
   {
-   "callees": 0,
+   "callees": 2,
    "callers": 0,
    "mids": 0,
    "name": "operatoragent",
@@ -1414,7 +1414,7 @@
   },
   {
    "callees": 0,
-   "callers": 0,
+   "callers": 1,
    "mids": 0,
    "name": "otabuild",
    "path": "internal/application/otabuild",
@@ -1423,7 +1423,7 @@
   },
   {
    "callees": 2,
-   "callers": 0,
+   "callers": 1,
    "mids": 3,
    "name": "otarelease",
    "path": "internal/application/otarelease",

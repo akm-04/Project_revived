@@ -3,6 +3,7 @@ package otabuild
 import (
 	"archive/zip"
 	"fmt"
+	"io"
 	"os"
 )
 
@@ -12,8 +13,9 @@ import (
 const msDos1980JanuaryFirst uint16 = 33
 
 // writeAssembled writes the deterministic package zip: sorted entries, fixed
-// date, deflate, no extra fields (I11A_1_PLAN "Builder decisions").
-func writeAssembled(path string, entries []packageEntry) (int64, error) {
+// date, the lane's method (deflate for code, stored for assets), no extra
+// fields (I11A_1_PLAN "Builder decisions", "L4c decisions").
+func writeAssembled(path string, entries []packageEntry, method uint16) (int64, error) {
 	file, err := os.Create(path)
 	if err != nil {
 		return 0, fmt.Errorf("otabuild: create package: %w", err)
@@ -21,9 +23,10 @@ func writeAssembled(path string, entries []packageEntry) (int64, error) {
 	writer := zip.NewWriter(file)
 	for _, entry := range entries {
 		header := &zip.FileHeader{
-			Name:         entry.path,
-			Method:       zip.Deflate,
-			ModifiedDate: msDos1980JanuaryFirst,
+			Name:               entry.path,
+			Method:             method,
+			ModifiedDate:       msDos1980JanuaryFirst,
+			UncompressedSize64: uint64(entry.size),
 		}
 		header.SetMode(0o644)
 		target, err := writer.CreateHeader(header)
@@ -31,9 +34,9 @@ func writeAssembled(path string, entries []packageEntry) (int64, error) {
 			file.Close()
 			return 0, fmt.Errorf("otabuild: create zip entry %q: %w", entry.path, err)
 		}
-		if _, err := target.Write(entry.content); err != nil {
+		if err := copyEntry(target, entry); err != nil {
 			file.Close()
-			return 0, fmt.Errorf("otabuild: write zip entry %q: %w", entry.path, err)
+			return 0, err
 		}
 	}
 	if err := writer.Close(); err != nil {
@@ -52,4 +55,20 @@ func writeAssembled(path string, entries []packageEntry) (int64, error) {
 		return 0, fmt.Errorf("otabuild: stat package: %w", err)
 	}
 	return info.Size(), nil
+}
+
+func copyEntry(target io.Writer, entry packageEntry) error {
+	source, err := entry.open()
+	if err != nil {
+		return err
+	}
+	defer source.Close()
+	written, err := io.Copy(target, source)
+	if err != nil {
+		return fmt.Errorf("otabuild: write zip entry %q: %w", entry.path, err)
+	}
+	if written != entry.size {
+		return fmt.Errorf("%w: zip entry %q has %d of %d bytes", ErrInvalidInput, entry.path, written, entry.size)
+	}
+	return nil
 }

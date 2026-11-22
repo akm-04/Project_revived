@@ -5,6 +5,7 @@
 package agentapi
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
@@ -31,6 +32,7 @@ const (
 	readPrefix        = "/agent/v1/reads/"
 	publishPath       = "/agent/v1/ota/publish"
 	withdrawPath      = "/agent/v1/ota/withdraw"
+	buildPath         = "/agent/v1/ota/build"
 	operationPrefix   = "/agent/v1/ops/"
 	logTailPath       = "/agent/v1/log/tail"
 
@@ -49,6 +51,7 @@ type Handler struct {
 	Tokens      *operatoragent.TokenHolder
 	Maintenance operatoragent.Maintenance
 	Operations  *operatoragent.Operations
+	Build       operatoragent.OTAOperationStarter
 	ToolLog     *operatoragent.ToolLog
 	ToolLogPath string
 	// Listen is the exact host:port the agent listens on; every route refuses
@@ -79,6 +82,14 @@ type commandRequest struct {
 
 type maintenanceRequest struct {
 	Version     string `json:"version"`
+	Reason      string `json:"reason"`
+	SemanticKey string `json:"semantic_key"`
+}
+
+type buildRequest struct {
+	Lane        string `json:"lane"`
+	Version     string `json:"version"`
+	Rollback    bool   `json:"rollback"`
 	Reason      string `json:"reason"`
 	SemanticKey string `json:"semantic_key"`
 }
@@ -131,6 +142,8 @@ func (handler Handler) ServeHTTP(writer http.ResponseWriter, request *http.Reque
 		handler.serveMaintenance(writer, request, true)
 	case request.URL.Path == withdrawPath && request.Method == http.MethodPost:
 		handler.serveMaintenance(writer, request, false)
+	case request.URL.Path == buildPath && request.Method == http.MethodPost:
+		handler.serveBuild(writer, request)
 	case strings.HasPrefix(request.URL.Path, operationPrefix) && request.Method == http.MethodGet:
 		handler.serveOperation(writer, strings.TrimPrefix(request.URL.Path, operationPrefix))
 	case request.URL.Path == logTailPath && request.Method == http.MethodGet:
@@ -313,6 +326,34 @@ func (handler Handler) serveMaintenance(writer http.ResponseWriter, request *htt
 	writeJSON(writer, http.StatusOK, operation)
 }
 
+// serveBuild starts the ota build long operation in the background and answers
+// 202 with its id; the CLI polls op status (I11A_1_PLAN "L4c decisions").
+func (handler Handler) serveBuild(writer http.ResponseWriter, request *http.Request) {
+	var body buildRequest
+	if err := decodeBody(writer, request, &body); err != nil {
+		handler.writeBodyError(writer, err)
+		return
+	}
+	if handler.Build == nil {
+		handler.writeAgentError(writer, "ota.build", operatoragent.Refuse(operatoragent.CodeFailed, "the agent build is not configured"))
+		return
+	}
+	// The operation outlives the HTTP request that started it.
+	operation, err := handler.Build.Start(context.WithoutCancel(request.Context()), operatoragent.BuildRequest{
+		Lane:        body.Lane,
+		Version:     body.Version,
+		Rollback:    body.Rollback,
+		Reason:      body.Reason,
+		SemanticKey: body.SemanticKey,
+	})
+	if err != nil {
+		handler.writeAgentError(writer, "ota.build", err)
+		return
+	}
+	handler.record("ota.build", "start", "ok", map[string]any{"operation_id": operation.ID})
+	writeJSON(writer, http.StatusAccepted, map[string]string{"operation_id": operation.ID})
+}
+
 func (handler Handler) serveOperation(writer http.ResponseWriter, id string) {
 	operation, err := handler.Operations.Status(id)
 	if err != nil {
@@ -395,15 +436,13 @@ func tailLines(path string, count int) ([]string, error) {
 	return all, nil
 }
 
-var errTrailingData = errors.New("trailing data after the JSON object")
-
 func decodeBody(writer http.ResponseWriter, request *http.Request, target any) error {
 	decoder := json.NewDecoder(http.MaxBytesReader(writer, request.Body, maxBodyBytes))
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(target); err != nil {
 		return errors.New("the body is not the expected JSON object")
 	}
-	return ensureNoTrailingData(decoder)
+	return endOfBody(decoder)
 }
 
 func decodeOptionalBody(writer http.ResponseWriter, request *http.Request, target any) error {
@@ -416,19 +455,17 @@ func decodeOptionalBody(writer http.ResponseWriter, request *http.Request, targe
 	if err != nil {
 		return errors.New("the body is not the expected JSON object")
 	}
-	return ensureNoTrailingData(decoder)
+	return endOfBody(decoder)
 }
 
-func ensureNoTrailingData(decoder *json.Decoder) error {
-	var extra any
-	err := decoder.Decode(&extra)
-	if errors.Is(err, io.EOF) {
-		return nil
+// endOfBody uses the agent's one trailing-data helper; a second JSON value is
+// the caller's 400, a malformed tail is the generic bad body.
+func endOfBody(decoder *json.Decoder) error {
+	err := operatoragent.EnsureEndOfFile(decoder)
+	if err == nil || errors.Is(err, operatoragent.ErrTrailingData) {
+		return err
 	}
-	if err != nil {
-		return errors.New("the body is not the expected JSON object")
-	}
-	return errTrailingData
+	return errors.New("the body is not the expected JSON object")
 }
 
 func loopback(remoteAddress string) bool {
@@ -465,7 +502,7 @@ func outcomeWord(status int) string {
 
 func (handler Handler) writeBodyError(writer http.ResponseWriter, err error) {
 	status := http.StatusConflict
-	if errors.Is(err, errTrailingData) {
+	if errors.Is(err, operatoragent.ErrTrailingData) {
 		status = http.StatusBadRequest
 	}
 	writeRefusal(writer, status, operatoragent.CodeBodyInvalid, err.Error())

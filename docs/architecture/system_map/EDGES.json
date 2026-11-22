@@ -1798,8 +1798,16 @@
    ]
   },
   "operatoragent": {},
-  "otabuild": {},
-  "otarelease": {},
+  "otabuild": {
+   "operatoragent": [
+    "Build"
+   ]
+  },
+  "otarelease": {
+   "operatoragent": [
+    "Load"
+   ]
+  },
   "petcampaign": {
    "achievement": [
     "*MaxFloorTx"
@@ -5287,7 +5295,14 @@
    ]
   },
   "operator": {},
-  "operatoragent": {},
+  "operatoragent": {
+   "otabuild": [
+    "Build"
+   ],
+   "otarelease": [
+    "Load"
+   ]
+  },
   "otabuild": {},
   "otarelease": {
    "operator": [

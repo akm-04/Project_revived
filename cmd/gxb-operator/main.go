@@ -62,6 +62,7 @@ func usage() {
   gxb-operator backend start [--closed] | stop | status
   gxb-operator cmd <module.command> --reason <text> [--key <key>] [json payload]
   gxb-operator read <module.read> [k=v ...]
+  gxb-operator ota build --lane <code|assets|catalog> --version <v> [--rollback] [--no-wait]
   gxb-operator ota publish <version> --reason <text> [--key <key>]
   gxb-operator ota withdraw <version> --reason <text> [--key <key>]
   gxb-operator op status <id>
