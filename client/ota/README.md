@@ -14,7 +14,9 @@ Patch kinds:
 
 Patch directories are applied in directory-name order. Several patches may target one file: each pins the same stock
 sha256 and each later patch applies to the previous output, so `backend_http_poll` and the two `league_room_stop_*`
-patches chain on `Backend.lua`. A target that also has a `src/` file is still refused as a duplicate.
+patches chain on `Backend.lua`. A held poll answered HTTP 401 with error code 20003 calls the stock alert that
+Backend.lua:440 uses for that code (with its restart callback) and stops polling; every other non-200 still retries.
+A target that also has a `src/` file is still refused as a duplicate.
 
 The retired Python generator's output is pinned as
 `internal/application/otabuild/testdata/backend_http_poll_golden.lua`; `TestOptInStockBaselineGolden` compares the
