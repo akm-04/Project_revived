@@ -1,11 +1,81 @@
 {
- "entries": {
-  "REPLY:app/windows/ChapterGachaWindow.lua:237": {
-   "client": "app/windows/ChapterGachaWindow.lua:237",
-   "owner_phase": "I10",
-   "reason": "A-155 adjudicated LATER in work/audit/LEAD_VERDICTS.md; reported, not fixed"
-  }
- },
- "note": "seeded only for GAP rows adjudicated LATER; lead reviews",
- "schema_version": 1
+  "entries": {
+    "PUSH:app/model/SelfPlayer.lua:4408": {
+      "client": "app/model/SelfPlayer.lua:4408",
+      "owner_phase": "REPAIR-LANE",
+      "reason": "REVIEWED UNUSED_BACKEND_GAP (A-163): fixed in I9-11 per work/audit/LEAD_VERDICTS.md; REVIEWED seed predates the fix; re-review, REPAIR_LANE_SEQUENCE item 19"
+    },
+    "REPLY:app/windows/ArenaSelectTeamNewWindow.lua:398": {
+      "client": "app/windows/ArenaSelectTeamNewWindow.lua:398",
+      "owner_phase": "REPAIR-LANE",
+      "reason": "no served MID produces 31005 (seal-hero formation refusal); post-freeze gameplay gap, REPAIR_LANE_SEQUENCE item 19"
+    },
+    "REPLY:app/windows/ArenaSelectTeamNewWindow.lua:613": {
+      "client": "app/windows/ArenaSelectTeamNewWindow.lua:613",
+      "owner_phase": "REPAIR-LANE",
+      "reason": "no served MID produces 31005 (seal-hero formation refusal); post-freeze gameplay gap, REPAIR_LANE_SEQUENCE item 19"
+    },
+    "REPLY:app/windows/ArenaSelectTeamWindow.lua:376": {
+      "client": "app/windows/ArenaSelectTeamWindow.lua:376",
+      "owner_phase": "REPAIR-LANE",
+      "reason": "no served MID produces 31005 (seal-hero formation refusal); post-freeze gameplay gap, REPAIR_LANE_SEQUENCE item 19"
+    },
+    "REPLY:app/windows/ArenaSelectTeamWindow.lua:591": {
+      "client": "app/windows/ArenaSelectTeamWindow.lua:591",
+      "owner_phase": "REPAIR-LANE",
+      "reason": "no served MID produces 31005 (seal-hero formation refusal); post-freeze gameplay gap, REPAIR_LANE_SEQUENCE item 19"
+    },
+    "REPLY:app/windows/ChampionsLeagueSelectTeamWindow.lua:315": {
+      "client": "app/windows/ChampionsLeagueSelectTeamWindow.lua:315",
+      "owner_phase": "REPAIR-LANE",
+      "reason": "no served MID produces 31005 (seal-hero formation refusal); post-freeze gameplay gap, REPAIR_LANE_SEQUENCE item 19"
+    },
+    "REPLY:app/windows/ChampionsLeagueSelectTeamWindow.lua:321": {
+      "client": "app/windows/ChampionsLeagueSelectTeamWindow.lua:321",
+      "owner_phase": "REPAIR-LANE",
+      "reason": "no served MID produces 31005 (seal-hero formation refusal); post-freeze gameplay gap, REPAIR_LANE_SEQUENCE item 19"
+    },
+    "REPLY:app/windows/ChapterGachaWindow.lua:237": {
+      "client": "app/windows/ChapterGachaWindow.lua:237",
+      "owner_phase": "I10",
+      "reason": "A-155 adjudicated LATER in work/audit/LEAD_VERDICTS.md; reported, not fixed"
+    },
+    "REPLY:app/windows/SelectPeakTeamOldWindow.lua:2325": {
+      "client": "app/windows/SelectPeakTeamOldWindow.lua:2325",
+      "owner_phase": "REPAIR-LANE",
+      "reason": "no served Conquer School MID produces 30003 (One-on-One owns 30003 low points); post-freeze gap, REPAIR_LANE_SEQUENCE item 19"
+    },
+    "REPLY:app/windows/SelectPeakTeamOldWindow.lua:2333": {
+      "client": "app/windows/SelectPeakTeamOldWindow.lua:2333",
+      "owner_phase": "REPAIR-LANE",
+      "reason": "no served Conquer School MID produces 30003 (One-on-One owns 30003 low points); post-freeze gap, REPAIR_LANE_SEQUENCE item 19"
+    },
+    "REPLY:app/windows/SummonWindow.lua:1209": {
+      "client": "app/windows/SummonWindow.lua:1209",
+      "owner_phase": "REPAIR-LANE",
+      "reason": "REVIEWED UNUSED_BACKEND_GAP (A-156): fixed in I9-11 per work/audit/LEAD_VERDICTS.md; REVIEWED seed predates the fix; re-review, REPAIR_LANE_SEQUENCE item 19"
+    },
+    "REPLY:app/windows/TeamFindWindow.lua:173": {
+      "client": "app/windows/TeamFindWindow.lua:173",
+      "owner_phase": "REPAIR-LANE",
+      "reason": "client reads 30010 as guild level too low; guild_dispatcher.go:317 sends 30010 with a wait time; post-freeze gap, REPAIR_LANE_SEQUENCE item 19"
+    },
+    "REPLY:app/windows/TeamFindWindow.lua:224": {
+      "client": "app/windows/TeamFindWindow.lua:224",
+      "owner_phase": "REPAIR-LANE",
+      "reason": "client reads 30010 as guild level too low; guild_dispatcher.go:317 sends 30010 with a wait time; post-freeze gap, REPAIR_LANE_SEQUENCE item 19"
+    },
+    "REPLY:app/windows/TeamJoinWindow.lua:157": {
+      "client": "app/windows/TeamJoinWindow.lua:157",
+      "owner_phase": "REPAIR-LANE",
+      "reason": "client reads 30010 as guild level too low; guild_dispatcher.go:317 sends 30010 with a wait time; post-freeze gap, REPAIR_LANE_SEQUENCE item 19"
+    },
+    "REPLY:app/windows/TeamJoinWindow.lua:208": {
+      "client": "app/windows/TeamJoinWindow.lua:208",
+      "owner_phase": "REPAIR-LANE",
+      "reason": "client reads 30010 as guild level too low; guild_dispatcher.go:317 sends 30010 with a wait time; post-freeze gap, REPAIR_LANE_SEQUENCE item 19"
+    }
+  },
+  "note": "seeded only for GAP rows adjudicated LATER; lead reviews",
+  "schema_version": 1
 }

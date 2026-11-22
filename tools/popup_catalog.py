@@ -363,7 +363,7 @@ class PopupExtractor(rc.Extractor):
             if inherited is not None:
                 site.guard, site.guard_source = inherited, "inherited"
 
-    def handle_call(self, mid, file, function, position, root, segments, after, bindings, via, guards, seeds) -> None:
+    def handle_call(self, mid, file, function, position, root, segments, after, bindings, via, guards, seeds) -> int:
         self.record_site(file, position, mid, function, bindings, seeds)
         target = self.resolve_callee(file, function, root, segments)
         previous: tuple[bool, dict | None] = (False, None)
@@ -376,7 +376,7 @@ class PopupExtractor(rc.Extractor):
             previous = (key in self.pending_guard, self.pending_guard.get(key))
             self.pending_guard[key] = inherited
         try:
-            super().handle_call(mid, file, function, position, root, segments, after, bindings, via, guards, seeds)
+            return super().handle_call(mid, file, function, position, root, segments, after, bindings, via, guards, seeds)
         finally:
             if target is not None:
                 existed, value = previous
