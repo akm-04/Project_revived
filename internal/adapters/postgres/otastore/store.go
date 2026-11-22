@@ -13,8 +13,9 @@ import (
 
 var errInvalid = errors.New("otastore: invalid input")
 
-// maxActiveReleases bounds one read; the version line has one active release
-// per lane.
+// maxActiveReleases bounds one read: one code, one assets and at most 14
+// catalog releases (OTA_AMENDMENTS OA-1). A read asks for one row more and
+// fails closed rather than silently drop a live release.
 const maxActiveReleases = 16
 
 const selectActiveReleases = `SELECT COALESCE(jsonb_agg(jsonb_build_object(
@@ -53,7 +54,7 @@ func listActive(ctx context.Context, query tx.Queryer, statement string) ([]otar
 		return nil, errInvalid
 	}
 	var raw string
-	if err := query.QueryRow(ctx, statement, maxActiveReleases).Scan(&raw); err != nil {
+	if err := query.QueryRow(ctx, statement, maxActiveReleases+1).Scan(&raw); err != nil {
 		return nil, err
 	}
 	var rows []otarelease.RawRelease

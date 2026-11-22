@@ -12,6 +12,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"gxb.local/backend/v2/internal/application/operator"
@@ -19,6 +20,7 @@ import (
 
 const (
 	commandPrefix  = "/operator/v1/commands/"
+	readPrefix     = "/operator/v1/reads/"
 	versionPath    = "/operator/v1/version"
 	maxRequestBody = 1 << 20
 
@@ -26,17 +28,24 @@ const (
 	codeBadRequest   = "OPERATOR_BAD_REQUEST"
 	codeUnavailable  = "OPERATOR_UNAVAILABLE"
 	codeFailed       = "OPERATOR_FAILED"
+	codeUnknownRead  = "OPERATOR_UNKNOWN_READ"
 )
 
 type Executor interface {
 	Execute(context.Context, operator.Command) (operator.Outcome, error)
 }
 
+// Read answers one bounded operator read; it runs no command and writes no
+// audit row.
+type Read func(context.Context, url.Values) (any, error)
+
 type Handler struct {
 	Bus   Executor
 	Token string
 	// Version answers GET /operator/v1/version (ruling 8).
 	Version func(context.Context) (any, error)
+	// Reads is the read registry the composition root fills.
+	Reads map[string]Read
 }
 
 type request struct {
@@ -83,6 +92,14 @@ func (handler Handler) ServeHTTP(writer http.ResponseWriter, request *http.Reque
 		handler.serveVersion(writer, request)
 		return
 	}
+	if name, isRead := strings.CutPrefix(request.URL.Path, readPrefix); isRead {
+		if request.Method != http.MethodGet {
+			writeError(writer, http.StatusNotFound, codeBadRequest, "no such operator route")
+			return
+		}
+		handler.serveRead(writer, request, name)
+		return
+	}
 	name, isCommand := strings.CutPrefix(request.URL.Path, commandPrefix)
 	if !isCommand || request.Method != http.MethodPost {
 		writeError(writer, http.StatusNotFound, codeBadRequest, "no such operator route")
@@ -103,6 +120,29 @@ func (handler Handler) serveVersion(writer http.ResponseWriter, request *http.Re
 		return
 	}
 	write(writer, http.StatusOK, version)
+}
+
+func (handler Handler) serveRead(writer http.ResponseWriter, request *http.Request, name string) {
+	read, registered := handler.Reads[name]
+	if !registered {
+		writeError(writer, http.StatusNotFound, codeUnknownRead, "no such operator read")
+		return
+	}
+	result, err := read(request.Context(), request.URL.Query())
+	if err == nil {
+		write(writer, http.StatusOK, result)
+		return
+	}
+	var refusal *operator.Refusal
+	switch {
+	case errors.As(err, &refusal):
+		write(writer, http.StatusConflict, refusal)
+	case errors.Is(err, operator.ErrUnavailable):
+		writeError(writer, http.StatusServiceUnavailable, codeUnavailable, "operator read unavailable")
+	default:
+		log.Printf("operator read %s failed: %v", name, err)
+		writeError(writer, http.StatusInternalServerError, codeFailed, "the read failed")
+	}
 }
 
 func (handler Handler) serveCommand(writer http.ResponseWriter, httpRequest *http.Request, name string) {

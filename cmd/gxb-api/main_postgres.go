@@ -32,6 +32,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/guildcampaigncontent"
 	"gxb.local/backend/v2/internal/adapters/guildpolicybridge"
 	"gxb.local/backend/v2/internal/adapters/guildviewread"
+	"gxb.local/backend/v2/internal/adapters/operatorapi"
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/achievementstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/activitystore"
@@ -64,6 +65,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/mentorstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/occultstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/oneononestore"
+	"gxb.local/backend/v2/internal/adapters/postgres/operatorstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/otastore"
 	"gxb.local/backend/v2/internal/adapters/postgres/petcampaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
@@ -489,8 +491,20 @@ func main() {
 	}
 	energyDispatcher := stockruntime.ItemsEnergyDispatcher{Authority: authority, Service: itemsEnergy.Service}
 	mux := http.NewServeMux()
-	// The OTA leaves (I11A_1_PLAN L1-L3) register their ota.* handlers here.
-	startOperator(ctx, runner, map[string]operator.Handler{})
+	otaRoot := os.Getenv("GXB_OTA_ROOT")
+	otaCommands := appotarelease.Commands{Store: otastore.Store{}, Root: otaRoot}
+	otaStatus := appotarelease.StatusService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: otastore.Store{}}
+	operatorAudit := operator.AuditService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Reader: operatorstore.Store{}}
+	backendVersion, gitCommit := buildIdentity()
+	operatorVersion := operator.VersionService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Reader: operatorstore.Store{}, BackendVersion: backendVersion, GitCommit: gitCommit}
+	operatorReads := map[string]operatorapi.Read{
+		"ota.status":          operatorapi.OTAStatus(otaStatus),
+		"operator.audit.list": operatorapi.AuditList(operatorAudit),
+	}
+	operatorVersionReply := func(ctx context.Context) (any, error) {
+		return operatorVersion.Version(ctx)
+	}
+	startOperator(ctx, runner, otaCommands.Handlers(), operatorReads, operatorVersionReply, otaRoot)
 	clientLogs, journal := startClientLog(ctx, pool, authority, cfg.ClientLogURL, retentionPolicies.RetentionDays, txMetrics, mux, handlerConcurrency("GXB_CLIENT_LOG_MAX_CONCURRENT", 4, poolConnections))
 	dailyReset := dailyreset.Service{Markers: dailyresetstore.Store{Queryer: pool}, Counters: itemsEnergy.Counters}
 	boot := stockruntime.BootstrapDispatcher{Bootstrap: bootstrap, Tracker: tracker, LogURLs: clientLogs, DailyReset: dailyReset}

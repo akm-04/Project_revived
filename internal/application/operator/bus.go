@@ -16,17 +16,17 @@ var ErrUnavailable = errors.New("operator: unavailable")
 
 // Record is one operator_commands row.
 type Record struct {
-	SemanticKey   string
-	ModuleCommand string
-	PayloadSHA256 string
-	Principal     string
-	Role          string
-	Scope         string
-	Reason        string
-	State         string
-	Result        json.RawMessage
-	CreatedAt     time.Time
-	FinishedAt    *time.Time
+	SemanticKey   string          `json:"semantic_key"`
+	ModuleCommand string          `json:"module_command"`
+	PayloadSHA256 string          `json:"payload_sha256"`
+	Principal     string          `json:"principal"`
+	Role          string          `json:"role"`
+	Scope         string          `json:"scope"`
+	Reason        string          `json:"reason"`
+	State         string          `json:"state"`
+	Result        json.RawMessage `json:"result"`
+	CreatedAt     time.Time       `json:"created_at"`
+	FinishedAt    *time.Time      `json:"finished_at"`
 }
 
 // Store is the operator_commands port. ClaimTx locks the key's row first (the

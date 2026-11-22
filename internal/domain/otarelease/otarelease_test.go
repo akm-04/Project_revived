@@ -166,6 +166,21 @@ func TestPlanUpdateMalformedRowFailsClosed(t *testing.T) {
 	}
 }
 
+func TestParseReleaseRefusesMalformedVolumeSuffix(t *testing.T) {
+	base := "1.631.2-" + testSHA256[:12] + ".zip"
+	for _, name := range []string{base + ".+01", base + ".1"} {
+		volumes, err := json.Marshal([]PackageVolume{{Name: name, Size: 2000, MD5: testMD5, SHA256: testSHA256}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		row := testRow(t, "1.631.2", "code", 2000)
+		row.PackageFiles = volumes
+		if _, err := ParseRelease(row); !errors.Is(err, ErrInvalidRelease) {
+			t.Fatalf("volume %q err=%v", name, err)
+		}
+	}
+}
+
 func TestParseReleaseRejectsUnsortedManifest(t *testing.T) {
 	row := testRow(t, "1.631.2", "code", 2000, "src_64/b.lua", "src_64/a.lua")
 	if _, err := ParseRelease(row); !errors.Is(err, ErrInvalidRelease) {

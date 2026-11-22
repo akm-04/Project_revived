@@ -220,8 +220,14 @@
    }
   ],
   "ranks": [],
-  "row_lock_methods": {},
-  "row_locks": [],
+  "row_lock_methods": {
+   "ota_releases": [
+    "otastore.LockLaneTx"
+   ]
+  },
+  "row_locks": [
+   "ota_releases"
+  ],
   "unresolved_methods": []
  },
  "login": [],
@@ -253,7 +259,9 @@
  ],
  "name": "otarelease",
  "pushes": [],
- "stores": [],
+ "stores": [
+  "internal/adapters/postgres/otastore"
+ ],
  "tables": {
   "owned": [
    "ota_activations",
@@ -261,14 +269,25 @@
    "ota_asset_served_daily",
    "ota_releases"
   ],
-  "read": [],
-  "written": []
+  "read": [
+   "ota_activations",
+   "ota_asset_misses",
+   "ota_asset_served_daily",
+   "ota_releases"
+  ],
+  "written": [
+   "ota_activations",
+   "ota_releases"
+  ]
  },
  "tests": {
   "integration": [],
   "scenarios_naming": [
    "i9_tutorial_switches.json"
   ],
-  "unit": []
+  "unit": [
+   "commands_test.go",
+   "status_test.go"
+  ]
  }
 }
