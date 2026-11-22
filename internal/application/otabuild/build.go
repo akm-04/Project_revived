@@ -42,10 +42,12 @@ type Input struct {
 	// its exact-current files there (I11A_1_PLAN "L4c decisions").
 	ResPath string
 	// StockCatalog is the catalogue source when the stock baseline has no
-	// version.json (for example a Lua-only zip); empty means StockBaseline.
+	// version.json (for example a Lua-only zip); empty means StockBaseline. The
+	// assets lane and a code lazy refresh both read it.
 	StockCatalog string
-	// LazyRefresh makes the code lane rewrite lazyFile.json from the ACTIVE
-	// assets sidecar plus the files recovered in ResPath (L4f).
+	// LazyRefresh makes the code lane rewrite lazyFile.json from the stock
+	// catalogue minus the ACTIVE assets release's delivered paths, keeping a
+	// marker for every undelivered row (L4f, OA-8).
 	LazyRefresh bool
 	// AssetsSidecar is the ACTIVE assets release's res sidecar that a code
 	// lazy refresh reads; required when LazyRefresh is set.
@@ -120,7 +122,7 @@ func Build(ctx context.Context, input Input) (Result, error) {
 	}
 	defer closeBaseline()
 	catalogBaseline := baseline
-	if lane == otarelease.LaneAssets && input.StockCatalog != "" {
+	if (lane == otarelease.LaneAssets || input.LazyRefresh) && input.StockCatalog != "" {
 		var closeCatalog func()
 		catalogBaseline, closeCatalog, err = openBaseline(input.StockCatalog)
 		if err != nil {
@@ -138,7 +140,7 @@ func Build(ctx context.Context, input Input) (Result, error) {
 		entries, err = codeEntries(input)
 		if err == nil && input.LazyRefresh {
 			var lazyBytes []byte
-			lazyBytes, sidecar, report, err = lazyRefreshPackage(input.ResPath, input.AssetsSidecar, version.String())
+			lazyBytes, sidecar, report, err = lazyRefreshPackage(input.ResPath, input.AssetsSidecar, catalogBaseline, version.String())
 			if err == nil {
 				entries = append(entries, packageEntry{path: lazyFileMember, content: lazyBytes, size: int64(len(lazyBytes)), md5: md5Hex(lazyBytes)})
 				sort.Slice(entries, func(left, right int) bool { return entries[left].path < entries[right].path })

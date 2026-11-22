@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -14,59 +15,50 @@ import (
 	"gxb.local/backend/v2/internal/domain/otarelease"
 )
 
-// lazyRefreshResource is one lazy marker value for the silent refresh; it has
-// the same shape as the assets lane's value minus the catalogue version.
-type lazyRefreshResource struct {
-	Size int64  `json:"size"`
-	MD5  string `json:"md5"`
-	Path string `json:"path"`
-}
-
-// lazyRefreshPackage rebuilds the code lane's lazyFile.json from the ACTIVE
-// assets release's sidecar: a file recovered under res_path contributes its
-// current md5 and size, an unrecovered entry keeps its sidecar row (L4f silent
-// lazy refresh). It also returns the code release's res sidecar.
-func lazyRefreshPackage(resPath, sidecarPath, version string) ([]byte, []resSidecarEntry, Report, error) {
+// lazyRefreshPackage rebuilds the code lane's lazyFile.json with the assets
+// lane's own rule (buildLazyMap): the stock catalogue rows are the input and the
+// ACTIVE assets release's delivered paths are `supplied`. force=1 and delivered
+// rows get no marker; every other force=0 row keeps one. A row whose file is
+// recovered under res_path carries the recovered md5 and size and is added to
+// the code release's res sidecar, so /res serves it at that md5 (OA-8).
+func lazyRefreshPackage(resPath, sidecarPath string, catalogBaseline stockBaseline, version string) ([]byte, []resSidecarEntry, Report, error) {
 	report := Report{Lane: string(otarelease.LaneCode), Version: version, MissingSample: []string{}, MismatchSample: []string{}}
+	rows, err := readCatalog(catalogBaseline)
+	if err != nil {
+		return nil, nil, report, err
+	}
 	root, err := resolveResRoot(resPath)
 	if err != nil {
 		return nil, nil, report, err
 	}
-	entries, err := readResourceSidecar(sidecarPath)
+	deliveredEntries, err := readResourceSidecar(sidecarPath)
 	if err != nil {
 		return nil, nil, report, err
 	}
-	lazyMap := make(map[string]string, len(entries))
-	sidecar := make([]resSidecarEntry, 0, len(entries))
-	for _, entry := range entries {
-		resourcePath := normalizeCatalogPath(entry.Path)
-		if !validCatalogPath(resourcePath) || !validMD5(strings.ToLower(entry.MD5)) {
-			return nil, nil, report, fmt.Errorf("%w: asset sidecar row %q", ErrCatalogInvalid, entry.Path)
-		}
-		row := resSidecarEntry{Path: resourcePath, MD5: strings.ToLower(entry.MD5), Size: entry.Size}
-		report.LazyConsidered++
-		if resolved, found := recoveredFile(root, resourcePath); found {
-			size, md5Text, digestErr := digestFile(resolved)
-			if digestErr != nil {
-				return nil, nil, report, digestErr
-			}
-			row.MD5, row.Size = md5Text, size
-			report.LazySupplied++
-		} else {
-			report.LazyRetained++
-		}
-		clientPath := cataloguePathFromResource(resourcePath)
-		value, valueErr := marshalNoEscape(lazyRefreshResource{Size: row.Size, MD5: row.MD5, Path: clientPath})
-		if valueErr != nil {
-			return nil, nil, report, fmt.Errorf("%w: lazy value: %v", ErrCatalogInvalid, valueErr)
-		}
-		key, keyErr := lazyKey(clientPath)
-		if keyErr != nil {
-			return nil, nil, report, keyErr
-		}
-		lazyMap[key] = string(value)
-		sidecar = append(sidecar, row)
+	supplied, err := deliveredCataloguePaths(deliveredEntries)
+	if err != nil {
+		return nil, nil, report, err
 	}
+	if len(supplied) == 0 {
+		return nil, nil, report, fmt.Errorf("%w: the active assets release delivered no file", ErrNoExactAssets)
+	}
+	rows, sidecar, err := recoveredLazyRows(rows, supplied, root)
+	if err != nil {
+		return nil, nil, report, err
+	}
+	lazyMap, summary, err := buildLazyMap(rows, supplied)
+	if err != nil {
+		return nil, nil, report, err
+	}
+	if err := checkDeliveredUnmarked(lazyMap, supplied); err != nil {
+		return nil, nil, report, err
+	}
+	if len(lazyMap) == 0 {
+		return nil, nil, report, fmt.Errorf("%w: the lazy refresh would ship no marker", ErrCatalogInvalid)
+	}
+	report.LazyConsidered = summary.considered
+	report.LazySupplied = summary.supplied
+	report.LazyRetained = summary.retained
 	lazyBytes, err := marshalLazyFile(lazyMap)
 	if err != nil {
 		return nil, nil, report, err
@@ -75,9 +67,75 @@ func lazyRefreshPackage(resPath, sidecarPath, version string) ([]byte, []resSide
 	return lazyBytes, sidecar, report, nil
 }
 
+// deliveredCataloguePaths maps the assets release's res-index paths to the
+// catalogue paths buildLazyMap compares against.
+func deliveredCataloguePaths(entries []resSidecarEntry) (map[string]struct{}, error) {
+	supplied := make(map[string]struct{}, len(entries))
+	for _, entry := range entries {
+		resourcePath := normalizeCatalogPath(entry.Path)
+		if !validCatalogPath(resourcePath) || !validMD5(strings.ToLower(entry.MD5)) {
+			return nil, fmt.Errorf("%w: asset sidecar row %q", ErrCatalogInvalid, entry.Path)
+		}
+		supplied[cataloguePathFromResource(resourcePath)] = struct{}{}
+	}
+	return supplied, nil
+}
+
+// recoveredLazyRows replaces a marker row's catalogue md5 and size with the
+// file found under res_path and returns the sidecar rows for every marker. An
+// unrecovered row keeps its catalogue row and points at the path the recovery
+// lane will supply (res/web/... -> web/...).
+func recoveredLazyRows(rows []catalogRow, supplied map[string]struct{}, root resRoot) ([]catalogRow, []resSidecarEntry, error) {
+	adjusted := make([]catalogRow, len(rows))
+	copy(adjusted, rows)
+	sidecar := make([]resSidecarEntry, 0, len(rows))
+	for index := range adjusted {
+		row := &adjusted[index]
+		if row.Force == 1 {
+			continue
+		}
+		catalogPath := normalizeCatalogPath(row.Path)
+		if catalogPath == "" {
+			continue
+		}
+		if _, delivered := supplied[catalogPath]; delivered {
+			continue
+		}
+		relative, size, md5Text, found, err := recoveredFile(root, catalogPath)
+		if err != nil {
+			return nil, nil, err
+		}
+		if found {
+			row.MD5 = md5Text
+			row.Size = size
+			sidecar = append(sidecar, resSidecarEntry{Path: relative, MD5: md5Text, Size: size})
+			continue
+		}
+		sidecar = append(sidecar, resSidecarEntry{Path: strings.TrimPrefix(catalogPath, "res/"), MD5: strings.ToLower(row.MD5), Size: row.Size})
+	}
+	return adjusted, sidecar, nil
+}
+
+// checkDeliveredUnmarked fails closed when the map and delivered set overlap.
+func checkDeliveredUnmarked(lazyMap map[string]string, supplied map[string]struct{}) error {
+	for catalogPath := range supplied {
+		key, err := lazyKey(catalogPath)
+		if err != nil {
+			continue
+		}
+		if _, marked := lazyMap[key]; marked {
+			return fmt.Errorf("%w: the delivered path %q kept a lazy marker", ErrCatalogInvalid, catalogPath)
+		}
+	}
+	return nil
+}
+
 func readResourceSidecar(path string) ([]resSidecarEntry, error) {
 	content, err := os.ReadFile(path)
 	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return nil, fmt.Errorf("%w: the active assets sidecar is missing: %v", ErrNoExactAssets, err)
+		}
 		return nil, fmt.Errorf("%w: active assets sidecar: %v", ErrBuildIO, err)
 	}
 	var document resSidecarDocument
@@ -87,23 +145,30 @@ func readResourceSidecar(path string) ([]resSidecarEntry, error) {
 	return document.Entries, nil
 }
 
-// recoveredFile finds the current file for a sidecar row: the exact place the
-// loud build found it, then the plan's res/ alias for a res/web/ path.
-func recoveredFile(root resRoot, resourcePath string) (string, bool) {
-	candidates := []string{filepath.Join(root.lexical, filepath.FromSlash(resourcePath))}
-	if rest, isWeb := strings.CutPrefix(resourcePath, "res/web/"); isWeb {
-		candidates = append(candidates, filepath.Join(root.lexical, "res", filepath.FromSlash(rest)))
-	}
-	for _, candidate := range candidates {
+// recoveredFile finds the current file for a catalogue row through the same
+// candidate forms the assets lane collects, and returns its path relative to
+// res_path plus its current size and md5.
+func recoveredFile(root resRoot, catalogPath string) (string, int64, string, bool, error) {
+	for _, candidate := range assetCandidates(root.lexical, catalogPath) {
 		info, err := os.Stat(candidate)
 		if err != nil || !info.Mode().IsRegular() {
 			continue
 		}
-		if resolved, ok := withinResRoot(root, candidate); ok {
-			return resolved, true
+		resolved, ok := withinResRoot(root, candidate)
+		if !ok {
+			continue
 		}
+		size, md5Text, err := digestFile(resolved)
+		if err != nil {
+			return "", 0, "", false, err
+		}
+		relative, err := filepath.Rel(root.lexical, candidate)
+		if err != nil {
+			return "", 0, "", false, fmt.Errorf("%w: asset path: %v", ErrBuildIO, err)
+		}
+		return filepath.ToSlash(relative), size, md5Text, true, nil
 	}
-	return "", false
+	return "", 0, "", false, nil
 }
 
 // cataloguePathFromResource maps a res_path-relative candidate back to the

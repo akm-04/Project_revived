@@ -30,6 +30,7 @@ type fakeBuildOperator struct {
 	blockFirstRead bool
 	readEntered    chan struct{}
 	readRelease    chan struct{}
+	activeAssets   string
 }
 
 func (fake *fakeBuildOperator) statusBody() []byte {
@@ -37,9 +38,13 @@ func (fake *fakeBuildOperator) statusBody() []byte {
 	for _, version := range fake.builtVersions {
 		built = append(built, map[string]string{"version": version, "lane": "code"})
 	}
+	active := map[string]any{"code": nil, "assets": nil, "catalog": []string{}}
+	if fake.activeAssets != "" {
+		active["assets"] = fake.activeAssets
+	}
 	body, _ := json.Marshal(map[string]any{
 		"revision": 0,
-		"active":   map[string]any{"code": nil, "assets": nil, "catalog": []string{}},
+		"active":   active,
 		"built":    built,
 	})
 	return body
@@ -344,6 +349,119 @@ func TestBuildLazyRefreshWithoutAssetsRelease(t *testing.T) {
 	}
 	if fake.registers != 0 {
 		t.Fatalf("registers = %d", fake.registers)
+	}
+}
+
+// TestBuildLazyRefreshUsesStockCatalog proves agent.json's stock_catalog reaches
+// the code-lane lazy refresh end to end, even when the stock baseline carries no
+// version.json (OA-8).
+func TestBuildLazyRefreshUsesStockCatalog(t *testing.T) {
+	build, fake, operations, root := newBuildOperation(t)
+	fake.activeAssets = "1.631.1"
+	resPath := prepareLazyRefreshRelease(t, build.Config.OTARoot, root)
+	writeBuildTestFile(t, filepath.Join(resPath, "web", "images", "recovered.png"), []byte("recovered"))
+
+	catalogDirectory := filepath.Join(root, "catalog")
+	rows := []map[string]any{
+		{"path": "res/web/images/delivered.png", "md5": strings.Repeat("d", 32), "size": 5, "force": 0},
+		{"path": "res/web/images/recovered.png", "md5": strings.Repeat("c", 32), "size": 4, "force": 0},
+	}
+	encoded, err := json.Marshal(rows)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, prefix := range []string{"assets/src_32", "assets/src_64"} {
+		writeBuildTestFile(t, filepath.Join(catalogDirectory, filepath.FromSlash(prefix), "version.json"), encoded)
+	}
+	build.Config.StockCatalog = catalogDirectory
+
+	started, err := build.Start(context.Background(), operatoragent.BuildRequest{Lane: "code", Version: "1.631.2", LazyRefresh: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	operation := waitOperation(t, operations, started.ID)
+	if operation.State != operatoragent.OperationDone {
+		t.Fatalf("operation = %+v", operation)
+	}
+	var result struct {
+		Report struct {
+			LazySupplied int `json:"lazy_supplied"`
+			LazyRetained int `json:"lazy_retained"`
+		} `json:"report"`
+	}
+	if err := json.Unmarshal(operation.Result, &result); err != nil {
+		t.Fatalf("result: %v (%s)", err, operation.Result)
+	}
+	if result.Report.LazySupplied != 1 || result.Report.LazyRetained != 1 {
+		t.Fatalf("report = %+v", result.Report)
+	}
+	if fake.registers != 1 {
+		t.Fatalf("registers = %d", fake.registers)
+	}
+}
+
+// TestBuildLazyRefreshRefusesWithoutCatalogue proves a lazy refresh with no
+// usable stock catalogue is a permanent AGENT_BUILD_CATALOG_INVALID refusal.
+func TestBuildLazyRefreshRefusesWithoutCatalogue(t *testing.T) {
+	build, fake, operations, root := newBuildOperation(t)
+	fake.activeAssets = "1.631.1"
+	prepareLazyRefreshRelease(t, build.Config.OTARoot, root)
+
+	started, err := build.Start(context.Background(), operatoragent.BuildRequest{Lane: "code", Version: "1.631.2", LazyRefresh: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	failed := waitOperation(t, operations, started.ID)
+	if failed.State != operatoragent.OperationFailed || failed.FailedStep != "build" {
+		t.Fatalf("operation = %+v", failed)
+	}
+	if !strings.Contains(failed.Error, operatoragent.CodeBuildCatalogInvalid) {
+		t.Fatalf("error = %q, want %s", failed.Error, operatoragent.CodeBuildCatalogInvalid)
+	}
+	if fake.registers != 0 {
+		t.Fatalf("registers = %d", fake.registers)
+	}
+}
+
+// prepareLazyRefreshRelease writes the ACTIVE assets release's sidecar and the
+// settings res_path a code lazy refresh reads.
+func prepareLazyRefreshRelease(t *testing.T, otaRoot, root string) string {
+	t.Helper()
+	assetsDirectory := filepath.Join(otaRoot, "updates", "assets")
+	if err := os.MkdirAll(assetsDirectory, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	sidecar := map[string]any{"entries": []map[string]any{
+		{"path": "web/images/delivered.png", "md5": strings.Repeat("d", 32), "size": 5},
+	}}
+	encoded, err := json.Marshal(sidecar)
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeBuildTestFile(t, filepath.Join(assetsDirectory, "1.631.1-abcdefabcdef.zip.res.json"), encoded)
+
+	resPath := filepath.Join(root, "res")
+	if err := os.MkdirAll(resPath, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	settings, err := json.Marshal(map[string]any{"lazy_fetch": "auto", "res_path": resPath, "volume_mb": 99})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(otaRoot, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	writeBuildTestFile(t, filepath.Join(otaRoot, "settings.json"), settings)
+	return resPath
+}
+
+func writeBuildTestFile(t *testing.T, path string, content []byte) {
+	t.Helper()
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, content, 0o644); err != nil {
+		t.Fatal(err)
 	}
 }
 

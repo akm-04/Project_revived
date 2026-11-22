@@ -102,9 +102,9 @@ func TestSplitBaselineBuilds(t *testing.T) {
 	}
 }
 
-// TestLazyRefreshRewritesCodeLazyMap proves a recovered file's current md5 and
-// size reach the code lazyFile.json and its res sidecar while an unrecovered
-// entry keeps its sidecar row (L4f silent lazy refresh).
+// TestLazyRefreshRewritesCodeLazyMap proves a recovered undelivered file's
+// current md5 and size reach the code lazyFile.json and its res sidecar while an
+// unrecovered undelivered row keeps its catalogue row (L4f, OA-8).
 func TestLazyRefreshRewritesCodeLazyMap(t *testing.T) {
 	fixture := newFixture(t)
 	fixture.addSource(t, "app/example/Feature.lua", []byte("return {}\n"))
@@ -112,11 +112,15 @@ func TestLazyRefreshRewritesCodeLazyMap(t *testing.T) {
 	recovered := []byte("recovered bytes with a new md5")
 	assetResFile(t, resPath, "web/images/a.png", recovered)
 
-	sidecarPath := filepath.Join(t.TempDir(), "active.zip.res.json")
 	oldMD5 := "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+	fixture.addCatalog(t, []catalogRow{
+		{Path: "res/web/images/a.png", MD5: "cccccccccccccccccccccccccccccccc", Size: 3, Force: 0},
+		{Path: "res/web/images/b.png", MD5: oldMD5, Size: 7, Force: 0},
+		{Path: "res/web/images/c.png", MD5: "dddddddddddddddddddddddddddddddd", Size: 5, Force: 0},
+	})
+	sidecarPath := filepath.Join(t.TempDir(), "active.zip.res.json")
 	sidecar := resSidecarDocument{Entries: []resSidecarEntry{
-		{Path: "web/images/a.png", MD5: oldMD5, Size: 3},
-		{Path: "web/images/b.png", MD5: oldMD5, Size: 7},
+		{Path: "web/images/c.png", MD5: "dddddddddddddddddddddddddddddddd", Size: 5},
 	}}
 	encoded, err := json.Marshal(sidecar)
 	if err != nil {
@@ -129,15 +133,11 @@ func TestLazyRefreshRewritesCodeLazyMap(t *testing.T) {
 	input.AssetsSidecar = sidecarPath
 	input.ResPath = resPath
 	result := fixture.buildResult(t, input)
-	if result.Report.LazySupplied != 1 || result.Report.LazyRetained != 1 {
+	if result.Report.LazySupplied != 1 || result.Report.LazyRetained != 2 {
 		t.Fatalf("report = %+v", result.Report)
 	}
 
-	assembled := readAssembled(t, fixture.updates, result.Request)
-	var lazyMap map[string]string
-	if err := json.Unmarshal(zipEntry(t, assembled, lazyFileMember), &lazyMap); err != nil {
-		t.Fatal(err)
-	}
+	lazyMap := readLazyMap(t, fixture.updates, result.Request)
 	recoveredValue := lazyValueOf(t, lazyMap, "__lazy__res___web___images___a.png")
 	if recoveredValue.Path != "res/web/images/a.png" || recoveredValue.MD5 != md5Hex(recovered) || recoveredValue.Size != int64(len(recovered)) {
 		t.Fatalf("recovered lazy value = %+v", recoveredValue)
@@ -147,24 +147,15 @@ func TestLazyRefreshRewritesCodeLazyMap(t *testing.T) {
 		t.Fatalf("retained lazy value = %+v", retainedValue)
 	}
 
-	sidecarName := result.Request.Version + "-" + result.Request.SHA256[:12] + ".zip.res.json"
-	sidecarBytes, err := os.ReadFile(filepath.Join(fixture.updates, sidecarName))
-	if err != nil {
-		t.Fatalf("code res sidecar: %v", err)
-	}
-	var document resSidecarDocument
-	if err := json.Unmarshal(sidecarBytes, &document); err != nil {
-		t.Fatal(err)
-	}
-	rows := map[string]resSidecarEntry{}
-	for _, row := range document.Entries {
-		rows[row.Path] = row
-	}
+	rows := readCodeSidecar(t, fixture.updates, result.Request)
 	if rows["web/images/a.png"].MD5 != md5Hex(recovered) {
 		t.Fatalf("sidecar recovered row = %+v", rows["web/images/a.png"])
 	}
 	if rows["web/images/b.png"].MD5 != oldMD5 {
 		t.Fatalf("sidecar retained row = %+v", rows["web/images/b.png"])
+	}
+	if _, delivered := rows["web/images/c.png"]; delivered {
+		t.Fatal("a delivered row reached the code sidecar")
 	}
 }
 
