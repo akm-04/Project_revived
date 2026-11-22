@@ -21,12 +21,13 @@ import (
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
 const (
 	CommandGrantItems = "grant.items"
-	CommandBulkShow   = "operator.bulk.show"
+	BulkShowRead      = "operator.bulk.show"
 
 	CodeGrantNotGrantable = "OPERATOR_GRANT_NOT_GRANTABLE"
 	CodeGrantAmount       = "OPERATOR_GRANT_AMOUNT"
@@ -46,7 +47,13 @@ const (
 const (
 	StatePending = "PENDING"
 	StateDone    = "DONE"
+	StateFailed  = "FAILED"
 )
+
+// ValidBulkState keeps the store and the migration's CHECK in step.
+func ValidBulkState(state string) bool {
+	return state == StatePending || state == StateDone || state == StateFailed
+}
 
 // BulkTarget is one operator_bulk_targets row: the recipient set frozen at
 // submit and the progress of the settlement job.
@@ -64,6 +71,7 @@ type BulkTarget struct {
 	Applied         int
 	Refused         int
 	State           string
+	FailedReason    string
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 	FinishedAt      *time.Time
@@ -75,7 +83,7 @@ type BulkStore interface {
 	InsertBulkTx(context.Context, tx.Tx, BulkTarget) error
 	ReadBulkTx(context.Context, tx.Queryer, string) (*BulkTarget, error)
 	ListPendingBulkTx(context.Context, tx.Queryer, int) ([]BulkTarget, error)
-	SaveBulkProgressTx(context.Context, tx.Tx, string, int, int, int, string, time.Time) error
+	SaveBulkProgressTx(context.Context, tx.Tx, string, int, int, int, string, string, time.Time) error
 }
 
 // GrantOwner is the i5 admin settlement command: the job form opens its own
@@ -139,15 +147,13 @@ type BulkProgress struct {
 	Applied       int        `json:"applied"`
 	Refused       int        `json:"refused"`
 	State         string     `json:"state"`
+	FailedReason  string     `json:"failed_reason,omitempty"`
 	CreatedAt     time.Time  `json:"created_at"`
 	FinishedAt    *time.Time `json:"finished_at"`
 }
 
 func (commands Commands) Handlers() map[string]operator.Handler {
-	return map[string]operator.Handler{
-		CommandGrantItems: commands.grantHandler,
-		CommandBulkShow:   commands.bulkShowHandler,
-	}
+	return map[string]operator.Handler{CommandGrantItems: commands.grantHandler}
 }
 
 func (commands Commands) grantHandler(ctx context.Context, scope tx.Scope, command operator.Command) (any, error) {
@@ -193,27 +199,49 @@ func (commands Commands) grantHandler(ctx context.Context, scope tx.Scope, comma
 	return GrantResult{Bulk: true, SemanticKey: target.SemanticKey, PlayerCount: target.PlayerCount, State: StatePending}, nil
 }
 
-func (commands Commands) bulkShowHandler(ctx context.Context, scope tx.Scope, command operator.Command) (any, error) {
-	var payload struct {
-		SemanticKey string `json:"semantic_key"`
+// BulkReadService answers operator.bulk.show as a bounded read: it runs no
+// command, so it writes no audit row.
+type BulkReadService struct {
+	Runner     tx.Runner
+	Operations operation.Factory
+	Store      BulkStore
+}
+
+// Show reads one frozen target's progress.
+func (service BulkReadService) Show(ctx context.Context, semanticKey string) (BulkProgress, error) {
+	if service.Store == nil || service.Runner.DB == nil {
+		return BulkProgress{}, operator.ErrUnavailable
 	}
-	if err := decodePayload(command.Payload, &payload); err != nil {
-		return nil, operator.Refuse(operator.CodePayloadInvalid, err.Error(), nil)
+	if semanticKey == "" {
+		return BulkProgress{}, operator.Refuse(operator.CodeReadInvalid, "semantic_key is required", nil)
 	}
-	if payload.SemanticKey == "" {
-		return nil, operator.Refuse(operator.CodePayloadInvalid, "semantic_key is required", nil)
-	}
-	if commands.Store == nil {
-		return nil, operator.ErrUnavailable
-	}
-	target, err := commands.Store.ReadBulkTx(ctx, scope.Tx, payload.SemanticKey)
+	var target *BulkTarget
+	current, err := service.Operations.New(policy.Set{})
 	if err != nil {
-		return nil, err
+		return BulkProgress{}, err
+	}
+	_, err = service.Runner.Run(ctx, current, readBulkProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, scope tx.Scope) error {
+		found, readErr := service.Store.ReadBulkTx(ctx, scope.Tx, semanticKey)
+		if readErr == nil {
+			target = found
+		}
+		return readErr
+	})
+	if err != nil {
+		return BulkProgress{}, err
 	}
 	if target == nil {
-		return nil, operator.Refuse(CodeBulkUnknown, "the bulk target does not exist", map[string]string{"semantic_key": payload.SemanticKey})
+		return BulkProgress{}, operator.Refuse(CodeBulkUnknown, "the bulk target does not exist", map[string]string{"semantic_key": semanticKey})
 	}
-	return BulkProgress{SemanticKey: target.SemanticKey, ModuleCommand: target.ModuleCommand, Selector: target.Selector, PlayerCount: target.PlayerCount, Processed: target.Processed, Applied: target.Applied, Refused: target.Refused, State: target.State, CreatedAt: target.CreatedAt, FinishedAt: target.FinishedAt}, nil
+	return progressOf(*target), nil
+}
+
+func progressOf(target BulkTarget) BulkProgress {
+	return BulkProgress{SemanticKey: target.SemanticKey, ModuleCommand: target.ModuleCommand, Selector: target.Selector, PlayerCount: target.PlayerCount, Processed: target.Processed, Applied: target.Applied, Refused: target.Refused, State: target.State, FailedReason: target.FailedReason, CreatedAt: target.CreatedAt, FinishedAt: target.FinishedAt}
+}
+
+func readBulkProfile() tx.Profile {
+	return tx.Profile{Name: "operator-bulk-read-v1", AcquireTimeout: 500 * time.Millisecond, LockTimeout: 500 * time.Millisecond, StatementTimeout: 1500 * time.Millisecond, TransactionTimeout: 2 * time.Second, CleanupTimeout: 500 * time.Millisecond, ReconcileTimeout: 500 * time.Millisecond, OperationTimeout: 3 * time.Second}
 }
 
 func (commands Commands) applyInline(ctx context.Context, scope tx.Scope, admin appi5.AdminOperator, commandKey string, recipients []int64, lines []grant.Line) (GrantResult, error) {
@@ -223,6 +251,12 @@ func (commands Commands) applyInline(ctx context.Context, scope tx.Scope, admin 
 	result := GrantResult{SemanticKey: commandKey, PlayerCount: len(recipients), State: operator.StateApplied}
 	for _, rawID := range recipients {
 		if _, err := commands.Grants.AdminGrantTx(ctx, scope.Tx, admin, identity.PlayerID(rawID), recipientKey(commandKey, rawID), PolicyVersion, lines, scope.Operation); err != nil {
+			if !appi5.IsPermanentGrantRefusal(err) {
+				// The bus rolls the whole command back and a resend with the same
+				// key retries every recipient; a transient fault must not become a
+				// permanent refusal.
+				return GrantResult{}, err
+			}
 			result.Refused++
 			if len(result.Failures) < maxReportedFailures {
 				result.Failures = append(result.Failures, RecipientFailure{PlayerID: rawID, Error: err.Error()})

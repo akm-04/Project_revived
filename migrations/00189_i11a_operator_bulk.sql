@@ -17,11 +17,13 @@ CREATE TABLE operator_bulk_targets (
   processed integer NOT NULL DEFAULT 0 CHECK (processed >= 0),
   applied integer NOT NULL DEFAULT 0 CHECK (applied >= 0),
   refused integer NOT NULL DEFAULT 0 CHECK (refused >= 0),
-  state text NOT NULL DEFAULT 'PENDING' CHECK (state IN ('PENDING', 'DONE')),
+  state text NOT NULL DEFAULT 'PENDING' CHECK (state IN ('PENDING', 'DONE', 'FAILED')),
+  failed_reason text,
   created_at timestamptz NOT NULL,
   updated_at timestamptz NOT NULL,
   finished_at timestamptz,
-  CHECK ((state = 'DONE') = (finished_at IS NOT NULL)),
+  CHECK ((state IN ('DONE', 'FAILED')) = (finished_at IS NOT NULL)),
+  CHECK ((state = 'FAILED') = (failed_reason IS NOT NULL)),
   CHECK (processed <= player_count)
 );
 CREATE INDEX operator_bulk_targets_pending ON operator_bulk_targets (created_at, semantic_key) WHERE state = 'PENDING';

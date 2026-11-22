@@ -24,6 +24,13 @@ func TestBuildJoinsClientNamesAndKeepsFailClosedRows(t *testing.T) {
 	if !found || stack.Grantable != GrantableEnabled || stack.Name != "Manga Toy" || stack.Icon == "" {
 		t.Fatalf("stack entry = %+v", stack)
 	}
+	if stack.ItemID == nil || *stack.ItemID != 50001010 {
+		t.Fatalf("stack item id = %v", stack.ItemID)
+	}
+	currency, _ := document.Lookup("scalar_currency:crystal")
+	if currency.ItemID != nil {
+		t.Fatalf("a definition without a client item id carries %v", *currency.ItemID)
+	}
 	if _, found := document.Lookup("specialized:item:250000111"); !found {
 		t.Fatal("fail-closed resource dropped from the catalogue")
 	}
@@ -93,6 +100,14 @@ func TestSearchPagesAndFilters(t *testing.T) {
 	byKind, err := document.Search(SearchFilter{Kind: "SCALAR_CURRENCY"})
 	if err != nil || len(byKind.Entries) != 1 {
 		t.Fatalf("kind search = %+v err=%v", byKind, err)
+	}
+	byItemID, err := document.Search(SearchFilter{Query: "2"})
+	if err != nil || len(byItemID.Entries) != 1 || byItemID.Entries[0].ID != "stack_item:2" {
+		t.Fatalf("numeric item id search = %+v err=%v", byItemID, err)
+	}
+	noNumeric, err := document.Search(SearchFilter{Query: "777"})
+	if err != nil || len(noNumeric.Entries) != 0 {
+		t.Fatalf("unknown numeric search = %+v err=%v", noNumeric, err)
 	}
 	if _, err := document.Search(SearchFilter{Limit: 201}); err == nil {
 		t.Fatal("over-limit search accepted")

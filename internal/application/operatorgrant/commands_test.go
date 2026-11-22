@@ -11,8 +11,10 @@ import (
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/operator"
 	"gxb.local/backend/v2/internal/application/operatorcatalog"
+	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -79,9 +81,13 @@ func (f *fakeStore) ListPendingBulkTx(_ context.Context, _ tx.Queryer, _ int) ([
 	return out, nil
 }
 
-func (f *fakeStore) SaveBulkProgressTx(_ context.Context, _ tx.Tx, key string, processed, applied, refused int, state string, _ time.Time) error {
+func (f *fakeStore) SaveBulkProgressTx(_ context.Context, _ tx.Tx, key string, processed, applied, refused int, state, failedReason string, _ time.Time) error {
 	target := f.rows[key]
-	target.Processed, target.Applied, target.Refused, target.State = processed, applied, refused, state
+	target.Processed, target.Applied, target.Refused, target.State, target.FailedReason = processed, applied, refused, state, failedReason
+	if state != StatePending {
+		at := time.Unix(1, 0).UTC()
+		target.FinishedAt = &at
+	}
 	f.rows[key] = target
 	return nil
 }
@@ -240,6 +246,158 @@ func TestGrantItemsResolvesServerTarget(t *testing.T) {
 	}
 	if result := outcome.(GrantResult); result.Applied != 2 || result.PlayerCount != 2 {
 		t.Fatalf("result = %+v", result)
+	}
+}
+
+type fakeBeginner struct{}
+
+func (fakeBeginner) Begin(context.Context, tx.Options) (tx.Tx, error) { return fakeTransaction{}, nil }
+
+type fakeTransaction struct{}
+
+func (fakeTransaction) QueryRow(context.Context, string, ...any) tx.Row { return fakeRow{} }
+func (fakeTransaction) Exec(context.Context, string, ...any) (tx.CommandTag, error) {
+	return fakeTag(0), nil
+}
+func (fakeTransaction) Commit(context.Context) error   { return nil }
+func (fakeTransaction) Rollback(context.Context) error { return nil }
+
+type fakeRow struct{}
+
+func (fakeRow) Scan(...any) error { return errors.New("unexpected read") }
+
+type fakeTag int64
+
+func (tag fakeTag) RowsAffected() int64 { return int64(tag) }
+
+// flakyGrants fails one chosen recipient a fixed number of times.
+type flakyGrants struct {
+	failAt       int64
+	failuresLeft int
+	err          error
+	successes    map[int64]int
+}
+
+func (f *flakyGrants) AdminGrantTx(ctx context.Context, _ tx.Tx, admin appi5.AdminOperator, target identity.PlayerID, key, policy string, lines []grant.Line, op operation.Context) (appi5.GrantResult, error) {
+	return f.AdminGrant(ctx, admin, target, key, policy, lines, op)
+}
+
+func (f *flakyGrants) AdminGrant(_ context.Context, _ appi5.AdminOperator, target identity.PlayerID, _, _ string, _ []grant.Line, _ operation.Context) (appi5.GrantResult, error) {
+	if int64(target) == f.failAt && f.failuresLeft > 0 {
+		f.failuresLeft--
+		return appi5.GrantResult{}, f.err
+	}
+	if f.successes == nil {
+		f.successes = map[int64]int{}
+	}
+	f.successes[int64(target)]++
+	return appi5.GrantResult{}, nil
+}
+
+func testBulkTarget(t *testing.T, key string, ids []int64, payload any) BulkTarget {
+	t.Helper()
+	raw, err := json.Marshal(payload)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return BulkTarget{SemanticKey: key, ModuleCommand: CommandGrantItems, Selector: "players", PlayerIDs: ids, PlayerCount: len(ids), PlayerIDsSHA256: sha256IDs(ids), Payload: raw, Principal: "root-op", Reason: "native grant", State: StatePending}
+}
+
+func testApplier(t *testing.T, store BulkStore, grants GrantOwner) Applier {
+	t.Helper()
+	return Applier{Runner: tx.Runner{DB: fakeBeginner{}}, Operations: operation.Factory{Clock: clock.System{}}, Store: store, Grants: grants, Catalogue: testCatalogue(t), LineCap: 10}
+}
+
+func grantPayloadFor(ids []int64) map[string]any {
+	return map[string]any{"target": map[string]any{"player_ids": ids}, "lines": []map[string]any{{"id": "stack_item:50001010", "amount": 1}}}
+}
+
+func TestApplyPendingResumesATransientRecipientAtTheSameCursor(t *testing.T) {
+	ids := []int64{11, 22, 33}
+	store := &fakeStore{rows: map[string]BulkTarget{"bulk-transient": testBulkTarget(t, "bulk-transient", ids, grantPayloadFor(ids))}}
+	grants := &flakyGrants{failAt: 22, failuresLeft: 1, err: errors.New("connection reset")}
+	applier := testApplier(t, store, grants)
+
+	if _, err := applier.ApplyPending(context.Background()); err == nil {
+		t.Fatal("a transient recipient fault must stop the run and be retried")
+	}
+	saved := store.rows["bulk-transient"]
+	if saved.Processed != 1 || saved.Applied != 1 || saved.Refused != 0 || saved.State != StatePending {
+		t.Fatalf("cursor after the transient fault = %+v", saved)
+	}
+	if _, err := applier.ApplyPending(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	final := store.rows["bulk-transient"]
+	if final.State != StateDone || final.Processed != len(ids) || final.Applied+final.Refused != len(ids) || final.Applied != len(ids) {
+		t.Fatalf("final = %+v", final)
+	}
+	for _, playerID := range ids {
+		if grants.successes[playerID] != 1 {
+			t.Fatalf("recipient %d granted %d times", playerID, grants.successes[playerID])
+		}
+	}
+}
+
+func TestApplyPendingCountsAPermanentRefusalAndContinues(t *testing.T) {
+	ids := []int64{11, 22, 33}
+	store := &fakeStore{rows: map[string]BulkTarget{"bulk-permanent": testBulkTarget(t, "bulk-permanent", ids, grantPayloadFor(ids))}}
+	grants := &flakyGrants{failAt: 22, failuresLeft: 1, err: economy.ErrUnknownResource}
+	applier := testApplier(t, store, grants)
+
+	if _, err := applier.ApplyPending(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	final := store.rows["bulk-permanent"]
+	if final.State != StateDone || final.Processed != len(ids) || final.Applied != 2 || final.Refused != 1 || final.FailedReason != "" {
+		t.Fatalf("final = %+v", final)
+	}
+	if grants.successes[11] != 1 || grants.successes[33] != 1 {
+		t.Fatalf("successes = %v", grants.successes)
+	}
+}
+
+func TestApplyPendingRecordsAFailedFrozenPayload(t *testing.T) {
+	cases := []struct {
+		name    string
+		payload json.RawMessage
+	}{
+		{"undecodable payload", json.RawMessage(`{"target":`)},
+		{"no longer grantable", json.RawMessage(`{"target":{"player_ids":[11]},"lines":[{"id":"stack_item:404","amount":1}]}`)},
+	}
+	for _, testCase := range cases {
+		t.Run(testCase.name, func(t *testing.T) {
+			target := BulkTarget{SemanticKey: "bulk-failed", ModuleCommand: CommandGrantItems, Selector: "players", PlayerIDs: []int64{11}, PlayerCount: 1, Payload: testCase.payload, Principal: "root-op", Reason: "native grant", State: StatePending}
+			store := &fakeStore{rows: map[string]BulkTarget{"bulk-failed": target}}
+			grants := &flakyGrants{}
+			finished, err := testApplier(t, store, grants).ApplyPending(context.Background())
+			if err != nil || finished != 1 {
+				t.Fatalf("finished=%d err=%v", finished, err)
+			}
+			saved := store.rows["bulk-failed"]
+			if saved.State != StateFailed || saved.FailedReason == "" || saved.FinishedAt == nil {
+				t.Fatalf("failed target = %+v", saved)
+			}
+			if len(grants.successes) != 0 {
+				t.Fatalf("a failed target granted %v", grants.successes)
+			}
+		})
+	}
+}
+
+func TestBulkShowIsAReadNotACommand(t *testing.T) {
+	commands := Commands{Catalogue: testCatalogue(t), Grants: &fakeGrants{}}
+	if _, registered := commands.Handlers()[BulkShowRead]; registered {
+		t.Fatal("operator.bulk.show is registered as a command")
+	}
+	store := &fakeStore{rows: map[string]BulkTarget{"bulk-read": {SemanticKey: "bulk-read", ModuleCommand: CommandGrantItems, Selector: "players", PlayerCount: 3, Processed: 3, Applied: 2, Refused: 1, State: StateFailed, FailedReason: "catalogue row removed"}}}
+	service := BulkReadService{Runner: tx.Runner{DB: fakeBeginner{}}, Operations: operation.Factory{Clock: clock.System{}}, Store: store}
+	progress, err := service.Show(context.Background(), "bulk-read")
+	if err != nil || progress.State != StateFailed || progress.FailedReason != "catalogue row removed" || progress.Refused != 1 {
+		t.Fatalf("progress = %+v err=%v", progress, err)
+	}
+	if _, err := service.Show(context.Background(), "bulk-missing"); err == nil {
+		t.Fatal("an unknown bulk target was reported as present")
 	}
 }
 

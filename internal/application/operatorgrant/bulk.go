@@ -76,11 +76,11 @@ func (applier Applier) ApplyPending(ctx context.Context) (int, error) {
 func (applier Applier) applyOne(ctx context.Context, target BulkTarget) (bool, error) {
 	var payload grantPayload
 	if err := decodePayload(target.Payload, &payload); err != nil {
-		return applier.finish(target)
+		return applier.finish(target, err)
 	}
 	lines, err := validateLines(applier.Catalogue, applier.LineCap, payload.Lines)
 	if err != nil {
-		return applier.finish(target)
+		return applier.finish(target, err)
 	}
 	cursor := target.Processed
 	if cursor > len(target.PlayerIDs) {
@@ -98,7 +98,7 @@ func (applier Applier) applyOne(ctx context.Context, target BulkTarget) (bool, e
 	applied, refused := target.Applied, target.Refused
 	for round := 0; round < applier.batchesPerRun(); round++ {
 		if cursor >= len(target.PlayerIDs) {
-			if err := applier.save(ctx, target.SemanticKey, cursor, applied, refused, StateDone); err != nil {
+			if err := applier.save(ctx, target.SemanticKey, cursor, applied, refused, StateDone, ""); err != nil {
 				return false, err
 			}
 			return true, nil
@@ -106,20 +106,30 @@ func (applier Applier) applyOne(ctx context.Context, target BulkTarget) (bool, e
 		end := min(cursor+applier.batchSize(), len(target.PlayerIDs))
 		for ; cursor < end; cursor++ {
 			playerID := target.PlayerIDs[cursor]
-			if _, grantErr := applier.Grants.AdminGrant(ctx, admin, identity.PlayerID(playerID), recipientKey(target.SemanticKey, playerID), policyVersion, lines, op); grantErr != nil {
+			_, grantErr := applier.Grants.AdminGrant(ctx, admin, identity.PlayerID(playerID), recipientKey(target.SemanticKey, playerID), policyVersion, lines, op)
+			if grantErr != nil && !appi5.IsPermanentGrantRefusal(grantErr) {
+				// Never count a transient fault as refused: keep the cursor on this
+				// recipient and let the River job retry it with the same key. The
+				// cursor write must survive a cancelled operation context.
+				if err := applier.save(context.WithoutCancel(ctx), target.SemanticKey, cursor, applied, refused, StatePending, ""); err != nil {
+					return false, err
+				}
+				return false, grantErr
+			}
+			if grantErr != nil {
 				refused++
 			} else {
 				applied++
 			}
 			if ctx.Err() != nil {
-				return false, applier.save(ctx, target.SemanticKey, cursor, applied, refused, StatePending)
+				return false, applier.save(context.WithoutCancel(ctx), target.SemanticKey, cursor, applied, refused, StatePending, "")
 			}
 		}
 		state := StatePending
 		if cursor >= len(target.PlayerIDs) {
 			state = StateDone
 		}
-		if err := applier.save(ctx, target.SemanticKey, cursor, applied, refused, state); err != nil {
+		if err := applier.save(ctx, target.SemanticKey, cursor, applied, refused, state, ""); err != nil {
 			return false, err
 		}
 		if state == StateDone {
@@ -129,23 +139,23 @@ func (applier Applier) applyOne(ctx context.Context, target BulkTarget) (bool, e
 	return false, nil
 }
 
-// finish records a target whose frozen payload can no longer be settled as
-// refused for every recipient, rather than leaving it pending.
-func (applier Applier) finish(target BulkTarget) (bool, error) {
-	if err := applier.save(context.Background(), target.SemanticKey, target.PlayerCount, target.Applied, target.PlayerCount-target.Applied, StateDone); err != nil {
+// finish records a target whose frozen payload no longer decodes or validates
+// as FAILED with the reason, instead of pretending every recipient refused.
+func (applier Applier) finish(target BulkTarget, cause error) (bool, error) {
+	if err := applier.save(context.Background(), target.SemanticKey, target.Processed, target.Applied, target.Refused, StateFailed, cause.Error()); err != nil {
 		return false, err
 	}
 	return true, nil
 }
 
-func (applier Applier) save(ctx context.Context, semanticKey string, processed, applied, refused int, state string) error {
+func (applier Applier) save(ctx context.Context, semanticKey string, processed, applied, refused int, state, failedReason string) error {
 	current, err := applier.Operations.New(policy.Set{})
 	if err != nil {
 		return err
 	}
 	at := time.Now().UTC()
 	_, err = applier.Runner.Run(ctx, current, bulkProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{MaxAttempts: 3}, nil, func(ctx context.Context, scope tx.Scope) error {
-		return applier.Store.SaveBulkProgressTx(ctx, scope.Tx, semanticKey, processed, applied, refused, state, at)
+		return applier.Store.SaveBulkProgressTx(ctx, scope.Tx, semanticKey, processed, applied, refused, state, failedReason, at)
 	})
 	return err
 }

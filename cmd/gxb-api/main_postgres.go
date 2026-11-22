@@ -549,13 +549,15 @@ func main() {
 	}
 	operatorVersion := operator.VersionService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Reader: operatorstore.Store{}, BackendVersion: backendVersion, GitCommit: gitCommit, ContentRevision: &operatorCatalogue.ContentRevision}
 	playerReads := operator.PlayerReadService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Directory: i4store.PlayerDirectoryReader{}, Wallet: appi5.OperatorWalletService{Store: i5db, Privileges: privileges}}
+	bulkReads := operatorgrant.BulkReadService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: operatorstore.Store{}}
 	operatorReads := map[string]operatorapi.Read{
-		"ota.status":          operatorapi.OTAStatus(otaStatus),
-		"ota.release":         operatorapi.OTARelease(otaReleaseLookup),
-		"operator.audit.list": operatorapi.AuditList(operatorAudit),
-		"catalog.search":      operatorapi.CatalogSearch(operatorCatalogue),
-		"player.find":         operatorapi.PlayerFind(playerReads),
-		"player.summary":      operatorapi.PlayerSummary(playerReads),
+		"ota.status":               operatorapi.OTAStatus(otaStatus),
+		"ota.release":              operatorapi.OTARelease(otaReleaseLookup),
+		"operator.audit.list":      operatorapi.AuditList(operatorAudit),
+		"catalog.search":           operatorapi.CatalogSearch(operatorCatalogue),
+		"player.find":              operatorapi.PlayerFind(playerReads),
+		"player.summary":           operatorapi.PlayerSummary(playerReads),
+		operatorgrant.BulkShowRead: operatorapi.BulkShow(bulkReads),
 	}
 	operatorVersionReply := func(ctx context.Context) (any, error) {
 		return operatorVersion.Version(ctx)

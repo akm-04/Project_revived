@@ -10,6 +10,7 @@ import (
 	appevents "gxb.local/backend/v2/internal/application/events"
 	"gxb.local/backend/v2/internal/application/operator"
 	"gxb.local/backend/v2/internal/application/operatorcatalog"
+	"gxb.local/backend/v2/internal/application/operatorgrant"
 	appota "gxb.local/backend/v2/internal/application/otarelease"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/domain/events"
@@ -135,6 +136,22 @@ func CatalogSearch(document operatorcatalog.Document) Read {
 			return nil, operator.Refuse(operator.CodeReadInvalid, err.Error(), nil)
 		}
 		return page, nil
+	}
+}
+
+// BulkShowService is the operator.bulk.show read.
+type BulkShowService interface {
+	Show(context.Context, string) (operatorgrant.BulkProgress, error)
+}
+
+// BulkShow adapts operator.bulk.show to the read registry.
+func BulkShow(service BulkShowService) Read {
+	return func(ctx context.Context, values url.Values) (any, error) {
+		semanticKey := values.Get("semantic_key")
+		if semanticKey == "" {
+			return nil, operator.Refuse(operator.CodeReadInvalid, "semantic_key is required", nil)
+		}
+		return service.Show(ctx, semanticKey)
 	}
 }
 

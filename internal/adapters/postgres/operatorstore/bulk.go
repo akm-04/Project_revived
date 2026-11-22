@@ -11,16 +11,20 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-const selectBulk = `SELECT semantic_key,module_command,selector,player_ids::text,player_count,player_ids_sha256,payload::text,principal,reason,processed,applied,refused,state,created_at,updated_at,finished_at FROM operator_bulk_targets`
+const selectBulk = `SELECT semantic_key,module_command,selector,player_ids::text,player_count,player_ids_sha256,payload::text,principal,reason,processed,applied,refused,state,failed_reason,created_at,updated_at,finished_at FROM operator_bulk_targets`
 
 func scanBulk(row tx.Row) (*operatorgrant.BulkTarget, error) {
 	var target operatorgrant.BulkTarget
 	var idsRaw, payloadRaw string
-	if err := row.Scan(&target.SemanticKey, &target.ModuleCommand, &target.Selector, &idsRaw, &target.PlayerCount, &target.PlayerIDsSHA256, &payloadRaw, &target.Principal, &target.Reason, &target.Processed, &target.Applied, &target.Refused, &target.State, &target.CreatedAt, &target.UpdatedAt, &target.FinishedAt); err != nil {
+	var failedReason *string
+	if err := row.Scan(&target.SemanticKey, &target.ModuleCommand, &target.Selector, &idsRaw, &target.PlayerCount, &target.PlayerIDsSHA256, &payloadRaw, &target.Principal, &target.Reason, &target.Processed, &target.Applied, &target.Refused, &target.State, &failedReason, &target.CreatedAt, &target.UpdatedAt, &target.FinishedAt); err != nil {
 		return nil, err
 	}
 	if err := json.Unmarshal([]byte(idsRaw), &target.PlayerIDs); err != nil {
 		return nil, err
+	}
+	if failedReason != nil {
+		target.FailedReason = *failedReason
 	}
 	target.Payload = json.RawMessage(payloadRaw)
 	return &target, nil
@@ -57,7 +61,7 @@ func (Store) ListPendingBulkTx(ctx context.Context, query tx.Queryer, limit int)
 	}
 	var raw string
 	if err := query.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(row),'[]'::jsonb)::text FROM (
-SELECT jsonb_build_object('semantic_key',semantic_key,'module_command',module_command,'selector',selector,'player_ids',player_ids,'player_count',player_count,'player_ids_sha256',player_ids_sha256,'payload',payload,'principal',principal,'reason',reason,'processed',processed,'applied',applied,'refused',refused,'state',state,'created_at',created_at,'updated_at',updated_at,'finished_at',finished_at) AS row
+SELECT jsonb_build_object('semantic_key',semantic_key,'module_command',module_command,'selector',selector,'player_ids',player_ids,'player_count',player_count,'player_ids_sha256',player_ids_sha256,'payload',payload,'principal',principal,'reason',reason,'processed',processed,'applied',applied,'refused',refused,'state',state,'failed_reason',failed_reason,'created_at',created_at,'updated_at',updated_at,'finished_at',finished_at) AS row
 FROM operator_bulk_targets WHERE state='PENDING' ORDER BY created_at, semantic_key LIMIT $1) pending`, limit).Scan(&raw); err != nil {
 		return nil, err
 	}
@@ -75,6 +79,7 @@ FROM operator_bulk_targets WHERE state='PENDING' ORDER BY created_at, semantic_k
 		Applied         int             `json:"applied"`
 		Refused         int             `json:"refused"`
 		State           string          `json:"state"`
+		FailedReason    *string         `json:"failed_reason"`
 		CreatedAt       time.Time       `json:"created_at"`
 		UpdatedAt       time.Time       `json:"updated_at"`
 		FinishedAt      *time.Time      `json:"finished_at"`
@@ -84,21 +89,25 @@ FROM operator_bulk_targets WHERE state='PENDING' ORDER BY created_at, semantic_k
 	}
 	out := make([]operatorgrant.BulkTarget, 0, len(wire))
 	for _, row := range wire {
-		out = append(out, operatorgrant.BulkTarget{SemanticKey: row.SemanticKey, ModuleCommand: row.ModuleCommand, Selector: row.Selector, PlayerIDs: row.PlayerIDs, PlayerCount: row.PlayerCount, PlayerIDsSHA256: row.PlayerIDsSHA256, Payload: row.Payload, Principal: row.Principal, Reason: row.Reason, Processed: row.Processed, Applied: row.Applied, Refused: row.Refused, State: row.State, CreatedAt: row.CreatedAt, UpdatedAt: row.UpdatedAt, FinishedAt: row.FinishedAt})
+		failedReason := ""
+		if row.FailedReason != nil {
+			failedReason = *row.FailedReason
+		}
+		out = append(out, operatorgrant.BulkTarget{SemanticKey: row.SemanticKey, ModuleCommand: row.ModuleCommand, Selector: row.Selector, PlayerIDs: row.PlayerIDs, PlayerCount: row.PlayerCount, PlayerIDsSHA256: row.PlayerIDsSHA256, Payload: row.Payload, Principal: row.Principal, Reason: row.Reason, Processed: row.Processed, Applied: row.Applied, Refused: row.Refused, State: row.State, FailedReason: failedReason, CreatedAt: row.CreatedAt, UpdatedAt: row.UpdatedAt, FinishedAt: row.FinishedAt})
 	}
 	return out, nil
 }
 
 // SaveBulkProgressTx keeps the counters monotone: a concurrent or resumed run
-// can never move them backwards, and DONE is terminal.
-func (Store) SaveBulkProgressTx(ctx context.Context, transaction tx.Tx, semanticKey string, processed, applied, refused int, state string, at time.Time) error {
-	if transaction == nil || semanticKey == "" || processed < 0 || applied < 0 || refused < 0 || at.IsZero() || (state != operatorgrant.StatePending && state != operatorgrant.StateDone) {
+// can never move them backwards, and DONE and FAILED are terminal.
+func (Store) SaveBulkProgressTx(ctx context.Context, transaction tx.Tx, semanticKey string, processed, applied, refused int, state, failedReason string, at time.Time) error {
+	if transaction == nil || semanticKey == "" || processed < 0 || applied < 0 || refused < 0 || at.IsZero() || !operatorgrant.ValidBulkState(state) || (state == operatorgrant.StateFailed) != (failedReason != "") {
 		return errInvalid
 	}
 	_, err := transaction.Exec(ctx, `UPDATE operator_bulk_targets
-SET processed=GREATEST(processed,$2::integer), applied=GREATEST(applied,$3::integer), refused=GREATEST(refused,$4::integer), state=$5::text, updated_at=$6::timestamptz,
-    finished_at=CASE WHEN $5::text='DONE' THEN $6::timestamptz ELSE NULL END
-WHERE semantic_key=$1 AND state<>'DONE'`, semanticKey, processed, applied, refused, state, at.UTC())
+SET processed=GREATEST(processed,$2::integer), applied=GREATEST(applied,$3::integer), refused=GREATEST(refused,$4::integer), state=$5::text, failed_reason=NULLIF($7::text,''), updated_at=$6::timestamptz,
+    finished_at=CASE WHEN $5::text IN ('DONE','FAILED') THEN $6::timestamptz ELSE NULL END
+WHERE semantic_key=$1 AND state NOT IN ('DONE','FAILED')`, semanticKey, processed, applied, refused, state, at.UTC(), failedReason)
 	return err
 }
 

@@ -1503,7 +1503,8 @@
    ],
    "operatorgrant": [
     "*AdminGrant",
-    "*AdminGrantTx"
+    "*AdminGrantTx",
+    "IsPermanentGrantRefusal"
    ],
    "petcampaign": [
     "*CheckAwakeningPetMaterialTx",
@@ -5375,7 +5376,8 @@
   "operatorgrant": {
    "i5": [
     "*AdminGrant",
-    "*AdminGrantTx"
+    "*AdminGrantTx",
+    "IsPermanentGrantRefusal"
    ],
    "operator": [
     "*InsertBulkTx",

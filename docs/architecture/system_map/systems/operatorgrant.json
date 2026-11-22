@@ -59,6 +59,10 @@
    {
     "lock_timeout_ms": 5000,
     "name": "operator-bulk-apply"
+   },
+   {
+    "lock_timeout_ms": 500,
+    "name": "operator-bulk-read-v1"
    }
   ],
   "ranks": [],

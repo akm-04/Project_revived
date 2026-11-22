@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"errors"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -43,12 +44,15 @@ type ItemPresentation struct {
 	Icon string
 }
 
-// Entry is one exported catalogue row.
+// Entry is one exported catalogue row. ID stays the backend definition key the
+// grant command uses; ItemID is the numeric client item id when the definition
+// has one.
 type Entry struct {
 	ID        string `json:"id"`
 	Kind      string `json:"kind"`
 	Grantable string `json:"grantable"`
 	Reason    string `json:"reason,omitempty"`
+	ItemID    *int64 `json:"item_id"`
 	Name      string `json:"name"`
 	Icon      string `json:"icon"`
 }
@@ -92,6 +96,10 @@ func Build(resources []Resource, items []ItemPresentation, generatedAt time.Time
 		if grantable {
 			entry.Grantable, entry.Reason = GrantableEnabled, ""
 		}
+		if resource.ItemID > 0 {
+			itemID := resource.ItemID
+			entry.ItemID = &itemID
+		}
 		if presentation, found := presentations[resource.ItemID]; found && resource.ItemID > 0 {
 			entry.Name, entry.Icon = presentation.Name, presentation.Icon
 		}
@@ -112,6 +120,32 @@ func entriesRevision(entries []Entry) (string, error) {
 	}
 	digest := sha256.Sum256(encoded)
 	return hex.EncodeToString(digest[:]), nil
+}
+
+// matches reports whether the lowercased query names this entry. An all-digit
+// query also matches the numeric client item id exactly.
+func (entry Entry) matches(needle string) bool {
+	if strings.Contains(strings.ToLower(entry.Name), needle) || strings.Contains(strings.ToLower(entry.ID), needle) {
+		return true
+	}
+	numeric, ok := parseNumeric(needle)
+	return ok && entry.ItemID != nil && *entry.ItemID == numeric
+}
+
+func parseNumeric(text string) (int64, bool) {
+	if text == "" {
+		return 0, false
+	}
+	for _, digit := range text {
+		if digit < '0' || digit > '9' {
+			return 0, false
+		}
+	}
+	value, err := strconv.ParseInt(text, 10, 64)
+	if err != nil {
+		return 0, false
+	}
+	return value, true
 }
 
 // Lookup returns one entry by its backend definition key.
@@ -210,7 +244,7 @@ func (d Document) Search(filter SearchFilter) (SearchPage, error) {
 		if filter.Kind != "" && entry.Kind != filter.Kind {
 			continue
 		}
-		if needle != "" && !strings.Contains(strings.ToLower(entry.Name), needle) && !strings.Contains(strings.ToLower(entry.ID), needle) {
+		if needle != "" && !entry.matches(needle) {
 			continue
 		}
 		matches = append(matches, entry)

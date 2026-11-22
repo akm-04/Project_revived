@@ -170,3 +170,40 @@ func TestO2BulkFreezeThenResumeNative(t *testing.T) {
 		}
 	}
 }
+
+// TestO2BulkFailedReasonNative proves a frozen payload whose catalogue row was
+// removed before settlement ends FAILED with its reason persisted and readable.
+func TestO2BulkFailedReasonNative(t *testing.T) {
+	pool := o2Pool(t)
+	store := operatorstore.Store{}
+	grants := &o2Grants{}
+	catalogue := o2Catalogue(t)
+	commands := operatorgrant.Commands{Catalogue: catalogue, Store: store, Grants: grants, LineCap: 1000}
+	bus := operator.Bus{Runner: tx.Runner{DB: pool}, Clock: clock.System{}, Store: store, Handlers: commands.Handlers()}
+	key := o2Key(t)
+	ids := make([]int64, 0, operatorgrant.InlineRecipientLimit+1)
+	for i := 1; i <= operatorgrant.InlineRecipientLimit+1; i++ {
+		ids = append(ids, int64(i))
+	}
+	payload := map[string]any{"target": map[string]any{"player_ids": ids}, "lines": []map[string]any{{"id": "stack_item:50001010", "amount": 1}}}
+	if _, err := bus.Execute(context.Background(), o2Command(t, key, payload)); err != nil {
+		t.Fatal(err)
+	}
+	// A later content update no longer carries the frozen line.
+	reduced, err := operatorcatalog.Build([]operatorcatalog.Resource{{DefinitionKey: "stack_item:1", Class: "STACK_ITEM", Activation: "ENABLED_R4", ItemID: 1}}, nil, time.Unix(100, 0))
+	if err != nil {
+		t.Fatal(err)
+	}
+	applier := operatorgrant.Applier{Runner: tx.Runner{DB: pool}, Operations: operation.Factory{Clock: clock.System{}}, Store: store, Grants: grants, Catalogue: reduced, LineCap: 1000}
+	finished, err := applier.ApplyPending(context.Background())
+	if err != nil || finished != 1 {
+		t.Fatalf("finished=%d err=%v", finished, err)
+	}
+	target := o2Read(t, pool, store, key)
+	if target == nil || target.State != operatorgrant.StateFailed || target.FailedReason == "" || target.FinishedAt == nil {
+		t.Fatalf("failed target = %+v", target)
+	}
+	if len(grants.effects) != 0 {
+		t.Fatalf("a failed target granted %v", grants.effects)
+	}
+}
