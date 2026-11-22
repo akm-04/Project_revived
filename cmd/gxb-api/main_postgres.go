@@ -436,6 +436,7 @@ func main() {
 		OperationBinder:         contentstore.Store{},
 		DetailContributors:      []appboot.MID1DetailContributor{appdorm.GlueBootstrap{Owner: dormstore.Store{}}, appi5.AwakeningBootstrap{Owner: i5svc}, appi5.SignInBootstrap{Owner: i5svc}, appi5.MissionBootstrap{Owner: i5svc}, commerceprivilege.BootstrapProjection{Provider: privileges}, i5store.BootstrapProjection{Display: displayService, Content: contentstore.Store{Queryer: pool}, Privileges: privileges, MaxHeroColor: maxHeroColorPolicy, Spirit: spiritSvc, BackpackSort: heroDB}, activitystore.BootstrapProjection{Directory: activityDirectory}, guildprojection.BootstrapProjection{}, guildprojection.TeaProjection{}, mentorstore.BootstrapProjection{Service: mentorSvc}, heroBootstrap, librarystore.BootstrapProjection{Service: librarySvc}, bookstore.BootstrapProjection{Service: bookSvc, Content: contentDB}, coursestore.BootstrapProjection{Service: courseSvc, Content: contentDB}, characterstore.PetBootstrapProjection{Content: contentDB}, characterstore.SavedPresetBootstrapProjection{}, conquerstore.BootstrapProjection{Content: contentDB}, campaignWorld, vending, appmarch.Mode{Store: marchstore.Store{}, Roster: heroBootstrap}, apppetcampaign.Mode{Store: petcampaignstore.Store{}}, appgodstrial.Mode{Store: godstrialstore.Store{}}, appworldboss.Mode{Store: worldbossstore.Store{}}, appadventure.Mode{Store: adventurestore.Store{}, Content: contentDB, Functions: i5db, Directory: i4store.PlayerDirectoryReader{}}, appcompat.BootstrapProjection{Store: compatstore.Store{}}, achievementstore.BootstrapProjection{Store: achievementstore.Store{}, Content: contentDB, Active: contentDB}, herorecommendstore.BootstrapProjection{Service: heroRecommend}},
 		DirectoryReconciler:     appdir.Reconciler{Source: i5db, Sink: i4store.DirectoryLevelProjection{}},
+		SessionHolds:            identitystore.Store{},
 	}
 	authority := i4store.RealtimeAuthority{Queryer: pool, DigestSecret: digestSecret, BearerSecret: bearerSecret, DerivationKeyID: keyID, BearerKeys: bearerKeys}
 	itemsEnergy := stockruntime.NewItemsEnergyComposition(stockruntime.ItemsEnergyDependencies{
@@ -554,11 +555,15 @@ func main() {
 	}
 	operatorVersion := operator.VersionService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Reader: operatorstore.Store{}, BackendVersion: backendVersion, GitCommit: gitCommit, ContentRevision: &operatorCatalogue.ContentRevision}
 	playerReads := operator.PlayerReadService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Directory: i4store.PlayerDirectoryReader{}, Wallet: appi5.OperatorWalletService{Store: i5db, Privileges: privileges}}
+	serverReads := operator.ServerReadService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Servers: i4store.ServerDirectoryReader{}, Online: identitystore.Store{}}
+	sessionReads := operator.SessionReadService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Sessions: identitystore.Store{}, Players: i4store.PlayerDirectoryReader{}}
+	publicationCommands := apppublication.OperatorCommands{Store: publicationstore.Store{}}
+	publicationReads := apppublication.OperatorRead{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: publicationstore.Store{}}
 	bulkReads := operatorgrant.BulkReadService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: operatorstore.Store{}}
 	operatorVersionReply := func(ctx context.Context) (any, error) {
 		return operatorVersion.Version(ctx)
 	}
-	logoutCommands := appidentity.LogoutCommands{Store: identitystore.Store{}}
+	logoutCommands := appidentity.LogoutCommands{Store: identitystore.Store{}, DefaultHoldSeconds: appidentity.SessionHoldSecondsTunable()}
 	grantCommands := operatorgrant.Commands{Catalogue: operatorCatalogue, Store: operatorstore.Store{}, Directory: i4store.PlayerDirectoryReader{}, Grants: i5svc, LineCap: grantLineCap}
 	mailCommands := operatorgrant.MailCommands{Catalogue: operatorCatalogue, Store: operatorstore.Store{}, Directory: i4store.PlayerDirectoryReader{}, Mail: i5svc, LineCap: grantLineCap}
 	redeemCommands := operatorgrant.RedeemCommands{Catalogue: operatorCatalogue, Redeem: i5svc, LineCap: grantLineCap}
@@ -598,11 +603,17 @@ func main() {
 		map[string]operator.ReadHandler{"catalog.search": operatorapi.CatalogSearch(operatorCatalogue)})
 	playerModule := bindModule(operator.PlayerModule(), nil,
 		map[string]operator.ReadHandler{"player.find": operatorapi.PlayerFind(playerReads), "player.summary": operatorapi.PlayerSummary(playerReads)})
+	serverModule := bindModule(operator.ServerModule(), nil,
+		map[string]operator.ReadHandler{"server.list": operatorapi.ServerList(serverReads)})
+	logoutModule := bindModule(logoutCommands.Module(), nil,
+		map[string]operator.ReadHandler{"session.online": operatorapi.SessionOnline(sessionReads)})
+	publicationModule := bindModule(publicationCommands.Module(), publicationCommands.Handlers(),
+		map[string]operator.ReadHandler{"publication.show": operatorapi.PublicationShow(publicationReads)})
 	operatorModule := bindModule(operator.OperatorModule(), nil,
 		map[string]operator.ReadHandler{"operator.audit.list": operatorapi.AuditList(operatorAudit), operatorgrant.BulkShowRead: operatorapi.BulkShow(bulkReads)})
 	redeemModule := bindModule(redeemCommands.Module(), nil,
 		map[string]operator.ReadHandler{"redeem.list": operatorapi.RedeemList(appi5.OperatorRedeemRead{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: i5db})})
-	modules := []operator.Module{otaModule, logoutCommands.Module(), grantCommands.Module(), mailCommands.Module(), redeemModule, eventsModule, catalogModule, playerModule, operatorModule}
+	modules := []operator.Module{otaModule, logoutModule, grantCommands.Module(), mailCommands.Module(), redeemModule, eventsModule, catalogModule, playerModule, serverModule, publicationModule, operatorModule}
 	modules = append(modules, operator.PlannedModules()...)
 	registry, err := operator.NewRegistry(modules...)
 	if err != nil {

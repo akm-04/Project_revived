@@ -10558,6 +10558,29 @@
         "retention": null
       }
     },
+    "operator_session_holds": {
+      "owner": "identity/logicalserver/bootstrap",
+      "allowed_query_owners": [
+        "identity/logicalserver/bootstrap"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/identitystore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/identitystore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00192_identity_session_holds.sql",
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
+    },
     "operator_bulk_targets": {
       "owner": "operator",
       "allowed_query_owners": [

@@ -177,8 +177,8 @@ func (Store) InsertActivationTx(ctx context.Context, transaction tx.Tx, activati
 
 const readStatus = `SELECT jsonb_build_object(
 	'revision',(SELECT COALESCE(max(id),0) FROM ota_activations),
-	'active',(SELECT COALESCE(jsonb_agg(jsonb_build_object('version',version,'lane',lane) ORDER BY version),'[]'::jsonb)
-		FROM (SELECT version,lane FROM ota_releases WHERE state='ACTIVE' ORDER BY version LIMIT $1) active),
+	'active',(SELECT COALESCE(jsonb_agg(jsonb_build_object('version',version,'lane',lane,'total_size',total_size,'published_at',published_at) ORDER BY version),'[]'::jsonb)
+		FROM (SELECT version,lane,total_size,published_at FROM ota_releases WHERE state='ACTIVE' ORDER BY version LIMIT $1) active),
 	'built',(SELECT COALESCE(jsonb_agg(jsonb_build_object('version',version,'lane',lane,'total_size',total_size,'built_at',built_at) ORDER BY version),'[]'::jsonb)
 		FROM (SELECT version,lane,total_size,built_at FROM ota_releases WHERE state='BUILT' ORDER BY version LIMIT $2) built),
 	'activations',(SELECT COALESCE(jsonb_agg(jsonb_build_object('id',id,'version',version,'action',action,'command_key',command_key,'at',at) ORDER BY id DESC),'[]'::jsonb)

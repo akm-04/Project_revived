@@ -151,6 +151,10 @@
  "locks": {
   "profiles": [
    {
+    "lock_timeout_ms": 500,
+    "name": "operator-publication-show-v1"
+   },
+   {
     "lock_timeout_ms": 2000,
     "name": "publication"
    }
@@ -250,6 +254,8 @@
    "publication"
   ],
   "scenarios_naming": [],
-  "unit": []
+  "unit": [
+   "operator_test.go"
+  ]
  }
 }

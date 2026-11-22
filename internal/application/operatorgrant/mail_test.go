@@ -22,6 +22,7 @@ type recordedMail struct {
 	player    int64
 	key       string
 	title     string
+	sender    string
 	body      string
 	lines     []grant.Line
 	expires   *time.Time
@@ -41,8 +42,8 @@ func (f *fakeMail) AdminSendMail(ctx context.Context, admin appi5.AdminOperator,
 	return f.AdminSendMailTx(ctx, nil, admin, target, ns, key, title, sender, body, policy, lines, expires, afterRead, op)
 }
 
-func (f *fakeMail) AdminSendMailTx(_ context.Context, _ tx.Tx, _ appi5.AdminOperator, target identity.PlayerID, _ mail.Namespace, key, title, _ string, body, _ string, lines []grant.Line, expires *time.Time, afterRead *int64, _ operation.Context) (appi5.AdminMailResult, error) {
-	f.calls = append(f.calls, recordedMail{player: int64(target), key: key, title: title, body: body, lines: lines, expires: expires, afterRead: afterRead})
+func (f *fakeMail) AdminSendMailTx(_ context.Context, _ tx.Tx, _ appi5.AdminOperator, target identity.PlayerID, _ mail.Namespace, key, title, sender, body, _ string, lines []grant.Line, expires *time.Time, afterRead *int64, _ operation.Context) (appi5.AdminMailResult, error) {
+	f.calls = append(f.calls, recordedMail{player: int64(target), key: key, title: title, sender: sender, body: body, lines: lines, expires: expires, afterRead: afterRead})
 	if int64(target) == f.failAt && f.failuresLeft > 0 {
 		f.failuresLeft--
 		return appi5.AdminMailResult{}, f.err
@@ -142,6 +143,44 @@ func TestMailSendInlineDeliversEachRecipientOnceWithItsOwnKey(t *testing.T) {
 	}
 	if len(deliveries.effects) != 2 {
 		t.Fatalf("effects = %d, want one per recipient", len(deliveries.effects))
+	}
+}
+
+func TestMailSendCarriesTheSenderAndDefaultsToTheGMName(t *testing.T) {
+	deliveries := &fakeMail{}
+	commands := MailCommands{Catalogue: testCatalogue(t), Store: &fakeStore{}, Mail: deliveries, LineCap: 10}
+	payload := mailPayloadFor([]int64{1}, map[string]any{"on_read": true})
+	if _, err := commands.sendHandler(context.Background(), testScope(), mailCommand(t, "mail-sender-default", payload)); err != nil {
+		t.Fatal(err)
+	}
+	payload["sender"] = "Game Master"
+	if _, err := commands.sendHandler(context.Background(), testScope(), mailCommand(t, "mail-sender-custom", payload)); err != nil {
+		t.Fatal(err)
+	}
+	if len(deliveries.calls) != 2 {
+		t.Fatalf("deliveries = %d", len(deliveries.calls))
+	}
+	if deliveries.calls[0].sender != DefaultMailSender || deliveries.calls[1].sender != "Game Master" {
+		t.Fatalf("senders = %q, %q", deliveries.calls[0].sender, deliveries.calls[1].sender)
+	}
+	if _, err := commands.sendHandler(context.Background(), testScope(), mailCommand(t, "mail-sender-long", map[string]any{
+		"target": map[string]any{"player_ids": []int64{1}}, "title": "t", "sender": string(make([]rune, MaxMailSenderRunes+1)), "body": "b", "expire": map[string]any{"on_read": true},
+	})); err == nil {
+		t.Fatal("an oversized sender was accepted")
+	}
+}
+
+func TestApplyPendingMailKeepsTheFrozenSender(t *testing.T) {
+	ids := []int64{11}
+	payload := mailPayloadFor(ids, map[string]any{"on_read": true})
+	payload["sender"] = "Frozen Sender"
+	store := &fakeStore{rows: map[string]BulkTarget{"mail-sender-bulk": testMailBulkTarget(t, "mail-sender-bulk", ids, payload)}}
+	deliveries := &fakeMail{}
+	if _, err := mailApplier(t, store, deliveries).ApplyPending(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if len(deliveries.calls) != 1 || deliveries.calls[0].sender != "Frozen Sender" {
+		t.Fatalf("calls = %+v", deliveries.calls)
 	}
 }
 

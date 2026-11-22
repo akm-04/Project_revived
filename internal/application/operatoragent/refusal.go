@@ -45,6 +45,12 @@ const (
 	CodeBuildConfig                  = "AGENT_BUILD_CONFIG"
 	CodeBuildIO                      = "AGENT_BUILD_IO"
 	CodeBuildNoAssetsRelease         = "AGENT_BUILD_NO_ASSETS_RELEASE"
+	// CodeBuildVersionNotNext refuses a supplied version that is not the lane's
+	// next last-component increment (OPERATOR_GUI_V2 G14).
+	CodeBuildVersionNotNext = "AGENT_BUILD_VERSION_NOT_NEXT"
+	// CodeBuildNoBaseline refuses an automatic next version when the lane has no
+	// built or active release to increment.
+	CodeBuildNoBaseline = "AGENT_BUILD_NO_BASELINE"
 )
 
 // Refusal is a permanent agent refusal: the agent API answers 409 with Code.

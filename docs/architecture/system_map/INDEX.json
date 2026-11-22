@@ -733,6 +733,7 @@
    "one_on_one_settlements": "oneonone",
    "operator_bulk_targets": "operator",
    "operator_commands": "operator",
+   "operator_session_holds": "bootstrap",
    "ota_activations": "otarelease",
    "ota_asset_misses": "otarelease",
    "ota_asset_served_daily": "otarelease",
@@ -931,7 +932,7 @@
    "name": "bootstrap",
    "path": "internal/application/bootstrap",
    "purpose": "",
-   "tables": 10
+   "tables": 11
   },
   {
    "callees": 0,
@@ -1411,8 +1412,8 @@
    "tables": 8
   },
   {
-   "callees": 2,
-   "callers": 6,
+   "callees": 3,
+   "callers": 7,
    "mids": 0,
    "name": "operator",
    "path": "internal/application/operator",
@@ -1537,7 +1538,7 @@
    "tables": 5
   },
   {
-   "callees": 4,
+   "callees": 5,
    "callers": 0,
    "mids": 4,
    "name": "publication",

@@ -34,7 +34,10 @@ type Resource struct {
 	Class         string
 	Activation    string
 	ItemID        int64
-	Reason        string
+	// ResourceKey names the scalar/temporal resource (mana, exp, energy, ...);
+	// it is empty for item-backed definitions.
+	ResourceKey string
+	Reason      string
 }
 
 // ItemPresentation is one compiled client item row, joined by item id.
@@ -42,6 +45,8 @@ type ItemPresentation struct {
 	ID   int64
 	Name string
 	Icon string
+	// Quality is the item.lua quality column: 0 unset, 1..6 the star rarity.
+	Quality int64
 }
 
 // Entry is one exported catalogue row. ID stays the backend definition key the
@@ -55,6 +60,7 @@ type Entry struct {
 	ItemID    *int64 `json:"item_id"`
 	Name      string `json:"name"`
 	Icon      string `json:"icon"`
+	Rarity    int64  `json:"rarity,omitempty"`
 }
 
 // Document is the export file and the read source.
@@ -101,6 +107,8 @@ func Build(resources []Resource, items []ItemPresentation, generatedAt time.Time
 			entry.ItemID = &itemID
 		}
 		if presentation, found := presentations[resource.ItemID]; found && resource.ItemID > 0 {
+			entry.Name, entry.Icon, entry.Rarity = presentation.Name, presentation.Icon, presentation.Quality
+		} else if presentation, found := ScalarPresentations[resource.ResourceKey]; found {
 			entry.Name, entry.Icon = presentation.Name, presentation.Icon
 		}
 		entries = append(entries, entry)
@@ -211,10 +219,11 @@ func parseItemID(id, prefix string) (int64, bool) {
 
 // SearchFilter is the bounded catalog.search query.
 type SearchFilter struct {
-	Kind  string
-	Query string
-	Limit int
-	After string
+	Kind   string
+	Query  string
+	Rarity *int64
+	Limit  int
+	After  string
 }
 
 // SearchPage is one catalog.search reply.
@@ -242,6 +251,9 @@ func (d Document) Search(filter SearchFilter) (SearchPage, error) {
 			continue
 		}
 		if filter.Kind != "" && entry.Kind != filter.Kind {
+			continue
+		}
+		if filter.Rarity != nil && (entry.Rarity < 1 || entry.Rarity != *filter.Rarity) {
 			continue
 		}
 		if needle != "" && !entry.matches(needle) {

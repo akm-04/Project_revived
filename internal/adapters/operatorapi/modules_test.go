@@ -9,11 +9,13 @@ import (
 	"testing"
 
 	appevents "gxb.local/backend/v2/internal/application/events"
+	appidentity "gxb.local/backend/v2/internal/application/identitylifecycle"
 	"gxb.local/backend/v2/internal/application/operator"
 	"gxb.local/backend/v2/internal/application/operatorcatalog"
 	"gxb.local/backend/v2/internal/application/operatorgrant"
 	appota "gxb.local/backend/v2/internal/application/otarelease"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
+	apppublication "gxb.local/backend/v2/internal/application/publication"
 )
 
 func TestModulesRouteServesTheRegistry(t *testing.T) {
@@ -58,6 +60,15 @@ func TestEveryReadWithARequirementRefusesEmptyQuery(t *testing.T) {
 		bindReads(t, operator.OperatorModule(), map[string]operator.ReadHandler{
 			"operator.audit.list": AuditList(&fakeAuditService{}),
 			"operator.bulk.show":  BulkShow(fakeBulkShow{}),
+		}),
+		bindReads(t, operator.ServerModule(), map[string]operator.ReadHandler{
+			"server.list": ServerList(fakeServerList{}),
+		}),
+		bindReads(t, appidentity.LogoutCommands{}.Module(), map[string]operator.ReadHandler{
+			"session.online": SessionOnline(fakeSessionOnline{}),
+		}),
+		bindReads(t, apppublication.OperatorCommands{}.Module(), map[string]operator.ReadHandler{
+			"publication.show": PublicationShow(fakePublicationShow{}),
 		}),
 	}
 	// The adapter itself refuses these when the declared required input is
@@ -116,4 +127,22 @@ type fakeEventsList struct{}
 
 func (fakeEventsList) List(context.Context, appevents.OccurrenceFilter) (appevents.OccurrencePage, error) {
 	return appevents.OccurrencePage{}, nil
+}
+
+type fakeServerList struct{}
+
+func (fakeServerList) List(context.Context) (operator.ServerListPage, error) {
+	return operator.ServerListPage{}, nil
+}
+
+type fakeSessionOnline struct{}
+
+func (fakeSessionOnline) Online(context.Context, operator.OnlineSessionFilter) (operator.OnlineSessionPage, error) {
+	return operator.OnlineSessionPage{}, nil
+}
+
+type fakePublicationShow struct{}
+
+func (fakePublicationShow) Show(context.Context, string, int64) (apppublication.ShowReply, error) {
+	return apppublication.ShowReply{}, nil
 }

@@ -69,7 +69,8 @@
    "gameplay_context_credentials",
    "gameplay_contexts",
    "gxb_operation_receipts",
-   "operator_audit_events"
+   "operator_audit_events",
+   "operator_session_holds"
   ]
  },
  "tests": {

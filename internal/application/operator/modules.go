@@ -24,6 +24,21 @@ func PlayerModule() Module {
 	}
 }
 
+// ServerModule is the backend's server read module (OPERATOR_GUI_V2 design
+// item 1). Its commands are the agent's, merged into this module by id.
+func ServerModule() Module {
+	return Module{
+		ID:         ModServer,
+		Title:      "Server",
+		Role:       RoleRoot,
+		LogChannel: "server",
+		Screen:     Screen{Tab: "Server", Columns: []string{"server_id", "name", "open", "online_count"}},
+		Reads: []Read{
+			{Name: "server.list", Help: "Registered logical servers with their live session count."},
+		},
+	}
+}
+
 // OperatorModule is the operator module (audit and bulk progress). Its two
 // reads are the only operator-tool state that comes from the bus itself.
 func OperatorModule() Module {
@@ -60,10 +75,6 @@ func PlannedModules() []Module {
 			{Name: "gm.list", Class: ClassLive, Help: "Player questions inbox."},
 			{Name: "gm.answer", Class: ClassLive, Help: "Answer one stored question."},
 			{Name: "gm.catcher_mode", Class: ClassLive, Help: "Off, allow-list or everyone."},
-		}},
-		{ID: "publication", Title: "Publications", LogChannel: "publication", Planned: later, Commands: []CommandSpec{
-			{Name: "publication.install", Class: ClassLive, Help: "Install a revisioned publication set."},
-			{Name: "publication.clear", Class: ClassLive, Help: "Clear the active publication set."},
 		}},
 		{ID: "tuning", Title: "Tuning overlays", LogChannel: "tuning", Planned: later, Commands: []CommandSpec{
 			{Name: "tuning.get", Class: ClassLive, Help: "Read one overlay (one command per overlay)."},

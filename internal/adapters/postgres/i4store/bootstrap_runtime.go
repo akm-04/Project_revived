@@ -142,6 +142,7 @@ type BootstrapService struct {
 	OperationBinder         appboot.CharacterBootstrapOperationBinder
 	DetailContributors      []appboot.MID1DetailContributor
 	DirectoryReconciler     appboot.MID1DirectoryReconciler
+	SessionHolds            appidentity.HoldChecker
 	Profile                 tx.Profile
 	Retry                   tx.RetryPolicy
 }
@@ -312,6 +313,19 @@ func (s BootstrapService) MID1(ctx context.Context, req appboot.RuntimeMID1Reque
 		server, existingPlayer, err := loadServerForMID1Admission(txctx, scope.Tx, req.Region, account.ID, existingPlayer)
 		if err != nil {
 			return err
+		}
+		if s.SessionHolds != nil {
+			playerID := identity.PlayerID(0)
+			if existingPlayer != nil {
+				playerID = existingPlayer.PlayerID
+			}
+			onHold, holdErr := s.SessionHolds.ActiveSessionHoldTx(txctx, scope.Tx, req.Region, playerID, decisionAt)
+			if holdErr != nil {
+				return holdErr
+			}
+			if onHold {
+				return appboot.ErrSessionHold
+			}
 		}
 		observed := false
 		if existingPlayer == nil {

@@ -62,6 +62,7 @@ type Handler struct {
 	Operations  *operatoragent.Operations
 	Build       operatoragent.OTAOperationStarter
 	Modules     operatoragent.ModuleLister
+	Dashboard   operatoragent.Dashboard
 	ToolLog     *operatoragent.ToolLog
 	ToolLogPath string
 	// OTARoot holds settings.json, whose res_path the GUI picture route reads.
@@ -351,6 +352,10 @@ func (handler Handler) serveRead(writer http.ResponseWriter, request *http.Reque
 		writeRefusal(writer, http.StatusConflict, operatoragent.CodeBodyInvalid, "read name is required")
 		return
 	}
+	if name == "dashboard.summary" {
+		handler.serveDashboard(writer, request)
+		return
+	}
 	response, err := handler.Operator.Read(request.Context(), name, request.URL.RawQuery)
 	if err != nil {
 		handler.writeAgentError(writer, name, err)
@@ -358,6 +363,14 @@ func (handler Handler) serveRead(writer http.ResponseWriter, request *http.Reque
 	}
 	handler.record(name, "read", outcomeWord(response.Status), map[string]any{"status": response.Status})
 	writeBackend(writer, response)
+}
+
+// serveDashboard answers the agent-composed dashboard read; it folds several
+// backend reads and the process state, so it never forwards one read.
+func (handler Handler) serveDashboard(writer http.ResponseWriter, request *http.Request) {
+	summary := handler.Dashboard.Summary(request.Context())
+	handler.record("dashboard.summary", "read", "ok", map[string]any{"servers": len(summary.Servers), "events": len(summary.Events)})
+	writeJSON(writer, http.StatusOK, summary)
 }
 
 func (handler Handler) serveMaintenance(writer http.ResponseWriter, request *http.Request, publish bool) {

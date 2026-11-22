@@ -1164,7 +1164,12 @@ def build_item_presentation(items: list[dict[str, str]]) -> dict[str, Any]:
     rows = []
     for index, row in enumerate(items, start=1):
         item_id = parse_int(row["id"], label=f"item_presentation[{index}].id", allow_zero=False, allow_negative=False)
-        rows.append({"id": item_id, "name": row.get("name", ""), "icon": row.get("icon", "")})
+        quality = 0
+        if row.get("quality", "") != "":
+            quality = parse_int(row["quality"], label=f"item_presentation[{index}].quality", allow_zero=True, allow_negative=False)
+            if quality > 6:
+                raise CompileError("item.lua quality is outside 0..6")
+        rows.append({"id": item_id, "name": row.get("name", ""), "icon": row.get("icon", ""), "quality": quality})
     rows.sort(key=lambda r: r["id"])
     if len({r["id"] for r in rows}) != len(rows):
         raise CompileError("item.lua presentation ids are not unique")

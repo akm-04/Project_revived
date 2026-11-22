@@ -70,7 +70,10 @@ type Config struct {
 	StockCatalog  string            `json:"stock_catalog,omitempty"`
 	ClientTree    string            `json:"client_tree"`
 	Origins       map[string]string `json:"origins"`
-	Backend       BackendConfig     `json:"backend"`
+	// PublicURLs are the tunnel and LAN addresses the dashboard shows (S3).
+	// Empty until the operator sets them; the dashboard still renders (F1).
+	PublicURLs []string      `json:"public_urls,omitempty"`
+	Backend    BackendConfig `json:"backend"`
 }
 
 // LoadConfig reads and validates <root>/agent.json.

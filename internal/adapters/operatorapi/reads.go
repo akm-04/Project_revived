@@ -14,6 +14,7 @@ import (
 	"gxb.local/backend/v2/internal/application/operatorgrant"
 	appota "gxb.local/backend/v2/internal/application/otarelease"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
+	apppublication "gxb.local/backend/v2/internal/application/publication"
 	"gxb.local/backend/v2/internal/domain/events"
 )
 
@@ -43,6 +44,65 @@ func OTARelease(service OTAReleaseService) Read {
 			return nil, operator.Refuse(operator.CodeReadInvalid, "version is required", nil)
 		}
 		return service.Exists(ctx, version)
+	}
+}
+
+// ServerListService is the server.list read.
+type ServerListService interface {
+	List(context.Context) (operator.ServerListPage, error)
+}
+
+// ServerList adapts server.list to the read registry.
+func ServerList(service ServerListService) Read {
+	return func(ctx context.Context, _ url.Values) (any, error) {
+		return service.List(ctx)
+	}
+}
+
+// SessionOnlineService is the session.online read.
+type SessionOnlineService interface {
+	Online(context.Context, operator.OnlineSessionFilter) (operator.OnlineSessionPage, error)
+}
+
+// SessionOnline adapts session.online to the read registry.
+func SessionOnline(service SessionOnlineService) Read {
+	return func(ctx context.Context, values url.Values) (any, error) {
+		filter := operator.OnlineSessionFilter{After: values.Get("after")}
+		if rawServer := values.Get("server_id"); rawServer != "" {
+			server, err := strconv.ParseInt(rawServer, 10, 64)
+			if err != nil || server <= 0 {
+				return nil, operator.Refuse(operator.CodeReadInvalid, "server_id must be a positive id", nil)
+			}
+			filter.ServerID = &server
+		}
+		if rawLimit := values.Get("limit"); rawLimit != "" {
+			limit, err := strconv.Atoi(rawLimit)
+			if err != nil {
+				return nil, operator.Refuse(operator.CodeReadInvalid, "limit must be a number", nil)
+			}
+			filter.Limit = limit
+		}
+		return service.Online(ctx, filter)
+	}
+}
+
+// PublicationShowService is the publication.show read.
+type PublicationShowService interface {
+	Show(context.Context, string, int64) (apppublication.ShowReply, error)
+}
+
+// PublicationShow adapts publication.show to the read registry.
+func PublicationShow(service PublicationShowService) Read {
+	return func(ctx context.Context, values url.Values) (any, error) {
+		var serverID int64
+		if rawServer := values.Get("server_id"); rawServer != "" {
+			parsed, err := strconv.ParseInt(rawServer, 10, 64)
+			if err != nil || parsed < 0 {
+				return nil, operator.Refuse(operator.CodeReadInvalid, "server_id must be zero or positive", nil)
+			}
+			serverID = parsed
+		}
+		return service.Show(ctx, values.Get("family"), serverID)
 	}
 }
 
@@ -145,6 +205,13 @@ func RedeemList(service RedeemListService) Read {
 func CatalogSearch(document operatorcatalog.Document) Read {
 	return func(_ context.Context, values url.Values) (any, error) {
 		filter := operatorcatalog.SearchFilter{Kind: values.Get("kind"), Query: values.Get("query"), After: values.Get("after")}
+		if rawRarity := values.Get("rarity"); rawRarity != "" {
+			rarity, err := strconv.ParseInt(rawRarity, 10, 64)
+			if err != nil || rarity < 1 || rarity > 6 {
+				return nil, operator.Refuse(operator.CodeReadInvalid, "rarity must be between 1 and 6", nil)
+			}
+			filter.Rarity = &rarity
+		}
 		if rawLimit := values.Get("limit"); rawLimit != "" {
 			limit, err := strconv.Atoi(rawLimit)
 			if err != nil || limit < 1 || limit > operatorcatalog.MaxSearchLimit {

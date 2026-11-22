@@ -78,6 +78,7 @@
  "pushes": [],
  "stores": [
   "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/identitystore",
   "internal/adapters/postgres/operatorstore"
  ],
  "tables": {
@@ -86,7 +87,10 @@
    "operator_commands"
   ],
   "read": [
+   "account_sessions",
    "accounts",
+   "gameplay_contexts",
+   "logical_servers",
    "operator_commands",
    "player_directory_profiles",
    "player_login_observations",
@@ -99,11 +103,13 @@
  "tests": {
   "integration": [
    "identitylogout",
-   "playerdisplay"
+   "playerdisplay",
+   "publication"
   ],
   "scenarios_naming": [],
   "unit": [
    "envelope_test.go",
+   "inventory_reads_test.go",
    "module_test.go"
   ]
  }

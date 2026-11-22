@@ -51,8 +51,104 @@ type buildFingerprint struct {
 type otaStatusReply struct {
 	Revision int64 `json:"revision"`
 	Active   struct {
-		Assets *string `json:"assets"`
+		Code    *string  `json:"code"`
+		Assets  *string  `json:"assets"`
+		Catalog []string `json:"catalog"`
 	} `json:"active"`
+	Built []struct {
+		Version string `json:"version"`
+		Lane    string `json:"lane"`
+	} `json:"built"`
+}
+
+// highestVersion is the lane's highest built-or-active version.
+func (status otaStatusReply) highestVersion(lane domain.Lane) (domain.Version, bool) {
+	highest := domain.Version{}
+	seen := false
+	consider := func(text string) {
+		parsed, err := domain.ParseVersion(text)
+		if err != nil {
+			return
+		}
+		if !seen || parsed.Compare(highest) > 0 {
+			highest = parsed
+			seen = true
+		}
+	}
+	switch lane {
+	case domain.LaneCode:
+		if status.Active.Code != nil {
+			consider(*status.Active.Code)
+		}
+	case domain.LaneAssets:
+		if status.Active.Assets != nil {
+			consider(*status.Active.Assets)
+		}
+	case domain.LaneCatalog:
+		for _, text := range status.Active.Catalog {
+			consider(text)
+		}
+	}
+	for _, release := range status.Built {
+		if release.Lane == string(lane) {
+			consider(release.Version)
+		}
+	}
+	return highest, seen
+}
+
+// readStatus reads ota.status once for the next-version rule.
+func (build Build) readStatus(ctx context.Context) (otaStatusReply, error) {
+	response, err := build.Operator.Read(ctx, "ota.status", "")
+	if err != nil {
+		return otaStatusReply{}, err
+	}
+	if response.Status != 200 {
+		return otaStatusReply{}, &BackendRefusal{Status: response.Status, Body: response.Body}
+	}
+	var status otaStatusReply
+	if err := json.Unmarshal(response.Body, &status); err != nil {
+		return otaStatusReply{}, fmt.Errorf("ota.status replied no release list: %w", err)
+	}
+	return status, nil
+}
+
+// resolveBuildVersion applies the G14 rule: only the last component increments
+// over the lane's highest built-or-active version; a rollback names its own
+// lower number. Any other shape is refused.
+func resolveBuildVersion(status otaStatusReply, lane domain.Lane, requested string, rollback bool) (domain.Version, error) {
+	var supplied domain.Version
+	hasSupplied := requested != ""
+	if hasSupplied {
+		parsed, err := domain.ParseVersion(requested)
+		if err != nil {
+			return domain.Version{}, Refuse(CodeBuildVersionInvalid, err.Error())
+		}
+		supplied = parsed
+	}
+	highest, exists := status.highestVersion(lane)
+	if rollback {
+		if !hasSupplied {
+			return domain.Version{}, Refuse(CodeBuildVersionInvalid, "a rollback needs the version to step down to")
+		}
+		if exists && supplied.Compare(highest) >= 0 {
+			return domain.Version{}, Refuse(CodeBuildVersionInvalid, "a rollback version must be below the lane's current "+highest.String())
+		}
+		return supplied, nil
+	}
+	if !hasSupplied {
+		if !exists {
+			return domain.Version{}, Refuse(CodeBuildNoBaseline, "the lane has no built or active release; supply the first version")
+		}
+		return domain.Version{Major: highest.Major, Minor: highest.Minor, Patch: highest.Patch + 1}, nil
+	}
+	if exists {
+		next := domain.Version{Major: highest.Major, Minor: highest.Minor, Patch: highest.Patch + 1}
+		if supplied.Compare(next) != 0 {
+			return domain.Version{}, Refuse(CodeBuildVersionNotNext, "the next version is "+next.String())
+		}
+	}
+	return supplied, nil
 }
 
 // releaseExists asks the backend's exact-version read. Any failure fails the
@@ -101,15 +197,19 @@ func (build Build) Start(ctx context.Context, request BuildRequest) (Operation, 
 	if err != nil {
 		return Operation{}, Refuse(CodeBuildLaneInvalid, err.Error())
 	}
-	version, err := domain.ParseVersion(request.Version)
-	if err != nil {
-		return Operation{}, Refuse(CodeBuildVersionInvalid, err.Error())
-	}
 	if build.Config.OTARoot == "" {
 		return Operation{}, Refuse(CodeBuildConfig, "agent.json has no ota_root")
 	}
 	if request.LazyRefresh && lane != domain.LaneCode {
 		return Operation{}, Refuse(CodeBuildInputInvalid, "lazy refresh is only an input of the code lane")
+	}
+	status, err := build.readStatus(ctx)
+	if err != nil {
+		return Operation{}, err
+	}
+	version, err := resolveBuildVersion(status, lane, request.Version, request.Rollback)
+	if err != nil {
+		return Operation{}, err
 	}
 	fingerprint, err := json.Marshal(buildFingerprint{Lane: string(lane), Version: version.String(), Rollback: request.Rollback, LazyRefresh: request.LazyRefresh})
 	if err != nil {
@@ -134,19 +234,12 @@ func (build Build) Start(ctx context.Context, request BuildRequest) (Operation, 
 	assetsVersion := ""
 	steps := []Step{
 		{Name: "read ota.status", Run: func(ctx context.Context) (any, error) {
-			response, err := build.Operator.Read(ctx, "ota.status", "")
+			current, err := build.readStatus(ctx)
 			if err != nil {
 				return nil, err
 			}
-			if response.Status != 200 {
-				return nil, &BackendRefusal{Status: response.Status, Body: response.Body}
-			}
-			var status otaStatusReply
-			if err := json.Unmarshal(response.Body, &status); err != nil {
-				return nil, fmt.Errorf("ota.status replied no release list: %w", err)
-			}
-			if status.Active.Assets != nil {
-				assetsVersion = *status.Active.Assets
+			if current.Active.Assets != nil {
+				assetsVersion = *current.Active.Assets
 			}
 			exists, err := build.releaseExists(ctx, version.String())
 			if err != nil {
@@ -155,7 +248,7 @@ func (build Build) Start(ctx context.Context, request BuildRequest) (Operation, 
 			if exists {
 				return nil, Refuse(CodeVersionExists, "the release number already exists")
 			}
-			return map[string]any{"revision": status.Revision}, nil
+			return map[string]any{"revision": current.Revision}, nil
 		}},
 		{Name: "build", Run: func(ctx context.Context) (any, error) {
 			input := otabuild.Input{

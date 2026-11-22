@@ -1835,10 +1835,13 @@
     "WithEnum"
    ],
    "identitylifecycle": [
+    "Bounded",
     "NewField",
-    "Refuse"
+    "Refuse",
+    "WithDefault"
    ],
    "operatoragent": [
+    "*Version",
     "MergeModules",
     "NewField",
     "WithEnum"
@@ -1854,7 +1857,8 @@
     "*SaveBulkProgressTx",
     "Bounded",
     "NewField",
-    "Refuse"
+    "Refuse",
+    "WithDefault"
    ],
    "otarelease": [
     "Bounded",
@@ -1863,6 +1867,11 @@
     "Refuse",
     "StaleRevision",
     "WithDefault",
+    "WithEnum"
+   ],
+   "publication": [
+    "NewField",
+    "Refuse",
     "WithEnum"
    ]
   },
@@ -4821,8 +4830,10 @@
   },
   "identitylifecycle": {
    "operator": [
+    "Bounded",
     "NewField",
-    "Refuse"
+    "Refuse",
+    "WithDefault"
    ],
    "store:auditstore": [
     "*InsertTx"
@@ -4833,11 +4844,13 @@
     "*FindProviderBindingTx",
     "*InsertProviderBindingTx",
     "*InsertSessionCredentialTx",
+    "*InsertSessionHoldTx",
     "*InsertSessionTx",
     "*ListLiveSessionIDsTx",
     "*LockAccountTx",
     "*LockLiveContextTx",
     "*LockSessionTx",
+    "*PlayerIDsForSessionIDsTx",
     "*RevokeGameplayCredentialsTx",
     "*RevokeSessionCredentialsTx",
     "*RevokeSessionsTx",
@@ -5471,11 +5484,18 @@
    ],
    "store:i4store": [
     "*FindPlayersTx",
-    "*OperatorPlayerTx"
+    "*OperatorPlayerTx",
+    "*OperatorServersTx",
+    "*PlayerNamesTx"
+   ],
+   "store:identitystore": [
+    "*ListOnlineSessionsTx",
+    "*OnlineCountsByServerTx"
    ]
   },
   "operatoragent": {
    "operator": [
+    "*Version",
     "MergeModules",
     "NewField",
     "WithEnum"
@@ -5511,7 +5531,8 @@
     "*SaveBulkProgressTx",
     "Bounded",
     "NewField",
-    "Refuse"
+    "Refuse",
+    "WithDefault"
    ],
    "operatorcatalog": [
     "GrantLine"
@@ -5760,6 +5781,11 @@
    ],
    "i5": [
     "*FenceActorTx"
+   ],
+   "operator": [
+    "NewField",
+    "Refuse",
+    "WithEnum"
    ],
    "playerroot": [
     "LockKey"
