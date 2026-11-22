@@ -247,11 +247,19 @@ func realStockExpected(t *testing.T) map[string]string {
 	selfPlayer := replaceOnce(t, readStock("app/model/SelfPlayer.lua"),
 		"\targ_9_0.funcIDs = arg_9_1.params.func_ids\n",
 		"\targ_9_0.funcIDs = arg_9_1.params.func_ids\n\n\targ_9_0:initABtest()\n\targ_9_0:getAbtestGroupByKey(xyd.tables.abtest:uniqueKey(xyd.Abtests.N7GSO))\n")
+	lazyManagerOverlay, err := os.ReadFile(filepath.Join(realClientTree(), "patches", "lazy_marker_reconcile", "overlay.lua"))
+	if err != nil {
+		t.Fatalf("read the lazy_marker_reconcile overlay: %v", err)
+	}
+	lazyManager := replaceOnce(t, readStock("lazyFileManager.lua"),
+		"\t\targ_1_0.changeCount = 0\n\tend,",
+		normalizeNewlines(lazyManagerOverlay))
 	return map[string]string{
 		"app/windows/SocialSystemWindow.lua":    social,
 		"app/windows/MainSceneBottomWindow.lua": bottom,
 		"app/model/SelfPlayer.lua":              selfPlayer,
 		"app/common/network/Backend.lua":        expectedBackendOutput(t, readStock("app/common/network/Backend.lua")),
+		"lazyFileManager.lua":                   lazyManager,
 	}
 }
 
