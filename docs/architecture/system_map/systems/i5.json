@@ -658,6 +658,7 @@
    "i9_tutorial_switches.json"
   ],
   "unit": [
+   "admin_grant_refusal_test.go",
    "awakening_blood_test.go",
    "awakening_occult_material_test.go",
    "ca1_test.go",

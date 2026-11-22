@@ -606,14 +606,23 @@
       "revision_id": "e34f67f323cb4f3401f098daede8926997321f91591cd563f3bc1c61b85dec1e",
       "scope": "daily_buy_input_catalog.json gains the 13 gift rows shipped content/events/definitions/1071.json names (gift.lua 90001428..90001440) so events.definition.deploy can expand the Rookie level gift tiers; every other artifact byte-identical.",
       "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
+    },
+    {
+      "ordinal": 78,
+      "stage": "I11A-3 Operator Catalogue",
+      "compiler_version": "i11a-operator-catalogue",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "b04cfdc7d5e3b8e8a97f7423d99cac7c478541eee8a50ee9e8fff55e3421101b",
+      "scope": "New item_presentation_catalog.json artifact (item.lua id, name, icon) for the operator catalogue; every other artifact byte-identical. Merged onto I11A-2 Events Gifts (lead, O2 merge): revision recomputed over both artifact sets.",
+      "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
     }
   ],
   "current": {
-    "stage": "I11A-2 Events Gifts",
-    "compiler_version": "i11a-events-gifts",
+    "stage": "I11A-3 Operator Catalogue",
+    "compiler_version": "i11a-operator-catalogue",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "e34f67f323cb4f3401f098daede8926997321f91591cd563f3bc1c61b85dec1e",
-    "scope": "daily_buy_input_catalog.json gains the 13 gift rows shipped content/events/definitions/1071.json names (gift.lua 90001428..90001440) so events.definition.deploy can expand the Rookie level gift tiers; every other artifact byte-identical.",
+    "revision_id": "b04cfdc7d5e3b8e8a97f7423d99cac7c478541eee8a50ee9e8fff55e3421101b",
+    "scope": "New item_presentation_catalog.json artifact (item.lua id, name, icon) for the operator catalogue; every other artifact byte-identical. Merged onto I11A-2 Events Gifts (lead, O2 merge): revision recomputed over both artifact sets.",
     "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
   }
 }

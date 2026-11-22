@@ -710,6 +710,9 @@ func (Store) ResolveResourceTx(ctx context.Context, q tx.Queryer, revision strin
 	if class != string(line.Kind) {
 		return appi5.ResourcePolicy{}, economy.ErrUnknownResource
 	}
+	if grantable, _ := grant.ResourceGrantable(class, activation); !grantable {
+		return appi5.ResourcePolicy{}, economy.ErrUnknownResource
+	}
 	out := appi5.ResourcePolicy{Kind: line.Kind, PolicyVersion: revision}
 	switch line.Kind {
 	case grant.ScalarCurrency:

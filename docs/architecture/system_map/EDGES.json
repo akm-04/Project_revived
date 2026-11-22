@@ -1515,6 +1515,14 @@
     "*SnapshotTx",
     "LockFrameStackOwnershipTx"
    ],
+   "operator": [
+    "*OperatorWalletTx"
+   ],
+   "operatorgrant": [
+    "*AdminGrant",
+    "*AdminGrantTx",
+    "IsPermanentGrantRefusal"
+   ],
    "petcampaign": [
     "*CheckAwakeningPetMaterialTx",
     "*DebitMaterialCostTx",
@@ -1816,12 +1824,25 @@
    "identitylifecycle": [
     "Refuse"
    ],
+   "operatorgrant": [
+    "*InsertBulkTx",
+    "*ListPendingBulkTx",
+    "*ReadBulkTx",
+    "*SaveBulkProgressTx",
+    "Refuse"
+   ],
    "otarelease": [
     "Refuse",
     "StaleRevision"
    ]
   },
   "operatoragent": {},
+  "operatorcatalog": {
+   "operatorgrant": [
+    "GrantLine"
+   ]
+  },
+  "operatorgrant": {},
   "otabuild": {
    "operatoragent": [
     "Build",
@@ -5387,7 +5408,15 @@
     "*Now"
    ]
   },
-  "operator": {},
+  "operator": {
+   "i5": [
+    "*OperatorWalletTx"
+   ],
+   "store:i4store": [
+    "*FindPlayersTx",
+    "*OperatorPlayerTx"
+   ]
+  },
   "operatoragent": {
    "otabuild": [
     "Build",
@@ -5395,6 +5424,28 @@
    ],
    "otarelease": [
     "Load"
+   ]
+  },
+  "operatorcatalog": {},
+  "operatorgrant": {
+   "i5": [
+    "*AdminGrant",
+    "*AdminGrantTx",
+    "IsPermanentGrantRefusal"
+   ],
+   "operator": [
+    "*InsertBulkTx",
+    "*ListPendingBulkTx",
+    "*ReadBulkTx",
+    "*SaveBulkProgressTx",
+    "Refuse"
+   ],
+   "operatorcatalog": [
+    "GrantLine"
+   ],
+   "store:i4store": [
+    "*AllPlayerIDsTx",
+    "*ServerPlayerIDsTx"
    ]
   },
   "otabuild": {},
@@ -6744,6 +6795,8 @@
   ],
   "operator": [],
   "operatoragent": [],
+  "operatorcatalog": [],
+  "operatorgrant": [],
   "otabuild": [],
   "otarelease": [
    "cmd/gxb-api/main_postgres.go"

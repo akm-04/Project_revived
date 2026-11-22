@@ -9,7 +9,10 @@ import (
 
 	appevents "gxb.local/backend/v2/internal/application/events"
 	"gxb.local/backend/v2/internal/application/operator"
+	"gxb.local/backend/v2/internal/application/operatorcatalog"
+	"gxb.local/backend/v2/internal/application/operatorgrant"
 	appota "gxb.local/backend/v2/internal/application/otarelease"
+	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/domain/events"
 )
 
@@ -113,6 +116,85 @@ func EventsList(service EventsListService) Read {
 			return nil, err
 		}
 		return service.List(ctx, filter)
+	}
+}
+
+// CatalogSearch adapts catalog.search to the shared operator catalogue
+// (I11A_OPERATOR_COMMANDS_V1 ruling 9).
+func CatalogSearch(document operatorcatalog.Document) Read {
+	return func(_ context.Context, values url.Values) (any, error) {
+		filter := operatorcatalog.SearchFilter{Kind: values.Get("kind"), Query: values.Get("query"), After: values.Get("after")}
+		if rawLimit := values.Get("limit"); rawLimit != "" {
+			limit, err := strconv.Atoi(rawLimit)
+			if err != nil || limit < 1 || limit > operatorcatalog.MaxSearchLimit {
+				return nil, operator.Refuse(operator.CodeReadInvalid, fmt.Sprintf("limit must be between 1 and %d", operatorcatalog.MaxSearchLimit), nil)
+			}
+			filter.Limit = limit
+		}
+		page, err := document.Search(filter)
+		if err != nil {
+			return nil, operator.Refuse(operator.CodeReadInvalid, err.Error(), nil)
+		}
+		return page, nil
+	}
+}
+
+// BulkShowService is the operator.bulk.show read.
+type BulkShowService interface {
+	Show(context.Context, string) (operatorgrant.BulkProgress, error)
+}
+
+// BulkShow adapts operator.bulk.show to the read registry.
+func BulkShow(service BulkShowService) Read {
+	return func(ctx context.Context, values url.Values) (any, error) {
+		semanticKey := values.Get("semantic_key")
+		if semanticKey == "" {
+			return nil, operator.Refuse(operator.CodeReadInvalid, "semantic_key is required", nil)
+		}
+		return service.Show(ctx, semanticKey)
+	}
+}
+
+// PlayerFindService is the player.find read.
+type PlayerFindService interface {
+	Find(context.Context, playerdirectory.OperatorFind) (operator.PlayerFindPage, error)
+}
+
+// PlayerFind adapts player.find to the read registry.
+func PlayerFind(service PlayerFindService) Read {
+	return func(ctx context.Context, values url.Values) (any, error) {
+		filter := playerdirectory.OperatorFind{UID: values.Get("uid"), NamePrefix: values.Get("name_prefix")}
+		if rawServer := values.Get("server_id"); rawServer != "" {
+			server, err := strconv.ParseInt(rawServer, 10, 64)
+			if err != nil || server <= 0 {
+				return nil, operator.Refuse(operator.CodeReadInvalid, "server_id must be a positive id", nil)
+			}
+			filter.ServerID = &server
+		}
+		if rawLimit := values.Get("limit"); rawLimit != "" {
+			limit, err := strconv.Atoi(rawLimit)
+			if err != nil {
+				return nil, operator.Refuse(operator.CodeReadInvalid, "limit must be a number", nil)
+			}
+			filter.Limit = limit
+		}
+		return service.Find(ctx, filter)
+	}
+}
+
+// PlayerSummaryService is the player.summary read.
+type PlayerSummaryService interface {
+	Summary(context.Context, int64) (operator.PlayerSummary, error)
+}
+
+// PlayerSummary adapts player.summary to the read registry.
+func PlayerSummary(service PlayerSummaryService) Read {
+	return func(ctx context.Context, values url.Values) (any, error) {
+		playerID, err := strconv.ParseInt(values.Get("player_id"), 10, 64)
+		if err != nil || playerID <= 0 {
+			return nil, operator.Refuse(operator.CodeReadInvalid, "player_id must be a positive id", nil)
+		}
+		return service.Summary(ctx, playerID)
 	}
 }
 

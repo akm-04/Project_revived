@@ -10534,6 +10534,31 @@
         "references": [],
         "retention": null
       }
+    },
+    "operator_bulk_targets": {
+      "owner": "operator",
+      "allowed_query_owners": [
+        "operator"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/operatorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/operatorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00189_i11a_operator_bulk.sql",
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [
+          "semantic_key"
+        ],
+        "retention": null
+      }
     }
   }
 }

@@ -730,6 +730,7 @@
    "one_on_one_rounds": "oneonone",
    "one_on_one_settlement_ranks": "oneonone",
    "one_on_one_settlements": "oneonone",
+   "operator_bulk_targets": "operator",
    "operator_commands": "operator",
    "ota_activations": "otarelease",
    "ota_asset_misses": "otarelease",
@@ -1293,7 +1294,7 @@
   },
   {
    "callees": 14,
-   "callers": 62,
+   "callers": 64,
    "mids": 25,
    "name": "i5",
    "path": "internal/application/i5",
@@ -1409,13 +1410,13 @@
    "tables": 8
   },
   {
-   "callees": 0,
-   "callers": 3,
+   "callees": 2,
+   "callers": 4,
    "mids": 0,
    "name": "operator",
    "path": "internal/application/operator",
    "purpose": "is the I11A operator command bus (I11A_OPERATOR_COMMANDS_V1): envelope validation, idempotency and the audit row",
-   "tables": 1
+   "tables": 2
   },
   {
    "callees": 2,
@@ -1424,6 +1425,24 @@
    "name": "operatoragent",
    "path": "internal/application/operatoragent",
    "purpose": "",
+   "tables": 0
+  },
+  {
+   "callees": 0,
+   "callers": 1,
+   "mids": 0,
+   "name": "operatorcatalog",
+   "path": "internal/application/operatorcatalog",
+   "purpose": "is the shared operator item catalogue (I11A_OPERATOR_COMMANDS_V1 ruling 9): the generated backend resource catalogue joined with the compiled client item rows, for the export file and the bounded catalog.search read",
+   "tables": 0
+  },
+  {
+   "callees": 4,
+   "callers": 0,
+   "mids": 0,
+   "name": "operatorgrant",
+   "path": "internal/application/operatorgrant",
+   "purpose": "is the operator grant module (I11A_OPERATOR_COMMANDS_V1 M2/M8, ruling 5): catalogue-checked grant.items with the shared bulk target core, the progress read, and the resumable per-recipient settlement job",
    "tables": 0
   },
   {
