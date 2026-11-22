@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -24,6 +25,7 @@ type fakeBuildOperator struct {
 	semanticKeys   []string
 	failNext       int
 	builtVersions  []string
+	releaseExists  bool
 	blockFirstRead bool
 	readEntered    chan struct{}
 	readRelease    chan struct{}
@@ -58,6 +60,12 @@ func (fake *fakeBuildOperator) ServeHTTP(writer http.ResponseWriter, request *ht
 		fake.mutex.Unlock()
 		writer.Header().Set("Content-Type", "application/json")
 		_, _ = writer.Write(body)
+	case request.URL.Path == "/operator/v1/reads/ota.release":
+		fake.mutex.Lock()
+		exists := fake.releaseExists
+		fake.mutex.Unlock()
+		writer.Header().Set("Content-Type", "application/json")
+		_, _ = fmt.Fprintf(writer, `{"version":%q,"exists":%t}`, request.URL.Query().Get("version"), exists)
 	case request.URL.Path == "/operator/v1/commands/ota.register_build":
 		body, _ := io.ReadAll(request.Body)
 		var submitted struct {
@@ -202,7 +210,7 @@ func TestBuildOperationRegisterFailureRetriesIdempotently(t *testing.T) {
 
 func TestBuildOperationRefusesVersionAlreadyListed(t *testing.T) {
 	build, fake, operations, _ := newBuildOperation(t)
-	fake.builtVersions = []string{"1.631.2"}
+	fake.releaseExists = true
 	started, err := build.Start(context.Background(), operatoragent.BuildRequest{Lane: "code", Version: "1.631.2"})
 	if err != nil {
 		t.Fatal(err)
@@ -256,6 +264,46 @@ func TestBuildOperationBackendNotRunning(t *testing.T) {
 	}
 	if !strings.Contains(failed.Error, operatoragent.CodeBackendUnavailable) {
 		t.Fatalf("error = %q", failed.Error)
+	}
+}
+
+func TestBuildRefusesExistingReleaseOutsideStatusList(t *testing.T) {
+	build, fake, operations, root := newBuildOperation(t)
+	fake.releaseExists = true
+	started, err := build.Start(context.Background(), operatoragent.BuildRequest{Lane: "code", Version: "1.631.2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	failed := waitOperation(t, operations, started.ID)
+	if failed.State != operatoragent.OperationFailed || failed.FailedStep != "read ota.status" {
+		t.Fatalf("operation = %+v", failed)
+	}
+	if !strings.Contains(failed.Error, operatoragent.CodeVersionExists) {
+		t.Fatalf("error = %q, want %s", failed.Error, operatoragent.CodeVersionExists)
+	}
+	if fake.registers != 0 {
+		t.Fatalf("the existing release was registered again %d times", fake.registers)
+	}
+	if _, err := os.Stat(filepath.Join(root, "ota", "updates", "code")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("a refused version started build work: %v", err)
+	}
+}
+
+func TestBuildLazyRefreshWithoutAssetsRelease(t *testing.T) {
+	build, fake, operations, _ := newBuildOperation(t)
+	started, err := build.Start(context.Background(), operatoragent.BuildRequest{Lane: "code", Version: "1.631.2", LazyRefresh: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	failed := waitOperation(t, operations, started.ID)
+	if failed.State != operatoragent.OperationFailed || failed.FailedStep != "build" {
+		t.Fatalf("operation = %+v", failed)
+	}
+	if !strings.Contains(failed.Error, operatoragent.CodeBuildNoAssetsRelease) {
+		t.Fatalf("error = %q, want %s", failed.Error, operatoragent.CodeBuildNoAssetsRelease)
+	}
+	if fake.registers != 0 {
+		t.Fatalf("registers = %d", fake.registers)
 	}
 }
 

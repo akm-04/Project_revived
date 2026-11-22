@@ -5319,6 +5319,7 @@
     "*LockSettingsTx",
     "*ReadSettingsTx",
     "*ReadStatusTx",
+    "*ReleaseExistsTx",
     "*ReleaseTx",
     "*SaveSettingsTx",
     "*SupersedeLaneTx",

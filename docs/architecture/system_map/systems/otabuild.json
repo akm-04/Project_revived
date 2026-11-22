@@ -31,7 +31,8 @@
   "scenarios_naming": [],
   "unit": [
    "assets_test.go",
-   "build_test.go"
+   "build_test.go",
+   "l4f_test.go"
   ]
  }
 }

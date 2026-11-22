@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"path/filepath"
 
 	"gxb.local/backend/v2/internal/application/operator"
@@ -21,6 +22,7 @@ type BuildRequest struct {
 	Lane        string `json:"lane"`
 	Version     string `json:"version"`
 	Rollback    bool   `json:"rollback"`
+	LazyRefresh bool   `json:"lazy_refresh,omitempty"`
 	Reason      string `json:"reason,omitempty"`
 	SemanticKey string `json:"semantic_key,omitempty"`
 }
@@ -40,40 +42,53 @@ type Build struct {
 }
 
 type buildFingerprint struct {
-	Lane     string `json:"lane"`
-	Version  string `json:"version"`
-	Rollback bool   `json:"rollback"`
+	Lane        string `json:"lane"`
+	Version     string `json:"version"`
+	Rollback    bool   `json:"rollback"`
+	LazyRefresh bool   `json:"lazy_refresh"`
 }
 
 type otaStatusReply struct {
 	Revision int64 `json:"revision"`
 	Active   struct {
-		Code    *string  `json:"code"`
-		Assets  *string  `json:"assets"`
-		Catalog []string `json:"catalog"`
+		Assets *string `json:"assets"`
 	} `json:"active"`
-	Built []struct {
-		Version string `json:"version"`
-	} `json:"built"`
 }
 
-func (status otaStatusReply) lists(version string) bool {
-	for _, built := range status.Built {
-		if built.Version == version {
-			return true
-		}
+// releaseExists asks the backend's exact-version read. Any failure fails the
+// step closed, so a release that the bounded status list omits (WITHDRAWN,
+// SUPERSEDED or past its bound) can still not be built twice (L4f fix 2).
+func (build Build) releaseExists(ctx context.Context, version string) (bool, error) {
+	response, err := build.Operator.Read(ctx, "ota.release", "version="+url.QueryEscape(version))
+	if err != nil {
+		return false, err
 	}
-	for _, active := range []*string{status.Active.Code, status.Active.Assets} {
-		if active != nil && *active == version {
-			return true
+	if response.Status != 200 {
+		if response.Status == 409 {
+			return false, &BackendRefusal{Status: response.Status, Body: response.Body}
 		}
+		return false, fmt.Errorf("ota.release answered HTTP %d", response.Status)
 	}
-	for _, catalog := range status.Active.Catalog {
-		if catalog == version {
-			return true
-		}
+	var reply struct {
+		Exists bool `json:"exists"`
 	}
-	return false
+	if err := json.Unmarshal(response.Body, &reply); err != nil {
+		return false, fmt.Errorf("ota.release replied no existence flag: %w", err)
+	}
+	return reply.Exists, nil
+}
+
+// assetsSidecarPath names the active assets release's res sidecar; the build
+// wrote it beside the volumes as <version>-<sha256[:12]>.zip.res.json.
+func assetsSidecarPath(otaRoot, version string) (string, error) {
+	matches, err := filepath.Glob(filepath.Join(otaRoot, "updates", "assets", version+"-*.zip.res.json"))
+	if err != nil {
+		return "", Refuse(CodeBuildConfig, "the active assets sidecar cannot be found: "+err.Error())
+	}
+	if len(matches) != 1 {
+		return "", Refuse(CodeBuildConfig, fmt.Sprintf("the active assets release %s has no single res sidecar (%d found)", version, len(matches)))
+	}
+	return matches[0], nil
 }
 
 // Start validates the request, mints or reuses the semantic key and starts the
@@ -93,7 +108,10 @@ func (build Build) Start(ctx context.Context, request BuildRequest) (Operation, 
 	if build.Config.OTARoot == "" {
 		return Operation{}, Refuse(CodeBuildConfig, "agent.json has no ota_root")
 	}
-	fingerprint, err := json.Marshal(buildFingerprint{Lane: string(lane), Version: version.String(), Rollback: request.Rollback})
+	if request.LazyRefresh && lane != domain.LaneCode {
+		return Operation{}, Refuse(CodeBuildInputInvalid, "lazy refresh is only an input of the code lane")
+	}
+	fingerprint, err := json.Marshal(buildFingerprint{Lane: string(lane), Version: version.String(), Rollback: request.Rollback, LazyRefresh: request.LazyRefresh})
 	if err != nil {
 		return Operation{}, err
 	}
@@ -113,6 +131,7 @@ func (build Build) Start(ctx context.Context, request BuildRequest) (Operation, 
 	}
 
 	var built otabuild.Result
+	assetsVersion := ""
 	steps := []Step{
 		{Name: "read ota.status", Run: func(ctx context.Context) (any, error) {
 			response, err := build.Operator.Read(ctx, "ota.status", "")
@@ -126,7 +145,14 @@ func (build Build) Start(ctx context.Context, request BuildRequest) (Operation, 
 			if err := json.Unmarshal(response.Body, &status); err != nil {
 				return nil, fmt.Errorf("ota.status replied no release list: %w", err)
 			}
-			if status.lists(version.String()) {
+			if status.Active.Assets != nil {
+				assetsVersion = *status.Active.Assets
+			}
+			exists, err := build.releaseExists(ctx, version.String())
+			if err != nil {
+				return nil, err
+			}
+			if exists {
 				return nil, Refuse(CodeVersionExists, "the release number already exists")
 			}
 			return map[string]any{"revision": status.Revision}, nil
@@ -137,12 +163,24 @@ func (build Build) Start(ctx context.Context, request BuildRequest) (Operation, 
 				Version:       version.String(),
 				Rollback:      request.Rollback,
 				StockBaseline: build.Config.StockBaseline,
+				StockCatalog:  build.Config.StockCatalog,
 				ClientTree:    build.Config.ClientTree,
 				Origins:       build.Config.Origins,
 				UpdatesDir:    filepath.Join(build.Config.OTARoot, "updates", string(lane)),
 				StagingDir:    filepath.Join(build.Config.OTARoot, "staging"),
 			}
-			if lane == domain.LaneAssets {
+			if request.LazyRefresh {
+				if assetsVersion == "" {
+					return nil, Refuse(CodeBuildNoAssetsRelease, "there is no ACTIVE assets release to refresh")
+				}
+				sidecar, err := assetsSidecarPath(build.Config.OTARoot, assetsVersion)
+				if err != nil {
+					return nil, err
+				}
+				input.LazyRefresh = true
+				input.AssetsSidecar = sidecar
+			}
+			if lane == domain.LaneAssets || request.LazyRefresh {
 				settings, err := apprelease.SettingsFile{Root: build.Config.OTARoot}.Load()
 				if err != nil {
 					return nil, Refuse(CodeBuildConfig, "settings.json is unreadable: "+err.Error())
@@ -211,6 +249,9 @@ var buildRefusalCodes = []struct {
 }
 
 func buildRefusal(err error) error {
+	if errors.Is(err, otabuild.ErrBuildIO) {
+		return Temporarily(CodeBuildIO, err.Error())
+	}
 	for _, entry := range buildRefusalCodes {
 		if errors.Is(err, entry.kind) {
 			return Refuse(entry.code, err.Error())

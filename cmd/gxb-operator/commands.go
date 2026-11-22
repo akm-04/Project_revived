@@ -262,7 +262,9 @@ func runOTABuild(root string, args []string) error {
 	lane := flags.String("lane", "", "code, assets or catalog")
 	version := flags.String("version", "", "release number")
 	rollback := flags.Bool("rollback", false, "allow a number below the lane's active release")
+	lazyRefresh := flags.Bool("lazy-refresh", false, "rewrite lazyFile.json from the active assets release (code lane)")
 	noWait := flags.Bool("no-wait", false, "return as soon as the operation starts")
+	timeout := flags.Duration("timeout", defaultBuildPollTimeout, "how long to poll the operation")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
@@ -274,7 +276,7 @@ func runOTABuild(root string, args []string) error {
 		return err
 	}
 	status, body, err := client.request(http.MethodPost, "/agent/v1/ota/build", map[string]any{
-		"lane": *lane, "version": *version, "rollback": *rollback,
+		"lane": *lane, "version": *version, "rollback": *rollback, "lazy_refresh": *lazyRefresh,
 	})
 	if err != nil {
 		return err
@@ -292,15 +294,34 @@ func runOTABuild(root string, args []string) error {
 	if *noWait {
 		return nil
 	}
-	return waitForOperation(client, started.OperationID)
+	return waitForOperation(client, started.OperationID, *timeout)
 }
 
-func waitForOperation(client *agentClient, id string) error {
+const (
+	defaultBuildPollTimeout  = 3 * time.Hour
+	operationPollInterval    = 500 * time.Millisecond
+	operationNotFoundRetries = 5
+)
+
+// waitForOperation polls until the operation finishes, giving a bounded time and
+// retrying a not-found answer a few times (L4f fixes 5 and 6).
+func waitForOperation(client *agentClient, id string, timeout time.Duration) error {
+	deadline := time.Now().Add(timeout)
+	notFound := 0
 	for {
+		if time.Now().After(deadline) {
+			return fmt.Errorf("operation %s did not finish within %s", id, timeout)
+		}
 		status, body, err := client.request(http.MethodGet, "/agent/v1/ops/"+id, nil)
 		if err != nil {
 			return err
 		}
+		if status == http.StatusNotFound && notFound < operationNotFoundRetries {
+			notFound++
+			time.Sleep(operationPollInterval)
+			continue
+		}
+		notFound = 0
 		if status != http.StatusOK {
 			return printResult(status, body)
 		}
@@ -319,7 +340,7 @@ func waitForOperation(client *agentClient, id string) error {
 			}
 			return errors.New("ota build failed")
 		}
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(operationPollInterval)
 	}
 }
 

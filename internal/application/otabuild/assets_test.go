@@ -165,6 +165,10 @@ func TestAssetsLazyMapGolden(t *testing.T) {
 		{Path: "data/foo.lua", MD5: "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", Size: 40, Force: 0},
 		{Path: "", MD5: "ffffffffffffffffffffffffffffffff", Size: 50, Force: 0},
 		{Path: "res/web/e.png", MD5: "11111111111111111111111111111111", Size: 60, Force: 2},
+		{Path: "res/web/f.png", MD5: "22222222222222222222222222222222", Size: 70, Force: 0, Version: json.RawMessage("null")},
+		{Path: "res/web/g.png", MD5: "33333333333333333333333333333333", Size: 80, Force: 0, Version: json.RawMessage(`"v1"`)},
+		{Path: `res/web/h\i.png`, MD5: "44444444444444444444444444444444", Size: 90, Force: 0},
+		{Path: "res/web/j\u2028.png", MD5: "55555555555555555555555555555555", Size: 100, Force: 0},
 	}
 	fixture.addCatalog(t, rows)
 
@@ -177,7 +181,7 @@ func TestAssetsLazyMapGolden(t *testing.T) {
 	if got := zipEntry(t, assembled, lazyFileMember); !bytes.Equal(got, golden) {
 		t.Fatalf("lazyFile.json differs from the V1 golden:\n got %s\nwant %s", got, golden)
 	}
-	if result.Report.LazyConsidered != 5 || result.Report.LazySupplied != 1 || result.Report.LazyRetained != 4 {
+	if result.Report.LazyConsidered != 9 || result.Report.LazySupplied != 1 || result.Report.LazyRetained != 8 {
 		t.Fatalf("lazy report = %+v", result.Report)
 	}
 }

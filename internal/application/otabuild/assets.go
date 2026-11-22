@@ -34,9 +34,12 @@ type catalogRow struct {
 	Version json.RawMessage `json:"version"`
 }
 
-// assetFile is one exact-current file found on disk.
+// assetFile is one exact-current file found on disk. source is the resolved
+// path (the bytes that are shipped) and relative is the candidate path relative
+// to res_path (the res index row and the V1 alias source).
 type assetFile struct {
 	source      string
+	relative    string
 	catalogPath string
 	archiveName string
 	size        int64
@@ -115,13 +118,8 @@ func assetsPackage(resPath, version string, baseline stockBaseline) ([]packageEn
 	entries := make([]packageEntry, 0, len(files)+1)
 	sidecar := make([]resSidecarEntry, 0, len(files))
 	for _, file := range files {
-		relative, relErr := filepath.Rel(root.lexical, file.source)
-		if relErr != nil {
-			return nil, nil, report, fmt.Errorf("%w: %s: %v", ErrInvalidInput, file.catalogPath, relErr)
-		}
-		archiveName := file.archiveName
-		entries = append(entries, packageEntry{path: archiveName, source: file.source, size: file.size, md5: file.md5})
-		sidecar = append(sidecar, resSidecarEntry{Path: filepath.ToSlash(relative), MD5: file.md5, Size: file.size})
+		entries = append(entries, packageEntry{path: file.archiveName, source: file.source, size: file.size, md5: file.md5})
+		sidecar = append(sidecar, resSidecarEntry{Path: file.relative, MD5: file.md5, Size: file.size})
 	}
 	entries = append(entries, packageEntry{path: lazyFileMember, content: lazyBytes, size: int64(len(lazyBytes)), md5: md5Hex(lazyBytes)})
 	sort.Slice(entries, func(left, right int) bool { return entries[left].path < entries[right].path })
@@ -160,7 +158,30 @@ func readCatalog(baseline stockBaseline) ([]catalogRow, error) {
 	if err := decoder.Decode(&trailing); !errorsIsEOF(err) {
 		return nil, fmt.Errorf("%w: version.json has trailing data", ErrCatalogInvalid)
 	}
+	for _, row := range rows {
+		if row.Path == "" {
+			continue
+		}
+		if !validCatalogPath(normalizeCatalogPath(row.Path)) {
+			return nil, fmt.Errorf("%w: unsafe catalogue path %q", ErrCatalogInvalid, row.Path)
+		}
+	}
 	return rows, nil
+}
+
+// validCatalogPath rejects an empty, "." or ".." segment anywhere in a
+// catalogue path, so a row cannot ship outside res/ or overwrite lazyFile.json
+// (L4f fix 3).
+func validCatalogPath(value string) bool {
+	if value == "" || strings.HasPrefix(value, "/") {
+		return false
+	}
+	for part := range strings.SplitSeq(value, "/") {
+		if part == "" || part == "." || part == ".." {
+			return false
+		}
+	}
+	return true
 }
 
 func errorsIsEOF(err error) bool {
@@ -214,7 +235,7 @@ func collectExactAssets(rows []catalogRow, root resRoot) ([]assetFile, collectio
 			continue
 		}
 		summary.considered++
-		exact, foundMismatch := findExactFile(root, catalogPath, md5)
+		exact, relative, foundMismatch := findExactFile(root, catalogPath, md5)
 		if exact == "" {
 			if foundMismatch {
 				summary.mismatching++
@@ -237,7 +258,7 @@ func collectExactAssets(rows []catalogRow, root resRoot) ([]assetFile, collectio
 		if err != nil || !info.Mode().IsRegular() {
 			return nil, summary, fmt.Errorf("%w: %s: %v", ErrInvalidInput, catalogPath, err)
 		}
-		files = append(files, assetFile{source: exact, catalogPath: catalogPath, archiveName: archiveName, size: info.Size(), md5: md5})
+		files = append(files, assetFile{source: exact, relative: relative, catalogPath: catalogPath, archiveName: archiveName, size: info.Size(), md5: md5})
 	}
 	if len(files) == 0 {
 		return nil, summary, ErrNoExactAssets
@@ -249,9 +270,11 @@ func normalizeCatalogPath(value string) string {
 	return strings.ReplaceAll(value, `\`, "/")
 }
 
-// findExactFile tries the four V1 candidates in order. foundMismatch reports
-// that a regular candidate existed but none carried the catalogue md5.
-func findExactFile(root resRoot, catalogPath, md5 string) (string, bool) {
+// findExactFile tries the four V1 candidates in order and returns the resolved
+// path (the bytes that are shipped) plus the candidate path relative to
+// res_path. foundMismatch reports that a regular candidate existed but none
+// carried the catalogue md5.
+func findExactFile(root resRoot, catalogPath, md5 string) (string, string, bool) {
 	foundMismatch := false
 	for _, candidate := range assetCandidates(root.lexical, catalogPath) {
 		info, err := os.Stat(candidate)
@@ -267,11 +290,15 @@ func findExactFile(root resRoot, catalogPath, md5 string) (string, bool) {
 			continue
 		}
 		if actual == md5 {
-			return candidate, false
+			relative, err := filepath.Rel(root.lexical, candidate)
+			if err != nil {
+				continue
+			}
+			return resolved, filepath.ToSlash(relative), false
 		}
 		foundMismatch = true
 	}
-	return "", foundMismatch
+	return "", "", foundMismatch
 }
 
 // assetCandidates is _current_asset_candidates: the catalogue path, the path
@@ -416,7 +443,9 @@ func buildLazyMap(rows []catalogRow, supplied map[string]struct{}) (map[string]s
 }
 
 // marshalLazyFile serializes the map with sorted keys and no HTML escaping so
-// the same catalogue always produces the same bytes.
+// the same catalogue always produces the same bytes. V1 writes the same map
+// with indent=2 and insertion order; the plan pins this compact sorted form
+// because the client decodes it with cjson, and the values are V1's.
 func marshalLazyFile(lazyMap map[string]string) ([]byte, error) {
 	encoded, err := marshalNoEscape(lazyMap)
 	if err != nil {
@@ -425,6 +454,8 @@ func marshalLazyFile(lazyMap map[string]string) ([]byte, error) {
 	return append(encoded, '\n'), nil
 }
 
+// marshalNoEscape is V1's json.dumps(..., ensure_ascii=False): no HTML
+// escaping, and U+2028/U+2029 stay raw instead of Go's \u2028/\u2029 escapes.
 func marshalNoEscape(value any) ([]byte, error) {
 	var buffer bytes.Buffer
 	encoder := json.NewEncoder(&buffer)
@@ -432,7 +463,44 @@ func marshalNoEscape(value any) ([]byte, error) {
 	if err := encoder.Encode(value); err != nil {
 		return nil, err
 	}
-	return bytes.TrimSuffix(buffer.Bytes(), []byte("\n")), nil
+	encoded := bytes.TrimSuffix(buffer.Bytes(), []byte("\n"))
+	return unescapeLineSeparators(encoded), nil
+}
+
+// unescapeLineSeparators turns a JSON \u2028 or \u2029 escape into the raw rune.
+// A backslash that is itself escaped (an even run) is left alone.
+func unescapeLineSeparators(encoded []byte) []byte {
+	output := make([]byte, 0, len(encoded))
+	for index := 0; index < len(encoded); {
+		if encoded[index] != '\\' {
+			output = append(output, encoded[index])
+			index++
+			continue
+		}
+		run := 0
+		for index+run < len(encoded) && encoded[index+run] == '\\' {
+			run++
+		}
+		escape := ""
+		if run%2 == 1 && index+run+5 <= len(encoded) {
+			escape = string(encoded[index+run : index+run+5])
+		}
+		var separator rune
+		switch escape {
+		case "u2028":
+			separator = '\u2028'
+		case "u2029":
+			separator = '\u2029'
+		default:
+			output = append(output, encoded[index:index+run]...)
+			index += run
+			continue
+		}
+		output = append(output, encoded[index:index+run-1]...)
+		output = append(output, []byte(string(separator))...)
+		index += run + 5
+	}
+	return output
 }
 
 // resSidecarEntry is one lazy res index row; its Path is relative to res_path.

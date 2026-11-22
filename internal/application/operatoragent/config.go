@@ -36,6 +36,7 @@ type Config struct {
 	Listen        string            `json:"listen"`
 	OTARoot       string            `json:"ota_root"`
 	StockBaseline string            `json:"stock_baseline"`
+	StockCatalog  string            `json:"stock_catalog,omitempty"`
 	ClientTree    string            `json:"client_tree"`
 	Origins       map[string]string `json:"origins"`
 	Backend       BackendConfig     `json:"backend"`

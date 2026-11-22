@@ -19,6 +19,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync/atomic"
 
 	"gxb.local/backend/v2/internal/domain/otarelease"
 )
@@ -37,6 +38,15 @@ type Input struct {
 	// ResPath is the P1 asset folder settings.json names; the assets lane reads
 	// its exact-current files there (I11A_1_PLAN "L4c decisions").
 	ResPath string
+	// StockCatalog is the catalogue source when the stock baseline has no
+	// version.json (for example a Lua-only zip); empty means StockBaseline.
+	StockCatalog string
+	// LazyRefresh makes the code lane rewrite lazyFile.json from the ACTIVE
+	// assets sidecar plus the files recovered in ResPath (L4f).
+	LazyRefresh bool
+	// AssetsSidecar is the ACTIVE assets release's res sidecar that a code
+	// lazy refresh reads; required when LazyRefresh is set.
+	AssetsSidecar string
 }
 
 // Result is one finished build: the ota.register_build payload plus the report
@@ -68,7 +78,14 @@ var (
 	ErrResPathMissing       = errors.New("otabuild: the res_path is empty or not a readable folder")
 	ErrNoExactAssets        = errors.New("otabuild: no exact-current asset file was found")
 	ErrAssetCollision       = errors.New("otabuild: two asset rows land on one zip name")
+	// ErrBuildIO is a transient read/write defect (short copy, disk fault); the
+	// agent maps it to a temporary refusal (L4f fix 8).
+	ErrBuildIO = errors.New("otabuild: the build could not read or write its files")
 )
+
+// markerSerial keeps the incomplete-marker names of two builds in one process
+// apart even when they share a version and digest (L4f fix 1).
+var markerSerial atomic.Uint64
 
 // volumeByteLimit is ruling 5's per-volume cap; tests lower it to exercise the
 // split without a multi-megabyte fixture.
@@ -84,6 +101,11 @@ func Build(ctx context.Context, input Input) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
+	lock, err := acquireBuildLock(filepath.Dir(input.UpdatesDir))
+	if err != nil {
+		return Result{}, err
+	}
+	defer lock.release()
 	if err := sweepInterruptedBuilds(input.UpdatesDir, input.StagingDir); err != nil {
 		return Result{}, err
 	}
@@ -92,14 +114,31 @@ func Build(ctx context.Context, input Input) (Result, error) {
 		return Result{}, err
 	}
 	defer closeBaseline()
+	catalogBaseline := baseline
+	if lane == otarelease.LaneAssets && input.StockCatalog != "" {
+		var closeCatalog func()
+		catalogBaseline, closeCatalog, err = openBaseline(input.StockCatalog)
+		if err != nil {
+			return Result{}, err
+		}
+		defer closeCatalog()
+	}
 
 	report := Report{Lane: string(lane), Version: version.String(), MissingSample: []string{}, MismatchSample: []string{}}
 	var entries []packageEntry
 	var sidecar []resSidecarEntry
 	if lane == otarelease.LaneAssets {
-		entries, sidecar, report, err = assetsPackage(input.ResPath, version.String(), baseline)
+		entries, sidecar, report, err = assetsPackage(input.ResPath, version.String(), catalogBaseline)
 	} else {
 		entries, err = codeEntries(input, baseline)
+		if err == nil && input.LazyRefresh {
+			var lazyBytes []byte
+			lazyBytes, sidecar, report, err = lazyRefreshPackage(input.ResPath, input.AssetsSidecar, version.String())
+			if err == nil {
+				entries = append(entries, packageEntry{path: lazyFileMember, content: lazyBytes, size: int64(len(lazyBytes)), md5: md5Hex(lazyBytes)})
+				sort.Slice(entries, func(left, right int) bool { return entries[left].path < entries[right].path })
+			}
+		}
 	}
 	if err != nil {
 		return Result{}, err
@@ -151,14 +190,14 @@ func Build(ctx context.Context, input Input) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
-	if lane == otarelease.LaneAssets {
+	if lane == otarelease.LaneAssets || input.LazyRefresh {
 		sidecarArtifact, err := stageSidecar(staging, packageBase, sidecar)
 		if err != nil {
 			return Result{}, err
 		}
 		artifacts = append(artifacts, sidecarArtifact)
 	}
-	marker := fmt.Sprintf("%s-%s.incomplete", version.String(), digest.sha256[:12])
+	marker := fmt.Sprintf("%s-%s-%d-%d.incomplete", version.String(), digest.sha256[:12], os.Getpid(), markerSerial.Add(1))
 	if err := commitArtifacts(staging, input.UpdatesDir, marker, artifacts); err != nil {
 		return Result{}, err
 	}
@@ -200,6 +239,14 @@ func validateInput(input Input) (otarelease.Lane, otarelease.Version, error) {
 	if lane == otarelease.LaneAssets {
 		if _, err := resolveResRoot(input.ResPath); err != nil {
 			return "", otarelease.Version{}, err
+		}
+	}
+	if input.LazyRefresh {
+		if lane != otarelease.LaneCode {
+			return "", otarelease.Version{}, fmt.Errorf("%w: lazy refresh is a code-lane input", ErrInvalidInput)
+		}
+		if input.AssetsSidecar == "" {
+			return "", otarelease.Version{}, fmt.Errorf("%w: lazy refresh needs the active assets sidecar", ErrInvalidInput)
 		}
 	}
 	if err := requireSameFilesystem(input.StagingDir, input.UpdatesDir); err != nil {
@@ -457,11 +504,11 @@ func writeVolume(source io.Reader, path string, size int64) (otarelease.PackageV
 	written, err := io.CopyN(io.MultiWriter(file, md5Hash, sha256Hash), source, size)
 	if err != nil {
 		file.Close()
-		return otarelease.PackageVolume{}, fmt.Errorf("otabuild: write volume: %w", err)
+		return otarelease.PackageVolume{}, fmt.Errorf("%w: write volume: %v", ErrBuildIO, err)
 	}
 	if written != size {
 		file.Close()
-		return otarelease.PackageVolume{}, fmt.Errorf("%w: volume %q has %d of %d bytes", ErrVolumeLimit, filepath.Base(path), written, size)
+		return otarelease.PackageVolume{}, fmt.Errorf("%w: volume %q has %d of %d bytes", ErrBuildIO, filepath.Base(path), written, size)
 	}
 	if err := file.Sync(); err != nil {
 		file.Close()
@@ -551,7 +598,9 @@ func commitArtifacts(staging, updatesDir, marker string, artifacts []artifact) e
 		rollback()
 		return err
 	}
-	if err := os.Remove(markerPath); err != nil {
+	// A peer must never delete this build's unique marker, but a marker already
+	// gone means the set is complete and must not be rolled back (L4f fix 1).
+	if err := os.Remove(markerPath); err != nil && !errors.Is(err, os.ErrNotExist) {
 		rollback()
 		return fmt.Errorf("otabuild: remove incomplete marker: %w", err)
 	}

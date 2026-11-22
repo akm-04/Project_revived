@@ -90,6 +90,7 @@ type buildRequest struct {
 	Lane        string `json:"lane"`
 	Version     string `json:"version"`
 	Rollback    bool   `json:"rollback"`
+	LazyRefresh bool   `json:"lazy_refresh"`
 	Reason      string `json:"reason"`
 	SemanticKey string `json:"semantic_key"`
 }
@@ -343,6 +344,7 @@ func (handler Handler) serveBuild(writer http.ResponseWriter, request *http.Requ
 		Lane:        body.Lane,
 		Version:     body.Version,
 		Rollback:    body.Rollback,
+		LazyRefresh: body.LazyRefresh,
 		Reason:      body.Reason,
 		SemanticKey: body.SemanticKey,
 	})
@@ -513,6 +515,12 @@ func (handler Handler) writeAgentError(writer http.ResponseWriter, action string
 	if errors.As(err, &backendRefusal) {
 		handler.record(action, "error", "refused", map[string]any{"status": backendRefusal.Status})
 		writeBackend(writer, operatoragent.BackendResponse{Status: backendRefusal.Status, Body: backendRefusal.Body})
+		return
+	}
+	var transient *operatoragent.Transient
+	if errors.As(err, &transient) {
+		handler.record(action, "error", "unavailable", map[string]any{"error_code": transient.Code})
+		writeRefusal(writer, http.StatusServiceUnavailable, transient.Code, transient.Message)
 		return
 	}
 	var refusal *operatoragent.Refusal

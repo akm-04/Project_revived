@@ -249,15 +249,76 @@ func (operations *Operations) guard(kind string) *sync.Mutex {
 	return guard
 }
 
+const (
+	operationWriteAttempts = 3
+	operationWriteDelay    = 50 * time.Millisecond
+)
+
+// operationWriteRecord is a variable so a test can inject a write fault.
+var operationWriteRecord = writeOperationRecord
+
+// write persists the record with retries. A write that keeps failing is logged
+// before the error reaches the caller, so an operation is never left RUNNING
+// silently (L4f fixes 5 and 6).
 func (operations *Operations) write(operation Operation) error {
-	if err := os.MkdirAll(operations.Directory, 0o700); err != nil {
-		return err
-	}
 	encoded, err := json.MarshalIndent(operation, "", "  ")
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(filepath.Join(operations.Directory, operation.ID+".json"), encoded, 0o600)
+	path := filepath.Join(operations.Directory, operation.ID+".json")
+	var lastErr error
+	for attempt := range operationWriteAttempts {
+		lastErr = operationWriteRecord(path, encoded)
+		if lastErr == nil {
+			return nil
+		}
+		if attempt+1 < operationWriteAttempts {
+			time.Sleep(operationWriteDelay)
+		}
+	}
+	if operations.Log != nil {
+		operations.Log.Write(operation.Kind, "write", "failed", map[string]any{
+			"operation_id": operation.ID,
+			"state":        operation.State,
+			"error":        MaskString(lastErr.Error()),
+		})
+	}
+	return lastErr
+}
+
+// writeOperationRecord replaces the record atomically: temp file, fsync, close,
+// rename, so a reader never sees a truncated JSON document (L4f fix 5).
+func writeOperationRecord(path string, encoded []byte) error {
+	directory := filepath.Dir(path)
+	if err := os.MkdirAll(directory, 0o700); err != nil {
+		return err
+	}
+	temporary, err := os.CreateTemp(directory, ".op-*.tmp")
+	if err != nil {
+		return err
+	}
+	temporaryName := temporary.Name()
+	cleanup := func() {
+		_ = temporary.Close()
+		_ = os.Remove(temporaryName)
+	}
+	if _, err := temporary.Write(encoded); err != nil {
+		cleanup()
+		return err
+	}
+	if err := temporary.Sync(); err != nil {
+		cleanup()
+		return err
+	}
+	if err := temporary.Close(); err != nil {
+		_ = os.Remove(temporaryName)
+		return err
+	}
+	if err := os.Rename(temporaryName, path); err != nil {
+		_ = os.Remove(temporaryName)
+		return err
+	}
+	return nil
 }
 
 func (operations *Operations) log(kind, step, outcome, id string) {

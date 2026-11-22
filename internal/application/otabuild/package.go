@@ -2,6 +2,8 @@ package otabuild
 
 import (
 	"archive/zip"
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"os"
@@ -57,18 +59,25 @@ func writeAssembled(path string, entries []packageEntry, method uint16) (int64, 
 	return info.Size(), nil
 }
 
+// copyEntry streams the entry and verifies its md5 while writing, so a file
+// that changed after collection can never ship different bytes than the
+// manifest records (L4f fix 4). It hashes the same single read it writes.
 func copyEntry(target io.Writer, entry packageEntry) error {
 	source, err := entry.open()
 	if err != nil {
-		return err
+		return fmt.Errorf("%w: %v", ErrBuildIO, err)
 	}
 	defer source.Close()
-	written, err := io.Copy(target, source)
+	digest := md5.New()
+	written, err := io.Copy(io.MultiWriter(target, digest), source)
 	if err != nil {
-		return fmt.Errorf("otabuild: write zip entry %q: %w", entry.path, err)
+		return fmt.Errorf("%w: write zip entry %q: %v", ErrBuildIO, entry.path, err)
 	}
 	if written != entry.size {
-		return fmt.Errorf("%w: zip entry %q has %d of %d bytes", ErrInvalidInput, entry.path, written, entry.size)
+		return fmt.Errorf("%w: zip entry %q has %d of %d bytes", ErrBuildIO, entry.path, written, entry.size)
+	}
+	if actual := hex.EncodeToString(digest.Sum(nil)); actual != entry.md5 {
+		return fmt.Errorf("%w: zip entry %q changed while copying", ErrBuildIO, entry.path)
 	}
 	return nil
 }
