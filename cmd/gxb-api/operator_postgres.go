@@ -18,6 +18,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/operatorapi"
 	"gxb.local/backend/v2/internal/adapters/postgres/operatorstore"
 	"gxb.local/backend/v2/internal/application/operator"
+	appotarelease "gxb.local/backend/v2/internal/application/otarelease"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -27,7 +28,7 @@ const defaultOperatorAddress = "127.0.0.1:8091"
 // startOperator opens the operator listener (I11A_ARCHITECTURE_V1 ruling 1,
 // I11A_OPERATOR_COMMANDS_V1 ruling 7) when the agent passed its per-start
 // token in GXB_OPERATOR_TOKEN; without a token there is no operator surface.
-func startOperator(ctx context.Context, runner tx.Runner, handlers map[string]operator.Handler, reads map[string]operatorapi.Read, version func(context.Context) (any, error), otaRoot string) {
+func startOperator(ctx context.Context, runner tx.Runner, handlers map[string]operator.Handler, reads map[string]operatorapi.Read, version func(context.Context) (any, error), committed otaAfterCommit) {
 	token := os.Getenv("GXB_OPERATOR_TOKEN")
 	if token == "" {
 		log.Printf("operator listener disabled: GXB_OPERATOR_TOKEN is not set")
@@ -48,7 +49,7 @@ func startOperator(ctx context.Context, runner tx.Runner, handlers map[string]op
 		log.Fatalf("operator listener must bind a loopback address, got %s", listener.Addr())
 	}
 	bus := operator.Bus{Runner: runner, Clock: clock.System{}, Store: operatorstore.Store{}, Handlers: handlers}
-	executor := postCommitExecutor{Next: bus, OTARoot: otaRoot}
+	executor := postCommitExecutor{Next: bus, OTA: committed}
 	server := &http.Server{Handler: operatorapi.Handler{Bus: executor, Token: token, Reads: reads, Version: version}, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: time.Minute, WriteTimeout: 5 * time.Minute, IdleTimeout: time.Minute}
 	go func() {
 		<-ctx.Done()
@@ -64,11 +65,22 @@ func startOperator(ctx context.Context, runner tx.Runner, handlers map[string]op
 	}()
 }
 
-// postCommitExecutor mirrors a committed OTA activation after the bus commit;
-// the database stays the record, so a failed mirror only logs.
+// otaAfterCommit is what an applied OTA command changes outside the database.
+type otaAfterCommit struct {
+	Root         string
+	SettingsFile appotarelease.SettingsFile
+	Settings     *appotarelease.SettingsValue
+	Serving      *appotarelease.Serving
+}
+
+// postCommitExecutor runs the OTA effects that must not happen inside the bus
+// transaction, once the command has committed (OTA_AMENDMENTS OA-6): the
+// activation history mirror (the database stays the record, so a failed mirror
+// only logs), the settings file and live value, and a serving refresh so MID
+// 2/20480 and /res see the change at once instead of after the refresh interval.
 type postCommitExecutor struct {
-	Next    operatorapi.Executor
-	OTARoot string
+	Next operatorapi.Executor
+	OTA  otaAfterCommit
 }
 
 func (executor postCommitExecutor) Execute(ctx context.Context, command operator.Command) (operator.Outcome, error) {
@@ -76,11 +88,22 @@ func (executor postCommitExecutor) Execute(ctx context.Context, command operator
 	if err != nil || outcome.State != operator.StateApplied || outcome.Replayed {
 		return outcome, err
 	}
-	if command.ModuleCommand != "ota.publish" && command.ModuleCommand != "ota.withdraw" {
+	switch command.ModuleCommand {
+	case "ota.publish", "ota.withdraw":
+		if writeErr := mirrorActivation(executor.OTA.Root, command.Envelope.SemanticKey, outcome.Result); writeErr != nil {
+			log.Printf("ota history mirror: %v", writeErr)
+		}
+	case "ota.settings.set":
+		if applyErr := appotarelease.ApplySettings(executor.OTA.SettingsFile, executor.OTA.Settings, outcome.Result); applyErr != nil {
+			return operator.Outcome{}, fmt.Errorf("ota.settings.set committed but settings.json was not written; nothing changed, send the command again: %w", applyErr)
+		}
+	default:
 		return outcome, nil
 	}
-	if writeErr := mirrorActivation(executor.OTARoot, command.Envelope.SemanticKey, outcome.Result); writeErr != nil {
-		log.Printf("ota history mirror: %v", writeErr)
+	if executor.OTA.Serving != nil {
+		if refreshErr := executor.OTA.Serving.Refresh(context.WithoutCancel(ctx)); refreshErr != nil {
+			log.Printf("ota serving refresh after %s: %v", command.ModuleCommand, refreshErr)
+		}
 	}
 	return outcome, nil
 }

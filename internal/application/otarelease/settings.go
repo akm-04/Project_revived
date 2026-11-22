@@ -117,11 +117,21 @@ func (v *SettingsValue) Set(next domain.Settings) {
 func (v *SettingsValue) Lock()   { v.mu.Lock() }
 func (v *SettingsValue) Unlock() { v.mu.Unlock() }
 
+// SettingsChange is the recorded result of `ota.settings.set`.
+type SettingsChange struct {
+	Old domain.Settings `json:"old"`
+	New domain.Settings `json:"new"`
+}
+
 // SettingsSetHandler is `ota.settings.set` (OTA ruling 6, live class): the
 // payload is the full settings object, no expected_revision, last writer wins.
-// A permanent bad payload is a 409 refusal; an I/O failure is a fault.
+// It only validates; nothing changes until ApplySettings runs after the
+// command commits (OTA_AMENDMENTS OA-6). A bad payload is a 409 refusal.
 func SettingsSetHandler(file SettingsFile, live *SettingsValue) operator.Handler {
 	return func(_ context.Context, _ tx.Scope, command operator.Command) (any, error) {
+		if file.Root == "" {
+			return nil, operator.Refuse(CodeRootUnavailable, "the OTA root is not configured", nil)
+		}
 		var next domain.Settings
 		decoder := json.NewDecoder(bytes.NewReader(command.Payload))
 		decoder.DisallowUnknownFields()
@@ -138,15 +148,24 @@ func SettingsSetHandler(file SettingsFile, live *SettingsValue) operator.Handler
 		if next.ResPath != "" && !readableDirectory(next.ResPath) {
 			return nil, operator.Refuse(operator.CodePayloadInvalid, fmt.Sprintf("res_path %q is not a readable folder", next.ResPath), nil)
 		}
-		live.Lock()
-		defer live.Unlock()
-		old := live.Get()
-		if err := file.Save(next); err != nil {
-			return nil, err
-		}
-		live.Set(next)
-		return map[string]any{"old": old, "new": next}, nil
+		return SettingsChange{Old: live.Get(), New: next}, nil
 	}
+}
+
+// ApplySettings writes a committed `ota.settings.set` result to settings.json,
+// then swaps the live value (OA-6); a failed write leaves both unchanged.
+func ApplySettings(file SettingsFile, live *SettingsValue, result json.RawMessage) error {
+	var change SettingsChange
+	if err := json.Unmarshal(result, &change); err != nil {
+		return err
+	}
+	live.Lock()
+	defer live.Unlock()
+	if err := file.Save(change.New); err != nil {
+		return err
+	}
+	live.Set(change.New)
+	return nil
 }
 
 func readableDirectory(path string) bool {

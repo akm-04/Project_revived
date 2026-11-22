@@ -2,6 +2,7 @@ package otarelease
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
@@ -47,27 +48,40 @@ func TestSettingsFileRefusesUnknownField(t *testing.T) {
 	}
 }
 
-func TestSettingsSetHandlerAppliesAndRecordsOldAndNew(t *testing.T) {
+func TestSettingsSetHandlerValidatesAndChangesNothing(t *testing.T) {
 	root := t.TempDir()
 	res := t.TempDir()
 	file := SettingsFile{Root: root}
 	live := NewSettingsValue(domain.DefaultSettings())
-	handler := SettingsSetHandler(file, live)
 
-	result, err := callSettings(handler, `{"lazy_fetch":"on","res_path":"`+res+`"}`)
+	result, err := callSettings(SettingsSetHandler(file, live), `{"lazy_fetch":"on","res_path":"`+res+`"}`)
 	if err != nil {
 		t.Fatal(err)
 	}
-	values, ok := result.(map[string]any)
-	if !ok {
+	want := SettingsChange{Old: domain.DefaultSettings(), New: domain.Settings{LazyFetch: domain.LazyFetchOn, ResPath: res}}
+	if change, ok := result.(SettingsChange); !ok || change != want {
 		t.Fatalf("result=%#v", result)
 	}
-	if old, ok := values["old"].(domain.Settings); !ok || old != domain.DefaultSettings() {
-		t.Fatalf("old=%#v", values["old"])
+	if live.Get() != domain.DefaultSettings() {
+		t.Fatalf("the handler changed the live value before commit: %+v", live.Get())
 	}
+	if _, statErr := os.Stat(filepath.Join(root, "settings.json")); !errors.Is(statErr, os.ErrNotExist) {
+		t.Fatalf("the handler wrote settings.json before commit: %v", statErr)
+	}
+}
+
+func TestApplySettingsWritesTheCommittedValue(t *testing.T) {
+	root := t.TempDir()
+	res := t.TempDir()
+	file := SettingsFile{Root: root}
+	live := NewSettingsValue(domain.DefaultSettings())
 	want := domain.Settings{LazyFetch: domain.LazyFetchOn, ResPath: res}
-	if next, ok := values["new"].(domain.Settings); !ok || next != want {
-		t.Fatalf("new=%#v", values["new"])
+	result, err := json.Marshal(SettingsChange{Old: domain.DefaultSettings(), New: want})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := ApplySettings(file, live, result); err != nil {
+		t.Fatal(err)
 	}
 	if live.Get() != want {
 		t.Fatalf("live=%+v", live.Get())
@@ -75,6 +89,14 @@ func TestSettingsSetHandlerAppliesAndRecordsOldAndNew(t *testing.T) {
 	reloaded, err := file.Load()
 	if err != nil || reloaded != want {
 		t.Fatalf("reloaded=%+v err=%v", reloaded, err)
+	}
+
+	unwritable := NewSettingsValue(domain.DefaultSettings())
+	if err := ApplySettings(SettingsFile{Root: filepath.Join(root, "missing")}, unwritable, result); err == nil {
+		t.Fatal("a failed write must be reported")
+	}
+	if unwritable.Get() != domain.DefaultSettings() {
+		t.Fatalf("a failed write changed the live value: %+v", unwritable.Get())
 	}
 }
 
@@ -100,5 +122,13 @@ func TestSettingsSetHandlerRefusalsAre409(t *testing.T) {
 		if _, statErr := os.Stat(filepath.Join(root, "settings.json")); !errors.Is(statErr, os.ErrNotExist) {
 			t.Fatalf("refused payload %s wrote settings.json: %v", payload, statErr)
 		}
+	}
+}
+
+func TestSettingsSetHandlerRefusesWithoutAnOTARoot(t *testing.T) {
+	_, err := callSettings(SettingsSetHandler(SettingsFile{}, NewSettingsValue(domain.DefaultSettings())), `{"lazy_fetch":"auto","res_path":""}`)
+	var refusal *operator.Refusal
+	if !errors.As(err, &refusal) || refusal.Code != CodeRootUnavailable {
+		t.Fatalf("err=%v", err)
 	}
 }

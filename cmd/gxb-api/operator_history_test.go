@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/application/operator"
+	appotarelease "gxb.local/backend/v2/internal/application/otarelease"
+	domain "gxb.local/backend/v2/internal/domain/otarelease"
 )
 
 type fixedExecutor struct {
@@ -40,7 +42,7 @@ func TestPostCommitExecutorMirrorsOnlyAppliedOTAActivations(t *testing.T) {
 	for _, testCase := range cases {
 		t.Run(testCase.name, func(t *testing.T) {
 			root := t.TempDir()
-			executor := postCommitExecutor{Next: fixedExecutor{outcome: testCase.outcome}, OTARoot: root}
+			executor := postCommitExecutor{Next: fixedExecutor{outcome: testCase.outcome}, OTA: otaAfterCommit{Root: root}}
 			command := operator.Command{ModuleCommand: testCase.module, Envelope: operator.Envelope{SemanticKey: "key-7"}}
 			if _, err := executor.Execute(context.Background(), command); err != nil {
 				t.Fatal(err)
@@ -56,6 +58,57 @@ func TestPostCommitExecutorMirrorsOnlyAppliedOTAActivations(t *testing.T) {
 				t.Fatalf("history written for a non-applied command: %v", entries)
 			}
 		})
+	}
+}
+
+func TestPostCommitExecutorAppliesOnlyCommittedSettings(t *testing.T) {
+	next := domain.Settings{LazyFetch: domain.LazyFetchOff}
+	change, err := json.Marshal(appotarelease.SettingsChange{Old: domain.DefaultSettings(), New: next})
+	if err != nil {
+		t.Fatal(err)
+	}
+	cases := []struct {
+		name    string
+		outcome operator.Outcome
+		applied bool
+	}{
+		{"applied", operator.Outcome{State: operator.StateApplied, Result: change}, true},
+		{"replayed", operator.Outcome{State: operator.StateApplied, Result: change, Replayed: true}, false},
+		{"refused", operator.Outcome{State: operator.StateRefused, Result: json.RawMessage(`{"error_code":"OTA_SETTINGS_INVALID"}`)}, false},
+	}
+	for _, testCase := range cases {
+		t.Run(testCase.name, func(t *testing.T) {
+			root := t.TempDir()
+			file := appotarelease.SettingsFile{Root: root}
+			live := appotarelease.NewSettingsValue(domain.DefaultSettings())
+			executor := postCommitExecutor{Next: fixedExecutor{outcome: testCase.outcome}, OTA: otaAfterCommit{Root: root, SettingsFile: file, Settings: live}}
+			if _, err := executor.Execute(context.Background(), operator.Command{ModuleCommand: "ota.settings.set"}); err != nil {
+				t.Fatal(err)
+			}
+			_, statErr := os.Stat(filepath.Join(root, "settings.json"))
+			if testCase.applied != (statErr == nil) || testCase.applied != (live.Get() == next) {
+				t.Fatalf("applied=%v file err=%v live=%+v", testCase.applied, statErr, live.Get())
+			}
+		})
+	}
+}
+
+func TestPostCommitExecutorReportsAFailedSettingsWrite(t *testing.T) {
+	change, err := json.Marshal(appotarelease.SettingsChange{Old: domain.DefaultSettings(), New: domain.Settings{LazyFetch: domain.LazyFetchOn}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	live := appotarelease.NewSettingsValue(domain.DefaultSettings())
+	missing := filepath.Join(t.TempDir(), "missing")
+	executor := postCommitExecutor{
+		Next: fixedExecutor{outcome: operator.Outcome{State: operator.StateApplied, Result: change}},
+		OTA:  otaAfterCommit{Root: missing, SettingsFile: appotarelease.SettingsFile{Root: missing}, Settings: live},
+	}
+	if _, err := executor.Execute(context.Background(), operator.Command{ModuleCommand: "ota.settings.set"}); err == nil {
+		t.Fatal("a failed settings write must not report success")
+	}
+	if live.Get() != domain.DefaultSettings() {
+		t.Fatalf("live value changed after a failed write: %+v", live.Get())
 	}
 }
 

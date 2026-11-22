@@ -532,7 +532,7 @@ func main() {
 	}
 	operatorHandlers := otaCommands.Handlers()
 	operatorHandlers["ota.settings.set"] = appotarelease.SettingsSetHandler(otaSettingsFile, otaSettingsValue)
-	startOperator(ctx, runner, operatorHandlers, operatorReads, operatorVersionReply, cfg.OTARoot)
+	startOperator(ctx, runner, operatorHandlers, operatorReads, operatorVersionReply, otaAfterCommit{Root: cfg.OTARoot, SettingsFile: otaSettingsFile, Settings: otaSettingsValue, Serving: otaServing})
 	clientLogs, journal := startClientLog(ctx, pool, authority, cfg.ClientLogURL, retentionPolicies.RetentionDays, txMetrics, mux, handlerConcurrency("GXB_CLIENT_LOG_MAX_CONCURRENT", 4, poolConnections))
 	dailyReset := dailyreset.Service{Markers: dailyresetstore.Store{Queryer: pool}, Counters: itemsEnergy.Counters}
 	boot := stockruntime.BootstrapDispatcher{Bootstrap: bootstrap, Tracker: tracker, LogURLs: clientLogs, DailyReset: dailyReset}
