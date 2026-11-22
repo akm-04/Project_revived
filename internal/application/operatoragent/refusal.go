@@ -7,12 +7,14 @@ const (
 	CodeAlreadySetUp       = "AGENT_ALREADY_SET_UP"
 	CodeLoginRefused       = "AGENT_LOGIN_REFUSED"
 	CodeUnauthorized       = "AGENT_UNAUTHORIZED"
+	CodeForbidden          = "AGENT_FORBIDDEN"
 	CodeBodyInvalid        = "AGENT_BODY_INVALID"
 	CodeNotFound           = "AGENT_NOT_FOUND"
 	CodeOperationRunning   = "AGENT_OP_RUNNING"
 	CodeOperationUnknown   = "AGENT_OP_UNKNOWN"
 	CodeBackendUnavailable = "AGENT_BACKEND_UNAVAILABLE"
 	CodeBackendRunning     = "AGENT_BACKEND_RUNNING"
+	CodeBackendBusy        = "AGENT_BACKEND_BUSY"
 	CodeFailed             = "AGENT_FAILED"
 )
 

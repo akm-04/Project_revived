@@ -120,6 +120,7 @@ func newMaintenance(t *testing.T) (operatoragent.Maintenance, *fakeBackend, *fak
 		Operator:   operatorclient.New(server.URL, tokens),
 		Tokens:     tokens,
 		Operations: operations,
+		Guard:      &operatoragent.BackendGuard{},
 	}, backend, api, server
 }
 
@@ -183,5 +184,57 @@ func TestPublishRefusalLeavesBackendClosed(t *testing.T) {
 		if call == "start:open" {
 			t.Fatalf("the backend reopened after a refusal: %v", calls)
 		}
+	}
+}
+
+type liveBackend struct {
+	running bool
+}
+
+func (backend *liveBackend) Start(bool, string) error {
+	if backend.running {
+		return operatoragent.Refuse(operatoragent.CodeBackendRunning, "one backend child at a time")
+	}
+	backend.running = true
+	return nil
+}
+
+func (backend *liveBackend) Stop() error {
+	backend.running = false
+	return nil
+}
+
+func (backend *liveBackend) Status() operatoragent.BackendStatus {
+	return operatoragent.BackendStatus{Running: backend.running}
+}
+
+func TestRefusedStartKeepsPreviousToken(t *testing.T) {
+	tokens := &operatoragent.TokenHolder{}
+	tokens.Set("previous-token")
+	backend := &liveBackend{running: true}
+	err := operatoragent.StartBackend(backend, tokens, false)
+	var refusal *operatoragent.Refusal
+	if !errors.As(err, &refusal) || refusal.Code != operatoragent.CodeBackendRunning {
+		t.Fatalf("want a backend-running refusal, got %v", err)
+	}
+	if tokens.Get() != "previous-token" {
+		t.Fatalf("the refused start replaced the live token with %q", tokens.Get())
+	}
+
+	authorization := make(chan string, 1)
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		authorization <- request.Header.Get("Authorization")
+		_, _ = io.WriteString(writer, `{"revision":1}`)
+	}))
+	t.Cleanup(server.Close)
+	response, err := operatorclient.New(server.URL, tokens).Read(context.Background(), "ota.status", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if response.Status != http.StatusOK {
+		t.Fatalf("forwarded call: status = %d", response.Status)
+	}
+	if got := <-authorization; got != "Bearer previous-token" {
+		t.Fatalf("the forwarded call carried %q", got)
 	}
 }

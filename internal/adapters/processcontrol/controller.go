@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"strings"
 	"sync"
 	"time"
 
@@ -126,7 +127,7 @@ func (controller *Controller) Start(closed bool, token string) error {
 	controller.mutex.Unlock()
 
 	if err := controller.waitUntilReady(child, token); err != nil {
-		_ = controller.Stop()
+		_ = controller.stopUnlocked()
 		return err
 	}
 	return nil
@@ -147,10 +148,25 @@ func (controller *Controller) environment(closed bool, token string) ([]string, 
 	if controller.options.OTARoot != "" {
 		environment = append(environment, "GXB_OTA_ROOT="+controller.options.OTARoot)
 	}
-	if closed {
-		environment = append(environment, "GXB_GAME_LISTENER=closed")
+	return appendListener(environment, closed), nil
+}
+
+// appendListener drops every inherited or env-file GXB_GAME_LISTENER entry and
+// appends exactly one explicit value last, so a stale "closed" can never
+// survive an open start.
+func appendListener(environment []string, closed bool) []string {
+	filtered := make([]string, 0, len(environment)+1)
+	for _, entry := range environment {
+		if strings.HasPrefix(entry, "GXB_GAME_LISTENER=") {
+			continue
+		}
+		filtered = append(filtered, entry)
 	}
-	return environment, nil
+	listener := "open"
+	if closed {
+		listener = "closed"
+	}
+	return append(filtered, "GXB_GAME_LISTENER="+listener)
 }
 
 func (controller *Controller) waitUntilReady(child *childProcess, token string) error {
@@ -187,8 +203,15 @@ func (controller *Controller) versionAnswers(token string) bool {
 	return response.StatusCode == http.StatusOK
 }
 
-// Stop asks the child to terminate, waits the grace period, then kills it.
+// Stop asks the child to terminate, waits the grace period, then kills it. It
+// shares the start guard so a stop cannot interleave a start.
 func (controller *Controller) Stop() error {
+	controller.startGuard.Lock()
+	defer controller.startGuard.Unlock()
+	return controller.stopUnlocked()
+}
+
+func (controller *Controller) stopUnlocked() error {
 	controller.mutex.Lock()
 	child := controller.child
 	controller.mutex.Unlock()

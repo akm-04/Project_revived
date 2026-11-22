@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 )
@@ -132,7 +133,7 @@ func TestStartWaitsForReadinessAndUsesFreshTokens(t *testing.T) {
 		t.Fatal("the backend must be running after Start")
 	}
 	first := readRecord(t, recordPath)
-	if first.Token != "token-one" || first.Listener != "" {
+	if first.Token != "token-one" || first.Listener != "open" {
 		t.Fatalf("first start saw %+v", first)
 	}
 	if err := controller.Stop(); err != nil {
@@ -183,5 +184,50 @@ func TestStartWaitsForDelayedReadiness(t *testing.T) {
 	}
 	if err := controller.Stop(); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestStartOpenDropsStaleListener(t *testing.T) {
+	t.Setenv("GXB_GAME_LISTENER", "closed")
+	binary := buildFakeBackend(t)
+	recordPath := filepath.Join(t.TempDir(), "record.json")
+	controller := newController(t, binary, writeEnvFile(t, "GXB_TEST_RECORD="+recordPath, "GXB_GAME_LISTENER=closed"), freeAddress(t))
+	if err := controller.Start(false, "token"); err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = controller.Stop() }()
+	if got := readRecord(t, recordPath).Listener; got != "open" {
+		t.Fatalf("the child saw listener %q, want open", got)
+	}
+}
+
+func TestConcurrentStartAndStopStayConsistent(t *testing.T) {
+	binary := buildFakeBackend(t)
+	for iteration := 0; iteration < 5; iteration++ {
+		recordPath := filepath.Join(t.TempDir(), "record.json")
+		controller := newController(t, binary, writeEnvFile(t, "GXB_TEST_RECORD="+recordPath, "GXB_TEST_DELAY_MS=200"), freeAddress(t))
+		var wait sync.WaitGroup
+		wait.Add(2)
+		go func() {
+			defer wait.Done()
+			_ = controller.Start(false, "token")
+		}()
+		go func() {
+			defer wait.Done()
+			_ = controller.Stop()
+		}()
+		wait.Wait()
+		if err := controller.Stop(); err != nil {
+			t.Fatal(err)
+		}
+		if controller.Status().Running {
+			t.Fatal("a stopped controller still reports a running child")
+		}
+		controller.mutex.Lock()
+		child := controller.child
+		controller.mutex.Unlock()
+		if child != nil {
+			t.Fatal("a stopped controller still holds a child")
+		}
 	}
 }

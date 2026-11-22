@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"mime"
 	"net"
 	"net/http"
 	"os"
@@ -50,6 +51,11 @@ type Handler struct {
 	Operations  *operatoragent.Operations
 	ToolLog     *operatoragent.ToolLog
 	ToolLogPath string
+	// Listen is the exact host:port the agent listens on; every route refuses
+	// any other Host header (a browser must not reach the loopback API).
+	Listen string
+	// Guard serializes every backend lifecycle action across routes.
+	Guard *operatoragent.BackendGuard
 }
 
 type sessionReply struct {
@@ -78,6 +84,9 @@ type maintenanceRequest struct {
 }
 
 func (handler Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+	if !handler.allowed(writer, request) {
+		return
+	}
 	if !loopback(request.RemoteAddr) {
 		writeRefusal(writer, http.StatusUnauthorized, operatoragent.CodeUnauthorized, "the agent API is loopback only")
 		return
@@ -131,6 +140,27 @@ func (handler Handler) ServeHTTP(writer http.ResponseWriter, request *http.Reque
 	}
 }
 
+// allowed is the browser boundary: the request must name the configured
+// listen address exactly, carry no Origin, and POST application/json.
+func (handler Handler) allowed(writer http.ResponseWriter, request *http.Request) bool {
+	if request.Host != handler.Listen {
+		writeRefusal(writer, http.StatusForbidden, operatoragent.CodeForbidden, "the agent API answers only its configured address")
+		return false
+	}
+	if len(request.Header.Values("Origin")) > 0 {
+		writeRefusal(writer, http.StatusForbidden, operatoragent.CodeForbidden, "the agent API refuses browser origins")
+		return false
+	}
+	if request.Method == http.MethodPost {
+		mediaType, _, err := mime.ParseMediaType(request.Header.Get("Content-Type"))
+		if err != nil || mediaType != "application/json" {
+			writeRefusal(writer, http.StatusUnsupportedMediaType, operatoragent.CodeBodyInvalid, "POST bodies must be application/json")
+			return false
+		}
+	}
+	return true
+}
+
 func bearer(request *http.Request) string {
 	presented, found := strings.CutPrefix(request.Header.Get("Authorization"), "Bearer ")
 	if !found {
@@ -150,7 +180,7 @@ func (handler Handler) serveSetup(writer http.ResponseWriter, request *http.Requ
 	}
 	var body passwordRequest
 	if err := decodeBody(writer, request, &body); err != nil {
-		writeRefusal(writer, http.StatusConflict, operatoragent.CodeBodyInvalid, err.Error())
+		handler.writeBodyError(writer, err)
 		return
 	}
 	if err := handler.Credentials.Setup(body.Password); err != nil {
@@ -164,7 +194,7 @@ func (handler Handler) serveSetup(writer http.ResponseWriter, request *http.Requ
 func (handler Handler) serveLogin(writer http.ResponseWriter, request *http.Request) {
 	var body passwordRequest
 	if err := decodeBody(writer, request, &body); err != nil {
-		writeRefusal(writer, http.StatusConflict, operatoragent.CodeBodyInvalid, err.Error())
+		handler.writeBodyError(writer, err)
 		return
 	}
 	if err := handler.Credentials.Verify(body.Password); err != nil {
@@ -183,9 +213,14 @@ func (handler Handler) serveLogin(writer http.ResponseWriter, request *http.Requ
 func (handler Handler) serveBackendStart(writer http.ResponseWriter, request *http.Request) {
 	var body closedRequest
 	if err := decodeOptionalBody(writer, request, &body); err != nil {
-		writeRefusal(writer, http.StatusConflict, operatoragent.CodeBodyInvalid, err.Error())
+		handler.writeBodyError(writer, err)
 		return
 	}
+	if !handler.Guard.TryLock() {
+		handler.writeAgentError(writer, "backend.start", operatoragent.Refuse(operatoragent.CodeBackendBusy, "a backend operation is already running"))
+		return
+	}
+	defer handler.Guard.Unlock()
 	if err := operatoragent.StartBackend(handler.Backend, handler.Tokens, body.Closed); err != nil {
 		handler.writeAgentError(writer, "backend.start", err)
 		return
@@ -196,6 +231,11 @@ func (handler Handler) serveBackendStart(writer http.ResponseWriter, request *ht
 }
 
 func (handler Handler) serveBackendStop(writer http.ResponseWriter) {
+	if !handler.Guard.TryLock() {
+		handler.writeAgentError(writer, "backend.stop", operatoragent.Refuse(operatoragent.CodeBackendBusy, "a backend operation is already running"))
+		return
+	}
+	defer handler.Guard.Unlock()
 	if err := handler.Backend.Stop(); err != nil {
 		handler.writeAgentError(writer, "backend.stop", err)
 		return
@@ -207,7 +247,7 @@ func (handler Handler) serveBackendStop(writer http.ResponseWriter) {
 func (handler Handler) serveCommand(writer http.ResponseWriter, request *http.Request, name string) {
 	var body commandRequest
 	if err := decodeBody(writer, request, &body); err != nil {
-		writeRefusal(writer, http.StatusConflict, operatoragent.CodeBodyInvalid, err.Error())
+		handler.writeBodyError(writer, err)
 		return
 	}
 	if name == "" || body.Reason == "" || body.SemanticKey == "" {
@@ -250,7 +290,7 @@ func (handler Handler) serveRead(writer http.ResponseWriter, request *http.Reque
 func (handler Handler) serveMaintenance(writer http.ResponseWriter, request *http.Request, publish bool) {
 	var body maintenanceRequest
 	if err := decodeBody(writer, request, &body); err != nil {
-		writeRefusal(writer, http.StatusConflict, operatoragent.CodeBodyInvalid, err.Error())
+		handler.writeBodyError(writer, err)
 		return
 	}
 	if body.Version == "" || body.Reason == "" || body.SemanticKey == "" {
@@ -355,13 +395,15 @@ func tailLines(path string, count int) ([]string, error) {
 	return all, nil
 }
 
+var errTrailingData = errors.New("trailing data after the JSON object")
+
 func decodeBody(writer http.ResponseWriter, request *http.Request, target any) error {
 	decoder := json.NewDecoder(http.MaxBytesReader(writer, request.Body, maxBodyBytes))
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(target); err != nil {
 		return errors.New("the body is not the expected JSON object")
 	}
-	return nil
+	return ensureNoTrailingData(decoder)
 }
 
 func decodeOptionalBody(writer http.ResponseWriter, request *http.Request, target any) error {
@@ -374,7 +416,19 @@ func decodeOptionalBody(writer http.ResponseWriter, request *http.Request, targe
 	if err != nil {
 		return errors.New("the body is not the expected JSON object")
 	}
-	return nil
+	return ensureNoTrailingData(decoder)
+}
+
+func ensureNoTrailingData(decoder *json.Decoder) error {
+	var extra any
+	err := decoder.Decode(&extra)
+	if errors.Is(err, io.EOF) {
+		return nil
+	}
+	if err != nil {
+		return errors.New("the body is not the expected JSON object")
+	}
+	return errTrailingData
 }
 
 func loopback(remoteAddress string) bool {
@@ -407,6 +461,14 @@ func outcomeWord(status int) string {
 		return "ok"
 	}
 	return "refused"
+}
+
+func (handler Handler) writeBodyError(writer http.ResponseWriter, err error) {
+	status := http.StatusConflict
+	if errors.Is(err, errTrailingData) {
+		status = http.StatusBadRequest
+	}
+	writeRefusal(writer, status, operatoragent.CodeBodyInvalid, err.Error())
 }
 
 func (handler Handler) writeAgentError(writer http.ResponseWriter, action string, err error) {

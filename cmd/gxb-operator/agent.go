@@ -17,12 +17,8 @@ import (
 	"gxb.local/backend/v2/internal/application/operatoragent"
 )
 
-func runAgent(args []string) error {
-	root, remaining, err := extractRoot(args)
-	if err != nil {
-		return err
-	}
-	if len(remaining) != 0 {
+func runAgent(root string, args []string) error {
+	if len(args) != 0 {
 		return errors.New("agent takes no arguments besides --root")
 	}
 	config, err := operatoragent.LoadConfig(root)
@@ -55,16 +51,19 @@ func runAgent(args []string) error {
 		LogPath:      filepath.Join(logsDirectory, operatoragent.BackendLogFileName),
 	})
 	operator := operatorclient.New(config.Backend.OperatorAddr, tokens)
+	backendGuard := &operatoragent.BackendGuard{}
 	handler := agentapi.Handler{
 		Credentials: operatoragent.NewCredentials(root),
 		Sessions:    operatoragent.NewSessions(time.Now),
 		Backend:     backend,
 		Operator:    operator,
 		Tokens:      tokens,
-		Maintenance: operatoragent.Maintenance{Backend: backend, Operator: operator, Tokens: tokens, Operations: operations},
+		Maintenance: operatoragent.Maintenance{Backend: backend, Operator: operator, Tokens: tokens, Operations: operations, Guard: backendGuard},
 		Operations:  operations,
 		ToolLog:     toolLog,
 		ToolLogPath: filepath.Join(logsDirectory, operatoragent.ToolLogFileName),
+		Listen:      config.Listen,
+		Guard:       backendGuard,
 	}
 	listener, err := net.Listen("tcp", config.Listen)
 	if err != nil {
@@ -73,14 +72,8 @@ func runAgent(args []string) error {
 	server := &http.Server{Handler: handler, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 5 * time.Minute, WriteTimeout: 30 * time.Minute, IdleTimeout: time.Minute}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
-	go func() {
-		<-ctx.Done()
-		shutdownContext, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		_ = server.Shutdown(shutdownContext)
-	}()
 	toolLog.Write("agent", "start", "ok", map[string]any{"listen": config.Listen})
-	if err := server.Serve(listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
+	if err := agentapi.Serve(ctx, server, listener, backend); err != nil {
 		return err
 	}
 	toolLog.Write("agent", "stop", "ok", nil)

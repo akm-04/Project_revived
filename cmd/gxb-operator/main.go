@@ -19,15 +19,38 @@ func run(args []string) error {
 		usage()
 		return errors.New("a command is required")
 	}
-	switch args[0] {
+	invocation, err := parseInvocation(args)
+	if err != nil {
+		return err
+	}
+	switch invocation.command {
 	case "agent":
-		return runAgent(args[1:])
+		return runAgent(invocation.root, invocation.arguments)
 	case "setup", "login", "logout", "backend", "cmd", "read", "ota", "op", "log":
-		return runClientCommand(args[0], args[1:])
+		return runClientCommand(invocation.root, invocation.command, invocation.arguments)
 	default:
 		usage()
-		return fmt.Errorf("unknown command %q", args[0])
+		return fmt.Errorf("unknown command %q", invocation.command)
 	}
+}
+
+type invocation struct {
+	root      string
+	command   string
+	arguments []string
+}
+
+// parseInvocation strips --root from anywhere before dispatch, so the
+// documented "gxb-operator [--root DIR] agent" shape works.
+func parseInvocation(args []string) (invocation, error) {
+	root, remaining, err := extractRoot(args)
+	if err != nil {
+		return invocation{}, err
+	}
+	if len(remaining) == 0 {
+		return invocation{}, errors.New("a command is required")
+	}
+	return invocation{root: root, command: remaining[0], arguments: remaining[1:]}, nil
 }
 
 func usage() {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sync"
 
 	"gxb.local/backend/v2/internal/application/operator"
 )
@@ -20,6 +21,22 @@ type BackendControl interface {
 	Start(closed bool, token string) error
 	Stop() error
 	Status() BackendStatus
+}
+
+// BackendGuard admits one backend lifecycle action at a time: a start, a stop
+// or a whole maintenance flow. It refuses rather than queues.
+type BackendGuard struct {
+	mutex sync.Mutex
+}
+
+// TryLock takes the guard when it is free.
+func (guard *BackendGuard) TryLock() bool {
+	return guard.mutex.TryLock()
+}
+
+// Unlock releases the guard.
+func (guard *BackendGuard) Unlock() {
+	guard.mutex.Unlock()
 }
 
 // OperatorRequest is one forwarded operator command.
@@ -49,16 +66,22 @@ type Maintenance struct {
 	Operator   OperatorClient
 	Tokens     *TokenHolder
 	Operations *Operations
+	Guard      *BackendGuard
 }
 
-// StartBackend mints the per-start operator token and launches the backend.
+// StartBackend mints the per-start operator token and launches the backend. The
+// holder takes the new token only after the launch succeeds, so a refused start
+// keeps the live per-start token in place.
 func StartBackend(backend BackendControl, tokens *TokenHolder, closed bool) error {
 	token, err := NewToken()
 	if err != nil {
 		return err
 	}
+	if err := backend.Start(closed, token); err != nil {
+		return err
+	}
 	tokens.Set(token)
-	return backend.Start(closed, token)
+	return nil
 }
 
 // Publish runs stop -> start closed -> status -> publish -> stop -> start open.
@@ -72,6 +95,11 @@ func (maintenance Maintenance) Withdraw(ctx context.Context, version, reason, se
 }
 
 func (maintenance Maintenance) run(ctx context.Context, command, version, reason, semanticKey string) (Operation, error) {
+	if !maintenance.Guard.TryLock() {
+		return Operation{}, Refuse(CodeBackendBusy, "a backend operation is already running")
+	}
+	defer maintenance.Guard.Unlock()
+
 	var revision int64
 	steps := []Step{
 		{Name: "stop backend", Run: func(context.Context) (any, error) { return nil, maintenance.Backend.Stop() }},

@@ -15,11 +15,7 @@ import (
 	"gxb.local/backend/v2/internal/application/operatoragent"
 )
 
-func runClientCommand(command string, args []string) error {
-	root, remaining, err := extractRoot(args)
-	if err != nil {
-		return err
-	}
+func runClientCommand(root, command string, remaining []string) error {
 	switch command {
 	case "setup":
 		return runSetup(root)

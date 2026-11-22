@@ -59,7 +59,7 @@ func (client *agentClient) request(method, path string, body any) (int, []byte, 
 	if client.token != "" {
 		request.Header.Set("Authorization", "Bearer "+client.token)
 	}
-	if body != nil {
+	if method == http.MethodPost {
 		request.Header.Set("Content-Type", "application/json")
 	}
 	response, err := client.http.Do(request)

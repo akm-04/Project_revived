@@ -34,3 +34,26 @@ func TestToolLogMasksSecretsEverywhere(t *testing.T) {
 		t.Fatalf("expected masked values: %s", line)
 	}
 }
+
+func TestMaskStringMasksKeyValueText(t *testing.T) {
+	masked := MaskString("password=hunter2 token=abcd&next=1")
+	if strings.Contains(masked, "hunter2") || strings.Contains(masked, "abcd") {
+		t.Fatalf("key=value leaked: %s", masked)
+	}
+	if !strings.Contains(masked, "password=***") || !strings.Contains(masked, "token=***") {
+		t.Fatalf("key=value not masked: %s", masked)
+	}
+	if !strings.Contains(masked, "&next=1") {
+		t.Fatalf("non-secret text was lost: %s", masked)
+	}
+}
+
+func TestMaskStringMasksPostgresQueryPassword(t *testing.T) {
+	masked := MaskString("postgresql://dbhost/app?password=s3cret&sslmode=require")
+	if strings.Contains(masked, "s3cret") {
+		t.Fatalf("DSN query password leaked: %s", masked)
+	}
+	if !strings.Contains(masked, "password=***") || !strings.Contains(masked, "sslmode=require") {
+		t.Fatalf("DSN query was not masked correctly: %s", masked)
+	}
+}

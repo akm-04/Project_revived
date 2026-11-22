@@ -15,6 +15,9 @@ var secretKeyPattern = regexp.MustCompile(`(?i)(token|password|passwd|secret|dsn
 // userinfoPattern masks the credentials in a database URL.
 var userinfoPattern = regexp.MustCompile(`(?i)\b(postgres(?:ql)?://)[^/@\s]+@`)
 
+// assignmentPattern masks key=value text and a DSN's query password.
+var assignmentPattern = regexp.MustCompile(`(?i)(token|password|passwd|secret|dsn|key)=[^\s&]+`)
+
 // ToolLog writes one JSON line per agent action. Masking happens here and only
 // here, so no call site has to remember it.
 type ToolLog struct {
@@ -89,7 +92,8 @@ func MaskValue(value any) any {
 	}
 }
 
-// MaskString masks database userinfo inside free text.
+// MaskString masks database userinfo and key=value secrets inside free text.
 func MaskString(text string) string {
-	return userinfoPattern.ReplaceAllString(text, "${1}***@")
+	masked := userinfoPattern.ReplaceAllString(text, "${1}***@")
+	return assignmentPattern.ReplaceAllString(masked, "${1}=***")
 }
