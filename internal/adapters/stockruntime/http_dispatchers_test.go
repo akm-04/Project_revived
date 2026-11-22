@@ -213,6 +213,17 @@ func TestBootstrapDispatcherReturns20018OnlyForCapacity(t *testing.T) {
 	}
 }
 
+func TestBootstrapDispatcherMapsTheLogoutHoldTo20029(t *testing.T) {
+	now := time.Unix(501, 0).UTC()
+	r := env(1, nil, now)
+	r.Envelope.Operation = operation.Context{StartedAt: now}
+	r.Envelope.Params = map[string]any{"sid": "s", "login_token": "l", "region": int64(1)}
+	got := (BootstrapDispatcher{Bootstrap: fakeBootstrap{err: bootstrap.ErrSessionHold}}).Dispatch(context.Background(), r)
+	if got.HTTPStatus != http.StatusConflict || got.Body["error_code"] != int64(20029) || got.Body["error_msg"] != "Server is maintaining, please wait" {
+		t.Fatalf("%+v", got)
+	}
+}
+
 // fakeUpdatePlanner keeps the prelogin shape test independent of the OTA store.
 type fakeUpdatePlanner struct {
 	plan ota.UpdatePlan

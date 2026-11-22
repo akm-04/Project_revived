@@ -1837,9 +1837,11 @@
    "identitylifecycle": [
     "Bounded",
     "NewField",
-    "Refuse"
+    "Refuse",
+    "WithDefault"
    ],
    "operatoragent": [
+    "*Version",
     "MergeModules",
     "NewField",
     "WithEnum"
@@ -1855,7 +1857,8 @@
     "*SaveBulkProgressTx",
     "Bounded",
     "NewField",
-    "Refuse"
+    "Refuse",
+    "WithDefault"
    ],
    "otarelease": [
     "Bounded",
@@ -4829,7 +4832,8 @@
    "operator": [
     "Bounded",
     "NewField",
-    "Refuse"
+    "Refuse",
+    "WithDefault"
    ],
    "store:auditstore": [
     "*InsertTx"
@@ -4840,11 +4844,13 @@
     "*FindProviderBindingTx",
     "*InsertProviderBindingTx",
     "*InsertSessionCredentialTx",
+    "*InsertSessionHoldTx",
     "*InsertSessionTx",
     "*ListLiveSessionIDsTx",
     "*LockAccountTx",
     "*LockLiveContextTx",
     "*LockSessionTx",
+    "*PlayerIDsForSessionIDsTx",
     "*RevokeGameplayCredentialsTx",
     "*RevokeSessionCredentialsTx",
     "*RevokeSessionsTx",
@@ -5489,6 +5495,7 @@
   },
   "operatoragent": {
    "operator": [
+    "*Version",
     "MergeModules",
     "NewField",
     "WithEnum"
@@ -5524,7 +5531,8 @@
     "*SaveBulkProgressTx",
     "Bounded",
     "NewField",
-    "Refuse"
+    "Refuse",
+    "WithDefault"
    ],
    "operatorcatalog": [
     "GrantLine"

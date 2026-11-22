@@ -436,6 +436,7 @@ func main() {
 		OperationBinder:         contentstore.Store{},
 		DetailContributors:      []appboot.MID1DetailContributor{appdorm.GlueBootstrap{Owner: dormstore.Store{}}, appi5.AwakeningBootstrap{Owner: i5svc}, appi5.SignInBootstrap{Owner: i5svc}, appi5.MissionBootstrap{Owner: i5svc}, commerceprivilege.BootstrapProjection{Provider: privileges}, i5store.BootstrapProjection{Display: displayService, Content: contentstore.Store{Queryer: pool}, Privileges: privileges, MaxHeroColor: maxHeroColorPolicy, Spirit: spiritSvc, BackpackSort: heroDB}, activitystore.BootstrapProjection{Directory: activityDirectory}, guildprojection.BootstrapProjection{}, guildprojection.TeaProjection{}, mentorstore.BootstrapProjection{Service: mentorSvc}, heroBootstrap, librarystore.BootstrapProjection{Service: librarySvc}, bookstore.BootstrapProjection{Service: bookSvc, Content: contentDB}, coursestore.BootstrapProjection{Service: courseSvc, Content: contentDB}, characterstore.PetBootstrapProjection{Content: contentDB}, characterstore.SavedPresetBootstrapProjection{}, conquerstore.BootstrapProjection{Content: contentDB}, campaignWorld, vending, appmarch.Mode{Store: marchstore.Store{}, Roster: heroBootstrap}, apppetcampaign.Mode{Store: petcampaignstore.Store{}}, appgodstrial.Mode{Store: godstrialstore.Store{}}, appworldboss.Mode{Store: worldbossstore.Store{}}, appadventure.Mode{Store: adventurestore.Store{}, Content: contentDB, Functions: i5db, Directory: i4store.PlayerDirectoryReader{}}, appcompat.BootstrapProjection{Store: compatstore.Store{}}, achievementstore.BootstrapProjection{Store: achievementstore.Store{}, Content: contentDB, Active: contentDB}, herorecommendstore.BootstrapProjection{Service: heroRecommend}},
 		DirectoryReconciler:     appdir.Reconciler{Source: i5db, Sink: i4store.DirectoryLevelProjection{}},
+		SessionHolds:            identitystore.Store{},
 	}
 	authority := i4store.RealtimeAuthority{Queryer: pool, DigestSecret: digestSecret, BearerSecret: bearerSecret, DerivationKeyID: keyID, BearerKeys: bearerKeys}
 	itemsEnergy := stockruntime.NewItemsEnergyComposition(stockruntime.ItemsEnergyDependencies{
@@ -562,7 +563,7 @@ func main() {
 	operatorVersionReply := func(ctx context.Context) (any, error) {
 		return operatorVersion.Version(ctx)
 	}
-	logoutCommands := appidentity.LogoutCommands{Store: identitystore.Store{}}
+	logoutCommands := appidentity.LogoutCommands{Store: identitystore.Store{}, DefaultHoldSeconds: appidentity.SessionHoldSecondsTunable()}
 	grantCommands := operatorgrant.Commands{Catalogue: operatorCatalogue, Store: operatorstore.Store{}, Directory: i4store.PlayerDirectoryReader{}, Grants: i5svc, LineCap: grantLineCap}
 	mailCommands := operatorgrant.MailCommands{Catalogue: operatorCatalogue, Store: operatorstore.Store{}, Directory: i4store.PlayerDirectoryReader{}, Mail: i5svc, LineCap: grantLineCap}
 	redeemCommands := operatorgrant.RedeemCommands{Catalogue: operatorCatalogue, Redeem: i5svc, LineCap: grantLineCap}

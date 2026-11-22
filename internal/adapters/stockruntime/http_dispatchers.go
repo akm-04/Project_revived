@@ -264,6 +264,11 @@ func bootstrapFailure(err error) httpedge.Response {
 		// message.lua 20003 is the login-failed row; its non-empty text opens the
 		// client's restart alert, which is the correct recovery for bad credentials.
 		return failureReply(sessionFailure())
+	case errors.Is(err, appboot.ErrSessionHold):
+		// message.lua row 20029 shows "Server is maintaining, please wait" in the
+		// login-failed alert; the client then exits, which is the intended relogin
+		// recovery after an operator logout hold (G11; not 20003).
+		return failureReply(refusalWithBody(int64(20029), map[string]any{"error_msg": "Server is maintaining, please wait"}))
 	case errors.Is(err, logicalserver.ErrObservationRequired):
 		return failureReply(refusal(unprovenRefusalCode))
 	case errors.Is(err, logicalserver.ErrExistingLoginClosed):

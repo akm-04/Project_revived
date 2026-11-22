@@ -283,7 +283,11 @@ func failureReply(failure *classifiedFailure) httpedge.Response {
 			body[key] = value
 		}
 		body["error_code"] = failure.code
-		body["error_msg"] = ""
+		// A refusal normally carries no client text; the few rows the client shows
+		// verbatim (for example message.lua 20029) pass their text explicitly.
+		if _, present := body["error_msg"]; !present {
+			body["error_msg"] = ""
+		}
 		return httpedge.Response{HTTPStatus: http.StatusConflict, Cause: failure.cause, Body: body}
 	case failureUnavailable:
 		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: failure.cause, Body: map[string]any{"error_code": serverBusyCode, "error_msg": ""}}

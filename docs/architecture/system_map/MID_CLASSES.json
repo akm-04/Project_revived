@@ -6,12 +6,12 @@
    "isolation": [
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 298,
+     "line": 299,
      "value": "serializable"
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 986,
+     "line": 1000,
      "value": "repeatable_read"
     }
    ],
@@ -19,35 +19,35 @@
    "read_only": [
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 298,
+     "line": 299,
      "value": "false"
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 986,
+     "line": 1000,
      "value": "true"
     }
    ],
    "receipt_writes": [
-    "internal/adapters/postgres/i4store/bootstrap_runtime.go:441"
+    "internal/adapters/postgres/i4store/bootstrap_runtime.go:455"
    ],
    "retry": [
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 298,
+     "line": 299,
      "value": "6"
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 986,
+     "line": 1000,
      "value": "1"
     }
    ],
    "state_writes": [
     "internal/adapters/postgres/clientlogstore/store.go:21",
     "internal/adapters/postgres/dailyresetstore/store.go:36",
-    "internal/adapters/postgres/i4store/bootstrap_runtime.go:822",
-    "internal/adapters/postgres/i4store/bootstrap_runtime.go:852",
+    "internal/adapters/postgres/i4store/bootstrap_runtime.go:836",
+    "internal/adapters/postgres/i4store/bootstrap_runtime.go:866",
     "internal/adapters/postgres/i4store/directory_level_projection.go:66"
    ],
    "system": "bootstrap",
@@ -56,7 +56,7 @@
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
      "function": "BootstrapService.MID1",
      "isolation": "serializable",
-     "line": 298,
+     "line": 299,
      "read_only": "false",
      "retry": "6"
     },
@@ -64,7 +64,7 @@
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
      "function": "BootstrapService.readMID1Reply",
      "isolation": "repeatable_read",
-     "line": 986,
+     "line": 1000,
      "read_only": "true",
      "retry": "1"
     }
@@ -87,23 +87,33 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 516,
+     "line": 530,
      "statement": "SELECT credential_id::text,session_id::text,kind,digest,issued_at,expires_at,revoked_at FROM account_session_credentials WHERE digest=$1"
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 724,
+     "line": 738,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 734,
+     "line": 748,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1 FOR SHARE"
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 734,
+     "line": 748,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1 FOR UPDATE"
+    },
+    {
+     "file": "internal/adapters/postgres/identitystore/holds.go",
+     "line": 25,
+     "statement": "SELECT 1 FROM operator_session_holds WHERE held_until > $3 AND (scope_kind='global' OR (scope_kind='server' AND scope_key=$1) OR (scope_kind='player' AND scope_key=$2)))"
+    },
+    {
+     "file": "internal/adapters/postgres/identitystore/holds.go",
+     "line": 25,
+     "statement": "SELECT EXISTS("
     },
     {
      "file": "internal/adapters/postgres/kernelstore/store.go",
@@ -120,11 +130,11 @@
     "FANOUT Claims has 29 implementers, not followed: achievementstore.BootstrapProjection.Claims, activitystore.BootstrapProjection.Claims, adventure.Mode.Claims, bookstore.BootstrapProjection.Claims, campaign.Mode.Claims, characterstore.HeroBootstrapProjection.Claims, characterstore.PetBootstrapProjection.Claims, characterstore.SavedPresetBootstrapProjection.Claims, commerceprivilege.BootstrapProjection.Claims, compat.BootstrapProjection.Claims, conquerstore.BootstrapProjection.Claims, coursestore.BootstrapProjection.Claims, dormhouse.GlueBootstrap.Claims, godstrial.Mode.Claims, guildprojection.BootstrapProjection.Claims, guildprojection.TeaProjection.Claims, heroassets.Bootstrap.Claims, herorecommendstore.BootstrapProjection.Claims, i5.AwakeningBootstrap.Claims, i5.MissionBootstrap.Claims, i5.SignInBootstrap.Claims, i5store.BootstrapProjection.Claims, itemsenergy.Bootstrap.Claims, librarystore.BootstrapProjection.Claims, march.Mode.Claims, mentorstore.BootstrapProjection.Claims, petcampaign.Mode.Claims, summon.Mode.Claims, worldboss.Mode.Claims at internal/application/bootstrap/detail_contributor.go:40",
     "FANOUT Name has 19 implementers, not followed: achievementstore.BootstrapContributor.Name, bookstore.BootstrapContributor.Name, characterbirth.BirthCompanion.Name, characterstore.BootstrapContributor.Name, characterstore.PetBootstrapContributor.Name, characterstore.PracticeBootstrapContributor.Name, characterstore.SavedPresetBootstrapContributor.Name, conquerstore.BootstrapContributor.Name, coursestore.BootstrapContributor.Name, dormstore.BootstrapContributor.Name, elementstore.BootstrapContributor.Name, i5store.EconomyOwnerBootstrapContributor.Name, i5store.FunctionBirthContributor.Name, i5store.InscriptionCertificateBootstrap.Name, i5store.PlayerCoreBootstrapContributor.Name, inscriptionstore.BootstrapContributor.Name, librarystore.BootstrapContributor.Name, rankingstore.BootstrapContributor.Name, spiritstore.BootstrapContributor.Name at internal/application/bootstrap/persistence_contributor.go:36",
     "FANOUT Name has 19 implementers, not followed: achievementstore.BootstrapContributor.Name, bookstore.BootstrapContributor.Name, characterbirth.BirthCompanion.Name, characterstore.BootstrapContributor.Name, characterstore.PetBootstrapContributor.Name, characterstore.PracticeBootstrapContributor.Name, characterstore.SavedPresetBootstrapContributor.Name, conquerstore.BootstrapContributor.Name, coursestore.BootstrapContributor.Name, dormstore.BootstrapContributor.Name, elementstore.BootstrapContributor.Name, i5store.EconomyOwnerBootstrapContributor.Name, i5store.FunctionBirthContributor.Name, i5store.InscriptionCertificateBootstrap.Name, i5store.PlayerCoreBootstrapContributor.Name, inscriptionstore.BootstrapContributor.Name, librarystore.BootstrapContributor.Name, rankingstore.BootstrapContributor.Name, spiritstore.BootstrapContributor.Name at internal/application/bootstrap/persistence_contributor.go:63",
-    "FANOUT Name has 29 implementers, not followed: achievementstore.BootstrapProjection.Name, activitystore.BootstrapProjection.Name, adventure.Mode.Name, bookstore.BootstrapProjection.Name, campaign.Mode.Name, characterstore.HeroBootstrapProjection.Name, characterstore.PetBootstrapProjection.Name, characterstore.SavedPresetBootstrapProjection.Name, commerceprivilege.BootstrapProjection.Name, compat.BootstrapProjection.Name, conquerstore.BootstrapProjection.Name, coursestore.BootstrapProjection.Name, dormhouse.GlueBootstrap.Name, godstrial.Mode.Name, guildprojection.BootstrapProjection.Name, guildprojection.TeaProjection.Name, heroassets.Bootstrap.Name, herorecommendstore.BootstrapProjection.Name, i5.AwakeningBootstrap.Name, i5.MissionBootstrap.Name, i5.SignInBootstrap.Name, i5store.BootstrapProjection.Name, itemsenergy.Bootstrap.Name, librarystore.BootstrapProjection.Name, march.Mode.Name, mentorstore.BootstrapProjection.Name, petcampaign.Mode.Name, summon.Mode.Name, worldboss.Mode.Name at internal/adapters/postgres/i4store/bootstrap_runtime.go:475",
+    "FANOUT Name has 29 implementers, not followed: achievementstore.BootstrapProjection.Name, activitystore.BootstrapProjection.Name, adventure.Mode.Name, bookstore.BootstrapProjection.Name, campaign.Mode.Name, characterstore.HeroBootstrapProjection.Name, characterstore.PetBootstrapProjection.Name, characterstore.SavedPresetBootstrapProjection.Name, commerceprivilege.BootstrapProjection.Name, compat.BootstrapProjection.Name, conquerstore.BootstrapProjection.Name, coursestore.BootstrapProjection.Name, dormhouse.GlueBootstrap.Name, godstrial.Mode.Name, guildprojection.BootstrapProjection.Name, guildprojection.TeaProjection.Name, heroassets.Bootstrap.Name, herorecommendstore.BootstrapProjection.Name, i5.AwakeningBootstrap.Name, i5.MissionBootstrap.Name, i5.SignInBootstrap.Name, i5store.BootstrapProjection.Name, itemsenergy.Bootstrap.Name, librarystore.BootstrapProjection.Name, march.Mode.Name, mentorstore.BootstrapProjection.Name, petcampaign.Mode.Name, summon.Mode.Name, worldboss.Mode.Name at internal/adapters/postgres/i4store/bootstrap_runtime.go:489",
     "FANOUT Name has 29 implementers, not followed: achievementstore.BootstrapProjection.Name, activitystore.BootstrapProjection.Name, adventure.Mode.Name, bookstore.BootstrapProjection.Name, campaign.Mode.Name, characterstore.HeroBootstrapProjection.Name, characterstore.PetBootstrapProjection.Name, characterstore.SavedPresetBootstrapProjection.Name, commerceprivilege.BootstrapProjection.Name, compat.BootstrapProjection.Name, conquerstore.BootstrapProjection.Name, coursestore.BootstrapProjection.Name, dormhouse.GlueBootstrap.Name, godstrial.Mode.Name, guildprojection.BootstrapProjection.Name, guildprojection.TeaProjection.Name, heroassets.Bootstrap.Name, herorecommendstore.BootstrapProjection.Name, i5.AwakeningBootstrap.Name, i5.MissionBootstrap.Name, i5.SignInBootstrap.Name, i5store.BootstrapProjection.Name, itemsenergy.Bootstrap.Name, librarystore.BootstrapProjection.Name, march.Mode.Name, mentorstore.BootstrapProjection.Name, petcampaign.Mode.Name, summon.Mode.Name, worldboss.Mode.Name at internal/application/bootstrap/detail_contributor.go:32",
     "FANOUT Name has 8 implementers, not followed: achievementstore.NoticeLoginReconciler.Name, i4store.PlayerLoginActivity.Name, i5.AwakeningBootstrap.Name, i5.MailExpiryLoginReconciler.Name, i5.MissionBootstrap.Name, i5.PetStarterLoginReconciler.Name, i5.SignInBootstrap.Name, socialrecall.LoginReconciler.Name at internal/application/bootstrap/login_reconciler.go:29",
     "FANOUT Name has 8 implementers, not followed: achievementstore.NoticeLoginReconciler.Name, i4store.PlayerLoginActivity.Name, i5.AwakeningBootstrap.Name, i5.MailExpiryLoginReconciler.Name, i5.MissionBootstrap.Name, i5.PetStarterLoginReconciler.Name, i5.SignInBootstrap.Name, socialrecall.LoginReconciler.Name at internal/application/bootstrap/login_reconciler.go:49",
-    "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/adapters/postgres/i4store/bootstrap_runtime.go:474",
+    "FANOUT OverlayMID1 has 29 implementers, not followed: achievementstore.BootstrapProjection.OverlayMID1, activitystore.BootstrapProjection.OverlayMID1, adventure.Mode.OverlayMID1, bookstore.BootstrapProjection.OverlayMID1, campaign.Mode.OverlayMID1, characterstore.HeroBootstrapProjection.OverlayMID1, characterstore.PetBootstrapProjection.OverlayMID1, characterstore.SavedPresetBootstrapProjection.OverlayMID1, commerceprivilege.BootstrapProjection.OverlayMID1, compat.BootstrapProjection.OverlayMID1, conquerstore.BootstrapProjection.OverlayMID1, coursestore.BootstrapProjection.OverlayMID1, dormhouse.GlueBootstrap.OverlayMID1, godstrial.Mode.OverlayMID1, guildprojection.BootstrapProjection.OverlayMID1, guildprojection.TeaProjection.OverlayMID1, heroassets.Bootstrap.OverlayMID1, herorecommendstore.BootstrapProjection.OverlayMID1, i5.AwakeningBootstrap.OverlayMID1, i5.MissionBootstrap.OverlayMID1, i5.SignInBootstrap.OverlayMID1, i5store.BootstrapProjection.OverlayMID1, itemsenergy.Bootstrap.OverlayMID1, librarystore.BootstrapProjection.OverlayMID1, march.Mode.OverlayMID1, mentorstore.BootstrapProjection.OverlayMID1, petcampaign.Mode.OverlayMID1, summon.Mode.OverlayMID1, worldboss.Mode.OverlayMID1 at internal/adapters/postgres/i4store/bootstrap_runtime.go:488",
     "FANOUT PersistCharacterBootstrap has 19 implementers, not followed: achievementstore.BootstrapContributor.PersistCharacterBootstrap, bookstore.BootstrapContributor.PersistCharacterBootstrap, characterbirth.BirthCompanion.PersistCharacterBootstrap, characterstore.BootstrapContributor.PersistCharacterBootstrap, characterstore.PetBootstrapContributor.PersistCharacterBootstrap, characterstore.PracticeBootstrapContributor.PersistCharacterBootstrap, characterstore.SavedPresetBootstrapContributor.PersistCharacterBootstrap, conquerstore.BootstrapContributor.PersistCharacterBootstrap, coursestore.BootstrapContributor.PersistCharacterBootstrap, dormstore.BootstrapContributor.PersistCharacterBootstrap, elementstore.BootstrapContributor.PersistCharacterBootstrap, i5store.EconomyOwnerBootstrapContributor.PersistCharacterBootstrap, i5store.FunctionBirthContributor.PersistCharacterBootstrap, i5store.InscriptionCertificateBootstrap.PersistCharacterBootstrap, i5store.PlayerCoreBootstrapContributor.PersistCharacterBootstrap, inscriptionstore.BootstrapContributor.PersistCharacterBootstrap, librarystore.BootstrapContributor.PersistCharacterBootstrap, rankingstore.BootstrapContributor.PersistCharacterBootstrap, spiritstore.BootstrapContributor.PersistCharacterBootstrap at internal/application/bootstrap/persistence_contributor.go:62",
     "FANOUT ReconcileCharacterLogin has 8 implementers, not followed: achievementstore.NoticeLoginReconciler.ReconcileCharacterLogin, i4store.PlayerLoginActivity.ReconcileCharacterLogin, i5.AwakeningBootstrap.ReconcileCharacterLogin, i5.MailExpiryLoginReconciler.ReconcileCharacterLogin, i5.MissionBootstrap.ReconcileCharacterLogin, i5.PetStarterLoginReconciler.ReconcileCharacterLogin, i5.SignInBootstrap.ReconcileCharacterLogin, socialrecall.LoginReconciler.ReconcileCharacterLogin at internal/application/bootstrap/login_reconciler.go:48",
     "FANOUT Required has 19 implementers, not followed: achievementstore.BootstrapContributor.Required, bookstore.BootstrapContributor.Required, characterbirth.BirthCompanion.Required, characterstore.BootstrapContributor.Required, characterstore.PetBootstrapContributor.Required, characterstore.PracticeBootstrapContributor.Required, characterstore.SavedPresetBootstrapContributor.Required, conquerstore.BootstrapContributor.Required, coursestore.BootstrapContributor.Required, dormstore.BootstrapContributor.Required, elementstore.BootstrapContributor.Required, i5store.EconomyOwnerBootstrapContributor.Required, i5store.FunctionBirthContributor.Required, i5store.InscriptionCertificateBootstrap.Required, i5store.PlayerCoreBootstrapContributor.Required, inscriptionstore.BootstrapContributor.Required, librarystore.BootstrapContributor.Required, rankingstore.BootstrapContributor.Required, spiritstore.BootstrapContributor.Required at internal/application/bootstrap/persistence_contributor.go:47"
@@ -403,7 +413,7 @@
    "isolation": [
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 241,
+     "line": 242,
      "value": "read_committed"
     }
    ],
@@ -411,7 +421,7 @@
    "read_only": [
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 241,
+     "line": 242,
      "value": "false"
     }
    ],
@@ -419,12 +429,12 @@
    "retry": [
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 241,
+     "line": 242,
      "value": "3"
     }
    ],
    "state_writes": [
-    "internal/adapters/postgres/i4store/bootstrap_runtime.go:233"
+    "internal/adapters/postgres/i4store/bootstrap_runtime.go:234"
    ],
    "system": "bootstrap",
    "transactions": [
@@ -432,7 +442,7 @@
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
      "function": "BootstrapService.MID18",
      "isolation": "read_committed",
-     "line": 241,
+     "line": 242,
      "read_only": "false",
      "retry": "3"
     }
@@ -440,12 +450,12 @@
    "unbounded_read": [
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 516,
+     "line": 530,
      "statement": "SELECT credential_id::text,session_id::text,kind,digest,issued_at,expires_at,revoked_at FROM account_session_credentials WHERE digest=$1"
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 620,
+     "line": 634,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'logical_server_id',logical_server_id,'name',name,'first_opened_at',first_opened_at, 'directory_visible',directory_visible,'existing_login_allowed',existing_login_allowed, 'new_character_allowed',new_character_allowed,'next_player_id',next_player_id, 'max_player_id',max_player_id,'state_version',state_version,'created_at',created_at, 'retired_at',retired_at) ORDER BY logical_server_id),'[]'::jsonb)::text FROM logical_servers WHERE directory_visible=true"
     }
    ],
@@ -28575,7 +28585,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 724,
+     "line": 738,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -30862,7 +30872,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 724,
+     "line": 738,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -35882,7 +35892,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 724,
+     "line": 738,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -40458,7 +40468,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 724,
+     "line": 738,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -40864,7 +40874,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 724,
+     "line": 738,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -41010,7 +41020,7 @@
    "unbounded_read": [
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 724,
+     "line": 738,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -49192,7 +49202,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 724,
+     "line": 738,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -50488,7 +50498,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 724,
+     "line": 738,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -80010,7 +80020,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 724,
+     "line": 738,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -80136,7 +80146,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 724,
+     "line": 738,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -80357,7 +80367,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 724,
+     "line": 738,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -80458,7 +80468,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 724,
+     "line": 738,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -80712,7 +80722,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 724,
+     "line": 738,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -80827,7 +80837,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 724,
+     "line": 738,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -81004,7 +81014,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 724,
+     "line": 738,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -81993,7 +82003,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 724,
+     "line": 738,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -95956,7 +95966,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 724,
+     "line": 738,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {
@@ -96032,7 +96042,7 @@
     },
     {
      "file": "internal/adapters/postgres/i4store/bootstrap_runtime.go",
-     "line": 724,
+     "line": 738,
      "statement": "SELECT logical_server_id,name,first_opened_at,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,state_version,created_at,retired_at FROM logical_servers WHERE logical_server_id=$1"
     },
     {

@@ -19,14 +19,31 @@ type fakeLogoutStore struct {
 	live           []identity.SessionID
 	revoked        map[identity.SessionID]bool
 	playerSessions map[identity.PlayerID][]identity.SessionID
+	sessionPlayers map[identity.SessionID]identity.PlayerID
 	serverSessions map[identity.SessionID]identity.LogicalServerID
 	serverFilters  []bool
 	batchSizes     []int
 	reasons        []string
+	holds          []SessionHold
 }
 
 func newFakeLogoutStore() *fakeLogoutStore {
-	return &fakeLogoutStore{revoked: map[identity.SessionID]bool{}, playerSessions: map[identity.PlayerID][]identity.SessionID{}, serverSessions: map[identity.SessionID]identity.LogicalServerID{}}
+	return &fakeLogoutStore{revoked: map[identity.SessionID]bool{}, playerSessions: map[identity.PlayerID][]identity.SessionID{}, sessionPlayers: map[identity.SessionID]identity.PlayerID{}, serverSessions: map[identity.SessionID]identity.LogicalServerID{}}
+}
+
+func (store *fakeLogoutStore) PlayerIDsForSessionIDsTx(_ context.Context, _ tx.Queryer, sessions []identity.SessionID) ([]identity.PlayerID, error) {
+	var out []identity.PlayerID
+	for _, session := range sessions {
+		if player, found := store.sessionPlayers[session]; found {
+			out = append(out, player)
+		}
+	}
+	return out, nil
+}
+
+func (store *fakeLogoutStore) InsertSessionHoldTx(_ context.Context, _ tx.Tx, hold SessionHold) error {
+	store.holds = append(store.holds, hold)
+	return nil
 }
 
 func logoutTestSession(t *testing.T) identity.SessionID {
@@ -107,7 +124,7 @@ func runLogoutHandler(t *testing.T, store *fakeLogoutStore, name, payload string
 	if !ok {
 		t.Fatalf("no handler for %s", name)
 	}
-	command := operator.Command{ModuleCommand: name, Payload: json.RawMessage(payload)}
+	command := operator.Command{ModuleCommand: name, Envelope: operator.Envelope{SemanticKey: "key"}, Payload: json.RawMessage(payload)}
 	value, err := handler(context.Background(), tx.Scope{Tx: &testTx{}, Operation: logoutOperation(t)}, command)
 	if err != nil {
 		return LogoutResult{}, err
@@ -229,6 +246,68 @@ func TestLogoutRefusesAnEmptyOrMalformedTarget(t *testing.T) {
 	}
 	for _, payload := range []string{`{"server_id":0}`, `{"server_id":-1}`, `{"other":1}`} {
 		_, err := runLogoutHandler(t, newFakeLogoutStore(), "session.logout_all", payload)
+		var refusal *operator.Refusal
+		if !errors.As(err, &refusal) || refusal.Code != operator.CodePayloadInvalid {
+			t.Fatalf("payload %s: %v", payload, err)
+		}
+	}
+}
+
+func TestLogoutHoldsThePlayerScopeForTheDefaultFiveSeconds(t *testing.T) {
+	store := newFakeLogoutStore()
+	player := identity.PlayerID(100001)
+	store.playerSessions[player] = []identity.SessionID{logoutTestSession(t)}
+	result, err := runLogoutHandler(t, store, "session.logout", `{"player_ids":[100001],"hold_seconds":5}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Revoked != 1 {
+		t.Fatalf("revoked = %d", result.Revoked)
+	}
+	if len(store.holds) != 1 {
+		t.Fatalf("holds = %+v", store.holds)
+	}
+	hold := store.holds[0]
+	if hold.ScopeKind != HoldScopePlayer || hold.ScopeKey != int64(player) || hold.Reason != identity.RevocationReasonOperatorLogout {
+		t.Fatalf("hold = %+v", hold)
+	}
+	want := logoutOperation(t).StartedAt.Add(5 * time.Second)
+	if !hold.HeldUntil.Equal(want) || hold.CommandKey != "key" {
+		t.Fatalf("hold = %+v want until %s", hold, want)
+	}
+}
+
+func TestLogoutAllHoldsTheServerOrGlobalScope(t *testing.T) {
+	store := newFakeLogoutStore()
+	if _, err := runLogoutHandler(t, store, "session.logout_all", `{"server_id":2,"hold_seconds":7}`); err != nil {
+		t.Fatal(err)
+	}
+	if len(store.holds) != 1 || store.holds[0].ScopeKind != HoldScopeServer || store.holds[0].ScopeKey != 2 {
+		t.Fatalf("server hold = %+v", store.holds)
+	}
+	globalStore := newFakeLogoutStore()
+	if _, err := runLogoutHandler(t, globalStore, "session.logout_all", `{"hold_seconds":7}`); err != nil {
+		t.Fatal(err)
+	}
+	if len(globalStore.holds) != 1 || globalStore.holds[0].ScopeKind != HoldScopeGlobal || globalStore.holds[0].ScopeKey != 0 {
+		t.Fatalf("global hold = %+v", globalStore.holds)
+	}
+}
+
+func TestLogoutHoldSecondsZeroDisablesTheHold(t *testing.T) {
+	store := newFakeLogoutStore()
+	store.playerSessions[identity.PlayerID(100001)] = []identity.SessionID{logoutTestSession(t)}
+	if _, err := runLogoutHandler(t, store, "session.logout", `{"player_ids":[100001],"hold_seconds":0}`); err != nil {
+		t.Fatal(err)
+	}
+	if len(store.holds) != 0 {
+		t.Fatalf("holds = %+v", store.holds)
+	}
+}
+
+func TestLogoutRefusesAHoldOutsideItsBounds(t *testing.T) {
+	for _, payload := range []string{`{"player_ids":[100001],"hold_seconds":-1}`, `{"player_ids":[100001],"hold_seconds":3601}`} {
+		_, err := runLogoutHandler(t, newFakeLogoutStore(), "session.logout", payload)
 		var refusal *operator.Refusal
 		if !errors.As(err, &refusal) || refusal.Code != operator.CodePayloadInvalid {
 			t.Fatalf("payload %s: %v", payload, err)

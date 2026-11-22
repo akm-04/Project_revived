@@ -7,6 +7,8 @@ import (
 	"gxb.local/backend/v2/internal/foundation/operation"
 )
 
+var ErrSessionHold = errors.New("session held after an operator logout")
+
 type MID1Command struct {
 	Account                 identity.Account
 	Session                 identity.Session
