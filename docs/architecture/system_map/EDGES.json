@@ -1347,6 +1347,7 @@
     "*SettleGrantTx"
    ],
    "events": [
+    "*DeliverTx",
     "*FenceActorTx",
     "*SettleGrantTx"
    ],
@@ -3941,6 +3942,7 @@
     "*OwnsOriginTx"
    ],
    "i5": [
+    "*DeliverTx",
     "*FenceActorTx",
     "*SettleGrantTx"
    ],
@@ -3965,10 +3967,14 @@
     "*ClaimOccurrenceTx",
     "*ClaimsForPlayerTx",
     "*CountOccurrenceClaimsTx",
+    "*CycleSlotTakenTx",
     "*DefinitionTx",
+    "*DueOccurrencesAfterTx",
     "*EnsureSettingsTx",
     "*GiftTx",
+    "*HasClaimTx",
     "*InsertClaimTx",
+    "*InsertCycleOccurrenceTx",
     "*InsertDefinitionTx",
     "*InsertOccurrenceTx",
     "*LatestDefinitionTx",
@@ -3976,16 +3982,21 @@
     "*LockOccurrenceSharedTx",
     "*LockOccurrenceTx",
     "*LockOccurrencesTx",
+    "*MarkSettledTx",
     "*OccurrenceClaimsTx",
     "*OccurrenceTx",
     "*OccurrencesTx",
     "*OverlapsTx",
     "*SaveOccurrenceTx",
+    "*SetCycleBodyTx",
+    "*SetCycleModeTx",
     "*UpdateClaimReplyTx"
    ],
    "store:i4store": [
+    "*ListLogicalServersAfterTx",
     "*LockPlayerRootsTx",
-    "*PlayerLevelTx"
+    "*PlayerLevelTx",
+    "*PlayersOfServerAfterTx"
    ]
   },
   "frienddm": {

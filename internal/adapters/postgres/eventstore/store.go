@@ -594,6 +594,24 @@ func (Store) CountOccurrenceClaimsTx(ctx context.Context, query tx.Queryer, occu
 	return count, nil
 }
 
+const claimExists = `SELECT EXISTS(
+	SELECT 1 FROM player_event_claims WHERE player_id=$1 AND occurrence_id=$2 AND tier=$3
+)`
+
+// HasClaimTx reports whether any claim row exists for (player, occurrence,
+// tier), whatever its period. Settlement uses it so a MID 231 claim under a
+// different period can never be paid a second time (E4b decision 1).
+func (Store) HasClaimTx(ctx context.Context, query tx.Queryer, playerID, occurrenceID, tier int64) (bool, error) {
+	if query == nil || playerID <= 0 || occurrenceID <= 0 || tier <= 0 {
+		return false, errInvalid
+	}
+	var claimed bool
+	if err := query.QueryRow(ctx, claimExists, playerID, occurrenceID, tier).Scan(&claimed); err != nil {
+		return false, err
+	}
+	return claimed, nil
+}
+
 const activeHooks = `SELECT COALESCE(jsonb_agg(hook ORDER BY occurrence_id,ordinality),'[]'::jsonb)::text FROM (
 	SELECT o.id AS occurrence_id,h.hook,h.ord AS ordinality
 	FROM event_occurrences o

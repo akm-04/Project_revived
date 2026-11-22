@@ -23,8 +23,8 @@ import (
 // business key is occurrence + player + tier (I11A-2 E3).
 const ClaimPolicyVersion = "I11A_EVENTS_CLAIM_V1"
 
-// ClaimPeriodPermanent is the claim-ledger period of a permanent occurrence
-// (EA-1); a timed TIERED_CLAIM needs its own period policy before it is served.
+// ClaimPeriodPermanent is the one claim-ledger period of every event tier
+// claim, permanent or timed; settlement writes the same period (E4b decision 1).
 const ClaimPeriodPermanent = "permanent"
 
 // ErrClaimRejected is every permanent MID 231 refusal (EA-7). The dispatcher
@@ -80,17 +80,13 @@ type HeroWire func(character.Hero) (map[string]any, error)
 // ClaimService serves MID 231: one generic TIERED_CLAIM path dispatching by
 // archetype (I11A_EVENTS_V1 ruling 12, EA-3, EA-7).
 type ClaimService struct {
-	Runner      tx.Runner
-	Store       Store
-	Fence       ActorFence
-	Players     playerroot.TxLocker
-	Levels      LevelReader
-	Grants      GrantSettler
-	Content     ContentRevision
-	HeroContent HeroContent
-	Heroes      HeroOwner
-	Fragments   HeroFragments
-	HeroWire    HeroWire
+	Runner  tx.Runner
+	Store   Store
+	Fence   ActorFence
+	Players playerroot.TxLocker
+	Levels  LevelReader
+	Content ContentRevision
+	ChoiceGrant
 }
 
 // ClaimResult is the stock MID 231 reply. The client indexes only awards and
@@ -103,8 +99,7 @@ type ClaimResult struct {
 
 func (s ClaimService) ready() bool {
 	return s.Runner.DB != nil && s.Store != nil && s.Fence != nil && s.Players != nil &&
-		s.Levels != nil && s.Grants != nil && s.Content != nil && s.HeroContent != nil &&
-		s.Heroes != nil && s.Fragments != nil && s.HeroWire != nil
+		s.Levels != nil && s.Content != nil && s.ChoiceGrant.ready()
 }
 
 func claimProfile() tx.Profile {
@@ -190,18 +185,12 @@ func (s ClaimService) Claim(ctx context.Context, actor identity.ActorContext, op
 		if !foundLevel || level < tier.Requirement.Value {
 			return claimRejected("the player level requirement is not met")
 		}
-		revision, pinned := op.Policies.Get("content")
-		if !pinned {
-			revision, err = s.Content.ActiveRevision(c, scope.Tx)
-			if err != nil {
-				return err
-			}
-			op.Policies, err = policy.NewSet(append(op.Policies.Refs(), policy.Ref{Name: "content", Version: revision})...)
-			if err != nil {
-				return err
-			}
+		var revision string
+		op, revision, err = pinContentRevision(c, op, s.Content, scope.Tx)
+		if err != nil {
+			return err
 		}
-		awards, err := s.grantChoice(c, scope.Tx, actor, op, occurrence, tier, resolvedChoice, revision)
+		awards, err := s.Grant(c, scope.Tx, actor, op, occurrence, tier, resolvedChoice, revision)
 		if err != nil {
 			return err
 		}
@@ -217,6 +206,21 @@ func (s ClaimService) Claim(ctx context.Context, actor identity.ActorContext, op
 		return ClaimResult{}, err
 	}
 	return out, nil
+}
+
+// pinContentRevision binds the active content revision to the operation, once
+// per operation; MID 231 and settlement share it (I11A-2 E4c).
+func pinContentRevision(ctx context.Context, op operation.Context, content ContentRevision, query tx.Queryer) (operation.Context, string, error) {
+	revision, pinned := op.Policies.Get("content")
+	if pinned {
+		return op, revision, nil
+	}
+	revision, err := content.ActiveRevision(ctx, query)
+	if err != nil {
+		return op, "", err
+	}
+	op.Policies, err = policy.NewSet(append(op.Policies.Refs(), policy.Ref{Name: "content", Version: revision})...)
+	return op, revision, err
 }
 
 func replayStoredClaim(stored Claim, choiceIndex int, out *ClaimResult) error {

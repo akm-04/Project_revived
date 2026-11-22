@@ -27,6 +27,17 @@ func (commands Commands) Module() operator.Module {
 			{Name: "events.end_now", Class: operator.ClassLive, Help: "End a RUNNING or CLAIM_WINDOW occurrence now.", Fields: []operator.Field{occurrenceField()}, Handler: commands.endNowHandler},
 			{Name: "events.extend", Class: operator.ClassLive, Help: "Move the end of a SCHEDULED or RUNNING occurrence.", Fields: []operator.Field{occurrenceField(), operator.NewField("duration", operator.FieldDuration, true, "timed extension, for example 1d")}, Handler: commands.extendHandler},
 			{Name: "events.set_permanent", Class: operator.ClassLive, Help: "Make a SCHEDULED or RUNNING occurrence permanent.", Fields: []operator.Field{occurrenceField()}, Handler: commands.setPermanentHandler},
+			{Name: "events.cycle.mode", Class: operator.ClassLive, Help: "Turn the automatic event cycle on (AUTO) or off (OFF) per server.", Fields: []operator.Field{
+				serversField(),
+				operator.NewField("mode", operator.FieldString, true, "materialiser mode").WithEnum(CycleModeAuto, CycleModeOff),
+			}, Handler: commands.cycleModeHandler},
+			{Name: "events.cycle.set", Class: operator.ClassLive, Help: "Replace the event cycle of servers; the revision must increase.", Fields: []operator.Field{
+				serversField(),
+				operator.NewField("cycle", operator.FieldObject, true, "cycle body with a higher revision"),
+			}, Handler: commands.cycleSetHandler},
+			{Name: "events.cycle.reset", Class: operator.ClassLive, Help: "Reset servers to the factory event cycle.", Fields: []operator.Field{
+				serversField(),
+			}, Handler: commands.cycleResetHandler},
 			{Name: "events.occurrence.show", Class: operator.ClassLive, Help: "Show one occurrence and its claim ledger page.", Fields: []operator.Field{
 				occurrenceField(),
 				operator.NewField("limit", operator.FieldInt, false, "claim page size").Bounded(1, MaxClaimsLimit),
@@ -43,6 +54,10 @@ func (commands Commands) Module() operator.Module {
 			}},
 		},
 	}
+}
+
+func serversField() operator.Field {
+	return operator.NewField("logical_server_ids", operator.FieldArray, true, "one to one hundred servers inside the command scope")
 }
 
 func occurrenceField() operator.Field {

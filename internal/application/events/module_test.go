@@ -82,7 +82,7 @@ func TestEventsListReadRequiresOnlyTheServer(t *testing.T) {
 func TestEventsModuleDeclaresEveryCommand(t *testing.T) {
 	commands := Commands{}
 	module := commands.Module()
-	if len(module.Commands) != 8 {
+	if len(module.Commands) != len(commands.Handlers()) {
 		t.Fatalf("commands = %+v", module.Commands)
 	}
 	for name := range commands.Handlers() {

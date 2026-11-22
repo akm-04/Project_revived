@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"sync"
@@ -28,10 +29,13 @@ import (
 	appevents "gxb.local/backend/v2/internal/application/events"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/operator"
+	domevents "gxb.local/backend/v2/internal/domain/events"
 	"gxb.local/backend/v2/internal/domain/identity"
 	otadomain "gxb.local/backend/v2/internal/domain/otarelease"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"gxb.local/backend/v2/internal/projection/hero"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -44,8 +48,9 @@ func (eventsCoverage) Covers(context.Context, otadomain.CoversRequest) (otadomai
 }
 
 type eventServices struct {
-	claims   appevents.ClaimService
-	activity stockruntime.ActivityDispatcher
+	claims      appevents.ClaimService
+	choiceGrant appevents.ChoiceGrant
+	activity    stockruntime.ActivityDispatcher
 }
 
 func eventFixture(t *testing.T, p *postgres.Pool, a identity.ActorContext) eventServices {
@@ -64,10 +69,10 @@ func eventFixture(t *testing.T, p *postgres.Pool, a identity.ActorContext) event
 		CollectionAdmission: apphero.CatalogCollectionAdmission{Content: content},
 		FreshFacets:         characterbirth.FreshHeroFacets(), Content: content, Progression: content,
 		ProgressionStore: heroDB, Economy: appi5.HeroProgressionDebiter{Store: values, Content: content}}
+	choiceGrant := appevents.ChoiceGrant{HeroContent: content, Heroes: heroSvc, Fragments: content, Grants: i5svc, HeroWire: hero.StockHero}
 	claims := appevents.ClaimService{
 		Runner: runner, Store: eventstore.Store{}, Fence: values, Players: i4store.PlayerRootLocker{},
-		Levels: i4store.PlayerDirectoryReader{}, Grants: i5svc, Content: content,
-		HeroContent: content, Heroes: heroSvc, Fragments: content, HeroWire: hero.StockHero,
+		Levels: i4store.PlayerDirectoryReader{}, Content: content, ChoiceGrant: choiceGrant,
 	}
 	authority := playtestAuthority{a}
 	registrations := appevents.ActivityRegistrations(eventstore.Store{}, p)
@@ -77,8 +82,9 @@ func eventFixture(t *testing.T, p *postgres.Pool, a identity.ActorContext) event
 	}
 	runtime := activitydirectory.Runtime{Directory: activitydirectory.Directory{Registry: registry}, Time: postgres.AuthoritativeTime{Queryer: p}}
 	return eventServices{
-		claims:   claims,
-		activity: stockruntime.ActivityDispatcher{Authority: authority, Service: runtime, Reads: runner, Levels: i4store.PlayerDirectoryReader{}},
+		claims:      claims,
+		choiceGrant: choiceGrant,
+		activity:    stockruntime.ActivityDispatcher{Authority: authority, Service: runtime, Reads: runner, Levels: i4store.PlayerDirectoryReader{}},
 	}
 }
 
@@ -151,7 +157,11 @@ func claimResponse(services eventServices, a identity.ActorContext, tier, choice
 }
 
 func claimRequest(a identity.ActorContext, tier, choice int64) httpedge.DispatchRequest {
-	return playtestRequest(a, 231, map[string]any{"activity_id": int64(1071), "award_id": tier, "sub_award_id": choice})
+	return claimRequestFor(a, 1071, tier, choice)
+}
+
+func claimRequestFor(a identity.ActorContext, activityID, tier, choice int64) httpedge.DispatchRequest {
+	return playtestRequest(a, 231, map[string]any{"activity_id": activityID, "award_id": tier, "sub_award_id": choice})
 }
 
 func dispatchAwards(t *testing.T, services eventServices, a identity.ActorContext, tier, choice int64) (httpedge.Response, []byte) {
@@ -169,11 +179,20 @@ func dispatchAwards(t *testing.T, services eventServices, a identity.ActorContex
 
 func claimTier(t *testing.T, services eventServices, a identity.ActorContext, tier, choice int64) []byte {
 	t.Helper()
-	response, awards := dispatchAwards(t, services, a, tier, choice)
+	return claimActivityTier(t, services, a, 1071, tier, choice)
+}
+
+func claimActivityTier(t *testing.T, services eventServices, a identity.ActorContext, activityID, tier, choice int64) []byte {
+	t.Helper()
+	response := services.rewardFor(a).Dispatch(ctx, claimRequestFor(a, activityID, tier, choice))
 	if response.HTTPStatus != http.StatusOK {
-		t.Fatalf("claim tier %d/%d: %d %#v", tier, choice, response.HTTPStatus, response.Body)
+		t.Fatalf("claim activity %d tier %d/%d: %d %#v", activityID, tier, choice, response.HTTPStatus, response.Body)
 	}
-	return awards
+	raw, err := json.Marshal(response.Body["awards"])
+	if err != nil {
+		t.Fatal(err)
+	}
+	return raw
 }
 
 func requireClaimRefused(t *testing.T, response httpedge.Response) {
@@ -424,6 +443,91 @@ func TestClaimChoiceResolution(t *testing.T) {
 	claimTier(t, services, a, 2, 2)
 }
 
+func deploySingleTier(t *testing.T, p *postgres.Pool, activityID int64) {
+	t.Helper()
+	raw := []byte(fmt.Sprintf(`{"activity_id":%d,"revision":1,"archetype":"TIERED_CLAIM","client_requirements":{},"default_days":-1,"tiers":[`+
+		`{"id":1,"requirement":{"kind":"player_level","value":10},"choices":[{"lines":[{"kind":"item","item_id":50001003,"amount":1}]}]}]}`, activityID))
+	key, err := ids.NewUUID()
+	if err != nil {
+		t.Fatal(err)
+	}
+	command, err := operator.NewCommand("events.definition.deploy", operator.Envelope{Principal: "root", Role: operator.RoleRoot, Scope: "global", Reason: "i11a e4b settlement native", SemanticKey: key.String()}, json.RawMessage(raw))
+	if err != nil {
+		t.Fatal(err)
+	}
+	outcome, err := eventOperatorBus(t, p).Execute(ctx, command)
+	if err != nil || outcome.State != operator.StateApplied {
+		t.Fatalf("deploy %d: %v %s %s", activityID, err, outcome.State, outcome.Result)
+	}
+}
+
+func settlementJobs(p *postgres.Pool, at time.Time, grant appevents.ChoiceGrant) appevents.Jobs {
+	return appevents.Jobs{
+		Runner:          tx.Runner{DB: p},
+		Operations:      operation.Factory{Clock: clock.Fixed{T: at}},
+		Store:           eventstore.Store{},
+		Clock:           clock.Fixed{T: at},
+		Players:         i4store.EventPlayerSource{},
+		Mail:            appi5.SettlementMail{Store: i5store.Store{}},
+		Content:         contentstore.Store{Queryer: p},
+		ClaimGrant:      grant,
+		OccurrenceBatch: 10,
+	}
+}
+
+// TestSettlementDoesNotPayAClaimedTierTwice covers E4b decision 1: a MID 231
+// claim inside the claim window and the settlement job share one claim period,
+// so settlement finds the claim and grants nothing a second time.
+func TestSettlementDoesNotPayAClaimedTierTwice(t *testing.T) {
+	p := pool(t)
+	installed(t, p)
+	exec(t, p, `DELETE FROM player_event_claims WHERE occurrence_id IN (SELECT id FROM event_occurrences WHERE activity_id=$1)`, int64(2099))
+	exec(t, p, `DELETE FROM event_occurrences WHERE activity_id=$1`, int64(2099))
+	a := bornActorOn(t, p, 3)
+	exec(t, p, `UPDATE player_directory_profiles SET lev=50 WHERE player_id=$1`, int64(a.PlayerID))
+	services := eventFixture(t, p, a)
+	deploySingleTier(t, p, 2099)
+	occurrence := scheduleOccurrence(t, p, int64(a.LogicalServerID), 2099, time.Now().UTC().Add(-25*time.Hour), "1d")
+	if occurrence.ClaimUntil == nil || !occurrence.ClaimUntil.After(time.Now().UTC()) {
+		t.Fatalf("the occurrence must be in its claim window: %+v", occurrence)
+	}
+	claimActivityTier(t, services, a, 2099, 1, 1)
+	due := occurrence.ClaimUntil.Add(time.Hour)
+	stored, err := (eventstore.Store{}).OccurrenceTx(ctx, p, occurrence.ID)
+	if err != nil || stored == nil {
+		t.Fatalf("read the occurrence: %v", err)
+	}
+	current, err := (operation.Factory{Clock: clock.Fixed{T: due}}).New(policy.Set{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := settlementJobs(p, due, services.choiceGrant).SettleOccurrence(ctx, current, *stored, due); err != nil {
+		t.Fatal(err)
+	}
+	var claims int
+	if err := p.QueryRow(ctx, `SELECT COUNT(*) FROM player_event_claims WHERE player_id=$1 AND occurrence_id=$2 AND tier=1`, int64(a.PlayerID), occurrence.ID).Scan(&claims); err != nil {
+		t.Fatal(err)
+	}
+	if claims != 1 {
+		t.Fatalf("one claim row expected, got %d", claims)
+	}
+	var mails int
+	if err := p.QueryRow(ctx, `SELECT COUNT(*) FROM mail_records WHERE source_kind=$1 AND recipient_player_id=$2 AND source_key=$3`,
+		appevents.SettlementMailSourceKind, int64(a.PlayerID), fmt.Sprintf("%d:%d:1", occurrence.ID, int64(a.PlayerID))).Scan(&mails); err != nil {
+		t.Fatal(err)
+	}
+	if mails != 0 {
+		t.Fatalf("a claimed tier must not be mailed again, got %d", mails)
+	}
+	var settled *time.Time
+	if err := p.QueryRow(ctx, `SELECT settled_at FROM event_occurrences WHERE id=$1`, occurrence.ID).Scan(&settled); err != nil {
+		t.Fatal(err)
+	}
+	if settled == nil {
+		t.Fatal("the occurrence must be settled after the claim window closes")
+	}
+}
+
 func activityRow(t *testing.T, services eventServices, a identity.ActorContext) string {
 	t.Helper()
 	response := services.activityFor(a).Dispatch(ctx, playtestRequest(a, 234, map[string]any{"activity_id": int64(1071)}))
@@ -497,4 +601,223 @@ func scalarAmount(t *testing.T, p *postgres.Pool, a identity.ActorContext, key s
 		t.Fatal(err)
 	}
 	return amount
+}
+
+const (
+	settlementHeroItem = int64(10001034)
+	settlementItem     = int64(50001003)
+)
+
+func deployTierDefinition(t *testing.T, p *postgres.Pool, activityID int64, tiers string) {
+	t.Helper()
+	raw := []byte(fmt.Sprintf(`{"activity_id":%d,"revision":1,"archetype":"TIERED_CLAIM","client_requirements":{},"default_days":-1,"tiers":[%s]}`, activityID, tiers))
+	key, err := ids.NewUUID()
+	if err != nil {
+		t.Fatal(err)
+	}
+	command, err := operator.NewCommand("events.definition.deploy", operator.Envelope{Principal: "root", Role: operator.RoleRoot, Scope: "global", Reason: "i11a e4c settlement native", SemanticKey: key.String()}, json.RawMessage(raw))
+	if err != nil {
+		t.Fatal(err)
+	}
+	outcome, err := eventOperatorBus(t, p).Execute(ctx, command)
+	if err != nil || outcome.State != operator.StateApplied {
+		t.Fatalf("deploy %d: %v %s %s", activityID, err, outcome.State, outcome.Result)
+	}
+}
+
+func resetEventActivity(t *testing.T, p *postgres.Pool, activityID int64) {
+	t.Helper()
+	exec(t, p, `DELETE FROM player_event_claims WHERE occurrence_id IN (SELECT id FROM event_occurrences WHERE activity_id=$1)`, activityID)
+	exec(t, p, `DELETE FROM event_occurrences WHERE activity_id=$1`, activityID)
+	exec(t, p, `DELETE FROM event_definitions WHERE activity_id=$1`, activityID)
+}
+
+func readEventOccurrence(t *testing.T, p *postgres.Pool, occurrenceID int64) *domevents.Occurrence {
+	t.Helper()
+	stored, err := (eventstore.Store{}).OccurrenceTx(ctx, p, occurrenceID)
+	if err != nil || stored == nil {
+		t.Fatalf("read occurrence %d: %v", occurrenceID, err)
+	}
+	return stored
+}
+
+func settleStoredOccurrence(t *testing.T, p *postgres.Pool, services eventServices, occurrence domevents.Occurrence, at time.Time) {
+	t.Helper()
+	current, err := (operation.Factory{Clock: clock.Fixed{T: at}}).New(policy.Set{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := settlementJobs(p, at, services.choiceGrant).SettleOccurrence(ctx, current, occurrence, at); err != nil {
+		t.Fatalf("settle occurrence %d: %v", occurrence.ID, err)
+	}
+}
+
+func settlementSourceKeyFor(occurrenceID int64, player identity.PlayerID, tier int64) string {
+	return fmt.Sprintf("%d:%d:%d", occurrenceID, int64(player), tier)
+}
+
+func countSettlementMail(t *testing.T, p *postgres.Pool, player identity.PlayerID, key string) int64 {
+	t.Helper()
+	return scalar(t, p, `SELECT count(*) FROM mail_records WHERE recipient_player_id=$1 AND source_kind=$2 AND source_key=$3`,
+		int64(player), appevents.SettlementMailSourceKind, key)
+}
+
+// TestSettlementGrantsAnUnclaimedHeroTierDirectly covers E4c: system mail
+// cannot carry a hero, so the tier settles through the MID 231 grant.
+func TestSettlementGrantsAnUnclaimedHeroTierDirectly(t *testing.T) {
+	p := pool(t)
+	installed(t, p)
+	server := nativeServer(t, p)
+	const activityID = int64(2201)
+	resetEventActivity(t, p, activityID)
+	a := bornActorOn(t, p, server)
+	exec(t, p, `UPDATE player_directory_profiles SET lev=50 WHERE player_id=$1`, int64(a.PlayerID))
+	services := eventFixture(t, p, a)
+	deployTierDefinition(t, p, activityID, fmt.Sprintf(`{"id":1,"requirement":{"kind":"player_level","value":10},"choices":[{"lines":[{"kind":"hero","item_id":%d,"amount":1}]}]}`, settlementHeroItem))
+	occurrence := scheduleOccurrence(t, p, int64(server), activityID, time.Now().UTC().Add(-25*time.Hour), "1d")
+	stored := readEventOccurrence(t, p, occurrence.ID)
+	settleStoredOccurrence(t, p, services, *stored, stored.ClaimUntil.Add(time.Hour))
+
+	if owned := scalar(t, p, `SELECT count(*) FROM player_heroes WHERE player_id=$1`, int64(a.PlayerID)); owned != 1 {
+		t.Fatalf("hero rows = %d, want one", owned)
+	}
+	if claims := scalar(t, p, `SELECT count(*) FROM player_event_claims WHERE player_id=$1 AND occurrence_id=$2 AND tier=1`, int64(a.PlayerID), occurrence.ID); claims != 1 {
+		t.Fatalf("claim rows = %d, want one", claims)
+	}
+	if mails := scalar(t, p, `SELECT count(*) FROM mail_records WHERE recipient_player_id=$1 AND source_kind=$2`, int64(a.PlayerID), appevents.SettlementMailSourceKind); mails != 0 {
+		t.Fatalf("a hero tier must not be mailed, got %d", mails)
+	}
+	if settled := scalar(t, p, `SELECT count(*) FROM event_occurrences WHERE id=$1 AND settled_at IS NOT NULL`, occurrence.ID); settled != 1 {
+		t.Fatal("the occurrence must settle after its hero tier is granted")
+	}
+}
+
+// TestSettlementConvertsAnOwnedHeroToFragments covers the item-box duplicate
+// rule shared with MID 231: a second hero grant becomes its stone.
+func TestSettlementConvertsAnOwnedHeroToFragments(t *testing.T) {
+	p := pool(t)
+	revision := installed(t, p)
+	server := nativeServer(t, p)
+	const firstActivity, secondActivity = int64(2202), int64(2203)
+	resetEventActivity(t, p, firstActivity)
+	resetEventActivity(t, p, secondActivity)
+	a := bornActorOn(t, p, server)
+	exec(t, p, `UPDATE player_directory_profiles SET lev=50 WHERE player_id=$1`, int64(a.PlayerID))
+	services := eventFixture(t, p, a)
+	tiers := fmt.Sprintf(`{"id":1,"requirement":{"kind":"player_level","value":10},"choices":[{"lines":[{"kind":"hero","item_id":%d,"amount":1}]}]}`, settlementHeroItem)
+	deployTierDefinition(t, p, firstActivity, tiers)
+	deployTierDefinition(t, p, secondActivity, tiers)
+
+	first := scheduleOccurrence(t, p, int64(server), firstActivity, time.Now().UTC().Add(-25*time.Hour), "1d")
+	firstStored := readEventOccurrence(t, p, first.ID)
+	settleStoredOccurrence(t, p, services, *firstStored, firstStored.ClaimUntil.Add(time.Hour))
+	second := scheduleOccurrence(t, p, int64(server), secondActivity, time.Now().UTC().Add(-25*time.Hour), "1d")
+	secondStored := readEventOccurrence(t, p, second.ID)
+	settleStoredOccurrence(t, p, services, *secondStored, secondStored.ClaimUntil.Add(time.Hour))
+
+	if owned := scalar(t, p, `SELECT count(*) FROM player_heroes WHERE player_id=$1`, int64(a.PlayerID)); owned != 1 {
+		t.Fatalf("hero rows = %d, want one", owned)
+	}
+	policy, err := (contentstore.Store{Queryer: p}).HeroNormalSummonTx(ctx, p, revision, settlementHeroItem)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fragments, err := (contentstore.Store{Queryer: p}).HeroFragmentsTx(ctx, p, revision, policy.Template.OriginTableID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	stone := fragments[0]
+	if got := stackQuantity(t, p, a.PlayerID, stone); got != fragments[1] {
+		t.Fatalf("stone %d = %d, want %d", stone, got, fragments)
+	}
+	if claims := scalar(t, p, `SELECT count(*) FROM player_event_claims WHERE player_id=$1 AND occurrence_id IN ($2,$3)`, int64(a.PlayerID), first.ID, second.ID); claims != 2 {
+		t.Fatalf("claim rows = %d, want one per occurrence", claims)
+	}
+	if mails := scalar(t, p, `SELECT count(*) FROM mail_records WHERE recipient_player_id=$1 AND source_kind=$2`, int64(a.PlayerID), appevents.SettlementMailSourceKind); mails != 0 {
+		t.Fatalf("hero tiers must not be mailed, got %d", mails)
+	}
+}
+
+// TestSettlementMailsItemTiersAndGrantsHeroTiers covers E4c's mixed definition:
+// the item-only tier keeps system mail, the hero tier grants directly.
+func TestSettlementMailsItemTiersAndGrantsHeroTiers(t *testing.T) {
+	p := pool(t)
+	installed(t, p)
+	server := nativeServer(t, p)
+	const activityID = int64(2204)
+	resetEventActivity(t, p, activityID)
+	a := bornActorOn(t, p, server)
+	exec(t, p, `UPDATE player_directory_profiles SET lev=50 WHERE player_id=$1`, int64(a.PlayerID))
+	services := eventFixture(t, p, a)
+	deployTierDefinition(t, p, activityID, fmt.Sprintf(`{"id":1,"requirement":{"kind":"player_level","value":10},"choices":[{"lines":[{"kind":"item","item_id":%d,"amount":3}]}]},{"id":2,"requirement":{"kind":"player_level","value":20},"choices":[{"lines":[{"kind":"hero","item_id":%d,"amount":1}]}]}`, settlementItem, settlementHeroItem))
+	occurrence := scheduleOccurrence(t, p, int64(server), activityID, time.Now().UTC().Add(-25*time.Hour), "1d")
+	stored := readEventOccurrence(t, p, occurrence.ID)
+	settleStoredOccurrence(t, p, services, *stored, stored.ClaimUntil.Add(time.Hour))
+
+	if claims := scalar(t, p, `SELECT count(*) FROM player_event_claims WHERE player_id=$1 AND occurrence_id=$2`, int64(a.PlayerID), occurrence.ID); claims != 2 {
+		t.Fatalf("claim rows = %d, want one per tier", claims)
+	}
+	if mails := countSettlementMail(t, p, a.PlayerID, settlementSourceKeyFor(occurrence.ID, a.PlayerID, 1)); mails != 1 {
+		t.Fatalf("item tier mail = %d, want one", mails)
+	}
+	if mails := countSettlementMail(t, p, a.PlayerID, settlementSourceKeyFor(occurrence.ID, a.PlayerID, 2)); mails != 0 {
+		t.Fatalf("hero tier mail = %d, want none", mails)
+	}
+	if owned := scalar(t, p, `SELECT count(*) FROM player_heroes WHERE player_id=$1 AND table_id=$2`, int64(a.PlayerID), settlementHeroItem); owned != 1 {
+		t.Fatalf("hero rows = %d, want one", owned)
+	}
+	if granted := stackQuantity(t, p, a.PlayerID, settlementItem); granted != 0 {
+		t.Fatalf("the item tier must wait in mail, got %d granted", granted)
+	}
+}
+
+// TestSettlementRerunGrantsNothingMore covers E4c's idempotency: rerunning the
+// settlement of the same occurrence changes no ledger, mail or inventory row.
+func TestSettlementRerunGrantsNothingMore(t *testing.T) {
+	p := pool(t)
+	revision := installed(t, p)
+	server := nativeServer(t, p)
+	const activityID = int64(2205)
+	resetEventActivity(t, p, activityID)
+	a := bornActorOn(t, p, server)
+	exec(t, p, `UPDATE player_directory_profiles SET lev=50 WHERE player_id=$1`, int64(a.PlayerID))
+	services := eventFixture(t, p, a)
+	deployTierDefinition(t, p, activityID, fmt.Sprintf(`{"id":1,"requirement":{"kind":"player_level","value":10},"choices":[{"lines":[{"kind":"item","item_id":%d,"amount":3}]}]},{"id":2,"requirement":{"kind":"player_level","value":20},"choices":[{"lines":[{"kind":"hero","item_id":%d,"amount":1}]}]}`, settlementItem, settlementHeroItem))
+	occurrence := scheduleOccurrence(t, p, int64(server), activityID, time.Now().UTC().Add(-25*time.Hour), "1d")
+	stored := readEventOccurrence(t, p, occurrence.ID)
+	at := stored.ClaimUntil.Add(time.Hour)
+	settleStoredOccurrence(t, p, services, *stored, at)
+
+	policy, err := (contentstore.Store{Queryer: p}).HeroNormalSummonTx(ctx, p, revision, settlementHeroItem)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fragments, err := (contentstore.Store{Queryer: p}).HeroFragmentsTx(ctx, p, revision, policy.Template.OriginTableID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	stone := fragments[0]
+	claimsBefore := scalar(t, p, `SELECT count(*) FROM player_event_claims WHERE player_id=$1 AND occurrence_id=$2`, int64(a.PlayerID), occurrence.ID)
+	mailsBefore := scalar(t, p, `SELECT count(*) FROM mail_records WHERE recipient_player_id=$1 AND source_kind=$2`, int64(a.PlayerID), appevents.SettlementMailSourceKind)
+	heroesBefore := scalar(t, p, `SELECT count(*) FROM player_heroes WHERE player_id=$1`, int64(a.PlayerID))
+	stonesBefore := stackQuantity(t, p, a.PlayerID, stone)
+	itemsBefore := stackQuantity(t, p, a.PlayerID, settlementItem)
+
+	settleStoredOccurrence(t, p, services, *stored, at)
+
+	if claims := scalar(t, p, `SELECT count(*) FROM player_event_claims WHERE player_id=$1 AND occurrence_id=$2`, int64(a.PlayerID), occurrence.ID); claims != claimsBefore {
+		t.Fatalf("claims %d -> %d after a rerun", claimsBefore, claims)
+	}
+	if mails := scalar(t, p, `SELECT count(*) FROM mail_records WHERE recipient_player_id=$1 AND source_kind=$2`, int64(a.PlayerID), appevents.SettlementMailSourceKind); mails != mailsBefore {
+		t.Fatalf("mails %d -> %d after a rerun", mailsBefore, mails)
+	}
+	if heroes := scalar(t, p, `SELECT count(*) FROM player_heroes WHERE player_id=$1`, int64(a.PlayerID)); heroes != heroesBefore {
+		t.Fatalf("heroes %d -> %d after a rerun", heroesBefore, heroes)
+	}
+	if stones := stackQuantity(t, p, a.PlayerID, stone); stones != stonesBefore {
+		t.Fatalf("stone %d -> %d after a rerun", stonesBefore, stones)
+	}
+	if items := stackQuantity(t, p, a.PlayerID, settlementItem); items != itemsBefore {
+		t.Fatalf("item %d -> %d after a rerun", itemsBefore, items)
+	}
 }

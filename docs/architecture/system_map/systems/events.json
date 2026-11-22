@@ -150,6 +150,7 @@
    "gxb_content_hero_templates",
    "gxb_content_resource_definitions",
    "gxb_content_revisions",
+   "logical_servers",
    "player_directory_profiles",
    "player_event_claims",
    "players"
@@ -168,7 +169,9 @@
   "scenarios_naming": [],
   "unit": [
    "activity_test.go",
+   "claim_grant_test.go",
    "commands_test.go",
+   "jobs_native_test.go",
    "module_test.go"
   ]
  }

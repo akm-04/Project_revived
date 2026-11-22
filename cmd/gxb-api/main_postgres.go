@@ -154,6 +154,7 @@ import (
 	appspirit "gxb.local/backend/v2/internal/application/spirit"
 	appsummon "gxb.local/backend/v2/internal/application/summon"
 	appworldboss "gxb.local/backend/v2/internal/application/worldboss"
+	eventscontent "gxb.local/backend/v2/internal/content/events"
 	"gxb.local/backend/v2/internal/content/guildcampaigncatalog"
 	"gxb.local/backend/v2/internal/content/guildcampaignpolicy"
 	"gxb.local/backend/v2/internal/content/guildpolicy"
@@ -586,6 +587,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("operator modules: %v", err)
 	}
+	defaultCycle, err := domainevents.ParseCycle(eventscontent.DefaultCycle())
+	if err != nil {
+		log.Fatalf("events default cycle: %v", err)
+	}
+	eventJobs := appevents.Jobs{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: eventstore.Store{}, Coverage: otaServing, Hooks: eventHooks, Clock: clock.System{}, DefaultCycle: defaultCycle, Servers: i4store.PlayerRootLocker{}, Players: i4store.EventPlayerSource{}, Mail: appi5.SettlementMail{Store: i5db}, Content: contentDB, ClaimGrant: appevents.ChoiceGrant{HeroContent: contentDB, Heroes: heroSvc, Fragments: contentDB, Grants: i5svc, HeroWire: heroproj.StockHero}}
+	startEventsJobs(ctx, pool, eventJobs)
 	startOperator(ctx, runner, registry.Handlers(), registry.Reads(), registry.Modules(), operatorVersionReply, otaAfterCommit{Root: cfg.OTARoot, ReconcileSettings: otaSettingsSync.Reconcile, Serving: otaServing})
 	startOperatorBulkJob(ctx, pool, operatorgrant.Applier{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: operatorstore.Store{}, Grants: i5svc, Mail: i5svc, Catalogue: operatorCatalogue, LineCap: grantLineCap})
 	clientLogs, journal := startClientLog(ctx, pool, authority, cfg.ClientLogURL, retentionPolicies.RetentionDays, txMetrics, mux, handlerConcurrency("GXB_CLIENT_LOG_MAX_CONCURRENT", 4, poolConnections))
@@ -995,8 +1002,8 @@ func main() {
 	}
 	eventClaims := appevents.ClaimService{
 		Runner: runner, Store: eventstore.Store{}, Fence: i5db, Players: i4store.PlayerRootLocker{},
-		Levels: i4store.PlayerDirectoryReader{}, Grants: i5svc, Content: contentDB,
-		HeroContent: contentDB, Heroes: heroSvc, Fragments: contentDB, HeroWire: heroproj.StockHero,
+		Levels: i4store.PlayerDirectoryReader{}, Content: contentDB,
+		ChoiceGrant: appevents.ChoiceGrant{HeroContent: contentDB, Heroes: heroSvc, Fragments: contentDB, Grants: i5svc, HeroWire: heroproj.StockHero},
 	}
 	eventRewardD := stockruntime.ActivityRewardDispatcher{Authority: authority, Service: eventClaims}
 	for _, mid := range stockruntime.ActivityRewardMIDs {

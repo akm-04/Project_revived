@@ -28,6 +28,9 @@ func (commands Commands) Handlers() map[string]operator.Handler {
 		"events.extend":            commands.extendHandler,
 		"events.set_permanent":     commands.setPermanentHandler,
 		"events.occurrence.show":   commands.occurrenceShowHandler,
+		"events.cycle.mode":        commands.cycleModeHandler,
+		"events.cycle.set":         commands.cycleSetHandler,
+		"events.cycle.reset":       commands.cycleResetHandler,
 	}
 }
 
