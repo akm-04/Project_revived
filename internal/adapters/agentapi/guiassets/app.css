@@ -11,9 +11,46 @@
 }
 
 .login {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.login .card {
+  width: 100%;
   max-width: 420px;
-  margin: 10vh auto 0;
-  padding: 0 16px;
+}
+
+.account-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.account-modal .card {
+  width: 100%;
+  max-width: 420px;
+}
+
+#account-menu {
+  position: relative;
+}
+
+#account-dropdown:not([hidden]) {
+  display: block;
+  position: absolute;
+  right: 0;
+  top: 100%;
 }
 
 form label,

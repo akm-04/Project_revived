@@ -370,6 +370,9 @@ function runAgentRoute(name, payload, reason, semanticKey) {
 
 function showReply(output, reply, semanticKey) {
   output.replaceChildren();
+  if (reply.unauthorized) {
+    return;
+  }
   const meta = paragraph("hint", "HTTP " + reply.status + (semanticKey ? " | semantic_key " + semanticKey : ""));
   output.append(meta);
   const raw = document.createElement("pre");
@@ -385,6 +388,9 @@ async function pollOperation(operationID, output) {
   for (;;) {
     await delay(operationPollMilliseconds);
     const reply = await request("/agent/v1/ops/" + encodeURIComponent(operationID));
+    if (reply.unauthorized) {
+      return;
+    }
     showReply(output, reply);
     const operationState = reply.body && typeof reply.body === "object" ? reply.body.state : "";
     if (operationState === "DONE" || operationState === "FAILED" || !reply.ok) {

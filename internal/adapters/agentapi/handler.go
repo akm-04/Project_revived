@@ -27,6 +27,7 @@ const (
 	setupPath         = "/agent/v1/setup"
 	loginPath         = "/agent/v1/login"
 	logoutPath        = "/agent/v1/logout"
+	passwordPath      = "/agent/v1/password"
 	backendStartPath  = "/agent/v1/backend/start"
 	backendStopPath   = "/agent/v1/backend/stop"
 	backendStatusPath = "/agent/v1/backend/status"
@@ -79,6 +80,11 @@ type sessionReply struct {
 
 type passwordRequest struct {
 	Password string `json:"password"`
+}
+
+type passwordChangeRequest struct {
+	Current string `json:"current"`
+	New     string `json:"new"`
 }
 
 type closedRequest struct {
@@ -141,6 +147,8 @@ func (handler Handler) ServeHTTP(writer http.ResponseWriter, request *http.Reque
 		handler.Sessions.Logout(token)
 		handler.record("logout", "session", "ok", nil)
 		writeJSON(writer, http.StatusOK, map[string]string{"state": "logged out"})
+	case request.URL.Path == passwordPath && request.Method == http.MethodPost:
+		handler.servePasswordChange(writer, request)
 	case request.URL.Path == backendStartPath && request.Method == http.MethodPost:
 		handler.serveBackendStart(writer, request)
 	case request.URL.Path == backendStopPath && request.Method == http.MethodPost:
@@ -204,8 +212,17 @@ func bearer(request *http.Request) string {
 	return presented
 }
 
+// authorized also checks the password generation, so a change or an offline
+// reset refuses every token minted before it.
 func (handler Handler) authorized(token string) bool {
-	return token != "" && handler.Sessions.Authorize(token)
+	if token == "" {
+		return false
+	}
+	generation, err := handler.Credentials.Generation()
+	if err != nil {
+		return false
+	}
+	return handler.Sessions.Authorize(token, generation)
 }
 
 func (handler Handler) serveSetup(writer http.ResponseWriter, request *http.Request) {
@@ -236,13 +253,34 @@ func (handler Handler) serveLogin(writer http.ResponseWriter, request *http.Requ
 		handler.writeAgentError(writer, "login", err)
 		return
 	}
-	token, expiresAt, err := handler.Sessions.Login()
+	generation, err := handler.Credentials.Generation()
+	if err != nil {
+		handler.writeAgentError(writer, "login", err)
+		return
+	}
+	token, expiresAt, err := handler.Sessions.Login(generation)
 	if err != nil {
 		handler.writeAgentError(writer, "login", err)
 		return
 	}
 	handler.record("login", "session", "ok", map[string]any{"expires_at": expiresAt})
 	writeJSON(writer, http.StatusOK, sessionReply{Token: token, ExpiresAt: expiresAt})
+}
+
+// servePasswordChange replaces the root password and, through the new
+// generation, ends every live session on its next request (design A.1).
+func (handler Handler) servePasswordChange(writer http.ResponseWriter, request *http.Request) {
+	var body passwordChangeRequest
+	if err := decodeBody(writer, request, maxBodyBytes, &body); err != nil {
+		handler.writeBodyError(writer, err)
+		return
+	}
+	if err := handler.Credentials.ChangePassword(body.Current, body.New); err != nil {
+		handler.writeAgentError(writer, "account.password", err)
+		return
+	}
+	handler.record("account", "password changed", "ok", nil)
+	writeJSON(writer, http.StatusOK, map[string]string{"state": "password changed"})
 }
 
 func (handler Handler) serveBackendStart(writer http.ResponseWriter, request *http.Request) {

@@ -25,6 +25,8 @@ func runClientCommand(root, command string, remaining []string) error {
 		return runLogin(root)
 	case "logout":
 		return runLogout(root)
+	case "reset-password":
+		return runResetPassword(root)
 	case "backend":
 		return runBackend(root, remaining)
 	case "cmd":
@@ -94,6 +96,28 @@ func runLogin(root string) error {
 		return err
 	}
 	fmt.Printf("logged in; the session expires at %s\n", reply.ExpiresAt.Format(time.RFC3339))
+	return nil
+}
+
+// runResetPassword changes the root password by writing the root folder file
+// directly: a forgotten password never needs the agent or a network path. The
+// new generation ends every live agent session on its next request (design A.2).
+func runResetPassword(root string) error {
+	password, err := readPassword("New password: ")
+	if err != nil {
+		return err
+	}
+	confirmation, err := readPassword("Repeat password: ")
+	if err != nil {
+		return err
+	}
+	if password != confirmation {
+		return errors.New("the passwords do not match")
+	}
+	if err := operatoragent.NewCredentials(root).ResetPassword(password); err != nil {
+		return err
+	}
+	fmt.Println("the root password was reset; every agent session ends on its next request")
 	return nil
 }
 

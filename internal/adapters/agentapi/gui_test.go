@@ -214,6 +214,29 @@ func TestSameOriginBrowserRequestIsAllowed(t *testing.T) {
 	}
 }
 
+func TestGUIIndexHasTheAccountMenuPasswordModalAndLogout(t *testing.T) {
+	contents, err := guiAssets.ReadFile("guiassets/index.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	index := string(contents)
+	for _, identifier := range []string{
+		`id="account-menu"`,
+		`id="account-button"`,
+		`id="change-password-button"`,
+		`id="logout-button"`,
+		`id="password-modal"`,
+		`id="password-form"`,
+		`id="current-password"`,
+		`id="new-password"`,
+		`id="repeat-password"`,
+	} {
+		if !strings.Contains(index, identifier) {
+			t.Fatalf("index.html lacks %s", identifier)
+		}
+	}
+}
+
 func TestEmbeddedGUIBuildsEveryModuleCommandAndRead(t *testing.T) {
 	scripts := guiScriptFiles(t)
 	fragments := []string{

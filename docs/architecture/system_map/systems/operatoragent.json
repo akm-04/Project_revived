@@ -36,6 +36,7 @@
    "modules_test.go",
    "operations_test.go",
    "otabuild_test.go",
+   "password_test.go",
    "sessions_test.go",
    "toollog_test.go"
   ]
