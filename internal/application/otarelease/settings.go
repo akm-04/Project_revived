@@ -153,11 +153,11 @@ func SettingsSetHandler(file SettingsFile, live *SettingsValue, store SettingsSt
 		if file.Root == "" {
 			return nil, operator.Refuse(CodeRootUnavailable, "the OTA root is not configured", nil)
 		}
-		var next domain.Settings
+		next := domain.DefaultSettings()
 		decoder := json.NewDecoder(bytes.NewReader(command.Payload))
 		decoder.DisallowUnknownFields()
 		if err := decoder.Decode(&next); err != nil {
-			return nil, operator.Refuse(operator.CodePayloadInvalid, "the payload must be {lazy_fetch, res_path}", nil)
+			return nil, operator.Refuse(operator.CodePayloadInvalid, "the payload must be {lazy_fetch, res_path, download_base_seconds, download_min_kib_per_second, cache_max_age_seconds, serving_refresh_seconds, volume_mb}", nil)
 		}
 		var trailing any
 		if err := decoder.Decode(&trailing); !errors.Is(err, io.EOF) {

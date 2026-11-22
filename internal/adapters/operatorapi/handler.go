@@ -8,7 +8,6 @@ import (
 	"crypto/subtle"
 	"encoding/json"
 	"errors"
-	"io"
 	"log"
 	"net"
 	"net/http"
@@ -16,6 +15,7 @@ import (
 	"strings"
 
 	"gxb.local/backend/v2/internal/application/operator"
+	"gxb.local/backend/v2/internal/application/operatoragent"
 )
 
 const (
@@ -24,10 +24,11 @@ const (
 	versionPath   = "/operator/v1/version"
 	// ota.register_build carries the release manifest: one row per shipped file, about 3 MB for the
 	// full 1.631 res set. The listener is loopback-only and token-gated, so the cap only bounds a bug.
-	maxRequestBody = 32 << 20
+	maxRequestBody = operator.MaxCommandBodyBytes
 
 	codeUnauthorized = "OPERATOR_UNAUTHORIZED"
 	codeBadRequest   = "OPERATOR_BAD_REQUEST"
+	codeBodyTooLarge = "OPERATOR_BODY_TOO_LARGE"
 	codeUnavailable  = "OPERATOR_UNAVAILABLE"
 	codeFailed       = "OPERATOR_FAILED"
 	codeUnknownRead  = "OPERATOR_UNKNOWN_READ"
@@ -149,10 +150,16 @@ func (handler Handler) serveRead(writer http.ResponseWriter, request *http.Reque
 
 func (handler Handler) serveCommand(writer http.ResponseWriter, httpRequest *http.Request, name string) {
 	var body request
-	decoder := json.NewDecoder(io.LimitReader(httpRequest.Body, maxRequestBody))
+	decoder := json.NewDecoder(http.MaxBytesReader(writer, httpRequest.Body, maxRequestBody))
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&body); err != nil {
-		writeError(writer, http.StatusBadRequest, codeBadRequest, "the body must be {envelope, payload}")
+		writeBodyRefusal(writer, err)
+		return
+	}
+	// The trailing-data check reads past the JSON value, so a body whose value
+	// ends early but whose tail runs over the cap still refuses as 413.
+	if err := operatoragent.EnsureEndOfFile(decoder); err != nil {
+		writeBodyRefusal(writer, err)
 		return
 	}
 	command, err := operator.NewCommand(name, body.Envelope, body.Payload)
@@ -174,6 +181,17 @@ func (handler Handler) serveCommand(writer http.ResponseWriter, httpRequest *htt
 		log.Printf("operator command %s failed: %v", name, err)
 		writeError(writer, http.StatusInternalServerError, codeFailed, "the command failed; operator.audit.list shows its state; send the same command again with the same key")
 	}
+}
+
+// writeBodyRefusal answers an oversized body with 413 and every other decoder
+// error, including trailing data, with the existing invalid-body 400.
+func writeBodyRefusal(writer http.ResponseWriter, err error) {
+	var tooLarge *http.MaxBytesError
+	if errors.As(err, &tooLarge) {
+		writeError(writer, http.StatusRequestEntityTooLarge, codeBodyTooLarge, "the body exceeds 32 MiB")
+		return
+	}
+	writeError(writer, http.StatusBadRequest, codeBadRequest, "the body must be {envelope, payload}")
 }
 
 // writeOutcome answers a stored REFUSED result with 409 too, so a replayed

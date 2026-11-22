@@ -49,6 +49,8 @@ func runAgent(root string, args []string) error {
 		OperatorAddr: config.Backend.OperatorAddr,
 		OTARoot:      config.OTARoot,
 		LogPath:      filepath.Join(logsDirectory, operatoragent.BackendLogFileName),
+		ReadyTimeout: config.Backend.ReadyTimeout(),
+		StopGrace:    config.Backend.StopGrace(),
 	})
 	operator := operatorclient.New(config.Backend.OperatorAddr, tokens)
 	backendGuard := &operatoragent.BackendGuard{}

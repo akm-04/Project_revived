@@ -1,9 +1,45 @@
 package otarelease
 
 import (
+	"context"
 	"fmt"
 	"testing"
+
+	domain "gxb.local/backend/v2/internal/domain/otarelease"
+	"gxb.local/backend/v2/internal/foundation/clock"
+	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/tx"
 )
+
+type fakeStatusStore struct {
+	snapshot StatusSnapshot
+}
+
+func (store fakeStatusStore) ReadStatusTx(context.Context, tx.Queryer) (StatusSnapshot, error) {
+	return store.snapshot, nil
+}
+
+func TestStatusReportsTheEffectiveSettings(t *testing.T) {
+	effective := domain.DefaultSettings()
+	effective.DownloadBaseSeconds = 12
+	effective.VolumeMB = 7
+	service := StatusService{
+		Runner:     tx.Runner{DB: fakeDB{}},
+		Operations: operation.Factory{Clock: clock.System{}},
+		Store:      fakeStatusStore{},
+		Live:       NewSettingsValue(effective),
+	}
+	status, err := service.Status(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if status.Settings != effective {
+		t.Fatalf("settings=%+v want=%+v", status.Settings, effective)
+	}
+	if status.Settings.DownloadBaseSeconds != 12 || status.Settings.VolumeMB != 7 {
+		t.Fatalf("settings=%+v", status.Settings)
+	}
+}
 
 func statusVersion(index int) string { return fmt.Sprintf("1.640.%d", index+1) }
 
