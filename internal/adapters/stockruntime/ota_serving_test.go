@@ -166,6 +166,70 @@ func TestOTAResHandlerServesIndexedAssetAndRefusesUnknown(t *testing.T) {
 	}
 }
 
+func TestOTADownloadWriteDeadlineFollowsSize(t *testing.T) {
+	now := time.Unix(1_000, 0)
+	if got := downloadWriteDeadline(now, 0).Sub(now); got != downloadBaseWriteDeadline {
+		t.Fatalf("empty deadline=%s want=%s", got, downloadBaseWriteDeadline)
+	}
+	if got := downloadWriteDeadline(now, downloadBytesPerSecond).Sub(now); got != downloadBaseWriteDeadline+time.Second {
+		t.Fatalf("32 KiB deadline=%s", got)
+	}
+	huge := int64(99_000_000)
+	want := downloadBaseWriteDeadline + time.Duration(huge)*time.Second/downloadBytesPerSecond
+	if got := downloadWriteDeadline(now, huge).Sub(now); got != want {
+		t.Fatalf("99 MB deadline=%s want=%s", got, want)
+	}
+	if !downloadWriteDeadline(now, huge).After(downloadWriteDeadline(now, downloadBytesPerSecond)) {
+		t.Fatal("the deadline does not grow with the size")
+	}
+}
+
+type deadlineRecorder struct {
+	*httptest.ResponseRecorder
+	set      bool
+	deadline time.Time
+}
+
+func (r *deadlineRecorder) SetWriteDeadline(deadline time.Time) error {
+	r.set = true
+	r.deadline = deadline
+	return nil
+}
+
+func TestOTAHandlersReplaceTheSharedWriteDeadline(t *testing.T) {
+	rows := []domain.RawRelease{otaRow(t, "1.631.1", domain.LaneAssets, domain.StateActive, 20)}
+	harness := newOTAHarness(t, rows, domain.LazyFetchOn)
+	cases := []struct {
+		name    string
+		handler http.Handler
+		target  string
+	}{
+		{"updates", OTAUpdatesGET{Serving: harness.serving}, "/updates/assets/" + otaVolumeName("1.631.1")},
+		{"res", OTAResGET{Serving: harness.serving}, "/res/a.png." + otaMD5(harness.asset)},
+	}
+	for _, test := range cases {
+		writer := &deadlineRecorder{ResponseRecorder: httptest.NewRecorder()}
+		test.handler.ServeHTTP(writer, httptest.NewRequest(http.MethodGet, test.target, nil))
+		if writer.Code != http.StatusOK {
+			t.Fatalf("%s status=%d", test.name, writer.Code)
+		}
+		if !writer.set || writer.deadline.IsZero() {
+			t.Fatalf("%s did not set a write deadline", test.name)
+		}
+	}
+}
+
+func TestOTAResHandlerRefusesWhenLazyFetchIsOff(t *testing.T) {
+	rows := []domain.RawRelease{otaRow(t, "1.631.1", domain.LaneAssets, domain.StateActive, 20)}
+	harness := newOTAHarness(t, rows, domain.LazyFetchOff)
+	handler := OTAResGET{Serving: harness.serving}
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/res/a.png."+otaMD5(harness.asset), nil))
+	if response.Code != http.StatusNotFound {
+		t.Fatalf("lazy_fetch off status=%d", response.Code)
+	}
+}
+
 func TestPreloginDiscoveryAdvertisesResOnlyWhenLazyFetchIsEffective(t *testing.T) {
 	at := time.Unix(1, 0)
 	discovery := func(resourceURL func(context.Context) (string, error)) httpedge.Response {

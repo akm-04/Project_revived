@@ -1,13 +1,44 @@
 package stockruntime
 
 import (
+	"io"
 	"log"
 	"net/http"
 	"path"
 	"strings"
+	"time"
 
 	appotarelease "gxb.local/backend/v2/internal/application/otarelease"
 )
+
+const (
+	downloadBaseWriteDeadline = 35 * time.Second
+	downloadBytesPerSecond    = 32 * 1024
+)
+
+// downloadWriteDeadline replaces the shared server's 35 s WriteTimeout: the
+// body gets the base window plus one second per 32 KiB (OA-4).
+func downloadWriteDeadline(now time.Time, size int64) time.Time {
+	if size < 0 {
+		size = 0
+	}
+	return now.Add(downloadBaseWriteDeadline + time.Duration(size)*time.Second/downloadBytesPerSecond)
+}
+
+func bodySize(file io.ReadSeeker) int64 {
+	size, err := file.Seek(0, io.SeekEnd)
+	if err != nil {
+		return 0
+	}
+	if _, err := file.Seek(0, io.SeekStart); err != nil {
+		return 0
+	}
+	return size
+}
+
+func setDownloadWriteDeadline(writer http.ResponseWriter, file io.ReadSeeker) {
+	_ = http.NewResponseController(writer).SetWriteDeadline(downloadWriteDeadline(time.Now(), bodySize(file)))
+}
 
 // OTAUpdatesGET serves /updates/<lane>/<file> (I11A_OTA_RELEASE_V1 ruling 6).
 // Only a volume named by an ACTIVE release is opened; everything else is 404.
@@ -42,6 +73,7 @@ func (h OTAUpdatesGET) ServeHTTP(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 	defer file.Close()
+	setDownloadWriteDeadline(writer, file)
 	writer.Header().Set("X-Content-Type-Options", "nosniff")
 	http.ServeContent(writer, request, parts[1], modified, file)
 }
@@ -78,6 +110,7 @@ func (h OTAResGET) ServeHTTP(writer http.ResponseWriter, request *http.Request) 
 		return
 	}
 	defer file.Close()
+	setDownloadWriteDeadline(writer, file)
 	writer.Header().Set("X-Content-Type-Options", "nosniff")
 	http.ServeContent(writer, request, path.Base(resourcePath), modified, file)
 }

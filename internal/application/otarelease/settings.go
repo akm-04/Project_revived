@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"sync"
@@ -41,7 +42,14 @@ func (f SettingsFile) Load() (domain.Settings, error) {
 	if err != nil {
 		return domain.Settings{}, err
 	}
-	return domain.ParseSettings(data)
+	settings, err := domain.ParseSettings(data)
+	if err != nil {
+		return domain.Settings{}, err
+	}
+	if settings.ResPath != "" && !readableDirectory(settings.ResPath) {
+		log.Printf("ota settings res_path %s is not a readable folder", settings.ResPath)
+	}
+	return settings, nil
 }
 
 // Save replaces the file atomically: a temp file in the same folder then a

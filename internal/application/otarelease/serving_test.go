@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -250,6 +251,105 @@ func TestServingResDownloadURLRules(t *testing.T) {
 	assets.serving.Settings = noPath
 	if url, err := assets.serving.ResDownloadURL(context.Background()); err != nil || url != "" {
 		t.Fatalf("no res_path url=%q err=%v", url, err)
+	}
+}
+
+func TestServingResDownloadURLRequiresIndexAndReadablePath(t *testing.T) {
+	assets := newServingFixture(t, servingRow(t, "1.631.1", domain.LaneAssets, 12, []string{"src_64/app/a.lua"}), []byte("asset"))
+	assets.serving.Settings = NewSettingsValue(domain.Settings{LazyFetch: domain.LazyFetchAuto, ResPath: assets.res})
+	if url, err := assets.serving.ResDownloadURL(context.Background()); err != nil || url != "https://engine.example/res/" {
+		t.Fatalf("with sidecar url=%q err=%v", url, err)
+	}
+
+	sidecar := filepath.Join(assets.root, "updates", "assets", strings.TrimSuffix(volumeName("1.631.1"), ".001")+".res.json")
+	if err := os.Remove(sidecar); err != nil {
+		t.Fatal(err)
+	}
+	if err := assets.serving.Refresh(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if url, err := assets.serving.ResDownloadURL(context.Background()); err != nil || url != "" {
+		t.Fatalf("missing sidecar url=%q err=%v", url, err)
+	}
+
+	moved := newServingFixture(t, servingRow(t, "1.631.2", domain.LaneAssets, 12, []string{"src_64/app/a.lua"}), []byte("asset"))
+	moved.serving.Settings = NewSettingsValue(domain.Settings{LazyFetch: domain.LazyFetchAuto, ResPath: moved.res})
+	if err := os.Rename(moved.res, moved.res+"-moved"); err != nil {
+		t.Fatal(err)
+	}
+	if err := moved.serving.Refresh(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if url, err := moved.serving.ResDownloadURL(context.Background()); err != nil || url != "" {
+		t.Fatalf("moved res_path url=%q err=%v", url, err)
+	}
+}
+
+func TestServingOpenResourceRefusesWhenLazyFetchIsOff(t *testing.T) {
+	fixture := newServingFixture(t, servingRow(t, "1.631.1", domain.LaneAssets, 12, []string{"src_64/app/a.lua"}), []byte("asset"))
+	fixture.serving.Settings = NewSettingsValue(domain.Settings{LazyFetch: domain.LazyFetchOff, ResPath: fixture.res})
+	if _, _, _, servable, err := fixture.serving.OpenResource(context.Background(), fixture.assetKey); err != nil || servable {
+		t.Fatalf("lazy_fetch off served the asset: servable=%v err=%v", servable, err)
+	}
+}
+
+func TestServingVerifiedMD5EvictsOneEntryAndKeepsHits(t *testing.T) {
+	fixture := newServingFixture(t, servingRow(t, "1.631.1", domain.LaneAssets, 12, []string{"src_64/app/a.lua"}), []byte("asset"))
+	assetPath := filepath.Join(fixture.res, "res", "web", "a.png")
+	file, err := os.Open(assetPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+	info, err := file.Stat()
+	if err != nil {
+		t.Fatal(err)
+	}
+	serving := fixture.serving
+	serving.md5Cache = map[md5CacheKey]string{}
+	for index := range maxMD5CacheEntries {
+		serving.md5Cache[md5CacheKey{path: fmt.Sprintf("filler-%d", index)}] = "filler"
+	}
+	want := md5Hex(fixture.asset)
+	if got, err := serving.verifiedMD5(file, assetPath, info); err != nil || got != want {
+		t.Fatalf("first digest=%q err=%v want=%q", got, err, want)
+	}
+	if len(serving.md5Cache) != maxMD5CacheEntries {
+		t.Fatalf("cache cleared wholesale: entries=%d want=%d", len(serving.md5Cache), maxMD5CacheEntries)
+	}
+	if again, err := serving.verifiedMD5(file, assetPath, info); err != nil || again != want {
+		t.Fatalf("cached digest=%q err=%v want=%q", again, err, want)
+	}
+	if len(serving.md5Cache) != maxMD5CacheEntries {
+		t.Fatalf("hit changed the cache size: entries=%d", len(serving.md5Cache))
+	}
+}
+
+func TestServingOpenResourceRejectsSymlinkEscape(t *testing.T) {
+	fixture := newServingFixture(t, servingRow(t, "1.631.1", domain.LaneAssets, 12, []string{"src_64/app/a.lua"}), []byte("asset"))
+	secret := []byte("outside-the-res-folder")
+	outsideDirectory := t.TempDir()
+	outsidePath := filepath.Join(outsideDirectory, "secret.png")
+	if err := os.WriteFile(outsidePath, secret, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	linkPath := filepath.Join(fixture.res, "res", "web", "escape.png")
+	if err := os.Symlink(outsidePath, linkPath); err != nil {
+		t.Fatal(err)
+	}
+	sidecar, err := json.Marshal(map[string]any{"entries": []resAsset{{Path: "res/web/escape.png", MD5: md5Hex(secret), Size: int64(len(secret))}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	sidecarPath := filepath.Join(fixture.root, "updates", "assets", strings.TrimSuffix(volumeName("1.631.1"), ".001")+".res.json")
+	if err := os.WriteFile(sidecarPath, sidecar, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := fixture.serving.Refresh(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, _, servable, err := fixture.serving.OpenResource(context.Background(), "escape.png."+md5Hex(secret)); err != nil || servable {
+		t.Fatalf("symlink escape served: servable=%v err=%v", servable, err)
 	}
 }
 

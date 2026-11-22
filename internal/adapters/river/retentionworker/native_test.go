@@ -14,6 +14,64 @@ import (
 	"gxb.local/backend/v2/internal/testsupport/latency"
 )
 
+// TestNativeOTAPurgeUsesFixedFifteenDayWindow runs the production rules with a
+// 7-day GXB_RETENTION_DAYS equivalent: a 10-day-old OTA row must survive,
+// because OA-5 fixes the two OTA observability tables at 15 days.
+func TestNativeOTAPurgeUsesFixedFifteenDayWindow(t *testing.T) {
+	dsn := os.Getenv("GXB_I11A_L2_DSN")
+	if dsn == "" {
+		t.Skip("GXB_I11A_L2_DSN required (ops/testing/fresh_db.sh i11a_l2_ota_purge)")
+	}
+	ctx := context.Background()
+	pool, err := pg.Open(ctx, dsn, pg.PoolSettings{MaxConns: 4, MaxConnLifetime: time.Hour, MaxConnIdleTime: time.Minute, HealthCheckPeriod: time.Minute, ApplicationName: "i11a-l2-ota-purge"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer pool.Close()
+	prefix := "i11a_l2_purge_"
+	clean := func() {
+		_, _ = pool.Raw().Exec(ctx, `DELETE FROM ota_asset_misses WHERE path LIKE $1`, prefix+"%")
+		_, _ = pool.Raw().Exec(ctx, `DELETE FROM ota_asset_served_daily WHERE path LIKE $1`, prefix+"%")
+	}
+	clean()
+	t.Cleanup(clean)
+	now := time.Now().UTC()
+	oldPath := prefix + "old.png"
+	middlePath := prefix + "middle.png"
+	newPath := prefix + "new.png"
+	if _, err := pool.Raw().Exec(ctx, `INSERT INTO ota_asset_misses(path,md5,first_seen,last_seen,hits) VALUES
+($1,'',$2,$2,1),($3,'',$4,$4,1),($5,'',$6,$6,1)`,
+		oldPath, now.Add(-20*24*time.Hour), middlePath, now.Add(-10*24*time.Hour), newPath, now.Add(-2*24*time.Hour)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := pool.Raw().Exec(ctx, `INSERT INTO ota_asset_served_daily(path,day,hits) VALUES
+($1,($2::timestamptz - interval '20 days')::date,1),
+($3,($2::timestamptz - interval '10 days')::date,1),
+($4,($2::timestamptz - interval '2 days')::date,1)`, oldPath, now, middlePath, newPath); err != nil {
+		t.Fatal(err)
+	}
+	policies := retentionstore.Policies{RetentionDays: 7, CacheRetentionDays: 7, RunBudget: time.Minute, ProfileMediaHistoryDays: 7}
+	sweeper := Sweeper{Begin: pool.Begin, Rules: NewRules(policies), Budget: time.Minute, Now: func() time.Time { return now }, Logf: t.Logf}
+	sweeper.Run(ctx)
+
+	countRows := func(query string) (oldCount, middleCount, newCount int64) {
+		for path, count := range map[string]*int64{oldPath: &oldCount, middlePath: &middleCount, newPath: &newCount} {
+			if err := pool.Raw().QueryRow(ctx, query, path).Scan(count); err != nil {
+				t.Fatal(err)
+			}
+		}
+		return oldCount, middleCount, newCount
+	}
+	oldMisses, middleMisses, newMisses := countRows(`SELECT count(*) FROM ota_asset_misses WHERE path=$1`)
+	if oldMisses != 0 || middleMisses != 1 || newMisses != 1 {
+		t.Fatalf("misses old=%d middle=%d new=%d want 0/1/1", oldMisses, middleMisses, newMisses)
+	}
+	oldServed, middleServed, newServed := countRows(`SELECT count(*) FROM ota_asset_served_daily WHERE path=$1`)
+	if oldServed != 0 || middleServed != 1 || newServed != 1 {
+		t.Fatalf("served old=%d middle=%d new=%d want 0/1/1", oldServed, middleServed, newServed)
+	}
+}
+
 // U2/A-039: the sweep must delete replay-only receipts faster than the 200 per
 // second the API can create at full load. Seed 50 000 aged receipts and require
 // at least 400 deletes per second.

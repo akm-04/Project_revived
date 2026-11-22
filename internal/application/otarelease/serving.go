@@ -64,10 +64,12 @@ type resSidecar struct {
 }
 
 type servingSnapshot struct {
-	volumes      map[domain.Lane]map[string]struct{}
-	resources    map[string][]resAsset
-	assetsActive bool
-	active       domain.ActiveRelease
+	volumes            map[domain.Lane]map[string]struct{}
+	resources          map[string][]resAsset
+	assetsActive       bool
+	assetsIndexEntries int
+	resPathUsable      bool
+	active             domain.ActiveRelease
 }
 
 type md5CacheKey struct {
@@ -111,10 +113,18 @@ func (s *Serving) Refresh(ctx context.Context) error {
 		for _, volume := range release.Volumes {
 			names[volume.Name] = struct{}{}
 		}
+		added := s.addSidecar(snapshot, release)
 		if release.Lane == domain.LaneAssets {
 			snapshot.assetsActive = true
+			snapshot.assetsIndexEntries += added
 		}
-		s.addSidecar(snapshot, release)
+	}
+	if resPath := s.resPath(); resPath != "" {
+		if readableDirectory(resPath) {
+			snapshot.resPathUsable = true
+		} else {
+			s.logResPathOnce(resPath)
+		}
 	}
 	s.mu.Lock()
 	s.snapshot = snapshot
@@ -123,9 +133,9 @@ func (s *Serving) Refresh(ctx context.Context) error {
 	return nil
 }
 
-func (s *Serving) addSidecar(snapshot *servingSnapshot, release domain.Release) {
+func (s *Serving) addSidecar(snapshot *servingSnapshot, release domain.Release) int {
 	if s.Root == "" {
-		return
+		return 0
 	}
 	sidecarPath := filepath.Join(s.Root, updatesDirectory, string(release.Lane), release.PackageBase+resSidecarSuffix)
 	data, err := os.ReadFile(sidecarPath)
@@ -133,14 +143,15 @@ func (s *Serving) addSidecar(snapshot *servingSnapshot, release domain.Release) 
 		if !errors.Is(err, os.ErrNotExist) {
 			s.logSidecarOnce(sidecarPath, err)
 		}
-		return
+		return 0
 	}
 	var sidecar resSidecar
 	if err := json.Unmarshal(data, &sidecar); err != nil {
 		s.logSidecarOnce(sidecarPath, err)
-		return
+		return 0
 	}
 	seen := map[string]struct{}{}
+	added := 0
 	for _, entry := range sidecar.Entries {
 		clean, ok := validResourcePath(entry.Path)
 		if !ok || !validMD5(entry.MD5) {
@@ -154,23 +165,33 @@ func (s *Serving) addSidecar(snapshot *servingSnapshot, release domain.Release) 
 		entry.Path = clean
 		key := resourceKey(clean, entry.MD5)
 		snapshot.resources[key] = append(snapshot.resources[key], entry)
+		added++
 	}
+	return added
 }
 
-func (s *Serving) logSidecarOnce(sidecarPath string, cause error) {
+func (s *Serving) logOnce(key, message string) {
 	s.logMu.Lock()
 	defer s.logMu.Unlock()
 	if s.loggedSidecars == nil {
 		s.loggedSidecars = map[string]struct{}{}
 	}
-	if _, logged := s.loggedSidecars[sidecarPath]; logged {
+	if _, logged := s.loggedSidecars[key]; logged {
 		return
 	}
 	if len(s.loggedSidecars) >= maxLoggedSidecars {
 		return
 	}
-	s.loggedSidecars[sidecarPath] = struct{}{}
-	log.Printf("ota res sidecar %s unusable: %v", sidecarPath, cause)
+	s.loggedSidecars[key] = struct{}{}
+	log.Print(message)
+}
+
+func (s *Serving) logSidecarOnce(sidecarPath string, cause error) {
+	s.logOnce("sidecar\x00"+sidecarPath, fmt.Sprintf("ota res sidecar %s unusable: %v", sidecarPath, cause))
+}
+
+func (s *Serving) logResPathOnce(resPath string) {
+	s.logOnce("res-path\x00"+resPath, fmt.Sprintf("ota res_path %s is not a readable folder", resPath))
 }
 
 func (s *Serving) now() time.Time {
@@ -231,6 +252,9 @@ func (s *Serving) OpenVolume(ctx context.Context, laneText, name string) (io.Rea
 // OpenResource resolves the client's "<basename>.<md5>" against the union res
 // index, verifies the bytes, and records the served hit or the miss.
 func (s *Serving) OpenResource(ctx context.Context, asset string) (io.ReadSeekCloser, time.Time, string, bool, error) {
+	if s == nil || s.Root == "" || s.lazyFetchOff() {
+		return nil, time.Time{}, "", false, nil
+	}
 	expectedMD5 := requestMD5(asset)
 	snapshot, err := s.current(ctx)
 	if err != nil {
@@ -262,12 +286,19 @@ func (s *Serving) openVerified(resPath string, asset resAsset) (io.ReadSeekClose
 	if !ok {
 		return nil, time.Time{}, errors.New("otarelease: unsafe res path")
 	}
-	fullPath := filepath.Join(resPath, filepath.FromSlash(clean))
-	relative, err := filepath.Rel(resPath, fullPath)
-	if err != nil || relative == ".." || strings.HasPrefix(relative, ".."+string(os.PathSeparator)) {
+	resolvedRoot, err := filepath.EvalSymlinks(resPath)
+	if err != nil {
+		return nil, time.Time{}, err
+	}
+	fullPath := filepath.Join(resolvedRoot, filepath.FromSlash(clean))
+	resolvedPath, err := filepath.EvalSymlinks(fullPath)
+	if err != nil {
+		return nil, time.Time{}, err
+	}
+	if !withinDirectory(resolvedRoot, resolvedPath) {
 		return nil, time.Time{}, errors.New("otarelease: res path escapes res_path")
 	}
-	file, err := os.Open(fullPath)
+	file, err := os.Open(resolvedPath)
 	if err != nil {
 		return nil, time.Time{}, err
 	}
@@ -276,7 +307,7 @@ func (s *Serving) openVerified(resPath string, asset resAsset) (io.ReadSeekClose
 		file.Close()
 		return nil, time.Time{}, errors.New("otarelease: res entry is not a regular file")
 	}
-	actual, err := s.verifiedMD5(file, fullPath, info)
+	actual, err := s.verifiedMD5(file, resolvedPath, info)
 	if err != nil {
 		file.Close()
 		return nil, time.Time{}, err
@@ -308,8 +339,14 @@ func (s *Serving) verifiedMD5(file *os.File, fullPath string, info os.FileInfo) 
 	}
 	actual := hex.EncodeToString(digest.Sum(nil))
 	s.md5Mu.Lock()
-	if s.md5Cache == nil || len(s.md5Cache) >= maxMD5CacheEntries {
+	if s.md5Cache == nil {
 		s.md5Cache = map[md5CacheKey]string{}
+	}
+	if len(s.md5Cache) >= maxMD5CacheEntries {
+		for victim := range s.md5Cache {
+			delete(s.md5Cache, victim)
+			break
+		}
 	}
 	s.md5Cache[key] = actual
 	s.md5Mu.Unlock()
@@ -321,6 +358,23 @@ func (s *Serving) resPath() string {
 		return ""
 	}
 	return s.Settings.Get().ResPath
+}
+
+// lazyFetchOff is the operator kill switch: "off" stops /res serving as well as
+// discovery (OA-3).
+func (s *Serving) lazyFetchOff() bool {
+	if s == nil || s.Settings == nil {
+		return false
+	}
+	return s.Settings.Get().LazyFetch == domain.LazyFetchOff
+}
+
+func withinDirectory(root, candidate string) bool {
+	relative, err := filepath.Rel(root, candidate)
+	if err != nil {
+		return false
+	}
+	return relative != ".." && !strings.HasPrefix(relative, ".."+string(os.PathSeparator))
 }
 
 func (s *Serving) recordServed(resourcePath string) {
@@ -349,7 +403,7 @@ func (s *Serving) ResDownloadURL(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if !settings.LazyFetchEnabled(snapshot.assetsActive) {
+	if !settings.LazyFetchEnabled(snapshot.assetsActive) || !snapshot.resPathUsable || snapshot.assetsIndexEntries == 0 {
 		return "", nil
 	}
 	return strings.TrimRight(s.PublicEngineURL, "/") + resourceURLPathPart, nil

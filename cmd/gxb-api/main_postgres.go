@@ -1055,10 +1055,7 @@ func main() {
 	if mediaHandler != nil {
 		mux.Handle("/profile-media/", mediaHandler)
 	}
-	if cfg.OTARoot != "" {
-		mux.Handle("/updates/", stockruntime.OTAUpdatesGET{Serving: otaServing})
-		mux.Handle("/res/", stockruntime.OTAResGET{Serving: otaServing})
-	}
+	registerOTARoutes(mux, otaServing)
 	srv := &http.Server{Addr: cfg.HTTPAddr, Handler: mux, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: limits.StockMultipartHTTPTimeout + 5*time.Second, WriteTimeout: limits.StockMultipartHTTPTimeout + 5*time.Second, IdleTimeout: 60 * time.Second}
 	go func() {
 		<-ctx.Done()
@@ -1070,6 +1067,13 @@ func main() {
 	if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatal(err)
 	}
+}
+
+// registerOTARoutes always mounts both routes: with no OTA root the Serving
+// answers 404 instead of the edge rejecting the path (finding 9).
+func registerOTARoutes(mux *http.ServeMux, serving *appotarelease.Serving) {
+	mux.Handle("/updates/", stockruntime.OTAUpdatesGET{Serving: serving})
+	mux.Handle("/res/", stockruntime.OTAResGET{Serving: serving})
 }
 
 // requireGirlsLogObserver refuses to start a settlement mode whose Girls Log
