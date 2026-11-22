@@ -51,6 +51,7 @@ func TestAuditA074ArenaPicksUsesCallerConnection(t *testing.T) {
 		Heroes: struct{ app.Roster }{}, Pets: struct{ app.Roster }{}, OwnedHeroes: struct{ app.OwnedHeroReader }{},
 		Directory: struct{ app.Directory }{}, Guilds: struct{ app.Guilds }{}, Servers: struct{ app.Servers }{},
 		Receipts: struct{ receipt.Store }{}, ReceiptRead: struct{ receipt.Reader }{}, BattleCounts: struct{ app.BattleCounts }{},
+		PartnerMissions: struct{ app.PartnerMissions }{},
 	}
 	currentOperation := operation.Context{ID: ids.UUID{1}, StartedAt: time.Unix(100, 0).UTC(), EntropySeed: [32]byte{9}}
 	_, err := service.Timed.Runner.Run(context.Background(), currentOperation, app.Profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, scope tx.Scope) error {
