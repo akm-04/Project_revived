@@ -974,7 +974,8 @@ def build_statements(player, revision, player_id, report):
     statements.append(f"DELETE FROM player_function_eligibility WHERE player_id={player_id};")
     for function_id in function_ids:
         fact_key = f"legacy-import:v1:{player_id}:{function_id}"
-        write("player_function_unlocks", f"INSERT INTO player_function_unlocks(player_id,function_id,opened_at,source_fact_key,state_version) VALUES({player_id},{function_id},{now},{quote(fact_key)},1);")
+        # The V1 server already announced these; a NULL acknowledged_at would replay every one in new_funcs_ (BUGS #114 rule).
+        write("player_function_unlocks", f"INSERT INTO player_function_unlocks(player_id,function_id,opened_at,source_fact_key,state_version,acknowledged_at) VALUES({player_id},{function_id},{now},{quote(fact_key)},1,{now});")
         write("player_function_eligibility", f"INSERT INTO player_function_eligibility(player_id,function_id,content_revision,source_fact_key,eligible_at) VALUES({player_id},{function_id},{quote(revision)},{quote(fact_key)},{now});")
     write("player_function_state_owners", f"UPDATE player_function_state_owners SET state_version={1 + len(function_ids)},updated_at={now} WHERE player_id={player_id};")
 

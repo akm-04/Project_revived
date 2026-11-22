@@ -18,9 +18,16 @@ PLAYTEST_HOME = Path(os.environ.get("PLAYTEST_HOME", Path(__file__).resolve().pa
 ASSET_TREE = Path(os.environ.get("PLAYTEST_ASSET_TREE", Path(__file__).resolve().parents[1] / "tmp" / "virtualclient" / "update-tree"))
 BIND_ADDRESS = os.environ.get("PLAYTEST_BIND", "127.0.0.1")
 ENGINE_ORIGIN = os.environ.get("PLAYTEST_ENGINE_ORIGIN", "https://gxbv2engine.shares.zrok.io").rstrip("/")
-LISTEN_PORT = 18956
+# Cloudflare Tunnel zone: clients that reach api.<domain> are handed api.<domain> and assets.<domain> URLs instead of ENGINE_ORIGIN.
+PUBLIC_DOMAIN = os.environ.get("PLAYTEST_PUBLIC_DOMAIN", "gxbengine.dpdns.org")
+# Asset names carry their md5, so a cached copy never goes stale; a 404 must never be cached because asset recovery adds files later.
+IMMUTABLE_CACHE_CONTROL = "public, max-age=31536000, immutable"
+LISTEN_PORT = int(os.environ.get("PLAYTEST_FRONT_PORT", "18956"))
 API_HOST = "127.0.0.1"
-API_PORT = 18953
+API_PORT = int(os.environ.get("PLAYTEST_API_PORT", "18953"))
+REALTIME_HTTP_HOST = os.environ.get("PLAYTEST_REALTIME_HTTP_HOST", "127.0.0.1")
+REALTIME_HTTP_PORT = int(os.environ.get("PLAYTEST_REALTIME_HTTP_PORT", "18958"))
+REALTIME_HTTP_PATH = "/realtime/poll"
 FORWARD_TIMEOUT_SECONDS = 60
 RESOURCE_PREFIX = "/res/"
 # One id per game launch, handed out in the MID 20480 reply and carried in every later URL of that launch.
@@ -34,6 +41,10 @@ SESSION_LOG_DIRECTORY = Path(__file__).resolve().parent / "logs" / "sessions"
 STATE_DIRECTORY = PLAYTEST_HOME / "state"
 ASSET_INDEX_PATH = STATE_DIRECTORY / "asset_index.json"
 MISSING_ASSETS_PATH = STATE_DIRECTORY / "missing_assets.txt"
+# Temporary playtest OTA built by ota.py: release.json, the raw volume and the recovered files it makes acceptable.
+OTA_DIRECTORY = PLAYTEST_HOME / "ota"
+UPDATES_PREFIX = "/updates/"
+VERSION_CHECK_MID = 2
 
 HOP_BY_HOP_HEADERS = {
     "connection",
@@ -55,7 +66,7 @@ def log(message):
 def walk_asset_tree():
     files = []
     total_size = 0
-    for directory, _, names in os.walk(ASSET_TREE):
+    for directory, _, names in [*os.walk(ASSET_TREE), *os.walk(OTA_DIRECTORY / "assets")]:
         for name in sorted(names):
             path = Path(directory) / name
             try:
@@ -164,6 +175,42 @@ def filtered_headers(headers, dropped):
     return [(name, value) for name, value in headers if name.lower() not in drop]
 
 
+def resource_version(value):
+    parts = str(value or "").split(".")
+    return tuple(int(part) for part in parts) if len(parts) == 3 and all(part.isdigit() for part in parts) else (0, 0, 0)
+
+
+def public_origins(host):
+    """(api origin, asset origin, per-launch asset paths) for the public hostname the client reached."""
+    if host.split(":")[0].lower() == f"api.{PUBLIC_DOMAIN}":
+        # Plain /res/ paths are identical for every launch, so the CDN can serve them from cache.
+        return f"https://api.{PUBLIC_DOMAIN}", f"https://assets.{PUBLIC_DOMAIN}", False
+    return ENGINE_ORIGIN, ENGINE_ORIGIN, True
+
+
+def ota_reply(body, asset_origin):
+    """MID 2 while an ota.py release exists: the v1 version-check reply, advertising it to clients below its version."""
+    try:
+        release = json.loads((OTA_DIRECTORY / "release.json").read_text(encoding="utf-8"))
+        payload = json.loads(urllib.parse.parse_qs(body.decode("utf-8")).get("payload", ["{}"])[0])
+    except (FileNotFoundError, UnicodeDecodeError, json.JSONDecodeError):
+        return None
+    if not isinstance(payload, dict) or payload.get("mid") != VERSION_CHECK_MID:
+        return None
+    reply = {"is_appstore": 0, "is_inapp": 0, "is_review": 0, "need_restart": 0}
+    if resource_version(payload.get("v")) >= resource_version(release["version"]):
+        return reply
+    return {
+        **reply, "is_inapp": 1,
+        # Source semantics (v1 local_update.py): is_review skips the update prompt and starts the download.
+        "is_review": 1 if release["silent"] else 0,
+        "res": [{
+            "version": release["version"], "volume": release["volume"], "size": release["size"], "md5": release["md5"],
+            "resource": f"{asset_origin}{UPDATES_PREFIX}{release['package']}",
+        }],
+    }
+
+
 class PlaytestFrontHandler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
 
@@ -190,9 +237,17 @@ class PlaytestFrontHandler(BaseHTTPRequestHandler):
 
     def handle_request(self, send_body):
         path = urllib.parse.urlsplit(self.path).path
+        if path == REALTIME_HTTP_PATH:
+            self.forward_request(send_body, self.path, None, REALTIME_HTTP_HOST, REALTIME_HTTP_PORT)
+            return
         session_resource = SESSION_RESOURCE.fullmatch(path)
         if session_resource:
             self.serve_asset(session_resource[2], send_body, session_resource[1])
+            return
+        if path.startswith(UPDATES_PREFIX):
+            name = path[len(UPDATES_PREFIX):]
+            valid = name and "/" not in name and name not in (".", "..")
+            self.serve_asset(name, send_body, None, OTA_DIRECTORY / name if valid else None)
             return
         if path.startswith(RESOURCE_PREFIX):
             self.serve_asset(path[len(RESOURCE_PREFIX):], send_body, None)
@@ -204,22 +259,26 @@ class PlaytestFrontHandler(BaseHTTPRequestHandler):
             return
         self.forward_request(send_body, self.path, None)
 
-    def serve_asset(self, key, send_body, session):
+    def serve_asset(self, key, send_body, session, path=None):
         started = time.monotonic()
         if not key or "/" in key or key in (".", ".."):
             self.send_empty(404)
             return
-        with INDEX_LOCK:
-            path = INDEX.get(key)
+        md5_named = path is None
+        if md5_named:
+            with INDEX_LOCK:
+                path = INDEX.get(key)
         if path is None or not os.path.isfile(path):
             record_missing(key)
             record_session_event(session, {"event": "asset", "file": key, "status": 404})
-            self.send_empty(404)
+            self.send_empty(404, "no-store")
             return
         size = os.path.getsize(path)
         self.send_response(200)
         self.send_header("Content-Type", "application/octet-stream")
         self.send_header("Content-Length", str(size))
+        if md5_named:
+            self.send_header("Cache-Control", IMMUTABLE_CACHE_CONTROL)
         self.end_headers()
         sent = 0
         delivered = True
@@ -258,12 +317,19 @@ class PlaytestFrontHandler(BaseHTTPRequestHandler):
         except (ValueError, OSError):
             return b""
 
-    def forward_request(self, send_body, target, session):
+    def forward_request(self, send_body, target, session, upstream_host=API_HOST, upstream_port=API_PORT):
         started = time.monotonic()
         body = self.read_body()
         headers = dict(filtered_headers(self.headers.items(), REQUEST_DROP_HEADERS))
         headers["Content-Length"] = str(len(body))
-        connection = http.client.HTTPConnection(API_HOST, API_PORT, timeout=FORWARD_TIMEOUT_SECONDS)
+        api_origin, asset_origin, per_launch_assets = public_origins(self.headers.get("Host", ""))
+        update = ota_reply(body, asset_origin)
+        if update is not None:
+            self.send_json(update)
+            record_session_event(session, {"event": "version_check", "path": target, "ota": update.get("res", []), "ms": elapsed_milliseconds(started)})
+            log(f"version check answered by playtest OTA: {update.get('res') or 'no update'}")
+            return
+        connection = http.client.HTTPConnection(upstream_host, upstream_port, timeout=FORWARD_TIMEOUT_SECONDS)
         try:
             connection.request(self.command, target, body=body, headers=headers)
             response = connection.getresponse()
@@ -276,7 +342,10 @@ class PlaytestFrontHandler(BaseHTTPRequestHandler):
             return
         finally:
             connection.close()
-        data, launch = self.claim_launch(data)
+        if api_origin != ENGINE_ORIGIN:
+            # gxb-api mints absolute URLs (MID 1 log_url) from ENGINE_ORIGIN; keep tunnel clients on their own hostname.
+            data = data.replace(ENGINE_ORIGIN.encode(), api_origin.encode())
+        data, launch = self.claim_launch(data, api_origin, asset_origin, per_launch_assets)
         if launch:
             session = launch
             record_session_event(
@@ -319,23 +388,39 @@ class PlaytestFrontHandler(BaseHTTPRequestHandler):
             },
         )
 
-    def claim_launch(self, data):
+    def claim_launch(self, data, api_origin, asset_origin, per_launch_assets):
         if b'"res_download_url"' not in data:
             return data, None
         session = new_session()
         reply = json.loads(data)
-        reply["res_download_url"] = f"{ENGINE_ORIGIN}/res/{session}/"
-        reply["url"] = f"{ENGINE_ORIGIN}/s/{session}{urllib.parse.urlsplit(reply['url']).path}"
+        reply["res_download_url"] = f"{asset_origin}/res/{session}/" if per_launch_assets else f"{asset_origin}/res/"
+        reply["url"] = f"{api_origin}/s/{session}{urllib.parse.urlsplit(reply['url']).path}"
         return json.dumps(reply, separators=(",", ":")).encode("utf-8"), session
 
-    def send_empty(self, status):
+    def send_json(self, payload):
+        data = json.dumps(payload, separators=(",", ":")).encode("utf-8")
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(data)))
+        self.end_headers()
+        self.wfile.write(data)
+
+    def send_empty(self, status, cache_control=None):
         self.send_response(status)
         self.send_header("Content-Length", "0")
+        if cache_control:
+            self.send_header("Cache-Control", cache_control)
         self.end_headers()
 
 
+class PlaytestFrontServer(ThreadingHTTPServer):
+    # Held polls arrive in one burst; socketserver's default backlog of 5 resets
+    # most of them, so size the accept queue for a full client population.
+    request_queue_size = 4096
+
+
 def main():
-    server = ThreadingHTTPServer((BIND_ADDRESS, LISTEN_PORT), PlaytestFrontHandler)
+    server = PlaytestFrontServer((BIND_ADDRESS, LISTEN_PORT), PlaytestFrontHandler)
     server.daemon_threads = True
     log(f"asset front listening on {BIND_ADDRESS}:{LISTEN_PORT}, {len(INDEX)} assets from {ASSET_TREE}")
     server.serve_forever()

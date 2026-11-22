@@ -25,9 +25,10 @@ PLAYTEST_TOOLS = Path(
 )
 DIGEST_SECRET = os.environ.get("GXB_CREDENTIAL_DIGEST_SECRET", "")
 BIND_ADDRESS = os.environ.get("PLAYTEST_BIND", "127.0.0.1")
-LISTEN_PORT = 18955
-DATABASE_NAME = "gxb_playtest"
-POSTGRES_PORT = 18957
+LISTEN_PORT = int(os.environ.get("PLAYTEST_SDK_PORT", "18955"))
+DATABASE_NAME = os.environ.get("PLAYTEST_DATABASE_NAME", "gxb_playtest")
+POSTGRES_HOST = os.environ.get("PLAYTEST_POSTGRES_HOST", str(PLAYTEST_HOME / "pg"))
+POSTGRES_PORT = int(os.environ.get("PLAYTEST_POSTGRES_PORT", "18957"))
 PBKDF2_ITERATIONS = 200_000
 PASSWORD_ALGORITHM = "pbkdf2-sha256"
 AUTH_PROFILE = "SID_LOGIN_TOKEN_PAIR"
@@ -160,7 +161,7 @@ def issue_database_session(account_uid, session_id, sid, token):
         "-v",
         "ON_ERROR_STOP=1",
         "-h",
-        str(PLAYTEST_HOME / "pg"),
+        POSTGRES_HOST,
         "-p",
         str(POSTGRES_PORT),
         "-U",

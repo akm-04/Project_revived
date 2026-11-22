@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Self-check for a running playtest instance: MID20480, one asset, SDK login and MID1."""
 
+import argparse
 import hashlib
 import json
 import os
@@ -29,7 +30,7 @@ ASSET_TREE = Path(
         "PLAYTEST_ASSET_TREE", WORKSPACE / "tmp" / "virtualclient" / "update-tree"
     )
 )
-FRONT_BASE = f"http://{PLAYTEST_BIND}:18956"
+FRONT_BASE = f"http://{PLAYTEST_BIND}:{int(os.environ.get('PLAYTEST_FRONT_PORT', '18956'))}"
 SDK_BASE = f"http://{PLAYTEST_BIND}:18955"
 DATABASE_NAME = "gxb_playtest"
 POSTGRES_PORT = 18957
@@ -257,8 +258,44 @@ def check_login_and_mid1():
     )
 
 
-def main():
-    checks = (check_prelogin, check_asset, check_login_and_mid1)
+def check_realtime_http_poll():
+    url = f"{FRONT_BASE}/realtime/poll"
+    status, body = post_json(url, {"frames": []})
+    if status != 200:
+        raise AssertionError(f"HTTP poll create status {status}")
+    created = json.loads(body)
+    session_id = created.get("session_id")
+    if not isinstance(session_id, str) or not session_id or created.get("frames") != []:
+        raise AssertionError(f"HTTP poll create reply was invalid: {created!r}")
+
+    status, body = post_json(url, {"session_id": session_id, "frames": []})
+    if status != 200:
+        raise AssertionError(f"HTTP poll reuse status {status}")
+    reused = json.loads(body)
+    if reused.get("session_id") != session_id or reused.get("frames") != []:
+        raise AssertionError("HTTP poll did not preserve the session through the front")
+
+    try:
+        post_json(url, {"session_id": "unknown-session", "frames": []})
+    except urllib.error.HTTPError as error:
+        if error.code != 409:
+            raise AssertionError(f"unknown HTTP poll session status {error.code}, expected 409")
+    else:
+        raise AssertionError("unknown HTTP poll session was accepted")
+    print("check 4 ok: /realtime/poll create, reuse and unknown-session refusal through the asset front")
+
+
+
+
+def main(arguments=None):
+    parser = argparse.ArgumentParser(description="Check a running playtest instance")
+    parser.add_argument("--realtime-only", action="store_true", help="check only /realtime/poll through the asset front")
+    options = parser.parse_args(arguments)
+    if options.realtime_only:
+        check_realtime_http_poll()
+        print("selfcheck ok")
+        return
+    checks = (check_prelogin, check_asset, check_login_and_mid1, check_realtime_http_poll)
     for check in checks:
         check()
     print("selfcheck ok")

@@ -34,15 +34,16 @@ ASSET_TREE = Path(
 )
 
 API_HOST = "127.0.0.1"
-API_PORT = 18953
+API_PORT = int(os.environ.get("PLAYTEST_API_PORT", "18953"))
 REALTIME_HOST = "0.0.0.0"
-REALTIME_PORT = 18954
-SDK_PORT = 18955
-ASSET_FRONT_PORT = 18956
-POSTGRES_PORT = 18957
+REALTIME_PORT = int(os.environ.get("PLAYTEST_REALTIME_PORT", "18954"))
+REALTIME_HTTP_PORT = int(os.environ.get("PLAYTEST_REALTIME_HTTP_PORT", "18958"))
+SDK_PORT = int(os.environ.get("PLAYTEST_SDK_PORT", "18955"))
+ASSET_FRONT_PORT = int(os.environ.get("PLAYTEST_FRONT_PORT", "18956"))
+POSTGRES_PORT = int(os.environ.get("PLAYTEST_POSTGRES_PORT", "18957"))
 API_ADDRESS = f"{API_HOST}:{API_PORT}"
 REALTIME_ADDRESS = f"{REALTIME_HOST}:{REALTIME_PORT}"
-DATABASE_NAME = "gxb_playtest"
+DATABASE_NAME = os.environ.get("PLAYTEST_DATABASE_NAME", "gxb_playtest")
 BINARY_NAMES = ("gxb-api", "gxb-combat-worker", "gxb-worker", "gxb-realtime")
 LOG_LINE_COUNT = 50
 API_START_TIMEOUT_SECONDS = 60
@@ -207,6 +208,7 @@ def realtime_environment(secrets_value):
         {
             "GXB_POSTGRES_DSN": DATABASE_DSN,
             "GXB_REALTIME_ADDR": REALTIME_ADDRESS,
+            "GXB_REALTIME_HTTP_ADDR": f"127.0.0.1:{REALTIME_HTTP_PORT}",
             "GXB_REALTIME_PUBLIC_HOST": LAN_HOST,
             "GXB_REALTIME_PUBLIC_PORT": str(REALTIME_PORT),
             "GXB_CREDENTIAL_DIGEST_SECRET": secrets_value["credential_digest_secret"],
@@ -239,6 +241,7 @@ def asset_front_environment():
             "PLAYTEST_ASSET_TREE": str(ASSET_TREE),
             "PLAYTEST_BIND": PLAYTEST_BIND,
             "PLAYTEST_ENGINE_ORIGIN": ENGINE_ORIGIN,
+            "PLAYTEST_REALTIME_HTTP_PORT": str(REALTIME_HTTP_PORT),
         }
     )
 
@@ -435,6 +438,11 @@ def cluster_running():
     return result.returncode == 0
 
 
+# C1 Tier 0 (work/i9/stages/I9-11/contract_recovery/C1_CAPACITY_DESIGN.md F3): the defaults escalate roster-sized
+# SERIALIZABLE reads to relation locks, so unrelated players abort each other with 40001.
+SERIALIZABLE_LOCK_BUDGET = "-c max_pred_locks_per_transaction=1024 -c max_pred_locks_per_relation=512 -c max_pred_locks_per_page=8"
+
+
 def initialize_cluster():
     if (POSTGRES_DATA_DIRECTORY / "PG_VERSION").exists():
         return
@@ -470,6 +478,8 @@ def start_cluster():
             str(POSTGRES_DATA_DIRECTORY),
             "-l",
             str(POSTGRES_LOG),
+            "-o",
+            SERIALIZABLE_LOCK_BUDGET,
             "-w",
             "start",
         ],
@@ -633,7 +643,7 @@ def command_reset(arguments):
 
 def wait_for_api():
     deadline = time.monotonic() + API_START_TIMEOUT_SECONDS
-    url = "http://127.0.0.1:18953/"
+    url = f"http://{API_ADDRESS}/"
     body = urllib.parse.urlencode({"payload": '{"mid":20480}'}).encode("utf-8")
     while time.monotonic() < deadline:
         request = urllib.request.Request(
