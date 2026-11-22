@@ -12,16 +12,32 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-// grantChoice settles the chosen tier and returns the stock award entries in
-// definition order. A hero line grants its character entity; a hero the player
-// already owns becomes its stone instead (the item-box rule, 1071 tiers 2-5).
-func (s ClaimService) grantChoice(ctx context.Context, transaction tx.Tx, actor identity.ActorContext, op operation.Context, occurrence *events.Occurrence, tier events.Tier, choiceIndex int, revision string) ([]map[string]any, error) {
+// ChoiceGrant settles one tier choice inside the caller's transaction: a hero
+// line grants its character entity, item and currency lines go through i5. MID
+// 231 claims and settlement share it (I11A-2 E4c); the caller writes the claim
+// row in the same transaction.
+type ChoiceGrant struct {
+	HeroContent HeroContent
+	Heroes      HeroOwner
+	Fragments   HeroFragments
+	Grants      GrantSettler
+	HeroWire    HeroWire
+}
+
+func (g ChoiceGrant) ready() bool {
+	return g.HeroContent != nil && g.Heroes != nil && g.Fragments != nil && g.Grants != nil && g.HeroWire != nil
+}
+
+// Grant resolves the chosen choice and awards it, returning the stock award
+// entries in definition order. A hero the player already owns becomes its stone
+// instead (the item-box rule, 1071 tiers 2-5).
+func (g ChoiceGrant) Grant(ctx context.Context, transaction tx.Tx, actor identity.ActorContext, op operation.Context, occurrence *events.Occurrence, tier events.Tier, choiceIndex int, revision string) ([]map[string]any, error) {
 	choice := tier.Choices[choiceIndex-1]
 	if len(choice.Lines) == 0 {
-		return nil, ErrUnavailable
+		return nil, claimRejected("the tier choice was not expanded at deploy")
 	}
 	if hasHeroLine(choice.Lines) {
-		if err := s.Heroes.LockStoryRosterTx(ctx, transaction, actor.PlayerID); err != nil {
+		if err := g.Heroes.LockStoryRosterTx(ctx, transaction, actor.PlayerID); err != nil {
 			return nil, err
 		}
 	}
@@ -41,11 +57,11 @@ func (s ClaimService) grantChoice(ctx context.Context, transaction tx.Tx, actor 
 			awards[index] = currencyAward(line.ResourceKey, line.Amount)
 			fungible = append(fungible, grant.Line{Kind: grant.ScalarCurrency, ResourceKey: line.ResourceKey, Amount: line.Amount})
 		case events.RewardKindHero:
-			policy, err := s.HeroContent.HeroNormalSummonTx(ctx, transaction, revision, line.ItemID)
+			policy, err := g.HeroContent.HeroNormalSummonTx(ctx, transaction, revision, line.ItemID)
 			if err != nil {
 				return nil, err
 			}
-			owned, err := s.Heroes.OwnsOriginTx(ctx, transaction, actor.PlayerID, policy.Template.OriginTableID)
+			owned, err := g.Heroes.OwnsOriginTx(ctx, transaction, actor.PlayerID, policy.Template.OriginTableID)
 			if err != nil {
 				return nil, err
 			}
@@ -53,25 +69,25 @@ func (s ClaimService) grantChoice(ctx context.Context, transaction tx.Tx, actor 
 				pending = append(pending, pendingHero{index: index, itemID: line.ItemID})
 				continue
 			}
-			stone, err := s.Fragments.HeroFragmentsTx(ctx, transaction, revision, policy.Template.OriginTableID)
+			stone, err := g.Fragments.HeroFragmentsTx(ctx, transaction, revision, policy.Template.OriginTableID)
 			if err != nil {
 				return nil, err
 			}
 			awards[index] = stoneAward(stone[0], stone[1])
 			fungible = append(fungible, grant.Line{Kind: grant.StackItem, ItemID: stone[0], Amount: stone[1]})
 		default:
-			return nil, ErrUnavailable
+			return nil, claimRejected("the tier choice has an unknown reward kind")
 		}
 	}
 	for _, hero := range pending {
-		granted, admission, err := s.Heroes.AwardStoryPartnerTx(ctx, transaction, actor.PlayerID, hero.itemID, revision, op)
+		granted, admission, err := g.Heroes.AwardStoryPartnerTx(ctx, transaction, actor.PlayerID, hero.itemID, revision, op)
 		if err != nil {
 			return nil, err
 		}
 		if admission == nil {
 			return nil, ErrUnavailable
 		}
-		wire, err := s.HeroWire(granted)
+		wire, err := g.HeroWire(granted)
 		if err != nil {
 			return nil, err
 		}
@@ -94,7 +110,7 @@ func (s ClaimService) grantChoice(ctx context.Context, transaction tx.Tx, actor 
 		},
 		Lines: fungible,
 	}
-	if _, err := s.Grants.SettleGrantTx(ctx, transaction, actor, plan, op, appi5.GrantTxOptions{}); err != nil {
+	if _, err := g.Grants.SettleGrantTx(ctx, transaction, actor, plan, op, appi5.GrantTxOptions{}); err != nil {
 		return nil, err
 	}
 	return awards, nil

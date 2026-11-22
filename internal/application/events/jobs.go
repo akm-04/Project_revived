@@ -73,6 +73,8 @@ type Jobs struct {
 	Servers      ServerSource
 	Players      PlayerSource
 	Mail         Mailer
+	Content      ContentRevision
+	ClaimGrant   ChoiceGrant
 
 	OccurrenceBatch int
 	PlayerPage      int
@@ -254,8 +256,9 @@ func (jobs Jobs) materialiseSlot(ctx context.Context, transaction tx.Tx, server 
 }
 
 // SettleDue archives occurrences whose claim window closed: a TIERED_CLAIM
-// mails every eligible unclaimed tier once, then the occurrence is marked
-// settled (EA-9). A permanent occurrence has no claim window and never settles.
+// delivers every eligible unclaimed tier once (mail, or the MID 231 grant when
+// the tier holds a hero), then the occurrence is marked settled (EA-9, E4c). A
+// permanent occurrence has no claim window and never settles.
 func (jobs Jobs) SettleDue(ctx context.Context) error {
 	if err := jobs.settleReady(); err != nil {
 		return err
@@ -326,14 +329,36 @@ func (jobs Jobs) SettleOccurrence(ctx context.Context, op operation.Context, occ
 		return fmt.Errorf("events: settlement occurrence %d has no definition %d/%d", occurrence.ID, occurrence.ActivityID, occurrence.DefinitionRevision)
 	}
 	if definition.Body.Archetype == events.ArchetypeTieredClaim {
-		if err := jobs.settleTiers(ctx, op, occurrence, definition.Body, at); err != nil {
+		op, revision, err := jobs.settlementRevision(ctx, op, definition.Body)
+		if err != nil {
+			return err
+		}
+		if err := jobs.settleTiers(ctx, op, occurrence, definition.Body, revision, at); err != nil {
 			return err
 		}
 	}
 	return jobs.settleMark(ctx, op, occurrence.ID, at)
 }
 
-func (jobs Jobs) settleTiers(ctx context.Context, op operation.Context, occurrence events.Occurrence, definition events.Definition, at time.Time) error {
+// settlementRevision pins the active content revision once for the occurrence
+// when a tier holds a hero, the same rule MID 231 follows (D02).
+func (jobs Jobs) settlementRevision(ctx context.Context, op operation.Context, definition events.Definition) (operation.Context, string, error) {
+	if !definitionHasHeroTier(definition) {
+		return op, "", nil
+	}
+	if jobs.Content == nil || !jobs.ClaimGrant.ready() {
+		return op, "", ErrUnavailable
+	}
+	revision := ""
+	err := jobs.read(ctx, op, "events-settlement-content", func(txCtx context.Context, scope tx.Scope) error {
+		var err error
+		op, revision, err = pinContentRevision(txCtx, op, jobs.Content, scope.Tx)
+		return err
+	})
+	return op, revision, err
+}
+
+func (jobs Jobs) settleTiers(ctx context.Context, op operation.Context, occurrence events.Occurrence, definition events.Definition, revision string, at time.Time) error {
 	server := identity.LogicalServerID(occurrence.LogicalServerID)
 	after := identity.PlayerID(0)
 	pageSize := jobs.playerPage()
@@ -345,8 +370,17 @@ func (jobs Jobs) settleTiers(ctx context.Context, op operation.Context, occurren
 		if len(players) == 0 {
 			return nil
 		}
-		if err := jobs.deliverTierPage(ctx, op, occurrence, definition, players, at); err != nil {
-			return err
+		if err := jobs.deliverTierPage(ctx, op, occurrence, definition, players, revision, at); err != nil {
+			var refusal *tierRefusal
+			if !errors.As(err, &refusal) {
+				return err
+			}
+			// The abort rolled the page back; record the refused tier so the
+			// retried page skips it and the occurrence still settles (E4c).
+			if err := jobs.recordRefusal(ctx, op, refusal, at); err != nil {
+				return err
+			}
+			continue
 		}
 		after = players[len(players)-1].PlayerID
 		if len(players) < pageSize {
@@ -367,14 +401,14 @@ func (jobs Jobs) playersAfter(ctx context.Context, op operation.Context, server 
 	return page, err
 }
 
-func (jobs Jobs) deliverTierPage(ctx context.Context, op operation.Context, occurrence events.Occurrence, definition events.Definition, players []PlayerRef, at time.Time) error {
-	return jobs.write(ctx, op, "events-settlement-mail", func(ctx context.Context, scope tx.Scope) error {
+func (jobs Jobs) deliverTierPage(ctx context.Context, op operation.Context, occurrence events.Occurrence, definition events.Definition, players []PlayerRef, revision string, at time.Time) error {
+	return jobs.write(ctx, op, "events-settlement-mail", func(txCtx context.Context, scope tx.Scope) error {
 		for _, player := range players {
 			for _, tier := range definition.Tiers {
 				if player.Level < tier.Requirement.Value {
 					continue
 				}
-				if err := jobs.deliverTier(ctx, scope.Tx, occurrence, player, tier, at); err != nil {
+				if err := jobs.deliverTier(txCtx, scope.Tx, occurrence, player, tier, op, revision, at); err != nil {
 					return err
 				}
 			}
@@ -383,7 +417,7 @@ func (jobs Jobs) deliverTierPage(ctx context.Context, op operation.Context, occu
 	})
 }
 
-func (jobs Jobs) deliverTier(ctx context.Context, transaction tx.Tx, occurrence events.Occurrence, player PlayerRef, tier events.Tier, at time.Time) error {
+func (jobs Jobs) deliverTier(ctx context.Context, transaction tx.Tx, occurrence events.Occurrence, player PlayerRef, tier events.Tier, op operation.Context, revision string, at time.Time) error {
 	claimed, err := jobs.Store.HasClaimTx(ctx, transaction, int64(player.PlayerID), occurrence.ID, tier.ID)
 	if err != nil {
 		return err
@@ -391,9 +425,12 @@ func (jobs Jobs) deliverTier(ctx context.Context, transaction tx.Tx, occurrence 
 	if claimed {
 		return nil
 	}
+	if tierHasHero(tier) {
+		return jobs.deliverHeroTier(ctx, transaction, occurrence, player, tier, op, revision, at)
+	}
 	lines, err := choiceGrantLines(tier)
 	if err != nil {
-		return err
+		return tierRefused(occurrence.ID, player.PlayerID, tier.ID, err)
 	}
 	key := settlementSourceKey(occurrence.ID, player.PlayerID, tier.ID)
 	claim := Claim{PlayerID: int64(player.PlayerID), OccurrenceID: occurrence.ID, Tier: tier.ID, Period: ClaimPeriodPermanent, Choice: 1, ClaimedAt: at.UTC(), GrantReceipt: key}
@@ -408,6 +445,74 @@ func (jobs Jobs) deliverTier(ctx context.Context, transaction tx.Tx, occurrence 
 		PolicyVersion: SettlementPolicyVersion, Lines: lines, At: at.UTC(),
 	})
 	return err
+}
+
+// deliverHeroTier settles a tier whose choice holds a hero by the MID 231 grant,
+// because system mail cannot carry one (E4c). The claim row is the guard and
+// the grant's business key makes the tier at-most-once.
+func (jobs Jobs) deliverHeroTier(ctx context.Context, transaction tx.Tx, occurrence events.Occurrence, player PlayerRef, tier events.Tier, op operation.Context, revision string, at time.Time) error {
+	claim := Claim{
+		PlayerID: int64(player.PlayerID), OccurrenceID: occurrence.ID, Tier: tier.ID,
+		Period: ClaimPeriodPermanent, Choice: 1, ClaimedAt: at.UTC(),
+		GrantReceipt: claimBusinessKey(occurrence.ID, int64(player.PlayerID), tier.ID),
+	}
+	if _, inserted, err := jobs.Store.InsertClaimTx(ctx, transaction, claim); err != nil {
+		return err
+	} else if !inserted {
+		return nil
+	}
+	actor := identity.ActorContext{LogicalServerID: identity.LogicalServerID(occurrence.LogicalServerID), PlayerID: player.PlayerID}
+	if _, err := jobs.ClaimGrant.Grant(ctx, transaction, actor, op, &occurrence, tier, 1, revision); err != nil {
+		if errors.Is(err, ErrClaimRejected) {
+			return tierRefused(occurrence.ID, player.PlayerID, tier.ID, err)
+		}
+		return err
+	}
+	return nil
+}
+
+// tierRefusal is a permanently ungrantable (player, tier) of one occurrence.
+// The page transaction is aborted; settleTiers records the refusal and retries.
+type tierRefusal struct {
+	occurrenceID int64
+	playerID     identity.PlayerID
+	tierID       int64
+	reason       error
+}
+
+func (r *tierRefusal) Error() string {
+	return fmt.Sprintf("events: settlement refused occurrence %d player %d tier %d: %v", r.occurrenceID, int64(r.playerID), r.tierID, r.reason)
+}
+
+func tierRefused(occurrenceID int64, playerID identity.PlayerID, tierID int64, reason error) error {
+	return &tierRefusal{occurrenceID: occurrenceID, playerID: playerID, tierID: tierID, reason: reason}
+}
+
+// settlementRefusedReceipt marks a claim row whose tier was refused; it keeps
+// the any-period guard and the occurrence settles (E4c).
+const settlementRefusedReceipt = "refused"
+
+func (jobs Jobs) recordRefusal(ctx context.Context, op operation.Context, refusal *tierRefusal, at time.Time) error {
+	return jobs.write(ctx, op, "events-settlement-refused", func(txCtx context.Context, scope tx.Scope) error {
+		_, _, err := jobs.Store.InsertClaimTx(txCtx, scope.Tx, Claim{
+			PlayerID: int64(refusal.playerID), OccurrenceID: refusal.occurrenceID, Tier: refusal.tierID,
+			Period: ClaimPeriodPermanent, Choice: 1, ClaimedAt: at.UTC(), GrantReceipt: settlementRefusedReceipt,
+		})
+		return err
+	})
+}
+
+func tierHasHero(tier events.Tier) bool {
+	return len(tier.Choices) > 0 && hasHeroLine(tier.Choices[0].Lines)
+}
+
+func definitionHasHeroTier(definition events.Definition) bool {
+	for _, tier := range definition.Tiers {
+		if tierHasHero(tier) {
+			return true
+		}
+	}
+	return false
 }
 
 func choiceGrantLines(tier events.Tier) ([]grant.Line, error) {

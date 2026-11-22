@@ -169,6 +169,7 @@
   "scenarios_naming": [],
   "unit": [
    "activity_test.go",
+   "claim_grant_test.go",
    "commands_test.go",
    "jobs_native_test.go"
   ]
