@@ -178,7 +178,9 @@ func TestRealGuildBroadcastSourceTransaction(t *testing.T) {
 		t.Fatal(e)
 	}
 	runner := tx.Runner{DB: p}
-	svc := app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: runner}, Reads: runner, Fresh: p, Store: guildbroadcaststore.Store{}, Guild: gdb, Names: i4store.PlayerRootLocker{}, Players: i4store.PlayerRootLocker{}, Fence: i5store.Store{}, Receipts: kernelstore.Store{}, Content: contentstore.Store{}, Enqueue: queue}
+	// The daily cap has its own native; the full-roster probe below is this
+	// scenario's fifth source, so leave one slot for the fresh nonleader probe.
+	svc := app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: runner}, Reads: runner, Fresh: p, Store: guildbroadcaststore.Store{}, Guild: gdb, Names: i4store.PlayerRootLocker{}, Players: i4store.PlayerRootLocker{}, Fence: i5store.Store{}, Receipts: kernelstore.Store{}, Content: contentstore.Store{}, Enqueue: queue, DailyLimit: app.DefaultDailyLimit + 1}
 	refs, e := policy.NewSet(policy.Ref{Name: "content", Version: bundle.RevisionID()})
 	if e != nil {
 		t.Fatal(e)
