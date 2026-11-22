@@ -51,6 +51,24 @@ func (client *Client) Command(ctx context.Context, request operatoragent.Operato
 	return client.do(ctx, http.MethodPost, url, body)
 }
 
+// Modules fetches the backend module registry for the agent's merged list.
+func (client *Client) Modules(ctx context.Context) ([]operator.Module, error) {
+	response, err := client.do(ctx, http.MethodGet, client.baseURL+"/operator/v1/modules", nil)
+	if err != nil {
+		return nil, err
+	}
+	if response.Status != http.StatusOK {
+		return nil, fmt.Errorf("the backend module list answered HTTP %d", response.Status)
+	}
+	var reply struct {
+		Modules []operator.Module `json:"modules"`
+	}
+	if err := json.Unmarshal(response.Body, &reply); err != nil {
+		return nil, err
+	}
+	return reply.Modules, nil
+}
+
 // Read runs one operator read.
 func (client *Client) Read(ctx context.Context, name, query string) (operatoragent.BackendResponse, error) {
 	url := client.baseURL + "/operator/v1/reads/" + name

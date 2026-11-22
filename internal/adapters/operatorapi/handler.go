@@ -11,17 +11,17 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"net/url"
 	"strings"
 
 	"gxb.local/backend/v2/internal/application/operator"
-	"gxb.local/backend/v2/internal/application/operatoragent"
+	"gxb.local/backend/v2/internal/foundation/jsonbody"
 )
 
 const (
 	commandPrefix = "/operator/v1/commands/"
 	readPrefix    = "/operator/v1/reads/"
 	versionPath   = "/operator/v1/version"
+	modulesPath   = "/operator/v1/modules"
 	// ota.register_build carries the release manifest: one row per shipped file, about 3 MB for the
 	// full 1.631 res set. The listener is loopback-only and token-gated, so the cap only bounds a bug.
 	maxRequestBody = operator.MaxCommandBodyBytes
@@ -40,15 +40,17 @@ type Executor interface {
 
 // Read answers one bounded operator read; it runs no command and writes no
 // audit row.
-type Read func(context.Context, url.Values) (any, error)
+type Read = operator.ReadHandler
 
 type Handler struct {
 	Bus   Executor
 	Token string
 	// Version answers GET /operator/v1/version (ruling 8).
 	Version func(context.Context) (any, error)
-	// Reads is the read registry the composition root fills.
+	// Reads is the read registry the composition root derives from the modules.
 	Reads map[string]Read
+	// Modules are the registry descriptors GET /operator/v1/modules serves.
+	Modules []operator.Module
 }
 
 type request struct {
@@ -95,6 +97,10 @@ func (handler Handler) ServeHTTP(writer http.ResponseWriter, request *http.Reque
 		handler.serveVersion(writer, request)
 		return
 	}
+	if request.URL.Path == modulesPath && request.Method == http.MethodGet {
+		handler.serveModules(writer)
+		return
+	}
 	if name, isRead := strings.CutPrefix(request.URL.Path, readPrefix); isRead {
 		if request.Method != http.MethodGet {
 			writeError(writer, http.StatusNotFound, codeBadRequest, "no such operator route")
@@ -123,6 +129,17 @@ func (handler Handler) serveVersion(writer http.ResponseWriter, request *http.Re
 		return
 	}
 	write(writer, http.StatusOK, version)
+}
+
+// serveModules answers the registry the GUI and CLI build their tabs from
+// (I11A_ARCHITECTURE_V1 section 2). Planned rows are included so the tool can
+// show what is not built yet.
+func (handler Handler) serveModules(writer http.ResponseWriter) {
+	modules := handler.Modules
+	if modules == nil {
+		modules = []operator.Module{}
+	}
+	write(writer, http.StatusOK, map[string]any{"modules": modules})
 }
 
 func (handler Handler) serveRead(writer http.ResponseWriter, request *http.Request, name string) {
@@ -158,7 +175,7 @@ func (handler Handler) serveCommand(writer http.ResponseWriter, httpRequest *htt
 	}
 	// The trailing-data check reads past the JSON value, so a body whose value
 	// ends early but whose tail runs over the cap still refuses as 413.
-	if err := operatoragent.EnsureEndOfFile(decoder); err != nil {
+	if err := jsonbody.EnsureEndOfFile(decoder); err != nil {
 		writeBodyRefusal(writer, err)
 		return
 	}

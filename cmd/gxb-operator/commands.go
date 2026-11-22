@@ -5,11 +5,13 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
+	"text/tabwriter"
 	"time"
 
 	"gxb.local/backend/v2/internal/application/operatoragent"
@@ -33,6 +35,8 @@ func runClientCommand(root, command string, remaining []string) error {
 		return runOTA(root, remaining)
 	case "op":
 		return runOperation(root, remaining)
+	case "modules":
+		return runModules(root, remaining)
 	default:
 		return runLog(root, remaining)
 	}
@@ -357,6 +361,67 @@ func runOperation(root string, args []string) error {
 		return err
 	}
 	return printResult(status, body)
+}
+
+// runModules prints the merged registry the GUI builds its tabs from: table by
+// default, the raw agent reply with --json.
+func runModules(root string, args []string) error {
+	flags := flag.NewFlagSet("modules", flag.ContinueOnError)
+	flags.SetOutput(os.Stderr)
+	asJSON := flags.Bool("json", false, "print the raw agent reply")
+	if err := flags.Parse(args); err != nil {
+		return err
+	}
+	client, err := newAgentClient(root, true)
+	if err != nil {
+		return err
+	}
+	status, body, err := client.request(http.MethodGet, "/agent/v1/modules", nil)
+	if err != nil {
+		return err
+	}
+	if status != http.StatusOK {
+		return printResult(status, body)
+	}
+	if *asJSON {
+		fmt.Println(strings.TrimRight(string(body), "\n"))
+		return nil
+	}
+	var reply operatoragent.AgentModules
+	if err := json.Unmarshal(body, &reply); err != nil {
+		return err
+	}
+	printModuleTable(os.Stdout, reply)
+	if reply.BackendError != "" {
+		fmt.Fprintln(os.Stderr, reply.BackendError)
+	}
+	return nil
+}
+
+func printModuleTable(output io.Writer, reply operatoragent.AgentModules) {
+	writer := tabwriter.NewWriter(output, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(writer, "MODULE\tKIND\tNAME\tCLASS\tROUTE\tHELP")
+	for _, module := range reply.Modules {
+		kind := "command"
+		if module.Planned != "" {
+			kind = "planned"
+		}
+		if len(module.Commands) == 0 && len(module.Reads) == 0 {
+			fmt.Fprintf(writer, "%s\t%s\t-\t-\t-\t%s (%s)\n", module.ID, kind, module.Title, module.Planned)
+			continue
+		}
+		for _, command := range module.Commands {
+			route := command.Route
+			if route == "" {
+				route = "backend"
+			}
+			fmt.Fprintf(writer, "%s\t%s\t%s\t%s\t%s\t%s\n", module.ID, kind, command.Name, command.Class, route, command.Help)
+		}
+		for _, read := range module.Reads {
+			fmt.Fprintf(writer, "%s\t%s\t%s\t-\tbackend\t%s\n", module.ID, kind, read.Name, read.Help)
+		}
+	}
+	writer.Flush()
 }
 
 func runLog(root string, args []string) error {

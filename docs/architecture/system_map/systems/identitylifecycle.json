@@ -80,6 +80,7 @@
   "scenarios_naming": [],
   "unit": [
    "logout_test.go",
+   "module_test.go",
    "service_test.go"
   ]
  }

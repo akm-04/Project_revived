@@ -94,7 +94,8 @@
   ],
   "scenarios_naming": [],
   "unit": [
-   "commands_test.go"
+   "commands_test.go",
+   "module_test.go"
   ]
  }
 }

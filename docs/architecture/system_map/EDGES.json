@@ -1819,21 +1819,40 @@
   },
   "operator": {
    "events": [
-    "Refuse"
+    "Bounded",
+    "NewField",
+    "Refuse",
+    "WithEnum"
    ],
    "identitylifecycle": [
+    "NewField",
     "Refuse"
+   ],
+   "operatoragent": [
+    "MergeModules",
+    "NewField",
+    "WithEnum"
+   ],
+   "operatorcatalog": [
+    "Bounded",
+    "NewField"
    ],
    "operatorgrant": [
     "*InsertBulkTx",
     "*ListPendingBulkTx",
     "*ReadBulkTx",
     "*SaveBulkProgressTx",
+    "NewField",
     "Refuse"
    ],
    "otarelease": [
+    "Bounded",
+    "DefaultValues",
+    "NewField",
     "Refuse",
-    "StaleRevision"
+    "StaleRevision",
+    "WithDefault",
+    "WithEnum"
    ]
   },
   "operatoragent": {},
@@ -3921,7 +3940,10 @@
     "*SettleGrantTx"
    ],
    "operator": [
-    "Refuse"
+    "Bounded",
+    "NewField",
+    "Refuse",
+    "WithEnum"
    ],
    "otarelease": [
     "*Covers"
@@ -4765,6 +4787,7 @@
   },
   "identitylifecycle": {
    "operator": [
+    "NewField",
     "Refuse"
    ],
    "store:auditstore": [
@@ -5418,6 +5441,11 @@
    ]
   },
   "operatoragent": {
+   "operator": [
+    "MergeModules",
+    "NewField",
+    "WithEnum"
+   ],
    "otabuild": [
     "Build",
     "PatchesPresent"
@@ -5426,7 +5454,12 @@
     "Load"
    ]
   },
-  "operatorcatalog": {},
+  "operatorcatalog": {
+   "operator": [
+    "Bounded",
+    "NewField"
+   ]
+  },
   "operatorgrant": {
    "i5": [
     "*AdminGrant",
@@ -5438,6 +5471,7 @@
     "*ListPendingBulkTx",
     "*ReadBulkTx",
     "*SaveBulkProgressTx",
+    "NewField",
     "Refuse"
    ],
    "operatorcatalog": [
@@ -5451,8 +5485,13 @@
   "otabuild": {},
   "otarelease": {
    "operator": [
+    "Bounded",
+    "DefaultValues",
+    "NewField",
     "Refuse",
-    "StaleRevision"
+    "StaleRevision",
+    "WithDefault",
+    "WithEnum"
    ],
    "store:otastore": [
     "*ActivateTx",

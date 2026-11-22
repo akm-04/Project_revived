@@ -19,16 +19,16 @@ const (
 	DefaultServingRefreshSeconds   = 5
 	DefaultVolumeMB                = 99
 
-	minDownloadBaseSeconds     = 5
-	maxDownloadBaseSeconds     = 600
-	minDownloadMinKiBPerSecond = 1
-	maxDownloadMinKiBPerSecond = 102_400
-	minCacheMaxAgeSeconds      = 0
-	maxCacheMaxAgeSeconds      = 31_536_000
-	minServingRefreshSeconds   = 1
-	maxServingRefreshSeconds   = 300
-	minVolumeMB                = 1
-	maxVolumeMB                = 2_000
+	MinDownloadBaseSeconds     = 5
+	MaxDownloadBaseSeconds     = 600
+	MinDownloadMinKiBPerSecond = 1
+	MaxDownloadMinKiBPerSecond = 102_400
+	MinCacheMaxAgeSeconds      = 0
+	MaxCacheMaxAgeSeconds      = 31_536_000
+	MinServingRefreshSeconds   = 1
+	MaxServingRefreshSeconds   = 300
+	MinVolumeMB                = 1
+	MaxVolumeMB                = 2_000
 
 	kibibyteBytes = 1024
 	megabyteBytes = 1_000_000
@@ -107,11 +107,11 @@ func (s Settings) Validate() error {
 		value            int
 		minimum, maximum int
 	}{
-		{"download_base_seconds", s.DownloadBaseSeconds, minDownloadBaseSeconds, maxDownloadBaseSeconds},
-		{"download_min_kib_per_second", s.DownloadMinKiBPerSecond, minDownloadMinKiBPerSecond, maxDownloadMinKiBPerSecond},
-		{"cache_max_age_seconds", s.CacheMaxAgeSeconds, minCacheMaxAgeSeconds, maxCacheMaxAgeSeconds},
-		{"serving_refresh_seconds", s.ServingRefreshSeconds, minServingRefreshSeconds, maxServingRefreshSeconds},
-		{"volume_mb", s.VolumeMB, minVolumeMB, maxVolumeMB},
+		{"download_base_seconds", s.DownloadBaseSeconds, MinDownloadBaseSeconds, MaxDownloadBaseSeconds},
+		{"download_min_kib_per_second", s.DownloadMinKiBPerSecond, MinDownloadMinKiBPerSecond, MaxDownloadMinKiBPerSecond},
+		{"cache_max_age_seconds", s.CacheMaxAgeSeconds, MinCacheMaxAgeSeconds, MaxCacheMaxAgeSeconds},
+		{"serving_refresh_seconds", s.ServingRefreshSeconds, MinServingRefreshSeconds, MaxServingRefreshSeconds},
+		{"volume_mb", s.VolumeMB, MinVolumeMB, MaxVolumeMB},
 	} {
 		if bound.value < bound.minimum || bound.value > bound.maximum {
 			return fmt.Errorf("%w: %s %d is outside %d..%d", ErrInvalidSettings, bound.name, bound.value, bound.minimum, bound.maximum)

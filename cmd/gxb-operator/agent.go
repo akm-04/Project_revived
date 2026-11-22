@@ -14,6 +14,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/agentapi"
 	"gxb.local/backend/v2/internal/adapters/operatorclient"
 	"gxb.local/backend/v2/internal/adapters/processcontrol"
+	appoperator "gxb.local/backend/v2/internal/application/operator"
 	"gxb.local/backend/v2/internal/application/operatoragent"
 )
 
@@ -55,6 +56,7 @@ func runAgent(root string, args []string) error {
 	operator := operatorclient.New(config.Backend.OperatorAddr, tokens)
 	backendGuard := &operatoragent.BackendGuard{}
 	buildOperation := operatoragent.Build{Config: config, Operator: operator, Operations: operations}
+	moduleCatalog := operatoragent.ModuleCatalog{Backend: operator, Local: []appoperator.Module{operatoragent.ServerModule(), operatoragent.AgentOTAModule()}}
 	handler := agentapi.Handler{
 		Credentials: operatoragent.NewCredentials(root),
 		Sessions:    operatoragent.NewSessions(time.Now),
@@ -64,6 +66,7 @@ func runAgent(root string, args []string) error {
 		Maintenance: operatoragent.Maintenance{Backend: backend, Operator: operator, Tokens: tokens, Operations: operations, Guard: backendGuard},
 		Operations:  operations,
 		Build:       buildOperation,
+		Modules:     moduleCatalog,
 		ToolLog:     toolLog,
 		ToolLogPath: filepath.Join(logsDirectory, operatoragent.ToolLogFileName),
 		Listen:      config.Listen,

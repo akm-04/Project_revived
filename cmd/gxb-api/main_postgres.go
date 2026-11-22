@@ -18,6 +18,7 @@ import (
 	"gxb.local/backend/v2/internal/application/dailyreset"
 	apponeonone "gxb.local/backend/v2/internal/application/oneonone"
 	"gxb.local/backend/v2/internal/application/operator"
+	"gxb.local/backend/v2/internal/application/operatorcatalog"
 	"gxb.local/backend/v2/internal/application/operatorgrant"
 	"gxb.local/backend/v2/internal/application/playerdisplay"
 	apptopfloor "gxb.local/backend/v2/internal/application/topfloor"
@@ -553,39 +554,35 @@ func main() {
 	operatorVersion := operator.VersionService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Reader: operatorstore.Store{}, BackendVersion: backendVersion, GitCommit: gitCommit, ContentRevision: &operatorCatalogue.ContentRevision}
 	playerReads := operator.PlayerReadService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Directory: i4store.PlayerDirectoryReader{}, Wallet: appi5.OperatorWalletService{Store: i5db, Privileges: privileges}}
 	bulkReads := operatorgrant.BulkReadService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: operatorstore.Store{}}
-	operatorReads := map[string]operatorapi.Read{
-		"ota.status":               operatorapi.OTAStatus(otaStatus),
-		"ota.release":              operatorapi.OTARelease(otaReleaseLookup),
-		"operator.audit.list":      operatorapi.AuditList(operatorAudit),
-		"catalog.search":           operatorapi.CatalogSearch(operatorCatalogue),
-		"player.find":              operatorapi.PlayerFind(playerReads),
-		"player.summary":           operatorapi.PlayerSummary(playerReads),
-		operatorgrant.BulkShowRead: operatorapi.BulkShow(bulkReads),
-	}
 	operatorVersionReply := func(ctx context.Context) (any, error) {
 		return operatorVersion.Version(ctx)
 	}
-	operatorHandlers := otaCommands.Handlers()
-	operatorHandlers["ota.settings.set"] = appotarelease.SettingsSetHandler(otaSettingsFile, otaSettingsValue, otastore.Store{})
 	logoutCommands := appidentity.LogoutCommands{Store: identitystore.Store{}}
-	for name, handler := range logoutCommands.Handlers() {
-		operatorHandlers[name] = handler
-	}
 	grantCommands := operatorgrant.Commands{Catalogue: operatorCatalogue, Store: operatorstore.Store{}, Directory: i4store.PlayerDirectoryReader{}, Grants: i5svc, LineCap: grantLineCap}
-	for name, handler := range grantCommands.Handlers() {
-		operatorHandlers[name] = handler
-	}
 	eventHooks, err := appevents.NewHookRegistry(domainevents.HookCampaignDropMultiplier)
 	if err != nil {
 		log.Fatalf("events hook registry: %v", err)
 	}
 	eventCommands := appevents.Commands{Store: eventstore.Store{}, Coverage: otaServing, Gifts: eventstore.ContentGifts{}, Catalogue: eventstore.ContentCatalogue{}, Hooks: eventHooks}
-	for name, handler := range eventCommands.Handlers() {
-		operatorHandlers[name] = handler
-	}
 	eventService := appevents.Service{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: eventstore.Store{}, Clock: clock.System{}}
-	operatorReads["events.list"] = operatorapi.EventsList(eventService)
-	startOperator(ctx, runner, operatorHandlers, operatorReads, operatorVersionReply, otaAfterCommit{Root: cfg.OTARoot, ReconcileSettings: otaSettingsSync.Reconcile, Serving: otaServing})
+	otaModule := bindModule(otaCommands.Module(),
+		map[string]operator.Handler{"ota.settings.set": appotarelease.SettingsSetHandler(otaSettingsFile, otaSettingsValue, otastore.Store{})},
+		map[string]operator.ReadHandler{"ota.status": operatorapi.OTAStatus(otaStatus), "ota.release": operatorapi.OTARelease(otaReleaseLookup)})
+	eventsModule := bindModule(eventCommands.Module(), nil,
+		map[string]operator.ReadHandler{"events.list": operatorapi.EventsList(eventService)})
+	catalogModule := bindModule(operatorcatalog.Module(), nil,
+		map[string]operator.ReadHandler{"catalog.search": operatorapi.CatalogSearch(operatorCatalogue)})
+	playerModule := bindModule(operator.PlayerModule(), nil,
+		map[string]operator.ReadHandler{"player.find": operatorapi.PlayerFind(playerReads), "player.summary": operatorapi.PlayerSummary(playerReads)})
+	operatorModule := bindModule(operator.OperatorModule(), nil,
+		map[string]operator.ReadHandler{"operator.audit.list": operatorapi.AuditList(operatorAudit), operatorgrant.BulkShowRead: operatorapi.BulkShow(bulkReads)})
+	modules := []operator.Module{otaModule, logoutCommands.Module(), grantCommands.Module(), eventsModule, catalogModule, playerModule, operatorModule}
+	modules = append(modules, operator.PlannedModules()...)
+	registry, err := operator.NewRegistry(modules...)
+	if err != nil {
+		log.Fatalf("operator modules: %v", err)
+	}
+	startOperator(ctx, runner, registry.Handlers(), registry.Reads(), registry.Modules(), operatorVersionReply, otaAfterCommit{Root: cfg.OTARoot, ReconcileSettings: otaSettingsSync.Reconcile, Serving: otaServing})
 	startOperatorBulkJob(ctx, pool, operatorgrant.Applier{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: operatorstore.Store{}, Grants: i5svc, Catalogue: operatorCatalogue, LineCap: grantLineCap})
 	clientLogs, journal := startClientLog(ctx, pool, authority, cfg.ClientLogURL, retentionPolicies.RetentionDays, txMetrics, mux, handlerConcurrency("GXB_CLIENT_LOG_MAX_CONCURRENT", 4, poolConnections))
 	dailyReset := dailyreset.Service{Markers: dailyresetstore.Store{Queryer: pool}, Counters: itemsEnergy.Counters}

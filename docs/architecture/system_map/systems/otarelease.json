@@ -296,6 +296,7 @@
   ],
   "unit": [
    "commands_test.go",
+   "module_test.go",
    "serving_test.go",
    "settings_test.go",
    "status_test.go"

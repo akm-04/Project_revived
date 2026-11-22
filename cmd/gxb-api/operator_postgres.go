@@ -28,7 +28,7 @@ const defaultOperatorAddress = "127.0.0.1:8091"
 // startOperator opens the operator listener (I11A_ARCHITECTURE_V1 ruling 1,
 // I11A_OPERATOR_COMMANDS_V1 ruling 7) when the agent passed its per-start
 // token in GXB_OPERATOR_TOKEN; without a token there is no operator surface.
-func startOperator(ctx context.Context, runner tx.Runner, handlers map[string]operator.Handler, reads map[string]operatorapi.Read, version func(context.Context) (any, error), committed otaAfterCommit) {
+func startOperator(ctx context.Context, runner tx.Runner, handlers map[string]operator.Handler, reads map[string]operator.ReadHandler, modules []operator.Module, version func(context.Context) (any, error), committed otaAfterCommit) {
 	token := os.Getenv("GXB_OPERATOR_TOKEN")
 	if token == "" {
 		log.Printf("operator listener disabled: GXB_OPERATOR_TOKEN is not set")
@@ -50,7 +50,7 @@ func startOperator(ctx context.Context, runner tx.Runner, handlers map[string]op
 	}
 	bus := operator.Bus{Runner: runner, Clock: clock.System{}, Store: operatorstore.Store{}, Handlers: handlers}
 	executor := postCommitExecutor{Next: bus, OTA: committed}
-	server := &http.Server{Handler: operatorapi.Handler{Bus: executor, Token: token, Reads: reads, Version: version}, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: time.Minute, WriteTimeout: 5 * time.Minute, IdleTimeout: time.Minute}
+	server := &http.Server{Handler: operatorapi.Handler{Bus: executor, Token: token, Reads: reads, Modules: modules, Version: version}, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: time.Minute, WriteTimeout: 5 * time.Minute, IdleTimeout: time.Minute}
 	go func() {
 		<-ctx.Done()
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -63,6 +63,21 @@ func startOperator(ctx context.Context, runner tx.Runner, handlers map[string]op
 			log.Fatalf("operator listener: %v", err)
 		}
 	}()
+}
+
+// bindModule attaches the declared command and read handlers. The registry
+// fails closed, so a declaration left without a handler stops startup instead
+// of becoming an uncallable or half-checked command.
+func bindModule(module operator.Module, commands map[string]operator.Handler, reads map[string]operator.ReadHandler) operator.Module {
+	bound, err := module.BindCommands(commands)
+	if err != nil {
+		log.Fatalf("operator modules: %v", err)
+	}
+	bound, err = bound.BindReads(reads)
+	if err != nil {
+		log.Fatalf("operator modules: %v", err)
+	}
+	return bound
 }
 
 // otaAfterCommit is what an applied OTA command changes outside the database.
