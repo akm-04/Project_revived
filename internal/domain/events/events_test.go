@@ -3,11 +3,13 @@ package events_test
 import (
 	"encoding/json"
 	"errors"
+	"os"
 	"strings"
 	"testing"
 	"time"
 
 	"gxb.local/backend/v2/internal/domain/events"
+	otadomain "gxb.local/backend/v2/internal/domain/otarelease"
 )
 
 const validDefinition = `{
@@ -110,11 +112,17 @@ func TestCampaignHookValidation(t *testing.T) {
 	if err := valid.Validate(); err != nil {
 		t.Fatalf("valid hook: %v", err)
 	}
+	boundary := valid
+	boundary.Hooks = []events.Hook{{Kind: events.HookCampaignDropMultiplier, Scope: "normal", ItemKinds: []int64{1}, Multiplier: 100}}
+	if err := boundary.Validate(); err != nil {
+		t.Fatalf("multiplier 100 must be accepted: %v", err)
+	}
 	invalid := []events.Hook{
 		{Kind: events.HookCampaignDropMultiplier, Scope: "hard", ItemKinds: []int64{1}, Multiplier: 2},
 		{Kind: events.HookCampaignDropMultiplier, Scope: "normal", ItemKinds: nil, Multiplier: 2},
 		{Kind: events.HookCampaignDropMultiplier, Scope: "normal", ItemKinds: []int64{1}, Multiplier: 0},
 		{Kind: events.HookCampaignDropMultiplier, Scope: "normal", ItemKinds: []int64{1, 1}, Multiplier: 2},
+		{Kind: events.HookCampaignDropMultiplier, Scope: "normal", ItemKinds: []int64{1}, Multiplier: 101},
 	}
 	for index, hook := range invalid {
 		definition := valid
@@ -122,6 +130,33 @@ func TestCampaignHookValidation(t *testing.T) {
 		if err := definition.Validate(); !errors.Is(err, events.ErrInvalidDefinition) {
 			t.Fatalf("hook %d must be refused, got %v", index, err)
 		}
+	}
+}
+
+func TestShipped1008RequirementsCoverOnlyWithLazyAsset(t *testing.T) {
+	raw, err := os.ReadFile("../../../content/events/definitions/1008.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	definition, err := events.ParseDefinition(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	request := definition.ClientRequirements.CoversRequest()
+	if len(request.ClientPaths) != 0 {
+		t.Fatalf("1008 ships no client table of its own, got client paths %v", request.ClientPaths)
+	}
+	want := otadomain.LazyAsset{Path: "res/web/windows/activities/1008/1008.csb", MD5: "67433bf1269e1fb05b36471e3cc142fc"}
+	if len(request.LazyAssets) != 1 || request.LazyAssets[0] != want {
+		t.Fatalf("1008 lazy assets = %+v, want %+v", request.LazyAssets, want)
+	}
+	covered := otadomain.EvaluateCovers(request, nil, nil, func(asset otadomain.LazyAsset) bool { return asset == want })
+	if covered.Status != otadomain.CoversCovered {
+		t.Fatalf("a present lazy asset must cover: %+v", covered)
+	}
+	missing := otadomain.EvaluateCovers(request, nil, nil, func(otadomain.LazyAsset) bool { return false })
+	if missing.Status != otadomain.CoversMissing || len(missing.MissingLazyAssets) != 1 || missing.MissingLazyAssets[0] != want {
+		t.Fatalf("an absent lazy asset must be the exact missing asset: %+v", missing)
 	}
 }
 

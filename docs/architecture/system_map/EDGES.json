@@ -31,7 +31,11 @@
     "*ObserveTopFloorDayTx"
    ]
   },
-  "activitydirectory": {},
+  "activitydirectory": {
+   "events": [
+    "QueryerValue"
+   ]
+  },
   "adventure": {
    "i5": [
     "*ObserveTx"
@@ -276,6 +280,11 @@
    "dormhouse": [
     "*ApplyDormEXPLockedTx",
     "*RawAwakeningTx"
+   ],
+   "events": [
+    "*AwardStoryPartnerTx",
+    "*LockStoryRosterTx",
+    "*OwnsOriginTx"
    ],
    "godstrial": [
     "*LockStoryRosterTx"
@@ -648,7 +657,11 @@
     "*RecycleInfoTx"
    ]
   },
-  "events": {},
+  "events": {
+   "activitydirectory": [
+    "*Project"
+   ]
+  },
   "frienddm": {
    "realtimewakeup": [
     "*ReloadAndDeliver"
@@ -1334,7 +1347,9 @@
     "*SettleGrantTx"
    ],
    "events": [
-    "*DeliverTx"
+    "*DeliverTx",
+    "*FenceActorTx",
+    "*SettleGrantTx"
    ],
    "frienddm": [
     "*PrepareEmoticonEntitlementTx"
@@ -1799,16 +1814,27 @@
    "events": [
     "Refuse"
    ],
+   "identitylifecycle": [
+    "Refuse"
+   ],
    "otarelease": [
     "Refuse",
     "StaleRevision"
    ]
   },
   "operatoragent": {},
-  "otabuild": {},
+  "otabuild": {
+   "operatoragent": [
+    "Build",
+    "PatchesPresent"
+   ]
+  },
   "otarelease": {
    "events": [
     "*Covers"
+   ],
+   "operatoragent": [
+    "Load"
    ]
   },
   "petcampaign": {
@@ -2488,6 +2514,9 @@
    ]
   },
   "activitydirectory": {
+   "events": [
+    "*Project"
+   ],
    "workplace": [
     "*Now"
    ],
@@ -2811,6 +2840,7 @@
    "store:contentstore": [
     "*ActiveRevision",
     "*CampaignCatalogTx",
+    "*ItemKindsTx",
     "*ResolveProgressionPolicyTx",
     "*SummonCatalogTx"
    ],
@@ -3858,8 +3888,18 @@
    ]
   },
   "events": {
+   "activitydirectory": [
+    "QueryerValue"
+   ],
+   "characterhero": [
+    "*AwardStoryPartnerTx",
+    "*LockStoryRosterTx",
+    "*OwnsOriginTx"
+   ],
    "i5": [
-    "*DeliverTx"
+    "*DeliverTx",
+    "*FenceActorTx",
+    "*SettleGrantTx"
    ],
    "operator": [
     "Refuse"
@@ -3867,9 +3907,16 @@
    "otarelease": [
     "*Covers"
    ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*HeroFragmentsTx",
+    "*HeroNormalSummonTx"
+   ],
    "store:eventstore": [
     "*ActiveHooksTx",
+    "*ActiveOccurrenceTx",
     "*CheckRewardsTx",
+    "*ClaimOccurrenceTx",
     "*ClaimsForPlayerTx",
     "*CountOccurrenceClaimsTx",
     "*DefinitionTx",
@@ -3892,10 +3939,13 @@
     "*OverlapsTx",
     "*SaveOccurrenceTx",
     "*SetCycleBodyTx",
-    "*SetCycleModeTx"
+    "*SetCycleModeTx",
+    "*UpdateClaimReplyTx"
    ],
    "store:i4store": [
     "*ListLogicalServersAfterTx",
+    "*LockPlayerRootsTx",
+    "*PlayerLevelTx",
     "*PlayersOfServerAfterTx"
    ]
   },
@@ -4702,19 +4752,26 @@
    ]
   },
   "identitylifecycle": {
+   "operator": [
+    "Refuse"
+   ],
    "store:auditstore": [
     "*InsertTx"
    ],
    "store:identitystore": [
+    "*FindLiveSessionIDsForPlayersTx",
+    "*FindLiveSessionsByPlayer",
     "*FindProviderBindingTx",
     "*InsertProviderBindingTx",
     "*InsertSessionCredentialTx",
     "*InsertSessionTx",
+    "*ListLiveSessionIDsTx",
     "*LockAccountTx",
     "*LockLiveContextTx",
     "*LockSessionTx",
     "*RevokeGameplayCredentialsTx",
     "*RevokeSessionCredentialsTx",
+    "*RevokeSessionsTx",
     "*SaveEndedContextTx",
     "*SaveRevokedSessionTx",
     "*TouchSessionActivityTx"
@@ -5340,7 +5397,15 @@
    ]
   },
   "operator": {},
-  "operatoragent": {},
+  "operatoragent": {
+   "otabuild": [
+    "Build",
+    "PatchesPresent"
+   ],
+   "otarelease": [
+    "Load"
+   ]
+  },
   "otabuild": {},
   "otarelease": {
    "operator": [
@@ -5357,6 +5422,7 @@
     "*LockSettingsTx",
     "*ReadSettingsTx",
     "*ReadStatusTx",
+    "*ReleaseExistsTx",
     "*ReleaseTx",
     "*SaveSettingsTx",
     "*SupersedeLaneTx",
@@ -6606,7 +6672,9 @@
   "eventcentre": [
    "cmd/gxb-api/main_postgres.go"
   ],
-  "events": [],
+  "events": [
+   "cmd/gxb-api/main_postgres.go"
+  ],
   "frienddm": [
    "cmd/gxb-api/main_postgres.go"
   ],

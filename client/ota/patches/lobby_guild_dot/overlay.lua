@@ -1,0 +1,6 @@
+	cc.EventProxy.new(xyd.EventDispatcher.get(), arg_2_0):addEventListener(xyd.event.DRINK_NOTIF, handler(arg_2_0, arg_2_0.updateGuildNotif))
+	cc.EventProxy.new(xyd.EventDispatcher.get(), arg_2_0):addEventListener(xyd.event.LEAGUE_CHAT_SESSION_CLOSED, function()
+		arg_2_0.guild:loadSelfGuild(function()
+			arg_2_0:updateGuildNotif(nil)
+		end)
+	end)

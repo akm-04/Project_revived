@@ -129,6 +129,19 @@ xyd = {
 	version = function() return "1.631.0" end,
 	isChatRoomMessage = function() return true end,
 }
+local alertCalls = {}
+xyd.CommonAlertType = { ONE_BTN = 1, TWO_BTN = 2 }
+xyd.CommonAlertWindow = { open = function(alertType, message, callback)
+	alertCalls[#alertCalls + 1] = { alertType = alertType, message = message, callback = callback }
+end }
+local restartCalls = 0
+local exitProgramCalls = 0
+restart_game = function()
+	restartCalls = restartCalls + 1
+end
+xyd.exitProgram = function()
+	exitProgramCalls = exitProgramCalls + 1
+end
 json = { encode = cjson.encode, decode = cjson.decode }
 device = { platform = "android" }
 string.urlencode = function(value)
@@ -447,5 +460,61 @@ local tcpBackend = TcpBackend.get()
 local stockTcp = tcpBackend:createTCPSocket("10.0.0.1", 18954)
 ok(stockTcp ~= nil and stockTcp.url == nil, "TCP mode returns the stock socket")
 ok(#tcpCreated >= 1, "stock TCP socket creator was used in TCP mode")
+
+-- A fresh backend that has completed its stock login and holds one poll.
+local function freshPollingBackend()
+	local FreshBackend = buildChunk(true)
+	local fresh = FreshBackend.get()
+	fresh.token_ = "session-token"
+	fresh.region_ = 1
+	function fresh:request(mid, parameters, callback)
+		callback(xyd.error.OK, { host = "10.0.0.1", port = 18954, room_id = 7 })
+	end
+	fresh:enterChatRoom(7)
+	complete(lastRequest())
+	local login = httpRequests[#httpRequests - 1]
+	complete(login)
+	local poll = pendingPoll()
+	assert(poll ~= nil, "fresh backend did not open a held poll")
+	return poll
+end
+
+local alertsBefore = #alertCalls
+local reloginPoll = freshPollingBackend()
+local requestsAfterReloginSetup = #httpRequests
+reloginPoll:complete(cjson.encode({ error_code = 20003, error_msg = "Unstable network,try to relogin!" }), 401)
+ok(#alertCalls == alertsBefore + 1, "401 with message.lua 20003 opened one stock alert")
+local reloginAlert = alertCalls[#alertCalls]
+ok(reloginAlert.alertType == 1 and reloginAlert.message == "Unstable network,try to relogin!",
+	"relogin alert is the stock one-button alert with the server error message")
+ok(type(reloginAlert.callback) == "function", "relogin alert carries a callback")
+reloginAlert.callback()
+ok(restartCalls == 1 and exitProgramCalls == 0, "relogin alert callback restarted the game")
+scheduler.advance(10)
+ok(#httpRequests == requestsAfterReloginSetup, "relogin stopped polling without a retry")
+
+local refusedAlertsBefore = #alertCalls
+local refusedPoll = freshPollingBackend()
+local requestsBeforeRefusal = #httpRequests
+refusedPoll:complete(cjson.encode({ error_code = 40002, error_msg = "" }), 401)
+ok(#alertCalls == refusedAlertsBefore, "401 without 20003 did not alert")
+scheduler.advance(0.5)
+ok(#httpRequests == requestsBeforeRefusal + 1 and pendingPoll() ~= nil, "401 without 20003 retried the poll")
+
+local errorAlertsBefore = #alertCalls
+local serverErrorPoll = freshPollingBackend()
+local requestsBeforeServerError = #httpRequests
+serverErrorPoll:complete("server error", 500)
+ok(#alertCalls == errorAlertsBefore, "HTTP 500 did not alert")
+scheduler.advance(0.5)
+ok(#httpRequests == requestsBeforeServerError + 1 and pendingPoll() ~= nil, "HTTP 500 retried the poll")
+
+local okAlertsBefore = #alertCalls
+local acceptedPoll = freshPollingBackend()
+complete(acceptedPoll)
+ok(#alertCalls == okAlertsBefore, "HTTP 200 did not alert")
+local continuedPoll = pendingPoll()
+ok(continuedPoll ~= nil and continuedPoll ~= acceptedPoll and requestPayload(continuedPoll).hold == true,
+	"HTTP 200 continued the held poll")
 
 print(string.format("SIMULATED HTTP_POLL_BACKEND PASS: %d assertions", assertions))

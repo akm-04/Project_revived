@@ -88,10 +88,13 @@ func newOTAHarness(t *testing.T, rows []domain.RawRelease, lazyFetch domain.Lazy
 	if err := os.WriteFile(assetPath, assetBytes, 0o644); err != nil {
 		t.Fatal(err)
 	}
+	settings := domain.DefaultSettings()
+	settings.LazyFetch = lazyFetch
+	settings.ResPath = res
 	serving := &appotarelease.Serving{
 		Load:            func(context.Context) ([]domain.RawRelease, error) { return rows, nil },
 		Root:            root,
-		Settings:        appotarelease.NewSettingsValue(domain.Settings{LazyFetch: lazyFetch, ResPath: res}),
+		Settings:        appotarelease.NewSettingsValue(settings),
 		PublicEngineURL: "https://engine.example",
 	}
 	if err := serving.Refresh(context.Background()); err != nil {
@@ -168,19 +171,24 @@ func TestOTAResHandlerServesIndexedAssetAndRefusesUnknown(t *testing.T) {
 
 func TestOTADownloadWriteDeadlineFollowsSize(t *testing.T) {
 	now := time.Unix(1_000, 0)
-	if got := downloadWriteDeadline(now, 0).Sub(now); got != downloadBaseWriteDeadline {
-		t.Fatalf("empty deadline=%s want=%s", got, downloadBaseWriteDeadline)
+	settings := domain.DefaultSettings()
+	if got := settings.DownloadWriteDeadline(now, 0).Sub(now); got != 35*time.Second {
+		t.Fatalf("empty deadline=%s", got)
 	}
-	if got := downloadWriteDeadline(now, downloadBytesPerSecond).Sub(now); got != downloadBaseWriteDeadline+time.Second {
+	if got := settings.DownloadWriteDeadline(now, 32*1024).Sub(now); got != 36*time.Second {
 		t.Fatalf("32 KiB deadline=%s", got)
 	}
 	huge := int64(99_000_000)
-	want := downloadBaseWriteDeadline + time.Duration(huge)*time.Second/downloadBytesPerSecond
-	if got := downloadWriteDeadline(now, huge).Sub(now); got != want {
-		t.Fatalf("99 MB deadline=%s want=%s", got, want)
+	if got := settings.DownloadWriteDeadline(now, huge).Sub(now); got != 35*time.Second+time.Duration(huge)*time.Second/(32*1024) {
+		t.Fatalf("99 MB deadline=%s", got)
 	}
-	if !downloadWriteDeadline(now, huge).After(downloadWriteDeadline(now, downloadBytesPerSecond)) {
+	if !settings.DownloadWriteDeadline(now, huge).After(settings.DownloadWriteDeadline(now, 32*1024)) {
 		t.Fatal("the deadline does not grow with the size")
+	}
+	slower := settings
+	slower.DownloadMinKiBPerSecond = 1
+	if got := slower.DownloadWriteDeadline(now, 32*1024).Sub(now); got != 35*time.Second+32*time.Second {
+		t.Fatalf("1 KiB/s deadline=%s", got)
 	}
 }
 
@@ -219,6 +227,95 @@ func TestOTAHandlersReplaceTheSharedWriteDeadline(t *testing.T) {
 	}
 }
 
+func TestOTACacheControlFollowsTheLiveSetting(t *testing.T) {
+	rows := []domain.RawRelease{otaRow(t, "1.631.1", domain.LaneAssets, domain.StateActive, 20)}
+	harness := newOTAHarness(t, rows, domain.LazyFetchOn)
+	updates := OTAUpdatesGET{Serving: harness.serving}
+	res := OTAResGET{Serving: harness.serving}
+	volumePath := "/updates/assets/" + otaVolumeName("1.631.1")
+	assetPath := "/res/a.png." + otaMD5(harness.asset)
+
+	const immutable = "public, max-age=31536000, immutable"
+	for _, target := range []string{volumePath, assetPath} {
+		response := httptest.NewRecorder()
+		if target == volumePath {
+			updates.ServeHTTP(response, httptest.NewRequest(http.MethodGet, target, nil))
+		} else {
+			res.ServeHTTP(response, httptest.NewRequest(http.MethodGet, target, nil))
+		}
+		if response.Code != http.StatusOK || response.Header().Get("Cache-Control") != immutable {
+			t.Fatalf("%s status=%d cache=%q", target, response.Code, response.Header().Get("Cache-Control"))
+		}
+	}
+
+	ranged := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, volumePath, nil)
+	request.Header.Set("Range", "bytes=10-")
+	updates.ServeHTTP(ranged, request)
+	if ranged.Code != http.StatusPartialContent || ranged.Header().Get("Cache-Control") != immutable {
+		t.Fatalf("range status=%d cache=%q", ranged.Code, ranged.Header().Get("Cache-Control"))
+	}
+
+	noStoreSettings := harness.serving.Settings.Get()
+	noStoreSettings.CacheMaxAgeSeconds = 0
+	harness.serving.Settings.Set(noStoreSettings)
+	for _, target := range []string{volumePath, assetPath} {
+		response := httptest.NewRecorder()
+		if target == volumePath {
+			updates.ServeHTTP(response, httptest.NewRequest(http.MethodGet, target, nil))
+		} else {
+			res.ServeHTTP(response, httptest.NewRequest(http.MethodGet, target, nil))
+		}
+		if response.Code != http.StatusOK || response.Header().Get("Cache-Control") != "no-store" {
+			t.Fatalf("%s status=%d cache=%q", target, response.Code, response.Header().Get("Cache-Control"))
+		}
+	}
+
+	for _, target := range []string{"/updates/assets/missing.zip.001", "/res/missing.png." + otaMD5([]byte("x"))} {
+		response := httptest.NewRecorder()
+		if target[:8] == "/updates" {
+			updates.ServeHTTP(response, httptest.NewRequest(http.MethodGet, target, nil))
+		} else {
+			res.ServeHTTP(response, httptest.NewRequest(http.MethodGet, target, nil))
+		}
+		if response.Code != http.StatusNotFound || response.Header().Get("Cache-Control") != "no-store" {
+			t.Fatalf("%s status=%d cache=%q", target, response.Code, response.Header().Get("Cache-Control"))
+		}
+	}
+}
+
+func TestOTALiveSettingsChangeTheNextWriteDeadline(t *testing.T) {
+	rows := []domain.RawRelease{otaRow(t, "1.631.1", domain.LaneAssets, domain.StateActive, 20)}
+	harness := newOTAHarness(t, rows, domain.LazyFetchOn)
+	now := time.Unix(1_000, 0)
+	harness.serving.Now = func() time.Time { return now }
+	handler := OTAUpdatesGET{Serving: harness.serving}
+	target := "/updates/assets/" + otaVolumeName("1.631.1")
+	bodyBytes := int64(len(harness.volume))
+
+	first := &deadlineRecorder{ResponseRecorder: httptest.NewRecorder()}
+	handler.ServeHTTP(first, httptest.NewRequest(http.MethodGet, target, nil))
+	if first.Code != http.StatusOK || !first.set {
+		t.Fatalf("first status=%d set=%v", first.Code, first.set)
+	}
+	if want := now.Add(35*time.Second + time.Duration(bodyBytes)*time.Second/(32*1024)); !first.deadline.Equal(want) {
+		t.Fatalf("deadline=%s want=%s", first.deadline, want)
+	}
+
+	shorter := harness.serving.Settings.Get()
+	shorter.DownloadBaseSeconds = 5
+	shorter.DownloadMinKiBPerSecond = 1
+	harness.serving.Settings.Set(shorter)
+	second := &deadlineRecorder{ResponseRecorder: httptest.NewRecorder()}
+	handler.ServeHTTP(second, httptest.NewRequest(http.MethodGet, target, nil))
+	if second.Code != http.StatusOK || !second.set {
+		t.Fatalf("second status=%d set=%v", second.Code, second.set)
+	}
+	if want := now.Add(5*time.Second + time.Duration(bodyBytes)*time.Second/1024); !second.deadline.Equal(want) {
+		t.Fatalf("live deadline=%s want=%s", second.deadline, want)
+	}
+}
+
 func TestOTAResHandlerRefusesWhenLazyFetchIsOff(t *testing.T) {
 	rows := []domain.RawRelease{otaRow(t, "1.631.1", domain.LaneAssets, domain.StateActive, 20)}
 	harness := newOTAHarness(t, rows, domain.LazyFetchOff)
@@ -250,7 +347,10 @@ func TestPreloginDiscoveryAdvertisesResOnlyWhenLazyFetchIsEffective(t *testing.T
 		t.Fatalf("auto with assets response=%+v", response.Body)
 	}
 
-	withAssets.serving.Settings = appotarelease.NewSettingsValue(domain.Settings{LazyFetch: domain.LazyFetchOff, ResPath: withAssets.res})
+	offSettings := domain.DefaultSettings()
+	offSettings.LazyFetch = domain.LazyFetchOff
+	offSettings.ResPath = withAssets.res
+	withAssets.serving.Settings = appotarelease.NewSettingsValue(offSettings)
 	response = discovery(withAssets.serving.ResDownloadURL)
 	if response.HTTPStatus != 200 || response.Body["res_download_url"] != "" {
 		t.Fatalf("off response=%+v", response.Body)

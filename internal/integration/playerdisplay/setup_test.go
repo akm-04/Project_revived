@@ -108,9 +108,17 @@ func companionActor(t *testing.T, p *pg.Pool) identity.ActorContext {
 	return born(t, p, nativebirth.Persist)
 }
 
+func bornActorOn(t *testing.T, p *pg.Pool, server identity.LogicalServerID) identity.ActorContext {
+	return bornOn(t, p, nativebirth.PersistBare, server)
+}
+
 func born(t *testing.T, p *pg.Pool, persist func(context.Context, *pg.Pool, ids.UUID, identity.LogicalServerID, identity.PlayerID) error) identity.ActorContext {
+	return bornOn(t, p, persist, 1)
+}
+
+func bornOn(t *testing.T, p *pg.Pool, persist func(context.Context, *pg.Pool, ids.UUID, identity.LogicalServerID, identity.PlayerID) error, server identity.LogicalServerID) identity.ActorContext {
 	t.Helper()
-	a, account := playerRoot(t, p, 1)
+	a, account := playerRoot(t, p, server)
 	if e := persist(ctx, p, account, a.LogicalServerID, a.PlayerID); e != nil {
 		t.Fatalf("fixture birth: %v", e)
 	}

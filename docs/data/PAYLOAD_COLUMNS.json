@@ -1415,6 +1415,38 @@
    "batch": 17
   },
   {
+   "table": "event_cycle_settings",
+   "column": "cycle_body",
+   "scope": "server",
+   "decode": "raw",
+   "decode_type": "json.RawMessage",
+   "decode_sites": [
+    "internal/adapters/postgres/eventstore/store.go:528 SettingsTx cycle_body -> json.RawMessage"
+   ],
+   "writers": [],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 20
+  },
+  {
+   "table": "event_definitions",
+   "column": "body",
+   "scope": "server",
+   "decode": "struct",
+   "decode_type": "events.Definition",
+   "decode_sites": [
+    "internal/adapters/postgres/eventstore/store.go:110 events.ParseDefinition"
+   ],
+   "writers": [
+    "internal/adapters/postgres/eventstore/store.go:197 InsertDefinitionTx body jsonb"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 20
+  },
+  {
    "table": "friend_dm_projection_receipts",
    "column": "messages",
    "scope": "player",
@@ -2222,6 +2254,74 @@
    "batch": 8
   },
   {
+   "table": "operator_commands",
+   "column": "result_json",
+   "scope": "infrastructure",
+   "decode": "raw",
+   "decode_type": "json.RawMessage",
+   "decode_sites": [
+    "internal/adapters/postgres/operatorstore/store.go:29 result_json -> json.RawMessage"
+   ],
+   "writers": [
+    "internal/adapters/postgres/operatorstore/store.go:69 result_json=$3::jsonb (FinishTx)"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 20
+  },
+  {
+   "table": "ota_releases",
+   "column": "manifest",
+   "scope": "infrastructure",
+   "decode": "raw",
+   "decode_type": "json.RawMessage",
+   "decode_sites": [
+    "internal/adapters/postgres/otastore/commands.go:34 ReleaseTx manifest -> json.RawMessage"
+   ],
+   "writers": [
+    "internal/adapters/postgres/otastore/commands.go:91 InsertBuildTx json.Marshal(map files) at :87"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 20
+  },
+  {
+   "table": "ota_releases",
+   "column": "package_files",
+   "scope": "infrastructure",
+   "decode": "raw",
+   "decode_type": "json.RawMessage",
+   "decode_sites": [
+    "internal/adapters/postgres/otastore/commands.go:33 ReleaseTx package_files -> json.RawMessage"
+   ],
+   "writers": [
+    "internal/adapters/postgres/otastore/commands.go:91 InsertBuildTx json.Marshal(release.Volumes) at :83"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 20
+  },
+  {
+   "table": "ota_settings",
+   "column": "settings",
+   "scope": "infrastructure",
+   "decode": "struct",
+   "decode_type": "otarelease.Settings",
+   "decode_sites": [
+    "internal/adapters/postgres/otastore/settings.go:80 otarelease.ParseSettings"
+   ],
+   "writers": [
+    "internal/adapters/postgres/otastore/settings.go:52 saveSettings json.Marshal(record.Settings) at :48"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 20
+  },
+  {
    "table": "personal_dm_delivery",
    "column": "terminal_receipt",
    "scope": "player",
@@ -2577,6 +2677,24 @@
    "digest": false,
    "digest_sites": [],
    "batch": 13
+  },
+  {
+   "table": "player_event_claims",
+   "column": "award_body",
+   "scope": "player",
+   "decode": "struct",
+   "decode_type": "events.ClaimResult",
+   "decode_sites": [
+    "internal/application/events/claim.go:229 payload.Decode"
+   ],
+   "writers": [
+    "internal/application/events/claim.go:209 payload.Encode",
+    "internal/adapters/postgres/eventstore/store.go:671 UpdateClaimReplyTx award_body jsonb"
+   ],
+   "sql_paths": [],
+   "digest": false,
+   "digest_sites": [],
+   "batch": 20
   },
   {
    "table": "player_hero_evolution",

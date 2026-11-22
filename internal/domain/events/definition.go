@@ -27,6 +27,9 @@ const (
 // HookCampaignDropMultiplier is the first typed hook (ruling 10, EA-8).
 const HookCampaignDropMultiplier = "campaign.drop_multiplier"
 
+// maxDropMultiplier keeps the count multiplication far from int64 overflow.
+const maxDropMultiplier = 100
+
 var ErrInvalidDefinition = errors.New("events: invalid definition")
 
 // RequirementKind is the per-player condition of a TIERED_CLAIM tier (EA-3).
@@ -39,7 +42,15 @@ type Requirement struct {
 	Value int64           `json:"value"`
 }
 
-// RewardLine is one grant line of a choice. Kind is "item" or "currency".
+const (
+	RewardKindItem     = "item"
+	RewardKindCurrency = "currency"
+	// RewardKindHero grants the character entity of a hero acquisition item
+	// (client item type -1), not the scroll item itself (EA-3, 1071 tiers).
+	RewardKindHero = "hero"
+)
+
+// RewardLine is one grant line of a choice.
 type RewardLine struct {
 	Kind        string `json:"kind"`
 	ItemID      int64  `json:"item_id,omitempty"`
@@ -52,13 +63,17 @@ func (line RewardLine) validate() error {
 		return fmt.Errorf("%w: reward amount must be positive", ErrInvalidDefinition)
 	}
 	switch line.Kind {
-	case "item":
+	case RewardKindItem:
 		if line.ItemID <= 0 || line.ResourceKey != "" {
 			return fmt.Errorf("%w: an item reward needs item_id and no resource_key", ErrInvalidDefinition)
 		}
-	case "currency":
+	case RewardKindCurrency:
 		if strings.TrimSpace(line.ResourceKey) == "" || line.ItemID != 0 {
 			return fmt.Errorf("%w: a currency reward needs resource_key and no item_id", ErrInvalidDefinition)
+		}
+	case RewardKindHero:
+		if line.ItemID <= 0 || line.ResourceKey != "" || line.Amount != 1 {
+			return fmt.Errorf("%w: a hero reward needs one acquisition item and no resource_key", ErrInvalidDefinition)
 		}
 	default:
 		return fmt.Errorf("%w: unknown reward kind %q", ErrInvalidDefinition, line.Kind)
@@ -139,6 +154,9 @@ func (hook Hook) validate() error {
 	}
 	if hook.Multiplier < 1 {
 		return fmt.Errorf("%w: %s needs a multiplier of at least 1", ErrInvalidDefinition, hook.Kind)
+	}
+	if hook.Multiplier > maxDropMultiplier {
+		return fmt.Errorf("%w: %s multiplier must not exceed %d", ErrInvalidDefinition, hook.Kind, maxDropMultiplier)
 	}
 	if len(hook.ItemKinds) == 0 {
 		return fmt.Errorf("%w: %s needs item_kinds", ErrInvalidDefinition, hook.Kind)

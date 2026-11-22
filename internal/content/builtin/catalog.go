@@ -1127,6 +1127,9 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 	if manifest.CompilerVersion == "i9-11d-compat" {
 		expectedSources, expectedArtifacts = 598, 61
 	}
+	if manifest.CompilerVersion == "i11a-events-gifts" {
+		expectedSources, expectedArtifacts = 598, 61
+	}
 	if len(manifest.Sources) != expectedSources {
 		return fmt.Errorf("builtin content: expected %d source records, got %d", expectedSources, len(manifest.Sources))
 	}

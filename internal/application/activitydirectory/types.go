@@ -29,6 +29,22 @@ type ProjectionContext struct {
 	PlayerLevel PlayerLevel
 }
 
+type queryerKey struct{}
+
+// WithQueryer carries the caller's read-only snapshot to a provider without
+// making this owner depend on the transaction package (I6B contract). A
+// provider whose read lives in its own tables asserts the carried value to its
+// own queryer type.
+func WithQueryer(ctx context.Context, queryer any) context.Context {
+	return context.WithValue(ctx, queryerKey{}, queryer)
+}
+
+// QueryerValue returns the snapshot WithQueryer carried, if any.
+func QueryerValue(ctx context.Context) (any, bool) {
+	value := ctx.Value(queryerKey{})
+	return value, value != nil
+}
+
 func validateActor(actor identity.ActorContext) error {
 	if !actor.AccountUID.Valid() || actor.AccountID.UUID().IsZero() || actor.SessionID.UUID().IsZero() || actor.ContextID.UUID().IsZero() ||
 		!actor.LogicalServerID.Valid() || !actor.PlayerID.Valid() || actor.ContextGeneration <= 0 || actor.SessionLivenessVersion <= 0 || actor.ContextLivenessVersion <= 0 {

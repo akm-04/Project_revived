@@ -329,6 +329,36 @@ func TestConcurrentRegisterOfOneVersionRefusesTheLoser(t *testing.T) {
 	}
 }
 
+// TestReleaseExistsCoversEveryState proves the exact-version read (any state)
+// that the agent's duplicate-number check uses (L4f fix 2).
+func TestReleaseExistsCoversEveryState(t *testing.T) {
+	pool := l3Pool(t)
+	versions := []string{"9.302.1"}
+	resetL3Releases(t, pool, versions)
+	first := l3BuildRequest(t, "9.302.1", "code")
+	bus := l3Bus(pool, l3Root(t, first))
+	if outcome := l3Execute(t, bus, l3Command(t, "ota.register_build", nil, first)); outcome.State != operator.StateApplied {
+		t.Fatalf("register: %s %s", outcome.State, outcome.Result)
+	}
+	revision := l3Revision(t, pool)
+	if outcome := l3Execute(t, bus, l3Command(t, "ota.publish", &revision, map[string]string{"version": "9.302.1"})); outcome.State != operator.StateApplied {
+		t.Fatalf("publish: %s %s", outcome.State, outcome.Result)
+	}
+	revision = l3Revision(t, pool)
+	if outcome := l3Execute(t, bus, l3Command(t, "ota.withdraw", &revision, map[string]string{"version": "9.302.1"})); outcome.State != operator.StateApplied {
+		t.Fatalf("withdraw: %s %s", outcome.State, outcome.Result)
+	}
+	lookup := appota.ReleaseLookup{Runner: tx.Runner{DB: pool}, Operations: operation.Factory{Clock: clock.System{}}, Store: otastore.Store{}}
+	withdrawn, err := lookup.Exists(context.Background(), "9.302.1")
+	if err != nil || !withdrawn.Exists {
+		t.Fatalf("a WITHDRAWN version was not reported: %+v err=%v", withdrawn, err)
+	}
+	unknown, err := lookup.Exists(context.Background(), "9.302.2")
+	if err != nil || unknown.Exists {
+		t.Fatalf("an unknown version was reported: %+v err=%v", unknown, err)
+	}
+}
+
 func resetL3Releases(t *testing.T, pool *pg.Pool, versions []string) {
 	t.Helper()
 	remove := func() {

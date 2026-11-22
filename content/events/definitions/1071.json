@@ -1,0 +1,26 @@
+{
+ "activity_id": 1071,
+ "revision": 1,
+ "archetype": "TIERED_CLAIM",
+ "client_requirements": {
+  "client_paths": [
+   "src_64/data/tables/activity_new_levelup.lua",
+   "src_64/data/tables/gift.lua",
+   "src_64/data/tables/item.lua"
+  ],
+  "lazy_assets": [
+   {"path": "res/web/windows/activities/1071/main_grow_up.csb", "md5": "26506b979da4073437cfd95123299eb0"},
+   {"path": "res/web/windows/activities/1071/award_item.csb", "md5": "ff6e2c51cd87c3b9806784823690cc2c"},
+   {"path": "res/web/windows/activities/1071/hero_item.csb", "md5": "84eef9807871b80a33f9987c7ba219ab"}
+  ],
+  "min_code_version": "1.631.0"
+ },
+ "default_days": -1,
+ "tiers": [
+  {"id": 1, "requirement": {"kind": "player_level", "value": 10}, "choices": [{"gift_id": 90001428}]},
+  {"id": 2, "requirement": {"kind": "player_level", "value": 20}, "choices": [{"gift_id": 90001429}, {"gift_id": 90001430}, {"gift_id": 90001431}]},
+  {"id": 3, "requirement": {"kind": "player_level", "value": 30}, "choices": [{"gift_id": 90001432}, {"gift_id": 90001433}, {"gift_id": 90001434}]},
+  {"id": 4, "requirement": {"kind": "player_level", "value": 40}, "choices": [{"gift_id": 90001435}, {"gift_id": 90001436}, {"gift_id": 90001437}]},
+  {"id": 5, "requirement": {"kind": "player_level", "value": 50}, "choices": [{"gift_id": 90001438}, {"gift_id": 90001439}, {"gift_id": 90001440}]}
+ ]
+}

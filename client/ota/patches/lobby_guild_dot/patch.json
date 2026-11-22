@@ -1,0 +1,8 @@
+{
+  "target": "app/windows/MainSceneBottomWindow.lua",
+  "stock_sha256": "1a113a3b6491e04b0af3293817b37706d7bb9be0823c328c9783771d8bc2d216",
+  "kind": "replace_exact",
+  "anchor": "\tcc.EventProxy.new(xyd.EventDispatcher.get(), arg_2_0):addEventListener(xyd.event.DRINK_NOTIF, handler(arg_2_0, arg_2_0.updateGuildNotif))\n",
+  "insert": "overlay.lua",
+  "origin": "D473a: a guild socket close raises LEAGUE_CHAT_SESSION_CLOSED; MID 612 decides the dot (fleet_l5r/01-client-items.md section 2a)"
+}

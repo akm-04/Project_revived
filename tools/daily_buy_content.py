@@ -66,7 +66,9 @@ GIFT_SCALARS = (
 )
 
 
-def build_daily_buy_inputs(items, gift_rows, dropbox_rows, vip_rows, monthly_rows, refresh_rows, misc_by_key, daily_consume_rows, error):
+def build_daily_buy_inputs(items, gift_rows, dropbox_rows, vip_rows, monthly_rows, refresh_rows, misc_by_key, daily_consume_rows, error, event_gift_ids=()):
+    """event_gift_ids are the gift rows shipped event definitions name; they are
+    exported even when no item references them (EA-11)."""
     items_by_id = {}
     for index, row in enumerate(items, start=1):
         item_id = _int(row.get("id", ""), f"item[{index}].id", error, allow_zero=False)
@@ -95,6 +97,7 @@ def build_daily_buy_inputs(items, gift_rows, dropbox_rows, vip_rows, monthly_row
     for item in items_by_id.values():
         referenced_gifts.update(item["gifts"])
         referenced_gifts.update(item["one_in_more"])
+    referenced_gifts.update(event_gift_ids)
 
     gifts_by_id = {}
     malformed_gifts = 0

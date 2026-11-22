@@ -60,6 +60,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/herorecommendstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
+	"gxb.local/backend/v2/internal/adapters/postgres/identitystore"
 	"gxb.local/backend/v2/internal/adapters/postgres/inscriptionstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/libraryforumstore"
@@ -252,7 +253,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("I6B content capability set: %v", err)
 	}
-	activityProviders, err := appactivity.NewRegistry([]appactivity.Registration{{Name: "worldboss", TableID: 1026, RuntimeCapability: "activity.worldboss", Provider: appworldboss.ActivityProvider{Queryer: pool, Directory: i4store.PlayerDirectoryReader{}}}}, activityContentCapabilities)
+	activityRegistrations := []appactivity.Registration{{Name: "worldboss", TableID: 1026, RuntimeCapability: "activity.worldboss", Provider: appworldboss.ActivityProvider{Queryer: pool, Directory: i4store.PlayerDirectoryReader{}}}}
+	activityRegistrations = append(activityRegistrations, appevents.ActivityRegistrations(eventstore.Store{}, pool)...)
+	activityProviders, err := appactivity.NewRegistry(activityRegistrations, activityContentCapabilities)
 	if err != nil {
 		log.Fatalf("I6B Activity provider registry: %v", err)
 	}
@@ -530,12 +533,14 @@ func main() {
 	energyDispatcher := stockruntime.ItemsEnergyDispatcher{Authority: authority, Service: itemsEnergy.Service}
 	mux := http.NewServeMux()
 	otaCommands := appotarelease.Commands{Store: otastore.Store{}, Root: cfg.OTARoot}
-	otaStatus := appotarelease.StatusService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: otastore.Store{}}
+	otaStatus := appotarelease.StatusService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: otastore.Store{}, Live: otaSettingsValue}
+	otaReleaseLookup := appotarelease.ReleaseLookup{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: otastore.Store{}}
 	operatorAudit := operator.AuditService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Reader: operatorstore.Store{}}
 	backendVersion, gitCommit := buildIdentity()
 	operatorVersion := operator.VersionService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Reader: operatorstore.Store{}, BackendVersion: backendVersion, GitCommit: gitCommit}
 	operatorReads := map[string]operatorapi.Read{
 		"ota.status":          operatorapi.OTAStatus(otaStatus),
+		"ota.release":         operatorapi.OTARelease(otaReleaseLookup),
 		"operator.audit.list": operatorapi.AuditList(operatorAudit),
 	}
 	operatorVersionReply := func(ctx context.Context) (any, error) {
@@ -543,7 +548,11 @@ func main() {
 	}
 	operatorHandlers := otaCommands.Handlers()
 	operatorHandlers["ota.settings.set"] = appotarelease.SettingsSetHandler(otaSettingsFile, otaSettingsValue, otastore.Store{})
-	eventHooks, err := appevents.NewHookRegistry()
+	logoutCommands := appidentity.LogoutCommands{Store: identitystore.Store{}}
+	for name, handler := range logoutCommands.Handlers() {
+		operatorHandlers[name] = handler
+	}
+	eventHooks, err := appevents.NewHookRegistry(domainevents.HookCampaignDropMultiplier)
 	if err != nil {
 		log.Fatalf("events hook registry: %v", err)
 	}
@@ -755,7 +764,7 @@ func main() {
 		}
 		go runReconcile(ctx, pool, appleague.Reconciler{Service: league})
 		conquer := canonicalConquer(pool, runner, contentDB, i5db, i5svc, privileges, fight, broadcastEmitter, librarySvc)
-		campaign := canonicalCampaign(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, librarySvc)
+		campaign := canonicalCampaign(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, librarySvc, campaignDropHooks{Events: eventService})
 		campaign.StarCaps = rentalStarCaps(rentalPolicy.Policy)
 		blood := appawakeningbattle.Mode{Timed: heroSvc.Timed, Fresh: pool, Content: contentDB, Fence: i5db, Heroes: heroSvc, Missions: i5svc, Combat: fight, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, BattleCounts: librarySvc}
 		for _, mid := range []uint16{866, 867} {
@@ -964,6 +973,15 @@ func main() {
 	activityD := stockruntime.ActivityDispatcher{Authority: authority, Service: activityRuntime, Reads: runner, Levels: i4store.PlayerDirectoryReader{}}
 	for _, mid := range []uint16{229, 234} {
 		mustRegister(mid, activityD)
+	}
+	eventClaims := appevents.ClaimService{
+		Runner: runner, Store: eventstore.Store{}, Fence: i5db, Players: i4store.PlayerRootLocker{},
+		Levels: i4store.PlayerDirectoryReader{}, Grants: i5svc, Content: contentDB,
+		HeroContent: contentDB, Heroes: heroSvc, Fragments: contentDB, HeroWire: heroproj.StockHero,
+	}
+	eventRewardD := stockruntime.ActivityRewardDispatcher{Authority: authority, Service: eventClaims}
+	for _, mid := range stockruntime.ActivityRewardMIDs {
+		mustRegister(mid, eventRewardD)
 	}
 	savedPresetD := stockruntime.SavedPresetDispatcher{Authority: authority, Service: savedPresetSvc}
 	mustRegister(1793, savedPresetD)

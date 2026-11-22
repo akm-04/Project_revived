@@ -16,6 +16,22 @@ import (
 
 const selectRelease = `SELECT version,lane,state,package_files::text,total_size,md5,sha256,manifest::text FROM ota_releases WHERE version=$1`
 
+const selectReleaseExists = `SELECT EXISTS(SELECT 1 FROM ota_releases WHERE version=$1)`
+
+// ReleaseExistsTx is the exact-version existence read in any state (BUILT,
+// ACTIVE, SUPERSEDED or WITHDRAWN), so the agent's duplicate-number check never
+// depends on the bounded ota.status list (L4f fix 2).
+func (Store) ReleaseExistsTx(ctx context.Context, query tx.Queryer, version string) (bool, error) {
+	if query == nil || version == "" {
+		return false, errInvalid
+	}
+	var exists bool
+	if err := query.QueryRow(ctx, selectReleaseExists, version).Scan(&exists); err != nil {
+		return false, err
+	}
+	return exists, nil
+}
+
 // ReleaseTx reads one release row, unlocked; lockTarget then locks its lane.
 func (Store) ReleaseTx(ctx context.Context, query tx.Queryer, version string) (*otarelease.RawRelease, error) {
 	if query == nil || version == "" {

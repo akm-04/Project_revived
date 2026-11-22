@@ -7,6 +7,31 @@ import (
 	"fmt"
 	"io"
 	"path/filepath"
+	"time"
+)
+
+// Defaults and bounds of the operator-tunable OTA values (I11A_1_PLAN "L4h OTA
+// tunables"). The defaults are today's constants.
+const (
+	DefaultDownloadBaseSeconds     = 35
+	DefaultDownloadMinKiBPerSecond = 32
+	DefaultCacheMaxAgeSeconds      = 31_536_000
+	DefaultServingRefreshSeconds   = 5
+	DefaultVolumeMB                = 99
+
+	minDownloadBaseSeconds     = 5
+	maxDownloadBaseSeconds     = 600
+	minDownloadMinKiBPerSecond = 1
+	maxDownloadMinKiBPerSecond = 102_400
+	minCacheMaxAgeSeconds      = 0
+	maxCacheMaxAgeSeconds      = 31_536_000
+	minServingRefreshSeconds   = 1
+	maxServingRefreshSeconds   = 300
+	minVolumeMB                = 1
+	maxVolumeMB                = 2_000
+
+	kibibyteBytes = 1024
+	megabyteBytes = 1_000_000
 )
 
 // LazyFetch is the operator switch for lazy asset serving (I11A_OTA_RELEASE_V1
@@ -22,13 +47,27 @@ const (
 // Settings is <ota_root>/settings.json (I11A_1_PLAN "OTA root and serving
 // inputs"). Later phases add fields in code, never by hand.
 type Settings struct {
-	LazyFetch LazyFetch `json:"lazy_fetch"`
-	ResPath   string    `json:"res_path"`
+	LazyFetch               LazyFetch `json:"lazy_fetch"`
+	ResPath                 string    `json:"res_path"`
+	DownloadBaseSeconds     int       `json:"download_base_seconds"`
+	DownloadMinKiBPerSecond int       `json:"download_min_kib_per_second"`
+	CacheMaxAgeSeconds      int       `json:"cache_max_age_seconds"`
+	ServingRefreshSeconds   int       `json:"serving_refresh_seconds"`
+	VolumeMB                int       `json:"volume_mb"`
 }
 
-// DefaultSettings is the value of a missing settings.json.
+// DefaultSettings is the value of a missing settings.json and the starting
+// point for a JSON document that omits a field.
 func DefaultSettings() Settings {
-	return Settings{LazyFetch: LazyFetchAuto, ResPath: ""}
+	return Settings{
+		LazyFetch:               LazyFetchAuto,
+		ResPath:                 "",
+		DownloadBaseSeconds:     DefaultDownloadBaseSeconds,
+		DownloadMinKiBPerSecond: DefaultDownloadMinKiBPerSecond,
+		CacheMaxAgeSeconds:      DefaultCacheMaxAgeSeconds,
+		ServingRefreshSeconds:   DefaultServingRefreshSeconds,
+		VolumeMB:                DefaultVolumeMB,
+	}
 }
 
 // ErrInvalidSettings marks a settings file this process must not use.
@@ -36,7 +75,7 @@ var ErrInvalidSettings = errors.New("otarelease: invalid OTA settings")
 
 // ParseSettings refuses unknown fields and any value outside the plan.
 func ParseSettings(data []byte) (Settings, error) {
-	var settings Settings
+	settings := DefaultSettings()
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&settings); err != nil {
@@ -52,7 +91,7 @@ func ParseSettings(data []byte) (Settings, error) {
 	return settings, nil
 }
 
-// Validate accepts the two values the plan defines; a relative res_path would
+// Validate accepts the values the plan defines; a relative res_path would
 // resolve against the process working directory, so it is refused.
 func (s Settings) Validate() error {
 	switch s.LazyFetch {
@@ -63,7 +102,45 @@ func (s Settings) Validate() error {
 	if s.ResPath != "" && !filepath.IsAbs(s.ResPath) {
 		return fmt.Errorf("%w: res_path %q is not absolute", ErrInvalidSettings, s.ResPath)
 	}
+	for _, bound := range []struct {
+		name             string
+		value            int
+		minimum, maximum int
+	}{
+		{"download_base_seconds", s.DownloadBaseSeconds, minDownloadBaseSeconds, maxDownloadBaseSeconds},
+		{"download_min_kib_per_second", s.DownloadMinKiBPerSecond, minDownloadMinKiBPerSecond, maxDownloadMinKiBPerSecond},
+		{"cache_max_age_seconds", s.CacheMaxAgeSeconds, minCacheMaxAgeSeconds, maxCacheMaxAgeSeconds},
+		{"serving_refresh_seconds", s.ServingRefreshSeconds, minServingRefreshSeconds, maxServingRefreshSeconds},
+		{"volume_mb", s.VolumeMB, minVolumeMB, maxVolumeMB},
+	} {
+		if bound.value < bound.minimum || bound.value > bound.maximum {
+			return fmt.Errorf("%w: %s %d is outside %d..%d", ErrInvalidSettings, bound.name, bound.value, bound.minimum, bound.maximum)
+		}
+	}
 	return nil
+}
+
+// DownloadWriteDeadline is the write deadline of one OTA body: the base window
+// plus the size at the slowest allowed client rate (OA-4).
+func (s Settings) DownloadWriteDeadline(now time.Time, size int64) time.Time {
+	if size < 0 {
+		size = 0
+	}
+	rate := int64(s.DownloadMinKiBPerSecond) * kibibyteBytes
+	if rate <= 0 {
+		rate = DefaultDownloadMinKiBPerSecond * kibibyteBytes
+	}
+	return now.Add(time.Duration(s.DownloadBaseSeconds)*time.Second + time.Duration(size)*time.Second/time.Duration(rate))
+}
+
+// ServingRefreshInterval is how long a servable snapshot stays fresh.
+func (s Settings) ServingRefreshInterval() time.Duration {
+	return time.Duration(s.ServingRefreshSeconds) * time.Second
+}
+
+// VolumeLimitBytes is the per-volume cap of `ota build` in bytes.
+func (s Settings) VolumeLimitBytes() int64 {
+	return int64(s.VolumeMB) * megabyteBytes
 }
 
 // LazyFetchEnabled reports whether discovery may advertise /res/ (ruling 6 and

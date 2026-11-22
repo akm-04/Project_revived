@@ -1,6 +1,7 @@
 package stockruntime
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -11,18 +12,16 @@ import (
 	appotarelease "gxb.local/backend/v2/internal/application/otarelease"
 )
 
-const (
-	downloadBaseWriteDeadline = 35 * time.Second
-	downloadBytesPerSecond    = 32 * 1024
-)
-
-// downloadWriteDeadline replaces the shared server's 35 s WriteTimeout: the
-// body gets the base window plus one second per 32 KiB (OA-4).
-func downloadWriteDeadline(now time.Time, size int64) time.Time {
-	if size < 0 {
-		size = 0
+// otaCacheControl is the Cache-Control value of a content-addressed OTA body.
+func otaCacheControl(maxAgeSeconds int) string {
+	if maxAgeSeconds == 0 {
+		return "no-store"
 	}
-	return now.Add(downloadBaseWriteDeadline + time.Duration(size)*time.Second/downloadBytesPerSecond)
+	return fmt.Sprintf("public, max-age=%d, immutable", maxAgeSeconds)
+}
+
+func noStore(writer http.ResponseWriter) {
+	writer.Header().Set("Cache-Control", "no-store")
 }
 
 func bodySize(file io.ReadSeeker) int64 {
@@ -36,8 +35,8 @@ func bodySize(file io.ReadSeeker) int64 {
 	return size
 }
 
-func setDownloadWriteDeadline(writer http.ResponseWriter, file io.ReadSeeker) {
-	_ = http.NewResponseController(writer).SetWriteDeadline(downloadWriteDeadline(time.Now(), bodySize(file)))
+func setDownloadWriteDeadline(writer http.ResponseWriter, deadline time.Time) {
+	_ = http.NewResponseController(writer).SetWriteDeadline(deadline)
 }
 
 // OTAUpdatesGET serves /updates/<lane>/<file> (I11A_OTA_RELEASE_V1 ruling 6).
@@ -48,6 +47,7 @@ type OTAUpdatesGET struct {
 
 func (h OTAUpdatesGET) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	if h.Serving == nil {
+		noStore(writer)
 		http.NotFound(writer, request)
 		return
 	}
@@ -59,6 +59,7 @@ func (h OTAUpdatesGET) ServeHTTP(writer http.ResponseWriter, request *http.Reque
 	suffix, found := strings.CutPrefix(request.URL.Path, "/updates/")
 	parts := strings.Split(suffix, "/")
 	if !found || suffix == "" || len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		noStore(writer)
 		http.NotFound(writer, request)
 		return
 	}
@@ -69,11 +70,14 @@ func (h OTAUpdatesGET) ServeHTTP(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 	if !servable {
+		noStore(writer)
 		http.NotFound(writer, request)
 		return
 	}
 	defer file.Close()
-	setDownloadWriteDeadline(writer, file)
+	settings := h.Serving.Settings.Get()
+	writer.Header().Set("Cache-Control", otaCacheControl(settings.CacheMaxAgeSeconds))
+	setDownloadWriteDeadline(writer, h.Serving.DownloadWriteDeadline(bodySize(file)))
 	writer.Header().Set("X-Content-Type-Options", "nosniff")
 	http.ServeContent(writer, request, parts[1], modified, file)
 }
@@ -86,6 +90,7 @@ type OTAResGET struct {
 
 func (h OTAResGET) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	if h.Serving == nil {
+		noStore(writer)
 		http.NotFound(writer, request)
 		return
 	}
@@ -96,6 +101,7 @@ func (h OTAResGET) ServeHTTP(writer http.ResponseWriter, request *http.Request) 
 	}
 	asset, found := strings.CutPrefix(request.URL.Path, "/res/")
 	if !found || asset == "" || strings.Contains(asset, "/") {
+		noStore(writer)
 		http.NotFound(writer, request)
 		return
 	}
@@ -106,11 +112,14 @@ func (h OTAResGET) ServeHTTP(writer http.ResponseWriter, request *http.Request) 
 		return
 	}
 	if !servable {
+		noStore(writer)
 		http.NotFound(writer, request)
 		return
 	}
 	defer file.Close()
-	setDownloadWriteDeadline(writer, file)
+	settings := h.Serving.Settings.Get()
+	writer.Header().Set("Cache-Control", otaCacheControl(settings.CacheMaxAgeSeconds))
+	setDownloadWriteDeadline(writer, h.Serving.DownloadWriteDeadline(bodySize(file)))
 	writer.Header().Set("X-Content-Type-Options", "nosniff")
 	http.ServeContent(writer, request, path.Base(resourcePath), modified, file)
 }

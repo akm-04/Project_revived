@@ -1164,6 +1164,35 @@ local function gxbNormalizeIncomingJSON(value)
 	return normalized
 end
 
+-- Stock Backend.lua:428-447 alerts and restarts into login for an error body
+-- whose error_msg is non-empty; the poll reuses that same stock alert call.
+local function gxbShowReloginAlert(errorMessage)
+	if xyd == nil or xyd.CommonAlertWindow == nil or xyd.CommonAlertType == nil then
+		return
+	end
+	xyd.CommonAlertWindow.open(xyd.CommonAlertType.ONE_BTN, errorMessage, function()
+		if restart_game then
+			restart_game()
+		else
+			xyd.exitProgram()
+		end
+	end)
+end
+
+local function gxbReloginMessage(status, body)
+	if status ~= 401 or type(body) ~= "string" then
+		return nil
+	end
+	local decodedOK, reply = pcall(gxbCjson.decode, body)
+	if not decodedOK or type(reply) ~= "table" or reply.error_code ~= 20003 then
+		return nil
+	end
+	if type(reply.error_msg) ~= "string" or reply.error_msg == "" then
+		return nil
+	end
+	return reply.error_msg
+end
+
 local function gxbRealtimeURL()
 	local origin = xyd.serverUrl
 	if origin == nil and xyd.tables ~= nil and xyd.tables.misc ~= nil then
@@ -1333,6 +1362,7 @@ function GXBHTTPPollTransport.new(url, scheduler)
 		sendSequence = nil,
 		retryHandle = nil,
 		generation = 0,
+		sessionEnded = false,
 	}, GXBHTTPPollTransport)
 end
 
@@ -1377,6 +1407,9 @@ function GXBHTTPPollTransport:cancelRetry()
 end
 
 function GXBHTTPPollTransport:scheduleRetry(callback, milliseconds)
+	if self.sessionEnded then
+		return
+	end
 	self:cancelRetry()
 	self.retryHandle = self.scheduler:after(milliseconds, function()
 		self.retryHandle = nil
@@ -1403,11 +1436,17 @@ function GXBHTTPPollTransport:request(payload, timeout, callback)
 		pcall(function()
 			request:release()
 		end)
-		if event.name ~= "completed" or request:getResponseStatusCode() ~= 200 then
+		if event.name ~= "completed" then
 			callback(nil, "failed")
 			return
 		end
-		callback(request:getResponseString(), nil)
+		local status = request:getResponseStatusCode()
+		local response = request:getResponseString()
+		if status ~= 200 then
+			callback(nil, "failed", status, response)
+			return
+		end
+		callback(response, nil)
 	end, self.url, "POST")
 	if not created or request == nil then
 		callback(nil, "create")
@@ -1541,21 +1580,34 @@ function GXBHTTPPollTransport:retryOrFail(stage)
 	end, delay)
 end
 
+function GXBHTTPPollTransport:stopForRelogin(errorMessage)
+	self.sessionEnded = true
+	self:cancelRetry()
+	self.pollInFlight = false
+	self.pollRequest = nil
+	gxbShowReloginAlert(errorMessage)
+end
+
 function GXBHTTPPollTransport:startPoll()
-	if self.state ~= "open" or self.pollInFlight or not self:hasAdapters() then
+	if self.sessionEnded or self.state ~= "open" or self.pollInFlight or not self:hasAdapters() then
 		return
 	end
 	self.pollInFlight = true
 	local generation = self.generation
 	local payload = { session_id = self.sessionID, ack = self.ack, hold = true }
 	local request
-	request = self:request(payload, GXB_HTTP_POLL_TIMEOUT_SECONDS, function(encoded, failure)
+	request = self:request(payload, GXB_HTTP_POLL_TIMEOUT_SECONDS, function(encoded, failure, status, body)
 		if self.pollRequest ~= request or self.generation ~= generation then
 			return
 		end
 		self.pollRequest = nil
 		self.pollInFlight = false
 		if failure ~= nil then
+			local reloginMessage = gxbReloginMessage(status, body)
+			if reloginMessage ~= nil then
+				self:stopForRelogin(reloginMessage)
+				return
+			end
 			self:retryOrFail("poll")
 			return
 		end
@@ -1608,7 +1660,7 @@ function GXBHTTPPollTransport:completeSend(frames)
 end
 
 function GXBHTTPPollTransport:pump()
-	if self.state ~= "open" or self.sendInFlight or #self.outgoing == 0 then
+	if self.sessionEnded or self.state ~= "open" or self.sendInFlight or #self.outgoing == 0 then
 		return
 	end
 	local frames = {}

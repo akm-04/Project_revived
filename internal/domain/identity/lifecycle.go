@@ -10,6 +10,13 @@ var (
 	ErrPrincipalBindingDisabled = errors.New("provider principal binding is disabled")
 )
 
+// Canonical revocation reasons of the operator logout commands
+// (I11A_1_PLAN "L6 logout on publish").
+const (
+	RevocationReasonOperatorLogout    = "operator_logout"
+	RevocationReasonOperatorLogoutAll = "operator_logout_all"
+)
+
 func BindPrincipal(existing *ProviderBinding, candidate ProviderBinding) (ProviderBinding, bool, error) {
 	if err := candidate.Principal.Validate(); err != nil {
 		return ProviderBinding{}, false, err

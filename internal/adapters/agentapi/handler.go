@@ -1,10 +1,12 @@
 // Package agentapi is the gxb-operator agent's local HTTP surface
 // (I11A_1_PLAN "Agent decisions"): loopback callers, bearer session on every
-// route but setup/login, 1 MiB bodies, backend refusals passed through
-// unchanged.
+// route but setup/login, 1 MiB bodies (the backend command cap minus envelope
+// headroom on the command route for ota.register_build), backend refusals passed
+// through unchanged.
 package agentapi
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
@@ -31,13 +33,18 @@ const (
 	readPrefix        = "/agent/v1/reads/"
 	publishPath       = "/agent/v1/ota/publish"
 	withdrawPath      = "/agent/v1/ota/withdraw"
+	buildPath         = "/agent/v1/ota/build"
 	operationPrefix   = "/agent/v1/ops/"
 	logTailPath       = "/agent/v1/log/tail"
 
-	maxBodyBytes  = 1 << 20
-	defaultTail   = 50
-	maxTailLines  = 1000
-	tailByteLimit = 256 << 10
+	maxBodyBytes = 1 << 20
+	// The agent re-marshals a command into a larger envelope, so it accepts
+	// this much less than the backend cap and every accepted body still fits.
+	commandEnvelopeHeadroomBytes = 64 << 10
+	maxCommandBodyBytes          = operator.MaxCommandBodyBytes - commandEnvelopeHeadroomBytes
+	defaultTail                  = 50
+	maxTailLines                 = 1000
+	tailByteLimit                = 256 << 10
 )
 
 // Handler serves the agent API. All fields are composed by cmd/gxb-operator.
@@ -49,6 +56,7 @@ type Handler struct {
 	Tokens      *operatoragent.TokenHolder
 	Maintenance operatoragent.Maintenance
 	Operations  *operatoragent.Operations
+	Build       operatoragent.OTAOperationStarter
 	ToolLog     *operatoragent.ToolLog
 	ToolLogPath string
 	// Listen is the exact host:port the agent listens on; every route refuses
@@ -79,6 +87,15 @@ type commandRequest struct {
 
 type maintenanceRequest struct {
 	Version     string `json:"version"`
+	Reason      string `json:"reason"`
+	SemanticKey string `json:"semantic_key"`
+}
+
+type buildRequest struct {
+	Lane        string `json:"lane"`
+	Version     string `json:"version"`
+	Rollback    bool   `json:"rollback"`
+	LazyRefresh bool   `json:"lazy_refresh"`
 	Reason      string `json:"reason"`
 	SemanticKey string `json:"semantic_key"`
 }
@@ -131,6 +148,8 @@ func (handler Handler) ServeHTTP(writer http.ResponseWriter, request *http.Reque
 		handler.serveMaintenance(writer, request, true)
 	case request.URL.Path == withdrawPath && request.Method == http.MethodPost:
 		handler.serveMaintenance(writer, request, false)
+	case request.URL.Path == buildPath && request.Method == http.MethodPost:
+		handler.serveBuild(writer, request)
 	case strings.HasPrefix(request.URL.Path, operationPrefix) && request.Method == http.MethodGet:
 		handler.serveOperation(writer, strings.TrimPrefix(request.URL.Path, operationPrefix))
 	case request.URL.Path == logTailPath && request.Method == http.MethodGet:
@@ -179,7 +198,7 @@ func (handler Handler) serveSetup(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 	var body passwordRequest
-	if err := decodeBody(writer, request, &body); err != nil {
+	if err := decodeBody(writer, request, maxBodyBytes, &body); err != nil {
 		handler.writeBodyError(writer, err)
 		return
 	}
@@ -193,7 +212,7 @@ func (handler Handler) serveSetup(writer http.ResponseWriter, request *http.Requ
 
 func (handler Handler) serveLogin(writer http.ResponseWriter, request *http.Request) {
 	var body passwordRequest
-	if err := decodeBody(writer, request, &body); err != nil {
+	if err := decodeBody(writer, request, maxBodyBytes, &body); err != nil {
 		handler.writeBodyError(writer, err)
 		return
 	}
@@ -246,7 +265,7 @@ func (handler Handler) serveBackendStop(writer http.ResponseWriter) {
 
 func (handler Handler) serveCommand(writer http.ResponseWriter, request *http.Request, name string) {
 	var body commandRequest
-	if err := decodeBody(writer, request, &body); err != nil {
+	if err := decodeBody(writer, request, maxCommandBodyBytes, &body); err != nil {
 		handler.writeBodyError(writer, err)
 		return
 	}
@@ -289,7 +308,7 @@ func (handler Handler) serveRead(writer http.ResponseWriter, request *http.Reque
 
 func (handler Handler) serveMaintenance(writer http.ResponseWriter, request *http.Request, publish bool) {
 	var body maintenanceRequest
-	if err := decodeBody(writer, request, &body); err != nil {
+	if err := decodeBody(writer, request, maxBodyBytes, &body); err != nil {
 		handler.writeBodyError(writer, err)
 		return
 	}
@@ -311,6 +330,35 @@ func (handler Handler) serveMaintenance(writer http.ResponseWriter, request *htt
 	}
 	handler.record(action, "maintenance", "ok", map[string]any{"operation_id": operation.ID})
 	writeJSON(writer, http.StatusOK, operation)
+}
+
+// serveBuild starts the ota build long operation in the background and answers
+// 202 with its id; the CLI polls op status (I11A_1_PLAN "L4c decisions").
+func (handler Handler) serveBuild(writer http.ResponseWriter, request *http.Request) {
+	var body buildRequest
+	if err := decodeBody(writer, request, maxBodyBytes, &body); err != nil {
+		handler.writeBodyError(writer, err)
+		return
+	}
+	if handler.Build == nil {
+		handler.writeAgentError(writer, "ota.build", operatoragent.Refuse(operatoragent.CodeFailed, "the agent build is not configured"))
+		return
+	}
+	// The operation outlives the HTTP request that started it.
+	operation, err := handler.Build.Start(context.WithoutCancel(request.Context()), operatoragent.BuildRequest{
+		Lane:        body.Lane,
+		Version:     body.Version,
+		Rollback:    body.Rollback,
+		LazyRefresh: body.LazyRefresh,
+		Reason:      body.Reason,
+		SemanticKey: body.SemanticKey,
+	})
+	if err != nil {
+		handler.writeAgentError(writer, "ota.build", err)
+		return
+	}
+	handler.record("ota.build", "start", "ok", map[string]any{"operation_id": operation.ID})
+	writeJSON(writer, http.StatusAccepted, map[string]string{"operation_id": operation.ID})
 }
 
 func (handler Handler) serveOperation(writer http.ResponseWriter, id string) {
@@ -395,15 +443,17 @@ func tailLines(path string, count int) ([]string, error) {
 	return all, nil
 }
 
-var errTrailingData = errors.New("trailing data after the JSON object")
-
-func decodeBody(writer http.ResponseWriter, request *http.Request, target any) error {
-	decoder := json.NewDecoder(http.MaxBytesReader(writer, request.Body, maxBodyBytes))
+func decodeBody(writer http.ResponseWriter, request *http.Request, limit int64, target any) error {
+	decoder := json.NewDecoder(http.MaxBytesReader(writer, request.Body, limit))
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(target); err != nil {
+		var tooLarge *http.MaxBytesError
+		if errors.As(err, &tooLarge) {
+			return err
+		}
 		return errors.New("the body is not the expected JSON object")
 	}
-	return ensureNoTrailingData(decoder)
+	return endOfBody(decoder)
 }
 
 func decodeOptionalBody(writer http.ResponseWriter, request *http.Request, target any) error {
@@ -416,19 +466,21 @@ func decodeOptionalBody(writer http.ResponseWriter, request *http.Request, targe
 	if err != nil {
 		return errors.New("the body is not the expected JSON object")
 	}
-	return ensureNoTrailingData(decoder)
+	return endOfBody(decoder)
 }
 
-func ensureNoTrailingData(decoder *json.Decoder) error {
-	var extra any
-	err := decoder.Decode(&extra)
-	if errors.Is(err, io.EOF) {
-		return nil
+// endOfBody uses the agent's one trailing-data helper; a second JSON value is
+// the caller's 400, a malformed tail is the generic bad body.
+func endOfBody(decoder *json.Decoder) error {
+	err := operatoragent.EnsureEndOfFile(decoder)
+	if err == nil || errors.Is(err, operatoragent.ErrTrailingData) {
+		return err
 	}
-	if err != nil {
-		return errors.New("the body is not the expected JSON object")
+	var tooLarge *http.MaxBytesError
+	if errors.As(err, &tooLarge) {
+		return err
 	}
-	return errTrailingData
+	return errors.New("the body is not the expected JSON object")
 }
 
 func loopback(remoteAddress string) bool {
@@ -464,8 +516,13 @@ func outcomeWord(status int) string {
 }
 
 func (handler Handler) writeBodyError(writer http.ResponseWriter, err error) {
+	var tooLarge *http.MaxBytesError
+	if errors.As(err, &tooLarge) {
+		writeRefusal(writer, http.StatusRequestEntityTooLarge, operatoragent.CodeBodyTooLarge, "the body is too large")
+		return
+	}
 	status := http.StatusConflict
-	if errors.Is(err, errTrailingData) {
+	if errors.Is(err, operatoragent.ErrTrailingData) {
 		status = http.StatusBadRequest
 	}
 	writeRefusal(writer, status, operatoragent.CodeBodyInvalid, err.Error())
@@ -476,6 +533,12 @@ func (handler Handler) writeAgentError(writer http.ResponseWriter, action string
 	if errors.As(err, &backendRefusal) {
 		handler.record(action, "error", "refused", map[string]any{"status": backendRefusal.Status})
 		writeBackend(writer, operatoragent.BackendResponse{Status: backendRefusal.Status, Body: backendRefusal.Body})
+		return
+	}
+	var transient *operatoragent.Transient
+	if errors.As(err, &transient) {
+		handler.record(action, "error", "unavailable", map[string]any{"error_code": transient.Code})
+		writeRefusal(writer, http.StatusServiceUnavailable, transient.Code, transient.Message)
 		return
 	}
 	var refusal *operatoragent.Refusal

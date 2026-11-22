@@ -46,7 +46,10 @@
   ]
  },
  "tests": {
-  "integration": [],
+  "integration": [
+   "identitylogout",
+   "playerdisplay"
+  ],
   "scenarios_naming": [],
   "unit": [
    "envelope_test.go"

@@ -20,22 +20,24 @@ const syntheticStockBackend = "local class = {}\n\nreturn var_0_1\n"
 const syntheticOverlay = "local enabled = __GXB_HTTP_POLL__\n-- GXB_HTTP_POLL marker\n"
 
 type fixture struct {
-	baseline   string
-	clientTree string
-	updates    string
-	staging    string
+	baseline    string
+	stockSource string
+	clientTree  string
+	updates     string
+	staging     string
 }
 
 func newFixture(t *testing.T) *fixture {
 	t.Helper()
 	root := t.TempDir()
 	fixture := &fixture{
-		baseline:   filepath.Join(root, "baseline"),
-		clientTree: filepath.Join(root, "client"),
-		updates:    filepath.Join(root, "updates", "code"),
-		staging:    filepath.Join(root, "staging"),
+		baseline:    filepath.Join(root, "baseline"),
+		stockSource: filepath.Join(root, "stock"),
+		clientTree:  filepath.Join(root, "client"),
+		updates:     filepath.Join(root, "updates", "code"),
+		staging:     filepath.Join(root, "staging"),
 	}
-	for _, directory := range []string{fixture.baseline, filepath.Join(fixture.clientTree, "src"), filepath.Join(fixture.clientTree, "patches")} {
+	for _, directory := range []string{fixture.baseline, fixture.stockSource, filepath.Join(fixture.clientTree, "src"), filepath.Join(fixture.clientTree, "patches")} {
 		if err := os.MkdirAll(directory, 0o755); err != nil {
 			t.Fatalf("create %s: %v", directory, err)
 		}
@@ -48,6 +50,7 @@ func (fixture *fixture) addStock(t *testing.T, clientPath string, content []byte
 	for _, prefix := range []string{"assets/src_32/", "assets/src_64/"} {
 		writeTestFile(t, filepath.Join(fixture.baseline, filepath.FromSlash(prefix+clientPath)), content)
 	}
+	writeTestFile(t, filepath.Join(fixture.stockSource, filepath.FromSlash(clientPath)), content)
 }
 
 func (fixture *fixture) addSource(t *testing.T, clientPath string, content []byte) {
@@ -85,6 +88,7 @@ func (fixture *fixture) input(version string) Input {
 		Lane:          "code",
 		Version:       version,
 		StockBaseline: fixture.baseline,
+		StockSource:   fixture.stockSource,
 		ClientTree:    fixture.clientTree,
 		UpdatesDir:    fixture.updates,
 		StagingDir:    fixture.staging,
@@ -93,11 +97,16 @@ func (fixture *fixture) input(version string) Input {
 
 func (fixture *fixture) build(t *testing.T, input Input) otarelease.BuildRequest {
 	t.Helper()
-	request, err := Build(context.Background(), input)
+	return fixture.buildResult(t, input).Request
+}
+
+func (fixture *fixture) buildResult(t *testing.T, input Input) Result {
+	t.Helper()
+	result, err := Build(context.Background(), input)
 	if err != nil {
 		t.Fatalf("Build: %v", err)
 	}
-	return request
+	return result
 }
 
 func standardPatch() map[string]any {
@@ -177,16 +186,50 @@ func TestPatchRefusals(t *testing.T) {
 
 func syntheticStockBackendBytes() []byte { return []byte(syntheticStockBackend) }
 
-func TestAbiMismatchRefused(t *testing.T) {
+func TestPatchReadsDecompiledStockSource(t *testing.T) {
 	fixture := newFixture(t)
 	stock := []byte(syntheticStockBackend)
 	fixture.addStock(t, "app/common/network/Backend.lua", stock)
-	writeTestFile(t, filepath.Join(fixture.baseline, "assets/src_32/app/common/network/Backend.lua"), []byte("different\n"))
+	// The APK's ABI trees hold different LuaJIT bytecode; the patch pins the
+	// decompiled source, so the build ignores them.
+	writeTestFile(t, filepath.Join(fixture.baseline, "assets/src_32/app/common/network/Backend.lua"), []byte("\x1bLJ\x02bytecode-32"))
+	writeTestFile(t, filepath.Join(fixture.baseline, "assets/src_64/app/common/network/Backend.lua"), []byte("\x1bLJ\x02bytecode-64"))
 	fixture.addPatch(t, "backend_http_poll", "app/common/network/Backend.lua", stock, standardPatch(), syntheticOverlay)
 
-	_, err := Build(context.Background(), fixture.input("1.631.2"))
-	if !errors.Is(err, ErrAbiMismatch) {
-		t.Fatalf("error = %v, want %v", err, ErrAbiMismatch)
+	request := fixture.build(t, fixture.input("1.631.2"))
+	assembled := readAssembled(t, fixture.updates, request)
+	want := "local class = {}\n\nlocal enabled = true\n-- GXB_HTTP_POLL marker\n\nreturn var_0_1\n"
+	for _, entry := range []string{"src_32/app/common/network/Backend.lua", "src_64/app/common/network/Backend.lua"} {
+		if got := zipEntry(t, assembled, entry); string(got) != want {
+			t.Fatalf("%s:\n got %q\nwant %q", entry, got, want)
+		}
+	}
+}
+
+func TestPatchRequiresStockSource(t *testing.T) {
+	fixture := newFixture(t)
+	stock := []byte(syntheticStockBackend)
+	fixture.addStock(t, "app/common/network/Backend.lua", stock)
+	fixture.addPatch(t, "backend_http_poll", "app/common/network/Backend.lua", stock, standardPatch(), syntheticOverlay)
+
+	input := fixture.input("1.631.2")
+	input.StockSource = ""
+	if _, err := Build(context.Background(), input); !errors.Is(err, ErrInvalidInput) {
+		t.Fatalf("error = %v, want %v", err, ErrInvalidInput)
+	}
+}
+
+func TestPatchMissingStockSourceFileRefused(t *testing.T) {
+	fixture := newFixture(t)
+	stock := []byte(syntheticStockBackend)
+	fixture.addStock(t, "app/common/network/Backend.lua", stock)
+	fixture.addPatch(t, "backend_http_poll", "app/common/network/Backend.lua", stock, standardPatch(), syntheticOverlay)
+	if err := os.Remove(filepath.Join(fixture.stockSource, "app", "common", "network", "Backend.lua")); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := Build(context.Background(), fixture.input("1.631.2")); err == nil {
+		t.Fatal("a patch without its stock source file built")
 	}
 }
 
@@ -269,9 +312,7 @@ func TestDeterministicBuild(t *testing.T) {
 }
 
 func TestVolumeSplit(t *testing.T) {
-	previousLimit := volumeByteLimit
-	volumeByteLimit = 2048
-	t.Cleanup(func() { volumeByteLimit = previousLimit })
+	const volumeByteLimit int64 = 2048
 
 	fixture := newFixture(t)
 	large := make([]byte, 20000)
@@ -283,7 +324,9 @@ func TestVolumeSplit(t *testing.T) {
 		large[index] = byte(state)
 	}
 	fixture.addSource(t, "app/example/Large.lua", large)
-	request := fixture.build(t, fixture.input("1.631.2"))
+	input := fixture.input("1.631.2")
+	input.VolumeByteLimit = volumeByteLimit
+	request := fixture.build(t, input)
 	volumes := packageVolumes(t, request)
 
 	if len(volumes) < 2 {
@@ -332,10 +375,19 @@ func TestImmutability(t *testing.T) {
 	request := fixture.build(t, fixture.input("1.631.2"))
 	assertEmptyDirectory(t, fixture.staging)
 
+	rebuilt := fixture.build(t, fixture.input("1.631.2"))
+	if rebuilt.SHA256 != request.SHA256 || rebuilt.MD5 != request.MD5 {
+		t.Fatal("the identical retry produced another package")
+	}
+
 	existing := filepath.Join(fixture.updates, packageVolumes(t, request)[0].Name)
 	before, err := os.ReadFile(existing)
 	if err != nil {
 		t.Fatalf("read existing artifact: %v", err)
+	}
+	tampered := append([]byte("x"), before[1:]...)
+	if err := os.WriteFile(existing, tampered, 0o644); err != nil {
+		t.Fatalf("tamper existing artifact: %v", err)
 	}
 	if _, err := Build(context.Background(), fixture.input("1.631.2")); !errors.Is(err, ErrTargetExists) {
 		t.Fatalf("rebuild error = %v, want %v", err, ErrTargetExists)
@@ -344,7 +396,7 @@ func TestImmutability(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read existing artifact: %v", err)
 	}
-	if !bytes.Equal(before, after) {
+	if !bytes.Equal(after, tampered) {
 		t.Fatal("a refused build changed the existing artifact")
 	}
 	assertEmptyDirectory(t, fixture.staging)
@@ -359,13 +411,13 @@ func TestRefusedBuildLeavesStagingEmpty(t *testing.T) {
 	assertEmptyDirectory(t, fixture.staging)
 }
 
-func TestAssetsLaneRefused(t *testing.T) {
+func TestAssetsLaneRefusedWithoutResPath(t *testing.T) {
 	fixture := newFixture(t)
 	fixture.addSource(t, "app/example/Feature.lua", []byte("return {}\n"))
 	input := fixture.input("1.631.1")
 	input.Lane = "assets"
-	if _, err := Build(context.Background(), input); !errors.Is(err, ErrAssetsLaneUnsupported) {
-		t.Fatalf("error = %v, want %v", err, ErrAssetsLaneUnsupported)
+	if _, err := Build(context.Background(), input); !errors.Is(err, ErrResPathMissing) {
+		t.Fatalf("error = %v, want %v", err, ErrResPathMissing)
 	}
 }
 
@@ -377,28 +429,31 @@ func TestEmptyPackageRefused(t *testing.T) {
 }
 
 func TestOptInStockBaselineGolden(t *testing.T) {
-	baseline := os.Getenv("GXB_STOCK_BASELINE")
-	if baseline == "" {
-		t.Skip("GXB_STOCK_BASELINE not set")
+	stockSource := os.Getenv("GXB_STOCK_SOURCE")
+	if stockSource == "" {
+		t.Skip("GXB_STOCK_SOURCE not set")
+	}
+	const target = "app/common/network/Backend.lua"
+	stock, err := os.ReadFile(filepath.Join(stockSource, filepath.FromSlash(target)))
+	if err != nil {
+		t.Fatalf("read stock Backend.lua: %v", err)
+	}
+	overlay, err := os.ReadFile(filepath.Join("..", "..", "..", "client", "ota", "patches", "backend_http_poll", "backend_http_poll_overlay.lua"))
+	if err != nil {
+		t.Fatalf("read the backend_http_poll overlay: %v", err)
 	}
 	golden, err := os.ReadFile(filepath.Join("testdata", "backend_http_poll_golden.lua"))
 	if err != nil {
 		t.Fatalf("read golden fixture: %v", err)
 	}
-	root := t.TempDir()
-	request, err := Build(context.Background(), Input{
-		Lane:          "code",
-		Version:       "1.631.2",
-		StockBaseline: baseline,
-		ClientTree:    filepath.Join("..", "..", "..", "client", "ota"),
-		UpdatesDir:    filepath.Join(root, "updates", "code"),
-		StagingDir:    filepath.Join(root, "staging"),
-	})
-	if err != nil {
-		t.Fatalf("Build: %v", err)
-	}
-	assembled := readAssembled(t, filepath.Join(root, "updates", "code"), request)
-	for _, entry := range []string{"src_32/app/common/network/Backend.lua", "src_64/app/common/network/Backend.lua"} {
+	// One patch on its target must stay byte-identical to the retired generator;
+	// the shipped tree chains the league patches after it.
+	fixture := newFixture(t)
+	fixture.addStock(t, target, stock)
+	fixture.addPatch(t, "backend_http_poll", target, stock, standardPatch(), string(overlay))
+	request := fixture.build(t, fixture.input("1.631.2"))
+	assembled := readAssembled(t, fixture.updates, request)
+	for _, entry := range []string{"src_32/" + target, "src_64/" + target} {
 		if got := zipEntry(t, assembled, entry); !bytes.Equal(got, golden) {
 			t.Fatalf("%s does not equal the golden fixture", entry)
 		}
@@ -653,9 +708,6 @@ func TestPatchTrailingDataRefused(t *testing.T) {
 }
 
 func TestCommitVolumesRollsBack(t *testing.T) {
-	previousLimit := volumeByteLimit
-	volumeByteLimit = 2048
-	t.Cleanup(func() { volumeByteLimit = previousLimit })
 	previousRename := renameFile
 	t.Cleanup(func() { renameFile = previousRename })
 
@@ -678,7 +730,9 @@ func TestCommitVolumesRollsBack(t *testing.T) {
 		}
 		return os.Rename(oldPath, newPath)
 	}
-	if _, err := Build(context.Background(), fixture.input("1.631.2")); err == nil {
+	rollbackInput := fixture.input("1.631.2")
+	rollbackInput.VolumeByteLimit = 2048
+	if _, err := Build(context.Background(), rollbackInput); err == nil {
 		t.Fatal("build succeeded despite the injected rename failure")
 	}
 	entries, err := os.ReadDir(fixture.updates)

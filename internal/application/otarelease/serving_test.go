@@ -94,6 +94,13 @@ type fakeDB struct{}
 
 func (fakeDB) Begin(context.Context, tx.Options) (tx.Tx, error) { return fakeTx{}, nil }
 
+func testSettings(lazyFetch domain.LazyFetch, resPath string) domain.Settings {
+	settings := domain.DefaultSettings()
+	settings.LazyFetch = lazyFetch
+	settings.ResPath = resPath
+	return settings
+}
+
 func newServingFixture(t *testing.T, release domain.RawRelease, asset []byte) servingFixture {
 	t.Helper()
 	root := t.TempDir()
@@ -138,7 +145,7 @@ func newServingFixture(t *testing.T, release domain.RawRelease, asset []byte) se
 		root: root, res: res, rows: rows, ledger: ledger, captures: captures,
 		serving: &Serving{
 			Load: func(context.Context) ([]domain.RawRelease, error) { return rows, nil },
-			Root: root, Settings: NewSettingsValue(domain.Settings{LazyFetch: domain.LazyFetchOn, ResPath: res}),
+			Root: root, Settings: NewSettingsValue(testSettings(domain.LazyFetchOn, res)),
 			PublicEngineURL: "https://engine.example", Ledger: ledger,
 		},
 		asset: asset, assetKey: "a.png." + md5Hex(asset),
@@ -233,21 +240,21 @@ func TestServingMissLogsOncePerPath(t *testing.T) {
 
 func TestServingResDownloadURLRules(t *testing.T) {
 	codeOnly := newServingFixture(t, servingRow(t, "1.631.2", domain.LaneCode, 12, []string{"src_64/app/a.lua"}), []byte("asset"))
-	codeOnly.serving.Settings = NewSettingsValue(domain.Settings{LazyFetch: domain.LazyFetchAuto, ResPath: codeOnly.res})
+	codeOnly.serving.Settings = NewSettingsValue(testSettings(domain.LazyFetchAuto, codeOnly.res))
 	if url, err := codeOnly.serving.ResDownloadURL(context.Background()); err != nil || url != "" {
 		t.Fatalf("auto without assets url=%q err=%v", url, err)
 	}
 	assets := newServingFixture(t, servingRow(t, "1.631.1", domain.LaneAssets, 12, []string{"src_64/app/a.lua"}), []byte("asset"))
-	assets.serving.Settings = NewSettingsValue(domain.Settings{LazyFetch: domain.LazyFetchAuto, ResPath: assets.res})
+	assets.serving.Settings = NewSettingsValue(testSettings(domain.LazyFetchAuto, assets.res))
 	if url, err := assets.serving.ResDownloadURL(context.Background()); err != nil || url != "https://engine.example/res/" {
 		t.Fatalf("auto with assets url=%q err=%v", url, err)
 	}
-	off := NewSettingsValue(domain.Settings{LazyFetch: domain.LazyFetchOff, ResPath: assets.res})
+	off := NewSettingsValue(testSettings(domain.LazyFetchOff, assets.res))
 	assets.serving.Settings = off
 	if url, err := assets.serving.ResDownloadURL(context.Background()); err != nil || url != "" {
 		t.Fatalf("off url=%q err=%v", url, err)
 	}
-	noPath := NewSettingsValue(domain.Settings{LazyFetch: domain.LazyFetchOn, ResPath: ""})
+	noPath := NewSettingsValue(testSettings(domain.LazyFetchOn, ""))
 	assets.serving.Settings = noPath
 	if url, err := assets.serving.ResDownloadURL(context.Background()); err != nil || url != "" {
 		t.Fatalf("no res_path url=%q err=%v", url, err)
@@ -256,7 +263,7 @@ func TestServingResDownloadURLRules(t *testing.T) {
 
 func TestServingResDownloadURLRequiresIndexAndReadablePath(t *testing.T) {
 	assets := newServingFixture(t, servingRow(t, "1.631.1", domain.LaneAssets, 12, []string{"src_64/app/a.lua"}), []byte("asset"))
-	assets.serving.Settings = NewSettingsValue(domain.Settings{LazyFetch: domain.LazyFetchAuto, ResPath: assets.res})
+	assets.serving.Settings = NewSettingsValue(testSettings(domain.LazyFetchAuto, assets.res))
 	if url, err := assets.serving.ResDownloadURL(context.Background()); err != nil || url != "https://engine.example/res/" {
 		t.Fatalf("with sidecar url=%q err=%v", url, err)
 	}
@@ -273,7 +280,7 @@ func TestServingResDownloadURLRequiresIndexAndReadablePath(t *testing.T) {
 	}
 
 	moved := newServingFixture(t, servingRow(t, "1.631.2", domain.LaneAssets, 12, []string{"src_64/app/a.lua"}), []byte("asset"))
-	moved.serving.Settings = NewSettingsValue(domain.Settings{LazyFetch: domain.LazyFetchAuto, ResPath: moved.res})
+	moved.serving.Settings = NewSettingsValue(testSettings(domain.LazyFetchAuto, moved.res))
 	if err := os.Rename(moved.res, moved.res+"-moved"); err != nil {
 		t.Fatal(err)
 	}
@@ -287,7 +294,7 @@ func TestServingResDownloadURLRequiresIndexAndReadablePath(t *testing.T) {
 
 func TestServingOpenResourceRefusesWhenLazyFetchIsOff(t *testing.T) {
 	fixture := newServingFixture(t, servingRow(t, "1.631.1", domain.LaneAssets, 12, []string{"src_64/app/a.lua"}), []byte("asset"))
-	fixture.serving.Settings = NewSettingsValue(domain.Settings{LazyFetch: domain.LazyFetchOff, ResPath: fixture.res})
+	fixture.serving.Settings = NewSettingsValue(testSettings(domain.LazyFetchOff, fixture.res))
 	if _, _, _, servable, err := fixture.serving.OpenResource(context.Background(), fixture.assetKey); err != nil || servable {
 		t.Fatalf("lazy_fetch off served the asset: servable=%v err=%v", servable, err)
 	}
@@ -322,6 +329,76 @@ func TestServingVerifiedMD5EvictsOneEntryAndKeepsHits(t *testing.T) {
 	}
 	if len(serving.md5Cache) != maxMD5CacheEntries {
 		t.Fatalf("hit changed the cache size: entries=%d", len(serving.md5Cache))
+	}
+}
+
+// TestServingNewestSidecarWinsForOnePath indexes two active releases whose
+// sidecars give one path different md5s; only the newest release's row serves
+// (L4f silent lazy refresh).
+func TestServingNewestSidecarWinsForOnePath(t *testing.T) {
+	root := t.TempDir()
+	res := t.TempDir()
+	content := []byte("newest bytes")
+	assetPath := filepath.Join(res, "res", "web", "a.png")
+	if err := os.MkdirAll(filepath.Dir(assetPath), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(assetPath, content, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	oldMD5 := md5Hex([]byte("old"))
+	newMD5 := md5Hex(content)
+	assetsRow := servingRow(t, "1.631.1", domain.LaneAssets, 12, nil)
+	codeRow := servingRow(t, "1.631.2", domain.LaneCode, 12, nil)
+	for _, release := range []domain.RawRelease{assetsRow, codeRow} {
+		directory := filepath.Join(root, "updates", release.Lane)
+		if err := os.MkdirAll(directory, 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(directory, volumeName(release.Version)), bytes.Repeat([]byte("v"), 12), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	writeSidecar := func(release domain.RawRelease, asset resAsset) {
+		encoded, err := json.Marshal(resSidecar{Entries: []resAsset{asset}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		base := strings.TrimSuffix(volumeName(release.Version), ".001")
+		if err := os.WriteFile(filepath.Join(root, "updates", release.Lane, base+".res.json"), encoded, 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	writeSidecar(assetsRow, resAsset{Path: "res/web/a.png", MD5: oldMD5, Size: 3})
+	writeSidecar(codeRow, resAsset{Path: "res/web/a.png", MD5: newMD5, Size: int64(len(content))})
+
+	rows := []domain.RawRelease{assetsRow, codeRow}
+	serving := &Serving{
+		Load:     func(context.Context) ([]domain.RawRelease, error) { return rows, nil },
+		Root:     root,
+		Settings: NewSettingsValue(testSettings(domain.LazyFetchOn, res)),
+	}
+	if err := serving.Refresh(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	snapshot, err := serving.current(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(snapshot.resources["a.png."+newMD5]) != 1 {
+		t.Fatalf("the newest md5 was not indexed: %v", snapshot.resources)
+	}
+	if len(snapshot.resources["a.png."+oldMD5]) != 0 {
+		t.Fatalf("the older sidecar row is still indexed: %v", snapshot.resources)
+	}
+	file, _, _, servable, err := serving.OpenResource(context.Background(), "a.png."+newMD5)
+	if err != nil || !servable {
+		t.Fatalf("servable=%v err=%v", servable, err)
+	}
+	defer file.Close()
+	got, err := io.ReadAll(file)
+	if err != nil || !bytes.Equal(got, content) {
+		t.Fatalf("served %q err=%v", got, err)
 	}
 }
 

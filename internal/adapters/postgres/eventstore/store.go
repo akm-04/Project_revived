@@ -294,6 +294,48 @@ func (Store) OccurrenceTx(ctx context.Context, query tx.Queryer, occurrenceID in
 	return &occurrence, nil
 }
 
+const selectActiveOccurrence = `SELECT ` + occurrenceColumns + ` FROM event_occurrences
+WHERE logical_server_id=$1 AND activity_id=$2 AND cancelled_at IS NULL AND settled_at IS NULL
+AND starts_at <= $3 AND (ends_at IS NULL OR ends_at > $3 OR claim_until > $3)
+ORDER BY starts_at DESC, id DESC LIMIT 1`
+
+// ActiveOccurrenceTx reads the server's RUNNING or CLAIM_WINDOW occurrence of
+// one activity at at (ruling 3); the derived state is re-checked by the caller.
+func (Store) ActiveOccurrenceTx(ctx context.Context, query tx.Queryer, server, activityID int64, at time.Time) (*events.Occurrence, error) {
+	return occurrenceAt(ctx, query, selectActiveOccurrence, server, activityID, at)
+}
+
+const selectClaimOccurrence = `SELECT ` + occurrenceColumns + ` FROM event_occurrences
+WHERE logical_server_id=$1 AND activity_id=$2 AND cancelled_at IS NULL
+AND starts_at <= $3
+ORDER BY starts_at DESC, id DESC LIMIT 1`
+
+// ClaimOccurrenceTx reads the newest occurrence that has started, including an
+// ENDED or ARCHIVED one, so a repeat of a stored claim is answered at any time
+// (EA-7). cancelled rows never run and are excluded.
+func (Store) ClaimOccurrenceTx(ctx context.Context, query tx.Queryer, server, activityID int64, at time.Time) (*events.Occurrence, error) {
+	return occurrenceAt(ctx, query, selectClaimOccurrence, server, activityID, at)
+}
+
+func occurrenceAt(ctx context.Context, query tx.Queryer, statement string, server, activityID int64, at time.Time) (*events.Occurrence, error) {
+	if query == nil || server <= 0 || activityID <= 0 || at.IsZero() {
+		return nil, errInvalid
+	}
+	var raw string
+	if err := query.QueryRow(ctx, statement, server, activityID, at.UTC()).Scan(&raw); err != nil {
+		if errors.Is(err, kernelstore.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	var row occurrenceRow
+	if err := json.Unmarshal([]byte(raw), &row); err != nil {
+		return nil, err
+	}
+	occurrence := row.domain()
+	return &occurrence, nil
+}
+
 const lockOccurrence = `SELECT ` + occurrenceColumns + ` FROM event_occurrences WHERE id=$1 FOR UPDATE`
 
 // LockOccurrenceTx locks one occurrence FOR UPDATE; nil when it does not exist.
@@ -490,24 +532,31 @@ func (Store) SettingsTx(ctx context.Context, query tx.Queryer, server int64) (ap
 
 const selectOccurrenceClaims = `SELECT COALESCE(jsonb_agg(jsonb_build_object(
 	'player_id',player_id,'occurrence_id',occurrence_id,'tier',tier,'period',period,
-	'choice',choice,'claimed_at',claimed_at,'grant_receipt',grant_receipt) ORDER BY claimed_at,player_id,tier,period),'[]'::jsonb)::text
+	'choice',choice,'claimed_at',claimed_at,'grant_receipt',grant_receipt,
+	'award_body',COALESCE(award_body::text,''),'payload_version',payload_version) ORDER BY claimed_at,player_id,tier,period),'[]'::jsonb)::text
 FROM (
-	SELECT player_id,occurrence_id,tier,period,choice,claimed_at,grant_receipt
+	SELECT player_id,occurrence_id,tier,period,choice,claimed_at,grant_receipt,award_body,payload_version
 	FROM player_event_claims WHERE occurrence_id=$1 ORDER BY claimed_at,player_id,tier,period LIMIT $2
 ) listed`
 
 type claimRow struct {
-	PlayerID     int64     `json:"player_id"`
-	OccurrenceID int64     `json:"occurrence_id"`
-	Tier         int64     `json:"tier"`
-	Period       string    `json:"period"`
-	Choice       int       `json:"choice"`
-	ClaimedAt    time.Time `json:"claimed_at"`
-	GrantReceipt string    `json:"grant_receipt"`
+	PlayerID       int64     `json:"player_id"`
+	OccurrenceID   int64     `json:"occurrence_id"`
+	Tier           int64     `json:"tier"`
+	Period         string    `json:"period"`
+	Choice         int       `json:"choice"`
+	ClaimedAt      time.Time `json:"claimed_at"`
+	GrantReceipt   string    `json:"grant_receipt"`
+	AwardBody      string    `json:"award_body"`
+	PayloadVersion int16     `json:"payload_version"`
 }
 
 func (row claimRow) domain() appevents.Claim {
-	return appevents.Claim{PlayerID: row.PlayerID, OccurrenceID: row.OccurrenceID, Tier: row.Tier, Period: row.Period, Choice: row.Choice, ClaimedAt: row.ClaimedAt.UTC(), GrantReceipt: row.GrantReceipt}
+	claim := appevents.Claim{PlayerID: row.PlayerID, OccurrenceID: row.OccurrenceID, Tier: row.Tier, Period: row.Period, Choice: row.Choice, ClaimedAt: row.ClaimedAt.UTC(), GrantReceipt: row.GrantReceipt, PayloadVersion: row.PayloadVersion}
+	if row.AwardBody != "" {
+		claim.AwardBody = json.RawMessage(row.AwardBody)
+	}
+	return claim
 }
 
 // OccurrenceClaimsTx reads a bounded claim page of one occurrence.
@@ -573,7 +622,7 @@ func (Store) ActiveHooksTx(ctx context.Context, query tx.Queryer, server int64, 
 	return hooks, nil
 }
 
-const selectClaim = `SELECT player_id,occurrence_id,tier,period,choice,claimed_at,grant_receipt
+const selectClaim = `SELECT player_id,occurrence_id,tier,period,choice,claimed_at,grant_receipt,COALESCE(award_body::text,''),payload_version
 FROM player_event_claims WHERE player_id=$1 AND occurrence_id=$2 AND tier=$3 AND period=$4`
 
 // InsertClaimTx inserts a claim; on the unique (player, occurrence, tier,
@@ -582,13 +631,21 @@ func (Store) InsertClaimTx(ctx context.Context, transaction tx.Tx, claim appeven
 	if transaction == nil || claim.PlayerID <= 0 || claim.OccurrenceID <= 0 || claim.Tier <= 0 || claim.Period == "" || claim.Choice < 1 || claim.Choice > 3 || claim.ClaimedAt.IsZero() || claim.GrantReceipt == "" {
 		return appevents.Claim{}, false, errInvalid
 	}
+	if len(claim.AwardBody) != 0 && !json.Valid(claim.AwardBody) {
+		return appevents.Claim{}, false, errInvalid
+	}
+	var body *string
+	if len(claim.AwardBody) != 0 {
+		text := string(claim.AwardBody)
+		body = &text
+	}
 	var row claimRow
-	err := transaction.QueryRow(ctx, `INSERT INTO player_event_claims(player_id,occurrence_id,tier,period,choice,claimed_at,grant_receipt)
-		VALUES($1,$2,$3,$4,$5,$6,$7)
+	err := transaction.QueryRow(ctx, `INSERT INTO player_event_claims(player_id,occurrence_id,tier,period,choice,claimed_at,grant_receipt,award_body,payload_version)
+		VALUES($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9)
 		ON CONFLICT (player_id,occurrence_id,tier,period) DO NOTHING
-		RETURNING player_id,occurrence_id,tier,period,choice,claimed_at,grant_receipt`,
-		claim.PlayerID, claim.OccurrenceID, claim.Tier, claim.Period, claim.Choice, claim.ClaimedAt.UTC(), claim.GrantReceipt).
-		Scan(&row.PlayerID, &row.OccurrenceID, &row.Tier, &row.Period, &row.Choice, &row.ClaimedAt, &row.GrantReceipt)
+		RETURNING player_id,occurrence_id,tier,period,choice,claimed_at,grant_receipt,COALESCE(award_body::text,''),payload_version`,
+		claim.PlayerID, claim.OccurrenceID, claim.Tier, claim.Period, claim.Choice, claim.ClaimedAt.UTC(), claim.GrantReceipt, body, claim.PayloadVersion).
+		Scan(&row.PlayerID, &row.OccurrenceID, &row.Tier, &row.Period, &row.Choice, &row.ClaimedAt, &row.GrantReceipt, &row.AwardBody, &row.PayloadVersion)
 	if err == nil {
 		return row.domain(), true, nil
 	}
@@ -596,17 +653,37 @@ func (Store) InsertClaimTx(ctx context.Context, transaction tx.Tx, claim appeven
 		return appevents.Claim{}, false, err
 	}
 	existing := claimRow{}
-	if err := transaction.QueryRow(ctx, selectClaim, claim.PlayerID, claim.OccurrenceID, claim.Tier, claim.Period).Scan(&existing.PlayerID, &existing.OccurrenceID, &existing.Tier, &existing.Period, &existing.Choice, &existing.ClaimedAt, &existing.GrantReceipt); err != nil {
+	if err := transaction.QueryRow(ctx, selectClaim, claim.PlayerID, claim.OccurrenceID, claim.Tier, claim.Period).Scan(&existing.PlayerID, &existing.OccurrenceID, &existing.Tier, &existing.Period, &existing.Choice, &existing.ClaimedAt, &existing.GrantReceipt, &existing.AwardBody, &existing.PayloadVersion); err != nil {
 		return appevents.Claim{}, false, err
 	}
 	return existing.domain(), false, nil
 }
 
+const updateClaimReply = `UPDATE player_event_claims SET award_body=$6::jsonb,payload_version=$7
+WHERE player_id=$1 AND occurrence_id=$2 AND tier=$3 AND period=$4 AND choice=$5`
+
+// UpdateClaimReplyTx stores the granted MID 231 reply on the claim row, so the
+// same command re-answers it without a second grant (EA-7).
+func (Store) UpdateClaimReplyTx(ctx context.Context, transaction tx.Tx, claim appevents.Claim, body json.RawMessage) error {
+	if transaction == nil || claim.PlayerID <= 0 || claim.OccurrenceID <= 0 || claim.Tier <= 0 || claim.Period == "" || claim.Choice < 1 || claim.Choice > 3 || claim.PayloadVersion < 0 || !json.Valid(body) {
+		return errInvalid
+	}
+	effect, err := transaction.Exec(ctx, updateClaimReply, claim.PlayerID, claim.OccurrenceID, claim.Tier, claim.Period, claim.Choice, string(body), claim.PayloadVersion)
+	if err != nil {
+		return err
+	}
+	if effect == nil || effect.RowsAffected() != 1 {
+		return errors.New("eventstore: claim row disappeared under its lock")
+	}
+	return nil
+}
+
 const selectPlayerClaims = `SELECT COALESCE(jsonb_agg(jsonb_build_object(
 	'player_id',player_id,'occurrence_id',occurrence_id,'tier',tier,'period',period,
-	'choice',choice,'claimed_at',claimed_at,'grant_receipt',grant_receipt) ORDER BY tier,period),'[]'::jsonb)::text
+	'choice',choice,'claimed_at',claimed_at,'grant_receipt',grant_receipt,
+	'award_body',COALESCE(award_body::text,''),'payload_version',payload_version) ORDER BY tier,period),'[]'::jsonb)::text
 FROM (
-	SELECT player_id,occurrence_id,tier,period,choice,claimed_at,grant_receipt
+	SELECT player_id,occurrence_id,tier,period,choice,claimed_at,grant_receipt,award_body,payload_version
 	FROM player_event_claims WHERE player_id=$1 AND occurrence_id=$2
 	ORDER BY tier,period LIMIT $3
 ) listed`

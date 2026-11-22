@@ -210,18 +210,29 @@ func runRead(root string, args []string) error {
 }
 
 func runOTA(root string, args []string) error {
-	if len(args) < 2 {
+	if len(args) == 0 {
+		return errors.New("usage: ota build|publish|withdraw <version> --reason <text> [--key <key>]")
+	}
+	switch args[0] {
+	case "build":
+		return runOTABuild(root, args[1:])
+	case "publish", "withdraw":
+		return runOTAMaintenance(root, args[0], args[1:])
+	default:
+		return fmt.Errorf("unknown ota command %q", args[0])
+	}
+}
+
+func runOTAMaintenance(root, action string, args []string) error {
+	if len(args) < 1 {
 		return errors.New("usage: ota publish|withdraw <version> --reason <text> [--key <key>]")
 	}
-	action, version := args[0], args[1]
-	if action != "publish" && action != "withdraw" {
-		return fmt.Errorf("unknown ota command %q", action)
-	}
+	version := args[0]
 	flags := flag.NewFlagSet("ota "+action, flag.ContinueOnError)
 	flags.SetOutput(os.Stderr)
 	reason := flags.String("reason", "", "why the operator runs the maintenance window")
 	semanticKey := flags.String("key", "", "idempotency key; a new one is chosen when omitted")
-	if err := flags.Parse(args[2:]); err != nil {
+	if err := flags.Parse(args[1:]); err != nil {
 		return err
 	}
 	if *reason == "" {
@@ -241,6 +252,96 @@ func runOTA(root string, args []string) error {
 		return err
 	}
 	return printResult(status, body)
+}
+
+// runOTABuild starts the long operation and, unless --no-wait, polls op status
+// until it finishes (I11A_1_PLAN "L4c decisions").
+func runOTABuild(root string, args []string) error {
+	flags := flag.NewFlagSet("ota build", flag.ContinueOnError)
+	flags.SetOutput(os.Stderr)
+	lane := flags.String("lane", "", "code, assets or catalog")
+	version := flags.String("version", "", "release number")
+	rollback := flags.Bool("rollback", false, "allow a number below the lane's active release")
+	lazyRefresh := flags.Bool("lazy-refresh", false, "rewrite lazyFile.json from the active assets release (code lane)")
+	noWait := flags.Bool("no-wait", false, "return as soon as the operation starts")
+	timeout := flags.Duration("timeout", defaultBuildPollTimeout, "how long to poll the operation")
+	if err := flags.Parse(args); err != nil {
+		return err
+	}
+	if *lane == "" || *version == "" {
+		return errors.New("--lane and --version are required")
+	}
+	client, err := newAgentClient(root, true)
+	if err != nil {
+		return err
+	}
+	status, body, err := client.request(http.MethodPost, "/agent/v1/ota/build", map[string]any{
+		"lane": *lane, "version": *version, "rollback": *rollback, "lazy_refresh": *lazyRefresh,
+	})
+	if err != nil {
+		return err
+	}
+	if status != http.StatusAccepted {
+		return printResult(status, body)
+	}
+	var started struct {
+		OperationID string `json:"operation_id"`
+	}
+	if err := json.Unmarshal(body, &started); err != nil || started.OperationID == "" {
+		return errors.New("the agent reply carried no operation id")
+	}
+	fmt.Println(strings.TrimRight(string(body), "\n"))
+	if *noWait {
+		return nil
+	}
+	return waitForOperation(client, started.OperationID, *timeout)
+}
+
+const (
+	defaultBuildPollTimeout  = 3 * time.Hour
+	operationPollInterval    = 500 * time.Millisecond
+	operationNotFoundRetries = 5
+)
+
+// waitForOperation polls until the operation finishes, giving a bounded time and
+// retrying a not-found answer a few times (L4f fixes 5 and 6).
+func waitForOperation(client *agentClient, id string, timeout time.Duration) error {
+	deadline := time.Now().Add(timeout)
+	notFound := 0
+	for {
+		if time.Now().After(deadline) {
+			return fmt.Errorf("operation %s did not finish within %s", id, timeout)
+		}
+		status, body, err := client.request(http.MethodGet, "/agent/v1/ops/"+id, nil)
+		if err != nil {
+			return err
+		}
+		if status == http.StatusNotFound && notFound < operationNotFoundRetries {
+			notFound++
+			time.Sleep(operationPollInterval)
+			continue
+		}
+		notFound = 0
+		if status != http.StatusOK {
+			return printResult(status, body)
+		}
+		var operation operatoragent.Operation
+		if err := json.Unmarshal(body, &operation); err != nil {
+			return err
+		}
+		switch operation.State {
+		case operatoragent.OperationDone:
+			fmt.Println(strings.TrimRight(string(body), "\n"))
+			return nil
+		case operatoragent.OperationFailed:
+			fmt.Println(strings.TrimRight(string(body), "\n"))
+			if operation.FailedStep != "" {
+				return fmt.Errorf("ota build failed at %s: %s", operation.FailedStep, operation.Error)
+			}
+			return errors.New("ota build failed")
+		}
+		time.Sleep(operationPollInterval)
+	}
 }
 
 func runOperation(root string, args []string) error {

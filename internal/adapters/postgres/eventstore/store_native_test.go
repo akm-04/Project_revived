@@ -169,7 +169,7 @@ func decodeOccurrenceView(t *testing.T, outcome operator.Outcome) appevents.Occu
 
 func TestDeployIdempotentAndImmutable(t *testing.T) {
 	bus := e1Bus(t, e1Pool(t))
-	definition := json.RawMessage(e1DefinitionJSON(1071, 1, 2))
+	definition := json.RawMessage(e1DefinitionJSON(1098, 1, 2))
 	first := e1Execute(t, bus, e1Command(t, "events.definition.deploy", nil, "global", definition))
 	if first.State != operator.StateApplied {
 		t.Fatalf("deploy: %s %s", first.State, first.Result)
@@ -187,11 +187,11 @@ func TestDeployIdempotentAndImmutable(t *testing.T) {
 	if err := json.Unmarshal(second.Result, &replay); err != nil || replay.Created {
 		t.Fatalf("same body must be idempotent: %s %v", second.Result, err)
 	}
-	changed := e1Execute(t, bus, e1Command(t, "events.definition.deploy", nil, "global", json.RawMessage(e1DefinitionJSON(1071, 1, 3))))
+	changed := e1Execute(t, bus, e1Command(t, "events.definition.deploy", nil, "global", json.RawMessage(e1DefinitionJSON(1098, 1, 3))))
 	if changed.State != operator.StateRefused || e1Code(t, changed) != appevents.CodeRevisionExists {
 		t.Fatalf("another body must be refused EVENT_REVISION_EXISTS: %s %s", changed.State, changed.Result)
 	}
-	successor := e1Execute(t, bus, e1Command(t, "events.definition.deploy", nil, "global", json.RawMessage(e1DefinitionJSON(1071, 2, 3))))
+	successor := e1Execute(t, bus, e1Command(t, "events.definition.deploy", nil, "global", json.RawMessage(e1DefinitionJSON(1098, 2, 3))))
 	if successor.State != operator.StateApplied {
 		t.Fatalf("revision 2: %s %s", successor.State, successor.Result)
 	}
@@ -614,7 +614,7 @@ func TestOccurrenceShowCountsEveryClaim(t *testing.T) {
 func TestActiveModifiersRead(t *testing.T) {
 	pool := e1Pool(t)
 	bus := e1Bus(t, pool)
-	definition := json.RawMessage(`{"activity_id":1090,"revision":1,"archetype":"RULE_MODIFIER","client_requirements":{},"hooks":[{"hook":"campaign.drop_multiplier","scope":"normal","item_kinds":[1],"multiplier":2}]}`)
+	definition := json.RawMessage(`{"activity_id":1990,"revision":1,"archetype":"RULE_MODIFIER","client_requirements":{},"hooks":[{"hook":"campaign.drop_multiplier","scope":"normal","item_kinds":[1],"multiplier":2}]}`)
 	deployed := e1Execute(t, bus, e1Command(t, "events.definition.deploy", nil, "global", definition))
 	if deployed.State != operator.StateApplied {
 		t.Fatalf("deploy: %s %s", deployed.State, deployed.Result)
@@ -622,7 +622,7 @@ func TestActiveModifiersRead(t *testing.T) {
 	ctx := context.Background()
 	now := time.Now().UTC()
 	if _, err := pool.Raw().Exec(ctx, `INSERT INTO event_occurrences(logical_server_id,activity_id,definition_revision,starts_at,ends_at,claim_until,source,revision,created_at)
-		VALUES(1,1090,1,$1,$2,$3,'CYCLE',1,$4)`, now.Add(-time.Hour), now.Add(time.Hour), now.Add(2*time.Hour), now); err != nil {
+		VALUES(1,1990,1,$1,$2,$3,'CYCLE',1,$4)`, now.Add(-time.Hour), now.Add(time.Hour), now.Add(2*time.Hour), now); err != nil {
 		t.Fatal(err)
 	}
 	service := appevents.Service{Store: eventstore.Store{}}
@@ -642,7 +642,7 @@ func TestActiveModifiersRead(t *testing.T) {
 	}
 }
 
-func TestContentAdaptersCheckCatalogueAndRefuseGift(t *testing.T) {
+func TestContentAdaptersExpandShippedRookieGift(t *testing.T) {
 	pool := e1Pool(t)
 	hooks, err := appevents.NewHookRegistry()
 	if err != nil {
@@ -650,11 +650,30 @@ func TestContentAdaptersCheckCatalogueAndRefuseGift(t *testing.T) {
 	}
 	commands := appevents.Commands{Store: eventstore.Store{}, Coverage: fakeCoverage{}, Gifts: eventstore.ContentGifts{}, Catalogue: eventstore.ContentCatalogue{}, Hooks: hooks}
 	bus := operator.Bus{Runner: tx.Runner{DB: pool}, Clock: clock.System{}, Store: operatorstore.Store{}, Handlers: commands.Handlers()}
-	e1Deploy(t, bus, 1086, 1, 2)
-	gift := json.RawMessage(`{"activity_id":1087,"revision":1,"archetype":"TIERED_CLAIM","client_requirements":{},"tiers":[{"id":1,"requirement":{"kind":"player_level","value":10},"choices":[{"gift_id":90001428}]}]}`)
-	outcome := e1Execute(t, bus, e1Command(t, "events.definition.deploy", nil, "global", gift))
-	if outcome.State != operator.StateRefused || e1Code(t, outcome) != appevents.CodeGiftUnsupported {
-		t.Fatalf("real content gift 90001428 must be EVENT_GIFT_UNSUPPORTED: %s %s", outcome.State, outcome.Result)
+	definition, err := os.ReadFile("../../../../content/events/definitions/1071.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	outcome := e1Execute(t, bus, e1Command(t, "events.definition.deploy", nil, "global", json.RawMessage(definition)))
+	if outcome.State != operator.StateApplied {
+		t.Fatalf("shipped 1071 definition must deploy: %s %s", outcome.State, outcome.Result)
+	}
+	stored, err := (eventstore.Store{}).DefinitionTx(context.Background(), pool, 1071, 1)
+	if err != nil || stored == nil {
+		t.Fatalf("stored definition: %v", err)
+	}
+	if len(stored.Body.Tiers) != 5 || len(stored.Body.Tiers[1].Choices) != 3 {
+		t.Fatalf("expanded tiers = %+v", stored.Body.Tiers)
+	}
+	lines := stored.Body.Tiers[1].Choices[0].Lines
+	heroLines := 0
+	for _, line := range lines {
+		if line.Kind == domainevents.RewardKindHero {
+			heroLines++
+		}
+	}
+	if heroLines != 1 || len(lines) != 3 {
+		t.Fatalf("gift 90001429 must expand to a hero, an item and mana, got %+v", lines)
 	}
 }
 

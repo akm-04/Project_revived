@@ -282,11 +282,11 @@
   }
  ],
  "client_senders_without_live_handler": {
-  "count": 553,
-  "window_sender_mid_count": 138,
+  "count": 552,
+  "window_sender_mid_count": 137,
   "non_window_sender_mid_count": 415,
   "registration_status_counts": {
-   "inactive_fallback": 550,
+   "inactive_fallback": 549,
    "no_registration": 1,
    "unattributed_registration": 2,
    "registration_without_dispatch_handler": 0
@@ -485,30 +485,6 @@
     "window_sender_files": [],
     "non_window_sender_files": [
      "app/model/SelfPlayer.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 231,
-    "name": "GET_ACTIVITY_REWARD",
-    "registration_status": "inactive_fallback",
-    "senders": [
-     "app/model/Activities.lua",
-     "app/model/Sakura.lua",
-     "app/model/Sakura2018.lua",
-     "app/windows/ActivityExchangeHeroWindow.lua",
-     "app/windows/ActivityVipGiftChoiceWindow.lua",
-     "app/windows/NewTermBonusWindow.lua"
-    ],
-    "window_sender_files": [
-     "app/windows/ActivityExchangeHeroWindow.lua",
-     "app/windows/ActivityVipGiftChoiceWindow.lua",
-     "app/windows/NewTermBonusWindow.lua"
-    ],
-    "non_window_sender_files": [
-     "app/model/Activities.lua",
-     "app/model/Sakura.lua",
-     "app/model/Sakura2018.lua"
     ],
     "runtime_reachability": "unknown"
    },
@@ -7615,7 +7591,7 @@
   "internal/application/occult/settlement.go:111: fact kind is not a constant"
  ],
  "inactive_mids": {
-  "count": 625,
+  "count": 624,
   "mids": [
    6,
    17,
@@ -7651,7 +7627,6 @@
    213,
    224,
    225,
-   231,
    232,
    233,
    235,
@@ -8543,9 +8518,7 @@
    "kind": "code_1"
   }
  ],
- "systems_not_wired": [
-  "otabuild"
- ],
+ "systems_not_wired": [],
  "tables_locked_by_many": [
   {
    "table": "account_sessions",
@@ -8568,6 +8541,7 @@
     "dormhouse",
     "elementequipment",
     "eventcentre",
+    "events",
     "gmquestion",
     "godstrial",
     "guildbroadcast",
@@ -8628,6 +8602,7 @@
     "dormhouse",
     "elementequipment",
     "eventcentre",
+    "events",
     "gmquestion",
     "godstrial",
     "guildbroadcast",
@@ -8688,6 +8663,7 @@
     "dormhouse",
     "elementequipment",
     "eventcentre",
+    "events",
     "gmquestion",
     "godstrial",
     "guildbroadcast",
@@ -8805,6 +8781,7 @@
     "dormhouse",
     "elementequipment",
     "eventcentre",
+    "events",
     "frienddm",
     "generaldm",
     "gmquestion",

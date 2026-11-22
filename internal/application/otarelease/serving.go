@@ -19,10 +19,6 @@ import (
 	domain "gxb.local/backend/v2/internal/domain/otarelease"
 )
 
-// ServingRefreshInterval is the plan's bound: the servable set is re-read from
-// the database at most every 5 s, and immediately through Refresh on publish.
-const ServingRefreshInterval = 5 * time.Second
-
 const (
 	maxMD5CacheEntries  = 4_096
 	resSidecarSuffix    = ".res.json"
@@ -101,6 +97,7 @@ func (s *Serving) Refresh(ctx context.Context) error {
 		resources: map[string][]resAsset{},
 		active:    active,
 	}
+	winners := map[string]sidecarWinner{}
 	for _, release := range releases {
 		if release.State != domain.StateActive {
 			continue
@@ -113,10 +110,17 @@ func (s *Serving) Refresh(ctx context.Context) error {
 		for _, volume := range release.Volumes {
 			names[volume.Name] = struct{}{}
 		}
-		added := s.addSidecar(snapshot, release)
+		entries := s.readSidecar(release)
 		if release.Lane == domain.LaneAssets {
 			snapshot.assetsActive = true
-			snapshot.assetsIndexEntries += added
+			snapshot.assetsIndexEntries += len(entries)
+		}
+		mergeSidecarEntries(winners, release.Version, entries)
+	}
+	for _, winner := range winners {
+		for _, entry := range winner.assets {
+			key := resourceKey(entry.Path, entry.MD5)
+			snapshot.resources[key] = append(snapshot.resources[key], entry)
 		}
 	}
 	if resPath := s.resPath(); resPath != "" {
@@ -133,9 +137,17 @@ func (s *Serving) Refresh(ctx context.Context) error {
 	return nil
 }
 
-func (s *Serving) addSidecar(snapshot *servingSnapshot, release domain.Release) int {
+// sidecarWinner is the newest release's rows for one resource path; two rows of
+// the same release all stay, so a wrong-md5 row is still verified and missed.
+type sidecarWinner struct {
+	version domain.Version
+	assets  []resAsset
+}
+
+// readSidecar returns one release's usable rows, deduplicated by (path, md5).
+func (s *Serving) readSidecar(release domain.Release) []resAsset {
 	if s.Root == "" {
-		return 0
+		return nil
 	}
 	sidecarPath := filepath.Join(s.Root, updatesDirectory, string(release.Lane), release.PackageBase+resSidecarSuffix)
 	data, err := os.ReadFile(sidecarPath)
@@ -143,15 +155,15 @@ func (s *Serving) addSidecar(snapshot *servingSnapshot, release domain.Release) 
 		if !errors.Is(err, os.ErrNotExist) {
 			s.logSidecarOnce(sidecarPath, err)
 		}
-		return 0
+		return nil
 	}
 	var sidecar resSidecar
 	if err := json.Unmarshal(data, &sidecar); err != nil {
 		s.logSidecarOnce(sidecarPath, err)
-		return 0
+		return nil
 	}
 	seen := map[string]struct{}{}
-	added := 0
+	entries := make([]resAsset, 0, len(sidecar.Entries))
 	for _, entry := range sidecar.Entries {
 		clean, ok := validResourcePath(entry.Path)
 		if !ok || !validMD5(entry.MD5) {
@@ -163,11 +175,24 @@ func (s *Serving) addSidecar(snapshot *servingSnapshot, release domain.Release) 
 		}
 		seen[identity] = struct{}{}
 		entry.Path = clean
-		key := resourceKey(clean, entry.MD5)
-		snapshot.resources[key] = append(snapshot.resources[key], entry)
-		added++
+		entries = append(entries, entry)
 	}
-	return added
+	return entries
+}
+
+// mergeSidecarEntries keeps only the newest release's md5 for a path present in
+// two sidecars (L4f silent lazy refresh).
+func mergeSidecarEntries(winners map[string]sidecarWinner, version domain.Version, entries []resAsset) {
+	for _, entry := range entries {
+		current, found := winners[entry.Path]
+		switch {
+		case !found || version.Compare(current.version) > 0:
+			winners[entry.Path] = sidecarWinner{version: version, assets: []resAsset{entry}}
+		case version.Compare(current.version) == 0:
+			current.assets = append(current.assets, entry)
+			winners[entry.Path] = current
+		}
+	}
 }
 
 func (s *Serving) logOnce(key, message string) {
@@ -201,13 +226,14 @@ func (s *Serving) now() time.Time {
 	return s.Now()
 }
 
-// current returns a snapshot no older than ServingRefreshInterval. A failed
-// refresh with a previous snapshot keeps serving that set rather than turning a
-// database blip into 404s the client retries.
+// current returns a snapshot no older than the live serving_refresh_seconds.
+// A failed refresh with a previous snapshot keeps serving that set rather than
+// turning a database blip into 404s the client retries.
 func (s *Serving) current(ctx context.Context) (*servingSnapshot, error) {
+	refreshInterval := s.settings().ServingRefreshInterval()
 	s.mu.Lock()
 	snapshot := s.snapshot
-	fresh := snapshot != nil && s.now().Sub(s.refreshedAt) < ServingRefreshInterval
+	fresh := snapshot != nil && s.now().Sub(s.refreshedAt) < refreshInterval
 	s.mu.Unlock()
 	if fresh {
 		return snapshot, nil
@@ -353,20 +379,27 @@ func (s *Serving) verifiedMD5(file *os.File, fullPath string, info os.FileInfo) 
 	return actual, nil
 }
 
-func (s *Serving) resPath() string {
+func (s *Serving) settings() domain.Settings {
 	if s == nil || s.Settings == nil {
-		return ""
+		return domain.DefaultSettings()
 	}
-	return s.Settings.Get().ResPath
+	return s.Settings.Get()
+}
+
+func (s *Serving) resPath() string {
+	return s.settings().ResPath
+}
+
+// DownloadWriteDeadline is the write deadline of a /updates or /res body of
+// size bytes at the live settings.
+func (s *Serving) DownloadWriteDeadline(size int64) time.Time {
+	return s.settings().DownloadWriteDeadline(s.now(), size)
 }
 
 // lazyFetchOff is the operator kill switch: "off" stops /res serving as well as
 // discovery (OA-3).
 func (s *Serving) lazyFetchOff() bool {
-	if s == nil || s.Settings == nil {
-		return false
-	}
-	return s.Settings.Get().LazyFetch == domain.LazyFetchOff
+	return s.settings().LazyFetch == domain.LazyFetchOff
 }
 
 func withinDirectory(root, candidate string) bool {

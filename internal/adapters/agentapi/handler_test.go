@@ -11,11 +11,13 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/adapters/operatorclient"
+	"gxb.local/backend/v2/internal/application/operator"
 	"gxb.local/backend/v2/internal/application/operatoragent"
 )
 
 type backendRecorder struct {
 	authorization string
+	bodyBytes     int64
 }
 
 func newForwardingHandler(t *testing.T) (Handler, *backendRecorder, string) {
@@ -32,6 +34,7 @@ func newForwardingHandler(t *testing.T) (Handler, *backendRecorder, string) {
 	recorder := &backendRecorder{}
 	backend := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		recorder.authorization = request.Header.Get("Authorization")
+		recorder.bodyBytes = request.ContentLength
 		writer.Header().Set("Content-Type", "application/json")
 		if strings.HasPrefix(request.URL.Path, "/operator/v1/commands/") {
 			writer.WriteHeader(http.StatusConflict)
@@ -82,6 +85,58 @@ func TestForwardedCommandPassesBackendRefusal(t *testing.T) {
 	}
 	if backend.authorization != "Bearer backend-token" {
 		t.Fatalf("the backend saw %q", backend.authorization)
+	}
+}
+
+func paddedCommandRequest(size int) string {
+	head := `{"reason":"r","semantic_key":"k","payload":"`
+	tail := `"}`
+	return head + strings.Repeat("a", size-len(head)-len(tail)) + tail
+}
+
+func paddedBuildRequest(size int) string {
+	head := `{"lane":"`
+	tail := `","version":"1.631.2"}`
+	return head + strings.Repeat("a", size-len(head)-len(tail)) + tail
+}
+
+func refusalCodeOf(t *testing.T, recorder *httptest.ResponseRecorder) string {
+	t.Helper()
+	var refusal operatoragent.Refusal
+	if err := json.Unmarshal(recorder.Body.Bytes(), &refusal); err != nil {
+		t.Fatalf("body %s: %v", recorder.Body, err)
+	}
+	return refusal.Code
+}
+
+func TestCommandRouteBodyCap(t *testing.T) {
+	handler, _, session := newForwardingHandler(t)
+	oversized := serveAgent(handler, http.MethodPost, "/agent/v1/commands/ota.register_build", session, paddedCommandRequest(maxCommandBodyBytes+1))
+	if oversized.Code != http.StatusRequestEntityTooLarge || refusalCodeOf(t, oversized) != operatoragent.CodeBodyTooLarge {
+		t.Fatalf("oversized command: %d %s", oversized.Code, oversized.Body)
+	}
+	under := serveAgent(handler, http.MethodPost, "/agent/v1/commands/ota.register_build", session, paddedCommandRequest(maxCommandBodyBytes-1024))
+	if under.Code != http.StatusConflict {
+		t.Fatalf("under-cap command did not reach the backend: %d %s", under.Code, under.Body)
+	}
+	otherRoute := serveAgent(handler, http.MethodPost, "/agent/v1/ota/build", session, paddedBuildRequest(maxBodyBytes+1))
+	if otherRoute.Code != http.StatusRequestEntityTooLarge || refusalCodeOf(t, otherRoute) != operatoragent.CodeBodyTooLarge {
+		t.Fatalf("other route cap: %d %s", otherRoute.Code, otherRoute.Body)
+	}
+}
+
+func TestCommandRouteCapFitsBackendCap(t *testing.T) {
+	handler, backend, session := newForwardingHandler(t)
+	atCap := serveAgent(handler, http.MethodPost, "/agent/v1/commands/ota.register_build", session, paddedCommandRequest(maxCommandBodyBytes))
+	if atCap.Code != http.StatusConflict {
+		t.Fatalf("body at the agent cap: %d %s", atCap.Code, atCap.Body)
+	}
+	if backend.bodyBytes >= operator.MaxCommandBodyBytes {
+		t.Fatalf("forwarded %d bytes, backend cap %d", backend.bodyBytes, operator.MaxCommandBodyBytes)
+	}
+	over := serveAgent(handler, http.MethodPost, "/agent/v1/commands/ota.register_build", session, paddedCommandRequest(maxCommandBodyBytes+1))
+	if over.Code != http.StatusRequestEntityTooLarge || refusalCodeOf(t, over) != operatoragent.CodeBodyTooLarge {
+		t.Fatalf("one byte over the agent cap: %d %s", over.Code, over.Body)
 	}
 }
 
@@ -191,6 +246,62 @@ func TestAgentAPIRejectsTrailingData(t *testing.T) {
 	}
 	if refusal.Code != operatoragent.CodeBodyInvalid {
 		t.Fatalf("code = %q", refusal.Code)
+	}
+}
+
+type fakeBuildStarter struct {
+	operation operatoragent.Operation
+	err       error
+	calls     int
+}
+
+func (starter *fakeBuildStarter) Start(context.Context, operatoragent.BuildRequest) (operatoragent.Operation, error) {
+	starter.calls++
+	return starter.operation, starter.err
+}
+
+func newBuildHandler(t *testing.T) (Handler, *fakeBuildStarter, string) {
+	t.Helper()
+	credentials := operatoragent.NewCredentials(t.TempDir())
+	if err := credentials.Setup("test password"); err != nil {
+		t.Fatal(err)
+	}
+	sessions := operatoragent.NewSessions(time.Now)
+	session, _, err := sessions.Login()
+	if err != nil {
+		t.Fatal(err)
+	}
+	starter := &fakeBuildStarter{operation: operatoragent.Operation{ID: "0123456789abcdef0123456789abcdef", State: operatoragent.OperationRunning}}
+	return Handler{Credentials: credentials, Sessions: sessions, Build: starter, Listen: testListen}, starter, session
+}
+
+func TestBuildRouteAnswers202WithOperationID(t *testing.T) {
+	handler, starter, session := newBuildHandler(t)
+	recorder := serveAgent(handler, http.MethodPost, "/agent/v1/ota/build", session, `{"lane":"code","version":"1.631.2"}`)
+	if recorder.Code != http.StatusAccepted {
+		t.Fatalf("status = %d, body = %s", recorder.Code, recorder.Body)
+	}
+	var started struct {
+		OperationID string `json:"operation_id"`
+	}
+	if err := json.Unmarshal(recorder.Body.Bytes(), &started); err != nil || started.OperationID != starter.operation.ID {
+		t.Fatalf("body = %s (%v)", recorder.Body, err)
+	}
+	if starter.calls != 1 {
+		t.Fatalf("starts = %d", starter.calls)
+	}
+}
+
+func TestBuildRouteRefusesWhileAnotherRuns(t *testing.T) {
+	handler, starter, session := newBuildHandler(t)
+	starter.err = operatoragent.Refuse(operatoragent.CodeOperationRunning, "another ota.build operation is running")
+	recorder := serveAgent(handler, http.MethodPost, "/agent/v1/ota/build", session, `{"lane":"code","version":"1.631.2"}`)
+	if recorder.Code != http.StatusConflict {
+		t.Fatalf("status = %d, body = %s", recorder.Code, recorder.Body)
+	}
+	var refusal operatoragent.Refusal
+	if err := json.Unmarshal(recorder.Body.Bytes(), &refusal); err != nil || refusal.Code != operatoragent.CodeOperationRunning {
+		t.Fatalf("refusal = %+v (%v)", refusal, err)
 	}
 }
 

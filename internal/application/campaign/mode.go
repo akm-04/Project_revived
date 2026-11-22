@@ -69,6 +69,7 @@ type Mode struct {
 	Receipts     receipt.Store
 	ReceiptRead  receipt.Reader
 	BattleCounts BattleCountObserver
+	Drops        DropModifiers
 }
 
 // BattleCountObserver records the Girls Log count of one first settled battle.
@@ -91,6 +92,7 @@ type Content interface {
 	CampaignCatalogTx(context.Context, tx.Queryer, string) (d.Catalog, error)
 	ResolveProgressionPolicyTx(context.Context, tx.Queryer, string) (player.ProgressionPolicy, error)
 	SummonCatalogTx(context.Context, tx.Queryer, string) (summon.Catalog, error)
+	ItemKindsTx(context.Context, tx.Queryer, string, []int64) (map[int64]int64, error)
 }
 
 type Fence interface {
@@ -216,7 +218,7 @@ func retry() tx.RetryPolicy {
 func (s Mode) ready() bool {
 	return s.Timed.Runner.DB != nil && s.Timed.Binder.Time != nil && s.Fresh != nil && s.Store != nil && s.Content != nil && s.Fence != nil && s.Functions != nil &&
 		s.Directory != nil && s.Heroes != nil && s.HeroExp != nil && s.Combat != nil && s.Energy != nil && s.Grants != nil && s.Stages != nil && s.Facts != nil &&
-		s.Receipts != nil && s.ReceiptRead != nil
+		s.Receipts != nil && s.ReceiptRead != nil && s.Drops != nil
 }
 
 // pin binds the active content revision to the operation once, so I5 and every retry observe one revision.
@@ -532,17 +534,35 @@ func (s Mode) start(c context.Context, sc gen.TimedScope, a identity.ActorContex
 			return combat.Started{}, err
 		}
 	}
+	// A pending replay returns the frozen numbers, so only a fresh roll reads
+	// the event modifier (EA-8).
+	pendingReplay := record.PendingGeneration == generation(node.Type, node.ID)
+	var multipliers, kinds map[int64]int64
+	if !pendingReplay {
+		multipliers, err = s.dropMultipliersTx(c, sc.Tx, a, node.Type, record.Progress.State(node.ID).Star == 0, at)
+		if err != nil {
+			return combat.Started{}, err
+		}
+		if kinds, err = s.dropItemKindsTx(c, sc.Tx, v.revision, v.catalog, box, multipliers); err != nil {
+			return combat.Started{}, err
+		}
+	}
+	fresh := func(stream *cd.Stream) []d.Item {
+		items := v.catalog.Drop(box, stream)
+		applyDropMultiplier(items, multipliers, kinds)
+		return items
+	}
 	drops := func(stream *cd.Stream) (any, error) {
 		if petAwakening != nil {
-			return awakeningStartPackage{Items: v.catalog.Drop(box, stream), PetAwakening: petAwakening}, nil
+			return awakeningStartPackage{Items: fresh(stream), PetAwakening: petAwakening}, nil
 		}
 
 		if frozen == nil {
-			return v.catalog.Drop(box, stream), nil
+			return fresh(stream), nil
 		}
 		next := *frozen
 		items := []d.Item{}
-		if record.PendingGeneration == generation(node.Type, node.ID) {
+		if pendingReplay {
 			items = append(items, record.PendingItems...)
 			old, e := readAwakeningPending(record.PendingAwakening)
 			if e != nil {
@@ -554,7 +574,7 @@ func (s Mode) start(c context.Context, sc gen.TimedScope, a identity.ActorContex
 				next.Drops = nil
 			}
 		} else {
-			items = v.catalog.Drop(box, stream)
+			items = fresh(stream)
 			next = next.Draw(stream)
 		}
 		return awakeningStartPackage{Items: items, Awakening: &next}, nil

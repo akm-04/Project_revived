@@ -53,6 +53,87 @@ func TestLoadConfigAcceptsLoopback(t *testing.T) {
 	}
 }
 
+func TestLoadConfigStockSource(t *testing.T) {
+	root := t.TempDir()
+	clientTree := filepath.Join(root, "client")
+	if err := os.MkdirAll(filepath.Join(clientTree, "patches", "backend_http_poll"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	stockSource := filepath.Join(root, "stock")
+	if err := os.MkdirAll(stockSource, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	document := map[string]any{
+		"listen":      "127.0.0.1:8090",
+		"client_tree": clientTree,
+		"backend":     map[string]any{"binary": "/bin/x", "operator_addr": "127.0.0.1:8091"},
+	}
+	load := func(t *testing.T) (Config, error) {
+		t.Helper()
+		encoded, err := json.Marshal(document)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return LoadConfig(writeAgentConfig(t, string(encoded)))
+	}
+
+	if _, err := load(t); err == nil || !strings.Contains(err.Error(), "stock_source") {
+		t.Fatalf("a patch without stock_source: error = %v", err)
+	}
+
+	notDirectory := filepath.Join(root, "not-a-directory")
+	if err := os.WriteFile(notDirectory, []byte("x"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	document["stock_source"] = notDirectory
+	if _, err := load(t); err == nil || !strings.Contains(err.Error(), "stock_source") {
+		t.Fatalf("stock_source naming a file: error = %v", err)
+	}
+
+	document["stock_source"] = stockSource
+	config, err := load(t)
+	if err != nil {
+		t.Fatalf("a readable stock_source was refused: %v", err)
+	}
+	if config.StockSource != stockSource {
+		t.Fatalf("stock_source = %q, want %q", config.StockSource, stockSource)
+	}
+}
+
+func TestLoadConfigBackendTimeoutsDefaultAndBounds(t *testing.T) {
+	base := `{"listen":"127.0.0.1:8090","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`
+	config, err := LoadConfig(writeAgentConfig(t, base))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if config.Backend.ReadyTimeout() != 60*time.Second || config.Backend.StopGrace() != 15*time.Second {
+		t.Fatalf("defaults = %s/%s", config.Backend.ReadyTimeout(), config.Backend.StopGrace())
+	}
+
+	for _, values := range []string{
+		`"ready_timeout_seconds":4`,
+		`"ready_timeout_seconds":601`,
+		`"stop_grace_seconds":0`,
+		`"stop_grace_seconds":301`,
+	} {
+		contents := `{"listen":"127.0.0.1:8090","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091",` + values + `}}`
+		if _, err := LoadConfig(writeAgentConfig(t, contents)); err == nil {
+			t.Fatalf("%s was accepted", values)
+		}
+	}
+
+	contents := `{"listen":"127.0.0.1:8090","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091","ready_timeout_seconds":5,"stop_grace_seconds":1}}`
+	config, err = LoadConfig(writeAgentConfig(t, contents))
+	if err != nil || config.Backend.ReadyTimeout() != 5*time.Second || config.Backend.StopGrace() != time.Second {
+		t.Fatalf("lower bounds: %+v err=%v", config.Backend, err)
+	}
+	contents = `{"listen":"127.0.0.1:8090","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091","ready_timeout_seconds":600,"stop_grace_seconds":300}}`
+	config, err = LoadConfig(writeAgentConfig(t, contents))
+	if err != nil || config.Backend.ReadyTimeout() != 600*time.Second || config.Backend.StopGrace() != 300*time.Second {
+		t.Fatalf("upper bounds: %+v err=%v", config.Backend, err)
+	}
+}
+
 func TestLoadConfigErrorCarriesNoValue(t *testing.T) {
 	root := writeAgentConfig(t, `{"listen":5,"ota_root":"postgres://alice:hunter2@db/x","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`)
 	_, err := LoadConfig(root)

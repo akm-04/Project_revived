@@ -9,6 +9,9 @@ import (
 	"net"
 	"os"
 	"strings"
+	"time"
+
+	"gxb.local/backend/v2/internal/application/otabuild"
 )
 
 const (
@@ -21,6 +24,13 @@ const (
 	BackendLogFileName  = "backend.log"
 	DefaultAgentListen  = "127.0.0.1:8090"
 	DefaultOperatorAddr = "127.0.0.1:8091"
+
+	DefaultReadyTimeoutSeconds = 60
+	DefaultStopGraceSeconds    = 15
+	minReadyTimeoutSeconds     = 5
+	maxReadyTimeoutSeconds     = 600
+	minStopGraceSeconds        = 1
+	maxStopGraceSeconds        = 300
 )
 
 // BackendConfig names the backend binary the agent controls.
@@ -28,6 +38,26 @@ type BackendConfig struct {
 	Binary       string `json:"binary"`
 	EnvFile      string `json:"env_file"`
 	OperatorAddr string `json:"operator_addr"`
+	// ReadyTimeoutSeconds and StopGraceSeconds are optional; nil means the
+	// default. A pointer separates a missing field from an explicit 0.
+	ReadyTimeoutSeconds *int `json:"ready_timeout_seconds,omitempty"`
+	StopGraceSeconds    *int `json:"stop_grace_seconds,omitempty"`
+}
+
+// ReadyTimeout is how long the agent waits for the backend to answer.
+func (config BackendConfig) ReadyTimeout() time.Duration {
+	if config.ReadyTimeoutSeconds == nil {
+		return DefaultReadyTimeoutSeconds * time.Second
+	}
+	return time.Duration(*config.ReadyTimeoutSeconds) * time.Second
+}
+
+// StopGrace is how long the agent waits before killing the backend.
+func (config BackendConfig) StopGrace() time.Duration {
+	if config.StopGraceSeconds == nil {
+		return DefaultStopGraceSeconds * time.Second
+	}
+	return time.Duration(*config.StopGraceSeconds) * time.Second
 }
 
 // Config is agent.json: the agent root folder's configuration. Unknown fields
@@ -36,6 +66,8 @@ type Config struct {
 	Listen        string            `json:"listen"`
 	OTARoot       string            `json:"ota_root"`
 	StockBaseline string            `json:"stock_baseline"`
+	StockSource   string            `json:"stock_source,omitempty"`
+	StockCatalog  string            `json:"stock_catalog,omitempty"`
 	ClientTree    string            `json:"client_tree"`
 	Origins       map[string]string `json:"origins"`
 	Backend       BackendConfig     `json:"backend"`
@@ -54,7 +86,7 @@ func LoadConfig(root string) (Config, error) {
 	if err := decoder.Decode(&config); err != nil {
 		return Config{}, fmt.Errorf("%s: %w", AgentConfigFileName, err)
 	}
-	if err := ensureEndOfFile(decoder); err != nil {
+	if err := EnsureEndOfFile(decoder); err != nil {
 		return Config{}, fmt.Errorf("%s: %w", AgentConfigFileName, err)
 	}
 	if err := config.Validate(); err != nil {
@@ -63,14 +95,21 @@ func LoadConfig(root string) (Config, error) {
 	return config, nil
 }
 
-func ensureEndOfFile(decoder *json.Decoder) error {
+// ErrTrailingData reports that a JSON document carried a second value. Callers
+// that answer HTTP map it to their own status.
+var ErrTrailingData = errors.New("trailing data after the JSON object")
+
+// EnsureEndOfFile refuses a decoder that has another JSON value after the
+// document. It is the one helper both agent.json loading and the HTTP body
+// decoder use.
+func EnsureEndOfFile(decoder *json.Decoder) error {
 	var extra any
 	if err := decoder.Decode(&extra); errors.Is(err, io.EOF) {
 		return nil
 	} else if err != nil {
 		return err
 	}
-	return errors.New("trailing data after the JSON object")
+	return ErrTrailingData
 }
 
 // Validate enforces the loopback-only rule (I11A_ARCHITECTURE_V1 section 6).
@@ -86,6 +125,27 @@ func (config Config) Validate() error {
 	}
 	if !isLoopbackAddress(config.Backend.OperatorAddr) {
 		return errors.New(AgentConfigFileName + ": backend.operator_addr must be a loopback address")
+	}
+	if config.StockSource != "" {
+		info, err := os.Stat(config.StockSource)
+		if err != nil || !info.IsDir() {
+			return errors.New(AgentConfigFileName + ": stock_source is not a readable directory")
+		}
+	}
+	if config.ClientTree != "" {
+		patched, err := otabuild.PatchesPresent(config.ClientTree)
+		if err != nil {
+			return fmt.Errorf("%s: %v", AgentConfigFileName, err)
+		}
+		if patched && config.StockSource == "" {
+			return errors.New(AgentConfigFileName + ": stock_source is required while the client tree has a patch")
+		}
+	}
+	if value := config.Backend.ReadyTimeoutSeconds; value != nil && (*value < minReadyTimeoutSeconds || *value > maxReadyTimeoutSeconds) {
+		return fmt.Errorf("%s: backend.ready_timeout_seconds %d is outside %d..%d", AgentConfigFileName, *value, minReadyTimeoutSeconds, maxReadyTimeoutSeconds)
+	}
+	if value := config.Backend.StopGraceSeconds; value != nil && (*value < minStopGraceSeconds || *value > maxStopGraceSeconds) {
+		return fmt.Errorf("%s: backend.stop_grace_seconds %d is outside %d..%d", AgentConfigFileName, *value, minStopGraceSeconds, maxStopGraceSeconds)
 	}
 	return nil
 }

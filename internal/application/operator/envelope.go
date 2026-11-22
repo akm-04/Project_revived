@@ -29,6 +29,10 @@ const (
 	CodeRevisionStale   = "OPERATOR_REVISION_STALE"
 	CodeUnknownCommand  = "OPERATOR_UNKNOWN_COMMAND"
 	CodePayloadInvalid  = "OPERATOR_PAYLOAD_INVALID"
+
+	// MaxCommandBodyBytes bounds a command body on the operator listener; the
+	// agent sizes its own cap below this because it re-marshals the envelope.
+	MaxCommandBodyBytes = 32 << 20
 )
 
 var (

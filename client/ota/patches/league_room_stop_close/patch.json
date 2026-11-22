@@ -1,0 +1,8 @@
+{
+  "target": "app/common/network/Backend.lua",
+  "stock_sha256": "95378e2b0be8180df6de27e9e430c630bcfe46c080e1f91ef5f6d74bdbb1b840",
+  "kind": "replace_exact",
+  "anchor": "function var_0_1.closeLeagueRoom(arg_6_0)\n\tif arg_6_0.leagueSocket_ ~= nil then\n\t\targ_6_0.leagueSocket_:close()\n\n\t\targ_6_0.leagueSocket_ = nil\n\t\targ_6_0.leagueChatRoomID_ = nil\n\n\t\treturn\n\tend\nend",
+  "insert": "overlay.lua",
+  "origin": "D473b: onSocketClose_ nils the socket first, so closeLeagueRoom kept the room id and the MID 192 retry never ended (fleet_l5r/01-client-items.md section 2b)"
+}

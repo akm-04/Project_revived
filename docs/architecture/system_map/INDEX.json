@@ -243,6 +243,7 @@
    "2307": "memoir",
    "2308": "memoir",
    "2309": "memoir",
+   "231": "events",
    "2310": "memoir",
    "2311": "memoir",
    "2312": "memoir",
@@ -877,8 +878,8 @@
    "tables": 7
   },
   {
-   "callees": 2,
-   "callers": 0,
+   "callees": 3,
+   "callers": 1,
    "mids": 2,
    "name": "activitydirectory",
    "path": "internal/application/activitydirectory",
@@ -977,7 +978,7 @@
   },
   {
    "callees": 27,
-   "callers": 16,
+   "callers": 17,
    "mids": 24,
    "name": "characterhero",
    "path": "internal/application/characterhero",
@@ -1129,9 +1130,9 @@
    "tables": 2
   },
   {
-   "callees": 5,
-   "callers": 0,
-   "mids": 0,
+   "callees": 8,
+   "callers": 1,
+   "mids": 1,
    "name": "events",
    "path": "internal/application/events",
    "purpose": "applies the I11A event owner commands and serves its bounded reads (I11A_EVENTS_V1)",
@@ -1300,7 +1301,7 @@
    "tables": 0
   },
   {
-   "callees": 3,
+   "callees": 4,
    "callers": 0,
    "mids": 0,
    "name": "identitylifecycle",
@@ -1409,7 +1410,7 @@
   },
   {
    "callees": 0,
-   "callers": 2,
+   "callers": 3,
    "mids": 0,
    "name": "operator",
    "path": "internal/application/operator",
@@ -1417,7 +1418,7 @@
    "tables": 1
   },
   {
-   "callees": 0,
+   "callees": 2,
    "callers": 0,
    "mids": 0,
    "name": "operatoragent",
@@ -1427,7 +1428,7 @@
   },
   {
    "callees": 0,
-   "callers": 0,
+   "callers": 1,
    "mids": 0,
    "name": "otabuild",
    "path": "internal/application/otabuild",
@@ -1436,7 +1437,7 @@
   },
   {
    "callees": 2,
-   "callers": 1,
+   "callers": 2,
    "mids": 3,
    "name": "otarelease",
    "path": "internal/application/otarelease",
