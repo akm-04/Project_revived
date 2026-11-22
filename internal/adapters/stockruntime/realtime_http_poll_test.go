@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	app "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/domain/identity"
 	domainrt "gxb.local/backend/v2/internal/domain/realtimeauth"
@@ -429,6 +430,80 @@ func TestHTTPPollEmptyAndHeldPollsDoNoAuthorityWork(t *testing.T) {
 	if counting.resolve.Load() != resolveAfterLogin || counting.validate.Load() != validateAfterLogin {
 		t.Fatalf("empty polls ran authority work: resolve %d->%d validate %d->%d",
 			resolveAfterLogin, counting.resolve.Load(), validateAfterLogin, counting.validate.Load())
+	}
+}
+
+// flippingAuthority turns a live admission into the real authority's revoked
+// answer, like a session.logout the socket loop notices on its next liveness
+// check.
+type flippingAuthority struct {
+	resolvePort app.GameplayAuthorityPort
+	revoked     atomic.Bool
+}
+
+func (authority *flippingAuthority) ResolveGameplayBearer(ctx context.Context, token string, at time.Time) (identity.ActorContext, error) {
+	return authority.resolvePort.ResolveGameplayBearer(ctx, token, at)
+}
+
+func (authority *flippingAuthority) ValidateActor(context.Context, identity.ActorContext, time.Time) error {
+	if authority.revoked.Load() {
+		return i4store.ErrGameplayBearerNotLive
+	}
+	return nil
+}
+
+// An idle lobby only polls. A revoked session must still learn the proven
+// relogin signal (HTTP 401, message.lua 20003 with its non-empty text).
+func TestHTTPPollRefusesRevokedSessionWithTheReloginSignal(t *testing.T) {
+	base := newRealtimeTestServer(t)
+	authority := &flippingAuthority{resolvePort: base.Auth.Authority}
+	base.Auth = app.Service{Authority: authority, Endpoints: base.Auth.Endpoints}
+	base.Policy.LivenessInterval = 20 * time.Millisecond
+	base.Policy.LivenessQueryTimeout = time.Second
+	server, err := NewHTTPPollServer(t.Context(), base, 5*time.Second, 100*time.Millisecond)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer server.Close()
+	handler := server.Handler()
+
+	sessionID, sequence := loginSocket(t, handler, "alpha", "world", 1)
+	if status, _ := sendPollRequest(t, handler, pollRequest{SessionID: sessionID, Ack: sequence, Hold: true}); status != http.StatusOK {
+		t.Fatalf("live session poll status=%d", status)
+	}
+
+	authority.revoked.Store(true)
+	deadline := time.Now().Add(eventWaitTimeout)
+	for {
+		server.mutex.Lock()
+		session := server.sessions[sessionID]
+		server.mutex.Unlock()
+		if session != nil && session.failed() {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("the poll never noticed the revocation")
+		}
+		time.Sleep(time.Millisecond)
+	}
+
+	body, err := json.Marshal(pollRequest{SessionID: sessionID, Ack: sequence})
+	if err != nil {
+		t.Fatal(err)
+	}
+	httpRequest := httptest.NewRequest(http.MethodPost, HTTPPollPath, bytes.NewReader(body))
+	httpRequest.Header.Set("Content-Type", "application/json")
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, httpRequest)
+	if response.Code != http.StatusUnauthorized {
+		t.Fatalf("revoked poll status = %d, want 401", response.Code)
+	}
+	var refusal map[string]any
+	if err := json.Unmarshal(response.Body.Bytes(), &refusal); err != nil {
+		t.Fatalf("decode refusal: %v", err)
+	}
+	if refusal["error_code"] != float64(20003) || refusal["error_msg"] != sessionFailureMessage {
+		t.Fatalf("refusal body = %v", refusal)
 	}
 }
 

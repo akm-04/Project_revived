@@ -74,10 +74,12 @@
  },
  "tests": {
   "integration": [
+   "identitylogout",
    "playerdisplay"
   ],
   "scenarios_naming": [],
   "unit": [
+   "logout_test.go",
    "service_test.go"
   ]
  }

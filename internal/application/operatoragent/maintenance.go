@@ -2,6 +2,8 @@ package operatoragent
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"sync"
@@ -148,10 +150,51 @@ func (maintenance Maintenance) run(ctx context.Context, command, version, reason
 			}
 			return json.RawMessage(response.Body), nil
 		}},
+		{Name: "session.logout_all", Run: func(ctx context.Context) (any, error) {
+			return maintenance.logoutAll(ctx, command, version, semanticKey)
+		}},
 		{Name: "stop backend", Run: func(context.Context) (any, error) { return nil, maintenance.Backend.Stop() }},
 		{Name: "start backend open", Run: func(context.Context) (any, error) {
 			return nil, StartBackend(maintenance.Backend, maintenance.Tokens, false)
 		}},
 	}
 	return maintenance.Operations.Run(ctx, "maintenance."+command, steps)
+}
+
+// logoutAll is the maintenance step that makes every client relogin and take
+// MID 2 (I11A_1_PLAN L6 item 3). It runs only after the publish committed.
+func (maintenance Maintenance) logoutAll(ctx context.Context, command, version, semanticKey string) (any, error) {
+	response, err := maintenance.Operator.Command(ctx, OperatorRequest{
+		Name: "session.logout_all",
+		Envelope: operator.Envelope{
+			Principal:   "root",
+			Role:        operator.RoleRoot,
+			Scope:       "global",
+			Reason:      logoutAllReason(command, version),
+			SemanticKey: logoutAllSemanticKey(semanticKey),
+		},
+		Payload: json.RawMessage(`{}`),
+	})
+	if err != nil {
+		return nil, err
+	}
+	if response.Status < 200 || response.Status >= 300 {
+		return nil, &BackendRefusal{Status: response.Status, Body: response.Body}
+	}
+	return json.RawMessage(response.Body), nil
+}
+
+func logoutAllReason(command, version string) string {
+	if command == "ota.withdraw" {
+		return "ota withdraw " + version
+	}
+	return "ota publish " + version
+}
+
+// logoutAllSemanticKey derives a stable key from the publish key, so a resend
+// replays the logout instead of keying a second command (the bus keys are
+// unique per command, 1-128 chars).
+func logoutAllSemanticKey(semanticKey string) string {
+	digest := sha256.Sum256([]byte("session.logout_all\x00" + semanticKey))
+	return hex.EncodeToString(digest[:])
 }

@@ -60,6 +60,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/herorecommendstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
+	"gxb.local/backend/v2/internal/adapters/postgres/identitystore"
 	"gxb.local/backend/v2/internal/adapters/postgres/inscriptionstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/libraryforumstore"
@@ -544,6 +545,10 @@ func main() {
 	}
 	operatorHandlers := otaCommands.Handlers()
 	operatorHandlers["ota.settings.set"] = appotarelease.SettingsSetHandler(otaSettingsFile, otaSettingsValue, otastore.Store{})
+	logoutCommands := appidentity.LogoutCommands{Store: identitystore.Store{}}
+	for name, handler := range logoutCommands.Handlers() {
+		operatorHandlers[name] = handler
+	}
 	eventHooks, err := appevents.NewHookRegistry(domainevents.HookCampaignDropMultiplier)
 	if err != nil {
 		log.Fatalf("events hook registry: %v", err)

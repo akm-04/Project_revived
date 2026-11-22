@@ -59,12 +59,15 @@ func (backend *fakeBackend) Status() operatoragent.BackendStatus {
 }
 
 type fakeOperatorAPI struct {
-	recorder *callRecorder
-	mutex    sync.Mutex
-	applies  int
-	seen     map[string]bool
-	refusal  bool
-	auth     []string
+	recorder      *callRecorder
+	mutex         sync.Mutex
+	applies       int
+	logoutApplies int
+	logoutReasons []string
+	seen          map[string]bool
+	refusal       bool
+	logoutRefusal bool
+	auth          []string
 }
 
 func (api *fakeOperatorAPI) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
@@ -101,6 +104,33 @@ func (api *fakeOperatorAPI) ServeHTTP(writer http.ResponseWriter, request *http.
 		api.seen[submitted.Envelope.SemanticKey] = true
 		api.applies++
 		_, _ = io.WriteString(writer, `{"activation_id":1,"version":"1.631.2","action":"PUBLISH"}`)
+	case request.URL.Path == "/operator/v1/commands/session.logout_all":
+		api.recorder.add("command:session.logout_all")
+		body, _ := io.ReadAll(request.Body)
+		var submitted struct {
+			Envelope struct {
+				SemanticKey string `json:"semantic_key"`
+				Reason      string `json:"reason"`
+			} `json:"envelope"`
+		}
+		_ = json.Unmarshal(body, &submitted)
+		if api.logoutRefusal {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusConflict)
+			_, _ = io.WriteString(writer, `{"error_code":"SESSION_LOGOUT_REFUSED","message":"logout refused"}`)
+			return
+		}
+		api.mutex.Lock()
+		defer api.mutex.Unlock()
+		writer.Header().Set("Content-Type", "application/json")
+		if api.seen[submitted.Envelope.SemanticKey] {
+			_, _ = io.WriteString(writer, `{"replayed":true}`)
+			return
+		}
+		api.seen[submitted.Envelope.SemanticKey] = true
+		api.logoutApplies++
+		api.logoutReasons = append(api.logoutReasons, submitted.Envelope.Reason)
+		_, _ = io.WriteString(writer, `{"revoked":2}`)
 	default:
 		http.NotFound(writer, request)
 	}
@@ -133,7 +163,7 @@ func TestPublishMaintenanceOrderAndReplay(t *testing.T) {
 	if operation.State != operatoragent.OperationDone {
 		t.Fatalf("operation = %+v", operation)
 	}
-	want := []string{"stop", "start:closed", "read:ota.status", "command:ota.publish", "stop", "start:open"}
+	want := []string{"stop", "start:closed", "read:ota.status", "command:ota.publish", "command:session.logout_all", "stop", "start:open"}
 	if got := api.recorder.snapshot(); !reflect.DeepEqual(got, want) {
 		t.Fatalf("call order = %v, want %v", got, want)
 	}
@@ -145,14 +175,17 @@ func TestPublishMaintenanceOrderAndReplay(t *testing.T) {
 			t.Fatalf("the maintenance calls did not carry the per-start token: %q", header)
 		}
 	}
-	if api.applies != 1 {
-		t.Fatalf("applies = %d", api.applies)
+	if api.applies != 1 || api.logoutApplies != 1 {
+		t.Fatalf("applies publish=%d logout=%d", api.applies, api.logoutApplies)
+	}
+	if len(api.logoutReasons) != 1 || api.logoutReasons[0] != "ota publish 1.631.2" {
+		t.Fatalf("logout reasons = %v", api.logoutReasons)
 	}
 	if _, err := maintenance.Publish(context.Background(), "1.631.2", "release", "same-key"); err != nil {
 		t.Fatal(err)
 	}
-	if api.applies != 1 {
-		t.Fatalf("a replayed semantic key applied twice: %d", api.applies)
+	if api.applies != 1 || api.logoutApplies != 1 {
+		t.Fatalf("a replayed semantic key applied twice: publish=%d logout=%d", api.applies, api.logoutApplies)
 	}
 }
 
@@ -184,6 +217,38 @@ func TestPublishRefusalLeavesBackendClosed(t *testing.T) {
 		if call == "start:open" {
 			t.Fatalf("the backend reopened after a refusal: %v", calls)
 		}
+	}
+}
+
+// A logout failure fails the operation at that step and leaves the backend
+// closed, so the operator recovers through the start path.
+func TestPublishLogoutFailureLeavesBackendClosed(t *testing.T) {
+	maintenance, _, api, _ := newMaintenance(t)
+	api.logoutRefusal = true
+	operation, err := maintenance.Publish(context.Background(), "1.631.2", "release", "logout-refused-key")
+	var backendRefusal *operatoragent.BackendRefusal
+	if !errors.As(err, &backendRefusal) || backendRefusal.Status != http.StatusConflict {
+		t.Fatalf("want the backend 409 passed through, got %v", err)
+	}
+	if operation.State != operatoragent.OperationFailed || operation.FailedStep != "session.logout_all" {
+		t.Fatalf("operation = %+v", operation)
+	}
+	calls := api.recorder.snapshot()
+	lastStart := ""
+	for _, call := range calls {
+		if strings.HasPrefix(call, "start:") {
+			lastStart = call
+		}
+		if call == "start:open" {
+			t.Fatalf("the backend reopened after a logout failure: %v", calls)
+		}
+	}
+	if lastStart != "start:closed" {
+		t.Fatalf("the backend was not left closed: %v", calls)
+	}
+	want := []string{"stop", "start:closed", "read:ota.status", "command:ota.publish", "command:session.logout_all"}
+	if !reflect.DeepEqual(calls, want) {
+		t.Fatalf("call order = %v, want %v", calls, want)
 	}
 }
 
