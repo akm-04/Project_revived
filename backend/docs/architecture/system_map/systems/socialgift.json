@@ -1,0 +1,163 @@
+{
+ "background": [],
+ "content": [
+  "content_social_gift_catalogs"
+ ],
+ "contracts": [
+  {
+   "count": 1,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [
+   {
+    "name": "socialgift.LockRankEpoch",
+    "rank": 371
+   },
+   {
+    "name": "socialgift.LockRankTransfer",
+    "rank": 372
+   }
+  ],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "player_social_roots": [
+    "socialrelationstore.LockRootTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ],
+   "social_gift_epochs": [
+    "socialgiftstore.LockEpoch"
+   ],
+   "social_gift_transfers": [
+    "socialgiftstore.LockTransfer"
+   ],
+   "social_notices": [
+    "socialinboxstore.LockNoticeTx",
+    "socialinboxstore.ReadNoticeEvidenceTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "player_social_roots",
+   "players",
+   "social_gift_epochs",
+   "social_gift_transfers",
+   "social_notices"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [],
+ "name": "socialgift",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/socialgiftstore",
+  "internal/adapters/postgres/socialinboxstore",
+  "internal/adapters/postgres/socialrelationstore"
+ ],
+ "tables": {
+  "owned": [
+   "social_gift_claim_operations",
+   "social_gift_epochs",
+   "social_gift_transfers"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "content_social_gift_catalogs",
+   "gameplay_contexts",
+   "gxb_content_activation",
+   "gxb_content_revisions",
+   "player_social_roots",
+   "players",
+   "social_gift_claim_operations",
+   "social_gift_epochs",
+   "social_gift_transfers",
+   "social_notices"
+  ],
+  "written": [
+   "player_social_roots",
+   "social_gift_claim_operations",
+   "social_gift_epochs",
+   "social_gift_transfers",
+   "social_notices"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "datacontract",
+   "guildinvite",
+   "playerdisplay",
+   "socialactivation"
+  ],
+  "scenarios_naming": [],
+  "unit": [
+   "send_proof_test.go",
+   "types_test.go"
+  ]
+ }
+}

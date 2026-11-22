@@ -51,7 +51,7 @@ func TestFriendFightDispatcherPreservesStockParametersAndRefusals(t *testing.T) 
 		t.Fatal("source shape", response)
 	}
 	fixture.refused = true
-	if response := dispatcher.Dispatch(context.Background(), request); response.HTTPStatus != 400 {
+	if response := dispatcher.Dispatch(context.Background(), request); response.HTTPStatus != 409 || response.Body["error_code"] != unprovenRefusalCode {
 		t.Fatal("unsafe callback ran", response)
 	}
 	fixture.refused = false
@@ -132,7 +132,7 @@ func TestFriendFightNoticePublishesThroughLiveWorldSocket(t *testing.T) {
 		}
 	case err := <-failures:
 		t.Fatal(err)
-	case <-time.After(2 * time.Second):
+	case <-time.After(eventWaitTimeout):
 		t.Fatal("invite not delivered")
 	}
 	handler.Delivery.Authority = deliveryAuthority{bad: true}

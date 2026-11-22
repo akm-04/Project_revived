@@ -37,13 +37,23 @@ func (service Service) taskCatalog(requestContext context.Context, query tx.Quer
 		return catalog, period, found, err
 	}
 	if !found {
-		return catalog, proposal, false, nil
+		period = proposal
+	} else if catalog, err = service.Content.TopFloorCatalogTx(requestContext, query, period.Ladder.ContentRevision); err != nil {
+		return catalog, period, true, err
 	}
-	catalog, err = service.Content.TopFloorCatalogTx(requestContext, query, period.Ladder.ContentRevision)
-	if err == nil && catalog.TaskModes == nil {
-		err = domain.ErrUnavailable
+	if catalog.TaskModes == nil {
+		return catalog, period, found, domain.ErrUnavailable
 	}
-	return catalog, period, true, err
+	bannedTables, err := service.Store.TaskModeBanTablesTx(requestContext, query, period.Rotation.Mode, period.Rotation.Number)
+	if err != nil {
+		return catalog, period, found, err
+	}
+	updatedTaskModes, err := catalog.TaskModes.WithOperatorBans(period.Rotation.Mode, bannedTables)
+	if err != nil {
+		return catalog, period, found, err
+	}
+	catalog.TaskModes = &updatedTaskModes
+	return catalog, period, found, nil
 }
 func (service Service) taskStateTx(requestContext context.Context, scope gen.TimedScope, actor identity.ActorContext) (domain.Catalog, domain.TaskModePeriod, domain.TaskModePlayer, error) {
 	at := scope.Operation.DecisionAt()
@@ -60,7 +70,7 @@ func (service Service) taskStateTx(requestContext context.Context, scope gen.Tim
 	if err = service.open(requestContext, scope.Tx, catalog, actor.PlayerID, at); err != nil {
 		return catalog, period, domain.TaskModePlayer{}, err
 	}
-	eligibility, err := service.TaskModeEligibilityTx(requestContext, scope.Tx, *catalog.TaskModes, actor, at)
+	eligibility, err := service.TaskModeEligibilityTx(requestContext, scope.Tx, *catalog.TaskModes, period, actor, at)
 	if err != nil {
 		return catalog, period, domain.TaskModePlayer{}, err
 	}
@@ -133,10 +143,37 @@ func (service Service) taskTeam(requestContext context.Context, query tx.Queryer
 	}
 	return rows, pet, nil
 }
+
+// requireTaskDefense refuses a new special attack without a usable saved defense.
+func (service Service) requireTaskDefense(requestContext context.Context, query tx.Queryer, catalog domain.Catalog, period domain.TaskModePeriod, player identity.PlayerID, saved domain.TaskModePlayer, at time.Time) error {
+	if len(saved.Player.Defense) == 0 {
+		return domain.ErrDefenseRequired
+	}
+	if _, _, err := service.taskTeam(requestContext, query, catalog, period, player, domain.TaskModeDefense{Heroes: saved.Player.Defense, Pet: saved.Player.DefensePet, Leader: saved.Leader}, at); err != nil {
+		return fmt.Errorf("%w: %v", domain.ErrDefenseRequired, err)
+	}
+	return nil
+}
+
+var errTaskOccupantNotRanked = errors.New("topfloor: task occupant is not ranked")
+
+// taskOfferError answers a vanished selected-target rank as the stock stale-offer
+// refusal, so preflight and START classify the same condition alike. A revenge
+// opponent is not an offer and keeps its own refusal.
+func taskOfferError(err error, avenge bool) error {
+	if err != nil && !avenge && errors.Is(err, errTaskOccupantNotRanked) {
+		return domain.ErrOfferStale
+	}
+	return err
+}
+
 func (service Service) taskDisplay(requestContext context.Context, query tx.Queryer, catalog domain.Catalog, period domain.TaskModePeriod, occupant domain.Occupant, at time.Time) (domain.Display, error) {
 	rank, found, err := service.Store.TaskRankOfTx(requestContext, query, period.Ladder.Server, period.Rotation.Number, occupant)
-	if err != nil || !found {
+	if err != nil {
 		return domain.Display{}, errors.Join(err, domain.ErrRefused)
+	}
+	if !found {
+		return domain.Display{}, errors.Join(domain.ErrRefused, errTaskOccupantNotRanked)
 	}
 	if occupant.IsRobot() {
 		team, _ := catalog.Team(occupant.Robot)
@@ -149,9 +186,12 @@ func (service Service) taskDisplay(requestContext context.Context, query tx.Quer
 			parameters, _ := catalog.RobotHeroParams(hero.ID)
 			display.Heroes = append(display.Heroes, parameters)
 		}
+		if period.Rotation.Mode == domain.TaskModeLeader && len(display.Heroes) > 0 {
+			display.Leader, _ = display.Heroes[0]["partner_id"].(int64)
+		}
 		return display, nil
 	}
-	display, err := service.playerDisplay(requestContext, query, occupant)
+	display, err := service.playerDisplay(requestContext, query, occupant, at)
 	if err != nil {
 		return display, err
 	}
@@ -160,7 +200,11 @@ func (service Service) taskDisplay(requestContext context.Context, query tx.Quer
 	if err != nil || !found {
 		return display, errors.Join(err, domain.ErrRefused)
 	}
+	if len(player.Player.Defense) == 0 {
+		return display, domain.ErrRefused
+	}
 	display.Wins = player.Player.Wins
+	display.Leader = player.Leader
 	display.Heroes, display.Pet, err = service.taskTeam(requestContext, query, catalog, period, occupant.Player, domain.TaskModeDefense{Heroes: player.Player.Defense, Pet: player.Player.DefensePet, Leader: player.Leader}, at)
 	display.Force = teamForce(display.Heroes)
 	return display, err
@@ -168,7 +212,8 @@ func (service Service) taskDisplay(requestContext context.Context, query tx.Quer
 func (service Service) taskOffers(requestContext context.Context, query tx.Queryer, catalog domain.Catalog, period domain.TaskModePeriod, player domain.Player, rank int64, at time.Time) ([]domain.Occupant, error) {
 	result := []domain.Occupant{}
 	seen := map[int64]bool{}
-	for _, probe := range catalog.OfferRanks(player.Server, player.PlayerID, rank, player.TicketDay, player.RefreshCount) {
+	// D512: special offers come from better-ranked humans only; rank 1 gets none.
+	for _, probe := range catalog.BetterOfferRanks(player.Server, player.PlayerID, rank, player.TicketDay, player.RefreshCount) {
 		if len(probe) == 0 {
 			continue
 		}
@@ -201,6 +246,37 @@ func (service Service) taskOffers(requestContext context.Context, query tx.Query
 	}
 	return result, nil
 }
+
+// taskViewer is the D512 read-only mode state for a player who is not admitted to
+// the current period: special rank 0, empty defense and offers. The stock client
+// renders it (ArenaWindow.lua:1460-1468 shows the NPC slot for zero offers).
+func (service Service) taskViewer(requestContext context.Context, actor identity.ActorContext) (TaskArenaView, error) {
+	catalog, at, err := service.readContext(requestContext)
+	if err != nil {
+		return TaskArenaView{}, err
+	}
+	if catalog.TaskModes == nil {
+		return TaskArenaView{}, domain.ErrUnavailable
+	}
+	if err = service.open(requestContext, service.Fresh, catalog, actor.PlayerID, at); err != nil {
+		return TaskArenaView{}, err
+	}
+	maximumLevel, err := service.Directory.ServerMaximumLevelTx(requestContext, service.Fresh, actor.LogicalServerID)
+	if err != nil {
+		return TaskArenaView{}, err
+	}
+	if maximumLevel < catalog.TaskModes.ServerLevel {
+		return TaskArenaView{}, domain.ErrRefused
+	}
+	_, period, _, err := service.taskCatalog(requestContext, service.Fresh, actor.LogicalServerID, at)
+	if err != nil {
+		return TaskArenaView{}, err
+	}
+	viewer := domain.Player{PlayerID: actor.PlayerID, Server: actor.LogicalServerID, TicketDay: domain.TicketDay(at),
+		Defense: []int64{}, Offered: []domain.Occupant{}, StateVersion: 1, CreatedAt: at.UTC(), UpdatedAt: at.UTC()}
+	return TaskArenaView{ArenaView: ArenaView{Player: viewer, ServerTime: at}, Rotation: period.Rotation}, nil
+}
+
 func (service Service) LoadTask(requestContext context.Context, actor identity.ActorContext, op operation.Context, refresh bool) (TaskArenaView, error) {
 	var result TaskArenaView
 	if !service.ready() {
@@ -241,8 +317,12 @@ func (service Service) LoadTask(requestContext context.Context, actor identity.A
 			}
 			result.Enemies = append(result.Enemies, display)
 		}
-		return nil
+		return service.saveOfferSnapshot(requestContext, scope.Tx, actor.LogicalServerID, actor.PlayerID, domain.OfferScopeSpecial, period.Rotation.Number, rank, result.Enemies, at)
 	})
+	if errors.Is(err, domain.ErrRefused) {
+		// D512: an unqualified player still sees the switch and special tab.
+		return service.taskViewer(requestContext, actor)
+	}
 	return result, err
 }
 func (service Service) SaveTaskDefense(requestContext context.Context, actor identity.ActorContext, defense domain.TaskModeDefense, op operation.Context) error {
@@ -273,13 +353,19 @@ func (service Service) SaveTaskDefense(requestContext context.Context, actor ide
 	})
 	return err
 }
-func (service Service) TaskSchedule(requestContext context.Context) ([]domain.TaskModeRotation, error) {
-	catalog, at, err := service.readContext(requestContext)
-	if err != nil {
-		return nil, err
-	}
-	if catalog.TaskModes == nil {
-		return nil, domain.ErrUnavailable
-	}
-	return catalog.TaskModes.ScheduleFrom(at)
+func (service Service) TaskSchedule(requestContext context.Context, op operation.Context) ([]domain.TaskModeRotation, error) {
+	var out []domain.TaskModeRotation
+	_, _, err := service.Timed.Run(requestContext, op, Profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, readRetry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		_, catalog, err := service.catalogTx(c, sc.Tx)
+		if err != nil {
+			return err
+		}
+		if catalog.TaskModes == nil {
+			return domain.ErrUnavailable
+		}
+		var readErr error
+		out, readErr = catalog.TaskModes.ScheduleFrom(sc.Operation.DecisionAt())
+		return readErr
+	})
+	return out, err
 }

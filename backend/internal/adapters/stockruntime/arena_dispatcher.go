@@ -3,13 +3,13 @@ package stockruntime
 import (
 	"context"
 	"errors"
-	"net/http"
 
 	app "gxb.local/backend/v2/internal/application/arena"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
 	d "gxb.local/backend/v2/internal/domain/arena"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	projection "gxb.local/backend/v2/internal/projection/arena"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -22,14 +22,14 @@ var ArenaMIDs = []uint16{666, 768, 769, 770, 771, 772, 773, 774, 775, 776, 777, 
 
 type ArenaPort interface {
 	Info(context.Context, identity.ActorContext, operation.Context) (d.InfoView, error)
-	Partners(context.Context, identity.ActorContext) (d.PartnersView, error)
+	Partners(context.Context, identity.ActorContext, identity.PlayerID, operation.Context) (d.PartnersView, error)
 	ModifyDefence(context.Context, identity.ActorContext, []int64, int64, operation.Context) (d.Player, error)
 	Match(context.Context, identity.ActorContext, bool, operation.Context) (d.EnemyView, error)
 	Start(context.Context, identity.ActorContext, operation.Context) error
 	Fight(context.Context, identity.ActorContext, app.FightCommand, operation.Context) (d.FightView, error)
 	Stop(context.Context, identity.ActorContext, identity.PlayerID, operation.Context) (d.Player, error)
-	Records(context.Context, identity.ActorContext) ([]d.RecordView, error)
-	Report(context.Context, string) ([]byte, bool, error)
+	Records(context.Context, identity.ActorContext, operation.Context) ([]d.RecordView, error)
+	Report(context.Context, string, operation.Context) ([]byte, bool, error)
 	GiveUpMission(context.Context, identity.ActorContext, int64, operation.Context) (d.MissionsView, error)
 	ClaimMission(context.Context, identity.ActorContext, int64, operation.Context) (d.MissionsView, error)
 	Exchange(context.Context, identity.ActorContext, int64, int64, operation.Context) (d.MissionsView, error)
@@ -46,7 +46,7 @@ func (o ArenaDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 		return *fail
 	}
 	if o.Service == nil {
-		return failArena(d.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	p, op := req.Envelope.Params, req.Envelope.Operation
 	bad := badHero("invalid_arena_parameter")
@@ -61,10 +61,20 @@ func (o ArenaDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 		}
 		return okI5(projection.Info(v))
 	case 769:
-		if !onlyStockGameplayParams(p) {
+		// The stock player popup carries the selected player_id even for the
+		// caller's own History; absent keeps the actor read.
+		subject := a.PlayerID
+		if _, present := p["player_id"]; present {
+			requested, ok := topFloorInteger(p, "player_id", true)
+			if !ok {
+				return bad
+			}
+			subject = identity.PlayerID(requested)
+		}
+		if !onlyStockGameplayParams(p, "player_id") {
 			return bad
 		}
-		v, err := o.Service.Partners(ctx, a)
+		v, err := o.Service.Partners(ctx, a, subject, op)
 		if err != nil {
 			return failArena(err)
 		}
@@ -113,14 +123,15 @@ func (o ArenaDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 			return okI5(projection.Fight(d.FightView{Unresolved: true}))
 		}
 		if err != nil {
-			return failArena(err)
+			return failArenaFight(err)
 		}
+		changes.Balance(ctx, "region_coin", v.RegionCoin)
 		return okI5(projection.Fight(v))
 	case 776:
 		if !onlyStockGameplayParams(p) {
 			return bad
 		}
-		records, err := o.Service.Records(ctx, a)
+		records, err := o.Service.Records(ctx, a, op)
 		if err != nil {
 			return failArena(err)
 		}
@@ -130,7 +141,7 @@ func (o ArenaDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 		if !onlyStockGameplayParams(p, "report_key") || !keyed {
 			return bad
 		}
-		report, found, err := o.Service.Report(ctx, key)
+		report, found, err := o.Service.Report(ctx, key, op)
 		if err != nil && !errors.Is(err, d.ErrInvalid) {
 			return failArena(err)
 		}
@@ -162,6 +173,7 @@ func (o ArenaDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 		if err != nil {
 			return failArena(err)
 		}
+		changes.Balance(ctx, "king_coin", v.KingCoin)
 		return okI5(projection.Missions(v))
 	case 848:
 		exchange, exchangeOK := topFloorInteger(p, "exchange_type", true)
@@ -173,6 +185,7 @@ func (o ArenaDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 		if err != nil {
 			return failArena(err)
 		}
+		changes.Balance(ctx, "king_coin", v.KingCoin)
 		return okI5(projection.Missions(v))
 	}
 	return badHero("unsupported_arena_mid")
@@ -195,9 +208,35 @@ func arenaTableIDs(raw any) ([]int64, error) {
 	return out, nil
 }
 
+var arenaFailureRows = []failureRow{
+	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: d.ErrConflict, class: failureRefusal, code: unprovenRefusalCode},
+	{match: d.ErrInvalid, class: failureMalformed, detail: "arena_request_refused"},
+	{match: d.ErrClosed, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+}
+
 func failArena(err error) httpedge.Response {
-	if errors.Is(err, d.ErrRefused) || errors.Is(err, d.ErrInvalid) || errors.Is(err, d.ErrClosed) || errors.Is(err, economy.ErrInsufficientBalance) {
-		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "arena_request_refused"}}
-	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "arena_unavailable"}}
+	return failureFromRows(arenaFailureRows, err)
+}
+
+// Stock message.lua rows for FIGHT refusals: 35006 is the only row mentioning
+// no available battle girl, 30023 is the generic stock match failure, and 31004
+// is the closed-Arena toast. D507/D426 keep malformed requests at 400.
+const (
+	arenaNoTeamError       = 35006
+	arenaMatchRefusedError = 30023
+	arenaClosedError       = 31004
+)
+
+var arenaFightFailureRows = []failureRow{
+	{match: app.ErrNoTeam, class: failureRefusal, code: arenaNoTeamError},
+	{match: d.ErrRefused, class: failureRefusal, code: arenaMatchRefusedError},
+	{match: d.ErrClosed, class: failureRefusal, code: arenaClosedError},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+	{match: d.ErrInvalid, class: failureMalformed, detail: "arena_request_refused"},
+}
+
+func failArenaFight(err error) httpedge.Response {
+	return failureFromRows(arenaFightFailureRows, err)
 }

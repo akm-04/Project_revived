@@ -10,7 +10,6 @@ import (
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
-	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
@@ -30,10 +29,10 @@ func (d SavedPresetDispatcher) Dispatch(ctx context.Context, req httpedge.Dispat
 		return *fail
 	}
 	if d.Service == nil {
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "saved_preset_unavailable"}}
+		return failureReply(defect(nil))
 	}
 	if req.Envelope.MID != 1793 {
-		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error": "not_saved_preset_mid"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 	if !onlyStockGameplayParams(req.Envelope.Params, "team_str", "team_name_str", "pet_str") {
 		return badSavedPreset("invalid_saved_preset")
@@ -67,8 +66,12 @@ func (d SavedPresetDispatcher) Dispatch(ctx context.Context, req httpedge.Dispat
 }
 
 func (d SavedPresetDispatcher) actor(ctx context.Context, req httpedge.DispatchRequest) (identity.ActorContext, *httpedge.Response) {
-	if d.Authority == nil || req.Envelope.Claims.Token == "" {
-		r := httpedge.Response{HTTPStatus: http.StatusUnauthorized, Body: map[string]any{"error": "gameplay_auth_required"}}
+	if d.Authority == nil {
+		r := failureReply(defect(nil))
+		return identity.ActorContext{}, &r
+	}
+	if req.Envelope.Claims.Token == "" {
+		r := failureReply(sessionFailure())
 		return identity.ActorContext{}, &r
 	}
 	a, err := d.Authority.ResolveGameplayBearer(ctx, req.Envelope.Claims.Token, req.Envelope.ReceivedAt)
@@ -77,7 +80,7 @@ func (d SavedPresetDispatcher) actor(ctx context.Context, req httpedge.DispatchR
 		return identity.ActorContext{}, &r
 	}
 	if req.Envelope.Claims.Region != int64(a.LogicalServerID) {
-		r := httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "region_mismatch"}}
+		r := failureReply(refusal(unprovenRefusalCode))
 		return identity.ActorContext{}, &r
 	}
 	return a, nil
@@ -93,20 +96,20 @@ func strictStringParam(params map[string]any, key string) (string, bool) {
 }
 
 func badSavedPreset(code string) httpedge.Response {
-	return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": code}}
+	return failureReply(malformed(code))
+}
+
+var savedPresetFailureRows = []failureRow{
+	{match: appsavedpreset.ErrInvalidCommand, class: failureMalformed, detail: "saved_preset_rejected"},
+	{match: characterasset.ErrReferenceNotFound, class: failureRefusal, code: unprovenRefusalCode},
+	{match: appsavedpreset.ErrAmbiguousLegacyDelete, class: failureRefusal, code: staleConflictCode},
+	{match: appsavedpreset.ErrStaleLegacyDelete, class: failureRefusal, code: staleConflictCode},
 }
 
 func failSavedPreset(err error) httpedge.Response {
 	var unknown *tx.UnknownCommitError
-	var conflict *receipt.ConflictError
-	switch {
-	case errors.Is(err, appsavedpreset.ErrInvalidCommand), errors.Is(err, characterasset.ErrReferenceNotFound):
-		return badSavedPreset("saved_preset_rejected")
-	case errors.Is(err, appsavedpreset.ErrAmbiguousLegacyDelete), errors.Is(err, appsavedpreset.ErrStaleLegacyDelete), errors.As(err, &conflict):
-		return httpedge.Response{HTTPStatus: http.StatusConflict, Body: map[string]any{"error": "saved_preset_conflict"}}
-	case errors.As(err, &unknown):
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "saved_preset_commit_unknown"}}
-	default:
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "saved_preset_failed"}}
+	if errors.As(err, &unknown) {
+		return failureReply(unknownCommit("saved_preset_commit_unknown", err))
 	}
+	return failureFromRows(savedPresetFailureRows, err)
 }

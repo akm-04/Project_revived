@@ -39,7 +39,8 @@ func (s Service) eligible(c context.Context, t tx.Queryer, pid identity.PlayerID
 			return nil, nil, e
 		}
 		if e == nil {
-			if x.Validate(pid, rev, at) != nil {
+			// K2': the provider observes at the latest stored fact, so validate there.
+			if x.Validate(pid, rev, x.ObservedAt) != nil {
 				return nil, nil, ErrUnavailable
 			}
 			vipKnown = true

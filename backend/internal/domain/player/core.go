@@ -16,6 +16,81 @@ import (
 // It is a presentation/onboarding completion marker, not gameplay reward proof.
 const GuideEndID int64 = 100197
 
+// GuideOpeningDoneID is the first guide cursor the stock client persists once
+// its opening story/video has finished: StoryWindow.onEnded saves
+// GUIDE_BEFORE_STORY (StoryWindow.lua:686-694; StartStoryWindow.lua:178-179,
+// enums.lua:348). A save at or above it proves the opening sequence is over.
+const GuideOpeningDoneID int64 = 100001
+
+// SkillUpFunctionID is the stock Skill Upgrade function (enums.lua:588). Its
+// announcement starts the skill guide from a reply's new_funcs_ (SelfPlayer.lua:487-518,554).
+const SkillUpFunctionID int64 = 33
+
+// SkillUpGuideCursor is the cursor the client saves after the Skill Upgrade
+// announcement runs playFuncGuide (enums.lua:445, MainScene.lua:1069-1078,
+// StoryData.lua:82-92). SAVE_STORY with it proves the announcement was seen.
+const SkillUpGuideCursor int64 = 100198
+
+// These functions set and persist a guide cursor from their announcement
+// (SelfPlayer.lua:487-618, MainScene.lua:1069-1085): 31 super campaign, 42 cloud
+// city and 48 conquer school. Their cursor SAVE_STORY is the acknowledgement too.
+const (
+	superCampaignFunctionID  int64 = 31
+	cloudCityFunctionID      int64 = 42
+	conquerSchoolFunctionID  int64 = 48
+	superBattleGuideCursor   int64 = 100250
+	cloudCityGuideCursor     int64 = 100701
+	conquerSchoolGuideCursor int64 = 101000
+)
+
+// FunctionAnnouncementAcknowledgement names the guide cursor whose SAVE_STORY
+// request acknowledges this function's announcement. A function with no entry
+// has no client acknowledgement and its unlock is born acknowledged.
+func FunctionAnnouncementAcknowledgement(functionID int64) (int64, bool) {
+	switch functionID {
+	case SkillUpFunctionID:
+		return SkillUpGuideCursor, true
+	case superCampaignFunctionID:
+		return superBattleGuideCursor, true
+	case cloudCityFunctionID:
+		return cloudCityGuideCursor, true
+	case conquerSchoolFunctionID:
+		return conquerSchoolGuideCursor, true
+	}
+	return 0, false
+}
+
+// AcknowledgedFunction is the function a saved guide cursor acknowledges.
+func AcknowledgedFunction(guideID int64) (int64, bool) {
+	switch guideID {
+	case SkillUpGuideCursor:
+		return SkillUpFunctionID, true
+	case superBattleGuideCursor:
+		return superCampaignFunctionID, true
+	case cloudCityGuideCursor:
+		return cloudCityFunctionID, true
+	case conquerSchoolGuideCursor:
+		return conquerSchoolFunctionID, true
+	}
+	return 0, false
+}
+
+// ReplayableFunctionAnnouncements keeps only the pending announcements the
+// client can still acknowledge at savedGuideID. A function without an
+// acknowledgement cursor never clears, so replaying it loops the client's
+// guide; a row whose cursor the player already reached is treated as seen.
+func ReplayableFunctionAnnouncements(functionIDs []int64, savedGuideID int64) []int64 {
+	out := make([]int64, 0, len(functionIDs))
+	for _, functionID := range functionIDs {
+		cursor, acknowledgeable := FunctionAnnouncementAcknowledgement(functionID)
+		if !acknowledgeable || savedGuideID >= cursor {
+			continue
+		}
+		out = append(out, functionID)
+	}
+	return out
+}
+
 type Profile struct {
 	PlayerID      identity.PlayerID
 	DisplayName   string
@@ -244,12 +319,16 @@ func SaveStory(cur StoryCursor, storyID, storyState, guideID int64, now time.Tim
 		return StoryCursor{}, false, errors.New("invalid SAVE_STORY values")
 	}
 	if cur.StoryID == storyID && cur.StoryState == storyState && cur.GuideID == guideID {
-		return cur, guideID == GuideEndID, nil
+		return cur, onboardingComplete(guideID), nil
 	}
 	cur.StoryID, cur.StoryState, cur.GuideID = storyID, storyState, guideID
 	cur.StateVersion++
 	cur.UpdatedAt = now.UTC()
-	return cur, guideID == GuideEndID, nil
+	return cur, onboardingComplete(guideID), nil
+}
+
+func onboardingComplete(guideID int64) bool {
+	return guideID >= GuideEndID || guideID >= GuideOpeningDoneID
 }
 
 // ProgressionRow is the immutable source-derived progression policy for one
@@ -430,6 +509,9 @@ type FunctionEligibility struct {
 	ContentRevision string
 	SourceFactKey   string
 	EligibleAt      time.Time
+	// MilestoneSatisfied marks an eligibility whose content-named tutorial
+	// milestone was proved in this transaction; it is not stored.
+	MilestoneSatisfied bool
 }
 
 func (e FunctionEligibility) Validate() error {

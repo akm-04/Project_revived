@@ -15,6 +15,6 @@ func NewAdmissionRouter() appsharedroom.AdmissionRouter {
 	return appsharedroom.AdmissionRouter{
 		"ILLUSION":           {Store: sharedroomstore.Store{}, Family: appillusion.RoomFamily, Slot: appillusion.RoomSlot},
 		"OCCULT":             {Store: sharedroomstore.Store{}, Family: appoccult.RoomFamily, Slot: appoccult.RoomSlot, ConvenerFirst: true},
-		"ADVENTURE_ILLUSION": {Store: sharedroomstore.Store{}, Family: appadventure.RoomFamily, Slot: appadventure.IllusionSlot, ConvenerFirst: true},
+		"ADVENTURE_ILLUSION": {Store: sharedroomstore.Store{}, Family: appadventure.RoomFamily, Slot: appadventure.IllusionSlot},
 	}
 }

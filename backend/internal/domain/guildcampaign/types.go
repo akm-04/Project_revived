@@ -37,6 +37,19 @@ type Chapter struct {
 	EndTime   *time.Time
 }
 
+// CopyOpen reports whether the catalog copy at position is open: its chapter is
+// open and not won, the copy itself is not won, and it is the first copy or the
+// copy before it is won. position is the copy's index in catalog order.
+func CopyOpen(chapterOpen, chapterWon, copyWon bool, position int, predecessorWon bool) bool {
+	if position < 0 || !chapterOpen || chapterWon || copyWon {
+		return false
+	}
+	if position == 0 {
+		return true
+	}
+	return predecessorWon
+}
+
 // Copy is one stage. Waves holds enemy HP that carries across every member's fights.
 type Copy struct {
 	GuildID           int64
@@ -52,7 +65,4 @@ type Copy struct {
 	LastFightTime     *time.Time
 	StartFightTime    *time.Time
 	AttemptGeneration string
-	SettledBy         int64
-	SettledIndex      int64
-	SettledBody       json.RawMessage
 }

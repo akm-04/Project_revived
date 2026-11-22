@@ -16,7 +16,9 @@ import (
 	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/foundation/tx"
 
+	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/workplacestore"
+	"gxb.local/backend/v2/internal/application/guildrental"
 	"gxb.local/backend/v2/internal/application/i5"
 	app "gxb.local/backend/v2/internal/application/workplace"
 	cd "gxb.local/backend/v2/internal/domain/combat"
@@ -24,6 +26,7 @@ import (
 	d "gxb.local/backend/v2/internal/domain/workplace"
 	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 	"sync"
 	"testing"
 	"time"
@@ -35,7 +38,7 @@ func (f *workplaceTime) Now(_ context.Context) (time.Time, error) { return f.at,
 func workplaceMode(t *testing.T, p *pg.Pool, clock *workplaceTime) app.Mode {
 	m := marchMode(t, p)
 	owner := m.Grants.(i5.Service)
-	return app.Mode{Timed: m.Timed, Fresh: p, Store: workplacestore.Store{}, Content: contentstore.Store{Queryer: p}, Fence: m.Fence, Functions: m.Functions, Directory: m.Directory, Campaigns: campaignstore.Store{}, Heroes: m.Heroes, HeroLocks: characterstore.WorkplaceHeroPort{Store: characterstore.Store{Queryer: p}}, HeroWire: m.HeroWire, Opponents: topFloorService(t, p), Combat: combatService(t, p), Stats: m.Stats, Values: owner, Privileges: owner.Privileges, Facts: m.Facts, Receipts: m.Receipts, ReceiptRead: m.ReceiptRead}
+	return app.Mode{Timed: m.Timed, Fresh: p, Store: workplacestore.Store{}, Content: contentstore.Store{Queryer: p}, Fence: m.Fence, Functions: m.Functions, Directory: m.Directory, Campaigns: campaignstore.Store{}, Heroes: m.Heroes, HeroLocks: characterstore.WorkplaceHeroPort{Store: characterstore.Store{Queryer: p}}, HeroWire: m.HeroWire, Opponents: topFloorService(t, p), Combat: combatService(t, p), Stats: m.Stats, Values: owner, Privileges: owner.Privileges, Facts: m.Facts, Receipts: m.Receipts, ReceiptRead: m.ReceiptRead, Broadcast: pg.BroadcastEmitter{}, Rental: guildrental.Reader{Store: guildstore.Store{Queryer: p}}, BattleObserver: libraryService(p, p)}
 }
 func workplaceRecord(t *testing.T, p *pg.Pool, a identity.ActorContext) d.State {
 	t.Helper()
@@ -101,6 +104,12 @@ func TestI9_5BWorkplaceNativeLifecycle(t *testing.T) {
 	if _, err = s.Dispatch(ctx, a, bad, op()); !errors.Is(err, d.ErrRefused) {
 		t.Fatal("foreign/missing hero", err)
 	}
+	// A live rental offer withdraws the girl from workplace dispatch (Rental is wired).
+	exec(t, p, `INSERT INTO guild_rental_offers(lender_id,kind,unit_id,guild_id,force,rent_award,rent_time)VALUES($1,'HERO',$2,1,1,0,clock_timestamp())`, int64(a.PlayerID), h.PartnerID)
+	if _, err = s.Dispatch(ctx, a, request, op()); !errors.Is(err, d.ErrRefused) {
+		t.Fatal("a rented hero was dispatched", err)
+	}
+	exec(t, p, `DELETE FROM guild_rental_offers WHERE lender_id=$1 AND unit_id=$2`, int64(a.PlayerID), h.PartnerID)
 	// Drain via the real I5 owner; an unaffordable dispatch must roll back all job effects.
 	tr, err := p.Begin(ctx, tx.Options{Isolation: tx.Serializable})
 	if err != nil {
@@ -146,6 +155,40 @@ func TestI9_5BWorkplaceNativeLifecycle(t *testing.T) {
 	}
 	if _, err = s.Dispatch(ctx, a, request, start); err != nil {
 		t.Fatal("dispatch", err)
+	}
+	loaded, err := s.Load(ctx, a, op())
+	if err != nil {
+		t.Fatal("load after dispatch", err)
+	}
+	loadedTeams, ok := loaded["teams_info"].([]map[string]any)
+	if !ok {
+		t.Fatal("teams_info", loaded["teams_info"])
+	}
+	var busy map[string]any
+	for _, row := range loadedTeams {
+		if row["team_id"] == location.ID {
+			busy = row
+		}
+	}
+	if busy == nil {
+		t.Fatal("busy team row absent", loadedTeams)
+	}
+	award, ok := busy["award"].(map[string]any)
+	if !ok {
+		t.Fatal("busy team row award", busy)
+	}
+	normal, ok := award["normal_award"].(map[string]any)
+	if !ok || normal["award_type"] == nil || normal["item_num"] == nil || normal["award_time"] == nil {
+		t.Fatal("normal_award shape", award)
+	}
+	if _, ok = award["chest_award"].(map[string]any); !ok {
+		t.Fatal("chest_award object", award)
+	}
+	if _, ok = award["battle_award"].(map[string]any); !ok {
+		t.Fatal("battle_award object", award)
+	}
+	if award["externa_crystal_award"] == nil {
+		t.Fatal("externa_crystal_award", award)
 	}
 	first := workplaceRecord(t, p, a).Slots[location.ID]
 	if first == nil || first.Attempt != "" {
@@ -236,6 +279,9 @@ func TestI9_5BWorkplaceNativeLifecycle(t *testing.T) {
 	if mails() != mailBefore+1 {
 		t.Fatal("overflow Mail not once", mailBefore, mails())
 	}
+	if count := girlsLogCount(t, p, a.PlayerID, h.PartnerID); count != 0 {
+		t.Fatalf("a job without a rival counted %d", count)
+	}
 	second := workplaceOperation(quote, len(job.Chests), true, 2)
 	if _, err = s.Dispatch(ctx, a, request, second); err != nil {
 		t.Fatal("second occurrence", err)
@@ -277,6 +323,15 @@ func TestI9_5BWorkplaceNativeLifecycle(t *testing.T) {
 	if _, err = s.Claim(ctx, a, location.ID, op()); err != nil {
 		t.Fatal("automatic rival claim", err)
 	}
+	if count := girlsLogCount(t, p, a.PlayerID, h.PartnerID); count != 1 {
+		t.Fatalf("the rival battle counted %d, want 1", count)
+	}
+	if _, err = s.Claim(ctx, a, location.ID, op()); err != nil {
+		t.Fatal("claimed job reread", err)
+	}
+	if count := girlsLogCount(t, p, a.PlayerID, h.PartnerID); count != 1 {
+		t.Fatalf("a claimed job reread counted %d, want 1", count)
+	}
 	final := workplaceRecord(t, p, a)
 	if len(final.Diary) != 2 || fmt.Sprint(final.Diary[0]["with_battle"]) != "1" {
 		t.Fatal("rival diary", final.Diary)
@@ -312,9 +367,11 @@ func TestI9_5BWorkplaceNativeLifecycle(t *testing.T) {
 		}
 		attempt := workplaceRecord(t, p, a).Slots[location.ID]
 		clock.at = time.Unix(attempt.Start+attempt.Quote.Seconds+1, 0).UTC()
-		if _, err = s.Claim(ctx, a, location.ID, op()); err != nil {
-			t.Fatal("full crew real claim", err)
+		claimed, claimErr := s.Claim(ctx, a, location.ID, op())
+		if claimErr != nil {
+			t.Fatal("full crew real claim", claimErr)
 		}
+		replyconformance.Check(t, 532, claimed)
 		result := workplaceRecord(t, p, a).Diary[0]
 		award, ok := result["award"].(map[string]any)
 		if !ok {

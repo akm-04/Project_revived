@@ -1,0 +1,52 @@
+{
+ "name": "playtest4_fixes",
+ "level": 32,
+ "heroes": [
+  10001002
+ ],
+ "grants": [
+  {
+   "Kind": "SCALAR_CURRENCY",
+   "ResourceKey": "crystal",
+   "Amount": 1000
+  },
+  {
+   "Kind": "SCALAR_CURRENCY",
+   "ResourceKey": "mana",
+   "Amount": 10000
+  }
+ ],
+ "steps": [
+  "wait:5",
+  "lua:local backend=xyd.Backend.get() local original=backend.request backend.request=function(self,mid,params,cb,showError,skip,showLoading) return original(self,mid,params,function(code,reply) if mid==xyd.mid.LOAD_USED_PARTNER then __vc_623={code=code,reply=reply} elseif mid==xyd.mid.RENT_HERO then __vc_594={code=code,reply=reply} elseif mid==xyd.mid.GET_DATA_TEAM then __vc_609={code=code,reply=reply} elseif mid==xyd.mid.MODIFY_SHOW_CASE then __vc_1832={code=code,reply=reply} end if cb then cb(code,reply) end end,showError,skip,showLoading) end",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) p:loadUsedPartners(function(list) __vc_used=list end)",
+  "wait:3",
+  "lua:if not __vc_623 or __vc_623.code~=xyd.error.OK then error('vc-623-refused') end if type(__vc_623.reply.used_partners)~='table' then error('vc-623-not-array') end if type(__vc_used)~='table' then error('vc-623-callback') end",
+  "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) g:createTeam({name='vc10fix',icon=20010001,icon_frame=0},function(code) if code~=xyd.error.OK then error('vc-577-refused-'..tostring(code)) end end)",
+  "wait:3",
+  "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) g:loadSelfGuild(function(code) if code~=xyd.error.OK then error('vc-612-refused-'..tostring(code)) end end)",
+  "wait:3",
+  "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) if not g.guild_id or g.guild_id==0 then error('vc-612-no-guild') end g:getData(function(code,reply) if code~=xyd.error.OK then error('vc-609-refused-'..tostring(code)) end end)",
+  "wait:3",
+  "lua:if not __vc_609 or __vc_609.code~=xyd.error.OK then error('vc-609-capture') end local rows=__vc_609.reply.guild_log if type(rows)~='table' then error('vc-609-not-array') end local created=false for _,row in ipairs(rows) do if row.type==xyd.GuildDataType.Create then created=true end end if not created then error('vc-609-missing-create') end",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) local _,hero=next(p:getHeros()) if not hero then error('vc-594-no-hero') end __vc_hero=hero:getHeroID() local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) g:rentHero({partner_id=__vc_hero},function(code,reply) if code~=xyd.error.OK then error('vc-594-refused-'..tostring(code)) end if type(reply.rent_info)~='table' then error('vc-594-not-array') end end)",
+  "wait:3",
+  "lua:if not __vc_594 or __vc_594.code~=xyd.error.OK then error('vc-594-capture') end local listed=false for _,row in ipairs(__vc_594.reply.rent_info) do if row.partner_id==__vc_hero then listed=true end end if not listed then error('vc-594-missing-offer') end",
+  "lua:__vc_623=nil __vc_used=nil local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) p:loadUsedPartners(function(list) __vc_used=list end)",
+  "wait:3",
+  "lua:if not __vc_623 or __vc_623.code~=xyd.error.OK then error('vc-623-second-refused') end local listed=false for _,id in ipairs(__vc_623.reply.used_partners) do if id==__vc_hero then listed=true end end if not listed then error('vc-623-offer-not-used') end",
+  "lua:local pd=xyd.ModelManager.get():loadModel(xyd.ModelType.PERSON_DISPLAY) pd:modifyShowCase({0,0,0,0,0,0},function(code,reply) if code~=xyd.error.OK then error('vc-1832-refused-'..tostring(code)) end end)",
+  "wait:3",
+  "lua:if not __vc_1832 or __vc_1832.code~=xyd.error.OK then error('vc-1832-capture') end if type(__vc_1832.reply.show_case)~='table' or #__vc_1832.reply.show_case~=6 then error('vc-1832-show-case') end"
+ ],
+ "settle_seconds": 15,
+ "expect_ok": [
+  577,
+  594,
+  609,
+  623,
+  1832
+ ],
+ "expect_lua_errors": [],
+ "note": "Calls the stock models the real windows call: SelfPlayer:loadUsedPartners (623), SelfGuild.rentHero (594), SelfGuild.getData (609) and PersonDisplay:modifyShowCase (1832 with the stock six-slot ids key). 623 is called once before the offer and once after it, so the reply must be an always-present array and must then list the offered hero."
+}

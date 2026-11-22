@@ -1,0 +1,59 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [],
+  "row_lock_methods": {
+   "player_social_presence": [
+    "presencestore.EnsureAndLockRootTx"
+   ],
+   "realtime_presence_owner_state": [
+    "presencestore.AssertOwnerFenceTx"
+   ]
+  },
+  "row_locks": [
+   "player_social_presence",
+   "realtime_presence_owner_state"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [],
+ "name": "socialpresence",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/presencestore"
+ ],
+ "tables": {
+  "owned": [
+   "player_social_presence",
+   "realtime_presence_leases",
+   "realtime_presence_owner_state"
+  ],
+  "read": [
+   "player_social_presence",
+   "realtime_presence_leases",
+   "realtime_presence_owner_state"
+  ],
+  "written": [
+   "player_social_presence",
+   "realtime_presence_leases"
+  ]
+ },
+ "tests": {
+  "integration": [],
+  "scenarios_naming": [],
+  "unit": [
+   "service_test.go"
+  ]
+ }
+}

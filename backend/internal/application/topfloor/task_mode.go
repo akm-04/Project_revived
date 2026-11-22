@@ -16,21 +16,18 @@ type TaskModeEligibility struct {
 	Eligible           bool
 }
 
-func (service Service) TaskModeEligibilityTx(requestContext context.Context, query tx.Queryer, catalog domain.TaskModeCatalog, actor identity.ActorContext, at time.Time) (TaskModeEligibility, error) {
+func (service Service) TaskModeEligibilityTx(requestContext context.Context, query tx.Queryer, catalog domain.TaskModeCatalog, period domain.TaskModePeriod, actor identity.ActorContext, at time.Time) (TaskModeEligibility, error) {
 	if query == nil || !actor.PlayerID.Valid() || !actor.LogicalServerID.Valid() || int64(actor.PlayerID)/domain.RegionStride != int64(actor.LogicalServerID) || at.IsZero() {
 		return TaskModeEligibility{}, domain.ErrInvalid
 	}
 	if service.Store == nil || service.Directory == nil {
 		return TaskModeEligibility{}, domain.ErrUnavailable
 	}
-	rank, found, err := service.Store.RankOfTx(requestContext, query, actor.LogicalServerID, domain.Occupant{Player: actor.PlayerID})
+	_, admitted, err := service.Store.ReadTaskPlayerTx(requestContext, query, actor.PlayerID, period, false)
 	if err != nil {
 		return TaskModeEligibility{}, err
 	}
-	if !found {
-		return TaskModeEligibility{}, nil
-	}
-	challenges, err := service.Store.WeeklyChallengesTx(requestContext, query, actor.PlayerID, at)
+	rank, found, err := service.Store.RankOfTx(requestContext, query, actor.LogicalServerID, domain.Occupant{Player: actor.PlayerID})
 	if err != nil {
 		return TaskModeEligibility{}, err
 	}
@@ -38,6 +35,12 @@ func (service Service) TaskModeEligibilityTx(requestContext context.Context, que
 	if err != nil {
 		return TaskModeEligibility{}, err
 	}
-	return TaskModeEligibility{Rank: rank, WeeklyChallenges: challenges, ServerMaximumLevel: maximumLevel,
-		Eligible: catalog.Admit(rank, challenges, maximumLevel) == nil}, nil
+	challenges, err := service.Store.WeeklyChallengesTx(requestContext, query, actor.PlayerID, at)
+	if err != nil {
+		return TaskModeEligibility{}, err
+	}
+	// D512: admission is checked once per period; an admitted player keeps every
+	// special MID for the rest of the period even after their normal rank drops.
+	eligible := admitted || found && catalog.Admit(rank, maximumLevel) == nil
+	return TaskModeEligibility{Rank: rank, WeeklyChallenges: challenges, ServerMaximumLevel: maximumLevel, Eligible: eligible}, nil
 }

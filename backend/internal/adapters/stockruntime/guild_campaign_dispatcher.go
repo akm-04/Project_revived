@@ -5,11 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"net/http"
 	"strconv"
 
 	"gxb.local/backend/v2/internal/application/guildcampaign"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
+	guilddomain "gxb.local/backend/v2/internal/domain/guildcampaign"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -202,7 +202,7 @@ func (d GuildCampaignDispatcher) Dispatch(c context.Context, r httpedge.Dispatch
 		}
 		return okI5(map[string]any{"logs": logs})
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error": "not_i9_9c_mid"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 }
 
@@ -349,8 +349,16 @@ func enemyStatus(waves map[int64][]guildcampaign.EnemyRow) []any {
 		enemies := waves[wave]
 		rows := make([]any, 0, len(enemies))
 		for _, enemy := range enemies {
-			row := map[string]any{"table_id": enemy.TableID, "lev": enemy.Lev, "star": enemy.Star, "color": enemy.Color, "health": enemy.Health}
+			// The client applies hp only when health is 1 (BattleCreate.lua:1106-1111),
+			// so health marks every row that carries a stored HP and hp stays numeric.
+			health := enemy.Health
 			if enemy.HP > 0 {
+				health = 1
+			}
+			// Hero.populate keeps partner_id as getHeroID (NormalHero.lua:142,493),
+			// and the stock 610 report sends that back as hero_id (BattleCreate.lua:3019).
+			row := map[string]any{"partner_id": enemy.PartnerID, "table_id": enemy.TableID, "lev": enemy.Lev, "star": enemy.Star, "color": enemy.Color, "health": health}
+			if health != 0 {
 				row["hp"] = enemy.HP
 			}
 			if enemy.Reborn != 0 {
@@ -375,8 +383,14 @@ func awardWire(body guildcampaign.AwardBody) map[string]any {
 		awards = append(awards, map[string]any{"award_id": award.AwardID, "award_num": award.AwardNum, "self_rank": award.SelfRank,
 			"self_apply": award.SelfApply, "apply_member": members})
 	}
+	selfApplyInfo := map[string]any{"rank": body.SelfRank}
+	// The stock application windows test item_id's truthiness and Lua treats 0
+	// as true, so an unapplied member must omit the key (A-185).
+	if body.SelfItemID != 0 {
+		selfApplyInfo["item_id"] = body.SelfItemID
+	}
 	return map[string]any{"award_infos": awards, "award_next_time": body.NextApplyTime,
-		"self_apply_info": map[string]any{"item_id": body.SelfItemID, "rank": body.SelfRank}, "guild_equip_apply_times": body.ApplyTimes}
+		"self_apply_info": selfApplyInfo, "guild_equip_apply_times": body.ApplyTimes}
 }
 
 func damageRank(rows []guildcampaign.RankRow) []any {
@@ -392,7 +406,7 @@ func damageRank(rows []guildcampaign.RankRow) []any {
 func serverRank(view guildcampaign.ServerView) map[string]any {
 	body := map[string]any{}
 	if view.Fast != nil {
-		body["fast_boss_killer"] = map[string]any{"name": view.Fast.GuildName, "guild_id": view.Fast.GuildID, "icon": int64(0), "cost_time": view.Fast.Seconds}
+		body["fast_boss_killer"] = map[string]any{"name": view.Fast.GuildName, "guild_id": view.Fast.GuildID, "icon": view.Fast.GuildIcon, "cost_time": view.Fast.Seconds}
 	}
 	if view.Boss != nil {
 		body["boss_killer"] = map[string]any{"player_name": view.Boss.Profile.Name, "guild_name": view.Boss.GuildName, "lev": view.Boss.Profile.Level,
@@ -401,19 +415,29 @@ func serverRank(view guildcampaign.ServerView) map[string]any {
 	}
 	rows := make([]any, 0, len(view.Ranks))
 	for _, row := range view.Ranks {
-		rows = append(rows, map[string]any{"rank": row.Rank, "damage": row.Damage, "player_name": row.Profile.Name, "guild_name": "",
+		rows = append(rows, map[string]any{"rank": row.Rank, "damage": row.Damage, "player_name": row.Profile.Name, "guild_name": row.GuildName,
 			"lev": row.Profile.Level, "avatar_id": row.Profile.AvatarID, "avatar_frame_id": row.Profile.AvatarFrameID,
-			"conquer_lev": row.Profile.ConquerLevel, "conquer_loop_id": row.Profile.ConquerLoopID, "partners": []any{}})
+			"conquer_lev": row.Profile.ConquerLevel, "conquer_loop_id": row.Profile.ConquerLoopID, "partners": serverRankPartners(row.Partners)})
 	}
 	body["rank_list"] = rows
 	return body
+}
+
+// serverRankPartners is the hero rows AllServerDamageWindow.lua:217-235 draws.
+func serverRankPartners(partners []guildcampaign.Partner) []any {
+	out := make([]any, 0, len(partners))
+	for _, partner := range partners {
+		out = append(out, map[string]any{"table_id": partner.TableID, "color": partner.Color, "star": partner.Star, "lev": partner.Level,
+			"current_skin_id": partner.CurrentSkinID, "twice_awake_stage": partner.TwiceAwakeStage})
+	}
+	return out
 }
 
 func guildLog(rows []guildcampaign.LogRow) []any {
 	out := make([]any, 0, len(rows))
 	for _, row := range rows {
 		out = append(out, map[string]any{"type": row.Type, "time": row.At.Unix(), "player_name": row.Profile.Name,
-			"player_job": row.PlayerJob, "member_name": "", "chapter_id": row.ChapterID})
+			"player_job": row.PlayerJob, "member_name": row.MemberName, "chapter_id": row.ChapterID})
 	}
 	return out
 }
@@ -422,7 +446,9 @@ func detailWire(view guildcampaign.DetailView) map[string]any {
 	body := map[string]any{"current_index": view.CurrentIndex, "monster_status": enemyStatus(view.Waves), "is_open": flag(view.IsOpen),
 		"is_win": flag(view.IsWin), "current_fight_player": view.CurrentFight, "last_fight_time": view.LastFight,
 		"start_fight_time": view.StartFight, "stage": view.Stage}
-	if view.FightInfo.PlayerID.Valid() {
+	// The client indexes fight_info whenever it sees a live holder
+	// (MapWindow.lua:1121-1130), so profile hydration cannot gate the shape.
+	if view.CurrentFight > 0 {
 		body["fight_info"] = map[string]any{"player_name": view.FightInfo.Name, "lev": view.FightInfo.Level,
 			"avatar_id": view.FightInfo.AvatarID, "conquer_lev": view.FightInfo.ConquerLevel}
 	}
@@ -450,20 +476,31 @@ func flag(value bool) int64 {
 }
 
 func campaignBad() httpedge.Response {
-	return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "guild_campaign_invalid_parameter"}}
+	return failureReply(malformed("guild_campaign_invalid_parameter"))
 }
 
 func campaignUnavailable() httpedge.Response {
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "guild_campaign_unavailable"}}
+	return failureReply(defect(nil))
+}
+
+var campaignFailureRows = []failureRow{
+	{match: guildcampaign.ErrLate, class: failureRefusal, code: 30021},
+	{match: guildcampaign.ErrHolder, class: failureRefusal, code: unprovenRefusalCode},
+	{match: guilddomain.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
 }
 
 // campaignFailure refuses with 409: a 200 without the reply's fields crashes
-// the stock callbacks (Backend.lua:562-566).
+// the stock callbacks (Backend.lua:562-566). Player and parameter refusals are
+// guilddomain.ErrRefused; the owner's ErrUnavailable means unwired ports or a
+// missing member profile, a defect (A-043).
 func campaignFailure(err error) httpedge.Response {
-	if errors.Is(err, guildcampaign.ErrUnavailable) {
-		return campaignUnavailable()
+	if classified := classifyFailure(campaignFailureRows, err); classified != nil {
+		return failureReply(classified)
 	}
-	return conflictRefusal(1)
+	if errors.Is(err, guildcampaign.ErrUnavailable) {
+		return failureReply(defect(err))
+	}
+	return failureFromRows(nil, err)
 }
 
 // campaignSettleFailure keeps 610's two client-visible codes: a late result is
@@ -471,7 +508,7 @@ func campaignFailure(err error) httpedge.Response {
 // arrives as a 200 body with error_code 30005 from Settle.
 func campaignSettleFailure(err error) httpedge.Response {
 	if errors.Is(err, guildcampaign.ErrLate) {
-		return conflictRefusal(30021)
+		return failureReply(refusal(30021))
 	}
 	return campaignFailure(err)
 }

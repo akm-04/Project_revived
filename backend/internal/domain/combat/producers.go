@@ -3,13 +3,16 @@ package combat
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 )
 
 // ProducerProfileID names the frozen battle producer registry a schema 2
 // snapshot pins (D05: an unsupported enabled producer blocks START; an absent
 // feature is declared inactive). A registry change takes a new ID.
 const LegacyProducerProfileID = "I8_BATTLE_PRODUCERS_V1"
-const ProducerProfileID = "I9_AWAKENING_BATTLE_PRODUCERS_V1"
+const AwakeningProducerProfileID = "I9_AWAKENING_BATTLE_PRODUCERS_V1"
+const LibraryProducerProfileID = "I9_LIBRARY_BATTLE_PRODUCERS_V1"
+const ProducerProfileID = "I9_CHAR_PET_BATTLE_PRODUCERS_V1"
 
 type ProducerStatus string
 
@@ -19,8 +22,9 @@ const (
 )
 
 // Producer owns the populate params keys it writes into owned actors. Required
-// keys are written whenever the producer is active, so their absence means the
-// producer was unavailable and START refuses instead of defaulting.
+// keys are written whenever the producer is active for the kind it writes, so
+// their absence means the producer was unavailable and START refuses instead
+// of defaulting.
 type Producer struct {
 	ID       string
 	Status   ProducerStatus
@@ -62,7 +66,7 @@ var producerProfiles = map[string]ProducerProfile{LegacyProducerProfileID: {ID: 
 
 func init() {
 	legacy := producerProfiles[LegacyProducerProfileID]
-	current := ProducerProfile{ID: ProducerProfileID, Producers: append([]Producer(nil), legacy.Producers...)}
+	current := ProducerProfile{ID: AwakeningProducerProfileID, Producers: append([]Producer(nil), legacy.Producers...)}
 	for i := range current.Producers {
 		switch current.Producers[i].ID {
 		case "RAW_AWAKENING":
@@ -72,7 +76,43 @@ func init() {
 			current.Producers[i].Owner = "I9_AWAKENING_MISSIONS_V1 through coherent CharacterHero raw observation"
 		}
 	}
-	producerProfiles[ProducerProfileID] = current
+	producerProfiles[AwakeningProducerProfileID] = current
+	library := libraryBoardProfile(current)
+	producerProfiles[LibraryProducerProfileID] = library
+	producerProfiles[ProducerProfileID] = petRequiredProfile(library)
+}
+
+// petRequiredProfile requires every CHAR_PET key: the active roster projection
+// always writes them, so their absence means the producer was unavailable and
+// START refuses instead of defaulting (D05: missing active stats never become
+// zeros).
+func petRequiredProfile(library ProducerProfile) ProducerProfile {
+	current := ProducerProfile{ID: ProducerProfileID}
+	for _, producer := range library.Producers {
+		if producer.ID == "CHAR_PET" {
+			producer.Required = append([]string(nil), producer.PetKeys...)
+		}
+		current.Producers = append(current.Producers, producer)
+	}
+	return current
+}
+
+// libraryBoardProfile moves the I9_LIBRARY_V1 board keys, which the roster
+// carries for every hero, from the inactive display producer to Library, and
+// ARENA_HERO_PICKS_V1's region_arena_times to its own active producer.
+func libraryBoardProfile(awakening ProducerProfile) ProducerProfile {
+	board := []string{"is_board", "board_card", "board_model_id"}
+	current := ProducerProfile{ID: LibraryProducerProfileID}
+	for _, producer := range awakening.Producers {
+		if producer.ID == "HERO_DISPLAY" {
+			producer.HeroKeys = []string{"force"}
+			current.Producers = append(current.Producers,
+				Producer{ID: "LIBRARY_BOARD", Status: ProducerActive, Owner: "I9_LIBRARY_V1 board partner, card and model (836/835)", HeroKeys: board},
+				Producer{ID: "ARENA_PICKS", Status: ProducerActive, Owner: "ARENA_HERO_PICKS_V1 season pick count", HeroKeys: []string{"region_arena_times"}})
+		}
+		current.Producers = append(current.Producers, producer)
+	}
+	return current
 }
 
 // LookupProducerProfile returns a registered profile; pinned IDs stay registered.
@@ -122,10 +162,14 @@ func (p ProducerProfile) CheckOwned(kind ActorKind, params json.RawMessage) erro
 		}
 	}
 	for _, producer := range p.Producers {
-		if producer.Status != ProducerActive || kind == PetActor {
+		if producer.Status != ProducerActive {
 			continue
 		}
+		owned := producer.KeysFor(kind)
 		for _, key := range producer.Required {
+			if !slices.Contains(owned, key) {
+				continue
+			}
 			if _, ok := fields[key]; !ok {
 				return fmt.Errorf("producer %s did not write %s", producer.ID, key)
 			}

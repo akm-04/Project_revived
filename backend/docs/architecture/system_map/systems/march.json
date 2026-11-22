@@ -1,0 +1,209 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [
+  {
+   "count": 7,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 7,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10A_EVENT_CENTRE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10F_MENTOR_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_RENTAL_V1.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 4,
+   "file": "docs/i9/I9_MARCH_IMPLEMENTATION.md"
+  },
+  {
+   "count": 7,
+   "file": "docs/i9/I9_MARCH_V1.json"
+  },
+  {
+   "count": 7,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  }
+ ],
+ "decorated_by": [
+  "observing"
+ ],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/march_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {
+   "MARCH_FINISHED": {
+    "missions": [
+     114
+    ]
+   }
+  },
+  "emits": [
+   "MARCH_FINISHED"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "march"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "march_players": [
+    "marchstore.LockTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "march_players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [
+  "OverlayMID1"
+ ],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/march_dispatcher.go",
+    "line": 36
+   },
+   "mid": 336,
+   "name": "LOAD_MARCH"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/march_dispatcher.go",
+    "line": 36
+   },
+   "mid": 337,
+   "name": "RESTART_MARCH"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/march_dispatcher.go",
+    "line": 36
+   },
+   "mid": 338,
+   "name": "MARCH_FIGHT_RESULT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/march_dispatcher.go",
+    "line": 36
+   },
+   "mid": 339,
+   "name": "MARCH_OPEN_BOX"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/march_dispatcher.go",
+    "line": 36
+   },
+   "mid": 340,
+   "name": "MARCH_START_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/march_dispatcher.go",
+    "line": 36
+   },
+   "mid": 341,
+   "name": "MARCH_OPEN_EXTRA_CHEST"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/march_dispatcher.go",
+    "line": 36
+   },
+   "mid": 342,
+   "name": "MARCH_ADVANCE_SWEEP"
+  }
+ ],
+ "name": "march",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/guildrentalread",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore",
+  "internal/adapters/postgres/marchstore"
+ ],
+ "tables": {
+  "owned": [
+   "march_players"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "gxb_content_activation",
+   "gxb_content_equipment_primitives",
+   "gxb_content_hero_equipment",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "march_players",
+   "player_directory_profiles",
+   "player_function_eligibility"
+  ],
+  "written": [
+   "gxb_operation_receipts",
+   "march_players"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [
+   "i9_5a_march.json"
+  ],
+  "unit": [
+   "scale_coherence_test.go",
+   "settle_balance_test.go",
+   "start_choice_conformance_test.go"
+  ]
+ }
+}

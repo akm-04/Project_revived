@@ -2,14 +2,13 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
+
 	"gxb.local/backend/v2/internal/application/dodgeball"
 	"gxb.local/backend/v2/internal/application/realtimeauth"
 	domain "gxb.local/backend/v2/internal/domain/dodgeball"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
-	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
@@ -36,10 +35,10 @@ func (dispatcher DodgeballDispatcher) Dispatch(ctx context.Context, request http
 		return *failure
 	}
 	if dispatcher.Service == nil {
-		return httpedge.Response{HTTPStatus: 503, Body: map[string]any{"error_code": int64(1)}}
+		return failureReply(defect(nil))
 	}
 	parameters, operationContext := request.Envelope.Params, request.Envelope.Operation
-	invalid := badHero("dodgeball_invalid_parameter")
+	invalid := failureReply(malformed("dodgeball_invalid_parameter"))
 	var response map[string]any
 	var err error
 	switch request.Envelope.MID {
@@ -80,22 +79,28 @@ func (dispatcher DodgeballDispatcher) Dispatch(ctx context.Context, request http
 		}
 		response, err = dispatcher.Service.Result(ctx, actor, records, operationContext)
 	default:
-		return httpedge.Response{HTTPStatus: 501, Body: map[string]any{"error_code": int64(1)}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 	if err != nil {
-		var conflict *receipt.ConflictError
-		if errors.Is(err, domain.ErrInvalid) || errors.As(err, &conflict) {
-			return invalid
-		}
-		if errors.Is(err, domain.ErrRefused) || errors.Is(err, economy.ErrInsufficientBalance) {
-			return conflictRefusal(1)
-		}
-		return httpedge.Response{HTTPStatus: 503, Body: map[string]any{"error_code": int64(1), "error": "dodgeball_failed"}, Cause: err}
+		return dodgeballFailure(err)
 	}
 	if request.Envelope.MID == 2964 {
 		return httpedge.Response{HTTPStatus: 200, JSON: response["friend_infos"]}
 	}
 	return okI5(response)
+}
+
+var dodgeballFailureRows = []failureRow{
+	{match: domain.ErrInvalid, class: failureMalformed, detail: "dodgeball_invalid_parameter"},
+	{match: domain.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+	// The owner's ErrUnavailable means a catalog that fails validation or a corrupt saved state: a
+	// permanent defect, not a refusal and not a fault a retry clears (R4 amendment items 4 and 13).
+	{match: domain.ErrUnavailable, class: failureDefect},
+}
+
+func dodgeballFailure(err error) httpedge.Response {
+	return failureFromRows(dodgeballFailureRows, err)
 }
 
 func dodgeballRecords(raw any) ([]domain.HitRecord, bool) {

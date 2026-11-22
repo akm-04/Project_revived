@@ -1,0 +1,32 @@
+{
+  "wins": [
+    1,
+    1
+  ],
+  "win": true,
+  "attacker_before": {
+    "level": 5,
+    "slot": 0,
+    "points": 4300,
+    "points_at": "2026-11-16T01:47:13.241911Z"
+  },
+  "defender_before": {
+    "level": 5,
+    "slot": 0,
+    "points": 4500,
+    "points_at": "2026-11-16T01:47:13.309783Z"
+  },
+  "attacker_after": {
+    "level": 5,
+    "slot": 0,
+    "points": 4315,
+    "points_at": "2026-11-16T01:47:27.829144Z"
+  },
+  "defender_after": {
+    "level": 5,
+    "slot": 0,
+    "points": 4485,
+    "points_at": "2026-11-16T01:47:27.829144Z"
+  },
+  "promoted": false
+}

@@ -3,7 +3,6 @@ package petcampaign
 import (
 	"encoding/json"
 	"gxb.local/backend/v2/internal/domain/grant"
-	"strconv"
 )
 
 type Sweep struct {
@@ -72,11 +71,10 @@ func (s State) Normal() map[string]any {
 	return map[string]any{"now_floor": s.Current, "max_floor": s.Max, "begin_sweep_time": start, "is_can_sweep": int64(1), "mission_sweep_times": s.AwakeUsed, "can_sweep_times": s.SweepLeft, "challenge_times": s.ResetLeft}
 }
 func (s State) Elite(c Catalog) map[string]any {
-	buys, remaining := map[string]int64{}, map[string]int64{}
+	buys, remaining := make([]int64, 20), make([]int64, 20)
 	for n := int64(1); n <= 20; n++ {
-		k := strconv.FormatInt(n, 10)
-		buys[k] = s.EliteBuys[n]
-		remaining[k] = c.Raids*(1+s.EliteBuys[n]) - s.EliteUsed[n]
+		buys[n-1] = s.EliteBuys[n]
+		remaining[n-1] = c.Raids*(1+s.EliteBuys[n]) - s.EliteUsed[n]
 	}
 	return map[string]any{"state": s.View, "now_floor": s.Selected, "max_floor": s.EliteMax, "mission_sweep_times": int64(0), "buy_info": buys, "sweep_info": remaining, "test_formation": s.TestFormation}
 }

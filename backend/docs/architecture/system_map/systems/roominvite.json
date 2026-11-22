@@ -1,0 +1,107 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [
+  {
+   "count": 1,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I9_8_ROOM_INVITE_MATERIALIZE"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "players": [
+    "i4store.LockBoundRecipientTx"
+   ],
+   "social_notices": [
+    "socialinboxstore.LockNoticeSourceTx"
+   ]
+  },
+  "row_locks": [
+   "players",
+   "social_notices"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [],
+ "name": "roominvite",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/socialinboxstore"
+ ],
+ "tables": {
+  "owned": [],
+  "read": [
+   "logical_servers",
+   "players",
+   "social_notices"
+  ],
+  "written": [
+   "social_notices"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [],
+  "unit": [
+   "senderrate_test.go"
+  ]
+ }
+}

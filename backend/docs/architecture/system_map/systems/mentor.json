@@ -1,0 +1,237 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [
+  {
+   "count": 9,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 9,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 8,
+   "file": "docs/i9/I9_10F_MENTOR_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 8,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [
+  "observing"
+ ],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/mentor_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I9_10F_MENTOR"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "mentor_applications": [
+    "mentorstore.LockApplicationTx"
+   ],
+   "mentor_exam_receipts": [
+    "mentorstore.LockExamReceiptTx"
+   ],
+   "mentor_mission_progress": [
+    "mentorstore.LockMissionProgressTx"
+   ],
+   "mentor_relations": [
+    "mentorstore.LockRelationshipsTx"
+   ],
+   "mentor_states": [
+    "mentorstore.LockStateTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ]
+  },
+  "row_locks": [
+   "mentor_applications",
+   "mentor_exam_receipts",
+   "mentor_mission_progress",
+   "mentor_relations",
+   "mentor_states",
+   "players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [
+  "BootstrapProjection"
+ ],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/mentor_dispatcher.go",
+    "line": 32
+   },
+   "mid": 1856,
+   "name": "GET_CLASS_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/mentor_dispatcher.go",
+    "line": 32
+   },
+   "mid": 1857,
+   "name": "APPLY_RELATION"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/mentor_dispatcher.go",
+    "line": 32
+   },
+   "mid": 1858,
+   "name": "GET_CLASS_FINDING_LIST"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/mentor_dispatcher.go",
+    "line": 32
+   },
+   "mid": 1859,
+   "name": "ACCEPT_TEACH_APPLY"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/mentor_dispatcher.go",
+    "line": 32
+   },
+   "mid": 1860,
+   "name": "DENY_TEACH_APPLY"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/mentor_dispatcher.go",
+    "line": 32
+   },
+   "mid": 1861,
+   "name": "TERMINATE_RELATION"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/mentor_dispatcher.go",
+    "line": 32
+   },
+   "mid": 1862,
+   "name": "GET_CLASS_MISSION_AWARD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/mentor_dispatcher.go",
+    "line": 32
+   },
+   "mid": 1863,
+   "name": "STUDENT_OVER_FIGHT_RESULT"
+  }
+ ],
+ "name": "mentor",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore",
+  "internal/adapters/postgres/librarystore",
+  "internal/adapters/postgres/mentorstore"
+ ],
+ "tables": {
+  "owned": [
+   "mentor_applications",
+   "mentor_exam_receipts",
+   "mentor_mission_progress",
+   "mentor_relations",
+   "mentor_states"
+  ],
+  "read": [
+   "gxb_content_activation",
+   "gxb_operation_receipts",
+   "mentor_applications",
+   "mentor_exam_receipts",
+   "mentor_mission_progress",
+   "mentor_relations",
+   "mentor_states",
+   "player_directory_profiles",
+   "player_function_unlocks",
+   "player_library_backgrounds",
+   "players"
+  ],
+  "written": [
+   "gxb_operation_receipts",
+   "mentor_applications",
+   "mentor_exam_receipts",
+   "mentor_mission_progress",
+   "mentor_relations",
+   "mentor_states"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay",
+   "socialactivation"
+  ],
+  "scenarios_naming": [
+   "i9_10f_mentor.json"
+  ],
+  "unit": [
+   "calendar_test.go",
+   "card_wire_test.go",
+   "commands_test.go",
+   "friendship_refusal_test.go",
+   "gift_base_info_test.go",
+   "read_test.go"
+  ]
+ }
+}

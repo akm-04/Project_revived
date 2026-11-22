@@ -53,6 +53,20 @@ func (f *freezer) admit(ctx context.Context, locator d.Locator, members []int64,
 	return nil
 }
 
+// AttemptMembersTx returns the roster an attempt froze at START, in seat
+// order, for the mode's RESULT fan-out (D24); the live room may differ.
+func (s Service) AttemptMembersTx(ctx context.Context, q tx.Queryer, attemptID ids.UUID) ([]identity.PlayerID, error) {
+	members, err := s.Store.ReadMembersTx(ctx, q, attemptID)
+	if err != nil {
+		return nil, err
+	}
+	frozen := make([]identity.PlayerID, len(members))
+	for index, member := range members {
+		frozen[index] = identity.PlayerID(member)
+	}
+	return frozen, nil
+}
+
 type MemberSettleRequest struct {
 	Locator           d.Locator
 	AttemptID         ids.UUID

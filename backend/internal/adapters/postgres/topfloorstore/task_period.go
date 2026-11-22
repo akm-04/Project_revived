@@ -31,24 +31,23 @@ func (Store) ReadTaskPeriodTx(requestContext context.Context, query tx.Queryer, 
 	return period, true, period.Validate()
 }
 
+func (Store) TaskModeBanTablesTx(requestContext context.Context, query tx.Queryer, mode, rotation int64) ([]int64, error) {
+	if query == nil || mode < domain.TaskModeSingle || mode > domain.TaskModeCamp || rotation < 1 {
+		return nil, domain.ErrInvalid
+	}
+	var bannedTableIDs []int64
+	err := query.QueryRow(requestContext, `SELECT COALESCE(array_agg(banned_table_id ORDER BY banned_table_id), '{}'::bigint[]) FROM top_floor_task_bans WHERE mode_id=$1 AND rotation_number=$2`, mode, rotation).Scan(&bannedTableIDs)
+	return bannedTableIDs, err
+}
+
 func (Store) CreateTaskPeriodTx(requestContext context.Context, transaction tx.Tx, period domain.TaskModePeriod) error {
-	if transaction == nil || period.Validate() != nil || period.Ladder.Size != domain.RobotTeams || period.Ladder.StateVersion != 1 {
+	if transaction == nil || period.Validate() != nil || period.Ladder.Size != 0 || period.Ladder.StateVersion != 1 {
 		return domain.ErrConflict
 	}
 	ladder, rotation := period.Ladder, period.Rotation
-	err := one(transaction.Exec(requestContext, `INSERT INTO top_floor_task_periods(logical_server_id,period_number,content_revision,mode,submode,starts_at,ends_at,size,settled_day,state_version,created_at,updated_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,1,$10,$10)`,
+	// PRIVATE_POLICY D512: a new period starts with no rank rows; humans enter it.
+	return one(transaction.Exec(requestContext, `INSERT INTO top_floor_task_periods(logical_server_id,period_number,content_revision,mode,submode,starts_at,ends_at,size,settled_day,state_version,created_at,updated_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,1,$10,$10)`,
 		int64(ladder.Server), rotation.Number, ladder.ContentRevision, rotation.Mode, rotation.Submode, rotation.StartsAt, rotation.EndsAt, ladder.Size, ladder.SettledDay, ladder.CreatedAt))
-	if err != nil {
-		return err
-	}
-	result, err := transaction.Exec(requestContext, `INSERT INTO top_floor_task_ranks(logical_server_id,period_number,rank,robot_team) SELECT $1,$2,rank,$3+1-rank FROM generate_series(1,$3::bigint) rank`, int64(ladder.Server), rotation.Number, int64(domain.RobotTeams))
-	if err != nil {
-		return err
-	}
-	if result.RowsAffected() != domain.RobotTeams {
-		return domain.ErrConflict
-	}
-	return nil
 }
 
 func (Store) SaveTaskPeriodTx(requestContext context.Context, transaction tx.Tx, period domain.TaskModePeriod, previousVersion int64) error {
@@ -86,7 +85,7 @@ func (Store) TaskRankOfTx(requestContext context.Context, query tx.Queryer, serv
 }
 
 func (Store) AppendTaskPlayerTx(requestContext context.Context, transaction tx.Tx, server identity.LogicalServerID, period, rank int64, player identity.PlayerID) error {
-	if transaction == nil || !server.Valid() || period < 1 || rank <= domain.RobotTeams || !player.Valid() || int64(player)/domain.RegionStride != int64(server) {
+	if transaction == nil || !server.Valid() || period < 1 || rank < 1 || !player.Valid() || int64(player)/domain.RegionStride != int64(server) {
 		return domain.ErrInvalid
 	}
 	return one(transaction.Exec(requestContext, `INSERT INTO top_floor_task_ranks(logical_server_id,period_number,rank,player_id) VALUES($1,$2,$3,$4)`, int64(server), period, rank, int64(player)))

@@ -17,6 +17,7 @@ import (
 	"gxb.local/backend/v2/internal/application/playerroot"
 	"gxb.local/backend/v2/internal/application/socialrelation"
 	d "gxb.local/backend/v2/internal/domain/arena"
+	"gxb.local/backend/v2/internal/domain/character"
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/grant"
@@ -66,6 +67,7 @@ type Store interface {
 	StandingsTx(context.Context, tx.Queryer, int64) ([]d.Standing, error)
 	ReadMatchTx(context.Context, tx.Queryer, ids.UUID, bool) (d.Match, bool, error)
 	LatestMatchTx(context.Context, tx.Queryer, identity.PlayerID) (d.Match, bool, error)
+	SettledMatchByFingerprintTx(context.Context, tx.Queryer, identity.PlayerID, string) (d.Match, bool, error)
 	OpenMatchesTx(context.Context, tx.Queryer, time.Time, int) ([]ids.UUID, error)
 	InsertMatchTx(context.Context, tx.Tx, d.Match) error
 	SaveMatchTx(context.Context, tx.Tx, d.Match, int64) error
@@ -128,6 +130,10 @@ type Roster interface {
 	OverlayMID1(context.Context, tx.Queryer, identity.ActorContext, bool, time.Time, map[string]any) error
 }
 
+type OwnedHeroReader interface {
+	ListHeroesTx(context.Context, tx.Queryer, identity.PlayerID) ([]character.Hero, error)
+}
+
 type Directory interface {
 	ProfileTx(context.Context, tx.Queryer, identity.PlayerID) (playerdirectory.Profile, bool, error)
 }
@@ -139,6 +145,18 @@ type Guilds interface {
 
 type Servers interface {
 	ServerNameTx(context.Context, tx.Queryer, identity.LogicalServerID) (string, error)
+}
+
+// BattleCounts is the Girls Log producer port (I9_11_GIRLS_LOG_V1 G2): one
+// settled battle raises the player's per-hero battle counts.
+type BattleCounts interface {
+	ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error
+}
+
+// PartnerMissions is the Library producer port (I9_12_CARRY_V1 R7): a settled
+// friend fight or ranked kill advances one partner mission row.
+type PartnerMissions interface {
+	ObservePartnerMissionTx(context.Context, tx.Tx, identity.PlayerID, int64, int64, time.Time) error
 }
 
 type Service struct {
@@ -158,15 +176,19 @@ type Service struct {
 	Combat       Combat
 	Heroes       Roster
 	Pets         Roster
+	OwnedHeroes  OwnedHeroReader
 	Directory    Directory
 	Guilds       Guilds
 	Servers      Servers
 	Receipts     receipt.Store
 	ReceiptRead  receipt.Reader
+	BattleCounts BattleCounts
+
+	PartnerMissions PartnerMissions
 }
 
 func (s Service) ready() bool {
 	return s.Timed.Runner.DB != nil && s.Timed.Binder.Time != nil && s.Fresh != nil && s.Store != nil && s.Content != nil && s.Fence != nil && s.Costs != nil && s.Grants != nil &&
-		s.Values != nil && s.Mail != nil && s.Achievements != nil && s.Facts != nil && s.Combat != nil && s.Heroes != nil && s.Pets != nil && s.Directory != nil && s.Guilds != nil && s.Servers != nil &&
-		s.Receipts != nil && s.ReceiptRead != nil
+		s.Values != nil && s.Mail != nil && s.Achievements != nil && s.Facts != nil && s.Combat != nil && s.Heroes != nil && s.Pets != nil && s.OwnedHeroes != nil && s.Directory != nil && s.Guilds != nil && s.Servers != nil &&
+		s.Receipts != nil && s.ReceiptRead != nil && s.BattleCounts != nil && s.PartnerMissions != nil
 }

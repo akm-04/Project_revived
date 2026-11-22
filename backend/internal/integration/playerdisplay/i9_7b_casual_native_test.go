@@ -4,6 +4,7 @@ package playerdisplay_test
 
 import (
 	"errors"
+	"reflect"
 	"sync"
 	"testing"
 	"time"
@@ -43,6 +44,11 @@ func TestI97BCasualQueueConcurrencyNative(t *testing.T) {
 	if !period.OpensAt.After(time.Now().UTC()) {
 		period = d.CasualPeriodAt(period.OpensAt.Add(7 * 24 * time.Hour))
 	}
+	// A casual week is global to the database, so rooms and queue entries other
+	// tests in this package left for the same week day would be matched and
+	// settled by this test; drop them before the week is played.
+	exec(t, database, `DELETE FROM arena_casual_entries WHERE week_day=$1`, period.WeekDay)
+	exec(t, database, `DELETE FROM arena_tournament_rooms WHERE casual_week_day=$1`, period.WeekDay)
 	clock := &workplaceTime{at: period.OpensAt.Add(time.Minute)}
 	service.Timed.Binder.Time = clock
 	for _, actor := range []identity.ActorContext{first, second} {
@@ -171,6 +177,31 @@ func TestI97BCasualQueueConcurrencyNative(t *testing.T) {
 		duplicateFinish, err := restartedAgain.ResolveTournamentCombat(ctx, reloaded.Identifier, op())
 		if err != nil || duplicateFinish.StateVersion != finished.StateVersion {
 			t.Fatalf("terminal restart changed outcome: %v", err)
+		}
+		genuineRounds := []int{}
+		for round := range d.SelectionTeamCount {
+			if started.RoundResults[round] == d.RoundUnresolved && !started.Attempts[round].IsZero() {
+				genuineRounds = append(genuineRounds, round)
+			}
+		}
+		if finished.GenuineBattles > len(genuineRounds) {
+			t.Fatalf("settled %d genuine battles of %d", finished.GenuineBattles, len(genuineRounds))
+		}
+		expected := map[identity.PlayerID]map[int64]int64{}
+		for _, round := range genuineRounds[:finished.GenuineBattles] {
+			for side, player := range started.Selection.Players {
+				if expected[player] == nil {
+					expected[player] = map[int64]int64{}
+				}
+				for _, hero := range started.Selection.Teams[side][round].Heroes {
+					expected[player][hero]++
+				}
+			}
+		}
+		for side, player := range started.Selection.Players {
+			if got := battleCountRows(t, database, player); !reflect.DeepEqual(got, expected[player]) {
+				t.Fatalf("player %d (side %d) battle counts %v, want one per own hero per genuine round %v", player, side, got, expected[player])
+			}
 		}
 
 		replayView, err := restartedAgain.TournamentReport(ctx, first, reloaded.Identifier, 1, 0, op())

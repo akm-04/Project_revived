@@ -12,6 +12,8 @@ import (
 // AdventureRobot is a robot team offered to Adventure 10004 when no Arena
 // player sits inside the Adventure section.
 type AdventureRobot struct {
+	Name   string
+	Level  int64
 	Heroes []combat.Participant
 }
 
@@ -35,5 +37,5 @@ func (s Service) AdventureRobotTx(c context.Context, q tx.Queryer, ordinal uint6
 		}
 		heroes = append(heroes, combat.Participant{Origin: cd.Template, Kind: cd.HeroActor, Identity: params["partner_id"].(int64), TemplateParams: params})
 	}
-	return AdventureRobot{Heroes: heroes}, true, nil
+	return AdventureRobot{Name: catalog.RobotName(teamID), Level: team.Level, Heroes: heroes}, true, nil
 }

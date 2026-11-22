@@ -38,6 +38,7 @@ const (
 	Cancel      = "COURSE_CANCEL"
 	Proficiency = "COURSE_PROFICIENCY"
 	Continue    = "COURSE_CONTINUE"
+	GiftBox     = "COURSE_GIFT_BOX"
 )
 
 var ErrUnavailable = errors.New("course: unavailable or unresolved admission")
@@ -53,6 +54,12 @@ type Command struct {
 }
 
 func (c Command) Validate() error {
+	if c.Family == GiftBox {
+		if c.PartnerID != 0 || c.ItemID <= 0 {
+			return course.ErrInvalid
+		}
+		return nil
+	}
 	if c.PartnerID <= 0 || c.PartnerID > 9007199254740991 {
 		return course.ErrInvalid
 	}
@@ -130,22 +137,27 @@ type HeroPort interface {
 	LockHeroByPartnerIDTx(context.Context, tx.Tx, identity.PlayerID, int64) (character.Hero, error)
 	ReadRootTx(context.Context, tx.Queryer, identity.PlayerID) (character.HeroRoot, error)
 	ReadHeroByPartnerIDTx(context.Context, tx.Queryer, identity.PlayerID, int64) (character.Hero, error)
+	FindHeroByPartnerIDTx(context.Context, tx.Queryer, identity.PlayerID, int64) (character.Hero, bool, error)
 	ListHeroesTx(context.Context, tx.Queryer, identity.PlayerID) ([]character.Hero, error)
 }
 type OwnerPort interface {
 	ReadHeroTx(context.Context, tx.Queryer, identity.PlayerID, int64) (course.HeroRoot, error)
+	ListHeroesTx(context.Context, tx.Queryer, identity.PlayerID) ([]course.HeroRoot, error)
 	LockHeroTx(context.Context, tx.Tx, identity.PlayerID, int64) (course.HeroRoot, error)
 	SaveHeroTx(context.Context, tx.Tx, course.HeroRoot, int64) error
 	ReadRootTx(context.Context, tx.Queryer, identity.PlayerID) (course.Root, error)
 	LockRootTx(context.Context, tx.Tx, identity.PlayerID) (course.Root, error)
 	SaveRootTx(context.Context, tx.Tx, course.Root, int64) error
+	ClaimGiftBoxDayTx(context.Context, tx.Tx, identity.PlayerID, int64, time.Time) error
 	LockAdmissionTx(context.Context, tx.Tx, identity.PlayerID, string) (Admission, bool, error)
 	SaveAdmissionTx(context.Context, tx.Tx, Admission) error
 }
 type ContentPort interface {
 	HeroKindTx(context.Context, tx.Queryer, string, int64) (character.HeroKind, error)
+	HeroKindsTx(context.Context, tx.Queryer, string, []int64) (map[int64]character.HeroKind, error)
 	HeroSkillCatalogTx(context.Context, tx.Queryer, string, int64) (character.HeroSkillCatalog, error)
 	CourseCatalogTx(context.Context, tx.Queryer, string) (course.Catalog, error)
+	CourseGiftBoxRuleTx(context.Context, tx.Queryer, string, int64) (course.GiftBoxRule, bool, error)
 	CourseInputsActive(context.Context) (string, bool, error)
 	CourseInputsRevisionTx(context.Context, tx.Queryer, string) (bool, error)
 }
@@ -266,6 +278,10 @@ func (s Service) lockPlan(ctx context.Context, t tx.Tx, a identity.ActorContext,
 	}
 	if len(roots) != 1 {
 		return course.ErrUnqualified
+	}
+	if c.Family == GiftBox {
+		_, e = s.Owner.LockRootTx(ctx, t, a.PlayerID)
+		return e
 	}
 	if _, e = s.Heroes.LockRootTx(ctx, t, a.PlayerID); e != nil {
 		return e

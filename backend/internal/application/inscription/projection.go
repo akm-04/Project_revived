@@ -7,6 +7,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	ins "gxb.local/backend/v2/internal/domain/inscription"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"strconv"
@@ -37,6 +38,32 @@ type HeroInputs struct {
 
 // Caller supplies one RR/Serializable query scope with its pinned content/time.
 func (s Service) InscriptionInputsTx(ctx context.Context, q tx.Queryer, scope InputScope) (Inputs, error) {
+	v, _, e := s.inputsTx(ctx, q, scope)
+	return v, e
+}
+
+func (s Service) inputsTx(ctx context.Context, q tx.Queryer, scope InputScope) (Inputs, []character.Hero, error) {
+	v, e := s.rootInputsTx(ctx, q, scope)
+	if e != nil {
+		return v, nil, e
+	}
+	hs, e := s.Heroes.ListHeroesTx(ctx, q, scope.Player)
+	if e != nil {
+		return v, nil, e
+	}
+	alive := map[int64]bool{}
+	for _, h := range hs {
+		if e = h.ValidatePersistent(); e != nil {
+			return v, nil, e
+		}
+		alive[h.PartnerID] = true
+	}
+	v.Alive = alive
+	return v, hs, nil
+}
+
+// rootInputsTx reads the player inscription root and catalog without the roster.
+func (s Service) rootInputsTx(ctx context.Context, q tx.Queryer, scope InputScope) (Inputs, error) {
 	var out Inputs
 	if q == nil || !scope.Player.Valid() || len(scope.ContentRevision) != 64 || scope.ObservedAt.IsZero() {
 		return out, ins.ErrUnqualified
@@ -44,9 +71,6 @@ func (s Service) InscriptionInputsTx(ctx context.Context, q tx.Queryer, scope In
 	r, e := s.Owner.ReadRootTx(ctx, q, scope.Player)
 	if e != nil {
 		return out, e
-	}
-	if scope.ObservedAt.Before(r.UpdatedAt) {
-		return out, ErrStale
 	}
 	c, e := s.Content.InscriptionCatalogTx(ctx, q, scope.ContentRevision)
 	if e != nil {
@@ -59,41 +83,78 @@ func (s Service) InscriptionInputsTx(ctx context.Context, q tx.Queryer, scope In
 	if e != nil {
 		return out, e
 	}
-	if scope.ObservedAt.Before(pop.UpdatedAt) {
-		return out, ErrStale
-	}
-	hs, e := s.Heroes.ListHeroesTx(ctx, q, scope.Player)
+	return Inputs{r, c, pop.StateVersion, map[int64]bool{}, scope.ObservedAt, scope.ContentRevision}, nil
+}
+
+// heroInputsTx reads the roster only for the shared validation path; a single
+// Hero projection reads that Hero alone and checks it in the caller.
+func (s Service) heroInputsTx(ctx context.Context, q tx.Queryer, scope InputScope, partner int64) (Inputs, error) {
+	v, e := s.rootInputsTx(ctx, q, scope)
 	if e != nil {
-		return out, e
+		return v, e
 	}
-	alive := map[int64]bool{}
-	for _, h := range hs {
-		if e = h.ValidatePersistent(); e != nil {
-			return out, e
+	v.Alive = map[int64]bool{partner: true}
+	return v, nil
+}
+
+// CompleteSuitCountTx counts completed inscription suits over the whole roster
+// with one owner roster read instead of one projection per Hero.
+func (s Service) CompleteSuitCountTx(ctx context.Context, q tx.Queryer, scope InputScope) (int64, error) {
+	v, roster, e := s.inputsTx(ctx, q, scope)
+	if e != nil {
+		return 0, e
+	}
+	facts, e := s.Owner.ListHeroesTx(ctx, q, scope.Player)
+	if e != nil {
+		return 0, e
+	}
+	byPartner := make(map[int64]ins.HeroRoot, len(facts))
+	for _, f := range facts {
+		byPartner[f.PartnerID] = f
+	}
+	tableIDs := make([]int64, 0, len(roster))
+	for _, h := range roster {
+		tableIDs = append(tableIDs, h.TableID)
+	}
+	kinds, e := s.Content.HeroKindsTx(ctx, q, scope.ContentRevision, tableIDs)
+	if e != nil {
+		return 0, e
+	}
+	total := int64(0)
+	for _, h := range roster {
+		f, ok := byPartner[h.PartnerID]
+		if !ok {
+			return 0, ins.ErrUnqualified
 		}
-		alive[h.PartnerID] = true
+		if e = f.Facts.Validate(v.Catalog); e != nil {
+			return 0, e
+		}
+		if _, ok = kinds[h.TableID]; !ok {
+			return 0, ins.ErrUnqualified
+		}
+		total += int64(len(f.Facts.Suits(v.Catalog)))
 	}
-	return Inputs{r, c, pop.StateVersion, alive, scope.ObservedAt, scope.ContentRevision}, nil
+	return total, nil
 }
 func (s Service) HeroInscriptionInputsTx(ctx context.Context, q tx.Queryer, scope InputScope, id int64) (HeroInputs, error) {
 	var out HeroInputs
-	v, e := s.InscriptionInputsTx(ctx, q, scope)
+	v, e := s.heroInputsTx(ctx, q, scope, id)
 	if e != nil {
 		return out, e
 	}
 	if !v.Alive[id] {
 		return out, ErrRetired
 	}
-	h, e := s.Heroes.ReadHeroByPartnerIDTx(ctx, q, scope.Player, id)
+	h, found, e := s.Heroes.FindHeroByPartnerIDTx(ctx, q, scope.Player, id)
 	if e != nil {
 		return out, e
+	}
+	if !found {
+		return out, ErrRetired
 	}
 	f, e := s.Owner.ReadHeroTx(ctx, q, scope.Player, id)
 	if e != nil {
 		return out, e
-	}
-	if scope.ObservedAt.Before(f.UpdatedAt) || scope.ObservedAt.Before(h.UpdatedAt) {
-		return out, ErrStale
 	}
 	if e = f.Facts.Validate(v.Catalog); e != nil {
 		return out, e
@@ -164,24 +225,24 @@ func (s Service) Response(ctx context.Context, a identity.ActorContext, r Result
 		if e := s.Fence.FenceActorTx(ctx, sc.Tx, a, bound.DecisionAt()); e != nil {
 			return e
 		}
-		values := map[string]any{}
 		for _, key := range []string{"mana", "crystal", "degree_cer", "graduate_cer", "patent_cer"} {
 			b, ok, e := s.Values.ReadScalarTx(ctx, sc.Tx, a.PlayerID, key)
 			if e != nil {
 				return e
 			}
-			if !ok {
-				if key == "mana" || key == "crystal" {
-					continue
+			amount := int64(0)
+			switch {
+			case !ok && (key == "mana" || key == "crystal"):
+				continue
+			case ok:
+				if e = b.Validate(); e != nil {
+					return e
 				}
-				return ins.ErrUnqualified
+				amount = b.Amount
 			}
-			if e = b.Validate(); e != nil {
-				return e
-			}
-			values[key] = b.Amount
+			// SelfPlayer.lua:201-203 defaults an absent certificate field to 0.
+			changes.Balance(ctx, key, amount)
 		}
-		out["economy_"] = values
 		if r.Command.Family == Insert || r.Command.Family == Remove {
 			f, e := s.Owner.ReadHeroTx(ctx, sc.Tx, a.PlayerID, r.Command.PartnerID)
 			if e != nil {

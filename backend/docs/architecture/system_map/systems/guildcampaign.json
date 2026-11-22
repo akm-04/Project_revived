@@ -1,0 +1,414 @@
+{
+ "background": [
+  {
+   "binary": "gxb-api",
+   "entry": "appguildcampaign.Reconciler",
+   "kind": "reconcile"
+  }
+ ],
+ "content": [],
+ "contracts": [
+  {
+   "count": 16,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/popup_catalog/WAIVERS.json"
+  },
+  {
+   "count": 15,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 9,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_CAMPAIGN_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 4,
+   "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
+  },
+  {
+   "count": 14,
+   "file": "docs/i9/I9_GUILD_CAMPAIGN_V1.json"
+  },
+  {
+   "count": 4,
+   "file": "docs/i9/I9_GUILD_RENTAL_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_ILLUSION_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MARCH_V1.json"
+  },
+  {
+   "count": 7,
+   "file": "docs/i9/I9_MODE_FRAMEWORK_V1.json"
+  },
+  {
+   "count": 14,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_OCCULT_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_PVP_TOURNAMENT_CASUAL_V1.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/i9/I9_SHARED_ROOM_CORE_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_TOP_FLOOR_TASK_MODE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_WORLD_BOSS_V1.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [
+  "observing"
+ ],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/guild_campaign_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {
+   "GUILD_ACTIVITY": {
+    "missions": [
+     117
+    ],
+    "stages": [
+     "I9-9"
+    ]
+   }
+  },
+  "emits": [
+   "GUILD_ACTIVITY"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "guild_campaign_awards": [
+    "guildcampaignstore.LockAwardTx"
+   ],
+   "guild_campaign_chapters": [
+    "guildcampaignstore.LockChapterTx",
+    "guildcampaignstore.LockGuildChaptersTx"
+   ],
+   "guild_campaign_copies": [
+    "guildcampaignstore.LockChapterCopiesTx",
+    "guildcampaignstore.LockCopyTx",
+    "guildcampaignstore.ReadCopyTx"
+   ],
+   "guild_campaign_member_days": [
+    "guildcampaignstore.LockMemberDayTx"
+   ],
+   "guild_memberships": [
+    "guildstore.LockMembershipTx"
+   ],
+   "guilds": [
+    "guildstore.LockGuildTx"
+   ],
+   "player_guild_activity_days": [
+    "guildstore.FoldActivityTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "guild_campaign_awards",
+   "guild_campaign_chapters",
+   "guild_campaign_copies",
+   "guild_campaign_member_days",
+   "guild_memberships",
+   "guilds",
+   "player_guild_activity_days",
+   "players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_campaign_dispatcher.go",
+    "line": 45
+   },
+   "mid": 601,
+   "name": "LOAD_GUILD_CAMPAIGN_LIST"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_campaign_dispatcher.go",
+    "line": 45
+   },
+   "mid": 602,
+   "name": "RESET_CHAPTER"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_campaign_dispatcher.go",
+    "line": 45
+   },
+   "mid": 603,
+   "name": "LOAD_GUILD_MAP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_campaign_dispatcher.go",
+    "line": 45
+   },
+   "mid": 604,
+   "name": "GUILD_START_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_campaign_dispatcher.go",
+    "line": 45
+   },
+   "mid": 605,
+   "name": "LOAD_GUILD_AWARD_LIST"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_campaign_dispatcher.go",
+    "line": 45
+   },
+   "mid": 606,
+   "name": "APPLY_REWARD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_campaign_dispatcher.go",
+    "line": 45
+   },
+   "mid": 607,
+   "name": "GUILD_CHAPTER_DAMAGE_RANK"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_campaign_dispatcher.go",
+    "line": 45
+   },
+   "mid": 608,
+   "name": "GUILF_ALL_SERVER_DAMAGE_RANK"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_campaign_dispatcher.go",
+    "line": 45
+   },
+   "mid": 609,
+   "name": "GET_DATA_TEAM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_campaign_dispatcher.go",
+    "line": 45
+   },
+   "mid": 610,
+   "name": "GUILD_FIGHT_RESULT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_campaign_dispatcher.go",
+    "line": 45
+   },
+   "mid": 611,
+   "name": "OPEN_CHAPTER"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_campaign_dispatcher.go",
+    "line": 45
+   },
+   "mid": 613,
+   "name": "LOAD_GUILD_MAP_DETAIL"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_campaign_dispatcher.go",
+    "line": 45
+   },
+   "mid": 614,
+   "name": "GUILD_FIGHT_PREPARE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_campaign_dispatcher.go",
+    "line": 45
+   },
+   "mid": 615,
+   "name": "GUILD_DISTRIBUTE_RECORD"
+  }
+ ],
+ "name": "guildcampaign",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/characterstore",
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/guildcampaignstore",
+  "internal/adapters/postgres/guildstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore"
+ ],
+ "tables": {
+  "owned": [
+   "guild_campaign_application_days",
+   "guild_campaign_applications",
+   "guild_campaign_awards",
+   "guild_campaign_chapters",
+   "guild_campaign_copies",
+   "guild_campaign_damage",
+   "guild_campaign_distributions",
+   "guild_campaign_log",
+   "guild_campaign_member_days",
+   "guild_campaign_registrations",
+   "guild_campaign_server_kills",
+   "guild_campaign_server_records"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "guild_audit_log",
+   "guild_campaign_application_days",
+   "guild_campaign_applications",
+   "guild_campaign_awards",
+   "guild_campaign_chapters",
+   "guild_campaign_copies",
+   "guild_campaign_damage",
+   "guild_campaign_distributions",
+   "guild_campaign_log",
+   "guild_campaign_member_days",
+   "guild_campaign_registrations",
+   "guild_campaign_server_kills",
+   "guild_campaign_server_records",
+   "guild_memberships",
+   "guilds",
+   "gxb_content_activation",
+   "gxb_operation_receipts",
+   "player_directory_profiles",
+   "player_guild_activity_days",
+   "player_hero_raw_awakening",
+   "player_heroes",
+   "players"
+  ],
+  "written": [
+   "guild_activity_awards",
+   "guild_campaign_application_days",
+   "guild_campaign_applications",
+   "guild_campaign_awards",
+   "guild_campaign_chapters",
+   "guild_campaign_copies",
+   "guild_campaign_damage",
+   "guild_campaign_distributions",
+   "guild_campaign_log",
+   "guild_campaign_member_days",
+   "guild_campaign_registrations",
+   "guild_campaign_server_kills",
+   "guild_campaign_server_records",
+   "guilds",
+   "gxb_operation_receipts",
+   "player_guild_activity_days"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [
+   "i9_9c_guild_campaign.json",
+   "playtest4_fixes.json"
+  ],
+  "unit": [
+   "audit_snapshot_test.go",
+   "awards_registration_test.go",
+   "commands_test.go",
+   "notice_policy_native_test.go",
+   "settings_test.go",
+   "start_choice_conformance_test.go"
+  ]
+ }
+}

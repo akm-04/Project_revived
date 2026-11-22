@@ -8,11 +8,14 @@ import (
 	"context"
 	"time"
 
+	"gxb.local/backend/v2/internal/application/broadcast"
 	ca "gxb.local/backend/v2/internal/application/characterasset"
 	"gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
+	"gxb.local/backend/v2/internal/application/publicstats"
+	"gxb.local/backend/v2/internal/domain/character"
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/guild"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -39,6 +42,8 @@ type Store interface {
 	SwapTx(context.Context, tx.Tx, identity.LogicalServerID, d.Ranked, d.Ranked) error
 	ReadPlayerTx(context.Context, tx.Queryer, identity.PlayerID, bool) (d.Player, bool, error)
 	DefendedTx(context.Context, tx.Queryer, []identity.PlayerID) (map[identity.PlayerID]bool, error)
+	ReadOfferSnapshotTx(context.Context, tx.Queryer, identity.PlayerID, int64, bool) (d.OfferSnapshot, bool, error)
+	SaveOfferSnapshotTx(context.Context, tx.Tx, d.OfferSnapshot) error
 	InsertPlayerTx(context.Context, tx.Tx, d.Player) error
 	SavePlayerTx(context.Context, tx.Tx, d.Player, int64) error
 	ReadFightTx(context.Context, tx.Queryer, ids.UUID, bool) (d.Fight, bool, error)
@@ -71,6 +76,7 @@ type Functions interface {
 }
 
 type Mail interface {
+	LockRecipientsTx(context.Context, tx.Tx, []identity.PlayerID) error
 	DeliverTx(context.Context, tx.Tx, i5.SettlementMailRequest) (mail.Record, bool, error)
 }
 
@@ -94,6 +100,20 @@ type Roster interface {
 	OverlayMID1(context.Context, tx.Queryer, identity.ActorContext, bool, time.Time, map[string]any) error
 }
 
+// HeroPower is the canonical public Hero force the stock enemy board reads from
+// each hero row instead of recomputing it.
+type HeroPower interface {
+	HeroTx(context.Context, ca.CoherentReadScope, character.HeroRef, publicstats.View) (publicstats.Result, error)
+	// RobotForceTx is the same engine over an unowned source hero template, so
+	// mode robots carry the power of the team their fight would resolve.
+	RobotForceTx(context.Context, ca.CoherentReadScope, int64, int64, int64, int64, []int64) (publicstats.Result, error)
+}
+
+// OwnedHeroReader is the CharacterHero-owned roster read used to build the D511 preset defense.
+type OwnedHeroReader interface {
+	ListHeroesTx(context.Context, tx.Queryer, identity.PlayerID) ([]character.Hero, error)
+}
+
 type Directory interface {
 	ServerMaximumLevelTx(context.Context, tx.Queryer, identity.LogicalServerID) (int64, error)
 	ProfileTx(context.Context, tx.Queryer, identity.PlayerID) (playerdirectory.Profile, bool, error)
@@ -110,30 +130,43 @@ type Guilds interface {
 	ReadGuildTx(context.Context, tx.Queryer, guild.ID) (guild.Guild, bool, error)
 }
 
+// BattleCounts is the Girls Log producer port (I9_11_GIRLS_LOG_V1 G2): one
+// settled battle raises the player's per-hero battle counts.
+type BattleCounts interface {
+	ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error
+}
+
 type Service struct {
-	Timed        gen.TimedRunner
-	Fresh        tx.Queryer
-	Store        Store
-	Content      Content
-	Fence        Fence
-	Functions    Functions
-	Privileges   i5.PrivilegeSnapshotProvider
-	Costs        i5.TxMaterialCostDebiter
-	Mail         Mail
-	Achievements Achievements
-	Combat       Combat
-	Heroes       Roster
-	Pets         Roster
-	Directory    Directory
-	Guilds       Guilds
-	Facts        Facts
-	Receipts     receipt.Store
-	ReceiptRead  receipt.Reader
+	Timed         gen.TimedRunner
+	Fresh         tx.Queryer
+	Store         Store
+	Content       Content
+	Fence         Fence
+	Functions     Functions
+	Privileges    i5.PrivilegeSnapshotProvider
+	Costs         i5.TxMaterialCostDebiter
+	FrameStacks   i5.MaterialCostStore
+	Mail          Mail
+	Achievements  Achievements
+	Combat        Combat
+	Heroes        Roster
+	Pets          Roster
+	HeroPower     HeroPower
+	OwnedHeroes   OwnedHeroReader
+	Directory     Directory
+	PlayerDisplay i5.TxEffectivePlayerDisplayReader
+	Guilds        Guilds
+	Facts         Facts
+	Receipts      receipt.Store
+	ReceiptRead   receipt.Reader
+	Broadcast     broadcast.Emitter
+	BattleCounts  BattleCounts
 }
 
 func (s Service) ready() bool {
 	return s.Timed.Runner.DB != nil && s.Timed.Binder.Time != nil && s.Fresh != nil && s.Store != nil && s.Content != nil && s.Fence != nil && s.Functions != nil && s.Privileges != nil && s.Costs != nil &&
-		s.Mail != nil && s.Achievements != nil && s.Combat != nil && s.Heroes != nil && s.Pets != nil && s.Directory != nil && s.Guilds != nil && s.Facts != nil && s.Receipts != nil && s.ReceiptRead != nil
+		s.Mail != nil && s.Achievements != nil && s.Combat != nil && s.Heroes != nil && s.Pets != nil && s.OwnedHeroes != nil && s.Directory != nil && s.PlayerDisplay != nil && s.Guilds != nil && s.Facts != nil && s.Receipts != nil && s.ReceiptRead != nil &&
+		s.Broadcast != nil && s.BattleCounts != nil
 }
 
 type ArenaView struct {
@@ -163,6 +196,14 @@ type RecordInfo struct {
 	Opponent   d.Display
 	AvengeType int64
 	CanAvenge  bool
+}
+
+// RecordReplay is one retained record and its stored report for a chat-card replay.
+type RecordReplay struct {
+	Record   d.Record
+	Self     d.Display
+	Opponent d.Display
+	Report   []byte
 }
 
 type RankList struct {

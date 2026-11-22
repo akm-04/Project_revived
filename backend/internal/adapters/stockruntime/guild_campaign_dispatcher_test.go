@@ -11,6 +11,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 	"gxb.local/backend/v2/internal/protocol/wire"
 )
 
@@ -20,11 +21,19 @@ func TestI9_9CSettleRefusalsAre409AndLateIs30021(t *testing.T) {
 		t.Fatalf("late %+v", late)
 	}
 	refused := campaignSettleFailure(d.ErrRefused)
-	if refused.HTTPStatus != http.StatusConflict || refused.Body["error_code"] != int64(1) {
+	if refused.HTTPStatus != http.StatusConflict || refused.Body["error_code"] != int64(35028) {
 		t.Fatalf("refused %+v", refused)
 	}
-	if unavailable := campaignSettleFailure(app.ErrUnavailable); unavailable.HTTPStatus != http.StatusServiceUnavailable {
+	if unavailable := campaignSettleFailure(app.ErrUnavailable); unavailable.HTTPStatus != http.StatusInternalServerError || unavailable.Body["error_code"] != int64(35028) {
 		t.Fatalf("unavailable %+v", unavailable)
+	}
+}
+
+func TestI9_9CApplyRewardRefusalIs409(t *testing.T) {
+	stub := &campaignStub{applyErr: d.ErrRefused}
+	got := campaignDispatch(t, stub, 606, map[string]any{"chapter_id": int64(7), "award_id": int64(20001091)})
+	if got.HTTPStatus != http.StatusConflict || got.Body["error_code"] != int64(35028) || got.Body["error_msg"] != "" {
+		t.Fatalf("606 refusal %+v", got)
 	}
 }
 
@@ -43,6 +52,7 @@ type campaignStub struct {
 	settled         app.Settled
 	detail          app.DetailView
 	award           app.AwardBody
+	applyErr        error
 	ranks           []app.RankRow
 	server          app.ServerView
 	logs            []app.LogRow
@@ -74,7 +84,7 @@ func (s *campaignStub) AwardRead(context.Context, identity.ActorContext, int64, 
 	return s.award, nil
 }
 func (s *campaignStub) ApplyReward(context.Context, identity.ActorContext, int64, int64, operation.Context) (app.AwardBody, error) {
-	return s.award, nil
+	return s.award, s.applyErr
 }
 func (s *campaignStub) DamageRank(context.Context, identity.ActorContext, int64, operation.Context) ([]app.RankRow, error) {
 	return s.ranks, nil
@@ -122,14 +132,18 @@ func TestI9_9CDispatcherChapterAndCopyJSON(t *testing.T) {
 		t.Fatalf("603 copy_list %+v", copies)
 	}
 
-	waves := map[int64][]app.EnemyRow{1: {{TableID: 80000010, Lev: 60, Star: 5, Color: 6, Health: 0}},
-		2: {{TableID: 80000011, Lev: 60, Star: 5, Color: 6, Health: 0}}, 3: {{TableID: 80000012, Lev: 60, Star: 5, Color: 6, Health: 0}}}
+	waves := map[int64][]app.EnemyRow{1: {{PartnerID: 1, TableID: 91071010, Lev: 60, Star: 5, Color: 6, Health: 0}},
+		2: {{PartnerID: 2, TableID: 91071022, Lev: 60, Star: 5, Color: 6, Health: 0}},
+		3: {{PartnerID: 3, TableID: 91071060, Lev: 60, Star: 5, Color: 6, Health: 0}}}
 	stub.started = app.Started{CopyID: 700028, CurrentIndex: 1, Waves: waves}
 	started := campaignDispatch(t, stub, 604, map[string]any{"copy_id": int64(700028), "chapter_id": int64(7), "campaign_type": int64(7), "formation": "10001001"})
 	// SelectTeamNewWindow.lua:6819 indexes enemy_status by wave number, so it
-	// is an array of waves, not an object.
+	// is an array of waves, not an object. Each row owes the battle monster and
+	// the partner_id Hero.populate keeps as getHeroID (NormalHero.lua:142).
 	enemies := started.Body["enemy_status"].([]any)
-	if len(enemies) != 3 || len(enemies[0].([]any)) != 1 || enemies[2].([]any)[0].(map[string]any)["table_id"] != int64(80000012) {
+	last := enemies[2].([]any)[0].(map[string]any)
+	if len(enemies) != 3 || len(enemies[0].([]any)) != 1 || last["table_id"] != int64(91071060) || last["partner_id"] != int64(3) ||
+		last["lev"] != int64(60) || last["star"] != int64(5) || last["color"] != int64(6) {
 		t.Fatalf("604 enemy_status %+v", enemies)
 	}
 
@@ -143,6 +157,64 @@ func TestI9_9CDispatcherChapterAndCopyJSON(t *testing.T) {
 	pushed := campaignDispatch(t, stub, 613, map[string]any{"copy_id": int64(700028), "chapter_id": int64(7), "player_id": int64(9)})
 	if pushed.HTTPStatus != 200 {
 		t.Fatalf("613 with the forwarded push body %d %+v", pushed.HTTPStatus, pushed.Body)
+	}
+}
+
+func TestI9_9CEnemyStatusCarriesHPForRecordedRows(t *testing.T) {
+	// SelectTeamNewWindow.lua:6795-6799 builds healthStatus from health/hp, and
+	// BattleCreate.lua:1106-1111 applies hp only when health is 1, so a recorded
+	// row owes health 1 with hp numeric; an untouched row keeps health 0 and no hp.
+	waves := map[int64][]app.EnemyRow{1: {
+		{PartnerID: 1, TableID: 91071010, Lev: 60, Star: 5, Color: 6, HP: 77},
+		{PartnerID: 2, TableID: 91071011, Lev: 60, Star: 5, Color: 6, Health: 1},
+		{PartnerID: 3, TableID: 91071012, Lev: 60, Star: 5, Color: 6},
+	}}
+	stub := &campaignStub{started: app.Started{CopyID: 700028, CurrentIndex: 1, Waves: waves},
+		detail: app.DetailView{CopyID: 700028, ChapterID: 7, CurrentIndex: 1, Waves: waves, IsOpen: true}}
+	replies := map[uint16]map[string]any{
+		604: {"copy_id": int64(700028), "chapter_id": int64(7), "campaign_type": int64(7), "formation": "10001001"},
+		613: {"copy_id": int64(700028)},
+	}
+	for mid, params := range replies {
+		got := campaignDispatch(t, stub, mid, params)
+		key := "enemy_status"
+		if mid == 613 {
+			key = "monster_status"
+		}
+		rows := got.Body[key].([]any)[0].([]any)
+		damaged, dead, untouched := rows[0].(map[string]any), rows[1].(map[string]any), rows[2].(map[string]any)
+		if damaged["health"] != int64(1) || damaged["hp"] != int64(77) || damaged["partner_id"] != int64(1) || damaged["table_id"] != int64(91071010) {
+			t.Fatalf("%d damaged row %+v", mid, damaged)
+		}
+		if dead["health"] != int64(1) || dead["hp"] != int64(0) {
+			t.Fatalf("%d dead row %+v", mid, dead)
+		}
+		if untouched["health"] != int64(0) || untouched["hp"] != nil {
+			t.Fatalf("%d untouched row %+v", mid, untouched)
+		}
+	}
+}
+
+func TestI9_9CDetailCarriesFightInfoForTheLiveHolder(t *testing.T) {
+	// MapWindow.lua:1100,1121-1130 and GuildMapDetailWindow.lua:60-82 index
+	// fight_info whenever current_fight_player>0 and last_fight_time>0, so the
+	// reply owes the shape even when the holder's profile row did not read back.
+	stub := &campaignStub{detail: app.DetailView{CopyID: 700028, ChapterID: 7, CurrentIndex: 1, IsOpen: true,
+		CurrentFight: 9, Stage: 1, LastFight: 1700000000, StartFight: 1700000000}}
+	got := campaignDispatch(t, stub, 613, map[string]any{"copy_id": int64(700028)})
+	if got.HTTPStatus != http.StatusOK {
+		t.Fatalf("613 %d %+v", got.HTTPStatus, got.Body)
+	}
+	info, ok := got.Body["fight_info"].(map[string]any)
+	if !ok {
+		t.Fatalf("613 without a holder profile omitted fight_info: %+v", got.Body)
+	}
+	if info["player_name"] != "" || info["lev"] != int64(0) || info["avatar_id"] != int64(0) || info["conquer_lev"] != int64(0) {
+		t.Fatalf("fight_info %+v", info)
+	}
+	stub.detail = app.DetailView{CopyID: 700028, ChapterID: 7, CurrentIndex: 1, IsOpen: true}
+	if free := campaignDispatch(t, stub, 613, map[string]any{"copy_id": int64(700028)}); free.Body["fight_info"] != nil {
+		t.Fatalf("613 without a holder carried fight_info: %+v", free.Body)
 	}
 }
 
@@ -169,12 +241,18 @@ func TestI9_9CDispatcherAwardRankAndLogJSON(t *testing.T) {
 	}
 
 	at := time.Unix(1700000000, 0).UTC()
-	stub.server = app.ServerView{Fast: &app.FastKiller{GuildID: 3, GuildName: "g", Seconds: 12},
-		Boss: &app.Killer{Profile: profile, GuildID: 3, GuildName: "g", At: at}, Ranks: []app.ServerRankRow{{Rank: 1, Damage: 5000, Profile: profile}}}
+	stub.server = app.ServerView{Fast: &app.FastKiller{GuildID: 3, GuildName: "g", GuildIcon: 20010001, Seconds: 12},
+		Boss: &app.Killer{Profile: profile, GuildID: 3, GuildName: "g", At: at},
+		Ranks: []app.ServerRankRow{{Rank: 1, Damage: 5000, Profile: profile, GuildID: 3, GuildName: "g",
+			Partners: []app.Partner{{TableID: 10001001, Color: 6, Star: 5, Level: 41, CurrentSkinID: 2, TwiceAwakeStage: 3}}}}}
 	server := campaignDispatch(t, stub, 608, map[string]any{"copy_id": int64(700028)})
 	serverRow := server.Body["rank_list"].([]any)[0].(map[string]any)
-	if server.Body["fast_boss_killer"].(map[string]any)["cost_time"] != int64(12) || server.Body["boss_killer"].(map[string]any)["time"] != at.Unix() ||
-		len(serverRow["partners"].([]any)) != 0 {
+	fast := server.Body["fast_boss_killer"].(map[string]any)
+	partner := serverRow["partners"].([]any)[0].(map[string]any)
+	if fast["cost_time"] != int64(12) || fast["name"] != "g" || fast["icon"] != int64(20010001) ||
+		server.Body["boss_killer"].(map[string]any)["time"] != at.Unix() || server.Body["boss_killer"].(map[string]any)["guild_name"] != "g" ||
+		serverRow["guild_name"] != "g" || partner["table_id"] != int64(10001001) || partner["color"] != int64(6) ||
+		partner["star"] != int64(5) || partner["lev"] != int64(41) || partner["current_skin_id"] != int64(2) || partner["twice_awake_stage"] != int64(3) {
 		t.Fatalf("608 %+v", server.Body)
 	}
 
@@ -195,18 +273,65 @@ func TestI9_9CDispatcherAwardRankAndLogJSON(t *testing.T) {
 func TestI9_9CDispatcherSettleBodyAndAlternativeNumbers(t *testing.T) {
 	stub := &campaignStub{settled: app.Settled{Body: map[string]any{"rank_award": map[string]any{"crystal": int64(100), "guild_coin": int64(100)},
 		"normal_drop": []any{}, "guild_drop": []any{}, "coin_award": int64(123), "exps": []any{}}}}
+	// BattleCreate.lua:2985-3045 sends hero_id = enemy:getHeroID(), which is the
+	// 604 row's partner_id, with a fractional hp and the wave index.
 	params := map[string]any{"total_damage": 12.9, "star": int64(0), "chapter_id": int64(7), "copy_id": int64(700028),
 		"current_index": int64(1), "formation": "10001001", "rent_formation": "10001002", "rent_player_id": int64(77),
-		"enemy_status": []any{map[string]any{"hero_id": int64(80000010), "hp": 5.9, "is_reborn": int64(1), "index": int64(1)}}}
+		"enemy_status": []any{map[string]any{"hero_id": int64(2), "hp": 5.9, "is_reborn": int64(1), "index": int64(1)}}}
 	got := campaignDispatch(t, stub, 610, params)
 	if got.HTTPStatus != http.StatusOK || got.Body["rank_award"].(map[string]any)["crystal"] != int64(100) {
 		t.Fatalf("610 %+v", got)
 	}
-	if !stub.settledRecorded || stub.settledRequest.TotalDamage != 12 || len(stub.settledRequest.Enemies) != 1 || stub.settledRequest.Enemies[0].HP != 5 {
+	if !stub.settledRecorded || stub.settledRequest.TotalDamage != 12 || len(stub.settledRequest.Enemies) != 1 ||
+		stub.settledRequest.Enemies[0].HeroID != 2 || stub.settledRequest.Enemies[0].HP != 5 || stub.settledRequest.Enemies[0].Index != 1 {
 		t.Fatalf("610 request %+v", stub.settledRequest)
 	}
 }
 
 func (campaignStub) BindContent(_ context.Context, op operation.Context) (operation.Context, error) {
 	return op, nil
+}
+
+func awardParams(mid uint16) map[string]any {
+	if mid == 606 {
+		return map[string]any{"chapter_id": int64(7), "award_id": int64(20001091)}
+	}
+	return map[string]any{"chapter_id": int64(7)}
+}
+
+func TestI9_11T34AwardWireSelfApplyItemIDOnlyWhenApplied(t *testing.T) {
+	// ApplyQueueWindow.lua:127-160 and ApplyRewardWindow.lua:119-150 test the
+	// field's truthiness, and Lua treats 0 as true, so an unapplied member owes
+	// no item_id key; rank stays required.
+	unapplied := &campaignStub{award: app.AwardBody{NextApplyTime: 60, SelfRank: 2}}
+	for _, mid := range []uint16{605, 606} {
+		got := campaignDispatch(t, unapplied, mid, awardParams(mid))
+		if got.HTTPStatus != http.StatusOK {
+			t.Fatalf("%d unapplied %+v", mid, got)
+		}
+		info, ok := got.Body["self_apply_info"].(map[string]any)
+		if !ok {
+			t.Fatalf("%d self_apply_info=%+v", mid, got.Body)
+		}
+		if _, exists := info["item_id"]; exists {
+			t.Fatalf("%d unapplied carried item_id: %+v", mid, info)
+		}
+		if info["rank"] != int64(2) {
+			t.Fatalf("%d unapplied rank=%+v", mid, info)
+		}
+		replyconformance.Check(t, mid, got.Body)
+	}
+
+	applied := &campaignStub{award: app.AwardBody{NextApplyTime: 60, SelfItemID: 20001091, SelfRank: 1, ApplyTimes: 1}}
+	for _, mid := range []uint16{605, 606} {
+		got := campaignDispatch(t, applied, mid, awardParams(mid))
+		if got.HTTPStatus != http.StatusOK {
+			t.Fatalf("%d applied %+v", mid, got)
+		}
+		info := got.Body["self_apply_info"].(map[string]any)
+		if info["item_id"] != int64(20001091) {
+			t.Fatalf("%d applied item_id=%+v", mid, info)
+		}
+		replyconformance.Check(t, mid, got.Body)
+	}
 }

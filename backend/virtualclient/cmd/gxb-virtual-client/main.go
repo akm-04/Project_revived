@@ -62,9 +62,21 @@ func main() {
 // scenario is one I8.5-5 scenario (D55): a provisioned player (D56), steps after MainScene and what the run must show.
 type scenario struct {
 	FriendFixture bool `json:"friend_fixture"`
+	// DormSocialFixture opens Dorm function 71 through the production stage owner and births one peer whose praise, comments and reactions the scenario reads.
+	DormSocialFixture bool `json:"dorm_social_fixture"`
+	// ProfileCommentFixture declares one peer-written comment on the driven player's profile so the stock card space tab renders a comment row.
+	ProfileCommentFixture bool `json:"profile_comment_fixture"`
+	// TournamentRoomFixture seeds a stage-7 tournament room whose sides picked no pet so the stock selection window reads the room reply.
+	TournamentRoomFixture bool `json:"tournament_room_fixture"`
+	// WorldBossSweepFixture seeds a ranked board whose player directly ahead has no directory profile.
+	WorldBossSweepFixture bool `json:"worldboss_sweep_fixture"`
 	// GuildRentalFixture births the peer that joins the guild and lends one girl.
-	GuildRentalFixture bool   `json:"guild_rental_fixture"`
-	Name               string `json:"name"`
+	GuildRentalFixture bool `json:"guild_rental_fixture"`
+	// SocialInviteFixture births the invited peer and binds it to the driven player's code.
+	SocialInviteFixture bool `json:"social_invite_fixture"`
+	// MentorFixture seeds the three students and the active student relation the Mentor MIDs need.
+	MentorFixture bool   `json:"mentor_fixture"`
+	Name          string `json:"name"`
 	// Level and Heroes progress the player stock MID1 births; the stock client then summons each hero through MID59.
 	Level  int64        `json:"level"`
 	VIP    int64        `json:"vip"`
@@ -108,7 +120,9 @@ type scenario struct {
 	ExpectClientLogAbsent []string `json:"expect_client_log_absent"`
 }
 
-const closeFunctionNotice = "lua:local m=xyd.WindowManager.get() if m:getWindow('function_show') then m:closeWindow('function_show') end"
+// closeFunctionNotice also closes the daily sign_in and alert_award popups a provisioned account meets in the lobby
+// since the opening flag survives relogin (T34 S31); before that the replayed opening hid them.
+const closeFunctionNotice = "lua:local m=xyd.WindowManager.get() for _,n in ipairs({'function_show','alert_award','sign_in'}) do if m:getWindow(n) then m:closeWindow(n) end end"
 
 type run struct {
 	source, assets, updateTree, device, origin, databaseURL, reportPath string
@@ -169,7 +183,7 @@ func (run run) play() ([]string, error) {
 		Report   client.Report      `json:"report"`
 		Failures []string           `json:"failures"`
 	}{Account: session.AccountID, Scenario: run.scenario.Name, Failures: []string{}}
-	progressed := run.scenario.FriendFixture || run.scenario.AwakeningFixture || run.scenario.PetAwakeningFixture || run.scenario.SignInBonusFixture || run.scenario.ChallengeFixture || run.scenario.WorldBossFixture || run.scenario.OccultTicketFixture || run.scenario.AdventureEventFixture || run.scenario.Level > 0 || len(run.scenario.Heroes) > 0 || run.scenario.VIP > 0 || len(run.scenario.Grants) > 0
+	progressed := run.scenario.FriendFixture || run.scenario.DormSocialFixture || run.scenario.ProfileCommentFixture || run.scenario.TournamentRoomFixture || run.scenario.WorldBossSweepFixture || run.scenario.MentorFixture || run.scenario.AwakeningFixture || run.scenario.PetAwakeningFixture || run.scenario.SignInBonusFixture || run.scenario.ChallengeFixture || run.scenario.WorldBossFixture || run.scenario.OccultTicketFixture || run.scenario.AdventureEventFixture || run.scenario.Level > 0 || len(run.scenario.Heroes) > 0 || run.scenario.VIP > 0 || len(run.scenario.Grants) > 0
 	if progressed {
 		// A returning player: the first boot lets stock MID1 birth the player, the harness progresses it, the second boot loads it.
 		birth, err := run.boot(session)
@@ -237,7 +251,7 @@ func (run run) play() ([]string, error) {
 			return nil, err
 		}
 	}
-	if run.scenario.FriendFixture || run.scenario.GuildRentalFixture {
+	if run.scenario.FriendFixture || run.scenario.DormSocialFixture || run.scenario.ProfileCommentFixture || run.scenario.TournamentRoomFixture || run.scenario.WorldBossSweepFixture || run.scenario.MentorFixture || run.scenario.GuildRentalFixture || run.scenario.SocialInviteFixture {
 		peer, err := run.bornPeer(ctx, secret)
 		if err != nil {
 			return nil, fmt.Errorf("peer: %w", err)
@@ -247,6 +261,36 @@ func (run run) play() ([]string, error) {
 			if err := provision.FriendFixture(ctx, run.databaseURL, session.AccountID, peer); err != nil {
 				return nil, err
 			}
+		}
+	}
+	if run.scenario.DormSocialFixture {
+		if err := provision.DormSocialFixture(ctx, run.databaseURL, session.AccountID, run.peerAccount); err != nil {
+			return nil, err
+		}
+	}
+	if run.scenario.ProfileCommentFixture {
+		if err := provision.ProfileCommentFixture(ctx, run.databaseURL, session.AccountID, run.peerAccount); err != nil {
+			return nil, err
+		}
+	}
+	if run.scenario.TournamentRoomFixture {
+		if err := provision.TournamentRoomNoPetFixture(ctx, run.databaseURL, session.AccountID, run.peerAccount, "55555555-5555-5555-5555-555555555555"); err != nil {
+			return nil, err
+		}
+	}
+	if run.scenario.WorldBossSweepFixture {
+		if err := provision.WorldBossSweepFixture(ctx, run.databaseURL, session.AccountID, run.peerAccount); err != nil {
+			return nil, err
+		}
+	}
+	if run.scenario.SocialInviteFixture {
+		if err := provision.SocialInviteBindFixture(ctx, run.databaseURL, session.AccountID, run.peerAccount); err != nil {
+			return nil, err
+		}
+	}
+	if run.scenario.MentorFixture {
+		if err := provision.MentorFixture(ctx, run.databaseURL, session.AccountID, run.peerAccount); err != nil {
+			return nil, err
 		}
 	}
 	groups, resumeFiles := [][]string{{}}, []string{""}
@@ -403,16 +447,28 @@ func (run run) step(virtual *client.Client, step string) error {
 		switch argument {
 		case "top_floor_task_rank":
 			return provision.TopFloorTaskRankFixture(context.Background(), run.databaseURL, run.account)
+		case "top_floor_no_defense":
+			return provision.TopFloorNoDefenseFixture(context.Background(), run.databaseURL, run.account)
+		case "top_floor_task_opponent":
+			return provision.TopFloorTaskOpponentFixture(context.Background(), run.databaseURL, run.account)
 		case "one_on_one_cooling":
 			return provision.OneOnOneCoolingFixture(context.Background(), run.databaseURL, run.account)
 		case "strong_team":
 			return provision.StrongTeamFixture(context.Background(), run.databaseURL, run.account)
 		case "guild_rental_lender":
 			return provision.GuildRentalLenderFixture(context.Background(), run.databaseURL, run.account, run.peerAccount)
+		case "guild_rental_lender_change":
+			return provision.GuildRentalLenderChangeFixture(context.Background(), run.databaseURL, run.peerAccount)
 		case "guild_campaign_activity":
 			return provision.GuildCampaignFixture(context.Background(), run.databaseURL, run.account)
 		case "guild_campaign_last_wave":
 			return provision.GuildCampaignLastWaveFixture(context.Background(), run.databaseURL, run.account)
+		case "guild_join_seed":
+			return provision.GuildJoinSeedFixture(context.Background(), run.databaseURL, run.account)
+		case "mentor_terminate_ready":
+			return provision.MentorTerminateReadyFixture(context.Background(), run.databaseURL, run.account)
+		case "hero_skill_stale":
+			return provision.HeroSkillStaleFixture(context.Background(), run.databaseURL, run.account)
 		}
 		return fmt.Errorf("unknown fixture %q", argument)
 	case "wait":
@@ -480,6 +536,20 @@ func answered(report client.Report, mid int, errorCode int) bool {
 	return false
 }
 
+// refused reports a completed non-200 refusal carrying the stock error_code.
+func refused(report client.Report, mid int, errorCode int) bool {
+	for _, exchange := range report.Requests {
+		if int(exchange.MID) == mid && exchange.Status != 200 && int(exchange.ErrorCode) == errorCode {
+			return true
+		}
+	}
+	return false
+}
+
+// inactiveRefusalCode is the D5 generic refusal code the shared inactive
+// dispatcher answers (PRIVATE_POLICY 35028).
+const inactiveRefusalCode = 35028
+
 func inactiveFailures(ctx context.Context, databaseURL, accountUID string, report client.Report, mids []int) ([]string, error) {
 	failures := []string{}
 	if len(mids) == 0 {
@@ -493,8 +563,8 @@ func inactiveFailures(ctx context.Context, databaseURL, accountUID string, repor
 	}
 	defer connection.Close(ctx)
 	for _, mid := range mids {
-		if !answered(report, mid, 1) {
-			failures = append(failures, fmt.Sprintf("MID%d not sent or not answered 200 with error_code 1", mid))
+		if !refused(report, mid, inactiveRefusalCode) {
+			failures = append(failures, fmt.Sprintf("MID%d not sent or not answered non-200 with error_code %d", mid, inactiveRefusalCode))
 		}
 		var journalled int
 		if err := connection.QueryRow(ctx, `SELECT count(*) FROM request_journal WHERE account_uid=$1 AND mid=$2 AND outcome='INACTIVE_MODE'`, accountUID, mid).Scan(&journalled); err != nil {

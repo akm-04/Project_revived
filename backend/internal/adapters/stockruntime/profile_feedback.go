@@ -53,24 +53,50 @@ func feedbackInteger(v any, min, max int64) (int64, error) {
 	}
 	return n, nil
 }
+
+// ErrInvalid means a broken transaction token or root, a defect that falls through to 500.
+var profileFeedbackFailureRows = []failureRow{
+	{match: app.ErrRequest, class: failureMalformed, detail: "profile_feedback_request_failed"},
+	{match: app.ErrConflict, class: failureRefusal, code: staleConflictCode},
+	{match: app.ErrProvider, class: failureUnavailable},
+}
+
 func (d ProfileFeedbackDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequest) httpedge.Response {
 	fail := func(status int) httpedge.Response {
-		return httpedge.Response{HTTPStatus: status, Body: map[string]any{"error_code": int64(1), "error": "profile_feedback_request_failed"}}
+		switch status {
+		case http.StatusBadRequest:
+			return failureReply(malformed("profile_feedback_request_failed"))
+		case http.StatusConflict:
+			return failureReply(refusal(unprovenRefusalCode))
+		case http.StatusServiceUnavailable:
+			return failureReply(defect(nil))
+		case http.StatusUnauthorized:
+			return failureReply(sessionFailure())
+		default:
+			return failureReply(refusal(unprovenRefusalCode))
+		}
 	}
-	if d.Authority == nil || d.Service == nil || r.Envelope.Claims.Token == "" {
+	if d.Authority == nil {
+		return failureReply(defect(nil))
+	}
+	if d.Service == nil {
+		return failureReply(defect(nil))
+	}
+	if r.Envelope.Claims.Token == "" {
 		return fail(http.StatusUnauthorized)
 	}
 	a, e := d.Authority.ResolveGameplayBearer(c, r.Envelope.Claims.Token, r.Envelope.ReceivedAt)
-	if e != nil || r.Envelope.Claims.Region != int64(a.LogicalServerID) {
+	if e != nil {
+		return authFailure(e)
+	}
+	if r.Envelope.Claims.Region != int64(a.LogicalServerID) {
 		return fail(http.StatusForbidden)
 	}
 	params := r.Envelope.Params
 	switch r.Envelope.MID {
 	case 1830:
-		for k := range params {
-			if k != "mid" && k != "token" && k != "region" && k != "to_player_id" {
-				return fail(http.StatusBadRequest)
-			}
+		if !onlyStockGameplayParams(params, "to_player_id") {
+			return fail(http.StatusBadRequest)
 		}
 		target, e := feedbackInteger(params["to_player_id"], 1, 9007199254740991)
 		if e != nil {
@@ -82,17 +108,15 @@ func (d ProfileFeedbackDispatcher) Dispatch(c context.Context, r httpedge.Dispat
 		}
 		out, e := d.Service.Execute(c, a, q, r.Envelope.Operation)
 		if e != nil {
-			return fail(http.StatusServiceUnavailable)
+			return failureFromRows(profileFeedbackFailureRows, e)
 		}
 		if out.Current.Target != q.Target || out.Current.Actor != a.PlayerID || !out.Current.HasPraised || out.Current.Count < 1 {
-			return fail(http.StatusServiceUnavailable)
+			return failureReply(defect(nil))
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: out.Wire()}
 	case 1842:
-		for k := range params {
-			if k != "mid" && k != "token" && k != "region" && k != "start" && k != "offset" && k != "total_num" {
-				return fail(http.StatusBadRequest)
-			}
+		if !onlyStockGameplayParams(params, "start", "offset", "total_num") {
+			return fail(http.StatusBadRequest)
 		}
 		start, e := feedbackInteger(params["start"], 0, 9007199254740991)
 		if e != nil {
@@ -112,10 +136,10 @@ func (d ProfileFeedbackDispatcher) Dispatch(c context.Context, r httpedge.Dispat
 		}
 		out, e := d.Service.List(c, a, q, r.Envelope.Operation)
 		if e != nil {
-			return fail(http.StatusServiceUnavailable)
+			return failureFromRows(profileFeedbackFailureRows, e)
 		}
 		if out.Current.Target != a.PlayerID || out.Rows == nil || out.Current.Count < 0 {
-			return fail(http.StatusServiceUnavailable)
+			return failureReply(defect(nil))
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: out.Wire()}
 	default:

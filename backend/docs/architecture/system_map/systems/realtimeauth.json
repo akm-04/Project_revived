@@ -1,0 +1,220 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [
+  {
+   "count": 1,
+   "file": "docs/architecture/CUMULATIVE_CONTENT_GENERATION_LOCK.json"
+  },
+  {
+   "count": 6,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10A_EVENT_CENTRE_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_10F_MENTOR_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_HERO_RECOMMEND_SCORES_V1.md"
+  },
+  {
+   "count": 4,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_BROADCAST_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_CAMPAIGN_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_ILLUSION_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_ILLUSION_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MARCH_IMPLEMENTATION.md"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_MISSIONS_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V3.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_OCCULT_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/RULING_I9-12_HAVE_FUN_LENDER.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/arena_result_dispatcher.go",
+  "internal/adapters/stockruntime/function_click.go",
+  "internal/adapters/stockruntime/guild_war_dispatcher.go",
+  "internal/adapters/stockruntime/http_dispatchers.go",
+  "internal/adapters/stockruntime/operation_log.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [],
+  "row_lock_methods": {},
+  "row_locks": [],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/function_click.go",
+    "line": 23
+   },
+   "mid": 30,
+   "name": "FUNCTION_CLICK"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/operation_log.go",
+    "line": 19
+   },
+   "mid": 121,
+   "name": "SEND_OPERATION_LOG"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/http_dispatchers.go",
+    "line": 38
+   },
+   "mid": 192,
+   "name": "LOAD_CHAT_ROOM_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/arena_result_dispatcher.go",
+    "line": 26
+   },
+   "mid": 279,
+   "name": "ARENA_FIGHT_RESULT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_war_dispatcher.go",
+    "line": 18
+   },
+   "mid": 1152,
+   "name": "GUILD_WAR_RED_POINT"
+  }
+ ],
+ "name": "realtimeauth",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/guildprojection",
+  "internal/adapters/postgres/i4store"
+ ],
+ "tables": {
+  "owned": [],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "gameplay_context_credentials",
+   "gameplay_contexts",
+   "guild_membership_events",
+   "guild_memberships",
+   "guilds"
+  ],
+  "written": []
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay",
+   "socialactivation"
+  ],
+  "scenarios_naming": [
+   "i9_9d_guild_inactive.json"
+  ],
+  "unit": [
+   "service_test.go"
+  ]
+ }
+}

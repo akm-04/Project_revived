@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "server": 10,
+  "generation": 1,
+  "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "observed_at": "2026-11-16T01:02:03.123456Z",
+  "digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "overview": {
+    "sub_rank_list": {
+      "11": [
+        100001,
+        100002
+      ]
+    },
+    "total_rank_list": [
+      {
+        "force": 42,
+        "player": 100001
+      }
+    ]
+  },
+  "details": {
+    "50001001": {
+      "recommend_score": 42,
+      "top_player_info": {
+        "player_id": 100001,
+        "player_name": "Golden",
+        "lev": 42,
+        "conquer_lev": 0,
+        "conquer_loop_id": 0,
+        "avatar_id": 0,
+        "avatar_frame_id": 0,
+        "region": 0,
+        "guild_id": 0
+      },
+      "top_hero_info": {
+        "hero_id": 50001001
+      },
+      "recommend_formations": {
+        "1": {
+          "slots": [
+            1,
+            2
+          ]
+        }
+      },
+      "force_rows": [
+        {
+          "player": {
+            "player_id": 100001,
+            "player_name": "Golden",
+            "lev": 42,
+            "conquer_lev": 0,
+            "conquer_loop_id": 0,
+            "avatar_id": 0,
+            "avatar_frame_id": 0,
+            "region": 0,
+            "guild_id": 0
+          },
+          "force": 42
+        }
+      ]
+    }
+  }
+}

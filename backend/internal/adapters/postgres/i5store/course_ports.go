@@ -17,7 +17,7 @@ func (Store) ReadCoursePlayerStateTx(ctx context.Context, q tx.Queryer, p identi
 	if e := q.QueryRow(ctx, `SELECT level,state_version,updated_at FROM player_progression WHERE player_id=$1`, int64(p)).Scan(&out.Level, &out.LevelVersion, &out.UpdatedAt); e != nil {
 		return out, e
 	}
-	if out.Level < 1 || out.LevelVersion < 1 || at.Before(out.UpdatedAt) {
+	if out.Level < 1 || out.LevelVersion < 1 {
 		return out, errors.New("i5: unqualified Course progression")
 	}
 	var id, ver *int64

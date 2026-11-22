@@ -12,6 +12,7 @@ import (
 	gi "gxb.local/backend/v2/internal/domain/guildinvite"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"math"
 	"time"
@@ -84,11 +85,11 @@ func (Store) InsertIssueTx(c context.Context, t tx.Tx, s gi.Issue, d gi.Delivery
 	if e != nil || d.Validate() != nil || d.State != gi.Pending || d.SourceID != s.Operation.ID || d.Recipient != s.Tuple.Recipient || !d.LastEnqueueAt.Equal(s.DecisionAt) {
 		return gi.ErrEvidence
 	}
-	raw, e := json.Marshal(s)
+	raw, version, e := payload.Encode(s)
 	if e != nil {
 		return e
 	}
-	tag, e := t.Exec(c, `INSERT INTO guild_invite_projection_sources(source_id,source_serial,guild_id,logical_server_id,recipient_player_id,inviter_player_id,invite_generation,source_payload,source_fingerprint,core_receipt_id,decision_at,expires_at,last_join_event_id) VALUES($1::uuid,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,$10::uuid,$11,$12,$13)`, s.Operation.ID.String(), s.Serial, int64(s.Tuple.GuildID), int32(s.Server), int64(s.Tuple.Recipient), int64(s.Inviter), s.Tuple.Generation, string(raw), hex.EncodeToString(fp[:]), s.Core.ID.String(), s.DecisionAt, s.ExpiresAt, s.LastJoinEventID)
+	tag, e := t.Exec(c, `INSERT INTO guild_invite_projection_sources(source_id,source_serial,guild_id,logical_server_id,recipient_player_id,inviter_player_id,invite_generation,source_payload,source_fingerprint,core_receipt_id,decision_at,expires_at,last_join_event_id,payload_version) VALUES($1::uuid,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,$10::uuid,$11,$12,$13,$14)`, s.Operation.ID.String(), s.Serial, int64(s.Tuple.GuildID), int32(s.Server), int64(s.Tuple.Recipient), int64(s.Inviter), s.Tuple.Generation, string(raw), hex.EncodeToString(fp[:]), s.Core.ID.String(), s.DecisionAt, s.ExpiresAt, s.LastJoinEventID, version)
 	if e = one(tag, e); e != nil {
 		return e
 	}
@@ -102,15 +103,16 @@ func (Store) ReadIssueTx(c context.Context, q tx.Queryer, id ids.UUID) (gi.Issue
 	var raw, fp, rr string
 	var serial, gid, pid, inviter, gen, join int64
 	var sid int32
+	var version int16
 	var at, expires time.Time
-	e := q.QueryRow(c, `SELECT source_payload::text,source_fingerprint,source_serial,guild_id,logical_server_id,recipient_player_id,inviter_player_id,invite_generation,core_receipt_id::text,decision_at,expires_at,last_join_event_id FROM guild_invite_projection_sources WHERE source_id=$1::uuid`, id.String()).Scan(&raw, &fp, &serial, &gid, &sid, &pid, &inviter, &gen, &rr, &at, &expires, &join)
+	e := q.QueryRow(c, `SELECT source_payload::text,source_fingerprint,source_serial,guild_id,logical_server_id,recipient_player_id,inviter_player_id,invite_generation,core_receipt_id::text,decision_at,expires_at,last_join_event_id,payload_version FROM guild_invite_projection_sources WHERE source_id=$1::uuid`, id.String()).Scan(&raw, &fp, &serial, &gid, &sid, &pid, &inviter, &gen, &rr, &at, &expires, &join, &version)
 	if errors.Is(e, kernelstore.ErrNoRows) {
 		return gi.Issue{}, false, nil
 	}
 	if e != nil {
 		return gi.Issue{}, false, e
 	}
-	s, e := gi.DecodeIssue([]byte(raw), fp)
+	s, e := gi.DecodeIssue("guild_invite_projection_sources", version, []byte(raw), fp)
 	if e != nil || s.Operation.ID != id || s.Serial != serial || int64(s.Tuple.GuildID) != gid || int32(s.Server) != sid || int64(s.Tuple.Recipient) != pid || int64(s.Inviter) != inviter || s.Tuple.Generation != gen || s.Core.ID.String() != rr || s.DecisionAt.UnixMicro() != at.UnixMicro() || s.ExpiresAt.UnixMicro() != expires.UnixMicro() || s.LastJoinEventID != join {
 		return gi.Issue{}, false, gi.ErrEvidence
 	}
@@ -139,11 +141,11 @@ func (Store) InsertMarkerTx(c context.Context, t tx.Tx, m gi.Marker, p gi.Marker
 	if e != nil || p.Validate() != nil || p.MarkerID != m.Operation.ID || p.MaxIssueSerial != m.MaxIssueSerial || p.CursorSerial != 0 || p.Complete || !p.LastEnqueueAt.Equal(m.DecisionAt) {
 		return gi.ErrEvidence
 	}
-	raw, e := json.Marshal(m)
+	raw, version, e := payload.Encode(m)
 	if e != nil {
 		return e
 	}
-	tag, e := t.Exec(c, `INSERT INTO guild_invite_projection_markers(marker_id,marker_kind,guild_id,subject_player_id,event_id,max_issue_serial,source_payload,source_fingerprint,core_receipt_id,decision_at,state,cursor_serial,last_enqueue_at,next_wakeup_at) VALUES($1::uuid,$2,$3,$4,$5,$6,$7::jsonb,$8,$9::uuid,$10,'PENDING',0,$11,$12)`, m.Operation.ID.String(), string(m.Kind), int64(m.GuildID), int64(m.Subject), m.EventID, m.MaxIssueSerial, string(raw), hex.EncodeToString(fp[:]), m.Core.ID.String(), m.DecisionAt, p.LastEnqueueAt, p.NextWakeupAt)
+	tag, e := t.Exec(c, `INSERT INTO guild_invite_projection_markers(marker_id,marker_kind,guild_id,subject_player_id,event_id,max_issue_serial,source_payload,source_fingerprint,core_receipt_id,decision_at,state,cursor_serial,last_enqueue_at,next_wakeup_at,payload_version) VALUES($1::uuid,$2,$3,$4,$5,$6,$7::jsonb,$8,$9::uuid,$10,'PENDING',0,$11,$12,$13)`, m.Operation.ID.String(), string(m.Kind), int64(m.GuildID), int64(m.Subject), m.EventID, m.MaxIssueSerial, string(raw), hex.EncodeToString(fp[:]), m.Core.ID.String(), m.DecisionAt, p.LastEnqueueAt, p.NextWakeupAt, version)
 	return one(tag, e)
 }
 func (Store) ReadMarkerTx(c context.Context, q tx.Queryer, id ids.UUID) (gi.Marker, gi.MarkerProgress, bool, error) {
@@ -151,22 +153,27 @@ func (Store) ReadMarkerTx(c context.Context, q tx.Queryer, id ids.UUID) (gi.Mark
 	var raw, fp, kind, rr, state string
 	var cursorRaw, cursorReceipt *string
 	var gid, pid, event int64
+	var version int16
 	var at time.Time
 	if q == nil || id.IsZero() {
 		return gi.Marker{}, p, false, gi.ErrEvidence
 	}
-	e := q.QueryRow(c, `SELECT source_payload::text,source_fingerprint,marker_kind,guild_id,subject_player_id,event_id,max_issue_serial,core_receipt_id::text,decision_at,state,cursor_serial,last_enqueue_at,next_wakeup_at,completed_at,cursor_proof::text,cursor_receipt_id::text FROM guild_invite_projection_markers WHERE marker_id=$1::uuid`, id.String()).Scan(&raw, &fp, &kind, &gid, &pid, &event, &p.MaxIssueSerial, &rr, &at, &state, &p.CursorSerial, &p.LastEnqueueAt, &p.NextWakeupAt, &p.CompletedAt, &cursorRaw, &cursorReceipt)
+	e := q.QueryRow(c, `SELECT source_payload::text,source_fingerprint,marker_kind,guild_id,subject_player_id,event_id,max_issue_serial,core_receipt_id::text,decision_at,state,cursor_serial,last_enqueue_at,next_wakeup_at,completed_at,cursor_proof::text,cursor_receipt_id::text,payload_version FROM guild_invite_projection_markers WHERE marker_id=$1::uuid`, id.String()).Scan(&raw, &fp, &kind, &gid, &pid, &event, &p.MaxIssueSerial, &rr, &at, &state, &p.CursorSerial, &p.LastEnqueueAt, &p.NextWakeupAt, &p.CompletedAt, &cursorRaw, &cursorReceipt, &version)
 	if errors.Is(e, kernelstore.ErrNoRows) {
 		return gi.Marker{}, p, false, nil
 	}
 	if e != nil {
 		return gi.Marker{}, p, false, e
 	}
-	m, e := gi.DecodeMarker([]byte(raw), fp)
+	m, e := gi.DecodeMarker("guild_invite_projection_markers", version, []byte(raw), fp)
 	p.MarkerID = id
 	p.Complete = state == "COMPLETE"
 	if cursorRaw != nil {
-		proof, decodeErr := gi.DecodeCursorProof([]byte(*cursorRaw), m)
+		var proof gi.CursorProof
+		decodeErr := payload.Decode("guild_invite_projection_markers", version, []byte(*cursorRaw), &proof)
+		if decodeErr == nil {
+			decodeErr = proof.Validate(m)
+		}
 		if decodeErr != nil || cursorReceipt == nil || proof.ReceiptID.String() != *cursorReceipt {
 			return gi.Marker{}, p, false, gi.ErrEvidence
 		}

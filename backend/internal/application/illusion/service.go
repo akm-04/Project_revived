@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
-	"strings"
 	"time"
 
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -48,10 +47,14 @@ func (s Mode) pin(c context.Context, op operation.Context) (operation.Context, e
 	if !s.ready() {
 		return op, d.ErrUnavailable
 	}
+	return s.pinTx(c, s.Fresh, op)
+}
+
+func (s Mode) pinTx(c context.Context, q tx.Queryer, op operation.Context) (operation.Context, error) {
 	if _, bound := op.Policies.Get("content"); bound {
 		return op, nil
 	}
-	revision, err := s.Content.ActiveRevision(c, s.Fresh)
+	revision, err := s.Content.ActiveRevision(c, q)
 	if err != nil {
 		return op, err
 	}
@@ -85,14 +88,9 @@ func (s Mode) run(c context.Context, a identity.ActorContext, name string, reque
 		if out.Body == nil {
 			out.Body = map[string]any{}
 		}
-		if balance, functions := changes.Recorded(c); len(balance) > 0 || len(functions) > 0 {
-			if len(balance) > 0 {
-				out.Body["economy_"] = balance
-			}
-			if len(functions) > 0 {
-				out.Body["new_funcs_"] = functions
-			}
-		}
+		balance, functions := changes.Recorded(c)
+		changes.WriteEconomy(out.Body, balance)
+		changes.WriteFunctions(out.Body, functions)
 		for key, value := range changes.RecordedMissions(c) {
 			out.Body[key] = value
 		}
@@ -168,13 +166,17 @@ func (s Mode) eligible(c context.Context, q tx.Queryer, a identity.ActorContext,
 	return nil
 }
 
+func playerLocator(server identity.LogicalServerID, playerID identity.PlayerID) cd.Locator {
+	return cd.Locator{DomainKind: "ILLUSION", AuthorityScope: fmt.Sprintf("server:%d", server), DomainLocator: fmt.Sprintf("player:%d", playerID)}
+}
+
 func locator(a identity.ActorContext) cd.Locator {
-	return cd.Locator{DomainKind: "ILLUSION", AuthorityScope: fmt.Sprintf("server:%d", a.LogicalServerID), DomainLocator: fmt.Sprintf("player:%d", a.PlayerID)}
+	return playerLocator(a.LogicalServerID, a.PlayerID)
 }
 
 // generationRef binds the Combat attempt to the occurrence it started against.
 func generationRef(occurrence d.Occurrence) string {
-	return fmt.Sprintf("ILLUSION/%d/%d/%d", occurrence.LogicalServerID, occurrence.OpenDay, occurrence.CampaignID)
+	return d.AttemptGeneration{LogicalServerID: occurrence.LogicalServerID, OpenDay: occurrence.OpenDay, CampaignID: occurrence.CampaignID}.Reference()
 }
 
 func startFingerprint(a identity.ActorContext, request StartRequest, op operation.Context) string {
@@ -274,29 +276,6 @@ func (s Mode) preInfo(c context.Context, q tx.Queryer, ranks []d.Result, playerI
 	return map[string]any{"player_name": profile.Name, "avatar_id": profile.AvatarID, "avatar_frame_id": profile.AvatarFrameID,
 		"lev": profile.Level, "hurt": ahead.Hurt, "pre_rank": int64(position), "conquer_lev": profile.ConquerLevel,
 		"conquer_loop_id": profile.ConquerLoopID}, nil
-}
-
-func formationText(formation []int64) string {
-	parts := make([]string, 0, len(formation))
-	for _, id := range formation {
-		parts = append(parts, strconv.FormatInt(id, 10))
-	}
-	return strings.Join(parts, "|")
-}
-
-func parseFormationText(text string) []int64 {
-	if text == "" {
-		return nil
-	}
-	out := make([]int64, 0)
-	for _, part := range strings.Split(text, "|") {
-		id, err := strconv.ParseInt(part, 10, 64)
-		if err != nil {
-			return nil
-		}
-		out = append(out, id)
-	}
-	return out
 }
 
 func numeric(raw any) (int64, bool) {

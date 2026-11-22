@@ -1,0 +1,3296 @@
+{
+ "authority": "R8 player data manifest (generated from CANONICAL_TABLE_OWNERSHIP.json and the PostgreSQL catalog)",
+ "schema_version": 1,
+ "tables": [
+  {
+   "table": "players",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 7,
+   "payload_columns": []
+  },
+  {
+   "table": "achievement_roots",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 8,
+   "payload_columns": [
+    "complete_times"
+   ]
+  },
+  {
+   "table": "achievement_award_claims",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "achievement_roots",
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 9,
+   "payload_columns": []
+  },
+  {
+   "table": "achievement_boss_facts",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "players",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 10,
+   "payload_columns": []
+  },
+  {
+   "table": "achievement_daily_counts",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "players",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 11,
+   "payload_columns": []
+  },
+  {
+   "table": "achievement_events",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "achievement_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 12,
+   "payload_columns": []
+  },
+  {
+   "table": "achievement_notices",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "achievement_roots",
+   "kind": "cache",
+   "backup": false,
+   "references": [],
+   "retention": null,
+   "restore_order": 13,
+   "payload_columns": []
+  },
+  {
+   "table": "achievement_streaks",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "achievement_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 14,
+   "payload_columns": [
+    "complete_times"
+   ]
+  },
+  {
+   "table": "combat_attempts",
+   "scope": "player",
+   "owner": [
+    "actor_player_id"
+   ],
+   "via": null,
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 19,
+   "payload_columns": []
+  },
+  {
+   "table": "adventure_attempt_settlements",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 20,
+   "payload_columns": []
+  },
+  {
+   "table": "adventure_occurrences",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 21,
+   "payload_columns": []
+  },
+  {
+   "table": "arena_friend_invitations",
+   "scope": "player",
+   "owner": [],
+   "via": null,
+   "kind": "shared",
+   "backup": true,
+   "references": [
+    "inviter_player",
+    "recipient_player"
+   ],
+   "retention": null,
+   "restore_order": 26,
+   "payload_columns": [
+    "payload"
+   ]
+  },
+  {
+   "table": "arena_tournament_rooms",
+   "scope": "player",
+   "owner": [],
+   "via": null,
+   "kind": "shared",
+   "backup": true,
+   "references": [
+    "first_player",
+    "second_player"
+   ],
+   "retention": null,
+   "restore_order": 27,
+   "payload_columns": [
+    "payload"
+   ]
+  },
+  {
+   "table": "arena_casual_entries",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 28,
+   "payload_columns": [
+    "payload"
+   ]
+  },
+  {
+   "table": "arena_casual_scores",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 29,
+   "payload_columns": []
+  },
+  {
+   "table": "arena_players",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [
+    "opponent"
+   ],
+   "retention": null,
+   "restore_order": 31,
+   "payload_columns": [
+    "defense",
+    "missions",
+    "awards",
+    "recent_offers"
+   ]
+  },
+  {
+   "table": "arena_matches",
+   "scope": "player",
+   "owner": [
+    "attacker_id"
+   ],
+   "via": null,
+   "kind": "report",
+   "backup": true,
+   "references": [
+    "defender_id"
+   ],
+   "retention": null,
+   "restore_order": 32,
+   "payload_columns": [
+    "defense_heroes",
+    "formation",
+    "outcome"
+   ]
+  },
+  {
+   "table": "arena_partner_usage",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 33,
+   "payload_columns": []
+  },
+  {
+   "table": "arena_records",
+   "scope": "player",
+   "owner": [
+    "owner_player_id"
+   ],
+   "via": null,
+   "kind": "report",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 34,
+   "payload_columns": []
+  },
+  {
+   "table": "arena_settlement_ranks",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 35,
+   "payload_columns": []
+  },
+  {
+   "table": "broadcast_outbox",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [
+    "enemy_player_id"
+   ],
+   "retention": null,
+   "restore_order": 36,
+   "payload_columns": [
+    "fields"
+   ]
+  },
+  {
+   "table": "campaign_players",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 37,
+   "payload_columns": [
+    "pending_items",
+    "last_result",
+    "chapter_claims",
+    "story_claims",
+    "trial_wins",
+    "pending_awakening"
+   ]
+  },
+  {
+   "table": "campaign_nodes",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 38,
+   "payload_columns": []
+  },
+  {
+   "table": "client_log_rows",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "journal",
+   "backup": false,
+   "references": [],
+   "retention": null,
+   "restore_order": 40,
+   "payload_columns": [
+    "extras"
+   ]
+  },
+  {
+   "table": "client_log_uploads",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "journal",
+   "backup": false,
+   "references": [],
+   "retention": null,
+   "restore_order": 41,
+   "payload_columns": []
+  },
+  {
+   "table": "combat_attempt_members",
+   "scope": "player",
+   "owner": [
+    "member_player_id"
+   ],
+   "via": null,
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 42,
+   "payload_columns": []
+  },
+  {
+   "table": "combat_attestations",
+   "scope": "player",
+   "owner": [],
+   "via": "combat_attempts",
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 43,
+   "payload_columns": []
+  },
+  {
+   "table": "combat_member_settlements",
+   "scope": "player",
+   "owner": [
+    "member_player_id"
+   ],
+   "via": null,
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 44,
+   "payload_columns": []
+  },
+  {
+   "table": "combat_start_packages",
+   "scope": "player",
+   "owner": [],
+   "via": "combat_attempts",
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 45,
+   "payload_columns": []
+  },
+  {
+   "table": "commerce_charge_cards",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 46,
+   "payload_columns": []
+  },
+  {
+   "table": "commerce_charge_purchases",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 47,
+   "payload_columns": []
+  },
+  {
+   "table": "commerce_privilege_roots",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 48,
+   "payload_columns": []
+  },
+  {
+   "table": "commerce_vip_awards",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 50,
+   "payload_columns": []
+  },
+  {
+   "table": "player_conquer_facts",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 51,
+   "payload_columns": [
+    "payload"
+   ]
+  },
+  {
+   "table": "conquer_school_players",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 52,
+   "payload_columns": [
+    "state"
+   ]
+  },
+  {
+   "table": "conquer_school_reports",
+   "scope": "player",
+   "owner": [
+    "owner_player_id"
+   ],
+   "via": null,
+   "kind": "report",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 53,
+   "payload_columns": [
+    "profile",
+    "heroes",
+    "pet",
+    "report"
+   ]
+  },
+  {
+   "table": "conquer_school_report_views",
+   "scope": "player",
+   "owner": [
+    "viewer_player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 54,
+   "payload_columns": []
+  },
+  {
+   "table": "daily_consumption_players",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 100,
+   "payload_columns": [
+    "counts"
+   ]
+  },
+  {
+   "table": "dodgeball_players",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 101,
+   "payload_columns": [
+    "payload"
+   ]
+  },
+  {
+   "table": "friend_dm_roots",
+   "scope": "player",
+   "owner": [
+    "recipient_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 102,
+   "payload_columns": []
+  },
+  {
+   "table": "friend_dm_occurrences",
+   "scope": "player",
+   "owner": [
+    "sender_id"
+   ],
+   "via": null,
+   "kind": "ledger",
+   "backup": true,
+   "references": [
+    "recipient_id"
+   ],
+   "retention": null,
+   "restore_order": 103,
+   "payload_columns": []
+  },
+  {
+   "table": "friend_dm_delivery",
+   "scope": "player",
+   "owner": [
+    "recipient_id"
+   ],
+   "via": "friend_dm_roots",
+   "kind": "cache",
+   "backup": false,
+   "references": [],
+   "retention": null,
+   "restore_order": 104,
+   "payload_columns": []
+  },
+  {
+   "table": "friend_dm_projection_receipts",
+   "scope": "player",
+   "owner": [
+    "recipient_id"
+   ],
+   "via": null,
+   "kind": "cache",
+   "backup": false,
+   "references": [],
+   "retention": null,
+   "restore_order": 105,
+   "payload_columns": [
+    "messages"
+   ]
+  },
+  {
+   "table": "godstrial_players",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 108,
+   "payload_columns": [
+    "payload"
+   ]
+  },
+  {
+   "table": "gxb_operation_receipts",
+   "scope": "player",
+   "owner": [
+    "owner_key"
+   ],
+   "via": null,
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 113,
+   "payload_columns": [
+    "result_payload",
+    "operation_policy_refs"
+   ],
+   "owner_where": "owner_kind = 'player'"
+  },
+  {
+   "table": "guild_broadcast_recipients",
+   "scope": "player",
+   "owner": [
+    "recipient_player_id"
+   ],
+   "via": null,
+   "kind": "cache",
+   "backup": false,
+   "references": [],
+   "retention": null,
+   "restore_order": 115,
+   "payload_columns": []
+  },
+  {
+   "table": "guild_campaign_application_days",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 116,
+   "payload_columns": []
+  },
+  {
+   "table": "guild_campaign_applications",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 117,
+   "payload_columns": []
+  },
+  {
+   "table": "guild_campaign_damage",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 121,
+   "payload_columns": []
+  },
+  {
+   "table": "guild_campaign_member_days",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 124,
+   "payload_columns": []
+  },
+  {
+   "table": "guild_invite_projection_cursors",
+   "scope": "player",
+   "owner": [
+    "recipient_player_id"
+   ],
+   "via": null,
+   "kind": "cache",
+   "backup": false,
+   "references": [],
+   "retention": null,
+   "restore_order": 128,
+   "payload_columns": []
+  },
+  {
+   "table": "guild_invite_projection_sources",
+   "scope": "player",
+   "owner": [
+    "recipient_player_id"
+   ],
+   "via": null,
+   "kind": "cache",
+   "backup": false,
+   "references": [
+    "inviter_player_id"
+   ],
+   "retention": null,
+   "restore_order": 129,
+   "payload_columns": [
+    "source_payload"
+   ]
+  },
+  {
+   "table": "guild_invite_projection_deliveries",
+   "scope": "player",
+   "owner": [
+    "recipient_player_id"
+   ],
+   "via": null,
+   "kind": "cache",
+   "backup": false,
+   "references": [],
+   "retention": null,
+   "restore_order": 130,
+   "payload_columns": []
+  },
+  {
+   "table": "guild_invite_projection_markers",
+   "scope": "player",
+   "owner": [
+    "subject_player_id"
+   ],
+   "via": null,
+   "kind": "cache",
+   "backup": false,
+   "references": [],
+   "retention": null,
+   "restore_order": 131,
+   "payload_columns": [
+    "source_payload",
+    "cursor_proof"
+   ]
+  },
+  {
+   "table": "guild_rental_offers",
+   "scope": "player",
+   "owner": [
+    "lender_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 136,
+   "payload_columns": []
+  },
+  {
+   "table": "guild_rental_uses",
+   "scope": "player",
+   "owner": [
+    "lender_id"
+   ],
+   "via": null,
+   "kind": "ledger",
+   "backup": true,
+   "references": [
+    "borrower_id"
+   ],
+   "retention": null,
+   "restore_order": 137,
+   "payload_columns": []
+  },
+  {
+   "table": "guild_tea_gifts",
+   "scope": "player",
+   "owner": [],
+   "via": null,
+   "kind": "shared",
+   "backup": true,
+   "references": [
+    "donor_id",
+    "receiver_id"
+   ],
+   "retention": null,
+   "restore_order": 139,
+   "payload_columns": []
+  },
+  {
+   "table": "illusion_attempt_settlements",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 188,
+   "payload_columns": []
+  },
+  {
+   "table": "illusion_occurrence_results",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "report",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 189,
+   "payload_columns": []
+  },
+  {
+   "table": "illusion_players",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 191,
+   "payload_columns": []
+  },
+  {
+   "table": "illusion_settlements",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 193,
+   "payload_columns": []
+  },
+  {
+   "table": "league_players",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 196,
+   "payload_columns": [
+    "payload"
+   ]
+  },
+  {
+   "table": "league_cosmetic_origins",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 197,
+   "payload_columns": [
+    "payload"
+   ]
+  },
+  {
+   "table": "library_forum_comments",
+   "scope": "player",
+   "owner": [
+    "author_player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 201,
+   "payload_columns": []
+  },
+  {
+   "table": "library_forum_reactions",
+   "scope": "player",
+   "owner": [
+    "viewer_player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [
+    "author_player_id"
+   ],
+   "retention": null,
+   "restore_order": 202,
+   "payload_columns": []
+  },
+  {
+   "table": "library_hero_battle_counts",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "players",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 203,
+   "payload_columns": []
+  },
+  {
+   "table": "library_hero_dialogue_counts",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "players",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 204,
+   "payload_columns": []
+  },
+  {
+   "table": "mail_records",
+   "scope": "player",
+   "owner": [
+    "recipient_player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 205,
+   "payload_columns": []
+  },
+  {
+   "table": "mail_attachments",
+   "scope": "player",
+   "owner": [],
+   "via": "mail_records",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 206,
+   "payload_columns": [
+    "metadata"
+   ]
+  },
+  {
+   "table": "mail_namespace_counters",
+   "scope": "player",
+   "owner": [
+    "recipient_player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 207,
+   "payload_columns": []
+  },
+  {
+   "table": "march_players",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 209,
+   "payload_columns": [
+    "payload"
+   ]
+  },
+  {
+   "table": "memoir_players",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 210,
+   "payload_columns": [
+    "payload"
+   ]
+  },
+  {
+   "table": "mentor_applications",
+   "scope": "player",
+   "owner": [],
+   "via": null,
+   "kind": "shared",
+   "backup": true,
+   "references": [
+    "applicant_id",
+    "target_id"
+   ],
+   "retention": null,
+   "restore_order": 212,
+   "payload_columns": []
+  },
+  {
+   "table": "mentor_exam_receipts",
+   "scope": "player",
+   "owner": [
+    "student_id"
+   ],
+   "via": null,
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 213,
+   "payload_columns": [
+    "items"
+   ]
+  },
+  {
+   "table": "mentor_mission_progress",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 214,
+   "payload_columns": []
+  },
+  {
+   "table": "mentor_relations",
+   "scope": "player",
+   "owner": [],
+   "via": null,
+   "kind": "shared",
+   "backup": true,
+   "references": [
+    "mentor_id",
+    "student_id"
+   ],
+   "retention": null,
+   "restore_order": 215,
+   "payload_columns": []
+  },
+  {
+   "table": "mentor_states",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 216,
+   "payload_columns": []
+  },
+  {
+   "table": "occult_logs",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "journal",
+   "backup": false,
+   "references": [],
+   "retention": null,
+   "restore_order": 219,
+   "payload_columns": [
+    "content"
+   ]
+  },
+  {
+   "table": "occult_players",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 220,
+   "payload_columns": [
+    "scores"
+   ]
+  },
+  {
+   "table": "one_on_one_players",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [
+    "opponent"
+   ],
+   "retention": null,
+   "restore_order": 223,
+   "payload_columns": [
+    "teams",
+    "offered",
+    "candidates",
+    "offer_snapshot"
+   ]
+  },
+  {
+   "table": "one_on_one_matches",
+   "scope": "player",
+   "owner": [
+    "attacker_id"
+   ],
+   "via": null,
+   "kind": "report",
+   "backup": true,
+   "references": [
+    "defender_id"
+   ],
+   "retention": null,
+   "restore_order": 224,
+   "payload_columns": [
+    "attack_teams",
+    "defense_teams",
+    "outcome"
+   ]
+  },
+  {
+   "table": "one_on_one_partner_usage",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 225,
+   "payload_columns": []
+  },
+  {
+   "table": "one_on_one_records",
+   "scope": "player",
+   "owner": [
+    "owner_player_id"
+   ],
+   "via": null,
+   "kind": "report",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 226,
+   "payload_columns": []
+  },
+  {
+   "table": "one_on_one_rounds",
+   "scope": "player",
+   "owner": [],
+   "via": "combat_attempts",
+   "kind": "report",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 227,
+   "payload_columns": []
+  },
+  {
+   "table": "one_on_one_settlement_ranks",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 229,
+   "payload_columns": []
+  },
+  {
+   "table": "personal_dm_intents",
+   "scope": "player",
+   "owner": [
+    "sender_id"
+   ],
+   "via": null,
+   "kind": "ledger",
+   "backup": true,
+   "references": [
+    "recipient_id"
+   ],
+   "retention": null,
+   "restore_order": 231,
+   "payload_columns": []
+  },
+  {
+   "table": "personal_dm_delivery",
+   "scope": "player",
+   "owner": [],
+   "via": "personal_dm_intents",
+   "kind": "cache",
+   "backup": false,
+   "references": [],
+   "retention": null,
+   "restore_order": 232,
+   "payload_columns": [
+    "terminal_receipt"
+   ]
+  },
+  {
+   "table": "personal_dm_payloads",
+   "scope": "player",
+   "owner": [],
+   "via": "personal_dm_intents",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 233,
+   "payload_columns": [
+    "payload"
+   ]
+  },
+  {
+   "table": "petcampaign_players",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 234,
+   "payload_columns": [
+    "payload"
+   ]
+  },
+  {
+   "table": "player_awakening_roots",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 235,
+   "payload_columns": [
+    "payload"
+   ]
+  },
+  {
+   "table": "player_book_roots",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 236,
+   "payload_columns": [
+    "facts"
+   ]
+  },
+  {
+   "table": "player_book_admissions",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_book_roots",
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 237,
+   "payload_columns": [
+    "operation_context"
+   ]
+  },
+  {
+   "table": "player_compat_preferences",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 238,
+   "payload_columns": []
+  },
+  {
+   "table": "player_profiles",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 239,
+   "payload_columns": []
+  },
+  {
+   "table": "player_cosmetic_entitlements",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 240,
+   "payload_columns": []
+  },
+  {
+   "table": "player_course_roots",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 241,
+   "payload_columns": [
+    "facts"
+   ]
+  },
+  {
+   "table": "player_course_admissions",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_course_roots",
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 242,
+   "payload_columns": [
+    "operation_context"
+   ]
+  },
+  {
+   "table": "player_course_heroes",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_course_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 243,
+   "payload_columns": [
+    "facts"
+   ]
+  },
+  {
+   "table": "player_crystal_spend_days",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 244,
+   "payload_columns": []
+  },
+  {
+   "table": "player_currency_balances",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 245,
+   "payload_columns": []
+  },
+  {
+   "table": "player_daily_reset_marks",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 246,
+   "payload_columns": []
+  },
+  {
+   "table": "player_directory_profiles",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "cache",
+   "backup": false,
+   "references": [],
+   "retention": null,
+   "restore_order": 247,
+   "payload_columns": []
+  },
+  {
+   "table": "player_display_admissions",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 248,
+   "payload_columns": [
+    "payload"
+   ]
+  },
+  {
+   "table": "player_display_selections",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 249,
+   "payload_columns": []
+  },
+  {
+   "table": "player_dorm_admissions",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 250,
+   "payload_columns": [
+    "operation_context",
+    "result"
+   ]
+  },
+  {
+   "table": "player_dorm_roots",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 251,
+   "payload_columns": []
+  },
+  {
+   "table": "player_dorm_rooms",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_dorm_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 252,
+   "payload_columns": [
+    "furniture_record",
+    "pending_expansion"
+   ]
+  },
+  {
+   "table": "player_dorm_comments",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_dorm_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [
+    "author_player_id"
+   ],
+   "retention": null,
+   "restore_order": 253,
+   "payload_columns": []
+  },
+  {
+   "table": "player_dorm_comment_reactions",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_dorm_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [
+    "actor_player_id"
+   ],
+   "retention": null,
+   "restore_order": 254,
+   "payload_columns": []
+  },
+  {
+   "table": "player_dorm_glue_purchases",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_dorm_roots",
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 255,
+   "payload_columns": []
+  },
+  {
+   "table": "player_dorm_heroes",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_dorm_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 256,
+   "payload_columns": [
+    "equipment"
+   ]
+  },
+  {
+   "table": "player_dorm_praises",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_dorm_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [
+    "actor_player_id"
+   ],
+   "retention": null,
+   "restore_order": 257,
+   "payload_columns": []
+  },
+  {
+   "table": "player_dorm_room_social",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_dorm_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 258,
+   "payload_columns": []
+  },
+  {
+   "table": "player_economy_owners",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 259,
+   "payload_columns": []
+  },
+  {
+   "table": "player_element_roots",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 260,
+   "payload_columns": [
+    "facts"
+   ]
+  },
+  {
+   "table": "player_element_admissions",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_element_roots",
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 261,
+   "payload_columns": [
+    "operation_context"
+   ]
+  },
+  {
+   "table": "player_element_heroes",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_element_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 262,
+   "payload_columns": [
+    "facts"
+   ]
+  },
+  {
+   "table": "player_event_centre_board_reports",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "report",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 263,
+   "payload_columns": []
+  },
+  {
+   "table": "player_event_centre_roots",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 264,
+   "payload_columns": [
+    "facts"
+   ]
+  },
+  {
+   "table": "player_function_eligibility",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 265,
+   "payload_columns": []
+  },
+  {
+   "table": "player_function_state_owners",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 266,
+   "payload_columns": []
+  },
+  {
+   "table": "player_function_unlocks",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 267,
+   "payload_columns": []
+  },
+  {
+   "table": "player_gm_questions",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 268,
+   "payload_columns": []
+  },
+  {
+   "table": "player_guide_return_state",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 269,
+   "payload_columns": []
+  },
+  {
+   "table": "player_hero_roots",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 272,
+   "payload_columns": []
+  },
+  {
+   "table": "player_hero_evolution",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_hero_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 273,
+   "payload_columns": [
+    "facts"
+   ]
+  },
+  {
+   "table": "player_hero_evolution_admissions",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_hero_roots",
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 274,
+   "payload_columns": [
+    "operation_context"
+   ]
+  },
+  {
+   "table": "player_heroes",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_hero_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 275,
+   "payload_columns": []
+  },
+  {
+   "table": "player_hero_live_entitlements",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_hero_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 276,
+   "payload_columns": []
+  },
+  {
+   "table": "player_practice_roots",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 277,
+   "payload_columns": []
+  },
+  {
+   "table": "player_hero_practice_candidates",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_practice_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 278,
+   "payload_columns": [
+    "generation_policy_refs"
+   ]
+  },
+  {
+   "table": "player_hero_raw_awakening",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_hero_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 279,
+   "payload_columns": []
+  },
+  {
+   "table": "player_hero_skin_entitlements",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_hero_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 280,
+   "payload_columns": []
+  },
+  {
+   "table": "player_inscription_roots",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 281,
+   "payload_columns": [
+    "facts"
+   ]
+  },
+  {
+   "table": "player_inscription_admissions",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_inscription_roots",
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 282,
+   "payload_columns": [
+    "operation_context"
+   ]
+  },
+  {
+   "table": "player_inscription_heroes",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_inscription_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 283,
+   "payload_columns": [
+    "facts"
+   ]
+  },
+  {
+   "table": "player_inscription_imports",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_inscription_roots",
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 284,
+   "payload_columns": []
+  },
+  {
+   "table": "player_item_stacks",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 285,
+   "payload_columns": []
+  },
+  {
+   "table": "player_library_roots",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 286,
+   "payload_columns": [
+    "special_claims"
+   ]
+  },
+  {
+   "table": "player_library_heroes",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_library_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 287,
+   "payload_columns": [
+    "feed_attrs",
+    "pending_candidate"
+   ]
+  },
+  {
+   "table": "player_library_act_awards",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_library_roots",
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 288,
+   "payload_columns": []
+  },
+  {
+   "table": "player_library_admissions",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_library_roots",
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 289,
+   "payload_columns": [
+    "operation_context",
+    "result"
+   ]
+  },
+  {
+   "table": "player_library_backgrounds",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_library_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 290,
+   "payload_columns": []
+  },
+  {
+   "table": "player_library_cg_claims",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_library_roots",
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 291,
+   "payload_columns": []
+  },
+  {
+   "table": "player_library_dialogs",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_library_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 292,
+   "payload_columns": []
+  },
+  {
+   "table": "player_library_hero_logs",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_library_roots",
+   "kind": "journal",
+   "backup": false,
+   "references": [],
+   "retention": null,
+   "restore_order": 293,
+   "payload_columns": []
+  },
+  {
+   "table": "player_library_partner_missions",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_library_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 294,
+   "payload_columns": []
+  },
+  {
+   "table": "player_library_talk_claims",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_library_roots",
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 295,
+   "payload_columns": []
+  },
+  {
+   "table": "player_login_observations",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 296,
+   "payload_columns": []
+  },
+  {
+   "table": "player_mission_instances",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 297,
+   "payload_columns": []
+  },
+  {
+   "table": "player_mission_roots",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 298,
+   "payload_columns": []
+  },
+  {
+   "table": "player_pet_practice_candidates",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_practice_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 299,
+   "payload_columns": [
+    "generation_policy_refs"
+   ]
+  },
+  {
+   "table": "player_pet_roots",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 300,
+   "payload_columns": []
+  },
+  {
+   "table": "player_pets",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_pet_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 301,
+   "payload_columns": []
+  },
+  {
+   "table": "player_pet_style_entitlements",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_pet_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 302,
+   "payload_columns": []
+  },
+  {
+   "table": "player_profile_feedback_roots",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 303,
+   "payload_columns": []
+  },
+  {
+   "table": "player_profile_comment_operations",
+   "scope": "player",
+   "owner": [
+    "target_player_id"
+   ],
+   "via": "player_profile_feedback_roots",
+   "kind": "ledger",
+   "backup": true,
+   "references": [
+    "actor_player_id"
+   ],
+   "retention": null,
+   "restore_order": 304,
+   "payload_columns": [
+    "admission_payload"
+   ]
+  },
+  {
+   "table": "player_profile_comments",
+   "scope": "player",
+   "owner": [
+    "target_player_id"
+   ],
+   "via": "player_profile_feedback_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [
+    "author_player_id"
+   ],
+   "retention": null,
+   "restore_order": 305,
+   "payload_columns": []
+  },
+  {
+   "table": "player_profile_comment_reactions",
+   "scope": "player",
+   "owner": [
+    "actor_player_id"
+   ],
+   "via": "player_profile_feedback_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 306,
+   "payload_columns": []
+  },
+  {
+   "table": "player_profile_praises",
+   "scope": "player",
+   "owner": [
+    "target_player_id"
+   ],
+   "via": "player_profile_feedback_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [
+    "actor_player_id"
+   ],
+   "retention": null,
+   "restore_order": 307,
+   "payload_columns": []
+  },
+  {
+   "table": "player_progression",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 308,
+   "payload_columns": []
+  },
+  {
+   "table": "player_public_profile_roots",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 309,
+   "payload_columns": []
+  },
+  {
+   "table": "player_public_profile_media_history",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_public_profile_roots",
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 310,
+   "payload_columns": [
+    "reference"
+   ]
+  },
+  {
+   "table": "player_public_profile_media_current",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_public_profile_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 311,
+   "payload_columns": []
+  },
+  {
+   "table": "player_public_profile_showcase_slots",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_public_profile_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 312,
+   "payload_columns": []
+  },
+  {
+   "table": "player_saved_preset_roots",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 313,
+   "payload_columns": []
+  },
+  {
+   "table": "player_saved_preset_lanes",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_saved_preset_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 314,
+   "payload_columns": []
+  },
+  {
+   "table": "player_saved_preset_heroes",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_saved_preset_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 315,
+   "payload_columns": []
+  },
+  {
+   "table": "player_scalar_daily_floors",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 316,
+   "payload_columns": []
+  },
+  {
+   "table": "player_signin_roots",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 317,
+   "payload_columns": []
+  },
+  {
+   "table": "player_social_presence",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 318,
+   "payload_columns": []
+  },
+  {
+   "table": "player_social_roots",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 319,
+   "payload_columns": []
+  },
+  {
+   "table": "player_spirit_roots",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 320,
+   "payload_columns": [
+    "facts"
+   ]
+  },
+  {
+   "table": "player_spirit_admissions",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_spirit_roots",
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 321,
+   "payload_columns": [
+    "operation_context"
+   ]
+  },
+  {
+   "table": "player_spirit_heroes",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_spirit_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 322,
+   "payload_columns": [
+    "facts"
+   ]
+  },
+  {
+   "table": "player_story_cursors",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 323,
+   "payload_columns": []
+  },
+  {
+   "table": "player_temporal_resources",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 324,
+   "payload_columns": []
+  },
+  {
+   "table": "player_undelivered_replies",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "cache",
+   "backup": false,
+   "references": [],
+   "retention": null,
+   "restore_order": 325,
+   "payload_columns": []
+  },
+  {
+   "table": "publication_picture_reads",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 328,
+   "payload_columns": []
+  },
+  {
+   "table": "ranking_board_scores",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 329,
+   "payload_columns": [
+    "metric"
+   ]
+  },
+  {
+   "table": "ranking_girls_awards",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 333,
+   "payload_columns": []
+  },
+  {
+   "table": "ranking_girls_birth_tracking",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 334,
+   "payload_columns": []
+  },
+  {
+   "table": "realtime_presence_leases",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "cache",
+   "backup": false,
+   "references": [],
+   "retention": null,
+   "restore_order": 335,
+   "payload_columns": []
+  },
+  {
+   "table": "redeem_redemptions",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "ledger",
+   "backup": true,
+   "references": [
+    "subject_id"
+   ],
+   "retention": null,
+   "restore_order": 340,
+   "payload_columns": []
+  },
+  {
+   "table": "request_journal",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "journal",
+   "backup": false,
+   "references": [],
+   "retention": null,
+   "restore_order": 341,
+   "payload_columns": []
+  },
+  {
+   "table": "shared_rooms",
+   "scope": "player",
+   "owner": [
+    "owner_player"
+   ],
+   "via": null,
+   "kind": "cache",
+   "backup": false,
+   "references": [],
+   "retention": null,
+   "restore_order": 343,
+   "payload_columns": [
+    "payload"
+   ]
+  },
+  {
+   "table": "shared_room_seats",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "cache",
+   "backup": false,
+   "references": [],
+   "retention": null,
+   "restore_order": 344,
+   "payload_columns": []
+  },
+  {
+   "table": "shop_players",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [
+    "player_id"
+   ],
+   "retention": null,
+   "restore_order": 345,
+   "payload_columns": [
+    "stock"
+   ]
+  },
+  {
+   "table": "social_blocks",
+   "scope": "player",
+   "owner": [],
+   "via": "player_social_roots",
+   "kind": "shared",
+   "backup": true,
+   "references": [
+    "blocked_player_id",
+    "blocker_player_id"
+   ],
+   "retention": null,
+   "restore_order": 347,
+   "payload_columns": []
+  },
+  {
+   "table": "social_friend_requests",
+   "scope": "player",
+   "owner": [],
+   "via": "player_social_roots",
+   "kind": "shared",
+   "backup": true,
+   "references": [
+    "requester_player_id",
+    "target_player_id"
+   ],
+   "retention": null,
+   "restore_order": 349,
+   "payload_columns": []
+  },
+  {
+   "table": "social_friendships",
+   "scope": "player",
+   "owner": [],
+   "via": "player_social_roots",
+   "kind": "shared",
+   "backup": true,
+   "references": [
+    "player_high_id",
+    "player_low_id"
+   ],
+   "retention": null,
+   "restore_order": 350,
+   "payload_columns": []
+  },
+  {
+   "table": "social_gift_epochs",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 351,
+   "payload_columns": []
+  },
+  {
+   "table": "social_gift_claim_operations",
+   "scope": "player",
+   "owner": [
+    "recipient_player_id"
+   ],
+   "via": null,
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 352,
+   "payload_columns": [
+    "semantic_result"
+   ]
+  },
+  {
+   "table": "social_notices",
+   "scope": "player",
+   "owner": [
+    "recipient_player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [
+    "related_player_id"
+   ],
+   "retention": null,
+   "restore_order": 353,
+   "payload_columns": []
+  },
+  {
+   "table": "social_gift_transfers",
+   "scope": "player",
+   "owner": [
+    "recipient_player_id"
+   ],
+   "via": null,
+   "kind": "ledger",
+   "backup": true,
+   "references": [
+    "sender_player_id"
+   ],
+   "retention": null,
+   "restore_order": 354,
+   "payload_columns": []
+  },
+  {
+   "table": "social_guild_invite_invalidations",
+   "scope": "player",
+   "owner": [
+    "recipient_player_id"
+   ],
+   "via": null,
+   "kind": "cache",
+   "backup": false,
+   "references": [],
+   "retention": null,
+   "restore_order": 355,
+   "payload_columns": [
+    "target_payload"
+   ]
+  },
+  {
+   "table": "social_guild_invite_materializations",
+   "scope": "player",
+   "owner": [
+    "recipient_player_id"
+   ],
+   "via": null,
+   "kind": "cache",
+   "backup": false,
+   "references": [],
+   "retention": null,
+   "restore_order": 356,
+   "payload_columns": [
+    "target_payload"
+   ]
+  },
+  {
+   "table": "social_invite_bindings",
+   "scope": "player",
+   "owner": [],
+   "via": null,
+   "kind": "shared",
+   "backup": true,
+   "references": [
+    "invitee_player_id",
+    "inviter_player_id"
+   ],
+   "retention": null,
+   "restore_order": 357,
+   "payload_columns": []
+  },
+  {
+   "table": "social_invite_mission_claims",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 358,
+   "payload_columns": []
+  },
+  {
+   "table": "social_recall_awards",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 360,
+   "payload_columns": []
+  },
+  {
+   "table": "social_recall_tasks",
+   "scope": "player",
+   "owner": [
+    "caller_player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [
+    "target_player_id"
+   ],
+   "retention": null,
+   "restore_order": 361,
+   "payload_columns": []
+  },
+  {
+   "table": "social_request_epochs",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": "player_social_roots",
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 362,
+   "payload_columns": []
+  },
+  {
+   "table": "summon_players",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 363,
+   "payload_columns": [
+    "counters"
+   ]
+  },
+  {
+   "table": "top_floor_day_ranks",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 367,
+   "payload_columns": []
+  },
+  {
+   "table": "top_floor_players",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 368,
+   "payload_columns": [
+    "offered",
+    "defense"
+   ]
+  },
+  {
+   "table": "top_floor_fights",
+   "scope": "player",
+   "owner": [
+    "challenger_id"
+   ],
+   "via": null,
+   "kind": "report",
+   "backup": true,
+   "references": [
+    "defender_player"
+   ],
+   "retention": null,
+   "restore_order": 369,
+   "payload_columns": [
+    "formation",
+    "outcome"
+   ]
+  },
+  {
+   "table": "top_floor_offer_snapshots",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "cache",
+   "backup": false,
+   "references": [],
+   "retention": null,
+   "restore_order": 370,
+   "payload_columns": [
+    "offers"
+   ]
+  },
+  {
+   "table": "top_floor_partner_usage",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 371,
+   "payload_columns": []
+  },
+  {
+   "table": "top_floor_ranks",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 372,
+   "payload_columns": []
+  },
+  {
+   "table": "top_floor_records",
+   "scope": "player",
+   "owner": [
+    "owner_player_id"
+   ],
+   "via": null,
+   "kind": "report",
+   "backup": true,
+   "references": [
+    "opponent_player"
+   ],
+   "retention": null,
+   "restore_order": 373,
+   "payload_columns": []
+  },
+  {
+   "table": "top_floor_task_fights",
+   "scope": "player",
+   "owner": [
+    "challenger_id"
+   ],
+   "via": null,
+   "kind": "report",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 377,
+   "payload_columns": [
+    "payload"
+   ]
+  },
+  {
+   "table": "top_floor_task_players",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 378,
+   "payload_columns": [
+    "payload"
+   ]
+  },
+  {
+   "table": "top_floor_task_preferences",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 379,
+   "payload_columns": [
+    "payload"
+   ]
+  },
+  {
+   "table": "top_floor_task_ranks",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 380,
+   "payload_columns": []
+  },
+  {
+   "table": "top_floor_task_records",
+   "scope": "player",
+   "owner": [
+    "owner_player_id"
+   ],
+   "via": null,
+   "kind": "report",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 381,
+   "payload_columns": [
+    "payload"
+   ]
+  },
+  {
+   "table": "workplace_players",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 382,
+   "payload_columns": [
+    "payload"
+   ]
+  },
+  {
+   "table": "worldboss_attempt_settlements",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "ledger",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 383,
+   "payload_columns": []
+  },
+  {
+   "table": "worldboss_player_totals",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 385,
+   "payload_columns": []
+  },
+  {
+   "table": "worldboss_players",
+   "scope": "player",
+   "owner": [
+    "player_id"
+   ],
+   "via": null,
+   "kind": "state",
+   "backup": true,
+   "references": [],
+   "retention": null,
+   "restore_order": 386,
+   "payload_columns": []
+  }
+ ]
+}

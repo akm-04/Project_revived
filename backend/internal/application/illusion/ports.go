@@ -38,15 +38,13 @@ type Store interface {
 	LockResultTx(context.Context, tx.Tx, int64, int64, int64, identity.PlayerID, time.Time) (d.Result, error)
 	SaveResultTx(context.Context, tx.Tx, int64, int64, int64, d.Result, time.Time) error
 	ReadRankTx(context.Context, tx.Queryer, int64, int64, int64) ([]d.Result, error)
+	RankOfTx(context.Context, tx.Queryer, int64, int64, identity.PlayerID) (int64, error)
 	ListOccurrencesTx(context.Context, tx.Queryer, int64) ([]d.Occurrence, error)
-	InsertAttemptTx(context.Context, tx.Tx, d.Attempt) error
-	FindAttemptTx(context.Context, tx.Queryer, identity.PlayerID, int64, int64, int64) (d.Attempt, bool, error)
-	FindDayAttemptTx(context.Context, tx.Queryer, identity.PlayerID, int64, int64) (d.Attempt, bool, error)
-	FindLatestAttemptTx(context.Context, tx.Queryer, identity.PlayerID) (d.Attempt, bool, error)
-	SaveAttemptTx(context.Context, tx.Tx, d.Attempt) error
+	InsertSettlementTx(context.Context, tx.Tx, ids.UUID, identity.PlayerID, int64, time.Time) error
+	ReadSettlementTx(context.Context, tx.Queryer, ids.UUID) (int64, bool, error)
 	InsertReportTx(context.Context, tx.Tx, string, int64, int64, int64, string, time.Time) error
 	ReadReportTx(context.Context, tx.Queryer, string, int64, time.Time) (string, bool, error)
-	PurgeExpiredReportsTx(context.Context, tx.Tx, time.Time, int64) (int64, error)
+	PurgeExpiredReportsTx(context.Context, tx.Tx, time.Time, int, int64) (int64, error)
 }
 
 type Content interface {
@@ -79,9 +77,11 @@ type Heroes interface {
 
 type Combat interface {
 	StartTx(context.Context, tx.Tx, ca.CoherentReadScope, cb.StartRequest) (cb.Started, error)
+	CurrentAttemptTx(context.Context, tx.Queryer, cd.Locator) (cb.CurrentAttempt, bool, error)
 	AttestSummaryTx(context.Context, tx.Tx, cb.SummaryRequest) (cb.SummaryAttested, error)
 	Resolve(context.Context, operation.Context, ids.UUID) (cb.Resolved, error)
 	TerminalTx(context.Context, tx.Tx, cb.TerminalRequest) (cb.Settled, error)
+	CloseTx(context.Context, tx.Tx, cb.TerminalRequest) (cb.Closed, error)
 	SettleMemberTx(context.Context, tx.Tx, cb.MemberSettleRequest) (cb.MemberSettled, error)
 	SnapshotTx(context.Context, tx.Queryer, ids.UUID) (cd.Snapshot, error)
 	MonsterWaves(int64) ([][]cb.Participant, error)
@@ -131,36 +131,53 @@ type Mail interface {
 	DeliverTx(context.Context, tx.Tx, i5.SettlementMailRequest) (mail.Record, bool, error)
 }
 
+// Achievements is the I9-11E settlement-attached fact port; it runs inside the
+// settlement transaction after the rank list is frozen.
+type Achievements interface {
+	ObserveFantasyTx(context.Context, tx.Tx, string, identity.PlayerID, int64, int64, int64, int64, time.Time) error
+}
+
+// BattleObserver is the Library owner's Girls Log battle-count port
+// (I9_11_GIRLS_LOG_V1 G2): one call per first settlement and owned hero.
+type BattleObserver interface {
+	ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error
+}
+
 type Mode struct {
-	Timed         gen.TimedRunner
-	Fresh         tx.Queryer
-	Store         Store
-	Content       Content
-	Fence         Fence
-	Players       Players
-	Functions     Functions
-	Directory     Directory
-	Heroes        Heroes
-	Pets          Heroes
-	Stats         Stats
-	Rooms         sharedroom.Service
-	RoomStore     sharedroom.Store
-	Invites       roominvite.Materializer
-	Combat        Combat
-	Privileges    i5.PrivilegeSnapshotProvider
-	Costs         Costs
-	Facts         Facts
-	Guilds        Guilds
-	GuildActivity GuildActivity
-	Mail          Mail
-	Receipts      receipt.Store
-	ReceiptRead   receipt.Reader
+	Timed          gen.TimedRunner
+	Fresh          tx.Queryer
+	Store          Store
+	Content        Content
+	Fence          Fence
+	Players        Players
+	Functions      Functions
+	Directory      Directory
+	Heroes         Heroes
+	Pets           Heroes
+	Stats          Stats
+	Rooms          sharedroom.Service
+	RoomStore      sharedroom.Store
+	Invites        roominvite.Materializer
+	Combat         Combat
+	Privileges     i5.PrivilegeSnapshotProvider
+	Costs          Costs
+	Facts          Facts
+	Guilds         Guilds
+	GuildActivity  GuildActivity
+	Mail           Mail
+	Achievements   Achievements
+	BattleObserver BattleObserver
+	Receipts       receipt.Store
+	ReceiptRead    receipt.Reader
+	// RetentionDays is the R8 cap (U4) on the owner's report window; zero
+	// keeps the owner window alone.
+	RetentionDays int
 }
 
 func (s Mode) ready() bool {
 	return s.Timed.Binder.Time != nil && s.Fresh != nil && s.Store != nil && s.Content != nil && s.Fence != nil && s.Players != nil &&
 		s.Functions != nil && s.Directory != nil && s.Heroes != nil && s.Combat != nil && s.Privileges != nil && s.Costs != nil &&
-		s.Facts != nil && s.Mail != nil && s.Receipts != nil && s.ReceiptRead != nil
+		s.Facts != nil && s.Mail != nil && s.Achievements != nil && s.BattleObserver != nil && s.Receipts != nil && s.ReceiptRead != nil
 }
 
 // StartRequest is the stock 1346 request; a mate's pet is never sent by stock.

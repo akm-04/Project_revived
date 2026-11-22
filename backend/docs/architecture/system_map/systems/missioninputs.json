@@ -1,0 +1,69 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V3.json"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [],
+  "row_lock_methods": {},
+  "row_locks": [],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [],
+ "name": "missioninputs",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/campaignstore",
+  "internal/adapters/postgres/i5store"
+ ],
+ "tables": {
+  "owned": [],
+  "read": [
+   "campaign_nodes",
+   "campaign_players",
+   "player_crystal_spend_days",
+   "player_heroes",
+   "player_progression"
+  ],
+  "written": []
+ },
+ "tests": {
+  "integration": [
+   "missions",
+   "playerdisplay"
+  ],
+  "scenarios_naming": [],
+  "unit": [
+   "reader_test.go"
+  ]
+ }
+}

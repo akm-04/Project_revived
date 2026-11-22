@@ -1,0 +1,105 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [
+  {
+   "count": 2,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10A_EVENT_CENTRE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MISSIONS_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V3.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/RULING_I9-12_SEAL_REGISTRY_SYNC.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/activity_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [],
+  "row_lock_methods": {},
+  "row_locks": [],
+  "unresolved_methods": []
+ },
+ "login": [
+  "BootstrapProjection"
+ ],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/activity_dispatcher.go",
+    "line": 33
+   },
+   "mid": 229,
+   "name": "ACTIVITIES"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/activity_dispatcher.go",
+    "line": 33
+   },
+   "mid": 234,
+   "name": "LOAD_SINGLE_ACTIVITY"
+  }
+ ],
+ "name": "activitydirectory",
+ "pushes": [],
+ "stores": [],
+ "tables": {
+  "owned": [],
+  "read": [],
+  "written": []
+ },
+ "tests": {
+  "integration": [
+   "logincapacity",
+   "playerdisplay"
+  ],
+  "scenarios_naming": [],
+  "unit": [
+   "service_test.go"
+  ]
+ }
+}

@@ -10,6 +10,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"math"
+	"slices"
 	"strconv"
 	"time"
 )
@@ -75,7 +76,7 @@ func (s Service) HeroLibraryInputsTx(ctx context.Context, q tx.Queryer, scope In
 	if e != nil {
 		return out, e
 	}
-	if scope.ObservedAt.Before(root.UpdatedAt) || scope.ObservedAt.Before(lr.UpdatedAt) || scope.ObservedAt.Before(h.UpdatedAt) || scope.ObservedAt.Before(facts.UpdatedAt) || catalog.Feeding.ValidateApplied(facts.Applied) != nil {
+	if catalog.Feeding.ValidateApplied(facts.Applied) != nil {
 		return out, lib.ErrUnqualified
 	}
 	bonus, e := facts.FavorBonusBP()
@@ -104,9 +105,6 @@ func (s Service) PlayerCollectionInputsTx(ctx context.Context, q tx.Queryer, sco
 	if e != nil {
 		return out, e
 	}
-	if scope.ObservedAt.Before(hr.UpdatedAt) || scope.ObservedAt.Before(lr.UpdatedAt) {
-		return out, lib.ErrUnqualified
-	}
 	out.PopulationVersion = hr.StateVersion
 	out.LibraryRootVersion = lr.StateVersion
 	heroes, e := s.Heroes.ListHeroesTx(ctx, q, scope.Player)
@@ -120,16 +118,21 @@ func (s Service) PlayerCollectionInputsTx(ctx context.Context, q tx.Queryer, sco
 		out.Contributions[c.AttrID] += c.Hundredths
 		return nil
 	}
+	factsRows, e := s.Library.ListHeroesTx(ctx, q, scope.Player)
+	if e != nil {
+		return out, e
+	}
+	byPartner := make(map[int64]lib.HeroFacts, len(factsRows))
+	for _, f := range factsRows {
+		byPartner[f.Ref.PartnerID] = f
+	}
 	for _, h := range heroes {
 		rule, ok := catalog.Templates[h.TableID]
 		if !ok {
 			return out, lib.ErrUnqualified
 		}
-		f, e := s.Library.ReadHeroTx(ctx, q, h.Ref())
-		if e != nil {
-			return out, e
-		}
-		if scope.ObservedAt.Before(h.UpdatedAt) || scope.ObservedAt.Before(f.UpdatedAt) {
+		f, ok := byPartner[h.PartnerID]
+		if !ok {
 			return out, lib.ErrUnqualified
 		}
 		if f.Married {
@@ -177,6 +180,10 @@ func (s Service) OverlayRosterTx(ctx context.Context, q tx.Queryer, actor identi
 	if !ok {
 		return lib.ErrUnqualified
 	}
+	root, e := s.Library.ReadRootTx(ctx, q, actor.PlayerID)
+	if e != nil {
+		return e
+	}
 	for key, raw := range rows {
 		partner, e := strconv.ParseInt(key, 10, 64)
 		if e != nil {
@@ -195,6 +202,14 @@ func (s Service) OverlayRosterTx(ctx context.Context, q tx.Queryer, actor identi
 		row["feed_attrs"] = f.Facts.Applied
 		row["collect_quality_stage"] = f.Facts.QualityStage
 		row["collect_star_stage"] = f.Facts.StarStage
+		row["is_board"] = int64(0)
+		row["board_card"] = int64(1)
+		row["board_model_id"] = int64(0)
+		if root.BoardPartner == partner {
+			row["is_board"] = int64(1)
+			row["board_card"] = root.BoardCard
+			row["board_model_id"] = root.BoardModelID
+		}
 	}
 	return nil
 }
@@ -204,7 +219,7 @@ func bit(v bool) int64 {
 	}
 	return 0
 }
-func (s Service) Read(ctx context.Context, a identity.ActorContext, op operation.Context, mid uint16, partner int64) (map[string]any, error) {
+func (s Service) Read(ctx context.Context, a identity.ActorContext, op operation.Context, mid uint16, targetIdentifier int64) (map[string]any, error) {
 	var body map[string]any
 	if !s.complete() {
 		return nil, ErrUnavailable
@@ -220,7 +235,12 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, op operation
 		if !active {
 			return ErrUnavailable
 		}
-		return s.ReadBodyTx(ctx, sc.Tx, a, revision, sc.Operation.DecisionAt(), mid, partner, &body)
+		if mid == 841 {
+			if e := s.ensurePartnerMissionsTx(ctx, sc.Tx, a.PlayerID, targetIdentifier, revision, sc.Operation.DecisionAt()); e != nil {
+				return e
+			}
+		}
+		return s.ReadBodyTx(ctx, sc.Tx, a, revision, sc.Operation.DecisionAt(), mid, targetIdentifier, &body)
 	})
 	if e != nil {
 		return nil, e
@@ -230,7 +250,7 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, op operation
 	}
 	return body, nil
 }
-func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorContext, revision string, at time.Time, mid uint16, partner int64, out *map[string]any) error {
+func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorContext, revision string, at time.Time, mid uint16, targetIdentifier int64, out *map[string]any) error {
 	scope := InputScope{a.PlayerID, revision, at}
 	if q == nil || out == nil || !scope.valid() {
 		return lib.ErrUnqualified
@@ -251,7 +271,7 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 		return nil
 	}
 	if mid == 853 {
-		f, e := s.HeroLibraryInputsTx(ctx, q, scope, partner)
+		f, e := s.HeroLibraryInputsTx(ctx, q, scope, targetIdentifier)
 		if e != nil {
 			return e
 		}
@@ -276,12 +296,71 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 		*out = map[string]any{"is_award": bits}
 		return nil
 	}
+	if mid == 841 {
+		catalog, e := s.Content.LibraryCatalogTx(ctx, q, revision)
+		if e != nil {
+			return e
+		}
+		return s.readPartnerMissions(ctx, q, scope, targetIdentifier, catalog, out)
+	}
+	if mid == 838 || mid == 842 {
+		return s.readPartnerDialogsOrActs(ctx, q, a, scope, targetIdentifier, mid, out)
+	}
 	if mid != 836 {
 		return errors.New("library: unsupported read")
+	}
+	catalog, e := s.Content.LibraryCatalogTx(ctx, q, revision)
+	if e != nil {
+		return e
 	}
 	heroes, e := s.Heroes.ListHeroesTx(ctx, q, a.PlayerID)
 	if e != nil {
 		return e
+	}
+	dialogs, e := s.Library.ListDialogsTx(ctx, q, a.PlayerID)
+	if e != nil {
+		return e
+	}
+	missions, e := s.Library.ListMissionsTx(ctx, q, a.PlayerID)
+	if e != nil {
+		return e
+	}
+	awards, e := s.Library.ListActAwardsTx(ctx, q, a.PlayerID)
+	if e != nil {
+		return e
+	}
+	talkClaims, e := s.Library.ListTalkClaimsTx(ctx, q, a.PlayerID)
+	if e != nil {
+		return e
+	}
+	cgClaims, e := s.Library.ListCGClaimsTx(ctx, q, a.PlayerID)
+	if e != nil {
+		return e
+	}
+	backgrounds, e := s.Library.ListBackgroundsTx(ctx, q, a.PlayerID)
+	if e != nil {
+		return e
+	}
+	heroLogs, e := s.Library.ListHeroLogsTx(ctx, q, a.PlayerID)
+	if e != nil {
+		return e
+	}
+	dialogueCounts, e := s.Library.ListHeroDialogueCountsTx(ctx, q, a.PlayerID)
+	if e != nil {
+		return e
+	}
+	root, e := s.Library.ReadRootTx(ctx, q, a.PlayerID)
+	if e != nil {
+		return e
+	}
+
+	dialogsByPartner := map[int64][]lib.DialogFact{}
+	for _, d := range dialogs {
+		dialogsByPartner[d.PartnerID] = append(dialogsByPartner[d.PartnerID], d)
+	}
+	missionsByPartner := map[int64][]lib.MissionFact{}
+	for _, m := range missions {
+		missionsByPartner[m.PartnerID] = append(missionsByPartner[m.PartnerID], m)
 	}
 	infos := map[string]any{}
 	for _, h := range heroes {
@@ -289,10 +368,231 @@ func (s Service) ReadBodyTx(ctx context.Context, q tx.Queryer, a identity.ActorC
 		if e != nil {
 			return e
 		}
-		infos[strconv.FormatInt(h.PartnerID, 10)] = map[string]any{"favor_degree": f.Facts.Favor, "is_married": bit(f.Facts.Married)}
+		rule, ok := catalog.Templates[h.TableID]
+		if !ok {
+			return lib.ErrUnqualified
+		}
+		infos[strconv.FormatInt(h.PartnerID, 10)] = map[string]any{
+			"favor_degree":     f.Facts.Favor,
+			"is_married":       bit(f.Facts.Married),
+			"partner_dialogs":  projectPartnerDialogs(catalog, rule.DialogEnabled, f.Facts.Favor, f.Facts.Married, h.PartnerID, dialogsByPartner[h.PartnerID]),
+			"partner_missions": projectPartnerMissions(catalog, f.Facts.Favor, h.PartnerID, missionsByPartner[h.PartnerID]),
+			"partner_acts":     projectPartnerActs(catalog, h.PartnerID, f.Facts.Favor, awards),
+			"partner_logs":     partnerLogMap(heroLogs, h.PartnerID, f.Facts.Favor, dialogueCounts[h.PartnerID], f.Facts.CreatedAt, at),
+		}
 	}
-	*out = map[string]any{"library_infos": infos, "library_talk_infos": map[string]any{}}
+
+	talkInfos := make(map[string]any, len(catalog.Talks))
+	for id := range catalog.Talks {
+		talkInfos[strconv.FormatInt(id, 10)] = int64(0)
+	}
+	for _, claim := range talkClaims {
+		if _, ok := catalog.Talks[claim.TalkID]; ok {
+			talkInfos[strconv.FormatInt(claim.TalkID, 10)] = int64(1)
+		}
+	}
+	cgInfos := make([]int64, 0, len(cgClaims))
+	for _, claim := range cgClaims {
+		if _, ok := catalog.CGs[claim.CGID]; ok {
+			cgInfos = append(cgInfos, claim.CGID)
+		}
+	}
+	hasBuy := make([]int64, 0, len(backgrounds))
+	for _, owned := range backgrounds {
+		if _, ok := catalog.Backgrounds[owned.BgID]; ok {
+			hasBuy = append(hasBuy, owned.BgID)
+		}
+	}
+
+	*out = map[string]any{
+		"library_infos":      infos,
+		"library_talk_infos": talkInfos,
+		"library_cg_infos":   cgInfos,
+		"library_bg_infos": map[string]any{
+			"bg_main": root.BgMain, "bg_room": root.BgRoom, "has_buy": hasBuy, "server_time": at.Unix(),
+		},
+	}
 	return nil
+}
+
+// projectPartnerMissions projects the hero's full unlocked set: a stored row as
+// stored and a missing one as a PROCEED row, ordered by mission_id.
+func projectPartnerMissions(catalog lib.Catalog, favor, partnerID int64, rows []lib.MissionFact) []any {
+	stored := map[int64]lib.MissionFact{}
+	for _, row := range rows {
+		if row.PartnerID == partnerID {
+			stored[row.MissionID] = row
+		}
+	}
+	unlocked := catalog.UnlockedMissions(favor)
+	out := make([]any, 0, len(unlocked))
+	for _, missionID := range unlocked {
+		if row, ok := stored[missionID]; ok {
+			out = append(out, partMissionRow(row.MissionID, row.Process, row.MissionState))
+			continue
+		}
+		out = append(out, partMissionRow(missionID, 0, lib.MissionProceed))
+	}
+	return out
+}
+
+func partMissionRow(missionID, process, state int64) map[string]any {
+	return map[string]any{"mission_id": missionID, "process": process, "mission_state": state}
+}
+
+func (s Service) readPartnerMissions(ctx context.Context, q tx.Queryer, scope InputScope, partnerID int64, catalog lib.Catalog, out *map[string]any) error {
+	inputs, e := s.HeroLibraryInputsTx(ctx, q, scope, partnerID)
+	if e != nil {
+		return e
+	}
+	missions, e := s.Library.ListMissionsTx(ctx, q, scope.Player)
+	if e != nil {
+		return e
+	}
+	*out = map[string]any{"mission_list": projectPartnerMissions(catalog, inputs.Facts.Favor, partnerID, missions)}
+	return nil
+}
+
+func (s Service) readPartnerDialogsOrActs(ctx context.Context, q tx.Queryer, a identity.ActorContext, scope InputScope, partnerID int64, mid uint16, out *map[string]any) error {
+	catalog, e := s.Content.LibraryCatalogTx(ctx, q, scope.ContentRevision)
+	if e != nil {
+		return e
+	}
+	heroes, e := s.Heroes.ListHeroesTx(ctx, q, a.PlayerID)
+	if e != nil {
+		return e
+	}
+	var tableID int64
+	found := false
+	for _, h := range heroes {
+		if h.PartnerID == partnerID {
+			tableID, found = h.TableID, true
+			break
+		}
+	}
+	if !found {
+		return lib.ErrUnqualified
+	}
+	rule, ok := catalog.Templates[tableID]
+	if !ok {
+		return lib.ErrUnqualified
+	}
+	inputs, e := s.HeroLibraryInputsTx(ctx, q, scope, partnerID)
+	if e != nil {
+		return e
+	}
+	if mid == 842 {
+		awards, e := s.Library.ListActAwardsTx(ctx, q, a.PlayerID)
+		if e != nil {
+			return e
+		}
+		*out = map[string]any{"partner_acts": projectPartnerActs(catalog, partnerID, inputs.Facts.Favor, awards)}
+		return nil
+	}
+	stored, e := s.Library.ListDialogsTx(ctx, q, a.PlayerID)
+	if e != nil {
+		return e
+	}
+	*out = map[string]any{"partner_dialogs": projectPartnerDialogs(catalog, rule.DialogEnabled, inputs.Facts.Favor, inputs.Facts.Married, partnerID, stored)}
+	return nil
+}
+
+// projectPartnerDialogs is the one sorted view 836, 838 and the saved 840 reply
+// share: statically open catalog dialogs plus retained known rows, with the
+// stored read/award/select bits preserved. It writes nothing.
+// partnerLogMap is the single Girls Log projection shared by 836 and the
+// library.partner_log.v1 notice. The explicit acquisition row wins; a facet
+// without one is dated from its creation time (PRIVATE_POLICY).
+func partnerLogMap(heroLogs []lib.HeroLogFact, partnerID, favor, dialogueCount int64, created, at time.Time) map[string]any {
+	acquiredAt := created
+	explicitAcquisition := false
+	out := map[string]any{}
+	for _, row := range heroLogs {
+		if row.PartnerID != partnerID {
+			continue
+		}
+		out[strconv.FormatInt(row.LogID, 10)] = map[string]any{"time": row.OccurredAt.Unix()}
+		if lib.IsAcquisitionLog(row.LogID) && (!explicitAcquisition || row.OccurredAt.Before(acquiredAt)) {
+			acquiredAt = row.OccurredAt
+			explicitAcquisition = true
+		}
+	}
+	if !explicitAcquisition {
+		out[strconv.FormatInt(lib.LogAcquired, 10)] = map[string]any{"time": acquiredAt.Unix()}
+	}
+	for _, logID := range lib.FavorLogIDsCrossed(0, favor) {
+		key := strconv.FormatInt(logID, 10)
+		if _, present := out[key]; !present {
+			out[key] = map[string]any{"time": acquiredAt.Unix()}
+		}
+	}
+	// The durable completion counter, not the distinct dialog rows, decides
+	// these milestones; a written row keeps its own time.
+	for _, logID := range lib.DialogueLogIDsReached(0, dialogueCount) {
+		key := strconv.FormatInt(logID, 10)
+		if _, present := out[key]; !present {
+			out[key] = map[string]any{"time": acquiredAt.Unix()}
+		}
+	}
+	for _, milestone := range lib.HoldTimeLogsReached(acquiredAt, at) {
+		out[strconv.FormatInt(milestone.LogID, 10)] = map[string]any{"time": milestone.OccurredAt.Unix()}
+	}
+	return out
+}
+
+func projectPartnerDialogs(catalog lib.Catalog, enabled bool, favor int64, married bool, partnerID int64, stored []lib.DialogFact) []DialogRow {
+	if !enabled {
+		return []DialogRow{}
+	}
+	byID := map[int64]lib.DialogFact{}
+	for _, row := range stored {
+		if row.PartnerID == partnerID {
+			byID[row.DialogID] = row
+		}
+	}
+	ids := map[int64]bool{}
+	for _, id := range catalog.OpenDialogIDs(favor, married) {
+		ids[id] = true
+	}
+	for id := range byID {
+		if _, known := catalog.DialogConfigs[id]; known {
+			ids[id] = true
+		}
+	}
+	ordered := make([]int64, 0, len(ids))
+	for id := range ids {
+		ordered = append(ordered, id)
+	}
+	slices.Sort(ordered)
+	dialogs := make([]DialogRow, 0, len(ordered))
+	for _, id := range ordered {
+		row, ok := byID[id]
+		if !ok {
+			row = lib.DialogFact{PartnerID: partnerID, DialogID: id}
+		}
+		dialogs = append(dialogs, DialogRow{DialogID: row.DialogID, IsRead: bit(row.IsRead), IsAwarded: bit(row.IsAwarded), SelectID: row.SelectID})
+	}
+	return dialogs
+}
+
+// projectPartnerActs returns the unlocked prefix the client indexes. The stock
+// touch window hides a button whose slot is nil (HeroTouchGameWindow.lua:164-181),
+// and library_amour stages unlock acts in order, so a shorter array gates them.
+func projectPartnerActs(catalog lib.Catalog, partnerID, favor int64, awards []lib.ActAwardFact) []ActSlot {
+	awarded := map[int64]bool{}
+	for _, award := range awards {
+		if award.PartnerID == partnerID {
+			awarded[award.ActID] = true
+		}
+	}
+	slots := make([]ActSlot, 0, lib.ActCount)
+	for id := int64(1); id <= lib.ActCount; id++ {
+		if !catalog.ActUnlocked(id, favor) {
+			break
+		}
+		slots = append(slots, ActSlot{IsAwarded: bit(awarded[id])})
+	}
+	return slots
 }
 
 // TitleProgressTx is the marriage title progress (C6_SELECTED_COSMETIC_ORIGINS_V1):

@@ -1,0 +1,182 @@
+{
+ "background": [
+  {
+   "enqueued_by": [
+    "gxb-api",
+    "gxb-content-broadcast-deploy",
+    "gxb-worker"
+   ],
+   "kind": "river",
+   "workers": [
+    "gxb-content-broadcast-deploy",
+    "gxb-worker"
+   ]
+  }
+ ],
+ "content": [
+  "content_guild_broadcast_policies"
+ ],
+ "contracts": [
+  {
+   "count": 3,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/guild_broadcast.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "guild_broadcast_recipients": [
+    "guildbroadcaststore.ListDuePendingForUpdateTx",
+    "guildbroadcaststore.LockBindingTx"
+   ],
+   "guild_memberships": [
+    "guildstore.LockMembershipTx"
+   ],
+   "guilds": [
+    "guildstore.LockGuildTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "guild_broadcast_recipients",
+   "guild_memberships",
+   "guilds",
+   "players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_broadcast.go",
+    "line": 60
+   },
+   "mid": 588,
+   "name": "MESSAGE_TEAM"
+  }
+ ],
+ "name": "guildbroadcast",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/guildbroadcaststore",
+  "internal/adapters/postgres/guildstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore"
+ ],
+ "tables": {
+  "owned": [
+   "guild_broadcast_recipients",
+   "guild_broadcast_sources"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "content_guild_broadcast_policies",
+   "gameplay_contexts",
+   "guild_audit_log",
+   "guild_broadcast_recipients",
+   "guild_broadcast_sources",
+   "guild_membership_events",
+   "guild_memberships",
+   "guilds",
+   "gxb_content_activation",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "player_directory_profiles",
+   "players"
+  ],
+  "written": [
+   "guild_audit_log",
+   "guild_broadcast_recipients",
+   "guild_broadcast_sources",
+   "gxb_operation_receipts"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "guildbroadcast"
+  ],
+  "scenarios_naming": [],
+  "unit": [
+   "membership_snapshot_test.go",
+   "reference_test.go",
+   "request_test.go",
+   "stored_reference_test.go"
+  ]
+ }
+}

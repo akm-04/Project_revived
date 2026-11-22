@@ -14,6 +14,11 @@ const SelectedID int64 = 100014
 var ErrUnavailable = errors.New("achievement: unavailable history or producer")
 var ErrConflict = errors.New("achievement: conflicting fact or coherent scope")
 
+// ErrOvertaken is an observation whose decision time is older than the stored
+// row. A producer that raced a newer accepted command must be refused as stale
+// state, not reported as corruption.
+var ErrOvertaken = errors.New("achievement: observation overtaken by a newer fact")
+
 func RevisionValid(s string) bool {
 	b, e := hex.DecodeString(s)
 	return e == nil && len(b) == 32 && hex.EncodeToString(b) == s
@@ -52,7 +57,13 @@ func (r Root) Validate() error {
 // ObservePopulation reuses I5's pure objective reducer; Achievement remains the
 // sole persistence owner. No I5 stock-family rows or award claims are created.
 func (r Root) ObservePopulation(c Catalog, n int64, at time.Time) (Root, bool, error) {
-	if r.Validate() != nil || c.Validate() != nil || n < 1 || n > 9007199254740991 || at.Before(r.UpdatedAt) {
+	// The domain layer cannot import the application helper (I0 import matrix),
+	// so the effective observation is computed locally for the write.
+	observedAt := at
+	if r.UpdatedAt.After(observedAt) {
+		observedAt = r.UpdatedAt
+	}
+	if r.Validate() != nil || c.Validate() != nil || n < 1 || n > 9007199254740991 {
 		return Root{}, false, ErrConflict
 	}
 	old := r.Progress
@@ -61,7 +72,7 @@ func (r Root) ObservePopulation(c Catalog, n int64, at time.Time) (Root, bool, e
 		inst := objective.Instance{PlayerID: r.PlayerID, ProgramID: Policy, ObjectiveID: int64(j + 1), DefinitionRevision: Policy, ContentRevision: r.ContentRevision, Progress: r.Progress, CompletedAt: times[j], ClaimState: objective.Unclaimed, StateVersion: r.StateVersion}
 		def := objective.Definition{ProgramID: Policy, ObjectiveID: int64(j + 1), DefinitionRevision: Policy, Strategy: objective.HighWaterFromCanonicalState, AcceptedFactKind: "MARRIED_HERO_POPULATION", Target: target}
 		fact := objective.Fact{PlayerID: r.PlayerID, SourceDomain: "Library", SourceBusinessKey: "validated-prepared-source-transition", Kind: def.AcceptedFactKind, Value: n}
-		v, _, e := objective.ApplyFact(inst, def, fact, at)
+		v, _, e := objective.ApplyFact(inst, def, fact, observedAt)
 		if e != nil {
 			return Root{}, false, e
 		}
@@ -70,7 +81,7 @@ func (r Root) ObservePopulation(c Catalog, n int64, at time.Time) (Root, bool, e
 	if n > old {
 		r.Progress = n
 		r.StateVersion++
-		r.UpdatedAt = at.UTC()
+		r.UpdatedAt = observedAt.UTC()
 	}
 	return r, n > old, r.Validate()
 }
@@ -139,6 +150,9 @@ const (
 	ArenaStreakID    int64 = 100003
 	LeagueDaysID     int64 = 100032
 	StreakTopRank    int64 = 3
+	// FactCountPolicy covers the I9-11E facts whose producer settles a bounded
+	// count inside its own transaction; it is not an owner-value read.
+	FactCountPolicy = "I9_11E_ACHIEVEMENT_FACT_V1"
 )
 
 type streakProfile struct {
@@ -149,17 +163,33 @@ type streakProfile struct {
 }
 
 var streakProfiles = map[int64]streakProfile{
-	LeagueDaysID:     {"C5F_LEAGUE_TOP5_DAYS_V2", [3]int64{1, 3, 7}, 0},
-	NormalHeroesID:   {OwnedStatePolicy, [3]int64{10, 50, 150}, 0},
-	AwakenedHeroesID: {OwnedStatePolicy, [3]int64{1, 30, 50}, 0},
-	SkinsID:          {OwnedStatePolicy, [3]int64{1, 10, 20}, 0},
-	PetsID:           {OwnedStatePolicy, [3]int64{2, 8, 15}, 0},
-	TextbooksID:      {OwnedStatePolicy, [3]int64{1, 15, 30}, 0},
-	RegionsID:        {OwnedStatePolicy, [3]int64{1, 3, 5}, 0},
-	SubjectsID:       {OwnedStatePolicy, [3]int64{50, 200, 500}, 0},
-	SuitsID:          {OwnedStatePolicy, [3]int64{1, 15, 30}, 0},
-	RoomsID:          {OwnedStatePolicy, [3]int64{5, 10, 15}, 0},
-	ExpandedRoomsID:  {OwnedStatePolicy, [3]int64{5, 10, 15}, 0},
+	LeagueDaysID:        {"C5F_LEAGUE_TOP5_DAYS_V2", [3]int64{1, 3, 7}, 0},
+	GuildDamageID:       {OwnedStatePolicy, [3]int64{100, 500, 1000}, 0},
+	SkyTowerID:          {OwnedStatePolicy, [3]int64{50, 80, 100}, 0},
+	CampaignStarsID:     {OwnedStatePolicy, [3]int64{100, 600, 1200}, 0},
+	SchoolStoriesID:     {OwnedStatePolicy, [3]int64{1, 15, 30}, 0},
+	GraduatedStudentsID: {OwnedStatePolicy, [3]int64{1, 3, 5}, 0},
+	MemoirFloorsID:      {OwnedStatePolicy, [3]int64{1, 2, 3}, 0},
+	OccultChaptersID:    {OwnedStatePolicy, [3]int64{1, 3, 5}, 0},
+	TitanID:             {OwnedStatePolicy, [3]int64{1, 5, 10}, 0},
+	NormalHeroesID:      {OwnedStatePolicy, [3]int64{10, 50, 150}, 0},
+	AwakenedHeroesID:    {OwnedStatePolicy, [3]int64{1, 30, 50}, 0},
+	SkinsID:             {OwnedStatePolicy, [3]int64{1, 10, 20}, 0},
+	PetsID:              {OwnedStatePolicy, [3]int64{2, 8, 15}, 0},
+	TextbooksID:         {OwnedStatePolicy, [3]int64{1, 15, 30}, 0},
+	RegionsID:           {OwnedStatePolicy, [3]int64{1, 3, 5}, 0},
+	SubjectsID:          {OwnedStatePolicy, [3]int64{50, 200, 500}, 0},
+	SuitsID:             {OwnedStatePolicy, [3]int64{1, 15, 30}, 0},
+	RoomsID:             {OwnedStatePolicy, [3]int64{5, 10, 15}, 0},
+	ExpandedRoomsID:     {OwnedStatePolicy, [3]int64{5, 10, 15}, 0},
+	// achievement.lua rows 100006/100007/100012: 1/3/6 bosses, 1/3/6 bosses,
+	// 3/4/5 girls in one "buy 10".
+	FantasyTopRankID: {FactCountPolicy, [3]int64{1, 3, 6}, 0},
+	FantasyDamageID:  {FactCountPolicy, [3]int64{1, 3, 6}, 0},
+	// 100011 is day-scoped: progress falls with a new day's first count; its
+	// thresholds come from the catalog row, not this profile.
+	GreatCustomerID:  {FactCountPolicy, [3]int64{}, 0},
+	MediumTenPullID:  {FactCountPolicy, [3]int64{3, 4, 5}, 0},
 	TopFloorStreakID: {"C5B_TOP_FLOOR_CHALLENGER_STREAK_V1", [3]int64{3, 6, 10}, 1},
 	WeeklyStreakID:   {"C5C_ONE_ON_ONE_DOMINATOR_STREAK_V1", [3]int64{1, 2, 3}, 7},
 	WinStreakID:      {"C5C_ONE_ON_ONE_WIN_STREAK_V1", [3]int64{5, 15, 30}, 0},
@@ -199,10 +229,13 @@ func (s Streak) Validate() error {
 	return nil
 }
 
-func (s Streak) profile(c Catalog, at time.Time) (streakProfile, error) {
+func (s Streak) profile(c Catalog) (streakProfile, error) {
 	profile := streakProfiles[s.AchievementID]
 	index := s.AchievementID - c.Rows[0].ID
-	if s.Validate() != nil || c.Validate() != nil || index < 0 || index >= int64(len(c.Rows)) || c.Rows[index].Thresholds != profile.thresholds || at.Before(s.UpdatedAt) {
+	if s.Validate() != nil || c.Validate() != nil || index < 0 || index >= int64(len(c.Rows)) {
+		return profile, ErrConflict
+	}
+	if s.AchievementID != GreatCustomerID && c.Rows[index].Thresholds != profile.thresholds {
 		return profile, ErrConflict
 	}
 	return profile, nil
@@ -224,8 +257,11 @@ func (s Streak) advance(profile streakProfile, next int64, at time.Time) Streak 
 // ObserveDay applies one settled period (a day number); a period at or before
 // the last observed one is a no-op.
 func (s Streak) ObserveDay(c Catalog, day int64, top bool, at time.Time) (Streak, bool, error) {
-	profile, err := s.profile(c, at)
-	if err != nil || profile.step == 0 {
+	profile, err := s.profile(c)
+	if err != nil {
+		return Streak{}, false, err
+	}
+	if profile.step == 0 {
 		return Streak{}, false, ErrConflict
 	}
 	if s.LastDay != nil && day <= *s.LastDay {
@@ -238,20 +274,72 @@ func (s Streak) ObserveDay(c Catalog, day int64, top bool, at time.Time) (Streak
 			next = s.Current + 1
 		}
 	}
-	s = s.advance(profile, next, at)
+	s = s.advance(profile, next, s.effectiveObservation(at))
 	s.LastDay = &day
 	return s, true, s.Validate()
 }
 
-// ObserveCount records a counted streak's current value.
-func (s Streak) ObserveCount(c Catalog, count int64, at time.Time) (Streak, bool, error) {
-	profile, err := s.profile(c, at)
-	if err != nil || profile.step != 0 || count < 0 {
+// ObserveHighWater records the best counted value ever seen; a lower later
+// observation leaves both progress and earned tiers alone.
+func (s Streak) ObserveHighWater(c Catalog, count int64, at time.Time) (Streak, bool, error) {
+	profile, err := s.profile(c)
+	if err != nil {
+		return Streak{}, false, err
+	}
+	if profile.step != 0 || count < 0 {
+		return Streak{}, false, ErrConflict
+	}
+	if count <= s.Current {
+		return s, false, nil
+	}
+	s = s.advance(profile, count, s.effectiveObservation(at))
+	return s, true, s.Validate()
+}
+
+// ObserveDailyCount records today's day-scoped count. Progress may fall when a
+// new day restarts the count; earned tiers are never cleared. The targets are
+// the pinned catalog row's thresholds, never constants.
+func (s Streak) ObserveDailyCount(c Catalog, count int64, at time.Time) (Streak, bool, error) {
+	profile, err := s.profile(c)
+	if err != nil {
+		return Streak{}, false, err
+	}
+	if profile.step != 0 || count < 0 {
 		return Streak{}, false, ErrConflict
 	}
 	if count == s.Current {
 		return s, false, nil
 	}
-	s = s.advance(profile, count, at)
+	profile.thresholds = c.Rows[s.AchievementID-c.Rows[0].ID].Thresholds
+	s = s.advance(profile, count, s.effectiveObservation(at))
+	return s, true, s.Validate()
+}
+
+// effectiveObservation keeps a writer's timestamps monotone after a clock
+// rollback (the application helper is not importable from the domain layer).
+func (s Streak) effectiveObservation(at time.Time) time.Time {
+	observedAt := at
+	if s.UpdatedAt.After(observedAt) {
+		observedAt = s.UpdatedAt
+	}
+	if s.CreatedAt.After(observedAt) {
+		observedAt = s.CreatedAt
+	}
+	return observedAt
+}
+
+// ObserveCount records a counted streak's current value.
+func (s Streak) ObserveCount(c Catalog, count int64, at time.Time) (Streak, bool, error) {
+	profile, err := s.profile(c)
+	if err != nil {
+		return Streak{}, false, err
+	}
+	if profile.step != 0 || count < 0 {
+		return Streak{}, false, ErrConflict
+	}
+	if count == s.Current {
+		return s, false, nil
+	}
+	s = s.advance(profile, count, s.effectiveObservation(at))
 	return s, true, s.Validate()
 }

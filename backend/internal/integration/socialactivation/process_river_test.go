@@ -36,7 +36,7 @@ func TestD07ProductionProcessesWorldListenerFanoutAndRestart(t *testing.T) {
 	c2 := worldLogin(t, world, b2, 2)
 	// Wait for actual dedicated LISTEN and distinguish it from owner advisory session.
 	deadline := time.Now().Add(3 * time.Second)
-	for f.number(`SELECT count(*) FROM pg_stat_activity WHERE application_name='gxb-v2-i4-realtime' AND query LIKE 'LISTEN %'`) == 0 {
+	for f.number(`SELECT count(*) FROM pg_stat_activity WHERE application_name='gxb-v2-i4-realtime' AND datname=current_database() AND query LIKE 'LISTEN %'`) == 0 {
 		if time.Now().After(deadline) {
 			t.Fatal("LISTEN missing")
 		}
@@ -57,10 +57,10 @@ func TestD07ProductionProcessesWorldListenerFanoutAndRestart(t *testing.T) {
 		t.Fatal(body)
 	}
 	// Kill only the dedicated listener connection. Reconnect must use a new PID.
-	old := f.number(`SELECT pid FROM pg_stat_activity WHERE application_name='gxb-v2-i4-realtime' AND query LIKE 'LISTEN %' LIMIT 1`)
+	old := f.number(`SELECT pid FROM pg_stat_activity WHERE application_name='gxb-v2-i4-realtime' AND datname=current_database() AND query LIKE 'LISTEN %' LIMIT 1`)
 	f.sql(`SELECT pg_terminate_backend($1)`, old)
 	deadline = time.Now().Add(3 * time.Second)
-	for f.number(`SELECT count(*) FROM pg_stat_activity WHERE application_name='gxb-v2-i4-realtime' AND query LIKE 'LISTEN %' AND pid<>$1`, old) == 0 {
+	for f.number(`SELECT count(*) FROM pg_stat_activity WHERE application_name='gxb-v2-i4-realtime' AND datname=current_database() AND query LIKE 'LISTEN %' AND pid<>$1`, old) == 0 {
 		if time.Now().After(deadline) {
 			t.Fatal("listener reconnect missing")
 		}

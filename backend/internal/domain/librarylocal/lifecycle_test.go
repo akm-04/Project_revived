@@ -21,20 +21,20 @@ func TestRelationshipProducerAndSaveSeparation(t *testing.T) {
 	rule := TemplateRule{TableID: 10001001, RelationshipSourceID: 10001001, DialogEnabled: true, GiftLikeType: 1, GiftDislikeType: 2}
 	now := time.Unix(101, 0).UTC()
 	ring := GiftRule{ItemID: 50001112, Ring: true}
-	if _, _, e := f.ApplyGift(rule, ring, now); e != ErrMarriageGate {
+	if _, _, e := f.ApplyGift(rule, ring, 1, now); e != ErrMarriageGate {
 		t.Fatalf("ring without favor: %v", e)
 	}
 	f.Favor = 1999
-	next, changed, e := f.ApplyGift(rule, GiftRule{ItemID: 50001113, Category: 1, BaseFavor: 100}, now)
+	next, changed, e := f.ApplyGift(rule, GiftRule{ItemID: 50001113, Category: 1, BaseFavor: 100}, 1, now)
 	if e != nil || !changed || next.Favor != 2000 || f.Favor != 1999 {
 		t.Fatalf("gift clamp/pure effect: %+v %v", next, e)
 	}
 	f = next
-	f, changed, e = f.ApplyGift(rule, ring, now)
+	f, changed, e = f.ApplyGift(rule, ring, 1, now)
 	if e != nil || !changed || !f.Married {
 		t.Fatal(f, e)
 	}
-	if _, changed, e = f.ApplyGift(rule, ring, now); e != nil || changed {
+	if _, changed, e = f.ApplyGift(rule, ring, 1, now); e != nil || changed {
 		t.Fatal("repeat ring must converge without debit", e)
 	}
 	id, _ := ids.ParseUUID("12345678-1234-4234-8234-123456789012")
@@ -66,6 +66,29 @@ func TestRelationshipProducerAndSaveSeparation(t *testing.T) {
 		t.Fatal("negative redo/apply", e)
 	}
 }
+func TestApplyGiftQuantityScalesAndClamps(t *testing.T) {
+	f := actor(t)
+	rule := TemplateRule{TableID: 10001001, RelationshipSourceID: 10001001, DialogEnabled: true, GiftLikeType: 1, GiftDislikeType: 2}
+	now := time.Unix(101, 0).UTC()
+	gift := GiftRule{ItemID: 50005011, Category: 1, BaseFavor: 8}
+	next, changed, e := f.ApplyGift(rule, gift, 3, now)
+	if e != nil || !changed || next.Favor != 39 || f.Favor != 0 || next.StateVersion != f.StateVersion+1 {
+		t.Fatalf("bulk gift effect %+v %v", next, e)
+	}
+	f.Favor = 1990
+	next, _, e = f.ApplyGift(rule, gift, 5, now)
+	if e != nil || next.Favor != 2000 {
+		t.Fatalf("bulk gift clamp %+v %v", next, e)
+	}
+	f.Favor = 0
+	if _, _, e = f.ApplyGift(rule, GiftRule{ItemID: 50001112, Ring: true}, 2, now); e != ErrInvalidGift {
+		t.Fatalf("bulk ring accepted: %v", e)
+	}
+	if _, _, e = f.ApplyGift(rule, gift, 0, now); e != ErrInvalidGift {
+		t.Fatalf("zero count accepted: %v", e)
+	}
+}
+
 func TestCollectionMonotonicPerInstanceAndExactFraction(t *testing.T) {
 	f := actor(t)
 	r := NormalCollectionRule{SourceID: 10001001, AttrID: 4, QualityThresholds: []int64{1, 2, 4, 7, 12, 15}, QualityHundredths: []int64{12000, 15000, 18000, 21000, 24000, 30000}, StarThresholds: []int64{4, 5}, StarHundredths: []int64{4000, 10000}}

@@ -46,7 +46,7 @@ type WorkerOutput struct {
 }
 
 // ErrWorkerSaturated refuses an attempt before any worker ran it
-// (I8_WORKER_ADMISSION_V1); the attempt stays untouched and runnable.
+// (I8_WORKER_ADMISSION_V2); the attempt stays untouched and runnable.
 var ErrWorkerSaturated = fmt.Errorf("%w: worker admission saturated", d.ErrResolverRetryable)
 
 // Worker resolves one snapshot in an isolated process. Errors wrap
@@ -59,6 +59,7 @@ type Worker interface {
 type Store interface {
 	LockLocatorTx(context.Context, tx.Tx, d.Locator) error
 	FindUnresolvedTx(context.Context, tx.Queryer, d.Locator) (d.Attempt, bool, error)
+	CurrentAttemptTx(context.Context, tx.Queryer, d.Locator) (d.Attempt, bool, error)
 	FindTerminalTx(context.Context, tx.Queryer, d.Locator, string) (d.Attempt, bool, error)
 	InsertSnapshotTx(context.Context, tx.Tx, string, []byte) error
 	ReadSnapshotTx(context.Context, tx.Queryer, string) ([]byte, error)
@@ -92,6 +93,12 @@ type Roster interface {
 
 type Stats interface {
 	HeroTx(context.Context, ca.CoherentReadScope, character.HeroRef, publicstats.View) (publicstats.Result, error)
+	// ScaledHeroTx evaluates the same hero at an overridden level/star/colour
+	// for a mode that scales a copied opponent snapshot.
+	ScaledHeroTx(context.Context, ca.CoherentReadScope, character.HeroRef, publicstats.View, int64, int64, int64) (publicstats.Result, error)
+	// FreezeHeroTx reads one hero's canonical inputs once so a mode can evaluate
+	// many scaled candidates without repeating the owner read.
+	FreezeHeroTx(context.Context, ca.CoherentReadScope, character.HeroRef, publicstats.View) (*publicstats.FrozenHero, error)
 	PetTx(context.Context, ca.CoherentReadScope, character.PetRef, publicstats.View) (publicstats.Result, error)
 }
 
@@ -116,8 +123,9 @@ type Loan struct {
 	Kind     d.ActorKind
 	Identity int64
 	Locator  d.Locator
-	// CampaignType keys the capability's table of modes that allow borrowing.
-	CampaignType int64
+	// RentalMode is the mode the caller offered the rental under (the client's
+	// rent-list campaign_type), never the battle's content type.
+	RentalMode int64
 	// Held marks a unit the mode already holds on loan (a March run's girl).
 	Held bool
 }

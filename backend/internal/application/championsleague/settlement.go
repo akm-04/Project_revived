@@ -216,7 +216,7 @@ func (s Service) cutoff(c context.Context, sc gen.TimedScope, ev event) error {
 			}
 			// Honor captures a currently valid saved defense; an unavailable preference
 			// cannot create a synthetic fighter. Missing rows are omitted in the read.
-			if row.Heroes, row.Pet, e = s.displayRows(c, sc.Tx, p.ID, p.Defense, ev.at); e != nil {
+			if _, row.Heroes, row.Pet, e = s.displayRows(c, sc.Tx, p.ID, p.Defense, ev.at); e != nil {
 				return e
 			}
 			start := ev.at.UTC()
@@ -340,14 +340,15 @@ func (s Service) cutoff(c context.Context, sc gen.TimedScope, ev event) error {
 	}
 	old := root.Version
 	root.Version++
-	root.UpdatedAt = at
+	root.UpdatedAt = gen.EffectiveObservation(at, root.UpdatedAt, root.CreatedAt)
 	return s.Store.PutRootTx(c, sc.Tx, root, old)
 }
 
 // displayRows validates weak saved defense references through canonical roster
 // reads. Consumed girls are omitted, never replaced or counted as owned; FIGHT
 // still revalidates every requested participant through the strict rows path.
-func (s Service) displayRows(c context.Context, q tx.Queryer, pid identity.PlayerID, l d.Lineup, at time.Time) ([]map[string]any, map[string]any, error) {
+func (s Service) displayRows(c context.Context, q tx.Queryer, pid identity.PlayerID, l d.Lineup, at time.Time) (d.Lineup, []map[string]any, map[string]any, error) {
+	lineup := d.Lineup{Heroes: []int64{}}
 	out := []map[string]any{}
 	for _, id := range l.Heroes {
 		rows, _, e := s.rows(c, q, pid, d.Lineup{Heroes: []int64{id}}, at)
@@ -355,19 +356,23 @@ func (s Service) displayRows(c context.Context, q tx.Queryer, pid identity.Playe
 			continue
 		}
 		if e != nil {
-			return nil, nil, e
+			return d.Lineup{}, nil, nil, e
 		}
 		out = append(out, rows...)
+		lineup.Heroes = append(lineup.Heroes, id)
 	}
 	var pet map[string]any
 	if l.Pet > 0 {
 		_, v, e := s.rows(c, q, pid, d.Lineup{Heroes: []int64{}, Pet: l.Pet}, at)
 		if e != nil && !errors.Is(e, d.ErrRefused) {
-			return nil, nil, e
+			return d.Lineup{}, nil, nil, e
 		}
 		pet = v
+		if e == nil {
+			lineup.Pet = l.Pet
+		}
 	}
-	return out, pet, nil
+	return lineup, out, pet, nil
 }
 
 // Keep the owning wire/reward mapping separate from these transactions.

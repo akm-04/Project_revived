@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"slices"
@@ -110,7 +111,10 @@ func (s Mode) StartTeam(c context.Context, a identity.ActorContext, op operation
 		return nil, d.ErrInvalid
 	}
 	if _, err = s.Combat.Resolve(c, op, attemptUUID); err != nil {
-		return nil, err
+		if !errors.Is(err, cd.ErrResolverPermanent) {
+			return nil, err
+		}
+		return nil, errors.Join(err, s.closeUnresolvedTeam(c, a, op, occurrence, attemptUUID))
 	}
 	_, err = s.Rooms.Update(c, a, sr.UpdateRequest{Family: RoomFamilyRef(),
 		Before: func(c context.Context, t tx.Tx, room sharedroom.Room, at time.Time) error {
@@ -166,9 +170,9 @@ func (s Mode) StartTeam(c context.Context, a identity.ActorContext, op operation
 			}
 			state.ReportID = attemptID
 			state.DamageResults = map[string]json.RawMessage{}
+			generation := d.AttemptGeneration{LogicalServerID: int64(room.LogicalServerID), OpenDay: occurrence.OpenDay, CampaignID: occurrence.CampaignID}
 			for _, member := range members {
-				attempt := d.Attempt{ID: attemptID, PlayerID: int64(member), LogicalServerID: int64(room.LogicalServerID), OpenDay: occurrence.OpenDay, CampaignID: occurrence.CampaignID}
-				body, err := s.terminalBody(c, sc.Tx, attempt, member, accepted)
+				body, err := s.terminalBody(c, sc.Tx, generation, member, accepted)
 				if err != nil {
 					return err
 				}
@@ -182,7 +186,20 @@ func (s Mode) StartTeam(c context.Context, a identity.ActorContext, op operation
 			if err != nil {
 				return err
 			}
-			return s.storeTeamInfo(sc, room, state, info)
+			if err = s.storeTeamInfo(sc, room, state, info); err != nil {
+				return err
+			}
+			// Each frozen member's own heroes; the counter lock is last.
+			snapshot, err := s.Combat.SnapshotTx(c, sc.Tx, attemptUUID)
+			if err != nil {
+				return err
+			}
+			for _, member := range members {
+				if err = s.BattleObserver.ObserveBattleTx(c, sc.Tx, member, frozenPartners(snapshot, member), at); err != nil {
+					return err
+				}
+			}
+			return nil
 		}}, op)
 	if err != nil {
 		return nil, err
@@ -190,23 +207,40 @@ func (s Mode) StartTeam(c context.Context, a identity.ActorContext, op operation
 	return reportArray(report), nil
 }
 
+// frozenPartners is the owned hero roster the attempt froze for one player:
+// borrowed, template and foreign actors never count.
+func frozenPartners(snapshot cd.Snapshot, player identity.PlayerID) []int64 {
+	partners := make([]int64, 0, len(snapshot.Battle.TeamA))
+	for _, actor := range snapshot.Battle.TeamA {
+		if actor.Kind != cd.HeroActor || identity.PlayerID(actor.Player) != player {
+			continue
+		}
+		if actor.Origin != cd.OwnedSelf && actor.Origin != cd.OwnedMember {
+			continue
+		}
+		partners = append(partners, actor.Identity)
+	}
+	return partners
+}
+
 // GetReport answers 1362 from the stored team report of the actor's server.
-func (s Mode) GetReport(c context.Context, a identity.ActorContext, reportID string, _ operation.Context) (map[string]any, error) {
+func (s Mode) GetReport(c context.Context, a identity.ActorContext, reportID string, op operation.Context) (map[string]any, error) {
 	if s.Store == nil || s.Timed.Binder.Time == nil || reportID == "" {
 		return nil, d.ErrUnavailable
 	}
-	at, err := s.Timed.Binder.Time.Now(c)
-	if err != nil {
-		return nil, err
-	}
-	raw, found, err := s.Store.ReadReportTx(c, s.Fresh, reportID, int64(a.LogicalServerID), at)
-	if err != nil {
-		return nil, err
-	}
-	if !found {
-		return nil, d.ErrRefused
-	}
-	return reportArray([]byte(raw)), nil
+	var out map[string]any
+	_, _, err := s.Timed.Run(c, op, profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, readRetry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		raw, found, err := s.Store.ReadReportTx(c, sc.Tx, reportID, int64(a.LogicalServerID), sc.Operation.DecisionAt())
+		if err != nil {
+			return err
+		}
+		if !found {
+			return d.ErrRefused
+		}
+		out = reportArray([]byte(raw))
+		return nil
+	})
+	return out, err
 }
 
 func (s Mode) lockOccurrence(c context.Context, t tx.Tx, server identity.LogicalServerID, at time.Time) (d.Occurrence, d.Catalog, error) {
@@ -248,16 +282,19 @@ func (s Mode) teamFromRoom(c context.Context, q tx.Queryer, room sharedroom.Room
 		if len(pick.Heroes) != expected || slices.Contains(pick.Heroes, 0) || pick.PetID < 0 {
 			return d.Team{}, fmt.Errorf("%w: member pick incomplete", d.ErrRefused)
 		}
+		if len(pick.Powers) != len(pick.Heroes) {
+			return d.Team{}, fmt.Errorf("%w: member pick powers", d.ErrRefused)
+		}
 		roster, err := s.heroRows(c, q, player, at)
 		if err != nil {
 			return d.Team{}, err
 		}
 		member := d.TeamMember{PlayerID: int64(player), Level: profile.Level, Force: pick.Force, PetID: pick.PetID}
-		for _, id := range pick.Heroes {
+		for index, id := range pick.Heroes {
 			if _, owned := roster[fmt.Sprint(id)]; !owned {
 				return d.Team{}, fmt.Errorf("%w: hero %d not owned", d.ErrRefused, id)
 			}
-			member.Heroes = append(member.Heroes, d.Hero{TableID: tableIDOf(roster, id), PartnerID: id, Power: pick.Force})
+			member.Heroes = append(member.Heroes, d.Hero{TableID: tableIDOf(roster, id), PartnerID: id, Power: pick.Powers[index]})
 		}
 		team.Members = append(team.Members, member)
 	}
@@ -272,7 +309,7 @@ func (s Mode) startTeamAttempt(c context.Context, sc gen.TimedScope, actor ident
 	if err != nil {
 		return cb.Started{}, err
 	}
-	battle := cb.BattleRequest{CampaignType: campaign.CampaignType, BattleID: campaign.FightID, WavesB: waves}
+	battle := cb.BattleRequest{CampaignType: campaign.CampaignType, RentalMode: d.RentalCampaignType, BattleID: campaign.FightID, WavesB: waves}
 	for index, member := range team.Members {
 		origin := cd.OwnedSelf
 		if index > 0 {
@@ -298,7 +335,7 @@ func (s Mode) startTeamAttempt(c context.Context, sc gen.TimedScope, actor ident
 		return cb.Started{}, err
 	}
 	members := room.Members()
-	return s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Actor: actor, Locator: teamLocator(room), GenerationRef: teamGeneration(room, occurrence),
+	return s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Mode: cd.ModeIllusionTeam, Actor: actor, Locator: teamLocator(room), GenerationRef: teamGeneration(room, occurrence),
 		StartFingerprint: teamFingerprint(room, team, occurrence), ResultDeadline: at.Add(attemptLimit), Battle: battle,
 		TrustProfile: cd.ServerReport, Members: members})
 }
@@ -322,6 +359,28 @@ func (s Mode) creditMember(c context.Context, sc gen.TimedScope, room sharedroom
 		return err
 	}
 	return s.recordFantasy(c, sc, identity.ActorContext{PlayerID: member, LogicalServerID: room.LogicalServerID}, fmt.Sprintf("%s:%d", attemptID, member))
+}
+
+// closeUnresolvedTeam ends a team attempt the resolver can never finish and
+// clears the room's pointer, so the next start freezes a new attempt.
+func (s Mode) closeUnresolvedTeam(c context.Context, a identity.ActorContext, op operation.Context, occurrence d.Occurrence, attempt ids.UUID) error {
+	_, err := s.Rooms.Update(c, a, sr.UpdateRequest{Family: RoomFamilyRef(), Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
+		state, err := d.LoadRoomState(room.Payload)
+		if err != nil {
+			return err
+		}
+		if _, err = s.Combat.CloseTx(c, sc.Tx, cb.TerminalRequest{Locator: teamLocator(*room), GenerationRef: teamGeneration(*room, occurrence),
+			TerminalKind: TeamClosedKind, SemanticReceiptID: teamClosedReceipt(attempt.String()), At: sc.Operation.DecisionAt()}); err != nil {
+			return err
+		}
+		state.AttemptID = ""
+		payload, err := state.Encode()
+		if err != nil {
+			return err
+		}
+		return room.SetPayload(payload, sc.Operation.DecisionAt())
+	}}, op)
+	return err
 }
 
 func allReady(room sharedroom.Room) bool {
@@ -349,19 +408,24 @@ func teamReceipt(attemptID string) string {
 	return "illusion-team:" + attemptID
 }
 
+func teamClosedReceipt(attemptID string) string {
+	return "illusion-team-closed:" + attemptID
+}
+
 func teamMemberReceipt(attemptID string, member identity.PlayerID) string {
 	return fmt.Sprintf("illusion-team:%s:%d", attemptID, member)
 }
 
 // teamFingerprint is deterministic so a replayed 1358 is a Combat replay, not a
-// new attempt: it never names the request operation.
-func teamFingerprint(room sharedroom.Room, team d.Team, occurrence d.Occurrence) string {
+// new attempt: the stage is the room, its open day and campaign. The picked team
+// is deliberately not hashed (START_REPLAY_IDENTITY_V1 ruling 1: picks are the
+// players' choice); the Combat Members check keeps the roster identity.
+func teamFingerprint(room sharedroom.Room, _ d.Team, occurrence d.Occurrence) string {
 	raw, _ := json.Marshal(struct {
 		Room       int64
 		OpenDay    int64
 		CampaignID int64
-		Team       d.Team
-	}{room.ID, occurrence.OpenDay, occurrence.CampaignID, team})
+	}{room.ID, occurrence.OpenDay, occurrence.CampaignID})
 	sum := sha256.Sum256(raw)
 	return hex.EncodeToString(sum[:])
 }

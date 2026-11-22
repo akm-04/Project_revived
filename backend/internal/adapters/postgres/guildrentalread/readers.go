@@ -10,11 +10,11 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
-	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	ca "gxb.local/backend/v2/internal/application/characterasset"
+	"gxb.local/backend/v2/internal/application/characterhero"
 	"gxb.local/backend/v2/internal/application/guildrental"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/application/publicstats"
@@ -138,24 +138,70 @@ func (Levels) LevelTx(c context.Context, q tx.Queryer, pid identity.PlayerID) (i
 	return p.Level, err
 }
 
-type Characters struct{}
+// CharacterContent is the exact-revision content the qualified Hero projection needs.
+type CharacterContent interface {
+	HeroKindTx(context.Context, tx.Queryer, string, int64) (character.HeroKind, error)
+	ca.AppearanceTxContent
+}
 
-func (Characters) HeroTx(c context.Context, q tx.Queryer, pid identity.PlayerID, partner int64) (character.Hero, bool, error) {
+type Characters struct {
+	Content CharacterContent
+}
+
+func (s Characters) HeroProjectionTx(c context.Context, q tx.Queryer, revision string, observedAt time.Time, pid identity.PlayerID, partner int64) (guildrental.HeroProjection, bool, error) {
+	if s.Content == nil || len(revision) != 64 || observedAt.IsZero() {
+		return guildrental.HeroProjection{}, false, guildrental.ErrUnavailable
+	}
 	h, err := (characterstore.Store{}).ReadHeroByPartnerIDTx(c, q, pid, partner)
 	if errors.Is(err, kernelstore.ErrNoRows) {
-		return character.Hero{}, false, nil
+		return guildrental.HeroProjection{}, false, nil
 	}
 	if err != nil {
-		return character.Hero{}, false, err
+		return guildrental.HeroProjection{}, false, err
 	}
 	// The hero row carries no Kind; the stock projector validates it against the
 	// hero's own creating content revision.
-	kind, err := (contentstore.Store{}).HeroKindTx(c, q, h.CreationContentRevision, h.TableID)
+	kind, err := s.Content.HeroKindTx(c, q, h.CreationContentRevision, h.TableID)
 	if err != nil {
-		return character.Hero{}, false, err
+		return guildrental.HeroProjection{}, false, err
 	}
 	h.Kind = kind
-	return h, true, nil
+	skins, err := (characterstore.Store{}).ListHeroSkinEntitlementsTx(c, q, pid, partner)
+	if err != nil {
+		return guildrental.HeroProjection{}, false, err
+	}
+	lives, err := (characterstore.Store{}).ListHeroLIVEEntitlementsTx(c, q, pid, partner)
+	if err != nil {
+		return guildrental.HeroProjection{}, false, err
+	}
+	appearance, err := ca.BuildEffectiveHeroAppearanceTx(c, q, revision, h, skins, lives, observedAt.UTC(), s.Content)
+	if err != nil {
+		return guildrental.HeroProjection{}, false, err
+	}
+	stage, err := twiceAwakeStageTx(c, q, revision, observedAt, h)
+	if err != nil {
+		return guildrental.HeroProjection{}, false, err
+	}
+	return guildrental.HeroProjection{Hero: h, Appearance: appearance, TwiceAwakeStage: stage}, true, nil
+}
+
+// twiceAwakeStageTx reads the Character-owned raw awakening facet; a legacy
+// Hero without the facet has no known stage and is not invented.
+func twiceAwakeStageTx(c context.Context, q tx.Queryer, revision string, observedAt time.Time, h character.Hero) (*int64, error) {
+	sc, err := scope(q, revision, observedAt)
+	if err != nil {
+		return nil, err
+	}
+	reader := characterhero.RawAwakeningObservationReader{Heroes: characterstore.Store{}, Births: characterstore.RawAwakeningStore{}}
+	observation, err := reader.RawAwakeningTx(c, sc, h.Ref())
+	if errors.Is(err, kernelstore.ErrNoRows) || errors.Is(err, character.ErrRawAwakeningUnavailable) {
+		return nil, nil
+	}
+	if err != nil || !observation.Known {
+		return nil, err
+	}
+	stage := observation.RawStage
+	return &stage, nil
 }
 
 func (Characters) PetTx(c context.Context, q tx.Queryer, pid identity.PlayerID, petID int64) (character.Pet, bool, error) {

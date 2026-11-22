@@ -3,6 +3,7 @@ package characterstore
 import (
 	"context"
 	"errors"
+	"strconv"
 	"time"
 
 	appboot "gxb.local/backend/v2/internal/application/bootstrap"
@@ -20,13 +21,21 @@ type HeroBootstrapContent interface {
 	AppearanceRevisionTx(context.Context, tx.Queryer, string) (bool, error)
 }
 
+// LibraryRosterOverlay applies one owner's roster keys inside the caller's transaction.
+type LibraryRosterOverlay interface {
+	OverlayRosterTx(context.Context, tx.Queryer, identity.ActorContext, string, time.Time, map[string]any) error
+}
+
+// SeasonPicksReader is Arena's ARENA_HERO_PICKS_V1 read: base table id -> the
+// girl's ranked attack fights in the player's current season.
+type SeasonPicksReader interface {
+	SeasonPicksTx(context.Context, tx.Queryer, identity.PlayerID, time.Time) (map[int64]int64, error)
+}
+
 // HeroBootstrapProjection repairs MID1 key49 with canonical owner state while
 // preserving the frozen inactive baseline when Hero projection capabilities are
 // legitimately inactive. It is read-only and executes entirely through the
 // caller-owned MID1 transaction/queryer.
-type LibraryRosterOverlay interface {
-	OverlayRosterTx(context.Context, tx.Queryer, identity.ActorContext, string, time.Time, map[string]any) error
-}
 type HeroBootstrapProjection struct {
 	AwakeningPositions *apphero.AwakeningPositionResolver
 	Awakening          LibraryRosterOverlay
@@ -38,7 +47,22 @@ type HeroBootstrapProjection struct {
 	Book               LibraryRosterOverlay
 	Dorm               LibraryRosterOverlay
 	Library            LibraryRosterOverlay
+	SeasonPicks        SeasonPicksReader
 	Content            HeroBootstrapContent
+}
+
+// HeroOriginTableIDsTx exposes each owned hero's stored origin identity, which
+// the stock MID1 roster wire does not carry.
+func (HeroBootstrapProjection) HeroOriginTableIDsTx(ctx context.Context, q tx.Queryer, playerID identity.PlayerID) (map[int64]int64, error) {
+	heroes, err := Store{}.ListHeroesTx(ctx, q, playerID)
+	if err != nil {
+		return nil, err
+	}
+	out := make(map[int64]int64, len(heroes))
+	for _, hero := range heroes {
+		out[hero.PartnerID] = hero.OriginTableID
+	}
+	return out, nil
 }
 
 func (HeroBootstrapProjection) Name() string     { return "ca6.hero-bootstrap" }
@@ -154,6 +178,20 @@ func (p HeroBootstrapProjection) OverlayMID1(ctx context.Context, q tx.Queryer, 
 	if p.Awakening != nil {
 		if err = p.Awakening.OverlayRosterTx(ctx, q, actor, revision, observedAt, body); err != nil {
 			return err
+		}
+	}
+	if p.SeasonPicks != nil {
+		picks, err := p.SeasonPicks.SeasonPicksTx(ctx, q, actor.PlayerID, observedAt)
+		if err != nil {
+			return err
+		}
+		rows, _ := body["heros"].(map[string]any)
+		for _, view := range views {
+			row, ok := rows[strconv.FormatInt(view.Hero.PartnerID, 10)].(map[string]any)
+			if !ok {
+				return errors.New("character hero bootstrap: roster row missing")
+			}
+			row["region_arena_times"] = picks[view.Hero.OriginTableID]
 		}
 	}
 	detail["49"] = body

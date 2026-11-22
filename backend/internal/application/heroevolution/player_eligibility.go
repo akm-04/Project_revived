@@ -28,9 +28,6 @@ func (s Service) requirePlayer(ctx context.Context, q tx.Queryer, p identity.Pla
 	if rule.Validate() != nil || rule.ValidateState(v) != nil {
 		return evo.ErrUnqualified
 	}
-	if at.Before(v.UpdatedAt) {
-		return ErrStale
-	}
 	c, e := s.Content.EvolutionCatalogTx(ctx, q, rev)
 	if e != nil {
 		return e

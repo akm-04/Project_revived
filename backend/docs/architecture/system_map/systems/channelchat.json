@@ -1,0 +1,56 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 500,
+    "name": "channel-chat-read-v1"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {},
+  "row_locks": [],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [],
+ "name": "channelchat",
+ "pushes": [
+  {
+   "file": "internal/protocol/realtime/channel_chat.go",
+   "kind": "direct",
+   "line": 85,
+   "mid": 32783,
+   "roles": [
+    "Guild",
+    "Service",
+    "World"
+   ]
+  }
+ ],
+ "stores": [],
+ "tables": {
+  "owned": [],
+  "read": [],
+  "written": []
+ },
+ "tests": {
+  "integration": [
+   "socialactivation"
+  ],
+  "scenarios_naming": [],
+  "unit": [
+   "service_test.go",
+   "structured_test.go"
+  ]
+ }
+}

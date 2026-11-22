@@ -63,11 +63,6 @@ func (s Service) HeroElementInputsTx(ctx context.Context, q tx.Queryer, scope In
 	if e != nil {
 		return out, e
 	}
-	for _, at := range []time.Time{r.UpdatedAt, pop.UpdatedAt, h.UpdatedAt, f.UpdatedAt} {
-		if scope.ObservedAt.Before(at) {
-			return out, ErrStale
-		}
-	}
 	if e = validateHeroFacts(f.Facts, c, h); e != nil {
 		return out, e
 	}
@@ -105,9 +100,6 @@ func (s Service) HeroElementInputsTx(ctx context.Context, q tx.Queryer, scope In
 		for _, v := range stacks {
 			if e = v.Validate(); e != nil {
 				return out, e
-			}
-			if scope.ObservedAt.Before(v.UpdatedAt) {
-				return out, ErrStale
 			}
 			if v.ItemID >= 50000001 && v.ItemID <= 50000025 && v.Quantity > 0 {
 				out.ExclusiveBookCount++

@@ -3,6 +3,8 @@ package occult
 import (
 	"encoding/json"
 	"strconv"
+
+	"gxb.local/backend/v2/internal/domain/sharedroom"
 )
 
 const (
@@ -44,6 +46,7 @@ type HeroStatus struct {
 // until the challenge starts. hero_status is the HP authority for the next
 // stage; a result can only lower it.
 type RunState struct {
+	sharedroom.ChatRing
 	ChapterID          int64                            `json:"chapter_id"`
 	CampaignType       int64                            `json:"campaign_type"`
 	StartedAt          int64                            `json:"started_at"`
@@ -56,18 +59,32 @@ type RunState struct {
 	Invites            []int64                          `json:"invites,omitempty"`
 	StayPositions      map[string]int64                 `json:"stay_positions,omitempty"`
 	EventsDone         []int64                          `json:"events_done,omitempty"`
-	Points             int64                            `json:"points"`
-	ClearSettled       bool                             `json:"clear_settled,omitempty"`
-	Frozen             map[string]json.RawMessage       `json:"frozen,omitempty"`
-	ReportID           string                           `json:"report_id,omitempty"`
-	Events             []EventRecord                    `json:"events,omitempty"`
-	Team               *TeamFight                       `json:"team,omitempty"`
-	TeamRounds         int64                            `json:"team_rounds,omitempty"`
-	Notices            []NoticeRecord                   `json:"notices,omitempty"`
+	// CampaignHeroes is every girl the campaign's accepted battles fielded,
+	// once each; event 6 compares its size with the row's event_condition.
+	CampaignHeroes map[string][]CampaignHero `json:"campaign_heroes,omitempty"`
+	Points         int64                     `json:"points"`
+	// ExtraPoints is the accumulated event-6 bonus; Points is the chapter score
+	// including it, recomputed at each settle.
+	ExtraPoints  int64                      `json:"extra_points,omitempty"`
+	ClearSettled bool                       `json:"clear_settled,omitempty"`
+	Frozen       map[string]json.RawMessage `json:"frozen,omitempty"`
+	ReportID     string                     `json:"report_id,omitempty"`
+	Events       []EventRecord              `json:"events,omitempty"`
+	Team         *TeamFight                 `json:"team,omitempty"`
+	TeamRounds   int64                      `json:"team_rounds,omitempty"`
+	Notices      []NoticeRecord             `json:"notices,omitempty"`
+	// ClosingNoticeSequence is the first notice the clear-settling command
+	// recorded; the closed room's wakeup delivers them, and only them, once.
+	ClosingNoticeSequence int64            `json:"closing_notice_sequence,omitempty"`
+	Forces                map[string]int64 `json:"forces,omitempty"`
 }
 
 func NewRun(chapterID, campaignType int64) RunState {
-	return RunState{ChapterID: chapterID, CampaignType: campaignType, DispatchLimit: DispatchLimit}
+	dispatchLimit := int64(DispatchLimit)
+	if campaignType == SingleCampaignType {
+		dispatchLimit = DispatchLimitSingle
+	}
+	return RunState{ChapterID: chapterID, CampaignType: campaignType, DispatchLimit: dispatchLimit}
 }
 
 func (s RunState) Encode() (json.RawMessage, error) { return json.Marshal(s) }
@@ -81,6 +98,17 @@ func LoadRunState(raw json.RawMessage) (RunState, error) {
 func key(id int64) string { return strconv.FormatInt(id, 10) }
 
 func (s RunState) Started() bool { return s.StartedAt > 0 }
+
+// SetForce freezes a member's best-15 AP so the prepare window renders it
+// without a Hero-stat read on every room change.
+func (s *RunState) SetForce(playerID, force int64) {
+	if s.Forces == nil {
+		s.Forces = map[string]int64{}
+	}
+	s.Forces[key(playerID)] = force
+}
+
+func (s RunState) Force(playerID int64) int64 { return s.Forces[key(playerID)] }
 
 func (s *RunState) Start(at int64) error {
 	if s.Started() {
@@ -167,8 +195,11 @@ func (s *RunState) Enter(campaignID int64, index int, playerID int64) error {
 	if err != nil {
 		return err
 	}
-	if stage.HP <= 0 || stage.InBattle != 0 || s.fighting(playerID) {
+	if stage.HP <= 0 || s.fighting(playerID) {
 		return ErrRefused
+	}
+	if stage.InBattle != 0 {
+		return ErrStageHeld
 	}
 	stage.InBattle = playerID
 	return nil

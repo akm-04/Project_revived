@@ -9,6 +9,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/campaign"
 	"gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/march"
 	"gxb.local/backend/v2/internal/domain/memoir"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -17,7 +18,7 @@ import (
 	"time"
 )
 
-var reportPolicy = combat.ReportPolicy{ID: "I9_MEMOIR_REPORT_V1", Version: 1, Formation: true, Pet: true, CompleteEnemies: true, LivingWinner: true, WinClearsEnemies: true, MaxHP: 1e12, HPPerFrozen: 2, SelectFrozenRoster: true, ReportedWave: true}
+var reportPolicy = combat.ReportPolicy{ID: "I9_MEMOIR_REPORT_V1", Version: 2, Formation: true, Pet: true, CompleteEnemies: true, LivingWinner: true, WinClearsEnemies: true, MaxHP: 1e12, HPPerFrozen: combat.ReportedHPBound, SelectFrozenRoster: true, ReportedWave: true}
 
 func locator(actor identity.ActorContext) combat.Locator {
 	return combat.Locator{DomainKind: "MEMOIR", AuthorityScope: fmt.Sprintf("server:%d", actor.LogicalServerID), DomainLocator: fmt.Sprint(actor.PlayerID)}
@@ -65,17 +66,30 @@ func (mode Mode) EnemyInfo(ctx context.Context, actor identity.ActorContext, pos
 			if !found {
 				return nil, memoir.ErrUnavailable
 			}
-			raw, err := json.Marshal(opponent)
+			enemy, err = enemyInfoForPlayer(opponent, carry)
 			if err != nil {
 				return nil, err
 			}
-			if err = json.Unmarshal(raw, &enemy); err != nil {
-				return nil, err
-			}
-			enemy["enemy_status"], enemy["round"] = enemyStatusProjection(carry.Statuses), carry.Round
 		}
 		return map[string]any{"enemy_info": enemy}, nil
 	})
+}
+
+// enemyInfoForPlayer projects one frozen opponent for the stock team window:
+// MemoriesOfSchoolTeamInfoWindow reads player_name and the pet row, while
+// march's own window reads name, so both keys stay.
+func enemyInfoForPlayer(opponent march.Enemy, carry memoir.EnemyCarry) (map[string]any, error) {
+	raw, err := json.Marshal(opponent)
+	if err != nil {
+		return nil, err
+	}
+	enemy := map[string]any{}
+	if err = json.Unmarshal(raw, &enemy); err != nil {
+		return nil, err
+	}
+	enemy["player_name"] = opponent.Name
+	enemy["enemy_status"], enemy["round"] = enemyStatusProjection(carry.Statuses), carry.Round
+	return enemy, nil
 }
 func (mode Mode) StartFight(ctx context.Context, actor identity.ActorContext, position int, operationContext operation.Context) (map[string]any, error) {
 	return mode.run(ctx, actor, "start_fight", position, operationContext, func(ctx context.Context, current scope, state *memoir.State) (map[string]any, error) {
@@ -145,7 +159,7 @@ func (mode Mode) StartFight(ctx context.Context, actor identity.ActorContext, po
 			return nil, err
 		}
 		deadline := current.timed.Operation.DecisionAt().Add(time.Duration(memoir.ResultWindowSeconds) * time.Second)
-		started, err := mode.Combat.StartTx(ctx, current.timed.Tx, coherent, applicationcombat.StartRequest{Actor: actor, Locator: locator(actor), GenerationRef: generation, StartFingerprint: fmt.Sprintf("%x", fingerprint), ResultDeadline: deadline, Battle: battle, TrustProfile: combat.ClientFullReportAttested, Replay: combat.ReplaySpec{Response: combat.ReplayFightExist, ErrorCode: combat.FightExistCode}, Package: func(_ *combat.Stream) (any, error) {
+		started, err := mode.Combat.StartTx(ctx, current.timed.Tx, coherent, applicationcombat.StartRequest{Mode: combat.ModeMemoirBattle, Actor: actor, Locator: locator(actor), GenerationRef: generation, StartFingerprint: fmt.Sprintf("%x", fingerprint), ResultDeadline: deadline, Battle: battle, TrustProfile: combat.ClientFullReportAttested, Replay: combat.ReplaySpec{Response: combat.ReplayFightExist, ErrorCode: combat.FightExistCode}, Package: func(_ *combat.Stream) (any, error) {
 			return map[string]any{"heroes_status": state.Heroes, "enemies_status": carry.Statuses, "round": carry.Round}, nil
 		}})
 		if err != nil {
@@ -175,7 +189,7 @@ func (mode Mode) startRevision(ctx context.Context, current scope) (string, erro
 	if revision == current.revision {
 		return revision, nil
 	}
-	catalog, err := mode.Content.MemoirCatalogTx(ctx, current.timed.Tx, revision)
+	catalog, err := mode.catalog(ctx, current.timed.Tx, revision)
 	if err != nil {
 		return "", err
 	}
@@ -256,6 +270,9 @@ func (mode Mode) MonsterResult(ctx context.Context, actor identity.ActorContext,
 		response := projection(*state)
 		response["awards"] = awards
 		state.LastGrid, state.LastResult = request.Grid, response
+		if err = mode.BattleCounts.ObserveBattleTx(ctx, current.timed.Tx, actor.PlayerID, request.Report.Formation, current.timed.Operation.DecisionAt()); err != nil {
+			return nil, err
+		}
 		return response, nil
 	})
 }

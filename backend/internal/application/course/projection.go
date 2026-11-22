@@ -6,6 +6,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/character"
 	course "gxb.local/backend/v2/internal/domain/course"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"strconv"
@@ -36,6 +37,37 @@ type HeroInputs struct {
 }
 
 func (s Service) CourseInputsTx(ctx context.Context, q tx.Queryer, scope InputScope) (Inputs, error) {
+	v, _, e := s.inputsTx(ctx, q, scope)
+	return v, e
+}
+
+func (s Service) inputsTx(ctx context.Context, q tx.Queryer, scope InputScope) (Inputs, []character.Hero, error) {
+	v, e := s.rootInputsTx(ctx, q, scope)
+	if e != nil {
+		return v, nil, e
+	}
+	heroes, e := s.Heroes.ListHeroesTx(ctx, q, scope.Player)
+	if e != nil {
+		return v, nil, e
+	}
+	alive := map[int64]bool{}
+	for _, h := range heroes {
+		if e = h.ValidatePersistent(); e != nil {
+			return v, nil, e
+		}
+		alive[h.PartnerID] = true
+	}
+	for p := range v.Root.Facts.Attendance {
+		if !alive[p] {
+			return v, nil, course.ErrUnqualified
+		}
+	}
+	v.Alive = alive
+	return v, heroes, nil
+}
+
+// rootInputsTx reads the player course root and catalog without the roster.
+func (s Service) rootInputsTx(ctx context.Context, q tx.Queryer, scope InputScope) (Inputs, error) {
 	var out Inputs
 	if q == nil || !scope.Player.Valid() || len(scope.ContentRevision) != 64 || scope.ObservedAt.IsZero() {
 		return out, course.ErrUnqualified
@@ -43,9 +75,6 @@ func (s Service) CourseInputsTx(ctx context.Context, q tx.Queryer, scope InputSc
 	r, e := s.Owner.ReadRootTx(ctx, q, scope.Player)
 	if e != nil {
 		return out, e
-	}
-	if scope.ObservedAt.Before(r.UpdatedAt) {
-		return out, ErrStale
 	}
 	c, e := s.Content.CourseCatalogTx(ctx, q, scope.ContentRevision)
 	if e != nil {
@@ -58,43 +87,105 @@ func (s Service) CourseInputsTx(ctx context.Context, q tx.Queryer, scope InputSc
 	if e != nil {
 		return out, e
 	}
+	return Inputs{Root: r, Catalog: c, PopulationVersion: pop.StateVersion, ObservedAt: scope.ObservedAt, ContentRevision: scope.ContentRevision}, nil
+}
+
+// heroInputsTx validates the roster only when the course root names an
+// attendance partner; a single-Hero projection otherwise reads that Hero alone.
+func (s Service) heroInputsTx(ctx context.Context, q tx.Queryer, scope InputScope, partner int64) (Inputs, error) {
+	v, e := s.rootInputsTx(ctx, q, scope)
+	if e != nil {
+		return v, e
+	}
+	v.Alive = map[int64]bool{partner: true}
+	if len(v.Root.Facts.Attendance) == 0 {
+		return v, nil
+	}
 	heroes, e := s.Heroes.ListHeroesTx(ctx, q, scope.Player)
 	if e != nil {
-		return out, e
+		return v, e
 	}
-	alive := map[int64]bool{}
+	v.Alive = map[int64]bool{}
 	for _, h := range heroes {
 		if e = h.ValidatePersistent(); e != nil {
-			return out, e
+			return v, e
 		}
-		alive[h.PartnerID] = true
+		v.Alive[h.PartnerID] = true
 	}
-	for p := range r.Facts.Attendance {
-		if !alive[p] {
-			return out, course.ErrUnqualified
+	for p := range v.Root.Facts.Attendance {
+		if !v.Alive[p] {
+			return v, course.ErrUnqualified
 		}
 	}
-	return Inputs{Root: r, Catalog: c, PopulationVersion: pop.StateVersion, Alive: alive, ObservedAt: scope.ObservedAt, ContentRevision: scope.ContentRevision}, nil
+	return v, nil
+}
+
+// CompletedCourseCountTx counts finished course records over the whole roster
+// with one owner roster read instead of one projection per Hero.
+func (s Service) CompletedCourseCountTx(ctx context.Context, q tx.Queryer, scope InputScope) (int64, error) {
+	v, roster, e := s.inputsTx(ctx, q, scope)
+	if e != nil {
+		return 0, e
+	}
+	facts, e := s.Owner.ListHeroesTx(ctx, q, scope.Player)
+	if e != nil {
+		return 0, e
+	}
+	byPartner := make(map[int64]course.HeroRoot, len(facts))
+	for _, f := range facts {
+		byPartner[f.PartnerID] = f
+	}
+	tableIDs := make([]int64, 0, len(roster))
+	for _, h := range roster {
+		tableIDs = append(tableIDs, h.TableID)
+	}
+	kinds, e := s.Content.HeroKindsTx(ctx, q, scope.ContentRevision, tableIDs)
+	if e != nil {
+		return 0, e
+	}
+	total := int64(0)
+	for _, h := range roster {
+		f, ok := byPartner[h.PartnerID]
+		if !ok {
+			return 0, course.ErrUnqualified
+		}
+		if e = f.Facts.Validate(v.Catalog); e != nil {
+			return 0, e
+		}
+		if _, ok := kinds[h.TableID]; !ok {
+			return 0, course.ErrUnqualified
+		}
+		applied := f.Facts.Clone()
+		if _, e = v.Root.Facts.Settle(v.Catalog, h.PartnerID, &applied, scope.ObservedAt); e != nil {
+			return 0, e
+		}
+		for _, record := range applied.Courses {
+			if record.Progress == 100 {
+				total++
+			}
+		}
+	}
+	return total, nil
 }
 func (s Service) HeroCourseInputsTx(ctx context.Context, q tx.Queryer, scope InputScope, partner int64) (HeroInputs, error) {
 	var out HeroInputs
-	v, e := s.CourseInputsTx(ctx, q, scope)
+	v, e := s.heroInputsTx(ctx, q, scope, partner)
 	if e != nil {
 		return out, e
 	}
 	if !v.Alive[partner] {
 		return out, ErrRetired
 	}
-	h, e := s.Heroes.ReadHeroByPartnerIDTx(ctx, q, scope.Player, partner)
+	h, found, e := s.Heroes.FindHeroByPartnerIDTx(ctx, q, scope.Player, partner)
 	if e != nil {
 		return out, e
+	}
+	if !found {
+		return out, ErrRetired
 	}
 	f, e := s.Owner.ReadHeroTx(ctx, q, scope.Player, partner)
 	if e != nil {
 		return out, e
-	}
-	if scope.ObservedAt.Before(f.UpdatedAt) {
-		return out, ErrStale
 	}
 	if e = f.Facts.Validate(v.Catalog); e != nil {
 		return out, e
@@ -141,10 +232,16 @@ func (s Service) RoomWireTx(ctx context.Context, q tx.Queryer, scope InputScope)
 	if e != nil {
 		return nil, e
 	}
-	return map[string]any{"study_infos": attendanceWire(v.Root.Facts, v.Catalog), "log_infos": logWire(v.Root.Facts, v.Alive), "is_has_gift": int64(0)}, nil
+	return map[string]any{"study_infos": attendanceWire(v.Root.Facts, v.Catalog), "log_infos": logWire(v.Root.Facts, v.Alive), "is_has_gift": giftBoxFlag(v.Root.GiftBoxDay != modes.Day(v.ObservedAt))}, nil
 }
 func (s Service) Read(ctx context.Context, a identity.ActorContext, mid uint16, op operation.Context) (map[string]any, error) {
-	if !s.complete() || (mid != 2130 && mid != 2137 && mid != 2139) {
+	if !s.complete() {
+		return nil, ErrUnavailable
+	}
+	if mid == 2500 {
+		return s.recommendRead(ctx, a, op)
+	}
+	if mid != 2130 && mid != 2137 && mid != 2139 {
 		return nil, ErrUnavailable
 	}
 	rev, on, e := s.Content.CourseInputsActive(ctx)

@@ -1,0 +1,179 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [
+  {
+   "count": 5,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 6,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 5,
+   "file": "docs/i9/I9_GODS_TRIAL_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_CAMPAIGN_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_RENTAL_V1.json"
+  },
+  {
+   "count": 6,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/godstrial_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {
+   "GODS_TRIAL_CLEARED": {
+    "missions": [
+     132
+    ]
+   }
+  },
+  "emits": [
+   "GODS_TRIAL_CLEARED"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "gods-trial"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "godstrial_players": [
+    "godstrialstore.LockTx"
+   ],
+   "mail_namespace_counters": [
+    "i5store.LockMailNamespaceCounterTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "godstrial_players",
+   "mail_namespace_counters"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [
+  "OverlayMID1"
+ ],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/godstrial_dispatcher.go",
+    "line": 33
+   },
+   "mid": 3092,
+   "name": "HUNQI_START_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/godstrial_dispatcher.go",
+    "line": 33
+   },
+   "mid": 3093,
+   "name": "HUNQI_FIGHT_RESULT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/godstrial_dispatcher.go",
+    "line": 33
+   },
+   "mid": 3097,
+   "name": "HUNQI_GET_CAMPAIGN_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/godstrial_dispatcher.go",
+    "line": 33
+   },
+   "mid": 3099,
+   "name": "HUNQI_AUTO_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/godstrial_dispatcher.go",
+    "line": 33
+   },
+   "mid": 3100,
+   "name": "HUNQI_GET_AUTO_AWRAD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/godstrial_dispatcher.go",
+    "line": 33
+   },
+   "mid": 3101,
+   "name": "HUNQI_START_GAME_GET_INFO"
+  }
+ ],
+ "name": "godstrial",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/godstrialstore",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore"
+ ],
+ "tables": {
+  "owned": [
+   "godstrial_players"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "godstrial_players",
+   "gxb_content_activation",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "mail_namespace_counters",
+   "player_function_eligibility",
+   "player_progression"
+  ],
+  "written": [
+   "godstrial_players",
+   "gxb_operation_receipts",
+   "mail_namespace_counters"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [
+   "i9_6a_gods_trial.json"
+  ],
+  "unit": [
+   "start_choice_conformance_test.go"
+  ]
+ }
+}

@@ -65,6 +65,9 @@ cap38 = None
 for row in flist:
     if int(row.get("function_id", row.get("id", 0))) == 38:
         cap38 = row.get("announcement_capability")
+    elif int(row.get("function_id", row.get("id", 0))) == 33:
+        if row.get("announcement_capability") != "CAMPAIGN_FIRST_CLEAR:100007":
+            errs.append("Function 33 tutorial milestone drift")
     elif row.get("announcement_capability") not in (None, "", "NONE"):
         errs.append(f"unexpected announcement capability on function {row.get('function_id', row.get('id'))}")
 if cap38 != "PET_STARTER_CA3":

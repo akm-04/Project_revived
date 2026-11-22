@@ -1,0 +1,196 @@
+{
+ "background": [],
+ "content": [
+  "content_achievement_catalogs",
+  "content_player_display_catalogs",
+  "content_public_profile_policies"
+ ],
+ "contracts": [
+  {
+   "count": 2,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 6,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/achievement_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "achievement"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "achievement_roots": [
+    "achievementstore.ReadRootTx"
+   ],
+   "achievement_streaks": [
+    "achievementstore.ReadStreakTx",
+    "achievementstore.ReadStreaksTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "achievement_roots",
+   "achievement_streaks",
+   "gameplay_contexts"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/achievement_dispatcher.go",
+    "line": 25
+   },
+   "mid": 1302,
+   "name": "LOAD_ACHIEVEMENT_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/achievement_dispatcher.go",
+    "line": 25
+   },
+   "mid": 1303,
+   "name": "GET_ACHIEVEMENT_AWARD"
+  }
+ ],
+ "name": "achievement",
+ "pushes": [
+  {
+   "file": "internal/adapters/stockruntime/achievement_notice.go",
+   "kind": "notice",
+   "line": 54,
+   "namespace": "rt.NoticeNamespaceGeneric",
+   "notice_type": 17,
+   "parent_mid": 36854,
+   "roles": [
+    "Role",
+    "World"
+   ]
+  }
+ ],
+ "stores": [
+  "internal/adapters/postgres/achievementstore",
+  "internal/adapters/postgres/characterstore",
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/guildcampaignstore",
+  "internal/adapters/postgres/guildrentalread",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore"
+ ],
+ "tables": {
+  "owned": [
+   "achievement_award_claims",
+   "achievement_boss_facts",
+   "achievement_daily_counts",
+   "achievement_events",
+   "achievement_notices",
+   "achievement_roots",
+   "achievement_streaks"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "achievement_award_claims",
+   "achievement_boss_facts",
+   "achievement_daily_counts",
+   "achievement_events",
+   "achievement_notices",
+   "achievement_roots",
+   "achievement_streaks",
+   "content_achievement_catalogs",
+   "content_player_display_catalogs",
+   "content_public_profile_policies",
+   "gameplay_contexts",
+   "guild_campaign_damage",
+   "gxb_content_activation",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "logical_servers",
+   "player_directory_profiles",
+   "player_hero_roots",
+   "player_heroes",
+   "player_item_stacks",
+   "player_pet_roots",
+   "player_pets"
+  ],
+  "written": [
+   "achievement_award_claims",
+   "achievement_boss_facts",
+   "achievement_daily_counts",
+   "achievement_events",
+   "achievement_notices",
+   "achievement_roots",
+   "achievement_streaks",
+   "gxb_operation_receipts"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [
+   "achievement.json",
+   "display.json",
+   "i9_11e_achievement_fantasy.json",
+   "i9_11e_achievement_medium_vending.json"
+  ],
+  "unit": [
+   "claim_first_award_test.go",
+   "counts_test.go"
+  ]
+ }
+}

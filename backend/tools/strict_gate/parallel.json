@@ -1,0 +1,13 @@
+{"serial": ["./internal/integration/profilemedia"],
+ "shards": {"./internal/integration/playerdisplay": 6,
+            "./internal/integration/socialactivation": 9,
+            "./internal/adapters/combatresolver": 3},
+ "serial_tests": ["internal/integration/playerdisplay.TestI9_10MarchNativeLatencyBudget",
+                  "internal/integration/playerdisplay.TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore",
+                  "internal/integration/playerdisplay.TestI7C5FLeagueGenuineFightReplayAndClockNative"],
+ "known_flaky": [],
+ "timeout_minutes": 20,
+ "timeouts": {"internal/adapters/combatresolver": 40,
+              "internal/integration/playerdisplay": 50,
+              "internal/integration/socialactivation": 50,
+              "internal/integration/socialrelation": 45}}

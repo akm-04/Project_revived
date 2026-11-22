@@ -1,0 +1,287 @@
+{
+ "background": [],
+ "content": [
+  "content_player_display_catalogs",
+  "content_public_profile_policies",
+  "content_public_showcase_policies"
+ ],
+ "contracts": [
+  {
+   "count": 8,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 9,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 8,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/PROFILE_MEDIA_HISTORY_RETENTION_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/RULING_I9-12_SEAL_REGISTRY_SYNC.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/profile_media.go",
+  "internal/adapters/stockruntime/public_profile.go",
+  "internal/adapters/stockruntime/public_profile_reads.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [
+   {
+    "name": "publicprofile.LockRankRoot",
+    "rank": 391
+   }
+  ],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "player_public_profile_roots": [
+    "publicprofilestore.LockRootTx",
+    "publicprofilestore.ReadRootTx"
+   ],
+   "player_social_roots": [
+    "socialrelationstore.LockRootTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ],
+   "social_blocks": [
+    "socialrelationstore.LockBlockTx"
+   ],
+   "social_friendships": [
+    "socialrelationstore.LockFriendshipTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "player_public_profile_roots",
+   "player_social_roots",
+   "players",
+   "social_blocks",
+   "social_friendships"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/public_profile_reads.go",
+    "line": 34
+   },
+   "mid": 1829,
+   "name": "GET_PLAYER_CARD_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/public_profile.go",
+    "line": 61
+   },
+   "mid": 1831,
+   "name": "MODIFY_SHOW_TYPES"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/public_profile_reads.go",
+    "line": 34
+   },
+   "mid": 1832,
+   "name": "MODIFY_SHOW_CASE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/public_profile.go",
+    "line": 61
+   },
+   "mid": 1833,
+   "name": "HIDE_SUB_TYPE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/public_profile.go",
+    "line": 61
+   },
+   "mid": 1834,
+   "name": "MODIFY_INTRO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/public_profile_reads.go",
+    "line": 34
+   },
+   "mid": 1838,
+   "name": "GET_SHOWCASE_DETAIL"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/public_profile_reads.go",
+    "line": 34
+   },
+   "mid": 1840,
+   "name": "GET_ALL_SHOW_TYPE_INFOS"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/profile_media.go",
+    "line": 23
+   },
+   "mid": 1844,
+   "name": "UPLOAD_SPACE_AVATAR"
+  }
+ ],
+ "name": "publicprofile",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/characterstore",
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/guildrentalread",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore",
+  "internal/adapters/postgres/publicprofilestore",
+  "internal/adapters/postgres/socialrelationstore"
+ ],
+ "tables": {
+  "owned": [
+   "player_public_profile_media_current",
+   "player_public_profile_media_history",
+   "player_public_profile_roots",
+   "player_public_profile_showcase_slots"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "content_player_display_catalogs",
+   "content_public_profile_policies",
+   "content_public_showcase_policies",
+   "gameplay_contexts",
+   "gxb_content_activation",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "player_directory_profiles",
+   "player_function_unlocks",
+   "player_hero_raw_awakening",
+   "player_hero_roots",
+   "player_heroes",
+   "player_pet_roots",
+   "player_pets",
+   "player_profiles",
+   "player_progression",
+   "player_public_profile_media_current",
+   "player_public_profile_media_history",
+   "player_public_profile_roots",
+   "player_public_profile_showcase_slots",
+   "player_social_roots",
+   "players",
+   "social_blocks",
+   "social_friend_requests",
+   "social_friendships"
+  ],
+  "written": [
+   "gxb_operation_receipts",
+   "player_public_profile_media_current",
+   "player_public_profile_media_history",
+   "player_public_profile_roots",
+   "player_public_profile_showcase_slots"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay",
+   "profilefeedback",
+   "profilemedia",
+   "publicprofilecommands",
+   "publicprofilefoundation",
+   "publicshowcase"
+  ],
+  "scenarios_naming": [
+   "playtest4_fixes.json",
+   "r1_profile_comment.json"
+  ],
+  "unit": [
+   "blood_awaken_metric_test.go",
+   "composition_test.go",
+   "media_test.go",
+   "rich_records_test.go",
+   "roster_metrics_test.go",
+   "selected_metrics_test.go",
+   "showcase_test.go",
+   "top_force_metric_test.go"
+  ]
+ }
+}

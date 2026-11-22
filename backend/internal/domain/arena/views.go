@@ -63,6 +63,9 @@ type Usage struct {
 	Wins    int64  `json:"wins"`
 	Kills   int64  `json:"kills"`
 	Harms   string `json:"harms"`
+	// Star is the subject's current star for this girl, filled by the Arena
+	// subject read; nil when the subject no longer owns her.
+	Star *int64 `json:"-"`
 }
 
 type PartnersView struct {

@@ -63,24 +63,26 @@ type kindFixture struct {
 	pool    *pg.Pool
 	actor   identity.ActorContext
 	rev     string
+	mode    d.ModeKey
 	partner int64
 	service combat.Service
 	locator d.Locator
 	builds  *atomic.Int32
 }
 
-func newKindFixture(t *testing.T, scope string) kindFixture {
+func newKindFixture(t *testing.T, scope string, mode d.ModeKey) kindFixture {
 	pool := pool(t)
 	a, rev, ref := combatOwner(t, pool, rankingServer(t, pool))
-	return kindFixture{pool: pool, actor: a, rev: rev, partner: ref.PartnerID, service: combatService(t, pool), builds: &atomic.Int32{},
-		locator: d.Locator{DomainKind: "i8-4-fixture-mode", AuthorityScope: scope, DomainLocator: fmt.Sprint(a.PlayerID)}}
+	return kindFixture{pool: pool, actor: a, rev: rev, mode: mode, partner: ref.PartnerID, service: combatService(t, pool), builds: &atomic.Int32{},
+		locator: d.Locator{DomainKind: d.MustMode(mode).Family, AuthorityScope: scope, DomainLocator: fmt.Sprint(a.PlayerID)}}
 }
 
-// request is a client-derived START: the server issues three seeds and the
-// family answers a duplicate RESULT with FightExist.
+// request is a START of the fixture's registered mode: the server issues three
+// seeds; a Challenge mode freezes one target, any other mode a one-wave battle.
 func (f kindFixture) request(stage, generation string) combat.StartRequest {
-	return combat.StartRequest{Actor: f.actor, Locator: f.locator, GenerationRef: generation, StartFingerprint: fingerprint(f.locator.AuthorityScope + "/" + stage),
-		TrustProfile: d.ServerEntropyClientDerived, Replay: d.ReplaySpec{Response: d.ReplayFightExist, ErrorCode: d.FightExistCode},
+	registration := d.MustMode(f.mode)
+	request := combat.StartRequest{Mode: f.mode, Actor: f.actor, Locator: f.locator, GenerationRef: generation, StartFingerprint: fingerprint(f.locator.AuthorityScope + "/" + stage),
+		TrustProfile: registration.Trust, Replay: registration.Replay,
 		Package: func(stream *d.Stream) (any, error) {
 			f.builds.Add(1)
 			seeds := make([]int64, 3)
@@ -93,8 +95,14 @@ func (f kindFixture) request(stage, generation string) combat.StartRequest {
 			}
 			return map[string]any{"seeds": seeds}, nil
 		},
-		Battle: combat.BattleRequest{CampaignType: 1, TeamA: []combat.Participant{{Origin: d.OwnedSelf, Kind: d.HeroActor, Player: f.actor.PlayerID, Identity: f.partner}},
-			WavesB: [][]combat.Participant{{{Origin: d.Template, Kind: d.HeroActor, Identity: 10001002, TemplateParams: templateParams(10001002)}}}}}
+	}
+	if registration.Producer == "" {
+		request.Challenge = &d.Challenge{Targets: []int64{10001002}}
+		return request
+	}
+	request.Battle = combat.BattleRequest{CampaignType: 1, TeamA: []combat.Participant{{Origin: d.OwnedSelf, Kind: d.HeroActor, Player: f.actor.PlayerID, Identity: f.partner}},
+		WavesB: [][]combat.Participant{{{Origin: d.Template, Kind: d.HeroActor, Identity: 10001002, TemplateParams: templateParams(10001002)}}}}
+	return request
 }
 
 func (f kindFixture) attestRequest(generation, receipt string) combat.AttestRequest {
@@ -119,7 +127,7 @@ func (f kindFixture) rows(t *testing.T, table string) int {
 // frozen package, a different stage supersedes, RESULT attests once and a
 // duplicate RESULT answers from the pinned FightExist spec.
 func TestI8_4ClientAttestedAttemptNative(t *testing.T) {
-	f := newKindFixture(t, "attested")
+	f := newKindFixture(t, "attested", d.ModeDodgeball)
 	s := f.service
 	first, err := f.start(f.request("stage-1", "g1"), 3)
 	if err != nil {
@@ -147,8 +155,10 @@ func TestI8_4ClientAttestedAttemptNative(t *testing.T) {
 	}
 	server := f.request("stage-1", "g1")
 	server.TrustProfile, server.Replay, server.Package = d.TrustProfile{}, d.ReplaySpec{}, nil
-	if _, err = f.start(server, 1); !errors.Is(err, d.ErrStartConflict) {
-		t.Fatal("a different kind on the locator must conflict", err)
+	// The mode registry refuses a server-report START under the dodgeball
+	// mode before it can reach the locator conflict.
+	if _, err = f.start(server, 1); !errors.Is(err, d.ErrInvalid) {
+		t.Fatal("a different kind under the dodgeball mode must be refused", err)
 	}
 	second, err := f.start(f.request("stage-2", "g2"), 3)
 	if err != nil || second.Superseded == nil || second.Superseded.ID != attempt.ID || second.Attempt.SupersedesAttemptID != attempt.ID || second.Package == nil {
@@ -180,7 +190,7 @@ func TestI8_4ClientAttestedAttemptNative(t *testing.T) {
 // Competing different-stage STARTs serialize on the rank-609 fence: one open
 // attempt remains and the superseded ones form one linear chain.
 func TestI8_4ConcurrentSupersedeNative(t *testing.T) {
-	f := newKindFixture(t, "concurrent-supersede")
+	f := newKindFixture(t, "concurrent-supersede", d.ModeDodgeball)
 	initial, err := f.start(f.request("stage-0", "g0"), 3)
 	if err != nil {
 		t.Fatal(err)
@@ -248,7 +258,7 @@ func TestI8_4ConcurrentSupersedeNative(t *testing.T) {
 // The schema refuses what the domain refuses, and a rolled-back START leaves
 // no attempt, snapshot reference or package behind.
 func TestI8_4SchemaGuardsNative(t *testing.T) {
-	f := newKindFixture(t, "guards")
+	f := newKindFixture(t, "guards", d.ModeDodgeball)
 	s := f.service
 	started, err := f.start(f.request("stage-1", "g1"), 3)
 	if err != nil {

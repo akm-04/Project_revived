@@ -1,0 +1,616 @@
+{
+ "background": [],
+ "content": [
+  "content_awakening_catalogs",
+  "content_daily_buy_input_catalogs"
+ ],
+ "contracts": [
+  {
+   "count": 17,
+   "file": "docs/architecture/CUMULATIVE_CONTENT_GENERATION_LOCK.json"
+  },
+  {
+   "count": 25,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 20,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 25,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/GUILD_NAME_LENGTH_POLICY_V1.json"
+  },
+  {
+   "count": 9,
+   "file": "docs/i9/I9_10A_EVENT_CENTRE_V1.json"
+  },
+  {
+   "count": 12,
+   "file": "docs/i9/I9_10F_MENTOR_V1.json"
+  },
+  {
+   "count": 7,
+   "file": "docs/i9/I9_10H_H2_STRUCTURED_KINDS.md"
+  },
+  {
+   "count": 6,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11B_ITEMS_ENERGY_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_11_CLOCK_ROLLBACK_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_FURNITURE_COMPOSE_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_GIRLS_LOG_V1.md"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11_HERO_RECOMMEND_SCORES_V1.md"
+  },
+  {
+   "count": 9,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_4A_RESEARCH_PLAN.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_4B_PREIMPLEMENTATION.md"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_4D_RESEARCH_PLAN.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_ADVENTURE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_ADVENTURE_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_BROADCAST_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_FRIEND_FIGHT_V1.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GM_QUESTION_FOUNDATION_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_CAMPAIGN_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_RENTAL_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_ILLUSION_V1.json"
+  },
+  {
+   "count": 4,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_MARCH_IMPLEMENTATION.md"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_MEMOIR_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_MEMOIR_V1.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_MENTOR_LEVEL_GAP_POLICY.md"
+  },
+  {
+   "count": 17,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V2.json"
+  },
+  {
+   "count": 17,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V3.json"
+  },
+  {
+   "count": 24,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_OCCULT_POLICY_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_OCCULT_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_PET_CAMPAIGN_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_SKILL_LEVEL_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_TOP_FLOOR_TASK_MODE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/RULING_I9-12_HAVE_FUN_LENDER.md"
+  }
+ ],
+ "decorated_by": [
+  "observing"
+ ],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/hero_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {
+   "HERO_PROMOTED": {
+    "missions": [
+     2
+    ],
+    "stages": [
+     "I9-11"
+    ]
+   },
+   "HERO_SKILL_UPGRADED": {
+    "missions": [
+     107
+    ],
+    "stages": [
+     "I9-11"
+    ]
+   }
+  },
+  "emits": [
+   "HERO_PROMOTED",
+   "HERO_SKILL_UPGRADED"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "CA2_HERO_CORE"
+   },
+   {
+    "lock_timeout_ms": 2000,
+    "name": "CA7_3_HERO_APPEARANCE"
+   },
+   {
+    "lock_timeout_ms": 2000,
+    "name": "CA7_4_HERO_LIVE"
+   }
+  ],
+  "ranks": [
+   {
+    "name": "character.HeroRootLockRank",
+    "rank": 400
+   }
+  ],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "player_economy_owners": [
+    "i5store.LockEconomyOwnerTx"
+   ],
+   "player_item_stacks": [
+    "i5store.LockStackTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "player_economy_owners",
+   "player_item_stacks",
+   "players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [
+  "OverlayRosterTx"
+ ],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
+    "line": 85
+   },
+   "mid": 39,
+   "name": "SET_ALL_SKILL_LEVEL"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
+    "line": 85
+   },
+   "mid": 49,
+   "name": "LOAD_HEROS"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
+    "line": 85
+   },
+   "mid": 51,
+   "name": "POWERUP_HERO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
+    "line": 85
+   },
+   "mid": 52,
+   "name": "EVOLVE_HERO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
+    "line": 85
+   },
+   "mid": 53,
+   "name": "SET_SKILL_LEVEL"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
+    "line": 85
+   },
+   "mid": 54,
+   "name": "SET_HERO_EQUIP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
+    "line": 85
+   },
+   "mid": 55,
+   "name": "USE_EXP_ITEM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
+    "line": 85
+   },
+   "mid": 57,
+   "name": "ONE_CLICK_JINJIE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
+    "line": 85
+   },
+   "mid": 58,
+   "name": "FUMO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
+    "line": 85
+   },
+   "mid": 59,
+   "name": "STONE_SUMMON_HERO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
+    "line": 85
+   },
+   "mid": 60,
+   "name": "SKIN_ON"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
+    "line": 85
+   },
+   "mid": 61,
+   "name": "SKIN_CANCEL"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
+    "line": 85
+   },
+   "mid": 62,
+   "name": "ONE_CLICK_EQUIP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
+    "line": 85
+   },
+   "mid": 63,
+   "name": "USE_EXP_ITEMS"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
+    "line": 85
+   },
+   "mid": 67,
+   "name": "LOAD_HERO_PIECES"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
+    "line": 85
+   },
+   "mid": 68,
+   "name": "UNLOCK_DYNAMIC_CARD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
+    "line": 85
+   },
+   "mid": 69,
+   "name": "SHOW_DYNAMIC_CARD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
+    "line": 85
+   },
+   "mid": 88,
+   "name": "BACKPACK_SORT_TYPE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
+    "line": 85
+   },
+   "mid": 89,
+   "name": "SAVA_SORT_TYPE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
+    "line": 85
+   },
+   "mid": 304,
+   "name": "UPGRADE_SUPER_EQUIP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
+    "line": 85
+   },
+   "mid": 305,
+   "name": "SUMMON_SUPER_HERO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
+    "line": 85
+   },
+   "mid": 2144,
+   "name": "CHANGE_PARTNER_SKILL"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
+    "line": 85
+   },
+   "mid": 2979,
+   "name": "USE_ILLUSION_SKIN_ITEM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
+    "line": 85
+   },
+   "mid": 3116,
+   "name": "HERO_COLLOCATION"
+  }
+ ],
+ "name": "characterhero",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/characterstore",
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore",
+  "internal/adapters/postgres/librarystore"
+ ],
+ "tables": {
+  "owned": [
+   "player_hero_evolution",
+   "player_hero_evolution_admissions",
+   "player_hero_live_entitlements",
+   "player_hero_raw_awakening",
+   "player_hero_roots",
+   "player_hero_skin_entitlements",
+   "player_heroes"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "content_awakening_catalogs",
+   "content_daily_buy_input_catalogs",
+   "gameplay_contexts",
+   "gxb_content_activation",
+   "gxb_content_appearance_live",
+   "gxb_content_appearance_skin_items",
+   "gxb_content_appearance_skins",
+   "gxb_content_equipment_primitives",
+   "gxb_content_equipment_recipe_edges",
+   "gxb_content_function_gates",
+   "gxb_content_hero_equipment",
+   "gxb_content_hero_exp",
+   "gxb_content_hero_exp_items",
+   "gxb_content_hero_fumo_materials",
+   "gxb_content_hero_fumo_targets",
+   "gxb_content_hero_normal_star",
+   "gxb_content_hero_practice_thresholds",
+   "gxb_content_hero_promotion_restoration_denominations",
+   "gxb_content_hero_promotion_restoration_equipment",
+   "gxb_content_hero_promotion_restoration_fractions",
+   "gxb_content_hero_super_star",
+   "gxb_content_hero_templates",
+   "gxb_content_player_progression",
+   "gxb_content_resource_definitions",
+   "gxb_content_revisions",
+   "gxb_content_super_equipment_caps",
+   "gxb_content_super_equipment_positions",
+   "gxb_content_super_equipment_tiers",
+   "gxb_content_super_hero_prerequisites",
+   "gxb_operation_receipts",
+   "player_economy_owners",
+   "player_hero_live_entitlements",
+   "player_hero_raw_awakening",
+   "player_hero_roots",
+   "player_hero_skin_entitlements",
+   "player_heroes",
+   "player_item_stacks",
+   "player_library_heroes",
+   "player_temporal_resources",
+   "players"
+  ],
+  "written": [
+   "gxb_operation_receipts",
+   "player_hero_live_entitlements",
+   "player_hero_roots",
+   "player_hero_skin_entitlements",
+   "player_heroes",
+   "player_library_hero_logs",
+   "player_library_heroes"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "missions",
+   "playerdisplay",
+   "publicshowcase"
+  ],
+  "scenarios_naming": [
+   "arena.json",
+   "conquer.json",
+   "i9_10_topfloor_defense_required.json",
+   "i9_10_topfloor_team_info_popup.json",
+   "i9_11_hero_skill.json",
+   "i9_3b_crystal.json",
+   "i9_3b_sweep.json",
+   "i9_3d_challenge_loss.json",
+   "i9_3d_trials.json",
+   "i9_4_real_pk.json",
+   "i9_4d_awakening.json",
+   "i9_7d_production_functions.json",
+   "league.json",
+   "oneonone.json",
+   "topfloor.json",
+   "topfloor_battle.json"
+  ],
+  "unit": [
+   "acquisition_test.go",
+   "appearance_contribution_test.go",
+   "appearance_service_test.go",
+   "awakening_clock_test.go",
+   "awakening_compose_test.go",
+   "base_observation_test.go",
+   "ca4_5_recovery_test.go",
+   "ca7_6_preservation_test.go",
+   "ca8_observation_adapters_test.go",
+   "collection_admission_test.go",
+   "equipment_planner_oracle_test.go",
+   "equipment_service_test.go",
+   "equipment_state_test.go",
+   "fumo_service_test.go",
+   "journal_policy_native_test.go",
+   "live_service_test.go",
+   "practice_contribution_test.go",
+   "progression_test.go",
+   "promotion_restoration_test.go",
+   "promotion_service_test.go",
+   "raw_skill_receipt_test.go",
+   "service_test.go",
+   "skill_level_test.go"
+  ]
+ }
+}

@@ -1,0 +1,338 @@
+{
+ "background": [
+  {
+   "binary": "gxb-api",
+   "entry": "appadventure.Reconciler",
+   "kind": "reconcile"
+  }
+ ],
+ "content": [],
+ "contracts": [
+  {
+   "count": 21,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 20,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 4,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_ADVENTURE_POLICY_V1.json"
+  },
+  {
+   "count": 20,
+   "file": "docs/i9/I9_ADVENTURE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
+  },
+  {
+   "count": 20,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/adventure_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": [
+   "CAMPAIGN_SWEEP",
+   "FANTASY",
+   "PVP_FIGHT",
+   "SUMMON"
+  ]
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "adventure"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {},
+  "row_locks": [],
+  "unresolved_methods": []
+ },
+ "login": [
+  "OverlayMID1"
+ ],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
+    "line": 67
+   },
+   "mid": 2410,
+   "name": "ADVENTURE_DEFENSE_FIGHT_ROOM_RESULT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
+    "line": 67
+   },
+   "mid": 2411,
+   "name": "ADVENTURE_ILLUSION_TEAM_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
+    "line": 67
+   },
+   "mid": 2412,
+   "name": "ADVENTURE_DEFENSE_PREPARE_ROOM_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
+    "line": 67
+   },
+   "mid": 2413,
+   "name": "ADVENTURE_DEFENSE_QUIT_ROOM_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
+    "line": 67
+   },
+   "mid": 2416,
+   "name": "GET_ADVENTURE_LIST"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
+    "line": 67
+   },
+   "mid": 2417,
+   "name": "GET_ADVENTURE_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
+    "line": 67
+   },
+   "mid": 2418,
+   "name": "BUY_ADVENTURE_ITEM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
+    "line": 67
+   },
+   "mid": 2419,
+   "name": "START_PVP_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
+    "line": 67
+   },
+   "mid": 2420,
+   "name": "BUY_ADVENTURE_CARD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
+    "line": 67
+   },
+   "mid": 2421,
+   "name": "START_PARADISE_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
+    "line": 67
+   },
+   "mid": 2422,
+   "name": "FIGHT_PARADISE_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
+    "line": 67
+   },
+   "mid": 2423,
+   "name": "ADVENTURE_ILLUSION_CREATE_TEAM_ROOM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
+    "line": 67
+   },
+   "mid": 2424,
+   "name": "ADVENTURE_ILLUSION_KICK_MEMBER"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
+    "line": 67
+   },
+   "mid": 2425,
+   "name": "ADVENTURE_ILLUSION_JOIN_ROOM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
+    "line": 67
+   },
+   "mid": 2426,
+   "name": "ADVENTURE_ILLUSION_EXIT_ROOM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
+    "line": 67
+   },
+   "mid": 2427,
+   "name": "ADVENTURE_ILLUSION_INVITE_FRIEND"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
+    "line": 67
+   },
+   "mid": 2428,
+   "name": "ADVENTURE_ILLUSION_ENTER_TEAM_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
+    "line": 67
+   },
+   "mid": 2429,
+   "name": "ADVENTURE_ILLUSION_PICK_TEAM_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
+    "line": 67
+   },
+   "mid": 2430,
+   "name": "ADVENTURE_ILLUSION_PREPARE_TEAM_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/adventure_dispatcher.go",
+    "line": 67
+   },
+   "mid": 2431,
+   "name": "ADVENTURE_DEFENSE_START_ROOM_FIGHT"
+  }
+ ],
+ "name": "adventure",
+ "pushes": [
+  {
+   "file": "internal/adapters/stockruntime/adventure_room_notice.go",
+   "kind": "direct",
+   "line": 41,
+   "mid": 516,
+   "roles": [
+    "Role",
+    "World"
+   ]
+  },
+  {
+   "file": "internal/adapters/stockruntime/adventure_notice.go",
+   "kind": "notice",
+   "line": 67,
+   "namespace": "rt.NoticeNamespaceGeneric",
+   "notice_type": 33,
+   "parent_mid": 36854,
+   "roles": [
+    "Role",
+    "World"
+   ]
+  },
+  {
+   "file": "internal/adapters/stockruntime/adventure_notice.go",
+   "kind": "notice",
+   "line": 68,
+   "namespace": "rt.NoticeNamespaceGeneric",
+   "notice_type": 34,
+   "parent_mid": 36854,
+   "roles": [
+    "Role",
+    "World"
+   ]
+  },
+  {
+   "file": "internal/adapters/stockruntime/adventure_room_notice.go",
+   "kind": "notice",
+   "line": 44,
+   "namespace": "rt.NoticeNamespaceGeneric",
+   "notice_type": 32,
+   "parent_mid": 36854,
+   "roles": [
+    "Role",
+    "World"
+   ]
+  }
+ ],
+ "stores": [
+  "internal/adapters/postgres/adventurestore",
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/guildrentalread",
+  "internal/adapters/postgres/guildstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/librarystore",
+  "internal/adapters/postgres/sharedroomstore"
+ ],
+ "tables": {
+  "owned": [
+   "adventure_attempt_settlements",
+   "adventure_occurrences",
+   "adventure_reports",
+   "adventure_single_attempts"
+  ],
+  "read": [
+   "adventure_attempt_settlements",
+   "adventure_occurrences",
+   "adventure_reports",
+   "guild_memberships",
+   "guilds",
+   "gxb_content_activation",
+   "gxb_content_revisions",
+   "player_directory_profiles",
+   "player_function_eligibility",
+   "player_library_heroes",
+   "shared_room_seats",
+   "shared_rooms"
+  ],
+  "written": [
+   "adventure_attempt_settlements",
+   "adventure_occurrences",
+   "adventure_reports"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [
+   "i9_8d_adventure.json"
+  ],
+  "unit": [
+   "coop_test.go",
+   "observer_test.go",
+   "reads_test.go",
+   "room_service_test.go",
+   "solo_test.go",
+   "start_choice_conformance_test.go",
+   "start_identity_test.go"
+  ]
+ }
+}

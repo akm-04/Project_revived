@@ -2,6 +2,7 @@ package illusion
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -15,7 +16,6 @@ import (
 	"gxb.local/backend/v2/internal/domain/logicalserver"
 	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/domain/objective"
-	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -27,40 +27,44 @@ var summaryPolicy = cd.SummaryPolicy{ID: "I9_ILLUSION_SUMMARY_V1", Version: 1, M
 // It answers below the unlock because the stock main scene sends it at every
 // lobby load and indexes paradise_info on any 200.
 func (s Mode) Info(c context.Context, a identity.ActorContext, op operation.Context) (map[string]any, error) {
-	op, err := s.pin(c, op)
-	if err != nil {
-		return nil, err
-	}
-	at, err := s.Timed.Binder.Time.Now(c)
-	if err != nil {
-		return nil, err
-	}
-	occurrence, found, err := s.Store.ReadOccurrenceTx(c, s.Fresh, int64(a.LogicalServerID))
-	if err != nil {
-		return nil, err
-	}
-	if !found {
-		occurrence = d.NewOccurrence(int64(a.LogicalServerID), d.FirstCampaignID, modes.Day(at))
-	}
-	player, found, err := s.Store.ReadPlayerTx(c, s.Fresh, a.PlayerID)
-	if err != nil {
-		return nil, err
-	}
-	if !found {
-		player = d.Player{PlayerID: int64(a.PlayerID)}
-	}
-	player.Reset(modes.Day(at))
-	hurt, rank, err := s.personalPlace(c, s.Fresh, occurrence, a.PlayerID)
-	if err != nil {
-		return nil, err
-	}
-	revision, _ := op.Policies.Get("content")
-	catalog, err := s.Content.IllusionCatalogTx(c, s.Fresh, revision)
-	if err != nil {
-		return nil, err
-	}
-	return infoBody(catalog, occurrence, player, hurt, rank, at), nil
+	var out map[string]any
+	_, _, err := s.Timed.Run(c, op, profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, readRetry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		bound, err := s.pinTx(c, sc.Tx, sc.Operation.Operation())
+		if err != nil {
+			return err
+		}
+		at := sc.Operation.DecisionAt()
+		occurrence, found, err := s.Store.ReadOccurrenceTx(c, sc.Tx, int64(a.LogicalServerID))
+		if err != nil {
+			return err
+		}
+		if !found {
+			occurrence = d.NewOccurrence(int64(a.LogicalServerID), d.FirstCampaignID, modes.Day(at))
+		}
+		player, found, err := s.Store.ReadPlayerTx(c, sc.Tx, a.PlayerID)
+		if err != nil {
+			return err
+		}
+		if !found {
+			player = d.Player{PlayerID: int64(a.PlayerID)}
+		}
+		player.Reset(modes.Day(at))
+		hurt, rank, err := s.personalPlace(c, sc.Tx, occurrence, a.PlayerID)
+		if err != nil {
+			return err
+		}
+		revision, _ := bound.Policies.Get("content")
+		catalog, err := s.Content.IllusionCatalogTx(c, sc.Tx, revision)
+		if err != nil {
+			return err
+		}
+		out = infoBody(catalog, occurrence, player, hurt, rank, at)
+		return nil
+	})
+	return out, err
 }
+
+func readRetry() tx.RetryPolicy { return tx.RetryPolicy{MaxAttempts: 1} }
 
 // Buy answers 1345: the next refresh_cost ladder entry, capped by
 // vip.paradise_buy_num, adds chances_per_buy chances through the I5 debiter.
@@ -118,13 +122,7 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, request StartReq
 		if err = st.player.ConsumeChance(); err != nil {
 			return Response{}, err
 		}
-		started, err := s.bind(c, sc, a, st.occurrence, campaign, request)
-		if err != nil {
-			return Response{}, err
-		}
-		attempt := d.Attempt{ID: started.Attempt.ID.String(), PlayerID: int64(a.PlayerID), LogicalServerID: int64(a.LogicalServerID),
-			OpenDay: st.occurrence.OpenDay, CampaignID: st.occurrence.CampaignID, Formation: formationText(request.Formation), FrozenAt: at.Unix()}
-		if err = s.Store.InsertAttemptTx(c, sc.Tx, attempt); err != nil {
+		if _, err = s.bind(c, sc, a, st.occurrence, campaign, request); err != nil {
 			return Response{}, err
 		}
 		if err = s.Store.SavePlayerTx(c, sc.Tx, st.player, at); err != nil {
@@ -143,7 +141,7 @@ func (s Mode) bind(c context.Context, sc gen.TimedScope, a identity.ActorContext
 	if err != nil {
 		return cb.Started{}, err
 	}
-	battle := cb.BattleRequest{CampaignType: campaign.CampaignType, BattleID: campaign.FightID, Formation: formation}
+	battle := cb.BattleRequest{CampaignType: campaign.CampaignType, RentalMode: d.RentalCampaignType, BattleID: campaign.FightID, Formation: formation}
 	for _, id := range formation {
 		battle.TeamA = append(battle.TeamA, cb.Participant{Origin: cd.OwnedSelf, Kind: cd.HeroActor, Player: a.PlayerID, Identity: id})
 	}
@@ -156,7 +154,7 @@ func (s Mode) bind(c context.Context, sc gen.TimedScope, a identity.ActorContext
 	if request.RentPetUnit > 0 && request.RentPetPlayer > 0 {
 		battle.PetsA = append(battle.PetsA, cb.Participant{Origin: cd.Borrowed, Kind: cd.PetActor, Player: identity.PlayerID(request.RentPetPlayer), Identity: request.RentPetUnit})
 	}
-	return s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Actor: a, Locator: locator(a), GenerationRef: generationRef(occurrence),
+	return s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Mode: cd.ModeIllusionSolo, Actor: a, Locator: locator(a), GenerationRef: generationRef(occurrence),
 		StartFingerprint: startFingerprint(a, request, op), ResultDeadline: sc.Operation.DecisionAt().Add(attemptLimit),
 		Battle: battle, TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK}})
 }
@@ -176,18 +174,29 @@ func (s Mode) Settle(c context.Context, a identity.ActorContext, request ResultR
 		// shortcut: 1347 carries no attempt token, so a result delayed past a new
 		// 1346 cannot be told from that fresh START; add a client attempt id if the
 		// stock wire ever gains one.
-		attempt, found, err := s.Store.FindLatestAttemptTx(c, sc.Tx, a.PlayerID)
+		current, found, err := s.Combat.CurrentAttemptTx(c, sc.Tx, locator(a))
 		if err != nil {
 			return Response{}, err
-		}
-		if found && attempt.Resolved {
-			body, err := s.terminalBody(c, sc.Tx, attempt, identity.PlayerID(st.player.PlayerID), attempt.Damage)
-			return Response{Body: body, Duplicate: err == nil}, err
 		}
 		if !found {
 			return Response{}, fmt.Errorf("%w: no open attempt", d.ErrRefused)
 		}
-		attested, err := s.Combat.AttestSummaryTx(c, sc.Tx, cb.SummaryRequest{Locator: locator(a), GenerationRef: generationRefForAttempt(attempt), TerminalKind: "ILLUSION_RESULT", At: at, Policy: summaryPolicy,
+		generation, ok := d.ParseAttemptGeneration(current.Attempt.GenerationRef)
+		if !ok {
+			return Response{}, fmt.Errorf("illusion: malformed attempt generation %q", current.Attempt.GenerationRef)
+		}
+		if current.Attempt.State == cd.Terminal {
+			damage, settled, err := s.Store.ReadSettlementTx(c, sc.Tx, current.Attempt.ID)
+			if err != nil {
+				return Response{}, err
+			}
+			if !settled {
+				return Response{}, fmt.Errorf("%w: no open attempt", d.ErrRefused)
+			}
+			body, err := s.terminalBody(c, sc.Tx, generation, identity.PlayerID(st.player.PlayerID), damage)
+			return Response{Body: body, Duplicate: err == nil}, err
+		}
+		attested, err := s.Combat.AttestSummaryTx(c, sc.Tx, cb.SummaryRequest{Locator: locator(a), GenerationRef: current.Attempt.GenerationRef, TerminalKind: "ILLUSION_RESULT", At: at, Policy: summaryPolicy,
 			Summary: cd.Summary{Star: request.Star, Win: request.Star > 0 || request.Damage > 0, Damage: request.Damage, Formation: request.Formation, Pet: request.PetID}})
 		if err != nil {
 			return Response{}, err
@@ -195,25 +204,27 @@ func (s Mode) Settle(c context.Context, a identity.ActorContext, request ResultR
 		if attested.Drained || attested.Attestation.Verdict == cd.VerdictRejected {
 			return Response{}, fmt.Errorf("%w: summary drained or rejected", d.ErrRefused)
 		}
-		current := attempt.Matches(st.occurrence)
+		currentOccurrence := generation.Matches(st.occurrence)
 		accepted := d.ClampDamage(request.Damage)
-		if err = s.creditResult(c, sc, attempt, accepted, request.CostTime, request.Star > 0, at); err != nil {
+		if err = s.creditResult(c, sc, generation, a.PlayerID, accepted, request.CostTime, request.Star > 0, at); err != nil {
 			return Response{}, err
 		}
-		attempt.Resolved, attempt.Damage = true, accepted
-		if err = s.Store.SaveAttemptTx(c, sc.Tx, attempt); err != nil {
+		if err = s.Store.InsertSettlementTx(c, sc.Tx, current.Attempt.ID, a.PlayerID, accepted, at); err != nil {
 			return Response{}, err
 		}
-		if current {
+		if currentOccurrence {
 			st.player.RecordHit(accepted, request.CostTime)
 			if err = s.Store.SavePlayerTx(c, sc.Tx, st.player, at); err != nil {
 				return Response{}, err
 			}
 		}
-		if err = s.recordFantasy(c, sc, a, attempt.ID); err != nil {
+		if err = s.recordFantasy(c, sc, a, current.Attempt.ID.String()); err != nil {
 			return Response{}, err
 		}
-		body, err := s.terminalBody(c, sc.Tx, attempt, a.PlayerID, accepted)
+		if err = s.BattleObserver.ObserveBattleTx(c, sc.Tx, a.PlayerID, current.Formation, at); err != nil {
+			return Response{}, err
+		}
+		body, err := s.terminalBody(c, sc.Tx, generation, a.PlayerID, accepted)
 		if err != nil {
 			return Response{}, err
 		}
@@ -221,17 +232,13 @@ func (s Mode) Settle(c context.Context, a identity.ActorContext, request ResultR
 	})
 }
 
-func generationRefForAttempt(attempt d.Attempt) string {
-	return fmt.Sprintf("ILLUSION/%d/%d/%d", attempt.LogicalServerID, attempt.OpenDay, attempt.CampaignID)
-}
-
-func (s Mode) creditResult(c context.Context, sc gen.TimedScope, attempt d.Attempt, accepted, costTime int64, killed bool, at time.Time) error {
-	result, err := s.Store.LockResultTx(c, sc.Tx, attempt.LogicalServerID, attempt.OpenDay, attempt.CampaignID, identity.PlayerID(attempt.PlayerID), at)
+func (s Mode) creditResult(c context.Context, sc gen.TimedScope, generation d.AttemptGeneration, playerID identity.PlayerID, accepted, costTime int64, killed bool, at time.Time) error {
+	result, err := s.Store.LockResultTx(c, sc.Tx, generation.LogicalServerID, generation.OpenDay, generation.CampaignID, playerID, at)
 	if err != nil {
 		return err
 	}
 	result.Record(accepted, costTime, killed)
-	return s.Store.SaveResultTx(c, sc.Tx, attempt.LogicalServerID, attempt.OpenDay, attempt.CampaignID, result, at)
+	return s.Store.SaveResultTx(c, sc.Tx, generation.LogicalServerID, generation.OpenDay, generation.CampaignID, result, at)
 }
 
 func (s Mode) recordFantasy(c context.Context, sc gen.TimedScope, a identity.ActorContext, attemptID string) error {
@@ -244,13 +251,13 @@ func (s Mode) recordFantasy(c context.Context, sc gen.TimedScope, a identity.Act
 }
 
 // terminalBody is the 1347 reply for the occurrence the attempt was frozen to.
-func (s Mode) terminalBody(c context.Context, q tx.Queryer, attempt d.Attempt, playerID identity.PlayerID, damage int64) (map[string]any, error) {
-	ranks, err := s.Store.ReadRankTx(c, q, attempt.LogicalServerID, attempt.OpenDay, rankLimit)
+func (s Mode) terminalBody(c context.Context, q tx.Queryer, generation d.AttemptGeneration, playerID identity.PlayerID, damage int64) (map[string]any, error) {
+	ranks, err := s.Store.ReadRankTx(c, q, generation.LogicalServerID, generation.OpenDay, rankLimit)
 	if err != nil {
 		return nil, err
 	}
 	rank, _ := d.RankOf(ranks, int64(playerID))
-	best, found, err := s.Store.ReadResultTx(c, q, attempt.LogicalServerID, attempt.OpenDay, attempt.CampaignID, playerID)
+	best, found, err := s.Store.ReadResultTx(c, q, generation.LogicalServerID, generation.OpenDay, generation.CampaignID, playerID)
 	if err != nil {
 		return nil, err
 	}
@@ -278,10 +285,10 @@ func (s Mode) personalPlace(c context.Context, q tx.Queryer, occurrence d.Occurr
 	return hurt, rank, nil
 }
 
-// MemberTeam answers 1364 with the member's frozen formation and current roster
-// rows, which the stock rank window populates as heroes. The target must belong
-// to the actor's logical server, and the formation is the attempt of the current
-// ranked occurrence.
+// MemberTeam answers 1364 with the member's frozen formation and the heroes and
+// pet frozen in that attempt's combat snapshot, which the stock rank window
+// populates as cards. The target must belong to the actor's logical server, and
+// the formation is the attempt of the current ranked occurrence.
 func (s Mode) MemberTeam(c context.Context, a identity.ActorContext, memberID identity.PlayerID, _ operation.Context) (map[string]any, error) {
 	if !s.ready() {
 		return nil, d.ErrUnavailable
@@ -310,43 +317,28 @@ func (s Mode) MemberTeam(c context.Context, a identity.ActorContext, memberID id
 		return out, err
 	}
 	boardDay := occurrence.BoardDay(at)
-	attempt, found, err := s.Store.FindAttemptTx(c, s.Fresh, memberID, int64(a.LogicalServerID), boardDay, occurrence.CampaignID)
-	if err != nil {
-		return nil, err
-	}
-	// Advance moves the occurrence's open day and campaign past the frozen board,
-	// so an attempt of the day the board shows is found by its day alone.
-	if !found {
-		attempt, found, err = s.Store.FindDayAttemptTx(c, s.Fresh, memberID, int64(a.LogicalServerID), boardDay)
-	}
+	current, found, err := s.Combat.CurrentAttemptTx(c, s.Fresh, playerLocator(a.LogicalServerID, memberID))
 	if err != nil || !found {
 		return out, err
 	}
-	formation := parseFormationText(attempt.Formation)
+	generation, ok := d.ParseAttemptGeneration(current.Attempt.GenerationRef)
+	if !ok || generation.OpenDay != boardDay {
+		return out, nil
+	}
+	formation := current.Formation
 	if len(formation) == 0 {
 		return out, nil
 	}
-	detail := map[string]any{}
-	if err = s.Heroes.OverlayMID1(c, s.Fresh, identity.ActorContext{PlayerID: memberID}, false, at, detail); err != nil {
-		return nil, err
+	snapshot, err := s.Combat.SnapshotTx(c, s.Fresh, current.Attempt.ID)
+	if err != nil {
+		return out, nil
 	}
-	body, _ := detail["49"].(map[string]any)
-	roster, _ := body["heros"].(map[string]any)
-	heroes := make([]map[string]any, 0, len(formation))
-	for _, id := range formation {
-		row, owned := roster[fmt.Sprint(id)].(map[string]any)
-		if !owned {
-			continue
-		}
-		heroes = append(heroes, row)
+	heroes, pet := frozenMemberTeam(snapshot, memberID, formation)
+	out["heros"] = heroes
+	for _, row := range heroes {
 		if shelf, ok := numeric(row["book_shelf_lev"]); ok && shelf > 0 {
 			out["book_shelf_lev"] = shelf
 		}
-	}
-	out["heros"] = heroes
-	pet, err := s.frozenPet(c, attempt, memberID, at)
-	if err != nil {
-		return nil, err
 	}
 	if pet != nil {
 		out["pet"] = pet
@@ -354,33 +346,33 @@ func (s Mode) MemberTeam(c context.Context, a identity.ActorContext, memberID id
 	return out, nil
 }
 
-// frozenPet re-projects the pet the attempt froze into its combat snapshot.
-// shortcut: an unreadable snapshot omits the pet; the rank detail still renders.
-func (s Mode) frozenPet(c context.Context, attempt d.Attempt, memberID identity.PlayerID, at time.Time) (map[string]any, error) {
-	if s.Pets == nil {
-		return nil, nil
-	}
-	attemptID, err := ids.ParseUUID(attempt.ID)
-	if err != nil {
-		return nil, nil
-	}
-	snapshot, err := s.Combat.SnapshotTx(c, s.Fresh, attemptID)
-	if err != nil {
-		return nil, nil
-	}
-	petID := int64(0)
-	for _, actor := range snapshot.Battle.PetsA {
-		if int64(memberID) == actor.Player && actor.Kind == cd.PetActor && actor.Origin == cd.OwnedSelf {
-			petID = actor.Identity
+// frozenMemberTeam projects the attempt's own hero and pet rows from the frozen
+// combat snapshot; live roster rows never reach the rank detail (C11).
+// shortcut: an unreadable frozen row is omitted, and an unreadable snapshot
+// omits the whole team, so the rank popup still renders.
+func frozenMemberTeam(snapshot cd.Snapshot, memberID identity.PlayerID, formation []int64) ([]map[string]any, map[string]any) {
+	heroes := make([]map[string]any, 0, len(formation))
+	for _, formationID := range formation {
+		for _, actor := range snapshot.Battle.TeamA {
+			if actor.Kind != cd.HeroActor || actor.Origin != cd.OwnedSelf || actor.Player != int64(memberID) || actor.Identity != formationID {
+				continue
+			}
+			row := map[string]any{}
+			if json.Unmarshal(actor.Params, &row) != nil {
+				continue
+			}
+			heroes = append(heroes, row)
 			break
 		}
 	}
-	if petID <= 0 {
-		return nil, nil
+	for _, actor := range snapshot.Battle.PetsA {
+		if actor.Kind != cd.PetActor || actor.Origin != cd.OwnedSelf || actor.Player != int64(memberID) {
+			continue
+		}
+		row := map[string]any{}
+		if json.Unmarshal(actor.Params, &row) == nil {
+			return heroes, row
+		}
 	}
-	pets, err := s.petRows(c, s.Fresh, memberID, at)
-	if err != nil {
-		return nil, err
-	}
-	return pets[fmt.Sprint(petID)], nil
+	return heroes, nil
 }

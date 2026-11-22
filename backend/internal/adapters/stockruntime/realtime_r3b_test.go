@@ -18,6 +18,7 @@ import (
 	"gxb.local/backend/v2/internal/protocol/limits"
 	"gxb.local/backend/v2/internal/protocol/mids"
 	wireRT "gxb.local/backend/v2/internal/protocol/realtime"
+	"gxb.local/backend/v2/internal/testsupport/latency"
 )
 
 type runtimeAuthority struct {
@@ -79,7 +80,7 @@ func startAuthenticated(t *testing.T, srv RealtimeServer) (net.Conn, <-chan erro
 		t.Fatal(err)
 	}
 	buf := make([]byte, 1024)
-	_ = client.SetReadDeadline(time.Now().Add(time.Second))
+	_ = client.SetReadDeadline(time.Now().Add(eventWaitTimeout))
 	n, err := client.Read(buf)
 	if err != nil {
 		t.Fatal(err)
@@ -113,10 +114,8 @@ func TestR3BAbsoluteHandshakeDeadlineSlowloris(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected handshake timeout")
 		}
-		if time.Since(start) > 180*time.Millisecond {
-			t.Fatalf("deadline was extended: %v", time.Since(start))
-		}
-	case <-time.After(250 * time.Millisecond):
+		latency.Enforce(t, latency.Incidental, time.Since(start), 180*time.Millisecond)
+	case <-time.After(eventWaitTimeout):
 		t.Fatal("slowloris did not hit absolute handshake deadline")
 	}
 }
@@ -178,7 +177,7 @@ func TestR3BAuthAndLivenessQueryTimeouts(t *testing.T) {
 		if !errors.Is(err, context.DeadlineExceeded) {
 			t.Fatalf("live err=%v", err)
 		}
-	case <-time.After(200 * time.Millisecond):
+	case <-time.After(eventWaitTimeout):
 		t.Fatal("liveness query timeout not enforced")
 	}
 }
@@ -214,7 +213,7 @@ func TestR3BHeartbeatKeepsAliveAndSilentConnectionExpires(t *testing.T) {
 		if !errors.Is(err, ErrRealtimeClientIdle) {
 			t.Fatalf("idle err=%v", err)
 		}
-	case <-time.After(250 * time.Millisecond):
+	case <-time.After(eventWaitTimeout):
 		t.Fatal("silent connection did not expire")
 	}
 }
@@ -233,7 +232,7 @@ func TestR3BMinimalDispatcherUsesExistingWriter(t *testing.T) {
 	req, _ := wireRT.EncodeFrame(wireRT.Frame{MID: 32782, Sequence: 7, Params: &amf3.Object{}})
 	_, _ = c.Write(req)
 	buf := make([]byte, 1024)
-	_ = c.SetReadDeadline(time.Now().Add(time.Second))
+	_ = c.SetReadDeadline(time.Now().Add(eventWaitTimeout))
 	n, err := c.Read(buf)
 	if err != nil {
 		t.Fatal(err)

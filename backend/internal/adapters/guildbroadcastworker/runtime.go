@@ -53,7 +53,7 @@ func New(c context.Context, p *postgres.Pool) (*Runtime, error) {
 	if e := (guildbroadcaststore.Store{}).ValidateSchema(c, p); e != nil {
 		return nil, e
 	}
-	runner := tx.Runner{DB: p, Admission: tx.NewSemaphore(32)}
+	runner := tx.Runner{DB: p, Admission: tx.NewSemaphore(int(p.Raw().Config().MaxConns))}
 	registryService := registry.Service{Runner: runner, Repo: contentstore.Store{}, Fresh: p, Providers: registry.DefaultProviderSet()}
 	active, e := registryService.ValidateActiveReadiness(c)
 	if e != nil {
@@ -82,7 +82,7 @@ func newForRevision(c context.Context, p *postgres.Pool, revision string) (*Runt
 	if e := (guildbroadcaststore.Store{}).ValidateSchema(c, p); e != nil {
 		return nil, e
 	}
-	runner := tx.Runner{DB: p, Admission: tx.NewSemaphore(32)}
+	runner := tx.Runner{DB: p, Admission: tx.NewSemaphore(int(p.Raw().Config().MaxConns))}
 	pol, e := (contentstore.Store{}).ReadBroadcastPolicy(c, p, revision)
 	if e != nil || pol.Validate() != nil {
 		return nil, errors.New("active content is not Guild broadcast compatible")

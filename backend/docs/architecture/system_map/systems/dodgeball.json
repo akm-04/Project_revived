@@ -1,0 +1,190 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [
+  {
+   "count": 6,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 6,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/dodgeball_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "dodgeball"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "dodgeball_players": [
+    "dodgeballstore.LockTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "mail_namespace_counters": [
+    "i5store.LockMailNamespaceCounterTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "dodgeball_players",
+   "gameplay_contexts",
+   "mail_namespace_counters",
+   "players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dodgeball_dispatcher.go",
+    "line": 32
+   },
+   "mid": 2960,
+   "name": "SANDBAG_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dodgeball_dispatcher.go",
+    "line": 32
+   },
+   "mid": 2961,
+   "name": "SANDBAG_ENTER"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dodgeball_dispatcher.go",
+    "line": 32
+   },
+   "mid": 2962,
+   "name": "SANDBAG_START"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dodgeball_dispatcher.go",
+    "line": 32
+   },
+   "mid": 2963,
+   "name": "SANDBAG_RESULT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dodgeball_dispatcher.go",
+    "line": 32
+   },
+   "mid": 2964,
+   "name": "SANDBAG_FRIEND_INFO"
+  }
+ ],
+ "name": "dodgeball",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/dodgeballstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore",
+  "internal/adapters/postgres/socialrelationstore"
+ ],
+ "tables": {
+  "owned": [
+   "dodgeball_players"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "dodgeball_players",
+   "gameplay_contexts",
+   "gxb_content_activation",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "mail_namespace_counters",
+   "player_function_eligibility",
+   "players",
+   "social_friendships"
+  ],
+  "written": [
+   "dodgeball_players",
+   "gxb_operation_receipts",
+   "mail_namespace_counters"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [
+   "i9_6b_dodgeball.json"
+  ],
+  "unit": []
+ }
+}

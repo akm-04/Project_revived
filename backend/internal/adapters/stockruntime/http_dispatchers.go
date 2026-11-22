@@ -11,11 +11,16 @@ import (
 
 	appboot "gxb.local/backend/v2/internal/application/bootstrap"
 	"gxb.local/backend/v2/internal/application/clientlog"
+	"gxb.local/backend/v2/internal/application/dailyreset"
+	appi5 "gxb.local/backend/v2/internal/application/i5"
 	domainclientlog "gxb.local/backend/v2/internal/domain/clientlog"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
+	domainrt "gxb.local/backend/v2/internal/domain/realtimeauth"
 	"gxb.local/backend/v2/internal/foundation/observability"
+	"gxb.local/backend/v2/internal/foundation/tx"
 
+	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/projection/lobby"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -27,18 +32,29 @@ import (
 type DiscoveryDispatcher struct {
 	Realtime apprealtime.Service
 	Tracker  *lobby.BootTracker
+	Reads    tx.Runner
 }
 
 func (d DiscoveryDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest) httpedge.Response {
 	room, err := requiredInt64(req.Envelope.Params, "room_id")
 	if err != nil || room <= 0 {
-		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "invalid_room"}}
+		return failureReply(&classifiedFailure{class: failureMalformed, detail: "invalid_room", cause: err})
 	}
-	adm, err := d.Realtime.Discover(ctx, apprealtime.Claims{
+	claims := apprealtime.Claims{
 		Bearer: req.Envelope.Claims.Token,
 		Region: req.Envelope.Claims.Region,
 		RoomID: room,
-	}, req.Envelope.ReceivedAt)
+	}
+	var adm apprealtime.Admission
+	if d.Reads.DB == nil {
+		adm, err = d.Realtime.Discover(ctx, claims, req.Envelope.ReceivedAt)
+	} else {
+		_, err = d.Reads.Run(ctx, req.Envelope.Operation, appi5.DefaultProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, scope tx.Scope) error {
+			var readErr error
+			adm, readErr = d.Realtime.DiscoverTx(c, scope.Tx, claims, req.Envelope.ReceivedAt)
+			return readErr
+		})
+	}
 	if err != nil {
 		return authFailure(err)
 	}
@@ -60,32 +76,35 @@ type LobbyDispatcher struct {
 }
 
 func (d LobbyDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest) httpedge.Response {
-	if d.Authority == nil || req.Envelope.Claims.Token == "" {
-		return httpedge.Response{HTTPStatus: http.StatusUnauthorized, Body: map[string]any{"error": "gameplay_auth_required"}}
+	if d.Authority == nil {
+		return failureReply(defect(nil))
+	}
+	if req.Envelope.Claims.Token == "" {
+		return failureReply(sessionFailure())
 	}
 	actor, err := d.Authority.ResolveGameplayBearer(ctx, req.Envelope.Claims.Token, req.Envelope.ReceivedAt)
 	if err != nil {
 		return authFailure(err)
 	}
 	if req.Envelope.Claims.Region != int64(actor.LogicalServerID) {
-		return httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "region_mismatch"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 	name := ""
 	if d.PlayerName != nil {
 		name, err = d.PlayerName(ctx, int64(actor.PlayerID))
 		if err != nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "projection_unavailable"}}
+			return failureFromRows(nil, err)
 		}
 	}
 	body, ok := lobby.Explicit(req.Envelope.MID, lobby.BootstrapView{Actor: actor, PlayerName: name, Now: req.Envelope.ReceivedAt})
 	if !ok {
-		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error": "not_wave_s_facade", "mid": int64(req.Envelope.MID)}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 	obj, ok := body.(map[string]any)
 	if !ok {
 		// Every I4 explicit facade is intentionally an object. Embedded MID1
 		// records may contain arrays, but those are not routed here.
-		return httpedge.Response{HTTPStatus: http.StatusInternalServerError, Body: map[string]any{"error": "invalid_wave_s_shape"}}
+		return failureReply(defect(nil))
 	}
 	if d.Tracker != nil {
 		kind := lobby.BootExplicitHTTP
@@ -97,12 +116,24 @@ func (d LobbyDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 	return httpedge.Response{HTTPStatus: http.StatusOK, Body: obj}
 }
 
+// authFailure classifies a rejected gameplay bearer by meaning: a region or room
+// claim that does not match the canonical actor, or a bearer whose context a
+// later selection superseded, is a permanent refusal whose empty error_msg does
+// not restart the switched scene; a transient lookup fault remains retryable, an
+// endpoint configuration fault is a server fault, and everything else is an
+// expired, replaced or invalid session. Credential and canonical actor details
+// are never reflected to stock callers.
 func authFailure(err error) httpedge.Response {
-	if err == nil {
-		err = errors.New("authentication failed")
+	if isTransient(err) {
+		return failureReply(unavailable(err))
 	}
-	// Do not reflect credential or canonical actor details to stock callers.
-	return httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "realtime_auth_failed"}}
+	if errors.Is(err, apprealtime.ErrRegionMismatch) || errors.Is(err, domainrt.ErrRoomNotAuthorized) || errors.Is(err, i4store.ErrContextSuperseded) {
+		return failureReply(refusal(unprovenRefusalCode))
+	}
+	if errors.Is(err, apprealtime.ErrNoEndpoint) {
+		return failureReply(defect(err))
+	}
+	return failureReply(sessionFailure())
 }
 
 func requiredInt64(m map[string]any, key string) (int64, error) {
@@ -135,9 +166,10 @@ func requiredInt64(m map[string]any, key string) (int64, error) {
 // 1. It deliberately ignores any injected gameplay token/region claim for
 // account authority; MID18/MID1 authenticate the explicit SID+login_token pair.
 type BootstrapDispatcher struct {
-	Bootstrap appboot.RuntimePort
-	Tracker   *lobby.BootTracker
-	LogURLs   ClientLogURLIssuer
+	Bootstrap  appboot.RuntimePort
+	Tracker    *lobby.BootTracker
+	LogURLs    ClientLogURLIssuer
+	DailyReset dailyreset.Service
 }
 
 // ClientLogURLIssuer mints the per-session MID1 log_url (I85_CLIENT_LOG_INGEST_V1 R2).
@@ -148,7 +180,7 @@ type ClientLogURLIssuer interface {
 
 func (d BootstrapDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest) httpedge.Response {
 	if d.Bootstrap == nil {
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "bootstrap_unavailable"}}
+		return failureReply(defect(nil))
 	}
 	creds := appboot.AccountCredentials{SID: stringParam(req.Envelope.Params, "sid"), LoginToken: stringParam(req.Envelope.Params, "login_token")}
 	switch req.Envelope.MID {
@@ -173,7 +205,7 @@ func (d BootstrapDispatcher) Dispatch(ctx context.Context, req httpedge.Dispatch
 	case 1:
 		region, err := requiredInt64(req.Envelope.Params, "region")
 		if err != nil || region <= 0 || region > math.MaxInt32 {
-			return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "invalid_region"}}
+			return failureReply(&classifiedFailure{class: failureMalformed, detail: "invalid_region", cause: err})
 		}
 		out, err := d.Bootstrap.MID1(ctx, appboot.RuntimeMID1Request{Credentials: creds, Region: identity.LogicalServerID(region), Operation: req.Envelope.Operation})
 		if err != nil {
@@ -186,6 +218,9 @@ func (d BootstrapDispatcher) Dispatch(ctx context.Context, req httpedge.Dispatch
 		}
 		sessionID := out.ContextPlan.Selected.SessionID.UUID().String()
 		observability.NoteActor(ctx, observability.RequestActor{AccountUID: string(out.UID), PlayerID: int64(out.Player.PlayerID), SessionID: sessionID})
+		// Login already sends fresh counters, so its day is marked delivered. A marker failure only means the next
+		// successful reply repeats the signal.
+		_ = d.DailyReset.MarkLogin(ctx, identity.PlayerID(out.Player.PlayerID), req.Envelope.ReceivedAt)
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{
 			"token": out.Token, "region": int64(out.Region), "log_url": d.logURL(ctx, out, sessionID),
 			"uid": out.UID, "detail": out.Detail, "is_new": out.IsNew,
@@ -196,7 +231,7 @@ func (d BootstrapDispatcher) Dispatch(ctx context.Context, req httpedge.Dispatch
 			"is_debug": int64(0), "is_old_top": int64(0),
 		}}
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error": "not_bootstrap_mid"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 }
 
@@ -222,17 +257,18 @@ func stringParam(m map[string]any, key string) string {
 func bootstrapFailure(err error) httpedge.Response {
 	switch {
 	case errors.Is(err, logicalserver.ErrServerFull):
-		// Recovered stock semantic: new-character capacity failure only.
-		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"error_code": int64(20018), "error_msg": ""}}
+		// Recovered stock semantic: new-character capacity failure only. The
+		// client reads 20018 on its failed-login branch, so this is not a 200.
+		return failureReply(refusalWithBody(int64(20018), map[string]any{"error_msg": ""}))
 	case errors.Is(err, appboot.ErrAccountAuth):
-		// Exact private auth semantic code is not source-recovered. Keep auth
-		// rejection as transport failure rather than inventing a stock code.
-		return httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "account_auth_failed"}}
+		// message.lua 20003 is the login-failed row; its non-empty text opens the
+		// client's restart alert, which is the correct recovery for bad credentials.
+		return failureReply(sessionFailure())
 	case errors.Is(err, logicalserver.ErrObservationRequired):
-		return httpedge.Response{HTTPStatus: http.StatusConflict, Body: map[string]any{"error": "server_observation_required"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	case errors.Is(err, logicalserver.ErrExistingLoginClosed):
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "server_login_closed"}}
+		return failureReply(unavailable(err))
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "bootstrap_failed"}}
+		return failureFromRows(nil, err)
 	}
 }

@@ -47,6 +47,14 @@ run python3 tools/generate_kernel_querytext.py --check
 run python3 tools/generate_content_querytext.py --check
 run python3 tools/generate_character_querytext.py --check
 run python3 tools/check_schema_query_ownership.py
+run python3 tools/test_system_map.py
+run go test ./tools/system_map_mids
+run python3 tools/system_map.py --check
+run python3 tools/mid_effects.py --check
+run python3 tools/reply_consumers.py --check
+run python3 tools/test_reply_consumers.py
+run python3 tools/generate_inactive_mids.py --check
+run python3 tools/test_tool_coverage.py
 run python3 tools/validate_foundation_trace.py
 
 # Never rewrite canonical source during a check. Formatting drift is a failure.
@@ -91,6 +99,8 @@ run python3 tools/validate_ca7_6.py
 run python3 tools/validate_ca8_6.py
 run python3 tools/validate_ca8_7.py
 run python3 tools/validate_ca8_8.py
+run python3 tools/validate_ca4_4a_i3.py
+run python3 tools/validate_ca4_4a_i4.py
 run python3 tools/validate_current_candidate.py
 
 if [ "$failures" -ne 0 ]; then

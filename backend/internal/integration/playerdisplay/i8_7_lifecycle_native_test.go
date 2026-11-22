@@ -47,12 +47,12 @@ func newLifecycle(t *testing.T) lifecycleFixture {
 }
 
 func (f lifecycleFixture) locator(name string) d.Locator {
-	return d.Locator{DomainKind: "i8-7-lifecycle-fixture", AuthorityScope: "lifecycle", DomainLocator: fmt.Sprintf("%d/%s", f.a.PlayerID, name)}
+	return d.Locator{DomainKind: "EVENT_CENTRE_BOARD", AuthorityScope: "lifecycle", DomainLocator: fmt.Sprintf("%d/%s", f.a.PlayerID, name)}
 }
 
 func (f lifecycleFixture) start(t *testing.T, s combat.Service, name string) d.Attempt {
 	t.Helper()
-	request := combat.StartRequest{Actor: f.a, Locator: f.locator(name), GenerationRef: "fixture-generation-1", StartFingerprint: fingerprint(name), Battle: combat.BattleRequest{CampaignType: 1,
+	request := combat.StartRequest{Mode: d.ModeEventCentreBoard, Actor: f.a, Locator: f.locator(name), GenerationRef: "fixture-generation-1", StartFingerprint: fingerprint(name), Battle: combat.BattleRequest{CampaignType: 1,
 		TeamA: []combat.Participant{{Origin: d.OwnedSelf, Kind: d.HeroActor, Player: f.a.PlayerID, Identity: f.ref.PartnerID}}, WavesB: [][]combat.Participant{{{Origin: d.Template, Kind: d.HeroActor, Identity: 10001002, TemplateParams: templateParams(10001002)}}}}}
 	started, err := fixtureStart(t, s, f.rev, request, f.pool)
 	if err != nil {

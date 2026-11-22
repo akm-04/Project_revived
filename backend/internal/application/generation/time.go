@@ -48,6 +48,20 @@ func (t TimedOperation) Validate() error {
 func (t TimedOperation) Operation() operation.Context { return t.operation }
 func (t TimedOperation) DecisionAt() time.Time        { return t.decisionAt }
 
+// EffectiveObservation returns the latest of the decision time and every stored
+// observation time. A read after a backwards clock step is observed at the
+// latest durable fact instead of refusing a row that looks future-dated. It is
+// pure: no table, no state, and a read never writes.
+func EffectiveObservation(now time.Time, stored ...time.Time) time.Time {
+	out := now
+	for _, observed := range stored {
+		if observed.After(out) {
+			out = observed
+		}
+	}
+	return out
+}
+
 // Binder samples authoritative time exactly once before an owner transaction
 // retry loop. Callers pass the returned TimedOperation unchanged to every retry
 // and any unknown-COMMIT reconciliation.

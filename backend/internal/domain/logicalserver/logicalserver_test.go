@@ -95,3 +95,24 @@ func TestFirstEntryReplayStable(t *testing.T) {
 		t.Fatal("terminal marker not consumed")
 	}
 }
+
+func TestD435FourSeededServersProjectInOrder(t *testing.T) {
+	servers := []Server{
+		{ID: 1, Name: "Server 1", DirectoryVisible: true, NewCharacterAllowed: true, NextPlayerID: 125001, MaxPlayerID: 199999},
+		{ID: 2, Name: "Server 2", DirectoryVisible: true, NewCharacterAllowed: true, NextPlayerID: 225001, MaxPlayerID: 299999},
+		{ID: 3, Name: "Server 3", DirectoryVisible: true, NewCharacterAllowed: true, NextPlayerID: 325001, MaxPlayerID: 399999},
+		{ID: 4, Name: "Server 4", DirectoryVisible: true, NewCharacterAllowed: true, NextPlayerID: 425001, MaxPlayerID: 499999},
+	}
+	view := ProjectMID18(servers, nil)
+	if len(view.Regions) != 4 {
+		t.Fatalf("region count %d", len(view.Regions))
+	}
+	for index, region := range view.Regions {
+		if region.RegionID != int32(index+1) || region.MaxPlayerID != int64(index+2)*100000-1 {
+			t.Fatalf("region %d projection %+v", index, region)
+		}
+	}
+	if view.Regions[2].CurID != 325000 || view.Regions[3].CurID != 425000 {
+		t.Fatalf("server 3/4 cursor %+v", view.Regions)
+	}
+}

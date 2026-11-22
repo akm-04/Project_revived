@@ -169,11 +169,6 @@ func (s Service) ClaimActivityChest(ctx context.Context, actor identity.ActorCon
 		return nil, err
 	}
 	body := map[string]any{"awards": StockRepresentableBulkAwards(out.Awards), "huoyue_info": map[string]any{"day_huoyue": view.Root.DayHuoyue, "week_huoyue": view.Root.WeekHuoyue, "day_award": claimFlags(view.Root.DayAward, 5), "week_award": claimFlags(view.Root.WeekAward, 2)}}
-	if len(projected.Economy) > 0 {
-		body["economy_"] = projected.Economy
-	}
-	if len(projected.NewFunctionIDs) > 0 {
-		body["new_funcs_"] = projected.NewFunctionIDs
-	}
+	projected.RecordChanges(ctx)
 	return body, nil
 }

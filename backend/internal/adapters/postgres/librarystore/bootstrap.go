@@ -2,11 +2,11 @@ package librarystore
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	appboot "gxb.local/backend/v2/internal/application/bootstrap"
 	library "gxb.local/backend/v2/internal/domain/librarylocal"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -22,11 +22,11 @@ func (BootstrapContributor) PersistCharacterBootstrap(ctx context.Context, t tx.
 	if e != nil {
 		return e
 	}
-	bits, e := json.Marshal(f.SpecialClaims)
+	bits, version, e := payload.Encode(f.SpecialClaims)
 	if e != nil {
 		return e
 	}
-	tag, e := t.Exec(ctx, `INSERT INTO player_library_roots(player_id,state_version,special_claims,seed_policy_id,created_at,updated_at)VALUES($1,1,$2::jsonb,$3,$4,$4)`, int64(f.PlayerID), string(bits), f.SeedPolicy, f.CreatedAt)
+	tag, e := t.Exec(ctx, `INSERT INTO player_library_roots(player_id,state_version,special_claims,payload_version,seed_policy_id,created_at,updated_at)VALUES($1,1,$2::jsonb,$3,$4,$5,$5)`, int64(f.PlayerID), string(bits), version, f.SeedPolicy, f.CreatedAt)
 	if e != nil {
 		return e
 	}

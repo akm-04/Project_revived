@@ -23,18 +23,6 @@ func TestValidateFormation(t *testing.T) {
 	}
 }
 
-func TestParseFormationText(t *testing.T) {
-	if got := parseFormationText("7|8|9"); len(got) != 3 || got[2] != 9 {
-		t.Fatalf("got %#v", got)
-	}
-	if parseFormationText("7|x") != nil {
-		t.Fatal("malformed text accepted")
-	}
-	if parseFormationText("") != nil {
-		t.Fatal("empty text")
-	}
-}
-
 func TestGuildScoresSumCurrentMemberBestHits(t *testing.T) {
 	guilds := []GuildSummary{
 		{ID: 2, Name: "second", Members: []identity.PlayerID{11, 12}},
@@ -66,7 +54,7 @@ func TestGuildScoresSumCurrentMemberBestHits(t *testing.T) {
 
 func TestPlayerRowCarriesSourceFields(t *testing.T) {
 	profile := playerdirectory.Profile{PlayerID: 100001, Name: "name", Level: 70, AvatarID: 11, AvatarFrameID: 12, ConquerLevel: 3, ConquerLoopID: 2}
-	row := playerRow(profile, 120, 4)
+	row := playerRow(profile, int64(120), 4)
 	for key, want := range map[string]int64{"player_id": 100001, "level": 70, "avatar_id": 11, "avatar_frame_id": 12, "conquer_lev": 3, "conquer_loop_id": 2, "hurt": 120, "rank": 4} {
 		if row[key] != want {
 			t.Fatalf("%s=%v want %d", key, row[key], want)

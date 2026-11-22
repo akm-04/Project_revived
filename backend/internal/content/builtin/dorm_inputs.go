@@ -17,6 +17,40 @@ type DormInputCatalog struct {
 	Furniture                     []DormFurnitureRule     `json:"furniture"`
 	HeroEquipment                 []DormHeroEquipmentRule `json:"hero_equipment"`
 	EquipmentItems                []DormEquipmentItemRule `json:"equipment_items"`
+	Glue                          *DormGlueRules          `json:"glue,omitempty"`
+	FurnitureRecipes              *DormFurnitureRecipes   `json:"furniture_recipes,omitempty"`
+}
+type DormFurnitureRecipes struct {
+	Furniture  []DormFurnitureRecipe `json:"furniture"`
+	Blueprints []DormBlueprintRecipe `json:"blueprints"`
+}
+type DormFurnitureRecipe struct {
+	ItemID        int64   `json:"item_id"`
+	Materials     []int64 `json:"materials"`
+	Counts        []int64 `json:"counts"`
+	Glue          int64   `json:"glue"`
+	BlueprintItem int64   `json:"blueprint_item"`
+}
+type DormBlueprintRecipe struct {
+	ItemID int64   `json:"item_id"`
+	Pieces []int64 `json:"pieces"`
+	Counts []int64 `json:"counts"`
+	Level  int64   `json:"level"`
+}
+type DormGlueRules struct {
+	DailyFloor         int64              `json:"daily_floor"`
+	PurchaseAmount     int64              `json:"purchase_amount"`
+	PurchaseStartLimit int64              `json:"purchase_start_limit"`
+	VIPDailyCaps       []DormVIPDailyCap  `json:"vip_daily_caps"`
+	PurchaseCosts      []DormPurchaseCost `json:"purchase_costs"`
+}
+type DormVIPDailyCap struct {
+	VIP int64 `json:"vip"`
+	Cap int64 `json:"cap"`
+}
+type DormPurchaseCost struct {
+	Ordinal int64 `json:"ordinal"`
+	Cost    int64 `json:"cost"`
 }
 type DormExchangeKey struct {
 	ItemID       int64 `json:"item_id"`
@@ -84,7 +118,7 @@ type DormEquipmentItemRule struct {
 var errDormInput = errors.New("builtin: invalid selected Dorm input profile")
 
 func (c DormInputCatalog) Validate() error {
-	if c.SchemaVersion != 1 || c.LoungePolicyID != "C2C_LOUNGE_EXP_V1" || c.RandomKeyPolicyID != "C2C_RANDOM_KEY_V1" || c.OriginalServerPolicyRecovered || len(c.Rooms) != 16 || len(c.Types) != 4 || len(c.Keys) != 18 || len(c.Expansions) != 3 || len(c.Furniture) != 267 || len(c.HeroEquipment) != 568 {
+	if (c.SchemaVersion != 1 && c.SchemaVersion != 2 && c.SchemaVersion != 3) || c.LoungePolicyID != "C2C_LOUNGE_EXP_V1" || c.RandomKeyPolicyID != "C2C_RANDOM_KEY_V1" || c.OriginalServerPolicyRecovered || len(c.Rooms) != 16 || len(c.Types) != 4 || len(c.Keys) != 18 || len(c.Expansions) != 3 || len(c.Furniture) != 267 || len(c.HeroEquipment) != 568 {
 		return errDormInput
 	}
 	rooms := map[int64]DormRoomRule{}
@@ -176,6 +210,87 @@ func (c DormInputCatalog) Validate() error {
 				return errDormInput
 			}
 		}
+	}
+	if c.SchemaVersion == 1 {
+		if c.Glue != nil || c.FurnitureRecipes != nil {
+			return errDormInput
+		}
+		return nil
+	}
+	if c.Glue == nil {
+		return errDormInput
+	}
+	if c.SchemaVersion == 2 {
+		if c.FurnitureRecipes != nil {
+			return errDormInput
+		}
+		return c.Glue.validate()
+	}
+	if c.FurnitureRecipes == nil {
+		return errDormInput
+	}
+	if err := c.FurnitureRecipes.validate(c.Furniture); err != nil {
+		return err
+	}
+	return c.Glue.validate()
+}
+
+func (r DormFurnitureRecipes) validate(furniture []DormFurnitureRule) error {
+	if len(r.Furniture) != 53 || len(r.Blueprints) != 53 {
+		return errDormInput
+	}
+	papers := make(map[int64]int64, len(furniture))
+	for _, x := range furniture {
+		papers[x.ItemID] = x.PaperItem
+	}
+	blueprints := make(map[int64]bool, len(r.Blueprints))
+	for _, x := range r.Blueprints {
+		if x.ItemID <= 0 || blueprints[x.ItemID] || x.Level <= 0 || len(x.Pieces) == 0 || len(x.Pieces) != len(x.Counts) {
+			return errDormInput
+		}
+		for i, piece := range x.Pieces {
+			if piece <= 0 || x.Counts[i] <= 0 {
+				return errDormInput
+			}
+		}
+		blueprints[x.ItemID] = true
+	}
+	used := make(map[int64]bool, len(r.Furniture))
+	for _, x := range r.Furniture {
+		if x.ItemID <= 0 || used[x.ItemID] || x.Glue < 0 || x.BlueprintItem <= 0 || len(x.Materials) == 0 || len(x.Materials) != len(x.Counts) {
+			return errDormInput
+		}
+		for i, material := range x.Materials {
+			if material <= 0 || x.Counts[i] <= 0 {
+				return errDormInput
+			}
+		}
+		if papers[x.ItemID] != x.BlueprintItem || !blueprints[x.BlueprintItem] || used[x.BlueprintItem] {
+			return errDormInput
+		}
+		used[x.ItemID] = true
+		used[x.BlueprintItem] = true
+	}
+	return nil
+}
+
+func (g DormGlueRules) validate() error {
+	if g.DailyFloor < 0 || g.PurchaseAmount < 0 || g.PurchaseStartLimit < 0 || len(g.VIPDailyCaps) == 0 || len(g.PurchaseCosts) == 0 {
+		return errDormInput
+	}
+	lastOrdinal := int64(0)
+	for _, r := range g.PurchaseCosts {
+		if r.Ordinal != lastOrdinal+1 || r.Cost < 0 {
+			return errDormInput
+		}
+		lastOrdinal = r.Ordinal
+	}
+	lastVIP := int64(-1)
+	for _, r := range g.VIPDailyCaps {
+		if r.VIP <= lastVIP || r.Cap < 0 || r.Cap > lastOrdinal {
+			return errDormInput
+		}
+		lastVIP = r.VIP
 	}
 	return nil
 }

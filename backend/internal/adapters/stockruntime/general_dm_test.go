@@ -20,7 +20,7 @@ func TestGeneralDispatcherRequiresExactChannel(t *testing.T) {
 	f := &generalFake{}
 	d := GeneralDMDispatcher{Service: f}
 	r := httpedge.DispatchRequest{Envelope: wire.RequestEnvelope{MID: 513, Params: map[string]any{"to_player_id": "2", "message": "hello"}, ReceivedAt: time.Now()}}
-	if got := d.Dispatch(context.Background(), r); got.HTTPStatus != 401 {
+	if got := d.Dispatch(context.Background(), r); got.HTTPStatus != 500 {
 		t.Fatal(got)
 	}
 	if f.called {

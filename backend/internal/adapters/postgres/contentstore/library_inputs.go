@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"io"
+	"sync"
 
 	"gxb.local/backend/v2/internal/content/builtin"
 	"gxb.local/backend/v2/internal/content/registry"
@@ -38,7 +39,13 @@ func (s Store) LibraryInputsActive(ctx context.Context) (string, bool, error) {
 
 // LibraryCatalogTx resolves exact captured content through the caller's queryer.
 // It neither discovers current time/activation nor opens another transaction.
+var libraryCatalogs sync.Map
+
 func (s Store) LibraryCatalogTx(ctx context.Context, q tx.Queryer, revision string) (library.Catalog, error) {
+	return memoCatalog(&libraryCatalogs, revision, func() (library.Catalog, error) { return s.libraryCatalogTx(ctx, q, revision) })
+}
+
+func (s Store) libraryCatalogTx(ctx context.Context, q tx.Queryer, revision string) (library.Catalog, error) {
 	var out library.Catalog
 	if q == nil || !library.ValidRevision(revision) {
 		return out, library.ErrUnqualified
@@ -87,22 +94,28 @@ func (s Store) LibraryCatalogTx(ctx context.Context, q tx.Queryer, revision stri
 }
 
 func (s Store) LibraryInputsRevisionTx(ctx context.Context, q tx.Queryer, revision string) (bool, error) {
-	var manifest string
 	if q == nil || !library.ValidRevision(revision) {
 		return false, library.ErrUnqualified
 	}
-	if e := q.QueryRow(ctx, `SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1`, revision).Scan(&manifest); e != nil {
-		return false, e
-	}
-	return manifestHasCapability([]byte(manifest), revision, "LIBRARY_INPUTS_I7C2B")
+	return storedCapability(ctx, q, revision, "LIBRARY_INPUTS_I7C2B")
 }
 
 type libraryDomainPayload struct {
-	Templates          []library.TemplateRule          `json:"templates"`
-	Gifts              []library.GiftRule              `json:"gifts"`
-	Feeding            library.FeedRules               `json:"feeding"`
-	NormalCollections  []library.NormalCollectionRule  `json:"normal_collections"`
-	SpecialCollections []library.SpecialCollectionRule `json:"special_collections"`
+	Templates            []library.TemplateRule          `json:"templates"`
+	Gifts                []library.GiftRule              `json:"gifts"`
+	Feeding              library.FeedRules               `json:"feeding"`
+	NormalCollections    []library.NormalCollectionRule  `json:"normal_collections"`
+	SpecialCollections   []library.SpecialCollectionRule `json:"special_collections"`
+	Stages               []library.StageRule             `json:"stages"`
+	Acts                 []library.ActRule               `json:"acts"`
+	Missions             []library.MissionRule           `json:"missions"`
+	Talks                []library.TalkRule              `json:"talks"`
+	CGs                  []library.CGRule                `json:"cgs"`
+	Backgrounds          []library.BackgroundRule        `json:"backgrounds"`
+	DialogConfigs        []library.DialogConfigRule      `json:"dialog_configs"`
+	DialogNodes          []library.DialogNodeRule        `json:"dialog_nodes"`
+	DialogSourceUnknowns []int64                         `json:"dialog_source_unknowns"`
+	CourseGiftBoxes      []library.CourseGiftBoxRule     `json:"course_gift_boxes"`
 }
 
 func libraryCatalogDomain(payload builtin.LibraryInputCatalog, revision string) (library.Catalog, error) {
@@ -121,7 +134,7 @@ func libraryCatalogDomain(payload builtin.LibraryInputCatalog, revision string) 
 	if c.Feeding.Validate() != nil {
 		return out, library.ErrUnqualified
 	}
-	out = library.Catalog{ContentRevision: revision, Templates: map[int64]library.TemplateRule{}, Gifts: map[int64]library.GiftRule{}, Feeding: c.Feeding, NormalCollections: map[int64]library.NormalCollectionRule{}}
+	out = library.Catalog{ContentRevision: revision, Templates: map[int64]library.TemplateRule{}, Gifts: map[int64]library.GiftRule{}, Feeding: c.Feeding, NormalCollections: map[int64]library.NormalCollectionRule{}, Acts: map[int64]library.ActRule{}, Missions: map[int64]library.MissionRule{}, Talks: map[int64]library.TalkRule{}, CGs: map[int64]library.CGRule{}, Backgrounds: map[int64]library.BackgroundRule{}, DialogConfigs: map[int64]library.DialogConfigRule{}, DialogNodes: map[library.DialogGroupKey]map[int64]library.DialogNode{}, DialogSourceUnknowns: append([]int64(nil), c.DialogSourceUnknowns...), CourseGiftBoxes: map[int64]library.CourseGiftBoxRule{}}
 	for _, r := range c.Templates {
 		out.Templates[r.TableID] = r
 	}
@@ -139,5 +152,49 @@ func libraryCatalogDomain(payload builtin.LibraryInputCatalog, revision string) 
 		r.RequiredSourceIDs = append([]int64(nil), r.RequiredSourceIDs...)
 		out.SpecialCollections[i] = r
 	}
-	return out, nil
+	for _, r := range c.Stages {
+		r.ActIDs = append([]int64(nil), r.ActIDs...)
+		r.MissionIDs = append([]int64(nil), r.MissionIDs...)
+		out.Stages = append(out.Stages, r)
+	}
+	for _, r := range c.Acts {
+		out.Acts[r.ID] = r
+	}
+	for _, r := range c.Missions {
+		out.Missions[r.ID] = r
+	}
+	for _, r := range c.Talks {
+		r.UnlockTypes = append([]int64(nil), r.UnlockTypes...)
+		r.UnlockHeroes = append([]int64(nil), r.UnlockHeroes...)
+		r.UnlockParams = append([]int64(nil), r.UnlockParams...)
+		out.Talks[r.ID] = r
+	}
+	for _, r := range c.CGs {
+		r.UnlockIDs = append([]int64(nil), r.UnlockIDs...)
+		r.UnlockTypes = append([]int64(nil), r.UnlockTypes...)
+		out.CGs[r.ID] = r
+	}
+	for _, r := range c.Backgrounds {
+		out.Backgrounds[r.ID] = r
+	}
+	for _, r := range c.DialogConfigs {
+		out.DialogConfigs[r.ID] = r
+	}
+	for _, r := range c.DialogNodes {
+		key := library.DialogGroupKey{RelationshipSourceID: r.RelationshipSourceID, DialogGroup: r.DialogGroup}
+		if out.DialogNodes[key] == nil {
+			out.DialogNodes[key] = map[int64]library.DialogNode{}
+		}
+		node := library.DialogNode{NodeID: r.NodeID, TurnIDs: append([]int64(nil), r.TurnIDs...)}
+		if r.IsReward != nil {
+			reward := *r.IsReward
+			node.IsReward = &reward
+		}
+		out.DialogNodes[key][r.NodeID] = node
+	}
+	for _, r := range c.CourseGiftBoxes {
+		r.Rolls = append([]library.CourseDropRoll(nil), r.Rolls...)
+		out.CourseGiftBoxes[r.ItemID] = r
+	}
+	return out, out.Validate()
 }

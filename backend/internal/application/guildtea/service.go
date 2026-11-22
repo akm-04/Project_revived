@@ -6,8 +6,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"time"
 
+	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/application/playerroot"
@@ -16,6 +18,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/guild"
 	"gxb.local/backend/v2/internal/domain/identity"
+	lib "gxb.local/backend/v2/internal/domain/librarylocal"
 	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -109,7 +112,7 @@ type Store interface {
 	ListWishesTx(context.Context, tx.Queryer, guild.ID, int64) ([]guild.Wish, error)
 	GiftedReceiversTx(context.Context, tx.Queryer, identity.PlayerID, int64) (map[identity.PlayerID]bool, error)
 	ClaimGiftsTx(context.Context, tx.Tx, identity.PlayerID, int64, time.Time) (int64, error)
-	DeleteExpiredWishesTx(context.Context, tx.Tx, guild.ID, int64) error
+	DeleteExpiredWishesTx(context.Context, tx.Tx, int64) error
 	DeleteExpiredGiftsForPlayerTx(context.Context, tx.Tx, identity.PlayerID, int64) error
 }
 
@@ -120,6 +123,7 @@ type Directory interface {
 type Content interface {
 	ActiveRevision(context.Context, tx.Queryer) (string, error)
 	HeroAcquisitionByItemTx(context.Context, tx.Queryer, string, int64) (character.HeroAcquisitionTemplate, error)
+	HeroScrollSXByItemTx(context.Context, tx.Queryer, string, int64) (bool, error)
 }
 
 type Heroes interface {
@@ -139,11 +143,18 @@ type Costs interface {
 }
 
 type Facts interface {
+	PrepareTx(context.Context, tx.Tx, identity.PlayerID, gen.TimedOperation) (context.Context, error)
 	RecordTx(context.Context, tx.Tx, operation.Context, ...objective.Fact) error
 }
 
 type Fence interface {
 	FenceActorTx(context.Context, tx.Tx, identity.ActorContext, time.Time) error
+}
+
+// PartnerMissions advances the donor's Library mission 1005 when the gifted
+// scroll matches an owned girl (I9_12_CARRY_V1 R7).
+type PartnerMissions interface {
+	ObservePartnerMissionTx(context.Context, tx.Tx, identity.PlayerID, int64, int64, time.Time) error
 }
 
 type Service struct {
@@ -159,10 +170,12 @@ type Service struct {
 	Fence     Fence
 	Players   playerroot.TxLocker
 	Policy    Policy
+
+	PartnerMissions PartnerMissions
 }
 
 func (s Service) validate() error {
-	if s.Runner.DB == nil || s.Store == nil || s.Directory == nil || s.Content == nil || s.Heroes == nil || s.Inventory == nil || s.Values == nil || s.Costs == nil || s.Facts == nil || s.Fence == nil || s.Players == nil {
+	if s.Runner.DB == nil || s.Store == nil || s.Directory == nil || s.Content == nil || s.Heroes == nil || s.Inventory == nil || s.Values == nil || s.Costs == nil || s.Facts == nil || s.Fence == nil || s.Players == nil || s.PartnerMissions == nil {
 		return ErrUnavailable
 	}
 	if err := s.Policy.Validate(); err != nil {
@@ -328,21 +341,23 @@ func (s Service) Request(c context.Context, a identity.ActorContext, itemID int6
 		if !owned {
 			return ErrNotOwner
 		}
+		sx, err := s.Content.HeroScrollSXByItemTx(c, t, revision, itemID)
+		if err != nil {
+			return err
+		}
 		need := s.Policy.NormalNeed
-		if tmpl.Kind == character.SuperHero {
+		if sx {
 			need = s.Policy.SXNeed
 		}
 		if err := s.Store.InsertWishTx(c, t, guild.Wish{PlayerID: a.PlayerID, GameDay: day, ItemID: itemID, NeedNum: need}); err != nil {
 			return err
 		}
-		member, found, err := s.Store.ReadMembershipTx(c, t, a.PlayerID)
-		if err != nil {
+		if _, found, err := s.Store.ReadMembershipTx(c, t, a.PlayerID); err != nil {
 			return err
-		}
-		if !found {
+		} else if !found {
 			return ErrNotInGuild
 		}
-		if err := s.Store.DeleteExpiredWishesTx(c, t, member.GuildID, day); err != nil {
+		if err := s.Store.DeleteExpiredWishesTx(c, t, day); err != nil {
 			return err
 		}
 		if err := s.Store.DeleteExpiredGiftsForPlayerTx(c, t, a.PlayerID, day); err != nil {
@@ -407,7 +422,7 @@ func (s Service) Present(c context.Context, a identity.ActorContext, receiver id
 		} else if !advanced {
 			return ErrWishFull
 		}
-		if err := s.Store.DeleteExpiredWishesTx(c, t, donor.GuildID, day); err != nil {
+		if err := s.Store.DeleteExpiredWishesTx(c, t, day); err != nil {
 			return err
 		}
 		if err := s.Store.DeleteExpiredGiftsForPlayerTx(c, t, a.PlayerID, day); err != nil {
@@ -421,6 +436,16 @@ func (s Service) Present(c context.Context, a identity.ActorContext, receiver id
 		if err != nil {
 			return err
 		}
+		// The mission view must be prepared in the same transaction as the fact,
+		// before any grant (I5 mission-fact contract).
+		timed, err := gen.NewTimedOperation(bound, op.StartedAt)
+		if err != nil {
+			return err
+		}
+		prepared, err := s.Facts.PrepareTx(c, t, a.PlayerID, timed)
+		if err != nil {
+			return err
+		}
 		presentation := fmt.Sprintf("tea:%d:%d:%d", int64(receiver), int64(a.PlayerID), day)
 		plan := grant.Plan{PlayerID: a.PlayerID, Source: grant.SourceIdentity{Domain: "guildtea", Operation: "present", BusinessKey: presentation, Occurrence: op.ID.String(), PolicyVersion: policyVersion},
 			Lines: []grant.Line{{Kind: grant.ScalarCurrency, ResourceKey: "friend_medal", Amount: s.Policy.DonorFriendMedalPerScroll}}}
@@ -430,13 +455,44 @@ func (s Service) Present(c context.Context, a identity.ActorContext, receiver id
 		if _, err := s.Costs.DebitMaterialCostTx(c, t, a.PlayerID, i5.MaterialCost{Stacks: []i5.StackMaterialCost{{ItemID: wish.ItemID, Amount: 1}}}, bound); err != nil {
 			return err
 		}
-		if err := s.Facts.RecordTx(c, t, bound, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "guildtea", SourceBusinessKey: presentation, Kind: "TEA_PARTY_DONATED", Delta: 1}); err != nil {
+		if err := s.Facts.RecordTx(prepared, t, bound, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "guildtea", SourceBusinessKey: presentation, Kind: "TEA_PARTY_DONATED", Delta: 1}); err != nil {
+			return err
+		}
+		// A-206 R7: the donor's girl matching the gifted scroll advances mission
+		// 1005 last, after the grant and the scroll debit.
+		if err = s.observePartnerMissionTea(c, t, a.PlayerID, wish.ItemID, revision, op.StartedAt); err != nil {
 			return err
 		}
 		out, err = s.stateTx(c, t, a, day, false)
 		return err
 	})
 	return out, err
+}
+
+// observePartnerMissionTea resolves the scroll's girl template and advances
+// mission 1005 for the donor's matching owned girl, in ascending partner order.
+func (s Service) observePartnerMissionTea(c context.Context, t tx.Tx, donor identity.PlayerID, itemID int64, revision string, at time.Time) error {
+	template, err := s.Content.HeroAcquisitionByItemTx(c, t, revision, itemID)
+	if err != nil {
+		return err
+	}
+	heroes, err := s.Heroes.ListHeroesTx(c, t, donor)
+	if err != nil {
+		return err
+	}
+	partners := []int64{}
+	for _, hero := range heroes {
+		if hero.TableID == template.TableID || hero.OriginTableID == template.TableID {
+			partners = append(partners, hero.PartnerID)
+		}
+	}
+	slices.Sort(partners)
+	for _, partnerID := range partners {
+		if err = s.PartnerMissions.ObservePartnerMissionTx(c, t, donor, partnerID, lib.TeaPartyMissionID, at); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // Confirm is 1811: pays the receiver the wish item per unclaimed gift and clears
@@ -458,14 +514,8 @@ func (s Service) Confirm(c context.Context, a identity.ActorContext, op operatio
 		if !found {
 			return ErrNoWish
 		}
-		member, memberFound, err := s.Store.ReadMembershipTx(c, t, a.PlayerID)
-		if err != nil {
+		if err := s.Store.DeleteExpiredWishesTx(c, t, day); err != nil {
 			return err
-		}
-		if memberFound {
-			if err := s.Store.DeleteExpiredWishesTx(c, t, member.GuildID, day); err != nil {
-				return err
-			}
 		}
 		if err := s.Store.DeleteExpiredGiftsForPlayerTx(c, t, a.PlayerID, day); err != nil {
 			return err

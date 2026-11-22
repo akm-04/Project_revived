@@ -5,6 +5,8 @@ package playerdisplay_test
 import (
 	"encoding/json"
 	"errors"
+	"math"
+	"slices"
 	"strconv"
 	"testing"
 	"time"
@@ -60,7 +62,8 @@ func occultMode(t *testing.T, p *pg.Pool, clock gen.TimeAuthority) oc.Mode {
 	mode := oc.Mode{Timed: timed, Fresh: p, Store: occultstore.Store{}, Content: content, Fence: values, Players: i4store.PlayerRootLocker{},
 		Functions: values, Directory: i4store.PlayerDirectoryReader{}, Presence: presencestore.Store{Queryer: p}, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Stats: fight.Inputs.Stats,
 		Rooms: rooms, RoomStore: sharedroomstore.Store{}, Combat: fight, Tickets: owner, Values: owner, Awakening: owner,
-		Facts: i5.ObjectiveFacts{Owner: owner, Open: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+		Facts: i5.ObjectiveFacts{Owner: owner, Open: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p},
+		BattleObserver: libraryService(p, p)}
 	mode.Invites = roomInviteMaterializer(t, p)
 	return mode
 }
@@ -149,6 +152,42 @@ type occultStagePlan struct {
 }
 
 var occultChapterTwoSolo = []occultStagePlan{{20011, 1}, {20012, 2}, {20013, 3}, {20014, 1}, {20015, 1}, {20016, 1}, {20017, 1}, {20018, 1}}
+
+// Chapter 1's final rows 10013/10026 keep back edges; the clear is the source
+// special_reward node, not a sink.
+var occultChapterOneSingle = []occultStagePlan{{10015, 3}, {10016, 3}, {10019, 3}, {10026, 1}}
+
+func occultClearChapterOneSolo(t *testing.T, s oc.Mode, a identity.ActorContext, formation []int64) oc.SettleResponse {
+	t.Helper()
+	var last oc.SettleResponse
+	for _, plan := range occultChapterOneSingle {
+		for sub := int64(1); sub <= plan.stages; sub++ {
+			if _, err := s.StartFight(ctx, a, plan.campaign, sub, op()); err != nil {
+				t.Fatalf("chapter 1 fight %d/%d: %v", plan.campaign, sub, err)
+			}
+			var err error
+			last, err = s.Settle(ctx, a, oc.SettleRequest{CampaignID: plan.campaign, SubID: sub, Star: 3, Formation: formation}, op())
+			if err != nil {
+				t.Fatalf("chapter 1 settle %d/%d: %v", plan.campaign, sub, err)
+			}
+		}
+	}
+	return last
+}
+
+func occultNoticeReader(p *pg.Pool) oc.NoticeReader {
+	return oc.NoticeReader{Rooms: sharedroomstore.Store{}, Content: contentstore.Store{}, Directory: i4store.PlayerDirectoryReader{},
+		Presence: presencestore.Store{Queryer: p}, Scores: occultstore.Store{}, Tickets: occultI5(p), Queryer: p}
+}
+
+func occultReadNotice(t *testing.T, p *pg.Pool, roomID int64) oc.RoomNotice {
+	t.Helper()
+	view, found, err := occultNoticeReader(p).ReadRoomNotice(ctx, strconv.FormatInt(roomID, 10))
+	if err != nil || !found {
+		t.Fatalf("room notice %v %v", found, err)
+	}
+	return view
+}
 
 func occultClearChapterTwoSolo(t *testing.T, p *pg.Pool, s oc.Mode, a identity.ActorContext, formation []int64) oc.SettleResponse {
 	t.Helper()
@@ -259,12 +298,15 @@ func TestI9_8COccultSoloLifecycleNative(t *testing.T) {
 	if err != nil {
 		t.Fatal("settle", err)
 	}
-	if settled.Duplicate || settled.Body["award_info"].(map[string]any)["award_detail"].(map[string]any)["point"] != int64(3) {
+	if settled.Duplicate || settled.Body["award_info"].(map[string]any)["award_detail"].(map[string]any)["point"] != int64(509) {
 		t.Fatalf("settle %+v", settled)
 	}
 	duplicate, err := s.Settle(ctx, a, oc.SettleRequest{CampaignID: 10015, SubID: 1, Star: 3, Formation: formation}, op())
 	if err != nil || !duplicate.Duplicate {
 		t.Fatalf("duplicate %+v %v", duplicate, err)
+	}
+	if count := girlsLogCount(t, p, a.PlayerID, partner); count != 1 {
+		t.Fatalf("occult solo with its duplicate counted %d, want 1", count)
 	}
 	if _, err = s.Prepare(ctx, a, 10015, 1, op()); err != nil {
 		t.Fatal("prepare", err)
@@ -284,7 +326,7 @@ func TestI9_8COccultSoloLifecycleNative(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if afterSettle["progress"] != int64(0) || afterSettle["room_info"].(map[string]any)["is_close"] != int64(0) {
+	if progress, _ := afterSettle["progress"].(float64); progress <= 0 || progress >= 1 || afterSettle["room_info"].(map[string]any)["is_close"] != int64(0) {
 		t.Fatalf("an uncleared chapter reported completion %#v", afterSettle)
 	}
 	self := afterSettle["self_dispatch"].(map[string]any)[keyOf(partner)].(map[string]any)
@@ -330,6 +372,75 @@ func TestI9_8COccultSoloLifecycleNative(t *testing.T) {
 	}
 }
 
+// TestI9_10OccultStockScoreNative drives a full chapter-4 single-player run in
+// the production order (2371 prepare, 2379 start, 2372 settle) and asserts the
+// stock score, bonus, progress, award rows and the stored best.
+func TestI9_10OccultStockScoreNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	a, partner := occultOwner(t, p, server, 1)
+	s, _ := occultTestMode(t, p)
+	if _, err := s.CreateSolo(ctx, a, 4, op()); err != nil {
+		t.Fatal(err)
+	}
+	steps := []struct {
+		campaign int64
+		point    int64
+		extra    int64
+	}{
+		{40010, 619, 0}, {40011, 759, 0}, {40014, 899, 0},
+		{40015, 1049, 1000}, {40012, 1189, 1000}, {40013, 1329, 1000}, {40016, 1479, 1000},
+	}
+	for index, step := range steps {
+		prepared, err := s.Prepare(ctx, a, step.campaign, 1, op())
+		if err != nil {
+			t.Fatalf("prepare %d: %v", step.campaign, err)
+		}
+		if prepared["is_auto_pass"] != false {
+			t.Fatalf("campaign %d auto passed", step.campaign)
+		}
+		if _, err = s.StartFight(ctx, a, step.campaign, 1, op()); err != nil {
+			t.Fatalf("start %d: %v", step.campaign, err)
+		}
+		mp := int64(550 + index*50)
+		settled, err := s.Settle(ctx, a, oc.SettleRequest{CampaignID: step.campaign, SubID: 1, Star: 3,
+			Formation: []int64{partner}, Heroes: map[int64]d.HeroStatus{partner: {HP: 5000, MP: mp}}}, op())
+		if err != nil {
+			t.Fatalf("settle %d: %v", step.campaign, err)
+		}
+		info := settled.Body["award_info"].(map[string]any)
+		detail := info["award_detail"].(map[string]any)
+		if detail["point"] != step.point || detail["extra_point"] != step.extra {
+			t.Fatalf("campaign %d detail %#v want point=%d extra=%d", step.campaign, detail, step.point, step.extra)
+		}
+		if progress, _ := detail["progress"].(float64); math.Abs(progress-float64(index+1)/float64(len(steps))) > 1e-9 {
+			t.Fatalf("campaign %d progress %v", step.campaign, detail["progress"])
+		}
+		awards := info["awards"].([]map[string]any)
+		if index < len(steps)-1 && len(awards) != 0 {
+			t.Fatalf("ordinary stage %d paid %#v", step.campaign, awards)
+		}
+		if index == len(steps)-1 && len(awards) != 4 {
+			t.Fatalf("clear result awards %#v", awards)
+		}
+		dispatch := settled.Body["self_dispatch"].(map[string]any)[keyOf(partner)].(map[string]any)
+		if dispatch["mp"] != mp {
+			t.Fatalf("campaign %d carried mp %v want %d", step.campaign, dispatch["mp"], mp)
+		}
+		if index == 0 {
+			duplicate, err := s.Settle(ctx, a, oc.SettleRequest{CampaignID: step.campaign, SubID: 1, Star: 3,
+				Formation: []int64{partner}, Heroes: map[int64]d.HeroStatus{partner: {HP: 5000, MP: mp}}}, op())
+			if err != nil || !duplicate.Duplicate {
+				t.Fatalf("repeated 2372 on %d: %+v %v", step.campaign, duplicate, err)
+			}
+		}
+	}
+	var best int64
+	if err := p.QueryRow(ctx, `SELECT (scores->>'4')::bigint FROM occult_players WHERE player_id=$1`, int64(a.PlayerID)).Scan(&best); err != nil || best != 2479 {
+		t.Fatalf("stored best %d %v want 2479", best, err)
+	}
+}
+
 func TestI9_8COccultEventAutoPassNative(t *testing.T) {
 	p := pool(t)
 	server := rankingServer(t, p)
@@ -362,6 +473,64 @@ func TestI9_8COccultEventAutoPassNative(t *testing.T) {
 	}
 	if state := occultRoomState(t, p, room.ID); state.StagesOf(10017)[0].HP != 0 {
 		t.Fatal("auto pass left the stage standing")
+	}
+}
+
+// TestI9_11A127OccultClearEventNative proves the event 6 bonus is granted by the
+// accepted clearance (2372), not by the 2371 prepare, and only once.
+func TestI9_11A127OccultClearEventNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	a, partner := occultOwner(t, p, server, 1)
+	s, _ := occultTestMode(t, p)
+	if _, err := s.CreateSolo(ctx, a, 4, op()); err != nil {
+		t.Fatal(err)
+	}
+	formation := []int64{partner}
+	for _, campaign := range []int64{40010, 40011, 40014} {
+		if _, err := s.Prepare(ctx, a, campaign, 1, op()); err != nil {
+			t.Fatalf("prepare %d: %v", campaign, err)
+		}
+		if _, err := s.StartFight(ctx, a, campaign, 1, op()); err != nil {
+			t.Fatalf("start %d: %v", campaign, err)
+		}
+		if _, err := s.Settle(ctx, a, oc.SettleRequest{CampaignID: campaign, SubID: 1, Star: 3, Formation: formation}, op()); err != nil {
+			t.Fatalf("settle %d: %v", campaign, err)
+		}
+	}
+	if _, err := s.Prepare(ctx, a, 40015, 1, op()); err != nil {
+		t.Fatalf("prepare 40015: %v", err)
+	}
+	room, found, err := (sharedroomstore.Store{}).ReadPlayerRoomTx(ctx, p, a.PlayerID, oc.RoomFamily, oc.RoomSlot)
+	if err != nil || !found {
+		t.Fatal(found, err)
+	}
+	prepared := occultRoomState(t, p, room.ID)
+	if prepared.ExtraPoints != 0 || slices.Contains(prepared.EventsDone, int64(40015)) {
+		t.Fatalf("40015 was consumed at prepare: extra=%d events_done=%v", prepared.ExtraPoints, prepared.EventsDone)
+	}
+	if _, err = s.StartFight(ctx, a, 40015, 1, op()); err != nil {
+		t.Fatal(err)
+	}
+	settled, err := s.Settle(ctx, a, oc.SettleRequest{CampaignID: 40015, SubID: 1, Star: 3, Formation: formation}, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	detail := settled.Body["award_info"].(map[string]any)["award_detail"].(map[string]any)
+	if detail["extra_point"] != int64(1000) {
+		t.Fatalf("the clear did not grant the event 6 bonus: %#v", detail)
+	}
+	cleared := occultRoomState(t, p, room.ID)
+	if cleared.ExtraPoints != 1000 || !slices.Contains(cleared.EventsDone, int64(40015)) {
+		t.Fatalf("the clear did not consume event 6: extra=%d events_done=%v", cleared.ExtraPoints, cleared.EventsDone)
+	}
+	duplicate, err := s.Settle(ctx, a, oc.SettleRequest{CampaignID: 40015, SubID: 1, Star: 3, Formation: formation}, op())
+	if err != nil || !duplicate.Duplicate {
+		t.Fatalf("repeated 2372: %+v %v", duplicate, err)
+	}
+	after := occultRoomState(t, p, room.ID)
+	if after.ExtraPoints != 1000 {
+		t.Fatalf("a repeated result granted the bonus again: extra=%d", after.ExtraPoints)
 	}
 }
 
@@ -405,7 +574,8 @@ func TestI9_8COccultClearAndSweepNative(t *testing.T) {
 		}
 	}
 	var best, finished int64
-	if err = p.QueryRow(ctx, `SELECT (scores->>'2')::bigint FROM occult_players WHERE player_id=$1`, int64(a.PlayerID)).Scan(&best); err != nil || best != 33 {
+	// 1480 battle score plus campaign 20014's event 6 bonus (2000), granted at its clear (A-127).
+	if err = p.QueryRow(ctx, `SELECT (scores->>'2')::bigint FROM occult_players WHERE player_id=$1`, int64(a.PlayerID)).Scan(&best); err != nil || best != 3480 {
 		t.Fatalf("best score %d %v", best, err)
 	}
 	if err = p.QueryRow(ctx, `SELECT count(*) FROM occult_runs WHERE room_id=$1 AND finished_at IS NOT NULL`, roomID).Scan(&finished); err != nil || finished != 1 {
@@ -438,14 +608,14 @@ func TestI9_8COccultClearAndSweepNative(t *testing.T) {
 		t.Fatalf("sweep progress is the chapter fraction, not energy: %#v", swept)
 	}
 	detail := clearedReply.Body["award_info"].(map[string]any)["award_detail"].(map[string]any)
-	if detail["progress"] != int64(1) || detail["is_close"] != int64(1) || clearedReply.Body["progress"] != int64(1) {
+	if detail["progress"] != float64(1) || detail["is_close"] != int64(1) || clearedReply.Body["progress"] != float64(1) {
 		t.Fatalf("award_detail completion %#v", clearedReply.Body)
 	}
 	cleared, err := s.Info(ctx, a, op())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if cleared["base_info"].(map[string]any)["room_id"] != int64(0) || cleared["progress"] != int64(0) {
+	if cleared["base_info"].(map[string]any)["room_id"] != int64(0) || cleared["progress"] != float64(0) {
 		t.Fatalf("a cleared chapter left a held room %#v", cleared)
 	}
 	if _, held := cleared["room_info"]; held {
@@ -460,6 +630,49 @@ func TestI9_8COccultClearAndSweepNative(t *testing.T) {
 	}
 	if _, err = s.Sweep(ctx, a, 3, op()); !errors.Is(err, d.ErrRefused) {
 		t.Fatal("sweep of an uncleared chapter", err)
+	}
+}
+
+// TestI9_11T34OccultChapterOneSoloCompletionNative is A-181: chapter 1's final
+// rows keep back edges, so the source special_reward column decides the clear.
+// A team clear through a server-report fight is not reachable with fixture
+// heroes against the 5M-HP final boss; the closing-write notice is covered by
+// the notice reader units instead.
+func TestI9_11T34OccultChapterOneSoloCompletionNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	chapterOneItems := []int64{50010001, 240001001, 40001138, 230001001}
+
+	a, partner := occultOwner(t, p, server, 2)
+	s, _ := occultTestMode(t, p)
+	created, err := s.CreateSolo(ctx, a, 1, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	roomID := occultRoomID(t, created)
+	cleared := occultClearChapterOneSolo(t, s, a, []int64{partner})
+	detail := cleared.Body["award_info"].(map[string]any)["award_detail"].(map[string]any)
+	if detail["is_close"] != int64(1) {
+		t.Fatalf("chapter 1 solo clear %#v", cleared.Body)
+	}
+	for _, item := range chapterOneItems {
+		if got := occultItemQuantity(t, p, a.PlayerID, item); got != 1 {
+			t.Fatalf("solo clear reward %d quantity %d", item, got)
+		}
+	}
+	if best := scalar(t, p, `SELECT (scores->>'1')::bigint FROM occult_players WHERE player_id=$1`, int64(a.PlayerID)); best <= 0 {
+		t.Fatalf("chapter 1 best score %d", best)
+	}
+	if finished := scalar(t, p, `SELECT count(*) FROM occult_runs WHERE room_id=$1 AND finished_at IS NOT NULL`, roomID); finished != 1 {
+		t.Fatalf("solo run finish %d", finished)
+	}
+	info, err := s.Info(ctx, a, op())
+	if err != nil || info["base_info"].(map[string]any)["room_id"] != int64(0) {
+		t.Fatalf("cleared solo room %#v %v", info, err)
+	}
+	swept, err := s.Sweep(ctx, a, 1, op())
+	if err != nil || swept["progress"] != int64(1) {
+		t.Fatalf("2385 after a chapter 1 solo clear %#v %v", swept, err)
 	}
 }
 

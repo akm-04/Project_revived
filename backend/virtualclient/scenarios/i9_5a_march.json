@@ -14,7 +14,7 @@
    "Amount": 600
   }
  ],
- "note": "Champion is entered through the stock Training menu. The map uses unnamed quick-cocos nodes, so its first opponent popup is opened with the same stock window arguments as the map touch callback. Hero EXP is setup through the real stock owner; no March/mission/guide state is provisioned. The chest uses MarchWindow.openBox, its stock touch callback method. Guide 6 is completed with real dialogue taps while present; stock may close it on the first tap. Guide 18 remains enabled for Vanguard, not claimed as exercised by this manual-battle scenario. After the level-30 roster genuinely lost, this victory/chest scenario uses the existing declared AwakeningFixture only for prior Aquaris progression (level90/color15); March state, combat results, missions and guides are still earned through their owners. This does not prove roster progression or level-30 balance.",
+ "note": "Champion is entered through the stock Training menu. The map uses unnamed quick-cocos nodes, so its first opponent popup is opened with the same stock window arguments as the map touch callback. Hero EXP is setup through the real stock owner; no March/mission/guide state is provisioned. The chest uses MarchWindow.openBox, its stock touch callback method. Guide 6 is completed with real dialogue taps while present; stock may close it on the first tap. Guide 18 remains enabled for Vanguard, not claimed as exercised by this manual-battle scenario. After the level-30 roster genuinely lost, this victory/chest scenario uses the existing declared AwakeningFixture only for prior Aquaris progression (level90/color15); March state, combat results, missions and guides are still earned through their owners. This does not prove roster progression or level-30 balance. After the chest, the scenario resets and sweeps Vanguard directly through the stock MIDs so the reply length, power_drink and award groups equal the cleared source prefix. This Vanguard tail is not yet exercised by a scenario run.",
  "steps": [
   "wait:3",
   "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) for _,h in pairs(p:getHeros()) do local hero=h if hero:getLevel()<xyd.tables.player:heroMaxLev(p.lev) then p:addPartnerExp({item_id=50001005,partner_id=hero:getHeroID(),item_num=100,total_num=p:getBackpack():getItemNumByID(50001005)},function(code,req,reply) if code~=xyd.error.OK or not reply.partner_exp then error('vc-training-failed') end hero:setExp(reply.partner_exp,xyd.tables.player:heroMaxLev(p.lev)) p:getBackpack():setItemNumByID(reply.item_id,reply.total_num) end) end end",
@@ -42,14 +42,21 @@
   "wait:5",
   "lua:local w=xyd.WindowManager.get():getWindow('march') if not w then error('vc-march-return-window') end w:openBox(1)",
   "wait:8",
-  "lua:local m=xyd.ModelManager.get():loadModel(xyd.ModelType.MARCH) if m.mapInfo.passed_stage~=1 then error('vc-march-chest-not-committed') end"
+  "lua:local m=xyd.ModelManager.get():loadModel(xyd.ModelType.MARCH) if m.mapInfo.passed_stage~=1 then error('vc-march-chest-not-committed') end",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) local ids,seen={},{} for _,h in pairs(p:getHeros()) do local o=xyd.tables.hero:beforeAwaken(h:getTableID()) if not o or o<=0 then o=h:getTableID() end if not seen[o] and h:getLevel()>=65 then seen[o]=true table.insert(ids,h:getHeroID()) end end if #ids<5 then error('vc-march-vanguard-roster') end local f={} for i=1,5 do f[i]=tostring(ids[i]) end __vc.vanguard={formation=table.concat(f,'|')} xyd.Backend.get():request(xyd.mid.RESTART_MARCH,{},function(code) if code~=xyd.error.OK then error('vc-march-reset') end end)",
+  "wait:3",
+  "lua:local v=__vc.vanguard xyd.Backend.get():request(xyd.mid.MARCH_ADVANCE_SWEEP,{campaign_type=xyd.CampaignType.MARCH,formation=v.formation,force=0},function(code,reply) if code~=xyd.error.OK then error('vc-march-sweep') end local n=tonumber(reply.map_info.passed_stage) if not n or n<1 or n>14 then error('vc-march-sweep-count-'..tostring(n)) end if #reply.award~=n or #reply.power_drink~=n then error('vc-march-sweep-groups') end __vc.sweep=n end)",
+  "wait:5",
+  "lua:local m=xyd.ModelManager.get():loadModel(xyd.ModelType.MARCH) if not __vc.sweep or m.mapInfo.passed_stage~=__vc.sweep then error('vc-march-sweep-not-committed') end"
  ],
  "settle_seconds": 5,
  "expect_ok": [
   336,
   340,
   338,
-  339
+  339,
+  337,
+  342
  ],
  "awakening_fixture": true
 }

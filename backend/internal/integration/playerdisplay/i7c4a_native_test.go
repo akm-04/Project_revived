@@ -419,16 +419,18 @@ func TestI7C4ANativeCoreFactsPurchaseSourceCA7AndFailClosed(t *testing.T) {
 	if e == nil {
 		t.Fatal("unwitnessed")
 	}
+	var future app.EligibilityObservation
 	_, e = (tx.Runner{DB: p}).Run(ctx, opPinned(rev), i5.DefaultProfile(), tx.Options{Isolation: tx.RepeatableRead}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
 		co, e := ca.NewCoherentReadScope(sc, rev, time.Now())
 		if e != nil {
 			return e
 		}
-		_, e = s.ReadEligibilityTx(c, co, app.EligibilityRequest{PlayerID: a.PlayerID, Family: "avatar"})
+		future, e = s.ReadEligibilityTx(c, co, app.EligibilityRequest{PlayerID: a.PlayerID, Family: "avatar"})
 		return e
 	})
-	if e == nil {
-		t.Fatal("futureowner")
+	// K7: a stored forward timestamp no longer refuses the read.
+	if e != nil || future.PlayerID != a.PlayerID || future.ContentRevision != rev || len(future.Character.Heroes) == 0 {
+		t.Fatal("future owner read", e, future)
 	}
 }
 

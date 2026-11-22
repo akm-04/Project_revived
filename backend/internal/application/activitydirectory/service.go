@@ -13,14 +13,14 @@ import (
 
 type Directory struct{ Registry Registry }
 
-func (d Directory) ListAt(ctx context.Context, actor identity.ActorContext, at time.Time) ([]activity.Projection, error) {
+func (d Directory) ListAt(ctx context.Context, actor identity.ActorContext, at time.Time, level PlayerLevel) ([]activity.Projection, error) {
 	if err := validateActor(actor); err != nil {
 		return nil, err
 	}
 	if d.Registry.Len() == 0 {
 		return []activity.Projection{}, nil
 	}
-	pc := ProjectionContext{Actor: actor, DecisionAt: at.UTC()}
+	pc := ProjectionContext{Actor: actor, DecisionAt: at.UTC(), PlayerLevel: level}
 	if err := pc.Validate(); err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func (d Directory) ListAt(ctx context.Context, actor identity.ActorContext, at t
 	return out, nil
 }
 
-func (d Directory) LookupAt(ctx context.Context, actor identity.ActorContext, at time.Time, tableID int64) (activity.Projection, bool, error) {
+func (d Directory) LookupAt(ctx context.Context, actor identity.ActorContext, at time.Time, tableID int64, level PlayerLevel) (activity.Projection, bool, error) {
 	if err := validateActor(actor); err != nil {
 		return activity.Projection{}, false, err
 	}
@@ -50,7 +50,7 @@ func (d Directory) LookupAt(ctx context.Context, actor identity.ActorContext, at
 	if !ok {
 		return activity.Projection{}, false, nil
 	}
-	pc := ProjectionContext{Actor: actor, DecisionAt: at.UTC()}
+	pc := ProjectionContext{Actor: actor, DecisionAt: at.UTC(), PlayerLevel: level}
 	if err := pc.Validate(); err != nil {
 		return activity.Projection{}, false, err
 	}
@@ -85,10 +85,19 @@ type Runtime struct {
 	Time      appgeneration.TimeAuthority
 }
 
+// Registered reports whether a provider is registered for tableID.
+func (d Directory) Registered(tableID int64) bool {
+	_, ok := d.Registry.registration(tableID)
+	return ok
+}
+
+// ValidActor reports whether the actor carries the identities a projection needs.
+func ValidActor(actor identity.ActorContext) bool { return validateActor(actor) == nil }
+
 func (s Runtime) List(ctx context.Context, actor identity.ActorContext) ([]activity.Projection, error) {
 	if s.Directory.Registry.Len() == 0 {
 		// No child provider is evaluated, so no authoritative gameplay instant is sampled.
-		return s.Directory.ListAt(ctx, actor, time.Time{})
+		return s.Directory.ListAt(ctx, actor, time.Time{}, nil)
 	}
 	if s.Time == nil {
 		return nil, errors.New("activity directory: nil time authority")
@@ -97,14 +106,14 @@ func (s Runtime) List(ctx context.Context, actor identity.ActorContext) ([]activ
 	if err != nil {
 		return nil, err
 	}
-	return s.Directory.ListAt(ctx, actor, at)
+	return s.Directory.ListAt(ctx, actor, at, nil)
 }
 
 func (s Runtime) Lookup(ctx context.Context, actor identity.ActorContext, tableID int64) (activity.Projection, bool, error) {
 	if err := validateActor(actor); err != nil {
 		return activity.Projection{}, false, err
 	}
-	if _, ok := s.Directory.Registry.registration(tableID); !ok {
+	if !s.Directory.Registered(tableID) {
 		return activity.Projection{}, false, nil
 	}
 	if s.Time == nil {
@@ -114,5 +123,5 @@ func (s Runtime) Lookup(ctx context.Context, actor identity.ActorContext, tableI
 	if err != nil {
 		return activity.Projection{}, false, err
 	}
-	return s.Directory.LookupAt(ctx, actor, at, tableID)
+	return s.Directory.LookupAt(ctx, actor, at, tableID, nil)
 }

@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strconv"
+	"strings"
 	"time"
 
 	"gxb.local/backend/v2/internal/domain/economy"
@@ -53,10 +55,30 @@ func (PetStarterFunctionAnnouncements) Announce(_ context.Context, _ identity.Pl
 			out = append(out, e.FunctionID)
 		case "NONE", "":
 		default:
-			return nil, errors.New("unsupported function announcement capability")
+			if _, named, err := campaignFirstClearNode(capByID[e.FunctionID]); err != nil {
+				return nil, err
+			} else if !named {
+				return nil, errors.New("unsupported function announcement capability")
+			}
 		}
 	}
 	return out, nil
+}
+
+// campaignFirstClearCapabilityPrefix is the content annotation that ties a
+// function to Campaign's durable tutorial milestone, e.g.
+// CAMPAIGN_FIRST_CLEAR:100007 for the Skill Upgrade function.
+const campaignFirstClearCapabilityPrefix = "CAMPAIGN_FIRST_CLEAR:"
+
+func campaignFirstClearNode(capability string) (int64, bool, error) {
+	if !strings.HasPrefix(capability, campaignFirstClearCapabilityPrefix) {
+		return 0, false, nil
+	}
+	node, err := strconv.ParseInt(strings.TrimPrefix(capability, campaignFirstClearCapabilityPrefix), 10, 64)
+	if err != nil || node <= 0 {
+		return 0, true, fmt.Errorf("invalid campaign first-clear milestone in capability %q", capability)
+	}
+	return node, true, nil
 }
 
 // LevelFunctionAnnouncements announces every function whose pure level gate the player reached (D59, PRIVATE_POLICY): stock
@@ -78,6 +100,14 @@ func (LevelFunctionAnnouncements) Announce(c context.Context, pid identity.Playe
 	for _, e := range eligible {
 		capability := capabilityByID[e.FunctionID]
 		if capability == "NONE" || capability == "" {
+			out = append(out, e.FunctionID)
+			continue
+		}
+		_, named, err := campaignFirstClearNode(capability)
+		if err != nil {
+			return nil, err
+		}
+		if named && e.MilestoneSatisfied {
 			out = append(out, e.FunctionID)
 		}
 	}
@@ -170,6 +200,48 @@ func ResolveTemporalPolicyTx(ctx context.Context, q tx.Queryer, pid identity.Pla
 
 func (s Service) resolveTemporalPolicyTx(ctx context.Context, q tx.Queryer, pid identity.PlayerID, d TemporalDescriptor, progression player.ProgressionPolicy, level int64, now time.Time) (economy.TemporalPolicy, string, error) {
 	return ResolveTemporalPolicyTx(ctx, q, pid, d, progression, level, now, s.Privileges)
+}
+
+// filterMilestoneEligibilityTx keeps the pure-level eligibility whose
+// content-named milestone is proved by the caller's committed set or Campaign's
+// durable first-clear fact. One rule serves every level-up and MID 114.
+func (s Service) filterMilestoneEligibilityTx(ctx context.Context, q tx.Queryer, pid identity.PlayerID, policy FunctionGatePolicy, eligible []player.FunctionEligibility, committed []int64) ([]player.FunctionEligibility, error) {
+	capabilityByID := make(map[int64]string, len(policy.Gates))
+	for _, gate := range policy.Gates {
+		capabilityByID[gate.FunctionID] = gate.AnnouncementCapability
+	}
+	committedSet := make(map[int64]bool, len(committed))
+	for _, node := range committed {
+		committedSet[node] = true
+	}
+	out := make([]player.FunctionEligibility, 0, len(eligible))
+	for _, e := range eligible {
+		node, named, err := campaignFirstClearNode(capabilityByID[e.FunctionID])
+		if err != nil {
+			return nil, err
+		}
+		if !named {
+			out = append(out, e)
+			continue
+		}
+		if committedSet[node] {
+			e.MilestoneSatisfied = true
+			out = append(out, e)
+			continue
+		}
+		if s.CampaignClears == nil {
+			continue
+		}
+		reached, err := s.CampaignClears.CampaignFirstClearCommittedTx(ctx, q, pid, node)
+		if err != nil {
+			return nil, err
+		}
+		if reached {
+			e.MilestoneSatisfied = true
+			out = append(out, e)
+		}
+	}
+	return out, nil
 }
 
 func pureLevelEligibility(policy FunctionGatePolicy, pid identity.PlayerID, level int64, now time.Time) ([]player.FunctionEligibility, error) {

@@ -13,6 +13,7 @@ import (
 	d "gxb.local/backend/v2/internal/domain/arena"
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
+	lib "gxb.local/backend/v2/internal/domain/librarylocal"
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -94,9 +95,11 @@ func (service Service) StartTournamentCombat(requestContext context.Context, ide
 			first, firstPets := tournamentParticipants(actor.PlayerID, formations[0], cd.OwnedSelf)
 			second, secondPets := tournamentParticipants(room.Selection.Players[1], formations[1], cd.OwnedForeign)
 			campaignType := d.CampaignType
+			mode := cd.ModeArenaPlayoffs
 			battleContext := &cd.BattleContext{Transform: tournamentTransform}
 			if room.IsFriendFight() {
 				campaignType = 31
+				mode = cd.ModeArenaFriendFight
 				if room.FriendMode == 1 {
 					battleContext = nil
 				}
@@ -107,7 +110,7 @@ func (service Service) StartTournamentCombat(requestContext context.Context, ide
 				return err
 			}
 			digest := sha256.Sum256(payload)
-			requests = append(requests, combat.StartRequest{Actor: actor, Locator: tournamentLocator(*room, round+1), GenerationRef: room.ContractIdentifier(), StartFingerprint: hex.EncodeToString(digest[:]), ResultDeadline: scope.Operation.DecisionAt().Add(resultWindow), Battle: battle})
+			requests = append(requests, combat.StartRequest{Mode: mode, Actor: actor, Locator: tournamentLocator(*room, round+1), GenerationRef: room.ContractIdentifier(), StartFingerprint: hex.EncodeToString(digest[:]), ResultDeadline: scope.Operation.DecisionAt().Add(resultWindow), Battle: battle})
 			requestRounds = append(requestRounds, round)
 		}
 		room.Attempts = make([]ids.UUID, d.SelectionTeamCount)
@@ -194,6 +197,7 @@ func (service Service) ResolveTournamentCombat(requestContext context.Context, i
 			return d.ErrConflict
 		}
 		current.Wins = [2]int{}
+		settledRounds := []int{}
 		for round, attempt := range current.Attempts[:current.Selection.TeamCount()] {
 			if current.Wins[0] >= current.RequiredWins() || current.Wins[1] >= current.RequiredWins() {
 				break
@@ -217,6 +221,7 @@ func (service Service) ResolveTournamentCombat(requestContext context.Context, i
 				}
 				current.RoundResults[round] = winner
 				current.GenuineBattles++
+				settledRounds = append(settledRounds, round)
 			}
 			if winner == 1 || winner == 2 {
 				current.Wins[winner-1]++
@@ -259,9 +264,38 @@ func (service Service) ResolveTournamentCombat(requestContext context.Context, i
 				}
 			}
 		}
-		current.Status, current.SettledAt = d.RoomSettled, at
+		current.Status, current.SettledAt = d.RoomSettled, gen.EffectiveObservation(at, current.SettledAt, current.StartsAt)
 		current.StateVersion++
 		current.NoticeVersion++
+		// One count per genuine round per player, from each player's own frozen
+		// selection; the counter lock stays the last lock of the transaction.
+		for _, round := range settledRounds {
+			for side, player := range current.Selection.Players {
+				if err := service.BattleCounts.ObserveBattleTx(requestContext, scope.Tx, player, current.Selection.Teams[side][round].Heroes, at); err != nil {
+					return err
+				}
+			}
+		}
+		// A-206 R7: each friend-fight participant advances mission 1002 for the
+		// girls that fought the duel, in ascending player id order.
+		if current.IsFriendFight() {
+			for _, player := range sortedPlayers(current.Selection.Players[0], current.Selection.Players[1]) {
+				side := 0
+				if player == current.Selection.Players[1] {
+					side = 1
+				}
+				for _, round := range settledRounds {
+					for _, partnerID := range current.Selection.Teams[side][round].Heroes {
+						if partnerID <= 0 {
+							continue
+						}
+						if err := service.PartnerMissions.ObservePartnerMissionTx(requestContext, scope.Tx, player, partnerID, lib.FriendFightMissionID, at); err != nil {
+							return err
+						}
+					}
+				}
+			}
+		}
 		return nil
 	})
 }

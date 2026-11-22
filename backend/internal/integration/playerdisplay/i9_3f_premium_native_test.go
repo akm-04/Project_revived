@@ -17,6 +17,7 @@ import (
 	"gxb.local/backend/v2/internal/application/i5"
 	app "gxb.local/backend/v2/internal/application/summon"
 	"gxb.local/backend/v2/internal/domain/character"
+	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/summon"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -108,6 +109,16 @@ func TestI9_3FPremiumNative(t *testing.T) {
 	if body, e = s.Magic(ctx, b, app.MagicPull{Times: 10, Target: 11001}, op()); e != nil || len(summonRows(t, body)) != 10 || stackQuantity(t, p, b.PlayerID, stone) <= 5 {
 		t.Fatal("70 ten", body, e)
 	}
+	const magicJuice = int64(50005182)
+	exec(t, p, `UPDATE player_item_stacks SET quantity=999 WHERE player_id=$1 AND item_id=$2`, int64(b.PlayerID), magicJuice)
+	exec(t, p, `UPDATE player_currency_balances SET amount=amount+1000 WHERE player_id=$1 AND resource_key='crystal'`, int64(b.PlayerID))
+	if body, e = s.Magic(ctx, b, app.MagicPull{Times: 1, Target: 11001}, op()); e != nil || stackQuantity(t, p, b.PlayerID, magicJuice) != 999 {
+		t.Fatal("70 with a full juice stack still settles", body, e)
+	}
+	var overflowMails int64
+	if e = p.QueryRow(ctx, `SELECT count(*) FROM mail_records WHERE recipient_player_id=$1 AND source_kind='GRANT_OVERFLOW'`, int64(b.PlayerID)).Scan(&overflowMails); e != nil || overflowMails != 1 {
+		t.Fatal("juice past the cap arrives by mail", overflowMails, e)
+	}
 
 	scroll, _ := catalog.VowsScroll(11001)
 	exec(t, p, `INSERT INTO player_item_stacks(player_id,item_id,quantity,state_version,acquired_at,updated_at)VALUES($1,50001666,250,1,clock_timestamp()-interval '1 hour',clock_timestamp()-interval '1 hour')`, int64(b.PlayerID))
@@ -118,7 +129,8 @@ func TestI9_3FPremiumNative(t *testing.T) {
 	if body, e = s.ExchangeVows(ctx, b, app.VowsExchange{TableID: 11001, Times: 2}, op()); e != nil || fmt.Sprint(body["awards"]) != fmt.Sprintf("[map[item_num:2 table_id:%d]]", scroll) || stackQuantity(t, p, b.PlayerID, 50001666) != 50 || stackQuantity(t, p, b.PlayerID, scroll) != before+2 {
 		t.Fatal("306", body, e)
 	}
-	if _, e = s.ExchangeVows(ctx, b, app.VowsExchange{TableID: 11001, Times: 1}, op()); !errors.Is(e, d.ErrRefused) {
+	// P1: a stack-material shortfall returns the typed balance cause.
+	if _, e = s.ExchangeVows(ctx, b, app.VowsExchange{TableID: 11001, Times: 1}, op()); !errors.Is(e, economy.ErrInsufficientBalance) {
 		t.Fatal("306 without essence", e)
 	}
 }

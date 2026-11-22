@@ -98,11 +98,7 @@ func (s Store) SpiritInputsActive(ctx context.Context) (string, bool, error) {
 }
 
 func (Store) SpiritInputsRevisionTx(ctx context.Context, q tx.Queryer, revision string) (bool, error) {
-	var raw string
-	if e := q.QueryRow(ctx, `SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1`, revision).Scan(&raw); e != nil {
-		return false, e
-	}
-	return manifestHasCapability([]byte(raw), revision, "SPIRIT_INPUTS_I7C2H")
+	return storedCapability(ctx, q, revision, "SPIRIT_INPUTS_I7C2H")
 }
 
 func (s Store) SpiritInputsActiveTx(ctx context.Context, q tx.Queryer) (string, bool, error) {

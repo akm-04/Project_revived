@@ -15,6 +15,7 @@ import (
 	appclientlog "gxb.local/backend/v2/internal/application/clientlog"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/observability"
+	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
 const clientLogPurgeInterval = time.Hour
@@ -22,9 +23,9 @@ const clientLogPurgeInterval = time.Hour
 // startClientLog wires the ClientLog owner (I8.5-3): the per-session log_url
 // issuer, the request journal writer, the log URL route (when
 // GXB_CLIENT_LOG_URL is set) and the hourly retention purge (D43).
-func startClientLog(ctx context.Context, pool *pg.Pool, authority i4store.RealtimeAuthority, baseURL string, metrics observability.Metrics, mux *http.ServeMux) (*appclientlog.Service, *appclientlog.Journal) {
+func startClientLog(ctx context.Context, pool *pg.Pool, authority i4store.RealtimeAuthority, baseURL string, retentionDays int, metrics observability.Metrics, mux *http.ServeMux, bound int) (*appclientlog.Service, *appclientlog.Journal) {
 	store := clientlogstore.Store{Pool: pool.Raw()}
-	service := &appclientlog.Service{Store: store, Bearers: authority, Clock: clock.System{}, BaseURL: baseURL}
+	service := &appclientlog.Service{Store: store, Bearers: authority, Clock: clock.System{}, BaseURL: baseURL, RetentionDays: retentionDays}
 	journal := appclientlog.NewJournal(store, metrics)
 	go journal.Run(ctx)
 	go purgeClientLogs(ctx, service)
@@ -35,7 +36,11 @@ func startClientLog(ctx context.Context, pool *pg.Pool, authority i4store.Realti
 	if err != nil {
 		log.Fatal(err)
 	}
-	handler := stockruntime.ClientLogHandler{Ingest: service, BasePath: basePath}
+	uploadBound, err := httpedge.NewAdmission(bound)
+	if err != nil {
+		log.Fatal(err)
+	}
+	handler := stockruntime.ClientLogHandler{Ingest: service, BasePath: basePath, Bound: uploadBound}
 	mux.Handle(basePath, handler)
 	mux.Handle(basePath+"/", handler)
 	return service, journal

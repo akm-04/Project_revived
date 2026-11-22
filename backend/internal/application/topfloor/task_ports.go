@@ -12,6 +12,7 @@ import (
 type TaskStore interface {
 	TaskDueServersTx(context.Context, tx.Queryer, time.Time) ([]identity.LogicalServerID, error)
 	ReadTaskPeriodTx(requestContext context.Context, query tx.Queryer, server identity.LogicalServerID, number int64, lock bool) (domain.TaskModePeriod, bool, error)
+	TaskModeBanTablesTx(requestContext context.Context, query tx.Queryer, mode, rotation int64) ([]int64, error)
 	CreateTaskPeriodTx(requestContext context.Context, transaction tx.Tx, period domain.TaskModePeriod) error
 	SaveTaskPeriodTx(requestContext context.Context, transaction tx.Tx, period domain.TaskModePeriod, previousVersion int64) error
 	TaskRangeTx(requestContext context.Context, query tx.Queryer, server identity.LogicalServerID, period, first, last int64) ([]domain.Ranked, error)

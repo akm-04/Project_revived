@@ -2,16 +2,14 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
-	"net/http"
 
 	apphero "gxb.local/backend/v2/internal/application/characterhero"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
 	app "gxb.local/backend/v2/internal/application/summon"
+	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/summon"
 	"gxb.local/backend/v2/internal/foundation/operation"
-	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
@@ -37,7 +35,7 @@ func (o SummonDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 		return *fail
 	}
 	if o.Service == nil {
-		return failSummon(d.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	p, op := req.Envelope.Params, req.Envelope.Operation
 	bad := badHero("summon_invalid_parameter")
@@ -99,14 +97,14 @@ func (o SummonDispatcher) summon(ctx context.Context, a identity.ActorContext, r
 	return okI5(body)
 }
 
-// failSummon keeps result = [] on a refusal: SelfPlayer.summonHero iterates it (V1 Pass41.3).
+// A refusal answers non-200, so Backend.lua never hands it to SelfPlayer.summonHero, which iterates result.
+var summonFailureRows = []failureRow{
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+	{match: d.ErrInvalid, class: failureMalformed, detail: "summon_invalid_parameter"},
+	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroCapacityExceeded, class: failureRefusal, code: unprovenRefusalCode},
+}
+
 func failSummon(err error) httpedge.Response {
-	var conflict *receipt.ConflictError
-	if errors.Is(err, d.ErrInvalid) || errors.As(err, &conflict) {
-		return badHero("summon_invalid_parameter")
-	}
-	if errors.Is(err, d.ErrRefused) || errors.Is(err, apphero.ErrHeroCapacityExceeded) {
-		return conflictRefusal(1)
-	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "summon_unavailable"}}
+	return failureFromRows(summonFailureRows, err)
 }

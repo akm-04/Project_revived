@@ -3,18 +3,22 @@ package illusion
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
 
 	ca "gxb.local/backend/v2/internal/application/characterasset"
 	gen "gxb.local/backend/v2/internal/application/generation"
+	"gxb.local/backend/v2/internal/application/heroforce"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/application/publicstats"
 	sr "gxb.local/backend/v2/internal/application/sharedroom"
 	"gxb.local/backend/v2/internal/application/socialinbox"
 	"gxb.local/backend/v2/internal/domain/character"
+	"gxb.local/backend/v2/internal/domain/friendmessage"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/illusion"
 	"gxb.local/backend/v2/internal/domain/modes"
@@ -30,6 +34,8 @@ const (
 	RoomNoticeRoute = "illusion.room.notice.v1"
 	// TeamTerminalKind names the one terminal of a team fight.
 	TeamTerminalKind = "ILLUSION_TEAM_RESULT"
+	// TeamClosedKind names a team attempt the resolver can never finish.
+	TeamClosedKind = "ILLUSION_TEAM_CLOSED"
 
 	roomLease = 3000 * time.Second
 )
@@ -48,6 +54,10 @@ func (s Mode) roomReady() error {
 // CreateRoom answers 1349 and binds the boss that is open at creation.
 func (s Mode) CreateRoom(c context.Context, a identity.ActorContext, op operation.Context) (map[string]any, error) {
 	if err := s.roomReady(); err != nil {
+		return nil, err
+	}
+	op, err := s.pin(c, op)
+	if err != nil {
 		return nil, err
 	}
 	at, err := s.Timed.Binder.Time.Now(c)
@@ -76,21 +86,22 @@ func (s Mode) CreateRoom(c context.Context, a identity.ActorContext, op operatio
 	if err != nil {
 		return nil, err
 	}
-	if _, err = s.Rooms.Open(c, a, sr.OpenRequest{Family: RoomFamilyRef(), Capacity: d.TeamSeats, Lease: roomLease, Payload: payload}, op); err != nil {
-		return nil, err
-	}
 	var info map[string]any
-	_, err = s.Rooms.Update(c, a, sr.UpdateRequest{Family: RoomFamilyRef(), Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
-		state, err := d.LoadRoomState(room.Payload)
-		if err != nil {
-			return err
-		}
-		info, err = s.teamInfo(c, sc.Tx, *room, state, sc.Operation.DecisionAt())
-		if err != nil {
-			return err
-		}
-		return s.storeTeamInfo(sc, room, state, info)
-	}}, op)
+	_, err = s.Rooms.Open(c, a, sr.OpenRequest{Family: RoomFamilyRef(), Capacity: d.TeamSeats, Lease: roomLease, Payload: payload,
+		Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
+			state, err := d.LoadRoomState(room.Payload)
+			if err != nil {
+				return err
+			}
+			if err = s.recordForce(c, sc, a.PlayerID, &state); err != nil {
+				return err
+			}
+			info, err = s.teamInfo(c, sc.Tx, *room, state, sc.Operation.DecisionAt())
+			if err != nil {
+				return err
+			}
+			return s.storeTeamInfo(sc, room, state, info)
+		}}, op)
 	if err != nil {
 		return nil, err
 	}
@@ -117,9 +128,43 @@ func (s Mode) RoomInfo(c context.Context, a identity.ActorContext, _ operation.C
 	return s.teamInfo(c, s.Fresh, room, state, at)
 }
 
-// Prepare answers 1351 and Ready answers 1357 with the same per-seat flag.
+// Prepare answers 1351: the master's prepare-room button opens the hero pick
+// for the full team. Ready answers 1357 with the per-seat flag.
 func (s Mode) Prepare(c context.Context, a identity.ActorContext, op operation.Context) (map[string]any, error) {
-	return s.setReady(c, a, true, op)
+	if err := s.roomReady(); err != nil {
+		return nil, err
+	}
+	op, err := s.pin(c, op)
+	if err != nil {
+		return nil, err
+	}
+	var info map[string]any
+	_, err = s.Rooms.Update(c, a, sr.UpdateRequest{Family: RoomFamilyRef(), Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
+		if room.Owner != a.PlayerID {
+			return fmt.Errorf("%w: only the master starts selection", d.ErrRefused)
+		}
+		seats := room.Members()
+		if len(seats) != int(d.TeamSeats) {
+			return fmt.Errorf("%w: three seats", d.ErrRefused)
+		}
+		state, err := d.LoadRoomState(room.Payload)
+		if err != nil {
+			return err
+		}
+		if state.Stage != d.StageSelectHero {
+			state.Stage = d.StageSelectHero
+			state.Picks = nil
+		}
+		info, err = s.teamInfo(c, sc.Tx, *room, state, sc.Operation.DecisionAt())
+		if err != nil {
+			return err
+		}
+		return s.storeTeamInfo(sc, room, state, info)
+	}}, op)
+	if err != nil {
+		return nil, err
+	}
+	return info, nil
 }
 
 func (s Mode) Ready(c context.Context, a identity.ActorContext, op operation.Context) (map[string]any, error) {
@@ -149,15 +194,19 @@ func (s Mode) EnterRoom(c context.Context, a identity.ActorContext, roomID int64
 	if roomID <= 0 {
 		return nil, d.ErrInvalid
 	}
+	op, err := s.pin(c, op)
+	if err != nil {
+		return nil, err
+	}
 	room, found, err := s.RoomStore.ReadRoomTx(c, s.Fresh, roomID)
 	if err != nil {
 		return nil, err
 	}
 	if !found || room.Family != RoomFamily || room.Slot != RoomSlot || room.Status != sharedroom.StatusOpen {
-		return nil, fmt.Errorf("%w: room unavailable", d.ErrRefused)
+		return nil, fmt.Errorf("%w: room unavailable", sr.ErrJoinUnavailable)
 	}
 	if !seatedIn(room, a.PlayerID) && len(room.Members()) >= int(room.Capacity) {
-		return nil, fmt.Errorf("%w: room full", d.ErrRefused)
+		return nil, fmt.Errorf("%w: room full", sr.ErrJoinUnavailable)
 	}
 	state, err := d.LoadRoomState(room.Payload)
 	if err != nil {
@@ -168,39 +217,37 @@ func (s Mode) EnterRoom(c context.Context, a identity.ActorContext, roomID int64
 		return nil, err
 	}
 	if !found || profile.Level < d.OpenLevel || abs(profile.Level-state.MasterLevel) > d.TeamLevelBand {
-		return nil, fmt.Errorf("%w: level band", d.ErrRefused)
+		return nil, fmt.Errorf("%w: level band", sr.ErrLevelBand)
 	}
-	joined, err := s.Rooms.Join(c, a, RoomFamilyRef(), roomID, op)
+	var info map[string]any
+	_, err = s.Rooms.Join(c, a, sr.JoinRequest{Family: RoomFamilyRef(), RoomID: roomID,
+		Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
+			state, err := d.LoadRoomState(room.Payload)
+			if err != nil {
+				return err
+			}
+			if err = s.recordForce(c, sc, a.PlayerID, &state); err != nil {
+				return err
+			}
+			info, err = s.teamInfo(c, sc.Tx, *room, state, sc.Operation.DecisionAt())
+			if err != nil {
+				return err
+			}
+			return s.storeTeamInfo(sc, room, state, info)
+		}}, op)
 	if err != nil {
-		return nil, err
-	}
-	state, err = d.LoadRoomState(joined.Payload)
-	if err != nil {
-		return nil, err
-	}
-	at, err := s.Timed.Binder.Time.Now(c)
-	if err != nil {
-		return nil, err
-	}
-	info, err := s.teamInfo(c, s.Fresh, joined, state, at)
-	if err != nil {
-		return nil, err
-	}
-	_, err = s.Rooms.Update(c, a, sr.UpdateRequest{Family: RoomFamilyRef(), Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
-		state, err := d.LoadRoomState(room.Payload)
-		if err != nil {
-			return err
-		}
-		info, err = s.teamInfo(c, sc.Tx, *room, state, sc.Operation.DecisionAt())
-		if err != nil {
-			return err
-		}
-		return s.storeTeamInfo(sc, room, state, info)
-	}}, op)
-	if err != nil {
-		return nil, err
+		return nil, enterRefusal(err)
 	}
 	return info, nil
+}
+
+// enterRefusal reports a seat the room core refused as a room that is full,
+// started or gone, the stock 1352 join refusal the client renders.
+func enterRefusal(err error) error {
+	if errors.Is(err, sharedroom.ErrFull) || errors.Is(err, sharedroom.ErrClosed) || errors.Is(err, sharedroom.ErrExpired) || errors.Is(err, sr.ErrNotFound) {
+		return fmt.Errorf("%w: %w", sr.ErrJoinUnavailable, err)
+	}
+	return err
 }
 
 // RemovePlayer answers 1353; the target's 518 room_id 0 comes from its KICKED
@@ -254,11 +301,20 @@ func (s Mode) SetPartner(c context.Context, a identity.ActorContext, request Par
 		if index < 0 {
 			return d.ErrRefused
 		}
+		if state.Status(len(seats)) != d.StageSelectHero {
+			return fmt.Errorf("%w: selection is not open", d.ErrRefused)
+		}
+		if err := turnReady(state, seats, index); err != nil {
+			return err
+		}
 		pick, err := s.validatePick(c, sc, state, seats, index, request, sc.Operation.DecisionAt())
 		if err != nil {
 			return err
 		}
 		state.SetPick(int64(a.PlayerID), pick)
+		if err = s.recordForce(c, sc, a.PlayerID, &state); err != nil {
+			return err
+		}
 		info, err = s.teamInfo(c, sc.Tx, *room, state, sc.Operation.DecisionAt())
 		if err != nil {
 			return err
@@ -269,6 +325,42 @@ func (s Mode) SetPartner(c context.Context, a identity.ActorContext, request Par
 		return nil, err
 	}
 	return info, nil
+}
+
+// SendRoomChat answers a 515 whose selectType is ILLUSION: the line is stored
+// on the room and the room wakeup pushes 516 to the addressed team mate.
+func (s Mode) SendRoomChat(c context.Context, a identity.ActorContext, recipient identity.PlayerID, message friendmessage.Message, op operation.Context) error {
+	if err := s.roomReady(); err != nil {
+		return err
+	}
+	if recipient == a.PlayerID || !recipient.Valid() {
+		return d.ErrInvalid
+	}
+	payload, err := message.Canonical()
+	if err != nil {
+		return d.ErrInvalid
+	}
+	op, err = s.pin(c, op)
+	if err != nil {
+		return err
+	}
+	_, err = s.Rooms.Update(c, a, sr.UpdateRequest{Family: RoomFamilyRef(), Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
+		if !seatedIn(*room, recipient) {
+			return fmt.Errorf("%w: not a room mate", d.ErrRefused)
+		}
+		state, err := d.LoadRoomState(room.Payload)
+		if err != nil {
+			return err
+		}
+		state.AddChat(d.ChatMessage{Sender: int64(a.PlayerID), Recipients: []int64{int64(recipient)},
+			Message: payload, At: sc.Operation.DecisionAt().Unix()})
+		raw, err := state.Encode()
+		if err != nil {
+			return err
+		}
+		return room.SetPayload(raw, sc.Operation.DecisionAt())
+	}}, op)
+	return err
 }
 
 // Invite answers 1360: the target's level band is checked and the room wakeup
@@ -361,6 +453,11 @@ func (s Mode) validatePick(c context.Context, sc gen.TimedScope, state d.RoomSta
 	if err != nil {
 		return d.TeamPick{}, err
 	}
+	best15, err := heroforce.Best15(c, sc, s.Heroes, s.Stats, seats[index], revision, at)
+	if err != nil {
+		return d.TeamPick{}, err
+	}
+	powerFloor := best15 / d.TeamPowerLimit
 	used := map[int64]bool{}
 	for otherIndex, member := range seats {
 		if otherIndex == index {
@@ -374,12 +471,12 @@ func (s Mode) validatePick(c context.Context, sc gen.TimedScope, state d.RoomSta
 			used[tableIDOf(otherRoster, id)] = true
 		}
 	}
-	force := int64(0)
 	powers := make([]int64, 0, len(request.Heroes))
 	picked := make([]int64, 0, len(request.Heroes))
 	for _, tableID := range request.Heroes {
 		if tableID == 0 {
 			picked = append(picked, 0)
+			powers = append(powers, 0)
 			continue
 		}
 		id, owned := idOfTable(roster, "partner_id", tableID)
@@ -396,13 +493,10 @@ func (s Mode) validatePick(c context.Context, sc gen.TimedScope, state d.RoomSta
 			return d.TeamPick{}, err
 		}
 		power := int64(result.Stats.Force)
-		powers = append(powers, power)
-		force += power
-	}
-	for _, power := range powers {
-		if power < force/d.TeamPowerLimit {
+		if power < powerFloor {
 			return d.TeamPick{}, fmt.Errorf("%w: hero power", d.ErrRefused)
 		}
+		powers = append(powers, power)
 	}
 	petID := int64(0)
 	if request.PetID > 0 {
@@ -415,7 +509,7 @@ func (s Mode) validatePick(c context.Context, sc gen.TimedScope, state d.RoomSta
 			return d.TeamPick{}, fmt.Errorf("%w: pet %d not owned", d.ErrRefused, request.PetID)
 		}
 	}
-	return d.TeamPick{Heroes: picked, PetID: petID, Force: force}, nil
+	return d.TeamPick{Heroes: picked, PetID: petID, Force: best15, Powers: powers}, nil
 }
 
 func (s Mode) heroRows(c context.Context, q tx.Queryer, player identity.PlayerID, at time.Time) (map[string]map[string]any, error) {
@@ -480,6 +574,24 @@ func tableIDOf(roster map[string]map[string]any, partnerID int64) int64 {
 	return partnerID
 }
 
+// recordForce freezes the player's best-15 AP into the room payload so the
+// prepare window and the 518 rebuild show it without re-reading every hero.
+func (s Mode) recordForce(c context.Context, sc gen.TimedScope, player identity.PlayerID, state *d.RoomState) error {
+	if s.Stats == nil {
+		return nil
+	}
+	revision, err := s.Content.ActiveRevision(c, sc.Tx)
+	if err != nil {
+		return err
+	}
+	force, err := heroforce.Best15(c, sc, s.Heroes, s.Stats, player, revision, sc.Operation.DecisionAt())
+	if err != nil {
+		return err
+	}
+	state.SetForce(int64(player), force)
+	return nil
+}
+
 func (s Mode) storeTeamInfo(sc gen.TimedScope, room *sharedroom.Room, state d.RoomState, info map[string]any) error {
 	raw, err := json.Marshal(info)
 	if err != nil {
@@ -497,7 +609,7 @@ func (s Mode) storeTeamInfo(sc gen.TimedScope, room *sharedroom.Room, state d.Ro
 // up to two mates in seat order.
 func (s Mode) teamInfo(c context.Context, q tx.Queryer, room sharedroom.Room, state d.RoomState, at time.Time) (map[string]any, error) {
 	seats := room.Members()
-	out := map[string]any{"room_id": room.ID, "status": stageOf(seats)}
+	out := map[string]any{"room_id": room.ID, "status": state.Status(len(seats))}
 	slots := []struct{ idName, infoName, prefix string }{
 		{"master_id", "master_id_info", "master"}, {"mate_1", "mate_1_info", "mate_1"}, {"mate_2", "mate_2_info", "mate_2"}}
 	for index, slot := range slots {
@@ -537,7 +649,7 @@ func (s Mode) teamInfo(c context.Context, q tx.Queryer, room sharedroom.Room, st
 			details = append(details, row)
 		}
 		out[slot.idName] = int64(player)
-		out[slot.infoName] = playerInfo(profile, pick.Force)
+		out[slot.infoName] = playerInfo(profile, state.Force(int64(player)))
 		out[slot.prefix+"_status"] = readyOf(room, player)
 		out[slot.prefix+"_partner"] = strings.Join(ids, "|")
 		out[slot.prefix+"_partner_detail"] = details
@@ -563,11 +675,24 @@ func playerInfo(profile playerdirectory.Profile, force int64) map[string]any {
 		"conquer_lev": profile.ConquerLevel, "conquer_loop_id": profile.ConquerLoopID}
 }
 
-func stageOf(seats []identity.PlayerID) int64 {
-	if len(seats) >= int(d.TeamSeats) {
-		return 1
+// turnReady enforces the stock turn order: the master picks one hero and the
+// pet, then mate 1 picks two heroes, then mate 2. A later seat may not start
+// before every earlier seat's pick is complete.
+func turnReady(state d.RoomState, seats []identity.PlayerID, index int) error {
+	for earlier := 0; earlier < index; earlier++ {
+		expected := d.MasterHeroes
+		if earlier > 0 {
+			expected = d.MateHeroes
+		}
+		pick := state.Pick(int64(seats[earlier]))
+		if len(pick.Heroes) < expected || slices.Contains(pick.Heroes[:expected], 0) {
+			return fmt.Errorf("%w: seat %d picks first", d.ErrRefused, earlier)
+		}
+		if earlier == 0 && pick.PetID <= 0 {
+			return fmt.Errorf("%w: seat 0 picks a pet first", d.ErrRefused)
+		}
 	}
-	return 0
+	return nil
 }
 
 func readyOf(room sharedroom.Room, player identity.PlayerID) int64 {

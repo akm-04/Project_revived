@@ -16,7 +16,9 @@ import (
 
 // MarchCandidatesTx exposes copied defense projections; it neither enters nor
 // locks the ladder and never changes another player's team or run health.
-func (s Service) MarchCandidatesTx(c context.Context, q tx.Queryer, a identity.ActorContext, at time.Time, limit int) ([]march.Enemy, error) {
+// Without withForce, player rows carry no force: the caller freezes the heroes
+// itself with the viewer-qualified stats it matches on.
+func (s Service) MarchCandidatesTx(c context.Context, q tx.Queryer, a identity.ActorContext, at time.Time, limit int, withForce bool) ([]march.Enemy, error) {
 	if limit < 15 || limit > 1000 {
 		return nil, d.ErrInvalid
 	}
@@ -33,7 +35,7 @@ func (s Service) MarchCandidatesTx(c context.Context, q tx.Queryer, a identity.A
 		if len(view.Heroes) == 0 {
 			return nil
 		}
-		enemy := march.Enemy{TableID: view.Occupant.TableID(), AvatarFrame: view.FrameID, ConquerLevel: view.ConquerLevel, ConquerLoop: view.ConquerLoop, Player: int64(view.Occupant.Player), Name: view.Name, Level: view.Level, Avatar: view.AvatarID, Heroes: map[string]map[string]any{}, Force: view.Force}
+		enemy := march.Enemy{TableID: view.Occupant.TableID(), AvatarFrame: view.FrameID, ConquerLevel: view.ConquerLevel, ConquerLoop: view.ConquerLoop, Player: int64(view.Occupant.Player), Name: view.Name, Level: view.Level, Avatar: view.AvatarID, Heroes: map[string]map[string]any{}, Pet: view.Pet, Force: view.Force}
 		// JSON copies prevent health updates from mutating shared catalog/roster rows.
 		for i, row := range view.Heroes {
 			raw, err := json.Marshal(row)
@@ -73,7 +75,7 @@ func (s Service) MarchCandidatesTx(c context.Context, q tx.Queryer, a identity.A
 		if r.Occupant.Player == a.PlayerID || r.Occupant.IsRobot() {
 			continue
 		}
-		view, err := s.display(c, q, catalog, a.LogicalServerID, r.Occupant, at)
+		view, err := s.displayTeam(c, q, catalog, a.LogicalServerID, r.Occupant, at, withForce)
 		if err != nil {
 			return nil, err
 		}

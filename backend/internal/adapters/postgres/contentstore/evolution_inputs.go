@@ -11,11 +11,18 @@ import (
 	heroevolution "gxb.local/backend/v2/internal/domain/heroevolution"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"io"
+	"sync"
 )
 
 // EvolutionCatalogTx reads only the caller-pinned immutable revision. Registration
 // and controlled deployment/backfill must complete before activation.
+var evolutionCatalogs sync.Map
+
 func (s Store) EvolutionCatalogTx(ctx context.Context, q tx.Queryer, revision string) (heroevolution.Catalog, error) {
+	return memoCatalog(&evolutionCatalogs, revision, func() (heroevolution.Catalog, error) { return s.evolutionCatalogTx(ctx, q, revision) })
+}
+
+func (s Store) evolutionCatalogTx(ctx context.Context, q tx.Queryer, revision string) (heroevolution.Catalog, error) {
 	var out heroevolution.Catalog
 	if q == nil || len(revision) != 64 {
 		return out, heroevolution.ErrUnqualified
@@ -91,11 +98,7 @@ func (s Store) EvolutionInputsActive(ctx context.Context) (string, bool, error) 
 }
 
 func (Store) EvolutionInputsRevisionTx(ctx context.Context, q tx.Queryer, revision string) (bool, error) {
-	var raw string
-	if e := q.QueryRow(ctx, `SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1`, revision).Scan(&raw); e != nil {
-		return false, e
-	}
-	return manifestHasCapability([]byte(raw), revision, "EVOLUTION_INPUTS_I7C2I")
+	return storedCapability(ctx, q, revision, "EVOLUTION_INPUTS_I7C2I")
 }
 
 func (s Store) EvolutionInputsActiveTx(ctx context.Context, q tx.Queryer) (string, bool, error) {

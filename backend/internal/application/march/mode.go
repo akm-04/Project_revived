@@ -35,13 +35,20 @@ type Result struct {
 	CostDrink int64     `json:"cost_drink"`
 }
 type view struct {
-	catalog  d.Catalog
-	revision string
-	day      int64
-	level    int64
+	catalog     d.Catalog
+	revision    string
+	day         int64
+	level       int64
+	colorLevels *heroColorLevelsCache
 }
 
-var reportPolicy = cd.ReportPolicy{ID: "MARCH_REPORT_V1", Version: 1, Formation: true, CompleteEnemies: true, LivingWinner: true, WinClearsEnemies: true, MaxHP: 1e12, HPPerFrozen: 2}
+// heroColorLevelsCache loads the immutable colour level table once per run.
+type heroColorLevelsCache struct {
+	loaded bool
+	levels map[int64]d.HeroColorLevels
+}
+
+var reportPolicy = cd.ReportPolicy{ID: "MARCH_REPORT_V1", Version: 2, Formation: true, CompleteEnemies: true, LivingWinner: true, WinClearsEnemies: true, MaxHP: 1e12, HPPerFrozen: cd.ReportedHPBound}
 
 func profile() tx.Profile {
 	return tx.Profile{Name: "march", AcquireTimeout: 2 * time.Second, LockTimeout: 5 * time.Second, StatementTimeout: 10 * time.Second, TransactionTimeout: 30 * time.Second, CleanupTimeout: 2 * time.Second, ReconcileTimeout: 10 * time.Second, OperationTimeout: 60 * time.Second}
@@ -129,6 +136,7 @@ func (s Mode) run(c context.Context, a identity.ActorContext, name string, reque
 			}
 		}
 		c = context.WithValue(c, lockedHeroesKey{}, locked)
+		c = context.WithValue(c, rosterCacheKey{}, &rosterCache{})
 		r, err := s.Store.LockTx(c, sc.Tx, a.PlayerID, at)
 		if err != nil {
 			return err
@@ -145,7 +153,7 @@ func (s Mode) run(c context.Context, a identity.ActorContext, name string, reque
 		if !found {
 			return d.ErrUnavailable
 		}
-		v := view{catalog: cat, revision: revision, day: modes.Day(at), level: player.Level}
+		v := view{catalog: cat, revision: revision, day: modes.Day(at), level: player.Level, colorLevels: &heroColorLevelsCache{}}
 		if r.Occurrence == "" {
 			if err = s.initialize(c, sc, a, v, &r, false); err != nil {
 				return err
@@ -160,12 +168,8 @@ func (s Mode) run(c context.Context, a identity.ActorContext, name string, reque
 			return err
 		}
 		balances, functions := changes.Recorded(c)
-		if len(balances) > 0 {
-			out["economy_"] = balances
-		}
-		if len(functions) > 0 {
-			out["new_funcs_"] = functions
-		}
+		changes.WriteEconomy(out, balances)
+		changes.WriteFunctions(out, functions)
 		for key, value := range changes.RecordedMissions(c) {
 			out[key] = value
 		}
@@ -191,8 +195,8 @@ func (s Mode) run(c context.Context, a identity.ActorContext, name string, reque
 	return out, err
 }
 func (s Mode) Load(c context.Context, a identity.ActorContext, op operation.Context) (map[string]any, error) {
-	return s.run(c, a, "load", struct{}{}, nil, op, func(_ context.Context, _ gen.TimedScope, _ view, r *d.Run) (map[string]any, error) {
-		return r.Projection(), nil
+	return s.run(c, a, "load", struct{}{}, nil, op, func(c context.Context, sc gen.TimedScope, _ view, r *d.Run) (map[string]any, error) {
+		return s.projectionWithStatuses(c, sc.Tx, a, sc.Operation.DecisionAt(), *r)
 	})
 }
 func (s Mode) Reset(c context.Context, a identity.ActorContext, op operation.Context) (map[string]any, error) {
@@ -203,7 +207,7 @@ func (s Mode) Reset(c context.Context, a identity.ActorContext, op operation.Con
 		if err := s.initialize(c, sc, a, v, r, true); err != nil {
 			return nil, err
 		}
-		return r.Projection(), nil
+		return s.projectionWithStatuses(c, sc.Tx, a, sc.Operation.DecisionAt(), *r)
 	})
 }
 func (s Mode) OverlayMID1(c context.Context, q tx.Queryer, a identity.ActorContext, _ bool, at time.Time, detail map[string]any) error {
@@ -218,7 +222,17 @@ func (s Mode) OverlayMID1(c context.Context, q tx.Queryer, a identity.ActorConte
 		return nil
 	}
 	r.Refresh(modes.Day(at))
-	detail["336"] = r.Projection()
+	// The MID1 contributor carries only the store; without a roster port the
+	// projection stays as saved rather than failing the whole bootstrap.
+	if s.Roster == nil {
+		detail["336"] = r.Projection()
+		return nil
+	}
+	out, err := s.projectionWithStatuses(c, q, a, at, r)
+	if err != nil {
+		return err
+	}
+	detail["336"] = out
 	return nil
 }
 func (s Mode) Start(c context.Context, a identity.ActorContext, q Fight, op operation.Context) (map[string]any, error) {
@@ -238,7 +252,7 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, q Fight, op oper
 			r.Pending = r.Generation()
 			r.Formation = append([]int64{}, q.Formation...)
 		}
-		battle := appcombat.BattleRequest{CampaignType: 5, BattleID: 112000 + r.NextStage(), Formation: q.Formation, PetsA: []appcombat.Participant{}}
+		battle := appcombat.BattleRequest{CampaignType: 5, RentalMode: 5, BattleID: 112000 + r.NextStage(), Formation: q.Formation, PetsA: []appcombat.Participant{}}
 		for _, id := range q.Formation {
 			if id > 0 {
 				battle.TeamA = append(battle.TeamA, appcombat.Participant{Origin: cd.OwnedSelf, Kind: cd.HeroActor, Player: a.PlayerID, Identity: id})
@@ -291,7 +305,7 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, q Fight, op oper
 		if err != nil {
 			return nil, err
 		}
-		_, err = s.Combat.StartTx(c, sc.Tx, scope, appcombat.StartRequest{Actor: a, Locator: locator(a), GenerationRef: r.Pending, StartFingerprint: fmt.Sprintf("%x", fp), ResultDeadline: sc.Operation.DecisionAt().Add(time.Duration(v.catalog.Policy.ResultWindow) * time.Second), Battle: battle, TrustProfile: cd.ClientFullReportAttested, Replay: cd.ReplaySpec{Response: cd.ReplayFightExist, ErrorCode: cd.FightExistCode}, Package: func(_ *cd.Stream) (any, error) {
+		_, err = s.Combat.StartTx(c, sc.Tx, scope, appcombat.StartRequest{Mode: cd.ModeMarch, Actor: a, Locator: locator(a), GenerationRef: r.Pending, StartFingerprint: fmt.Sprintf("%x", fp), ResultDeadline: sc.Operation.DecisionAt().Add(time.Duration(v.catalog.Policy.ResultWindow) * time.Second), Battle: battle, TrustProfile: cd.ClientFullReportAttested, Replay: cd.ReplaySpec{Response: cd.ReplayFightExist, ErrorCode: cd.FightExistCode}, Package: func(_ *cd.Stream) (any, error) {
 			return map[string]any{"hero_status": r.Heroes, "enemies": enemy, "power_drink": r.Drinks, "policy": d.PolicyID}, nil
 		}})
 		if err != nil {
@@ -299,7 +313,7 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, q Fight, op oper
 		}
 		r.HasFight = true
 		r.Version++
-		return r.Projection(), nil
+		return s.projectionWithStatuses(c, sc.Tx, a, sc.Operation.DecisionAt(), *r)
 	})
 }
 func sameFormation(a, b []int64) bool {

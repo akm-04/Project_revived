@@ -1,0 +1,230 @@
+{
+ "background": [],
+ "content": [
+  "content_conquer_input_catalogs"
+ ],
+ "contracts": [
+  {
+   "count": 8,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 8,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 7,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [
+  "observing"
+ ],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/conquer_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I7C2J_CONQUER_FACTS"
+   },
+   {
+    "lock_timeout_ms": 5000,
+    "name": "conquer-school"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "conquer_school_players": [
+    "conquerstore.ReadModeTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "player_conquer_facts": [
+    "conquerstore.LockFactsTx"
+   ],
+   "player_directory_profiles": [
+    "i4store.ProjectConquerTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "conquer_school_players",
+   "gameplay_contexts",
+   "player_conquer_facts",
+   "player_directory_profiles",
+   "players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/conquer_dispatcher.go",
+    "line": 37
+   },
+   "mid": 1568,
+   "name": "GET_CONQUER_SCHOOL_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/conquer_dispatcher.go",
+    "line": 37
+   },
+   "mid": 1569,
+   "name": "START_CONQUER_SCHOOL_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/conquer_dispatcher.go",
+    "line": 37
+   },
+   "mid": 1570,
+   "name": "CONQUER_SCHOOL_FIGHT_RESULT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/conquer_dispatcher.go",
+    "line": 37
+   },
+   "mid": 1571,
+   "name": "GET_CONQUER_SCHOOL_REPORT_LIST"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/conquer_dispatcher.go",
+    "line": 37
+   },
+   "mid": 1572,
+   "name": "GET_CONQUER_SCHOOL_REPORT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/conquer_dispatcher.go",
+    "line": 37
+   },
+   "mid": 1573,
+   "name": "RESET_CONQUER_SCHOOL"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/conquer_dispatcher.go",
+    "line": 37
+   },
+   "mid": 2790,
+   "name": "BUY_CONQUER_TIMES"
+  }
+ ],
+ "name": "conquerschool",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/conquerstore",
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/guildrentalread",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore"
+ ],
+ "tables": {
+  "owned": [],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "conquer_school_players",
+   "conquer_school_reports",
+   "content_conquer_input_catalogs",
+   "gameplay_contexts",
+   "gxb_content_activation",
+   "gxb_content_hero_templates",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "player_conquer_facts",
+   "player_directory_profiles",
+   "player_function_eligibility",
+   "player_hero_roots",
+   "player_heroes",
+   "players"
+  ],
+  "written": [
+   "conquer_school_players",
+   "conquer_school_report_views",
+   "conquer_school_reports",
+   "gxb_operation_receipts",
+   "player_conquer_facts",
+   "player_directory_profiles"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [
+   "conquer.json"
+  ],
+  "unit": [
+   "start_choice_conformance_test.go"
+  ]
+ }
+}

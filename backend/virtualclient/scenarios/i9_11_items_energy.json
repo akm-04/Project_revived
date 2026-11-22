@@ -1,0 +1,53 @@
+{
+  "name": "i9_11_items_energy",
+  "level": 1,
+  "grants": [
+    {
+      "Kind": "SCALAR_CURRENCY",
+      "ResourceKey": "crystal",
+      "Amount": 5000
+    },
+    {
+      "Kind": "STACK_ITEM",
+      "ItemID": 50001991,
+      "Amount": 99
+    },
+    {
+      "Kind": "STACK_ITEM",
+      "ItemID": 41001,
+      "Amount": 10
+    },
+    {
+      "Kind": "STACK_ITEM",
+      "ItemID": 50001059,
+      "Amount": 1
+    }
+  ],
+  "steps": [
+    "wait:2",
+    "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) _G.vcEnergy0=tonumber(p.energy) _G.vcCrystal0=tonumber(p.crystal) _G.vcEnergyReply=nil xyd.Backend.get():request(xyd.mid.ADD_ENERGY, {}, function(e,b) _G.vcEnergyReply={e=e,b=b} end, {}, true, true)",
+    "wait:3",
+    "lua:if not vcEnergyReply then error('vc-energy-no-reply') end if vcEnergyReply.e~=xyd.error.OK then error('vc-energy-buy-'..tostring(vcEnergyReply.e)) end if not vcEnergyReply.b or tonumber(vcEnergyReply.b.buy_energy_times)~=1 then error('vc-energy-times-'..tostring(vcEnergyReply.b and vcEnergyReply.b.buy_energy_times)) end local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) if tonumber(p.energy)<vcEnergy0+120 then error('vc-energy-grant-'..tostring(p.energy)) end if tonumber(p.crystal)~=vcCrystal0-50 then error('vc-energy-cost-'..tostring(p.crystal)) end",
+    "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) _G.vcMana0=tonumber(p.mana) _G.vcSellReply=nil xyd.Backend.get():request(xyd.mid.SELL_ITEM, {item_id=41001,item_num=1}, function(e,b) _G.vcSellReply={e=e,b=b} end, {}, true, true)",
+    "wait:3",
+    "lua:if not vcSellReply or vcSellReply.e~=xyd.error.OK then error('vc-sell-'..tostring(vcSellReply and vcSellReply.e)) end local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) if tonumber(p.mana)~=vcMana0+4000 then error('vc-sell-mana-'..tostring(p.mana)) end",
+    "lua:_G.vcBoxReply=nil xyd.Backend.get():request(xyd.mid.EXCHAGE_CODE_HERO, {item_id=50001059,gift_id=90001219,num=1}, function(e,b) _G.vcBoxReply={e=e,b=b} end, {}, true, true)",
+    "wait:3",
+    "lua:if not vcBoxReply or vcBoxReply.e~=xyd.error.OK then error('vc-box-'..tostring(vcBoxReply and vcBoxReply.e)) end local b=vcBoxReply.b if not b or type(b.awards)~='table' or #b.awards~=12 then error('vc-box-awards-'..tostring(b and b.awards and #b.awards)) end if type(b.spirit_awards)~='table' then error('vc-box-spirit') end",
+    "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) local need=500-tonumber(p.energy) local n=math.ceil(need/100) if n<1 then n=1 end if n>99 then n=99 end _G.vcUseEnergy0=tonumber(p.energy) _G.vcUseItemReply=nil xyd.Backend.get():request(xyd.mid.USE_ENERGY_ITEM, {item_id=50001991,item_num=n}, function(e,b) _G.vcUseItemReply={e=e,b=b} end, {}, true, true)",
+    "wait:3",
+    "lua:if not vcUseItemReply or vcUseItemReply.e~=xyd.error.OK then error('vc-use-energy-'..tostring(vcUseItemReply and vcUseItemReply.e)) end local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) if tonumber(p.energy)<vcUseEnergy0+100 then error('vc-use-energy-grant-'..tostring(p.energy)) end",
+    "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) _G.vcCapEnergy=tonumber(p.energy) if vcCapEnergy<500 then error('vc-cap-not-reached-'..tostring(vcCapEnergy)) end _G.vcCapReply=nil xyd.Backend.get():request(xyd.mid.ADD_ENERGY, {}, function(e,b) _G.vcCapReply={e=e,b=b} end, {}, true, true)",
+    "wait:3",
+    "lua:if not vcCapReply then error('vc-cap-no-reply') end if vcCapReply.e==xyd.error.OK then error('vc-cap-accepted') end local b=vcCapReply.b if not b or tonumber(b.error_code)~=35031 then error('vc-cap-code-'..tostring(b and b.error_code)) end if tonumber(b.energy)~=vcCapEnergy then error('vc-cap-energy-'..tostring(b and b.energy)) end local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) if tonumber(p.energy)~=vcCapEnergy then error('vc-cap-mutated-'..tostring(p.energy)) end"
+  ],
+  "settle_seconds": 5,
+  "expect_ok": [
+    97,
+    82,
+    241,
+    27,
+    1
+  ],
+  "note": "Stock client transport without window taps: MID97 AddEnergy:addEnergy, MID82 sellItem request shape, MID241 GiftbagUseWindow request shape and MID27 useEnergyItem request shape. The first buy proves the counter and crystal debit, the item use raises energy to the cap, and the last buy must answer 409 35031 with the unchanged energy projection. The box gift 90001219 is the one 50001059 declares. Daily reset and the 05:00 boundary stay native-side (C17); a VC cannot move the host clock without an operator."
+}

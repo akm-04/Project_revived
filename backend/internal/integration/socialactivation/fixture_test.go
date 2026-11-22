@@ -26,6 +26,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 )
@@ -71,6 +72,16 @@ func (f *fixture) sql(q string, args ...any) {
 	f.t.Helper()
 	if _, e := f.p.Raw().Exec(ctx, q, args...); e != nil {
 		f.t.Fatalf("fixture SQL: %v", e)
+	}
+}
+
+const foreignKeyViolation = "23503"
+
+func (f *fixture) refusedByPlayerKey(e error, constraint string) {
+	f.t.Helper()
+	var refusal interface{ SQLState() string }
+	if !errors.As(e, &refusal) || refusal.SQLState() != foreignKeyViolation || !strings.Contains(e.Error(), `"`+constraint+`"`) {
+		f.t.Fatalf("want %s refusal by %s, got %v", foreignKeyViolation, constraint, e)
 	}
 }
 func (f *fixture) number(q string, args ...any) int64 {

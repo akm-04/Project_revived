@@ -7,9 +7,11 @@ import (
 	"slices"
 	"time"
 
+	gen "gxb.local/backend/v2/internal/application/generation"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
+	lib "gxb.local/backend/v2/internal/domain/librarylocal"
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -124,7 +126,7 @@ func (s Service) ApplyAwakeningHeroLockedTx(c context.Context, t tx.Tx, h appi5.
 		}
 		raw.RawStage = stage
 		raw.Version++
-		raw.UpdatedAt = at.UTC()
+		raw.UpdatedAt = gen.EffectiveObservation(at, raw.UpdatedAt, raw.CreatedAt).UTC()
 		raw.ProducerReference = fmt.Sprintf("%s/%d/%d/%s", objective.AwakeningContract, a.Mission, a.Generation, op.ID.String())
 		if e := s.Awakening.SaveRawAwakeningTx(c, t, raw, h.Raw.Version); e != nil {
 			return h, e
@@ -134,12 +136,14 @@ func (s Service) ApplyAwakeningHeroLockedTx(c context.Context, t tx.Tx, h appi5.
 		return h, objective.ErrAwakeningRefused
 	}
 	next.StateVersion++
-	next.UpdatedAt = at.UTC()
-	if next.UpdatedAt.Before(next.CreatedAt) {
-		return h, errors.New("awakening decision precedes Hero birth")
-	}
+	next.UpdatedAt = gen.EffectiveObservation(at, next.UpdatedAt, next.CreatedAt).UTC()
 	if e := s.Awakening.SaveHeroAwakeningTx(c, t, next, h.Hero.StateVersion); e != nil {
 		return h, e
+	}
+	if next.TableID != h.Hero.TableID {
+		if e := s.recordHeroJournalTx(c, t, next.PlayerID, next.PartnerID, lib.LogAwakened, at); e != nil {
+			return h, e
+		}
 	}
 	h.Hero = next
 	return h, nil
@@ -158,9 +162,6 @@ func (s Service) OverlayRosterTx(c context.Context, q tx.Queryer, actor identity
 	for _, h := range heroes {
 		if h.Raw == nil {
 			continue
-		}
-		if at.Before(h.Raw.UpdatedAt) || at.Before(h.Hero.UpdatedAt) {
-			return character.ErrRawAwakeningUnavailable
 		}
 		row, ok := rows[fmt.Sprint(h.Hero.PartnerID)].(map[string]any)
 		if !ok {

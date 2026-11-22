@@ -2,24 +2,26 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
 	app "gxb.local/backend/v2/internal/application/bookskill"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
 	book "gxb.local/backend/v2/internal/domain/bookskill"
 	"gxb.local/backend/v2/internal/domain/economy"
+	ec "gxb.local/backend/v2/internal/domain/eventcentre"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/projection/lobby"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
-	"net/http"
 )
 
 type BookPort interface {
 	Command(context.Context, identity.ActorContext, app.Command, operation.Context) (app.Result, error)
 	Read(context.Context, identity.ActorContext, uint16, operation.Context) (map[string]any, error)
+	OwnsComposeItem(context.Context, int64, operation.Context) (bool, error)
 }
 type BookDispatcher struct {
 	Authority rt.GameplayAuthorityPort
 	Service   BookPort
+	Tracker   *lobby.BootTracker
 }
 
 func (d BookDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest) httpedge.Response {
@@ -28,7 +30,7 @@ func (d BookDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		return *fail
 	}
 	if d.Service == nil {
-		return failBook(app.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	p := req.Envelope.Params
 	mid := req.Envelope.MID
@@ -44,9 +46,6 @@ func (d BookDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		c.Family = map[uint16]string{1060: app.Learn, 1061: app.GiveUp, 1078: app.SpeedSkill}[mid]
 	case 1079:
 		c.Family = app.ConfirmSkill
-	case 83:
-		allowed = []string{"item_id", "item_num"}
-		c.Family = app.Compose
 	default:
 		return badHero("unsupported_book_mid")
 	}
@@ -58,6 +57,9 @@ func (d BookDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		if e != nil {
 			return failBook(e)
 		}
+		if mid == 1056 && d.Tracker != nil {
+			_ = d.Tracker.Record(d.Tracker.Correlate(lobby.BootEvent{MID: 1056, Kind: lobby.BootLegitTimer, Phase: lobby.PhaseClientRequestObserved, At: req.Envelope.ReceivedAt}, a.SessionID.UUID().String(), a.ContextID.UUID().String(), ""))
+		}
 		return okI5(body)
 	}
 	var e error
@@ -65,15 +67,6 @@ func (d BookDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		c.Type, e = requiredInt64(p, "type")
 	} else if c.Family == app.Learn || c.Family == app.GiveUp || c.Family == app.SpeedSkill {
 		c.SkillID, e = requiredInt64(p, "skill_id")
-	} else if c.Family == app.Compose {
-		c.ItemID, e = requiredInt64(p, "item_id")
-		if e == nil {
-			if _, ok := p["item_num"]; ok {
-				c.Amount, e = requiredInt64(p, "item_num")
-			} else {
-				c.Amount = 1
-			}
-		}
 	}
 	if e != nil || c.Validate() != nil {
 		return badHero("invalid_book_request")
@@ -84,9 +77,20 @@ func (d BookDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 	}
 	return okI5(r.Body)
 }
+
+// The EventCentre rows below carry the same class and code as
+// eventcentre_dispatcher.go:182,184 so MID 1056/1059 agree with MID 1074.
+var bookFailureRows = []failureRow{
+	{match: app.ErrRejected, class: failureRefusal, code: unprovenRefusalCode},
+	{match: app.ErrStale, class: failureRefusal, code: staleConflictCode},
+	{match: book.ErrInvalid, class: failureRefusal, code: unprovenRefusalCode},
+	{match: book.ErrUnqualified, class: failureRefusal, code: unprovenRefusalCode},
+	{match: book.ErrStaleTime, class: failureRefusal, code: staleConflictCode},
+	{match: ec.ErrUnqualified, class: failureRefusal, code: unprovenRefusalCode},
+	{match: ec.ErrStaleTime, class: failureRefusal, code: staleConflictCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+}
+
 func failBook(e error) httpedge.Response {
-	if errors.Is(e, app.ErrRejected) || errors.Is(e, book.ErrInvalid) || errors.Is(e, economy.ErrInsufficientBalance) {
-		return badHero("book_command_rejected")
-	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: e, Body: map[string]any{"error": "book_unavailable_or_unresolved"}}
+	return failureFromRows(bookFailureRows, e)
 }

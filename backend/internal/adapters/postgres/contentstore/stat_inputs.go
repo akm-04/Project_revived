@@ -11,11 +11,19 @@ import (
 	statinputs "gxb.local/backend/v2/internal/domain/statinputs"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"io"
+	"sync"
 )
 
 // StatInputCatalogTx reads only the caller-pinned immutable revision. Registration
 // and controlled deployment/backfill must complete before activation.
+var statInputCatalogs sync.Map
+
 func (s Store) StatInputCatalogTx(ctx context.Context, q tx.Queryer, revision string) (statinputs.Catalog, error) {
+	return memoCatalog(&statInputCatalogs, revision, func() (statinputs.Catalog, error) { return s.ReadStatInputCatalogTx(ctx, q, revision) })
+}
+
+// ReadStatInputCatalogTx reads and verifies the stored catalog, bypassing the per-revision cache.
+func (s Store) ReadStatInputCatalogTx(ctx context.Context, q tx.Queryer, revision string) (statinputs.Catalog, error) {
 	var out statinputs.Catalog
 	if q == nil || len(revision) != 64 {
 		return out, statinputs.ErrUnqualified

@@ -12,7 +12,8 @@ type BoardPeriod struct {
 
 func (p BoardPeriod) Validate(s BoardSnapshot) error {
 	w, e := BoardWeek(s.ObservedAt)
-	if e != nil || s.Validate() != nil || p.Server != int64(s.Server) || p.Policy != s.Policy || !p.Week.Equal(w) || p.Generation != s.Generation || p.SettledAt != nil && p.SettledAt.Before(s.ObservedAt) {
+	legacy, legacyErr := LegacyBoardWeek(s.ObservedAt)
+	if e != nil || legacyErr != nil || s.Validate() != nil || p.Server != int64(s.Server) || p.Policy != s.Policy || !(p.Week.Equal(w) || p.Week.Equal(legacy)) || p.Generation != s.Generation || p.SettledAt != nil && p.SettledAt.Before(s.ObservedAt) {
 		return ErrSnapshot
 	}
 	return nil

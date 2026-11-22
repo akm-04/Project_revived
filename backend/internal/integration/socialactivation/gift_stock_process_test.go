@@ -6,6 +6,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	"gxb.local/backend/v2/internal/protocol/amf3"
 	"gxb.local/backend/v2/internal/protocol/mids"
+	"net/http"
 	"os"
 	"os/exec"
 	"testing"
@@ -14,8 +15,8 @@ import (
 
 func Test7B_ProductionGiftHTTPNotifyListenerAndRecovery(t *testing.T) {
 	f, _, a, b := giftFixture(t)
-	_, sender := f.live(a.PlayerID)
-	_, recipient := f.live(b.PlayerID)
+	senderActor, sender := f.live(a.PlayerID)
+	recipientActor, recipient := f.live(b.PlayerID)
 	apiBin, rtBin := os.Getenv("GXB_I7A4D_API_BINARY"), os.Getenv("GXB_I7A4D_REALTIME_BINARY")
 	if apiBin == "" || rtBin == "" {
 		t.Fatal("exact candidate server binaries required")
@@ -23,10 +24,12 @@ func Test7B_ProductionGiftHTTPNotifyListenerAndRecovery(t *testing.T) {
 	api, world := freeAddr(t), freeAddr(t)
 	apiProc := startProcess(t, apiBin, api, world)
 	rtProc := startProcess(t, rtBin, api, world)
+	loginProcess(t, api, f, senderActor)
+	loginProcess(t, api, f, recipientActor)
 	senderWorld := worldLogin(t, world, sender, 1)
 	recipientWorld := worldLogin(t, world, recipient, 2)
 	deadline := time.Now().Add(3 * time.Second)
-	for f.number(`SELECT count(*) FROM pg_stat_activity WHERE application_name='gxb-v2-i4-realtime' AND query LIKE 'LISTEN %'`) == 0 {
+	for f.number(`SELECT count(*) FROM pg_stat_activity WHERE application_name='gxb-v2-i4-realtime' AND datname=current_database() AND query LIKE 'LISTEN %'`) == 0 {
 		if time.Now().After(deadline) {
 			t.Fatal("dedicated listener missing")
 		}
@@ -64,10 +67,10 @@ func Test7B_ProductionGiftHTTPNotifyListenerAndRecovery(t *testing.T) {
 		t.Fatal(status, body)
 	}
 	// Actual listener connection replacement still reuses the sole reference bus.
-	old := f.number(`SELECT pid FROM pg_stat_activity WHERE application_name='gxb-v2-i4-realtime' AND query LIKE 'LISTEN %' LIMIT 1`)
+	old := f.number(`SELECT pid FROM pg_stat_activity WHERE application_name='gxb-v2-i4-realtime' AND datname=current_database() AND query LIKE 'LISTEN %' LIMIT 1`)
 	f.sql(`SELECT pg_terminate_backend($1)`, old)
 	deadline = time.Now().Add(3 * time.Second)
-	for f.number(`SELECT count(*) FROM pg_stat_activity WHERE application_name='gxb-v2-i4-realtime' AND query LIKE 'LISTEN %' AND pid<>$1`, old) == 0 {
+	for f.number(`SELECT count(*) FROM pg_stat_activity WHERE application_name='gxb-v2-i4-realtime' AND datname=current_database() AND query LIKE 'LISTEN %' AND pid<>$1`, old) == 0 {
 		if time.Now().After(deadline) {
 			t.Fatal("listener did not reconnect")
 		}
@@ -134,7 +137,7 @@ func Test7B_ExplicitDeploymentActivationPreservesStartupContract(t *testing.T) {
 		t.Fatal("API startup switched oldpointer")
 	}
 	status, _ := postProcess(t, api, token, 1, 183, map[string]any{"player_id": 200001})
-	if status != 501 {
+	if status != http.StatusConflict {
 		t.Fatal("partial gift group exposed", status)
 	}
 	status, body := postProcess(t, api, token, 1, 184, map[string]any{"notice_ids": []any{}})

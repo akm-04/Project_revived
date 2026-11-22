@@ -19,13 +19,13 @@
     "one_active_per_type": true,
     "fact_kinds": {
       "CAMPAIGN_SWEEP": 10001,
+      "SHOP_PURCHASE": 10003,
       "PVP_FIGHT": 10004,
       "SUMMON": 10005,
       "FANTASY": 10006
     },
     "never_before_producer": {
-      "10002": "I9-10 ADD_FAVOR 840",
-      "10003": "I9-11 shop debit"
+      "10002": "I9-10 ADD_FAVOR 840"
     },
     "obligations": [
       "I9-8-ADVENTURE-FAVOR",

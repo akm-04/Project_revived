@@ -15,6 +15,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"os"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -30,7 +31,7 @@ func TestRealPostgresSourceRoundtripAndRestoreHole(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	defer p.Close()
+	t.Cleanup(p.Close)
 	at := time.Date(2026, 10, 9, 9, 0, 0, 123456789, time.UTC)
 	op, e := (operation.Factory{Clock: clock.Fixed{T: at}}).New(policy.Set{})
 	if e != nil {
@@ -73,6 +74,15 @@ func TestRealPostgresSourceRoundtripAndRestoreHole(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer x.Rollback(context.Background())
+	for _, player := range []int64{100001, 100002} {
+		accountUID := "guild-broadcast-source-native-" + strconv.FormatInt(player, 10)
+		if _, e = x.Exec(c, `INSERT INTO accounts(account_id,account_uid,status,created_at) VALUES(gen_random_uuid(),$1,'ACTIVE',$2) ON CONFLICT (account_uid) DO NOTHING`, accountUID, decision); e != nil {
+			t.Fatal(e)
+		}
+		if _, e = x.Exec(c, `INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version) SELECT $1,account_id,1,$2,'guild-broadcast-source-native' FROM accounts WHERE account_uid=$3 ON CONFLICT (player_id) DO NOTHING`, player, decision, accountUID); e != nil {
+			t.Fatal(e)
+		}
+	}
 	if e = (Store{}).InsertSourceTx(c, x, s, rr.ID); e != nil {
 		t.Fatal(e)
 	}
@@ -88,6 +98,22 @@ func TestRealPostgresSourceRoundtripAndRestoreHole(t *testing.T) {
 	if e = x.Commit(c); e != nil {
 		t.Fatal(e)
 	}
+	t.Cleanup(func() {
+		for _, statement := range []struct {
+			query     string
+			arguments []any
+		}{
+			{`DELETE FROM guild_broadcast_recipients WHERE source_id=$1::uuid`, []any{op.ID.String()}},
+			{`DELETE FROM guild_broadcast_sources WHERE source_id=$1::uuid`, []any{op.ID.String()}},
+			{`DELETE FROM gxb_operation_receipts WHERE receipt_id=$1::uuid`, []any{rr.ID.String()}},
+			{`DELETE FROM players WHERE player_id IN (100001,100002)`, nil},
+			{`DELETE FROM accounts WHERE account_uid LIKE 'guild-broadcast-source-native-%'`, nil},
+		} {
+			if _, err := p.Raw().Exec(context.Background(), statement.query, statement.arguments...); err != nil {
+				t.Errorf("cleanup %q: %v", statement.query, err)
+			}
+		}
+	})
 	got, ok, e := (Store{}).ReadSourceTx(c, p, op.ID)
 	if e != nil || !ok {
 		t.Fatal(ok, e)

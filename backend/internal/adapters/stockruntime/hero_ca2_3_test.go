@@ -28,6 +28,9 @@ func (s *ca23HeroService) RosterView(_ context.Context, _ identity.ActorContext,
 func (s *ca23HeroService) SaveSortType(context.Context, identity.ActorContext, int64, operation.Context) error {
 	return nil
 }
+func (s *ca23HeroService) SaveBackpackSortType(context.Context, identity.ActorContext, int64, operation.Context) error {
+	return nil
+}
 func (s *ca23HeroService) UseExpItem(context.Context, identity.ActorContext, int64, int64, int64, operation.Context) (apphero.ExpResult, error) {
 	return apphero.ExpResult{}, nil
 }
@@ -55,7 +58,7 @@ func (s *ca23HeroService) OneClickJinjie(context.Context, identity.ActorContext,
 func (s *ca23HeroService) Evolve(context.Context, identity.ActorContext, int64, operation.Context) error {
 	return nil
 }
-func (s *ca23HeroService) HeroPieces(context.Context, identity.ActorContext) (map[int64]int64, error) {
+func (s *ca23HeroService) HeroPieces(context.Context, identity.ActorContext, operation.Context) (map[int64]int64, error) {
 	return map[int64]int64{}, nil
 }
 func ca23Hero(kind character.HeroKind, table, partner, star int64) character.Hero {
@@ -80,7 +83,11 @@ func heroReq(t *testing.T, mid uint16, params map[string]any) httpedge.DispatchR
 func TestCA23MID59StrictRequestAndDirectHeroResponse(t *testing.T) {
 	svc := &ca23HeroService{}
 	d := HeroDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: svc, Economy: &ca42HeroEconomy{amount: 777}}
-	r := d.Dispatch(context.Background(), heroReq(t, 59, map[string]any{"table_id": int64(1001), "stone": int64(4001), "stone_num": int64(10)}))
+	direct := d.Dispatch(context.Background(), heroReq(t, 59, map[string]any{"table_id": int64(1001), "stone": int64(4001), "stone_num": int64(10)}))
+	if _, written := direct.Body["economy_"]; written {
+		t.Fatalf("dispatcher assembled economy_: %#v", direct.Body)
+	}
+	r := Decorated{Next: d}.Dispatch(context.Background(), heroReq(t, 59, map[string]any{"table_id": int64(1001), "stone": int64(4001), "stone_num": int64(10)}))
 	if r.HTTPStatus != 200 || r.Body["table_id"] != int64(1001) || r.Body["partner_id"] != int64(7) {
 		t.Fatalf("response=%+v", r)
 	}
@@ -139,7 +146,7 @@ func TestNormal59MissingEconomyRejectsBeforeMutation(t *testing.T) {
 	svc := &ca23HeroService{}
 	d := HeroDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: svc}
 	r := d.Dispatch(context.Background(), heroReq(t, 59, map[string]any{"table_id": int64(1001), "stone": int64(4001), "stone_num": int64(10)}))
-	if r.HTTPStatus != 503 || len(svc.summonArgs) != 0 {
+	if r.HTTPStatus != 500 || len(svc.summonArgs) != 0 {
 		t.Fatal("missing projection allowed partial mutation", r, svc.summonArgs)
 	}
 }

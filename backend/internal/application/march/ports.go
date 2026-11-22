@@ -30,6 +30,7 @@ type Content interface {
 	ActiveRevision(context.Context, tx.Queryer) (string, error)
 	MarchCatalogTx(context.Context, tx.Queryer, string) (d.Catalog, error)
 	SummonCatalogTx(context.Context, tx.Queryer, string) (summon.Catalog, error)
+	HeroColorLevelsTx(context.Context, tx.Queryer, string) (map[int64]d.HeroColorLevels, error)
 }
 type Fence interface {
 	FenceActorTx(context.Context, tx.Tx, identity.ActorContext, time.Time) error
@@ -53,7 +54,7 @@ type Roster interface {
 
 // Opponents is a nonmutating projection from the canonical Top Floor owner.
 type Opponents interface {
-	MarchCandidatesTx(context.Context, tx.Queryer, identity.ActorContext, time.Time, int) ([]d.Enemy, error)
+	MarchCandidatesTx(context.Context, tx.Queryer, identity.ActorContext, time.Time, int, bool) ([]d.Enemy, error)
 }
 type Combat interface {
 	StartTx(context.Context, tx.Tx, ca.CoherentReadScope, combat.StartRequest) (combat.Started, error)
@@ -67,23 +68,37 @@ type Grants interface {
 	SettleGrantTx(context.Context, tx.Tx, identity.ActorContext, grant.Plan, operation.Context, i5.GrantTxOptions) (i5.GrantResult, error)
 }
 type Mode struct {
-	Timed       gen.TimedRunner
-	Fresh       tx.Queryer
-	Store       Store
-	Content     Content
-	Fence       Fence
-	Functions   Functions
-	Directory   Directory
-	HeroLocks   HeroLocks
-	Heroes      Heroes
-	Roster      Roster
-	HeroWire    func(character.Hero) (map[string]any, error)
-	Opponents   Opponents
-	Stats       combat.Stats
-	Combat      Combat
-	Facts       Facts
-	Grants      Grants
-	Costs       i5.TxMaterialCostDebiter
-	Receipts    receipt.Store
-	ReceiptRead receipt.Reader
+	Timed        gen.TimedRunner
+	Fresh        tx.Queryer
+	Store        Store
+	Content      Content
+	Fence        Fence
+	Functions    Functions
+	Directory    Directory
+	HeroLocks    HeroLocks
+	Heroes       Heroes
+	Roster       Roster
+	HeroWire     func(character.Hero) (map[string]any, error)
+	Opponents    Opponents
+	Stats        combat.Stats
+	Combat       Combat
+	Facts        Facts
+	Grants       Grants
+	Costs        i5.TxMaterialCostDebiter
+	Receipts     receipt.Store
+	ReceiptRead  receipt.Reader
+	BattleCounts BattleCountObserver
+
+	PartnerMissions PartnerMissionObserver
+}
+
+// BattleCountObserver records the Girls Log count of one first settled battle.
+type BattleCountObserver interface {
+	ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error
+}
+
+// PartnerMissionObserver advances one Library partner mission from a settled
+// battle (I9_12_CARRY_V1 R7).
+type PartnerMissionObserver interface {
+	ObservePartnerMissionTx(context.Context, tx.Tx, identity.PlayerID, int64, int64, time.Time) error
 }

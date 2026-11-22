@@ -5,32 +5,34 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io"
 	"time"
 
+	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	library "gxb.local/backend/v2/internal/domain/librarylocal"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
 type Store struct{ Queryer tx.Queryer }
 
-const rootColumns = `player_id,state_version,special_claims::text,seed_policy_id,created_at,updated_at,married_high_water`
-const heroColumns = `player_id,partner_id,state_version,favor_degree,is_married,feed_attrs::text,collect_quality_stage,collect_star_stage,pending_candidate::text,seed_policy_id,created_at,updated_at`
+const rootColumns = `player_id,state_version,special_claims::text,payload_version,seed_policy_id,created_at,updated_at,married_high_water,board_partner,board_card,board_model_id,bg_main,bg_room`
+const heroColumns = `player_id,partner_id,state_version,favor_degree,is_married,feed_attrs::text,collect_quality_stage,collect_star_stage,pending_candidate::text,payload_version,seed_policy_id,created_at,updated_at`
 
 func scanRoot(row tx.Row) (library.PlayerFacts, error) {
 	var f library.PlayerFacts
 	var pid int64
 	var raw string
-	if e := row.Scan(&pid, &f.StateVersion, &raw, &f.SeedPolicy, &f.CreatedAt, &f.UpdatedAt, &f.MarriedHighWater); e != nil {
+	var version int16
+	if e := row.Scan(&pid, &f.StateVersion, &raw, &version, &f.SeedPolicy, &f.CreatedAt, &f.UpdatedAt, &f.MarriedHighWater, &f.BoardPartner, &f.BoardCard, &f.BoardModelID, &f.BgMain, &f.BgRoom); e != nil {
 		return f, e
 	}
 	f.PlayerID = identity.PlayerID(pid)
 	f.CreatedAt = f.CreatedAt.UTC()
 	f.UpdatedAt = f.UpdatedAt.UTC()
 	var bits []bool
-	if e := json.Unmarshal([]byte(raw), &bits); e != nil {
+	if e := payload.Decode("player_library_roots", version, []byte(raw), &bits); e != nil {
 		return f, e
 	}
 	if len(bits) != library.SpecialClaimCount {
@@ -44,14 +46,15 @@ func scanHero(row tx.Row) (library.HeroFacts, error) {
 	var pid int64
 	var raw string
 	var pending *string
-	if e := row.Scan(&pid, &f.Ref.PartnerID, &f.StateVersion, &f.Favor, &f.Married, &raw, &f.QualityStage, &f.StarStage, &pending, &f.SeedPolicy, &f.CreatedAt, &f.UpdatedAt); e != nil {
+	var version int16
+	if e := row.Scan(&pid, &f.Ref.PartnerID, &f.StateVersion, &f.Favor, &f.Married, &raw, &f.QualityStage, &f.StarStage, &pending, &version, &f.SeedPolicy, &f.CreatedAt, &f.UpdatedAt); e != nil {
 		return f, e
 	}
 	f.Ref.PlayerID = identity.PlayerID(pid)
 	f.CreatedAt = f.CreatedAt.UTC()
 	f.UpdatedAt = f.UpdatedAt.UTC()
 	var attrs []int64
-	if e := json.Unmarshal([]byte(raw), &attrs); e != nil {
+	if e := payload.Decode("player_library_heroes", version, []byte(raw), &attrs); e != nil {
 		return f, e
 	}
 	if len(attrs) != library.AxisCount {
@@ -60,14 +63,8 @@ func scanHero(row tx.Row) (library.HeroFacts, error) {
 	copy(f.Applied[:], attrs)
 	if pending != nil {
 		var c library.Candidate
-		d := json.NewDecoder(bytes.NewBufferString(*pending))
-		d.DisallowUnknownFields()
-		if e := d.Decode(&c); e != nil {
+		if e := payload.Decode("player_library_heroes", version, []byte(*pending), &c); e != nil {
 			return f, e
-		}
-		var extra any
-		if d.Decode(&extra) != io.EOF {
-			return f, library.ErrInvalidFacts
 		}
 		f.Pending = &c
 	}
@@ -91,6 +88,78 @@ func (Store) ReadHeroTx(ctx context.Context, q tx.Queryer, ref character.HeroRef
 	}
 	return scanHero(q.QueryRow(ctx, `SELECT `+heroColumns+` FROM player_library_heroes WHERE player_id=$1 AND partner_id=$2`, int64(ref.PlayerID), ref.PartnerID))
 }
+
+// FavorOccurrenceTx is Adventure C4's typed Library read: the partner must be
+// an owned Library hero below the favor limit before a 10002 occurrence exists.
+func (Store) FavorOccurrenceTx(ctx context.Context, q tx.Queryer, pid identity.PlayerID, partnerID int64) (bool, error) {
+	if q == nil || !pid.Valid() || partnerID <= 0 {
+		return false, library.ErrInvalidFacts
+	}
+	f, e := (Store{}).ReadHeroTx(ctx, q, character.HeroRef{PlayerID: pid, PartnerID: partnerID})
+	if errors.Is(e, kernelstore.ErrNoRows) {
+		return false, nil
+	}
+	if e != nil {
+		return false, e
+	}
+	return f.Favor < library.FavorLimit, nil
+}
+
+// ListHeroesTx returns every Library Hero facet of one player in one owner read.
+func (Store) ListHeroesTx(ctx context.Context, q tx.Queryer, pid identity.PlayerID) ([]library.HeroFacts, error) {
+	if q == nil || !pid.Valid() {
+		return nil, library.ErrInvalidFacts
+	}
+	var raw string
+	if e := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY partner_id),'[]'::jsonb)::text FROM player_library_heroes t WHERE player_id=$1`, int64(pid)).Scan(&raw); e != nil {
+		return nil, e
+	}
+	var rows []struct {
+		PlayerID            int64           `json:"player_id"`
+		PartnerID           int64           `json:"partner_id"`
+		StateVersion        int64           `json:"state_version"`
+		FavorDegree         int64           `json:"favor_degree"`
+		IsMarried           bool            `json:"is_married"`
+		FeedAttrs           json.RawMessage `json:"feed_attrs"`
+		CollectQualityStage int64           `json:"collect_quality_stage"`
+		CollectStarStage    int64           `json:"collect_star_stage"`
+		PendingCandidate    json.RawMessage `json:"pending_candidate"`
+		PayloadVersion      int16           `json:"payload_version"`
+		SeedPolicyID        string          `json:"seed_policy_id"`
+		CreatedAt           time.Time       `json:"created_at"`
+		UpdatedAt           time.Time       `json:"updated_at"`
+	}
+	if e := json.Unmarshal([]byte(raw), &rows); e != nil {
+		return nil, e
+	}
+	out := make([]library.HeroFacts, 0, len(rows))
+	for _, row := range rows {
+		var f library.HeroFacts
+		f.Ref.PlayerID, f.Ref.PartnerID, f.StateVersion = identity.PlayerID(row.PlayerID), row.PartnerID, row.StateVersion
+		f.Favor, f.Married, f.QualityStage, f.StarStage, f.SeedPolicy = row.FavorDegree, row.IsMarried, row.CollectQualityStage, row.CollectStarStage, row.SeedPolicyID
+		f.CreatedAt, f.UpdatedAt = row.CreatedAt.UTC(), row.UpdatedAt.UTC()
+		var attrs []int64
+		if e := payload.Decode("player_library_heroes", row.PayloadVersion, row.FeedAttrs, &attrs); e != nil {
+			return nil, e
+		}
+		if len(attrs) != library.AxisCount {
+			return nil, library.ErrInvalidFacts
+		}
+		copy(f.Applied[:], attrs)
+		if len(row.PendingCandidate) > 0 && !bytes.Equal(row.PendingCandidate, []byte("null")) {
+			var c library.Candidate
+			if e := payload.Decode("player_library_heroes", row.PayloadVersion, row.PendingCandidate, &c); e != nil {
+				return nil, e
+			}
+			f.Pending = &c
+		}
+		if e := f.Validate(); e != nil {
+			return nil, e
+		}
+		out = append(out, f)
+	}
+	return out, nil
+}
 func (Store) LockHeroTx(ctx context.Context, t tx.Tx, ref character.HeroRef) (library.HeroFacts, error) {
 	if t == nil || ref.Validate() != nil {
 		return library.HeroFacts{}, library.ErrInvalidFacts
@@ -107,19 +176,33 @@ func (Store) EnsurePlayerRootTx(ctx context.Context, t tx.Tx, pid identity.Playe
 	if e != nil {
 		return e
 	}
-	bits, e := json.Marshal(f.SpecialClaims)
+	bits, version, e := payload.Encode(f.SpecialClaims)
 	if e != nil {
 		return e
 	}
-	_, e = t.Exec(ctx, `INSERT INTO player_library_roots(player_id,state_version,special_claims,seed_policy_id,created_at,updated_at)VALUES($1,1,$2::jsonb,$3,$4,$4)ON CONFLICT(player_id)DO NOTHING`, int64(pid), string(bits), f.SeedPolicy, now.UTC())
+	_, e = t.Exec(ctx, `INSERT INTO player_library_roots(player_id,state_version,special_claims,payload_version,seed_policy_id,created_at,updated_at)VALUES($1,1,$2::jsonb,$3,$4,$5,$5)ON CONFLICT(player_id)DO NOTHING`, int64(pid), string(bits), version, f.SeedPolicy, now.UTC())
 	return e
 }
 
-const insertHero = `INSERT INTO player_library_heroes(player_id,partner_id,state_version,favor_degree,is_married,feed_attrs,collect_quality_stage,collect_star_stage,seed_policy_id,created_at,updated_at)VALUES($1,$2,1,0,false,'[0,0,0,0,0,0]'::jsonb,0,0,$3,$4,$4)`
+const insertHero = `INSERT INTO player_library_heroes(player_id,partner_id,state_version,favor_degree,is_married,feed_attrs,payload_version,collect_quality_stage,collect_star_stage,seed_policy_id,created_at,updated_at)VALUES($1,$2,1,0,false,'[0,0,0,0,0,0]'::jsonb,1,0,0,$3,$4,$4)`
 
 // InitFreshHeroTx only inserts a unique unpublished facet. It does not take an
 // existing Library root lock after I5 locks; bootstrap must already own its root.
-func (Store) InitFreshHeroTx(ctx context.Context, t tx.Tx, ref character.HeroRef, now time.Time) error {
+func (s Store) InitFreshHeroTx(ctx context.Context, t tx.Tx, ref character.HeroRef, now time.Time) error {
+	return s.initFreshHeroTx(ctx, t, ref, now, library.LogAcquired)
+}
+
+// InitFreshHeroSourceTx is InitFreshHeroTx with the stock acquisition source the
+// caller proved (a type-1 sub_id); MID 59 records 10004 instead of the Vending
+// default.
+func (s Store) InitFreshHeroSourceTx(ctx context.Context, t tx.Tx, ref character.HeroRef, now time.Time, logID int64) error {
+	if !library.IsAcquisitionLog(logID) {
+		return library.ErrInvalidFacts
+	}
+	return s.initFreshHeroTx(ctx, t, ref, now, logID)
+}
+
+func (s Store) initFreshHeroTx(ctx context.Context, t tx.Tx, ref character.HeroRef, now time.Time, logID int64) error {
 	if t == nil {
 		return library.ErrInvalidFacts
 	}
@@ -134,11 +217,15 @@ func (Store) InitFreshHeroTx(ctx context.Context, t tx.Tx, ref character.HeroRef
 	if tag.RowsAffected() != 1 {
 		return errors.New("library: fresh facet insert count")
 	}
-	return nil
+	// A new hero starts the Girls Log with its acquisition entry (type 1).
+	// PRIVATE_POLICY: every owned creation path records a Vending source unless
+	// the caller proves a more specific stock source.
+	_, e = s.InsertHeroLogTx(ctx, t, library.HeroLogFact{PlayerID: ref.PlayerID, PartnerID: ref.PartnerID, LogID: logID, OccurredAt: now.UTC()})
+	return e
 }
 
 // BackfillMissingHeroTx preserves an explicit existing facet, including previews.
-func (Store) BackfillMissingHeroTx(ctx context.Context, t tx.Tx, ref character.HeroRef, now time.Time) (bool, error) {
+func (s Store) BackfillMissingHeroTx(ctx context.Context, t tx.Tx, ref character.HeroRef, now time.Time) (bool, error) {
 	if t == nil {
 		return false, library.ErrInvalidFacts
 	}
@@ -150,7 +237,13 @@ func (Store) BackfillMissingHeroTx(ctx context.Context, t tx.Tx, ref character.H
 	if e != nil {
 		return false, e
 	}
-	return tag.RowsAffected() == 1, nil
+	if tag.RowsAffected() != 1 {
+		return false, nil
+	}
+	// A backfilled facet gets the same acquisition entry as a fresh one.
+	// PRIVATE_POLICY: every owned creation path records the Vending source.
+	_, e = s.InsertHeroLogTx(ctx, t, library.HeroLogFact{PlayerID: ref.PlayerID, PartnerID: ref.PartnerID, LogID: library.LogAcquired, OccurredAt: now.UTC()})
+	return true, e
 }
 
 // SaveHeroTx requires the preplanned Library root and record locks. The root
@@ -159,19 +252,19 @@ func (Store) SaveHeroTx(ctx context.Context, t tx.Tx, f library.HeroFacts, oldVe
 	if t == nil || f.Validate() != nil || oldVersion <= 0 || f.StateVersion != oldVersion+1 {
 		return library.ErrInvalidFacts
 	}
-	attrs, e := json.Marshal(f.Applied)
+	attrs, version, e := payload.Encode(f.Applied)
 	if e != nil {
 		return e
 	}
 	var pending any
 	if f.Pending != nil {
-		raw, e := json.Marshal(f.Pending)
+		raw, _, e := payload.Encode(f.Pending)
 		if e != nil {
 			return e
 		}
 		pending = string(raw)
 	}
-	tag, e := t.Exec(ctx, `UPDATE player_library_heroes SET state_version=$3,favor_degree=$4,is_married=$5,feed_attrs=$6::jsonb,collect_quality_stage=$7,collect_star_stage=$8,pending_candidate=$9::jsonb,updated_at=$10 WHERE player_id=$1 AND partner_id=$2 AND state_version=$11`, int64(f.Ref.PlayerID), f.Ref.PartnerID, f.StateVersion, f.Favor, f.Married, string(attrs), f.QualityStage, f.StarStage, pending, f.UpdatedAt.UTC(), oldVersion)
+	tag, e := t.Exec(ctx, `UPDATE player_library_heroes SET state_version=$3,favor_degree=$4,is_married=$5,feed_attrs=$6::jsonb,collect_quality_stage=$7,collect_star_stage=$8,pending_candidate=$9::jsonb,payload_version=$10,updated_at=$11 WHERE player_id=$1 AND partner_id=$2 AND state_version=$12`, int64(f.Ref.PlayerID), f.Ref.PartnerID, f.StateVersion, f.Favor, f.Married, string(attrs), f.QualityStage, f.StarStage, pending, version, f.UpdatedAt.UTC(), oldVersion)
 	if e != nil {
 		return e
 	}
@@ -191,11 +284,11 @@ func (Store) SavePlayerTx(ctx context.Context, t tx.Tx, f library.PlayerFacts, o
 	if t == nil || f.Validate() != nil || oldVersion <= 0 || f.StateVersion != oldVersion+1 {
 		return library.ErrInvalidFacts
 	}
-	bits, e := json.Marshal(f.SpecialClaims)
+	bits, version, e := payload.Encode(f.SpecialClaims)
 	if e != nil {
 		return e
 	}
-	tag, e := t.Exec(ctx, `UPDATE player_library_roots SET state_version=$2,special_claims=$3::jsonb,updated_at=$4 WHERE player_id=$1 AND state_version=$5`, int64(f.PlayerID), f.StateVersion, string(bits), f.UpdatedAt.UTC(), oldVersion)
+	tag, e := t.Exec(ctx, `UPDATE player_library_roots SET state_version=$2,special_claims=$3::jsonb,payload_version=$4,board_partner=$5,board_card=$6,board_model_id=$7,bg_main=$8,bg_room=$9,updated_at=$10 WHERE player_id=$1 AND state_version=$11`, int64(f.PlayerID), f.StateVersion, string(bits), version, f.BoardPartner, f.BoardCard, f.BoardModelID, f.BgMain, f.BgRoom, f.UpdatedAt.UTC(), oldVersion)
 	if e != nil {
 		return e
 	}

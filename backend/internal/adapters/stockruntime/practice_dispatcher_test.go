@@ -293,8 +293,9 @@ func TestPracticeDispatcherUnauthenticatedMID124DoesNotEmitLegitTimerEvidence(t 
 	now := time.Unix(702, 0).UTC()
 	tracker := capturedHTTPTracker(t)
 	svc := &fakePracticeGameplay{}
-	d := PracticeDispatcher{Service: svc, Tracker: tracker}
+	d := PracticeDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: svc, Tracker: tracker}
 	r := env(124, nil, now)
+	r.Envelope.Claims.Token = ""
 	got := d.Dispatch(context.Background(), r)
 	if got.HTTPStatus != 401 {
 		t.Fatalf("status=%d body=%v", got.HTTPStatus, got.Body)

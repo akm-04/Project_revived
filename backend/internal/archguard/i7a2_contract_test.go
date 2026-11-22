@@ -1,12 +1,15 @@
 package archguard
 
 import (
+	"fmt"
 	"go/ast"
+	"go/format"
 	"go/parser"
 	"go/token"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"testing"
@@ -135,14 +138,50 @@ var familyNoticeRoutes = []string{
 	"realtimewakeup.Registration{Route: appadventure.RoomNoticeRoute, Handler: adventureRooms}",
 	"realtimewakeup.Registration{Route: roominvite.NoticeListRoute, Handler: roomInviteNotices}",
 	"realtimewakeup.Registration{Route: stockruntime.GuildCampaignNoticeRoute, Handler: guildFightNotices}",
+	"realtimewakeup.Registration{Route: guildcore.ApplyNoticeRoute, Handler: guildApplyNotices}",
+	"realtimewakeup.Registration{Route: appbroadcast.Route, Handler: broadcastNotices}",
+	"realtimewakeup.Registration{Route: applibrary.PartnerLogNoticeRoute, Handler: libraryPartnerLogNotices}",
+	"realtimewakeup.Registration{Route: applibrary.MissionNoticeRoute, Handler: libraryMissionNotices}",
 }
 
-var familyNoticeSchemas = map[string]bool{
-	"internal/adapters/stockruntime/illusion_room_notice.go":  true,
-	"internal/adapters/stockruntime/occult_room_notice.go":    true,
-	"internal/adapters/stockruntime/adventure_notice.go":      true,
-	"internal/adapters/stockruntime/adventure_room_notice.go": true,
-	"internal/adapters/stockruntime/guild_fight_notice.go":    true,
+// allowedRegistrations is the identity allow-list for I7A-2 notice and direct
+// producers. Its population is every NoticeRegistration/DirectRegistration
+// literal in the product tree, collected by collectRegistrationIdentities, so a
+// second registration in an allowed file is unlisted and fails.
+type registrationActivation int
+
+const (
+	dormantRegistration registrationActivation = iota
+	generalDMRegistration
+	friendDMRegistration
+	socialRegistration
+)
+
+type allowedRegistration struct {
+	activation registrationActivation
+	count      int
+}
+
+var allowedRegistrations = map[string]allowedRegistration{
+	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:AchievementNoticeType,Validate:ValidateAchievementNotice}":             {dormantRegistration, 1},
+	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:app.NoticeFinish,Validate:ValidateAdventureFinishNotice}":              {dormantRegistration, 1},
+	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:app.NoticeOccur,Validate:ValidateAdventureOccurNotice}":                {dormantRegistration, 1},
+	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:AdventureRoomNoticeType,Validate:ValidateAdventureRoomNotice}":         {dormantRegistration, 1},
+	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:14,Validate:ValidateFriendFightNotice}":                                {dormantRegistration, 1},
+	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:15,Validate:ValidateFriendFightNotice}":                                {dormantRegistration, 1},
+	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:GuildApplyNoticeType,Validate:ValidateGuildApplyNotice}":               {dormantRegistration, 1},
+	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:OccultRoomNoticeType,Validate:ValidateOccultRoomNotice}":               {dormantRegistration, 1},
+	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:LibraryPartnerLogNoticeType,Validate:ValidateLibraryPartnerLogNotice}": {dormantRegistration, 1},
+	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:LibraryMissionNoticeType,Validate:ValidateLibraryMissionNotice}":       {dormantRegistration, 1},
+	"rt.NoticeRegistration{ParentMID:mids.MIDPlayerNotice,Namespace:rt.NoticeNamespaceGeneric,NoticeType:TournamentNoticeType,Validate:ValidateTournamentNotice}":               {dormantRegistration, 1},
+	"rt.DirectRegistration{MID:mids.MIDActivityBroadcast,Validate:ValidateActivityBroadcast}":                                                                                   {dormantRegistration, 1},
+	"rt.DirectRegistration{MID:mids.MIDSystemBroadcast,Validate:ValidateSystemBroadcast}":                                                                                       {dormantRegistration, 1},
+	"rt.DirectRegistration{MID:mids.MIDGuildFightNotice,Validate:ValidateGuildFightNotice}":                                                                                     {dormantRegistration, 1},
+	"rt.DirectRegistration{MID:mids.MIDIllusionNotice,Validate:ValidateIllusionRoomNotice}":                                                                                     {dormantRegistration, 1},
+	"DirectRegistration{MID:mids.MIDChatMessage,Validate:ValidateChannelChat}":                                                                                                  {dormantRegistration, 1},
+	"rt.DirectRegistration{MID:mids.MIDChatFromPlayer,Validate:rt.ValidateGeneralDM}":                                                                                           {generalDMRegistration, 1},
+	"rt.DirectRegistration{MID:mids.MIDChatFromFriend,Validate:rt.ValidateFriendDM}":                                                                                            {friendDMRegistration, 5},
+	"rt.DirectRegistration{MID:mids.MIDForceReload,Validate:ValidateSocialReload}":                                                                                              {socialRegistration, 3},
 }
 
 func genericWakeupRoutes(realtime string) int {
@@ -175,65 +214,190 @@ func TestI7A2KeepsFeatureProducerAndWakeupRoutesDormant(t *testing.T) {
 		}
 		s := string(b)
 		// I7A-2 installs mechanisms and source descriptors only. Domain-owned
-		// producers/routes activate in later owning stages with their exact
-		// recovery and schema contracts.
+		// routes activate in later owning stages with their exact recovery and
+		// schema contracts; registrations are checked by identity below.
 		for _, marker := range []string{
-			"realtime.DirectRegistration{",
-			"realtime.NoticeRegistration{",
-			"wireRT.DirectRegistration{",
-			"rt.DirectRegistration{",
-			"wireRT.NoticeRegistration{",
-			"rt.NoticeRegistration{",
 			"realtimewakeup.Registration{",
 			"appwakeup.Registration{",
 		} {
-			if strings.Contains(s, marker) {
-				rel, _ := filepath.Rel(root, path)
-				// I7C-4 full stage A activates exactly one notice schema (17) and its route.
-				achievementSchema := filepath.ToSlash(rel) == "internal/adapters/stockruntime/achievement_notice.go" && marker == "rt.NoticeRegistration{" && strings.Count(s, marker) == 1 && strings.Count(s, "NoticeType:") == 1
-				tournamentSchema := filepath.ToSlash(rel) == "internal/adapters/stockruntime/tournament_notice.go" && marker == "rt.NoticeRegistration{" && strings.Count(s, marker) == 1 && strings.Count(s, "NoticeType:") == 1
-				friendFightSchema := filepath.ToSlash(rel) == "internal/adapters/stockruntime/friend_fight_notice.go" && marker == "rt.NoticeRegistration{" && strings.Count(s, marker) == 1 && strings.Count(s, "NoticeType:") == 2
-				familySchema := familyNoticeSchemas[filepath.ToSlash(rel)] && (marker == "rt.NoticeRegistration{" || marker == "rt.DirectRegistration{")
-				if achievementSchema || tournamentSchema || friendFightSchema || familySchema {
-					continue
-				}
-				if marker == "realtimewakeup.Registration{" {
-					for _, route := range familyNoticeRoutes {
-						s = strings.Replace(s, route, "", 1)
-					}
-					s = strings.Replace(s, achievementNoticeRoute, "", 1)
-					s = strings.Replace(s, tournamentNoticeRoute, "", 1)
-					s = strings.Replace(s, friendFightNoticeRoute, "", 1)
-				}
-				allowedGeneralSchema := filepath.ToSlash(rel) == "internal/adapters/stockruntime/general_dm_events.go" && marker == "rt.DirectRegistration{" && strings.Count(s, marker) == 1
-				if allowedGeneralSchema && selectedGeneralDMActivation(t) {
-					validateGeneralDMActivation(t)
-					continue
-				}
-				allowedFriendSchema := filepath.ToSlash(rel) == "internal/adapters/stockruntime/friend_dm_delivery.go" && marker == "rt.DirectRegistration{" && strings.Count(s, marker) == 1
-				allowedFriendRoutes := filepath.ToSlash(rel) == "cmd/gxb-realtime/main_postgres.go" && marker == "realtimewakeup.Registration{" && (strings.Count(s, marker) == 2 || strings.Count(s, marker) == 3 && selectedGeneralDMActivation(t)) && strings.Contains(s, "Route: frienddm.WakeupRoute, Handler: friendReconcile")
-				if (allowedFriendSchema || allowedFriendRoutes) && selectedFriendDMActivation(t) {
-					validateSocialActivationRoutes(t)
-					validateFriendDMActivation(t)
-					continue
-				}
-				allowedSocial := filepath.ToSlash(rel) == "cmd/gxb-realtime/main_postgres.go" && marker == "realtimewakeup.Registration{" && strings.Count(s, marker) == 1 && strings.Contains(s, "Route: postgres.SocialReloadRoute, Handler: socialHandler")
-				allowedSchema := filepath.ToSlash(rel) == "internal/adapters/stockruntime/social_reload.go" && marker == "rt.DirectRegistration{" && strings.Count(s, marker) == 1 && strings.Count(s, "MID:") == 1
-				if (allowedSocial || allowedSchema) && selectedSocialActivation(t) {
-					validateSocialActivationRoutes(t)
-					continue
-				}
-				offenders = append(offenders, filepath.ToSlash(rel)+": "+marker)
+			if !strings.Contains(s, marker) {
+				continue
 			}
+			rel, _ := filepath.Rel(root, path)
+			if marker == "realtimewakeup.Registration{" {
+				for _, route := range familyNoticeRoutes {
+					s = strings.Replace(s, route, "", 1)
+				}
+				s = strings.Replace(s, achievementNoticeRoute, "", 1)
+				s = strings.Replace(s, tournamentNoticeRoute, "", 1)
+				s = strings.Replace(s, friendFightNoticeRoute, "", 1)
+			}
+			allowedFriendRoutes := filepath.ToSlash(rel) == "cmd/gxb-realtime/main_postgres.go" && marker == "realtimewakeup.Registration{" && (strings.Count(s, marker) == 2 || strings.Count(s, marker) == 3 && selectedGeneralDMActivation(t)) && strings.Contains(s, "Route: frienddm.WakeupRoute, Handler: friendReconcile")
+			if allowedFriendRoutes && selectedFriendDMActivation(t) {
+				validateSocialActivationRoutes(t)
+				validateFriendDMActivation(t)
+				continue
+			}
+			allowedSocial := filepath.ToSlash(rel) == "cmd/gxb-realtime/main_postgres.go" && marker == "realtimewakeup.Registration{" && strings.Count(s, marker) == 1 && strings.Contains(s, "Route: postgres.SocialReloadRoute, Handler: socialHandler")
+			if allowedSocial && selectedSocialActivation(t) {
+				validateSocialActivationRoutes(t)
+				continue
+			}
+			offenders = append(offenders, filepath.ToSlash(rel)+": "+marker)
 		}
 		return nil
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
+	for identity, files := range collectRegistrationIdentities(t, root) {
+		allowed, listed := allowedRegistrations[identity]
+		if !listed {
+			offenders = append(offenders, strings.Join(files, ",")+": unlisted registration "+identity)
+			continue
+		}
+		if len(files) != allowed.count {
+			offenders = append(offenders, strings.Join(files, ",")+fmt.Sprintf(": registration count %d, want %d: %s", len(files), allowed.count, identity))
+			continue
+		}
+		switch allowed.activation {
+		case generalDMRegistration:
+			if !selectedGeneralDMActivation(t) {
+				offenders = append(offenders, strings.Join(files, ",")+": selected registration is not activated "+identity)
+				continue
+			}
+			validateGeneralDMActivation(t)
+		case friendDMRegistration:
+			if !selectedFriendDMActivation(t) {
+				offenders = append(offenders, strings.Join(files, ",")+": selected registration is not activated "+identity)
+				continue
+			}
+			validateSocialActivationRoutes(t)
+			validateFriendDMActivation(t)
+		case socialRegistration:
+			if !selectedSocialActivation(t) {
+				offenders = append(offenders, strings.Join(files, ",")+": selected registration is not activated "+identity)
+				continue
+			}
+			validateSocialActivationRoutes(t)
+		}
+	}
 	if len(offenders) != 0 {
+		sort.Strings(offenders)
 		t.Fatalf("I7A-2 unexpectedly activates a deferred producer/route: %v", offenders)
 	}
+}
+
+func collectRegistrationIdentities(t *testing.T, root string) map[string][]string {
+	t.Helper()
+	identities := map[string][]string{}
+	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			if outsideProduct(root, path, d) || strings.Contains(filepath.ToSlash(path), "/vendor/") {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if !strings.HasSuffix(path, ".go") || strings.HasSuffix(path, "_test.go") {
+			return nil
+		}
+		raw, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		text := string(raw)
+		if !strings.Contains(text, "NoticeRegistration") && !strings.Contains(text, "DirectRegistration") {
+			return nil
+		}
+		parsed, err := parser.ParseFile(token.NewFileSet(), path, raw, 0)
+		if err != nil {
+			return err
+		}
+		relative, _ := filepath.Rel(root, path)
+		for _, identity := range fileRegistrationIdentities(parsed) {
+			identities[identity] = append(identities[identity], filepath.ToSlash(relative))
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return identities
+}
+
+func fileRegistrationIdentities(file *ast.File) []string {
+	identities := []string{}
+	ast.Inspect(file, func(node ast.Node) bool {
+		literal, ok := node.(*ast.CompositeLit)
+		if !ok {
+			return true
+		}
+		if array, ok := literal.Type.(*ast.ArrayType); ok {
+			typeName := registrationTypeName(array.Elt)
+			if !isRegistrationType(typeName) {
+				return true
+			}
+			for _, element := range literal.Elts {
+				inner, ok := element.(*ast.CompositeLit)
+				if !ok || inner.Type != nil {
+					continue
+				}
+				identities = append(identities, registrationIdentity(typeName, inner))
+			}
+			return true
+		}
+		typeName := registrationTypeName(literal.Type)
+		if isRegistrationType(typeName) {
+			identities = append(identities, registrationIdentity(typeName, literal))
+		}
+		return true
+	})
+	return identities
+}
+
+func registrationTypeName(expression ast.Expr) string {
+	switch typed := expression.(type) {
+	case *ast.SelectorExpr:
+		return expressionName(typed.X) + "." + typed.Sel.Name
+	case *ast.Ident:
+		return typed.Name
+	}
+	return ""
+}
+
+func isRegistrationType(name string) bool {
+	return strings.HasSuffix(name, "NoticeRegistration") || strings.HasSuffix(name, "DirectRegistration")
+}
+
+// registrationIdentity names one registration by its distinguishing fields, so
+// the allow-list below accepts registrations, not files.
+func registrationIdentity(typeName string, literal *ast.CompositeLit) string {
+	fields := []string{}
+	for _, wanted := range []string{"MID", "ParentMID", "Namespace", "NoticeType", "Validate"} {
+		for _, element := range literal.Elts {
+			pair, ok := element.(*ast.KeyValueExpr)
+			if !ok {
+				continue
+			}
+			key, ok := pair.Key.(*ast.Ident)
+			if !ok || key.Name != wanted {
+				continue
+			}
+			fields = append(fields, wanted+":"+renderExpression(pair.Value))
+		}
+	}
+	return typeName + "{" + strings.Join(fields, ",") + "}"
+}
+
+func renderExpression(expression ast.Expr) string {
+	var rendered strings.Builder
+	if err := format.Node(&rendered, token.NewFileSet(), expression); err != nil {
+		return ""
+	}
+	return rendered.String()
 }
 
 func TestI97BFiniteTournamentNoticeDoesNotAddGenericTransport(t *testing.T) {

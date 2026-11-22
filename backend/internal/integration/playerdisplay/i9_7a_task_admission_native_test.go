@@ -11,13 +11,14 @@ import (
 	application "gxb.local/backend/v2/internal/application/topfloor"
 	"gxb.local/backend/v2/internal/domain/modes"
 	domain "gxb.local/backend/v2/internal/domain/topfloor"
+	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
 func TestI97ATaskModeAdmissionReadsNative(t *testing.T) {
 	database := pool(t)
 	service := topFloorService(t, database)
 	server := rankingServer(t, database)
-	actor, _, hero := topFloorPlayer(t, database, server)
+	actor, revision, hero := topFloorPlayer(t, database, server)
 	otherServer := rankingServer(t, database)
 	other, _, _ := topFloorPlayer(t, database, otherServer)
 	exec(t, database, `UPDATE player_directory_profiles SET lev=60 WHERE player_id=$1`, int64(actor.PlayerID))
@@ -35,6 +36,9 @@ func TestI97ATaskModeAdmissionReadsNative(t *testing.T) {
 		t.Skip("normal Top Floor freeze: no host clock change permitted")
 	}
 	command := application.StartCommand{Formation: []int64{hero.PartnerID}, Enemy: current.Enemies[0].Occupant.TableID()}
+	if err = service.SaveDefense(ctx, actor, []int64{hero.PartnerID}, 0, op()); err != nil {
+		t.Fatal("saved defense", err)
+	}
 	result, err := service.Start(ctx, actor, command, op())
 	if err != nil || len(result.Report) == 0 {
 		t.Fatalf("genuine admission: %v", err)
@@ -54,9 +58,52 @@ func TestI97ATaskModeAdmissionReadsNative(t *testing.T) {
 		t.Fatalf("display trimming lost admission: %d %v", count, err)
 	}
 	catalog := domain.TaskModeCatalog{EntryRank: 200, EntryChallenges: 10, ServerLevel: 60}
-	eligibility, err := service.TaskModeEligibilityTx(ctx, database, catalog, actor, now)
+	period := domain.TaskModePeriod{
+		Rotation: domain.TaskModeRotation{Number: 1, Mode: domain.TaskModeSingle, StartsAt: now, EndsAt: now.Add(7 * 24 * time.Hour)},
+		Ladder:   domain.Ladder{Server: server, ContentRevision: revision, SettledDay: 0, StateVersion: 1, CreatedAt: now, UpdatedAt: now},
+	}
+	eligibility, err := service.TaskModeEligibilityTx(ctx, database, catalog, period, actor, now)
 	if err != nil || eligibility.WeeklyChallenges != 1 || eligibility.ServerMaximumLevel != 60 || eligibility.Eligible {
-		t.Fatalf("source gate read %+v %v", eligibility, err)
+		t.Fatalf("unranked above 200 source gate read %+v %v", eligibility, err)
+	}
+	// D512: weekly challenges are no longer enforced; rank <=200 and server level
+	// >=60 qualify even with a single challenge this week.
+	robotAtEntryRank := domain.Occupant{Robot: domain.RobotTeams + 1 - 200}
+	transaction, err := database.Begin(ctx, tx.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = store.SwapTx(ctx, transaction, server, domain.Ranked{Rank: current.Rank, Occupant: domain.Occupant{Player: actor.PlayerID}}, domain.Ranked{Rank: 200, Occupant: robotAtEntryRank}); err != nil {
+		t.Fatal(err)
+	}
+	if err = transaction.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+	eligibility, err = service.TaskModeEligibilityTx(ctx, database, catalog, period, actor, now)
+	if err != nil || !eligibility.Eligible || eligibility.Rank != 200 {
+		t.Fatalf("D512 challenge gate still enforced: %+v %v", eligibility, err)
+	}
+	// A player admitted to the period stays eligible after their normal rank drops.
+	transaction, err = database.Begin(ctx, tx.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = store.CreateTaskPeriodTx(ctx, transaction, period); err != nil {
+		t.Fatal(err)
+	}
+	admitted := domain.TaskModePlayer{PeriodNumber: period.Rotation.Number, Player: (domain.Catalog{FreeTickets: 5}).NewPlayer(actor.PlayerID, server, revision, 1, now)}
+	if err = store.InsertTaskPlayerTx(ctx, transaction, admitted, period); err != nil {
+		t.Fatal(err)
+	}
+	if err = store.SwapTx(ctx, transaction, server, domain.Ranked{Rank: 200, Occupant: domain.Occupant{Player: actor.PlayerID}}, domain.Ranked{Rank: current.Rank, Occupant: robotAtEntryRank}); err != nil {
+		t.Fatal(err)
+	}
+	if err = transaction.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+	eligibility, err = service.TaskModeEligibilityTx(ctx, database, catalog, period, actor, now)
+	if err != nil || !eligibility.Eligible || eligibility.Rank <= 200 {
+		t.Fatalf("admitted player lost eligibility after a rank drop: %+v %v", eligibility, err)
 	}
 	boundary := modes.DayBegins(modes.WeekStart(now))
 	exec(t, database, `UPDATE top_floor_fights SET started_at=$2 WHERE challenger_id=$1`, int64(actor.PlayerID), boundary)

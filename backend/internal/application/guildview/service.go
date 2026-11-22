@@ -23,6 +23,7 @@ type Store interface {
 	ReadSevenDayActivity(context.Context, []identity.PlayerID, int64) (map[identity.PlayerID]int64, error)
 	ReadGuildThreeDayActivity(context.Context, guild.ID, int64) (int64, error)
 	ListActivityBoard(context.Context, identity.LogicalServerID, int64, int64) ([]guild.ActivityBoardRow, error)
+	ActivityRankOf(context.Context, identity.LogicalServerID, int64, guild.ID) (int64, error)
 	ReadMembership(context.Context, identity.PlayerID) (guild.Membership, bool, error)
 	ListMemberships(context.Context, guild.ID) ([]guild.Membership, error)
 	ListGuilds(context.Context, identity.LogicalServerID, int) ([]guild.Guild, error)
@@ -84,6 +85,7 @@ type GuildInfo struct {
 	MinAllowLevel   int64
 	Vitality        int64
 	ThreeHuoyue     int64
+	GuildRank       int64
 	MemberNum       int64
 	GuildLeader     int64
 	GuildLeaderName string
@@ -354,7 +356,20 @@ func (s Service) GuildForPlayer(ctx context.Context, actor identity.ActorContext
 	if err != nil || !ok {
 		return GuildInfo{}, false, err
 	}
-	return s.GuildInfo(ctx, actor, m.GuildID)
+	out, ok, err := s.GuildInfo(ctx, actor, m.GuildID)
+	if err != nil || !ok {
+		return out, ok, err
+	}
+	day, err := s.day(ctx)
+	if err != nil {
+		return GuildInfo{}, false, err
+	}
+	rank, err := s.Store.ActivityRankOf(ctx, actor.LogicalServerID, day, m.GuildID)
+	if err != nil {
+		return GuildInfo{}, false, err
+	}
+	out.GuildRank = rank
+	return out, true, nil
 }
 
 func (s Service) Other(ctx context.Context, actor identity.ActorContext, gid guild.ID) (SelfGuild, bool, error) {
@@ -433,6 +448,12 @@ func (s Service) ActivityRankList(ctx context.Context, actor identity.ActorConte
 		out = append(out, GuildRank{Rank: int64(index + 1), Guild: row, Leader: leaderName})
 		if ownMember && own.GuildID == guild.ID(row.GuildID) {
 			mine = int64(index + 1)
+		}
+	}
+	if mine == 0 && ownMember && own.GuildID != 0 {
+		mine, err = s.Store.ActivityRankOf(ctx, actor.LogicalServerID, day, own.GuildID)
+		if err != nil {
+			return nil, 0, err
 		}
 	}
 	return out, mine, nil

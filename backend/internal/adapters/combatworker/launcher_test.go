@@ -15,6 +15,8 @@ import (
 	app "gxb.local/backend/v2/internal/application/combat"
 	"gxb.local/backend/v2/internal/content/combatcorpus"
 	d "gxb.local/backend/v2/internal/domain/combat"
+	"gxb.local/backend/v2/internal/foundation/tx"
+	"gxb.local/backend/v2/internal/testsupport/latency"
 )
 
 var workerBinary string
@@ -44,7 +46,7 @@ func limits(t *testing.T) Limits {
 }
 
 func pool(t *testing.T, l Limits, workers int, admissionWait time.Duration) *Launcher {
-	launcher := New(l, workers, admissionWait)
+	launcher := New(l, workers, admissionWait, 0)
 	t.Cleanup(launcher.Close)
 	return launcher
 }
@@ -98,6 +100,27 @@ func TestFreshProcessesAreDeterministic(t *testing.T) {
 		t.Fatal("fresh processes diverged")
 	}
 	t.Logf("outcome %+v report %s", first.Outcome, d.ReportHash(first.Report))
+}
+
+// Warm starts a spare before any attempt, so the first client fight does not
+// pay the worker's one-time preparation.
+func TestWarmStartsSpareBeforeFirstAttempt(t *testing.T) {
+	l := launcher(t)
+	l.Warm()
+	var pid string
+	for i := 0; i < 500 && pid == ""; i++ {
+		time.Sleep(20 * time.Millisecond)
+		entries, _ := os.ReadDir("/proc")
+		for _, e := range entries {
+			cmdline, err := os.ReadFile(filepath.Join("/proc", e.Name(), "cmdline"))
+			if err == nil && bytes.HasPrefix(cmdline, []byte(workerBinary+"\x00")) {
+				pid = e.Name()
+			}
+		}
+	}
+	if pid == "" {
+		t.Fatal("warm launcher started no spare process")
+	}
 }
 
 // A09: limits and isolation are observed on the running process, not assumed.
@@ -192,7 +215,7 @@ func TestSaturatedPoolRefusesThenAdmits(t *testing.T) {
 	if !errors.Is(err, app.ErrWorkerSaturated) || !errors.Is(err, d.ErrResolverRetryable) {
 		t.Fatal("saturated pool admitted or misclassified", err)
 	}
-	if waited := time.Since(began); waited > 2*time.Second {
+	if waited := time.Since(began); !latency.Within(t, latency.Incidental, waited, 2*time.Second) {
 		t.Fatal("refusal took", waited)
 	}
 	if err = <-busy; err != nil {
@@ -202,7 +225,72 @@ func TestSaturatedPoolRefusesThenAdmits(t *testing.T) {
 	if _, err = admitted.Resolve(context.Background(), raw, hash, root); err != nil {
 		t.Fatal(err)
 	}
-	if _, err = New(limits(t), 0, time.Second).Resolve(context.Background(), raw, hash, root); !errors.Is(err, d.ErrResolverPermanent) {
+	if _, err = New(limits(t), 0, time.Second, 0).Resolve(context.Background(), raw, hash, root); !errors.Is(err, d.ErrResolverPermanent) {
 		t.Fatal("pool without workers must refuse permanently", err)
+	}
+}
+
+// C1-6: a request waits up to its remaining admission budget; a job without a request keeps the fixed wait, and a
+// configured maximum caps the request-derived wait.
+func TestAdmissionBoundFollowsRequestBudgetAndCap(t *testing.T) {
+	fixed := time.Unix(1000, 0)
+	l := &Launcher{admissionWait: 5 * time.Second, now: func() time.Time { return fixed }}
+	if got := l.admissionBound(context.Background()); got != 5*time.Second {
+		t.Fatalf("background wait=%v want 5s", got)
+	}
+	request := tx.WithAdmissionDeadline(context.Background(), fixed.Add(18*time.Second))
+	if got := l.admissionBound(request); got != 18*time.Second {
+		t.Fatalf("request wait=%v want 18s", got)
+	}
+	l.admissionCap = 7 * time.Second
+	if got := l.admissionBound(request); got != 7*time.Second {
+		t.Fatalf("capped wait=%v want 7s", got)
+	}
+	expired := tx.WithAdmissionDeadline(context.Background(), fixed.Add(-time.Second))
+	if got := l.admissionBound(expired); got != 0 {
+		t.Fatalf("expired request wait=%v want 0", got)
+	}
+}
+
+// C1-6: the only worker is busy; request N+1 waits, then takes the worker that frees inside the budget.
+func TestTakeWaitsWithinRequestBudgetThenAdmits(t *testing.T) {
+	fixed := time.Unix(1000, 0)
+	l := New(limits(t), 1, 5*time.Second, 0)
+	l.now = func() time.Time { return fixed }
+	l.slots <- struct{}{}
+	spare := &process{}
+	admitted := make(chan *process, 1)
+	failed := make(chan error, 1)
+	go func() {
+		p, err := l.take(tx.WithAdmissionDeadline(context.Background(), fixed.Add(10*time.Second)))
+		if err != nil {
+			failed <- err
+			return
+		}
+		admitted <- p
+	}()
+	l.spares <- spare
+	select {
+	case got := <-admitted:
+		if got != spare {
+			t.Fatalf("admitted %p want the freed spare %p", got, spare)
+		}
+	case err := <-failed:
+		t.Fatal("request inside the budget was refused:", err)
+	case <-time.After(5 * time.Second):
+		t.Fatal("request inside the budget was not admitted")
+	}
+}
+
+// C1-6: past the request budget the launcher refuses with ErrWorkerSaturated, which the failure mapper answers
+// 503 + 35033.
+func TestTakeRefusesPastRequestBudget(t *testing.T) {
+	fixed := time.Unix(1000, 0)
+	l := New(limits(t), 1, 5*time.Second, 0)
+	l.now = func() time.Time { return fixed }
+	l.slots <- struct{}{}
+	_, err := l.take(tx.WithAdmissionDeadline(context.Background(), fixed.Add(-time.Millisecond)))
+	if !errors.Is(err, app.ErrWorkerSaturated) || !errors.Is(err, d.ErrResolverRetryable) {
+		t.Fatalf("err=%v want ErrWorkerSaturated wrapping ErrResolverRetryable", err)
 	}
 }

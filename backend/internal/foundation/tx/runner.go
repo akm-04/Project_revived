@@ -39,8 +39,10 @@ func (r Runner) Run(ctx context.Context, op operation.Context, profile Profile, 
 	opCtx, cancel := withMaxTimeout(ctx, profile.OperationTimeout)
 	defer cancel()
 	var reconciliationHistory []Reconciliation
+	var lastErr error
 	for attempt := 1; attempt <= retry.MaxAttempts; attempt++ {
 		res, action, err := r.attempt(opCtx, op, attempt, profile, opts, retry, resolver, body)
+		lastErr = err
 		if len(res.Reconciliations) > 0 {
 			reconciliationHistory = append(reconciliationHistory, res.Reconciliations...)
 		}
@@ -68,7 +70,8 @@ func (r Runner) Run(ctx context.Context, op operation.Context, profile Profile, 
 		res.Reconciliations = append([]Reconciliation(nil), reconciliationHistory...)
 		res.Evidence = reconciliationHistory[len(reconciliationHistory)-1].Evidence
 	}
-	return res, errors.New("transaction retry budget exhausted")
+	// Every attempt rolled back, so callers see a retryable definite abort, not a defect.
+	return res, MarkDefiniteAbort(fmt.Errorf("transaction retry budget exhausted: %w", lastErr))
 }
 
 type nextAction uint8
@@ -81,7 +84,7 @@ const (
 
 func (r Runner) attempt(ctx context.Context, op operation.Context, attempt int, profile Profile, opts Options, retry RetryPolicy, resolver UnknownCommitResolver, body Body) (Result, nextAction, error) {
 	started := time.Now()
-	acquireCtx, acqCancel := context.WithTimeout(ctx, profile.AcquireTimeout)
+	acquireCtx, acqCancel := context.WithTimeout(ctx, admissionWait(ctx, profile))
 	release, err := r.Admission.Acquire(acquireCtx)
 	if err != nil {
 		acqCancel()
@@ -106,6 +109,7 @@ func (r Runner) attempt(ctx context.Context, op operation.Context, attempt int, 
 	txCtx, txCancel := withMaxTimeout(ctx, profile.TransactionTimeout)
 	defer txCancel()
 	txCtx, staged := changes.Stage(txCtx)
+	txCtx = context.WithValue(txCtx, holdsConnectionKey{}, true)
 	if err = applyTimeouts(txCtx, dbtx, profile); err != nil {
 		_ = finalizer.rollback()
 		outcome := DefiniteAbort
@@ -131,6 +135,7 @@ func (r Runner) attempt(ctx context.Context, op operation.Context, attempt int, 
 		// shortcut: a commit proven only by reconciliation keeps no changes, so its response omits F17 keys; the client
 		// reloads on its next MID1.
 		staged.Keep()
+		r.Admission.Observe(time.Since(started))
 		r.event(op, profile, attempt, "commit", DefiniteCommit, nil, time.Since(started))
 		return Result{Outcome: DefiniteCommit, Attempts: attempt}, actionReturn, nil
 	}

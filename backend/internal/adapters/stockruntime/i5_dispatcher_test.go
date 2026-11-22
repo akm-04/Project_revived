@@ -3,6 +3,7 @@ package stockruntime
 import (
 	"context"
 	"encoding/json"
+	"net/http"
 	"testing"
 	"time"
 
@@ -94,10 +95,16 @@ func i5Req(mid uint16, params map[string]any, now time.Time) httpedge.DispatchRe
 	return httpedge.DispatchRequest{Envelope: wire.RequestEnvelope{Operation: operation.Context{StartedAt: now}, MID: mid, ReceivedAt: now, Params: params, Claims: wire.CredentialClaims{Token: "bearer", Region: 1}}}
 }
 
+type backpackSortFake struct{ sortType int64 }
+
+func (f backpackSortFake) ReadBackpackSortType(context.Context, identity.PlayerID) (int64, error) {
+	return f.sortType, nil
+}
+
 func TestI5MID81ProjectsCanonicalBackpackAcquiredTime(t *testing.T) {
 	now := time.Unix(1_700_000_100, 0).UTC()
 	svc := &i5WireFake{}
-	d := I5Dispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: svc}
+	d := I5Dispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: svc, BackpackSort: backpackSortFake{sortType: 4}}
 	got := d.Dispatch(context.Background(), i5Req(81, map[string]any{}, now))
 	if got.HTTPStatus != 200 {
 		t.Fatalf("%+v", got)
@@ -110,7 +117,7 @@ func TestI5MID81ProjectsCanonicalBackpackAcquiredTime(t *testing.T) {
 	if row["table_id"] != int64(9001) || row["item_num"] != int64(3) || row["time"] != int64(1_700_000_000) {
 		t.Fatalf("row=%#v", row)
 	}
-	if got.Body["sort_type"] != int64(0) {
+	if got.Body["sort_type"] != int64(4) {
 		t.Fatalf("sort_type=%#v", got.Body["sort_type"])
 	}
 	if spirit, ok := got.Body["spirit_list"].([]any); !ok || len(spirit) != 0 {
@@ -170,12 +177,19 @@ func TestI5R5SettlementSidebandsAreGlobalAndDoNotInventNumericAwards(t *testing.
 	} {
 		svc := &i5WireFake{projection: proj}
 		d := I5Dispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: svc}
-		got := d.Dispatch(context.Background(), i5Req(tc.mid, tc.params, now))
+		direct := d.Dispatch(context.Background(), i5Req(tc.mid, tc.params, now))
+		if _, written := direct.Body["economy_"]; written {
+			t.Fatalf("mid %d dispatcher assembled economy_: %#v", tc.mid, direct.Body)
+		}
+		if _, written := direct.Body["new_funcs_"]; written {
+			t.Fatalf("mid %d dispatcher assembled new_funcs_: %#v", tc.mid, direct.Body)
+		}
+		got := Decorated{Next: d}.Dispatch(context.Background(), i5Req(tc.mid, tc.params, now))
 		if got.HTTPStatus != 200 {
 			t.Fatalf("mid %d: %+v", tc.mid, got)
 		}
-		economy, ok := got.Body["economy_"].(map[string]int64)
-		if !ok || economy["exp"] != 123 || economy["lev"] != 7 || economy["energy"] != 88 {
+		economy, ok := got.Body["economy_"].(map[string]any)
+		if !ok || economy["exp"] != int64(123) || economy["lev"] != int64(7) || economy["energy"] != int64(88) {
 			t.Fatalf("mid %d economy_=%#v", tc.mid, got.Body["economy_"])
 		}
 		funcs, ok := got.Body["new_funcs_"].([]int64)
@@ -192,11 +206,39 @@ func TestI5R5SettlementSidebandsAreGlobalAndDoNotInventNumericAwards(t *testing.
 	}
 }
 
+func TestI5MalformedRepliesCarryFamilyToken(t *testing.T) {
+	now := time.Unix(703, 0).UTC()
+	d := I5Dispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: &i5WireFake{}}
+	cases := []struct {
+		name string
+		got  httpedge.Response
+	}{
+		{"story missing", d.Dispatch(context.Background(), i5Req(26, map[string]any{}, now))},
+		{"mail limit", d.Dispatch(context.Background(), i5Req(368, map[string]any{"load_num": json.Number("0")}, now))},
+		{"mail id", d.Dispatch(context.Background(), i5Req(369, map[string]any{"id": json.Number("-1")}, now))},
+		{"mission type", d.Dispatch(context.Background(), i5Req(2736, map[string]any{"mission_type": json.Number("99")}, now))},
+	}
+	for _, tc := range cases {
+		if tc.got.HTTPStatus != http.StatusBadRequest || tc.got.Body["error"] != "i5_invalid_parameter" || tc.got.Body["error_code"] != int64(35028) || tc.got.Body["error_msg"] != "" {
+			t.Fatalf("%s: %+v", tc.name, tc.got)
+		}
+	}
+	blood := AwakeningBloodDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: &bloodWireFake{}}
+	got := blood.Dispatch(context.Background(), i5Req(866, map[string]any{"twice_awake_mission": json.Number("0")}, now))
+	if got.HTTPStatus != http.StatusBadRequest || got.Body["error"] != "i5_invalid_parameter" {
+		t.Fatalf("blood: %+v", got)
+	}
+}
+
 func TestI5MID369GlobalSidebandsPreserveNamedReward(t *testing.T) {
 	now := time.Unix(703, 0).UTC()
 	svc := &i5WireFake{projection: appi5.SettlementProjection{Economy: map[string]int64{"gold": 9}}}
 	d := I5Dispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: svc}
-	got := d.Dispatch(context.Background(), i5Req(369, map[string]any{"id": int64(7), "is_region": false}, now))
+	direct := d.Dispatch(context.Background(), i5Req(369, map[string]any{"id": int64(7), "is_region": false}, now))
+	if _, written := direct.Body["economy_"]; written {
+		t.Fatalf("dispatcher assembled economy_: %#v", direct.Body)
+	}
+	got := Decorated{Next: d}.Dispatch(context.Background(), i5Req(369, map[string]any{"id": int64(7), "is_region": false}, now))
 	if got.HTTPStatus != 200 || got.Body["economy_"] == nil {
 		t.Fatalf("response=%+v", got)
 	}

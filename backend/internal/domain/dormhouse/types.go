@@ -24,6 +24,7 @@ var (
 	ErrStaleTime     = errors.New("dorm: stale captured time")
 	ErrInUse         = errors.New("dorm: Hero or furniture in use")
 	ErrCooldown      = errors.New("dorm: resident change cooldown")
+	ErrHidden        = errors.New("dorm: room is hidden")
 )
 
 // Attributes are percent * 100, exactly representable as basis points. The
@@ -52,15 +53,56 @@ type EquipmentRule struct {
 	TemplateID int64
 	Items      [5]int64
 }
+
+// GlueRules carries the source purchase ladder. Nil on a Catalog means the
+// older schema 1 payload, which has no glue facts.
+type GlueRules struct {
+	DailyFloor, PurchaseAmount, PurchaseStartLimit int64
+	VIPDailyCaps                                   map[int64]int64
+	PurchaseCosts                                  map[int64]int64
+}
+
+func (g GlueRules) VIPDailyCap(vip int64) (int64, bool) {
+	dailyCap, ok := g.VIPDailyCaps[vip]
+	return dailyCap, ok
+}
+
+func (g GlueRules) PurchaseCost(ordinal int64) (int64, bool) {
+	cost, ok := g.PurchaseCosts[ordinal]
+	return cost, ok
+}
+
 type Catalog struct {
-	ExchangeRates  map[int64]int64
-	Furniture      map[int64]FurnitureRule
-	EquipmentLevel map[int64]int64
-	Rooms          map[int64]RoomRule
-	Types          map[int64]TypeRule
-	Keys           map[int64]KeyRule
-	Expansions     map[int64]ExpansionRule
-	Equipment      map[int64]EquipmentRule
+	ExchangeRates    map[int64]int64
+	Furniture        map[int64]FurnitureRule
+	EquipmentLevel   map[int64]int64
+	Rooms            map[int64]RoomRule
+	Types            map[int64]TypeRule
+	Keys             map[int64]KeyRule
+	Expansions       map[int64]ExpansionRule
+	Equipment        map[int64]EquipmentRule
+	Glue             *GlueRules
+	FurnitureRecipes map[int64]FurnitureRecipe
+	BlueprintRecipes map[int64]BlueprintRecipe
+}
+
+// FurnitureRecipe is the MID 83 furniture target: its material cost and the
+// permanently owned blueprint that authorizes it.
+type FurnitureRecipe struct {
+	ItemID        int64
+	Materials     []int64
+	Counts        []int64
+	Glue          int64
+	BlueprintItem int64
+}
+
+// BlueprintRecipe is the MID 83 blueprint target: the pieces that unlock it and
+// the player level its list row requires.
+type BlueprintRecipe struct {
+	ItemID int64
+	Pieces []int64
+	Counts []int64
+	Level  int64
 }
 
 type Root struct {

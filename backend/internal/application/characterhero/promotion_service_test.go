@@ -8,12 +8,14 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/application/characterasset"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/mail"
+	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/domain/player"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -34,6 +36,9 @@ func (c promotionFumoContent) HeroFumoTargetTx(_ context.Context, _ tx.Queryer, 
 }
 func (promotionFumoContent) HeroFumoMaterialTx(context.Context, tx.Queryer, string, character.EquipmentTemplateID) (character.HeroFumoMaterial, error) {
 	return character.HeroFumoMaterial{}, errors.New("unexpected fumo material")
+}
+func (promotionFumoContent) QuickFumoRuleTx(context.Context, tx.Queryer, string) (character.QuickFumoRule, error) {
+	return character.QuickFumoRule{CrystalCost: 20, FumoGrant: 150, DailyLimit: 1}, nil
 }
 
 type promotionContent struct {
@@ -182,6 +187,89 @@ func corruptPromotionReceiptBranch(t *testing.T, rr *receipts, branch HeroPromot
 		}
 		got.ResultPayload = payload
 		rr.m[id] = got
+	}
+}
+
+type promotionFixedTime struct{ at time.Time }
+
+func (c promotionFixedTime) Now(context.Context) (time.Time, error) { return c.at, nil }
+
+type promotionNoObjectives struct{}
+
+func (promotionNoObjectives) LockOpenObjectivesTx(context.Context, tx.Tx, identity.PlayerID) ([]objective.Instance, []appi5.ObjectiveDefinition, error) {
+	return nil, nil, nil
+}
+
+type promotionFactRecorder struct{ facts []objective.Fact }
+
+func (r *promotionFactRecorder) ObserveTx(_ context.Context, _ tx.Tx, _ operation.Context, facts ...objective.Fact) error {
+	r.facts = append(r.facts, facts...)
+	return nil
+}
+
+func attachPromotionFacts(fx *promotionFixture) *promotionFactRecorder {
+	recorder := &promotionFactRecorder{}
+	fx.svc.Facts = appi5.ObjectiveFacts{Owner: fx.i5svc, Open: promotionNoObjectives{}, Observer: recorder}
+	fx.svc.Timed = gen.TimedRunner{Binder: gen.Binder{Time: promotionFixedTime{at: time.Unix(1, 0).UTC()}}}
+	return recorder
+}
+
+func TestPowerUpHeroEmitsOneHeroPromotedFactPerRequest(t *testing.T) {
+	now := time.Unix(1, 0).UTC()
+	h := heroAt(11, 1001, 1001, 3, 3, 60, now)
+	h.Equipment[0] = 1
+	positions := emptyPromotionPositions(h.TableID, 1)
+	positions[[3]int64{h.TableID, 1, 1}] = character.HeroEquipmentPosition{HeroTableID: h.TableID, Color: 1, Slot: 1, ItemID: 20001005, OrdinaryEligible: true}
+	for slot := int64(1); slot <= character.HeroEquipmentSlotCount; slot++ {
+		positions[[3]int64{h.TableID, 2, slot}] = character.HeroEquipmentPosition{HeroTableID: h.TableID, Color: 2, Slot: slot}
+	}
+	fx := makePromotionFixture(t, h, positions, map[int64]character.EquipmentPrimitive{20001005: {ItemID: 20001005, RequiredLevel: 1}}, 5)
+	recorder := attachPromotionFacts(&fx)
+	op := testOp(t, "f1f1f1f1-f1f1-41f1-81f1-f1f1f1f1f1f1")
+	if _, err := fx.svc.PowerUpHero(context.Background(), testActor(t), h.PartnerID, op); err != nil {
+		t.Fatal(err)
+	}
+	if len(recorder.facts) != 1 || recorder.facts[0].Kind != "HERO_PROMOTED" || recorder.facts[0].Delta != 1 || recorder.facts[0].SourceDomain != "character-hero" || recorder.facts[0].SourceBusinessKey != op.ID.String() {
+		t.Fatalf("promotion facts %#v", recorder.facts)
+	}
+	if _, err := fx.svc.PowerUpHero(context.Background(), testActor(t), h.PartnerID, op); err != nil {
+		t.Fatal(err)
+	}
+	if len(recorder.facts) != 1 {
+		t.Fatalf("receipt replay emitted facts %#v", recorder.facts)
+	}
+}
+
+func TestOneClickJinjieEmitsFactOnlyWhenColorRises(t *testing.T) {
+	now := time.Unix(1, 0).UTC()
+	h := heroAt(11, 1001, 1001, 3, 3, 60, now)
+	positions := emptyPromotionPositions(h.TableID, 1)
+	positions[[3]int64{h.TableID, 1, 1}] = character.HeroEquipmentPosition{HeroTableID: h.TableID, Color: 1, Slot: 1, ItemID: 20001005, OrdinaryEligible: true}
+	for slot := int64(1); slot <= character.HeroEquipmentSlotCount; slot++ {
+		positions[[3]int64{h.TableID, 2, slot}] = character.HeroEquipmentPosition{HeroTableID: h.TableID, Color: 2, Slot: slot}
+	}
+	fx := makePromotionFixture(t, h, positions, map[int64]character.EquipmentPrimitive{20001005: {ItemID: 20001005, RequiredLevel: 1}}, 5)
+	fx.i5.stacks[20001005] = economy.StackState{PlayerID: h.PlayerID, ItemID: 20001005, Quantity: 1, StateVersion: 1, AcquiredAt: now, UpdatedAt: now}
+	recorder := attachPromotionFacts(&fx)
+	if _, err := fx.svc.OneClickJinjie(context.Background(), testActor(t), h.PartnerID, testOp(t, "f2f2f2f2-f2f2-42f2-82f2-f2f2f2f2f2f2")); err != nil {
+		t.Fatal(err)
+	}
+	if len(recorder.facts) != 1 || recorder.facts[0].Kind != "HERO_PROMOTED" || recorder.facts[0].Delta != 1 {
+		t.Fatalf("promotion facts %#v", recorder.facts)
+	}
+
+	capped := heroAt(11, 1001, 1001, 3, 3, 60, now)
+	capped.Color = 5
+	cappedPositions := emptyPromotionPositions(capped.TableID, 5)
+	cappedPositions[[3]int64{capped.TableID, 5, 1}] = character.HeroEquipmentPosition{HeroTableID: capped.TableID, Color: 5, Slot: 1, ItemID: 20001005, OrdinaryEligible: true}
+	cappedFixture := makePromotionFixture(t, capped, cappedPositions, map[int64]character.EquipmentPrimitive{20001005: {ItemID: 20001005, RequiredLevel: 1}}, 5)
+	cappedFixture.i5.stacks[20001005] = economy.StackState{PlayerID: capped.PlayerID, ItemID: 20001005, Quantity: 1, StateVersion: 1, AcquiredAt: now, UpdatedAt: now}
+	cappedRecorder := attachPromotionFacts(&cappedFixture)
+	if _, err := cappedFixture.svc.OneClickJinjie(context.Background(), testActor(t), capped.PartnerID, testOp(t, "f3f3f3f3-f3f3-43f3-83f3-f3f3f3f3f3f3")); err != nil {
+		t.Fatal(err)
+	}
+	if len(cappedRecorder.facts) != 0 {
+		t.Fatalf("collect-only emitted promotion fact %#v", cappedRecorder.facts)
 	}
 }
 

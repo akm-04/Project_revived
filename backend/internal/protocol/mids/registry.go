@@ -41,6 +41,10 @@ const (
 	MIDPlayerNotice     uint16 = 36854
 	MIDForceReload      uint16 = 36855
 	MIDGuildBroadcast   uint16 = 36863
+	// MIDActivityBroadcast and MIDSystemBroadcast are the stock lobby marquee
+	// pushes (4096/4101). The client maps both to events and indexes params.msg.
+	MIDActivityBroadcast uint16 = 4096
+	MIDSystemBroadcast   uint16 = 4101
 
 	MIDTCPLogin          uint16 = 32771
 	MIDChatRoomEntered   uint16 = 32779
@@ -50,11 +54,15 @@ const (
 	// They intentionally do not appear in app/common/network/mid.lua.
 	MIDVersionCheck    uint16 = 2
 	MIDCenterDiscovery uint16 = 20480
+	// MIDRechargeTap is private: the stock client sends nothing on a recharge tap
+	// (I9_COMMERCE_CHARGE_V1 C3), so the future OTA bridge calls this number.
+	MIDRechargeTap uint16 = 32000
 )
 
 var sourcePlaneAliases = map[uint16][]string{
 	MIDVersionCheck:    {"UPDATE_VERSION_CHECK"},
 	MIDCenterDiscovery: {"CENTER_DISCOVERY"},
+	MIDRechargeTap:     {"PRESERVATION_RECHARGE_TAP"},
 }
 
 var zlibMIDs = map[uint16]struct{}{279: {}, 2484: {}, 535: {}, 774: {}, 1412: {}, 1570: {}, 2515: {}}
@@ -117,7 +125,7 @@ func Lookup(mid uint16) (Descriptor, bool) {
 		d.Encoding = AMF3
 		d.Direction = S2C
 		d.Status = ResearchedUnimplemented
-	case MIDChatMessage, MIDWorldNotice, MIDPlayerNotice, MIDForceReload, MIDGuildBroadcast, MIDGuildFightNotice:
+	case MIDChatMessage, MIDWorldNotice, MIDPlayerNotice, MIDForceReload, MIDGuildBroadcast, MIDGuildFightNotice, MIDActivityBroadcast, MIDSystemBroadcast:
 		d.Transport = TCP
 		d.Encoding = AMF3
 		d.Direction = S2C

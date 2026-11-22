@@ -2,11 +2,14 @@ package dormhouse
 
 import (
 	"context"
+	"errors"
+	"gxb.local/backend/v2/internal/application/characterasset"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/domain/character"
 	dorm "gxb.local/backend/v2/internal/domain/dormhouse"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"sort"
 	"strconv"
@@ -17,11 +20,39 @@ func heroWire(f dorm.HeroFacts, rooms map[int64]dorm.Room) map[string]any {
 	r := rooms[f.HouseID]
 	return map[string]any{"house_id": f.HouseID, "house_table_id": r.TableID, "house_comfort": r.Comfort, "house_expand_lev": r.ExpansionLevel, "house_equips": f.Equipment}
 }
-func roomWire(r dorm.Room, heroes map[int64]character.Hero, facts map[int64]dorm.HeroFacts) map[string]any {
+func unixOrZero(at time.Time) int64 {
+	if at.IsZero() {
+		return 0
+	}
+	return at.Unix()
+}
+
+// dormPanelKinds is xyd.DormPanelType: the stock client reads
+// house_detail.record as a three-element panel array (Floor, LeftWall,
+// RightWall), indexed 1..3.
+const dormPanelKinds = 3
+
+// stockHouseRecord presents the flat stored placement map in the stock panel
+// array; ValidateLayout has already bounded Panel to 1..3.
+func stockHouseRecord(layout map[string]string, validated dorm.LayoutResult) []map[string]string {
+	record := make([]map[string]string, dormPanelKinds)
+	for index := range record {
+		record[index] = map[string]string{}
+	}
+	for _, placement := range validated.Placements {
+		record[placement.Panel-1][placement.Key] = layout[placement.Key]
+	}
+	return record
+}
+
+func roomWire(r dorm.Room, heroes map[int64]character.Hero, facts map[int64]dorm.HeroFacts, wire socialRoomWire, stages map[int64]int64) map[string]any {
 	residents := []any{}
 	for _, p := range r.Residents {
 		h := heroes[p]
-		row := map[string]any{"partner_id": p, "table_id": h.TableID, "star": h.Star, "color": h.Color, "lev": h.Level, "exp": h.Exp, "skills": h.RawSkills.Levels, "skill_ids": h.RawSkills.ChoiceIDs, "equips": h.Equipment, "fumos": h.Fumo, "practice_attr": h.Practice, "is_like": h.IsLike, "current_skin_id": h.CurrentSkinID, "illusion_skin_id": h.IllusionSkinID, "twice_awake_stage": 0, "house_id": r.ID, "house_table_id": r.TableID, "house_comfort": r.Comfort, "house_expand_lev": r.ExpansionLevel, "house_equips": facts[p].Equipment}
+		row := map[string]any{"partner_id": p, "table_id": h.TableID, "star": h.Star, "color": h.Color, "lev": h.Level, "exp": h.Exp, "skills": h.RawSkills.Levels, "skill_ids": h.RawSkills.ChoiceIDs, "equips": h.Equipment, "fumos": h.Fumo, "practice_attr": h.Practice, "is_like": h.IsLike, "current_skin_id": h.CurrentSkinID, "illusion_skin_id": h.IllusionSkinID, "house_id": r.ID, "house_table_id": r.TableID, "house_comfort": r.Comfort, "house_expand_lev": r.ExpansionLevel, "house_equips": facts[p].Equipment, "house_enter_time": unixOrZero(facts[p].LoungeAnchor)}
+		if stage, known := stages[p]; known {
+			row["twice_awake_stage"] = stage
+		}
 		if h.Kind == character.SuperHero {
 			row["partner_type"] = 2
 		}
@@ -34,20 +65,70 @@ func roomWire(r dorm.Room, heroes map[int64]character.Hero, facts map[int64]dorm
 	if !r.LastEnterAt.IsZero() {
 		last = r.LastEnterAt.Unix()
 	}
-	return map[string]any{"house_id": r.ID, "table_id": r.TableID, "floor": r.Floor, "pos": r.Position, "comfort": r.Comfort, "expand_lev": r.ExpansionLevel, "expand_start_time": start, "last_enter_time": last, "partner_infos": residents, "house_name": "", "is_hide": 0, "praise_num": 0, "is_has_praise": 0}
+	state := wire.Social[r.ID]
+	return map[string]any{"house_id": r.ID, "table_id": r.TableID, "house_type": r.MainType, "floor": r.Floor, "pos": r.Position, "comfort": r.Comfort, "expand_lev": r.ExpansionLevel, "expand_start_time": start, "last_enter_time": last, "partner_infos": residents, "house_name": state.Name, "is_hide": boolFlag(state.Hidden), "praise_num": wire.PraiseCounts[r.ID], "is_has_praise": boolFlag(wire.ActorPraises[r.ID].Actor != 0)}
 }
-func listWire(rooms map[int64]dorm.Room, heroes map[int64]character.Hero, facts map[int64]dorm.HeroFacts) [][]any {
+func listWire(rooms map[int64]dorm.Room, heroes map[int64]character.Hero, facts map[int64]dorm.HeroFacts, wire socialRoomWire, stages map[int64]int64, includeHidden bool) [][]any {
 	out := [][]any{{}, {}, {}, {}}
 	ids := []int64{}
 	for id := range rooms {
+		if !includeHidden && wire.Social[id].Hidden {
+			continue
+		}
 		ids = append(ids, id)
 	}
 	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
 	for _, id := range ids {
 		r := rooms[id]
-		out[r.MainType-1] = append(out[r.MainType-1], roomWire(r, heroes, facts))
+		if r.MainType < 1 || r.MainType > 4 {
+			return out
+		}
+		out[r.MainType-1] = append(out[r.MainType-1], roomWire(r, heroes, facts, wire, stages))
 	}
 	return out
+}
+
+// awakeningStagesTx reads the Character-owned raw twice-awake stage for every
+// resident in the caller's coherent read. A hero without the facet is unknown
+// and is omitted instead of being reported as stage 0.
+func (s Service) awakeningStagesTx(ctx context.Context, sc tx.Scope, revision string, at time.Time, rooms map[int64]dorm.Room, heroes map[int64]character.Hero) (map[int64]int64, error) {
+	operation := sc.Operation
+	refs := operation.Policies.Refs()
+	if pinned, ok := operation.Policies.Get("content"); ok {
+		if pinned != revision {
+			return nil, ErrUnavailable
+		}
+	} else {
+		refs = append(refs, policy.Ref{Name: "content", Version: revision})
+	}
+	var e error
+	if operation.Policies, e = policy.NewSet(refs...); e != nil {
+		return nil, e
+	}
+	coherent, e := characterasset.NewCoherentReadScope(tx.Scope{Tx: sc.Tx, Operation: operation, Attempt: sc.Attempt, Options: sc.Options}, revision, at)
+	if e != nil {
+		return nil, e
+	}
+	out := map[int64]int64{}
+	for _, room := range rooms {
+		for _, partner := range room.Residents {
+			hero, ok := heroes[partner]
+			if !ok {
+				continue
+			}
+			observation, e := s.Awakening.RawAwakeningTx(ctx, coherent, hero.Ref())
+			if errors.Is(e, character.ErrRawAwakeningUnavailable) {
+				continue
+			}
+			if e != nil {
+				return nil, e
+			}
+			if observation.Known && observation.Ref == hero.Ref() {
+				out[partner] = observation.RawStage
+			}
+		}
+	}
+	return out, nil
 }
 
 // Read owns its one captured DB decision instant. Foreign reads are strictly
@@ -93,9 +174,6 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, op operation
 		if e != nil {
 			return e
 		}
-		if at.Before(root.UpdatedAt) {
-			return ErrStale
-		}
 		catalog, e := s.Content.DormCatalogTx(ctx, sc.Tx, rev)
 		if e != nil {
 			return e
@@ -123,12 +201,20 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, op operation
 			}
 			facts[h.PartnerID] = f
 		}
+		stages, e := s.awakeningStagesTx(ctx, tx.Scope{Tx: sc.Tx, Operation: sc.Operation.Operation(), Attempt: sc.Attempt, Options: sc.Options}, rev, at, rooms, hm)
+		if e != nil {
+			return e
+		}
 		values, e := s.Values.ReadDormPlayerStateTx(ctx, sc.Tx, pid, at)
 		if e != nil {
 			return e
 		}
 		if _, ok := values.Functions[71]; !ok {
 			return dorm.ErrUnqualified
+		}
+		wire, e := s.socialRoomWireTx(ctx, sc.Tx, pid, a.PlayerID)
+		if e != nil {
+			return e
 		}
 		body = map[string]any{}
 		if mid == 2512 {
@@ -138,7 +224,7 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, op operation
 					functions = append(functions, id)
 				}
 			}
-			body["house_list"] = listWire(rooms, hm, facts)
+			body["house_list"] = listWire(rooms, hm, facts, wire, stages, pid == a.PlayerID)
 			body["open_functions"] = functions
 			return nil
 		}
@@ -146,8 +232,8 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, op operation
 		if !ok {
 			return dorm.ErrInvalidFacts
 		}
-		if at.Before(r.UpdatedAt) {
-			return ErrStale
+		if pid != a.PlayerID && wire.Social[house].Hidden {
+			return dorm.ErrHidden
 		}
 		if own {
 			values, e = s.Values.LockDormPlayerStateTx(ctx, sc.Tx, pid, at)
@@ -167,42 +253,39 @@ func (s Service) Read(ctx context.Context, a identity.ActorContext, op operation
 					return e
 				}
 				if !at.Before(due) {
-					if _, e = s.Content.DormCatalogTx(ctx, sc.Tx, r.Pending.ContentRevision); e != nil {
+					if e = s.completePendingExpansion(ctx, sc.Tx, a, r, rooms, catalog, at); e != nil {
 						return e
 					}
-					old := r.StateVersion
-					r.StateVersion++
-					r.ExpansionLevel = r.Pending.NextLevel
-					r.Pending = nil
-					r.UpdatedAt = at
-					rooms[r.ID] = r
-					if e = s.Owner.SaveRoomTx(ctx, sc.Tx, r, old); e != nil {
-						return e
-					}
+					r = rooms[r.ID]
 					mutated = true
 				}
 			}
 			if mutated {
 				old := root.StateVersion
 				root.StateVersion++
-				root.UpdatedAt = at
+				root.UpdatedAt = gen.EffectiveObservation(at, root.UpdatedAt, root.CreatedAt)
 				if e = s.Owner.SaveRootTx(ctx, sc.Tx, root, old); e != nil {
 					return e
 				}
 			}
 		}
 		used := map[string]int64{}
-		for _, r := range rooms {
-			v, e := catalog.ValidateLayout(r.TableID, r.ExpansionLevel, r.Layout)
+		targetID := r.ID
+		var houseLayout dorm.LayoutResult
+		for _, room := range rooms {
+			v, e := catalog.ValidateLayout(room.TableID, room.ExpansionLevel, room.Layout)
 			if e != nil {
 				return e
+			}
+			if room.ID == targetID {
+				houseLayout = v
 			}
 			for item, n := range v.Used {
 				used[strconv.FormatInt(item, 10)] += n
 			}
 		}
-		body["house_info"] = roomWire(r, hm, facts)
-		body["house_detail"] = map[string]any{"house_id": r.ID, "record": r.Layout}
+		body["house_info"] = roomWire(r, hm, facts, wire, stages)
+		body["house_detail"] = map[string]any{"house_id": r.ID, "record": stockHouseRecord(r.Layout, houseLayout)}
 		body["item_record"] = used
 		if own {
 			changed := map[string]any{}
@@ -264,17 +347,11 @@ func (s Service) DormHouseInputsTx(ctx context.Context, q tx.Queryer, scope Inpu
 	if e != nil {
 		return out, e
 	}
-	if scope.ObservedAt.Before(h.UpdatedAt) || scope.ObservedAt.Before(f.UpdatedAt) || scope.ObservedAt.Before(dr.UpdatedAt) || scope.ObservedAt.Before(hr.UpdatedAt) {
-		return out, dorm.ErrUnqualified
-	}
 	out = HeroInputs{Hero: h, Facts: f, PopulationVersion: hr.StateVersion, DormRootVersion: dr.StateVersion, ContentRevision: scope.ContentRevision, ObservedAt: scope.ObservedAt}
 	if f.HouseID != 0 {
 		r, e := s.Owner.ReadRoomTx(ctx, q, scope.Player, f.HouseID)
 		if e != nil {
 			return out, e
-		}
-		if scope.ObservedAt.Before(r.UpdatedAt) {
-			return out, dorm.ErrUnqualified
 		}
 		out.Room = &r
 		if r.MainType != dorm.LoungeType {
@@ -315,14 +392,8 @@ func (s Service) VillaCountTx(ctx context.Context, q tx.Queryer, scope InputScop
 	if e != nil {
 		return out, e
 	}
-	if scope.ObservedAt.Before(dr.UpdatedAt) || scope.ObservedAt.Before(hr.UpdatedAt) {
-		return out, dorm.ErrUnqualified
-	}
 	out = VillaInputs{PopulationVersion: hr.StateVersion, DormRootVersion: dr.StateVersion, ContentRevision: scope.ContentRevision, ObservedAt: scope.ObservedAt}
 	for _, r := range rooms {
-		if scope.ObservedAt.Before(r.UpdatedAt) {
-			return out, dorm.ErrUnqualified
-		}
 		if r.MainType == 4 {
 			out.Count++
 		}

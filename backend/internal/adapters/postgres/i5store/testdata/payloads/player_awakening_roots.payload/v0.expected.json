@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "next_generation": 1,
+  "active": [
+    {
+      "mission": 0,
+      "type": 0,
+      "owner_id": 0,
+      "generation": 0,
+      "revision": "",
+      "count": 0,
+      "complete": false
+    },
+    {
+      "mission": 0,
+      "type": 0,
+      "owner_id": 0,
+      "generation": 0,
+      "revision": "",
+      "count": 0,
+      "complete": false
+    },
+    {
+      "mission": 0,
+      "type": 0,
+      "owner_id": 0,
+      "generation": 0,
+      "revision": "",
+      "count": 0,
+      "complete": false
+    }
+  ],
+  "replays": {}
+}

@@ -12,9 +12,11 @@ import (
 )
 
 type viewStore struct {
-	g           guild.Guild
-	memberships map[identity.PlayerID]guild.Membership
-	apps        []guild.Application
+	g            guild.Guild
+	memberships  map[identity.PlayerID]guild.Membership
+	apps         []guild.Application
+	activityRows []guild.ActivityBoardRow
+	activityRank int64
 }
 
 func (s viewStore) ReadGuild(context.Context, guild.ID) (guild.Guild, bool, error) {
@@ -34,7 +36,10 @@ func (s viewStore) ReadGuildThreeDayActivity(context.Context, guild.ID, int64) (
 	return 0, nil
 }
 func (s viewStore) ListActivityBoard(context.Context, identity.LogicalServerID, int64, int64) ([]guild.ActivityBoardRow, error) {
-	return nil, nil
+	return s.activityRows, nil
+}
+func (s viewStore) ActivityRankOf(context.Context, identity.LogicalServerID, int64, guild.ID) (int64, error) {
+	return s.activityRank, nil
 }
 func (s viewStore) ReadMembership(_ context.Context, p identity.PlayerID) (guild.Membership, bool, error) {
 	m, ok := s.memberships[p]
@@ -170,6 +175,20 @@ func TestGuildRoomRequiresOnlyCanonicalGuildStore(t *testing.T) {
 	}
 }
 
+func TestGuildForPlayerAnswersActivityBoardRank(t *testing.T) {
+	s, a := viewFixture()
+	store := s.Store.(viewStore)
+	store.activityRank = 3
+	s.Store = store
+	info, ok, err := s.GuildForPlayer(context.Background(), a, 100002)
+	if err != nil || !ok {
+		t.Fatalf("ok=%v err=%v", ok, err)
+	}
+	if info.GuildRank != 3 {
+		t.Fatalf("guild_rank=%d, want the board rank 3", info.GuildRank)
+	}
+}
+
 func TestGuildForPlayerIsServerFenced(t *testing.T) {
 	s, a := viewFixture()
 	info, ok, err := s.GuildForPlayer(context.Background(), a, 100002)
@@ -182,5 +201,30 @@ func TestGuildForPlayerIsServerFenced(t *testing.T) {
 	a.LogicalServerID = 2
 	if _, ok, err := s.GuildForPlayer(context.Background(), a, 100002); err != nil || ok {
 		t.Fatalf("cross-server ok=%v err=%v", ok, err)
+	}
+}
+
+func TestActivityRankListResolvesRankBelowPublishedWindow(t *testing.T) {
+	own := guild.ID(1000001)
+	rows := make([]guild.ActivityBoardRow, 0, 50)
+	for index := 1; index <= 50; index++ {
+		rows = append(rows, guild.ActivityBoardRow{GuildID: int64(2000000 + index), Name: "other"})
+	}
+	directory := viewDirectory{100001: {PlayerID: 100001, Name: "leader", Level: 40}}
+	service := Service{
+		Store: viewStore{
+			memberships:  map[identity.PlayerID]guild.Membership{100001: {PlayerID: 100001, GuildID: own}},
+			activityRows: rows,
+			activityRank: 51,
+		},
+		Directory: directory,
+		Day:       func(context.Context) (int64, error) { return 1, nil },
+	}
+	gotRows, mine, err := service.ActivityRankList(context.Background(), identity.ActorContext{LogicalServerID: 1, PlayerID: 100001}, 50)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(gotRows) != 50 || mine != 51 {
+		t.Fatalf("rows=%d mine=%d, want 50 rows and true rank 51", len(gotRows), mine)
 	}
 }

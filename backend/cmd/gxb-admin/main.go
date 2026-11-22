@@ -1,7 +1,13 @@
+//go:build !postgres
+
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 func main() {
-	fmt.Println("gxb-admin: GXB V2 I0 bootstrap; product behavior not implemented")
+	fmt.Fprintln(os.Stderr, "gxb-admin: requires -tags postgres; refusing to run an unaudited operator command without a database")
+	os.Exit(2)
 }

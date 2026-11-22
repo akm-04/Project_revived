@@ -1,0 +1,363 @@
+{
+ "background": [],
+ "content": [
+  "content_dorm_input_catalogs",
+  "content_public_profile_policies"
+ ],
+ "contracts": [
+  {
+   "count": 11,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 20,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 4,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 12,
+   "file": "docs/i9/I9_DORM_SOCIAL_GLUE_RANKING_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 19,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [
+  "observing"
+ ],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/dorm_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I7C2C_DORM_INPUTS"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "player_dorm_admissions": [
+    "dormstore.LockAdmissionTx"
+   ],
+   "player_dorm_roots": [
+    "dormstore.LockRootTx"
+   ],
+   "player_economy_owners": [
+    "i5store.LockDormPlayerStateTx"
+   ],
+   "player_progression": [
+    "i5store.LockDormPlayerStateTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "player_dorm_admissions",
+   "player_dorm_roots",
+   "player_economy_owners",
+   "player_progression",
+   "players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [
+  "GlueBootstrap",
+  "OverlayMID1",
+  "OverlayRosterTx"
+ ],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 27
+   },
+   "mid": 1845,
+   "name": "BUY_GLUE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 27
+   },
+   "mid": 2512,
+   "name": "GET_HOUSE_LIST"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 27
+   },
+   "mid": 2513,
+   "name": "OPEN_HOUSE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 27
+   },
+   "mid": 2514,
+   "name": "GET_HOUSE_DETAIL"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 27
+   },
+   "mid": 2515,
+   "name": "SAVE_FURNITURES"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 27
+   },
+   "mid": 2516,
+   "name": "HOUSE_EQUIP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 27
+   },
+   "mid": 2517,
+   "name": "ENTER_HERO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 27
+   },
+   "mid": 2518,
+   "name": "CHANGE_HOUSE_NAME"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 27
+   },
+   "mid": 2519,
+   "name": "VISIT_RANDOM_HOUSE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 27
+   },
+   "mid": 2520,
+   "name": "HIDE_HOUSE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 27
+   },
+   "mid": 2521,
+   "name": "PRAISE_HOUSE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 27
+   },
+   "mid": 2522,
+   "name": "GET_DORM_PRAISE_LIST"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 27
+   },
+   "mid": 2523,
+   "name": "COMMENT_HOUSE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 27
+   },
+   "mid": 2524,
+   "name": "GET_DORM_COMMENT_LIST"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 27
+   },
+   "mid": 2525,
+   "name": "PRAISE_COMMENT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 27
+   },
+   "mid": 2526,
+   "name": "DELETE_COMMENT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 27
+   },
+   "mid": 2693,
+   "name": "EXCHANGE_DORM_KEY"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 27
+   },
+   "mid": 2694,
+   "name": "START_EXPAND_HOUSE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/dorm_dispatcher.go",
+    "line": 27
+   },
+   "mid": 2695,
+   "name": "FINISH_EXPAND_HOUSE"
+  }
+ ],
+ "name": "dormhouse",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/dormstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore"
+ ],
+ "tables": {
+  "owned": [
+   "player_dorm_admissions",
+   "player_dorm_comment_reactions",
+   "player_dorm_comments",
+   "player_dorm_glue_purchases",
+   "player_dorm_heroes",
+   "player_dorm_praises",
+   "player_dorm_room_social",
+   "player_dorm_rooms",
+   "player_dorm_roots"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "content_dorm_input_catalogs",
+   "content_public_profile_policies",
+   "gameplay_contexts",
+   "gxb_content_activation",
+   "gxb_content_hero_templates",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "player_directory_profiles",
+   "player_dorm_admissions",
+   "player_dorm_comment_reactions",
+   "player_dorm_comments",
+   "player_dorm_glue_purchases",
+   "player_dorm_heroes",
+   "player_dorm_praises",
+   "player_dorm_room_social",
+   "player_dorm_rooms",
+   "player_dorm_roots",
+   "player_economy_owners",
+   "player_function_unlocks",
+   "player_hero_roots",
+   "player_heroes",
+   "player_item_stacks",
+   "player_login_observations",
+   "player_progression",
+   "players"
+  ],
+  "written": [
+   "gxb_operation_receipts",
+   "player_dorm_admissions",
+   "player_dorm_comment_reactions",
+   "player_dorm_comments",
+   "player_dorm_glue_purchases",
+   "player_dorm_heroes",
+   "player_dorm_praises",
+   "player_dorm_room_social",
+   "player_dorm_rooms",
+   "player_dorm_roots"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "logincapacity",
+   "playerdisplay"
+  ],
+  "scenarios_naming": [
+   "i9_10c_buy_glue_1845.json",
+   "i9_10c_dorm_social.json"
+  ],
+  "unit": [
+   "compose_test.go",
+   "projection_test.go",
+   "social_native_test.go"
+  ]
+ }
+}

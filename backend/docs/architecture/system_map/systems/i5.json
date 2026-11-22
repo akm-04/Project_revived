@@ -1,0 +1,696 @@
+{
+ "background": [],
+ "content": [
+  "content_awakening_catalogs",
+  "content_dorm_input_catalogs",
+  "content_mission_activity_catalogs",
+  "content_monthly_signin_catalogs"
+ ],
+ "contracts": [
+  {
+   "count": 1,
+   "file": "docs/architecture/CUMULATIVE_CONTENT_GENERATION_LOCK.json"
+  },
+  {
+   "count": 26,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 12,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/popup_catalog/WAIVERS.json"
+  },
+  {
+   "count": 26,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
+   "count": 6,
+   "file": "docs/i9/I9_10A_EVENT_CENTRE_V1.json"
+  },
+  {
+   "count": 6,
+   "file": "docs/i9/I9_10F_MENTOR_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10H_H2_STRUCTURED_KINDS.md"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 6,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_CLOCK_ROLLBACK_V1.md"
+  },
+  {
+   "count": 16,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_TRIAL_SWEEP_V1.md"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_4A_RESEARCH_PLAN.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_4B_PREIMPLEMENTATION.md"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_4C_RESEARCH_PLAN.md"
+  },
+  {
+   "count": 13,
+   "file": "docs/i9/I9_4D_RESEARCH_PLAN.md"
+  },
+  {
+   "count": 10,
+   "file": "docs/i9/I9_AWAKENING_MISSIONS_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_ILLUSION_V1.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 18,
+   "file": "docs/i9/I9_MISSIONS_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V3.json"
+  },
+  {
+   "count": 25,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/RULING_I9-12_HAVE_FUN_LENDER.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/i5_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": [
+   "CAMPAIGN_NORMAL_WIN",
+   "CAMPAIGN_SUPER_WIN",
+   "CAMPAIGN_TRIAL_WIN",
+   "COURSE_QUIZ",
+   "EQUIPMENT_ENCHANTED",
+   "GODS_TRIAL_CLEARED",
+   "GOLDEN_HAND_USED",
+   "GUILD_ACTIVITY",
+   "HERO_LENT",
+   "HERO_PROMOTED",
+   "HERO_QUALITY_COUNT",
+   "HERO_SKILL_UPGRADED",
+   "INFINITY_BOSS_DEFEATED",
+   "INTIMACY_IMPROVED",
+   "MARCH_FINISHED",
+   "PET_FED",
+   "PVP_FIGHT",
+   "SKY_CITY_BATTLE",
+   "SUMMON",
+   "TEA_PARTY_DONATED",
+   "VENDING_JUICE_PURCHASED",
+   "VOYAGE_FINISHED",
+   "WORKPLACE_TEAM_SENT"
+  ]
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I5_CURRENT_SCALAR_PROJECTION"
+   },
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I5_PLAYER_WRITE"
+   }
+  ],
+  "ranks": [
+   {
+    "name": "i5.CharacterAssetLockRankMax",
+    "rank": 599
+   },
+   {
+    "name": "i5.CharacterAssetLockRankMin",
+    "rank": 400
+   },
+   {
+    "name": "i5.grantLockRankDirectory",
+    "rank": 740
+   },
+   {
+    "name": "i5.grantLockRankEconomyOwner",
+    "rank": 700
+   },
+   {
+    "name": "i5.grantLockRankFunctionState",
+    "rank": 730
+   },
+   {
+    "name": "i5.grantLockRankMailNamespace",
+    "rank": 610
+   },
+   {
+    "name": "i5.grantLockRankProgression",
+    "rank": 710
+   },
+   {
+    "name": "i5.grantLockRankScalar",
+    "rank": 720
+   },
+   {
+    "name": "i5.grantLockRankStack",
+    "rank": 722
+   },
+   {
+    "name": "i5.grantLockRankTemporal",
+    "rank": 721
+   }
+  ],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "mail_namespace_counters": [
+    "i5store.LockMailNamespaceCounterTx"
+   ],
+   "mail_records": [
+    "i5store.LockMailTx"
+   ],
+   "player_awakening_roots": [
+    "i5store.LockAwakeningTx",
+    "i5store.ReadAwakeningTx"
+   ],
+   "player_currency_balances": [
+    "i5store.LockScalarTx"
+   ],
+   "player_directory_profiles": [
+    "i4store.LockTx"
+   ],
+   "player_economy_owners": [
+    "i5store.LockEconomyOwnerTx"
+   ],
+   "player_function_state_owners": [
+    "i5store.LockFunctionStateTx"
+   ],
+   "player_guide_return_state": [
+    "i5store.LockGuideReturnTx"
+   ],
+   "player_item_stacks": [
+    "i5store.LockStackTx"
+   ],
+   "player_mission_instances": [
+    "i5store.LockObjectiveForClaimTx",
+    "i5store.LockObjectiveTx",
+    "i5store.LockOpenObjectivesTx"
+   ],
+   "player_mission_roots": [
+    "i5store.LockMissionRootTx",
+    "i5store.ReadMissionRootTx"
+   ],
+   "player_progression": [
+    "i5store.LockPlayerLevelTx",
+    "i5store.LockProgressionTx"
+   ],
+   "player_signin_roots": [
+    "i5store.LockSignInTx",
+    "i5store.ReadSignInTx"
+   ],
+   "player_story_cursors": [
+    "i5store.LockStoryTx"
+   ],
+   "player_temporal_resources": [
+    "i5store.LockTemporalTx"
+   ],
+   "players": [
+    "i4store.LockBoundRecipientTx"
+   ],
+   "redeem_campaigns": [
+    "i5store.LockRedeemByDigestTx"
+   ],
+   "redeem_codes": [
+    "i5store.LockRedeemByDigestTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "mail_namespace_counters",
+   "mail_records",
+   "player_awakening_roots",
+   "player_currency_balances",
+   "player_directory_profiles",
+   "player_economy_owners",
+   "player_function_state_owners",
+   "player_guide_return_state",
+   "player_item_stacks",
+   "player_mission_instances",
+   "player_mission_roots",
+   "player_progression",
+   "player_signin_roots",
+   "player_story_cursors",
+   "player_temporal_resources",
+   "players",
+   "redeem_campaigns",
+   "redeem_codes"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [
+  "AwakeningBootstrap",
+  "MailExpiryLoginReconciler",
+  "MissionBootstrap",
+  "OverlayMID1",
+  "PetStarterLoginReconciler",
+  "ReconcileCharacterLogin",
+  "SignInBootstrap"
+ ],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 73
+   },
+   "mid": 26,
+   "name": "SAVE_STORY"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 73
+   },
+   "mid": 81,
+   "name": "LOAD_BACKPACK"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 73
+   },
+   "mid": 160,
+   "name": "LOAD_MISSION"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 73
+   },
+   "mid": 161,
+   "name": "TAKE_MISSION_AWARD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 73
+   },
+   "mid": 163,
+   "name": "OPEN_AWAKE_MISSION"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 73
+   },
+   "mid": 164,
+   "name": "GIVE_UP_AWAKE_MISSION"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 73
+   },
+   "mid": 165,
+   "name": "OPEN_PET_AWAKE_MISSION"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 73
+   },
+   "mid": 166,
+   "name": "GIVE_UP_PET_AWAKE_MISSION"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 73
+   },
+   "mid": 167,
+   "name": "OPEN_AWAKE_TWICE_MISSION"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 73
+   },
+   "mid": 168,
+   "name": "GIVE_UP_AWAKE_TWICE_MISSION"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 73
+   },
+   "mid": 169,
+   "name": "GET_DAY_HUOYUE_AWARD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 73
+   },
+   "mid": 170,
+   "name": "GET_WEEK_HUOYUE_AWARD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 73
+   },
+   "mid": 171,
+   "name": "GET_AWAKE_ITEM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 73
+   },
+   "mid": 230,
+   "name": "REDEEM_CODE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 73
+   },
+   "mid": 352,
+   "name": "LOAD_SIGN_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 73
+   },
+   "mid": 353,
+   "name": "SIGN"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 73
+   },
+   "mid": 368,
+   "name": "LOAD_MAIL_LIST"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 73
+   },
+   "mid": 369,
+   "name": "SET_MAIL_READ"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 73
+   },
+   "mid": 370,
+   "name": "MAIL_ONEKEY"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 73
+   },
+   "mid": 2561,
+   "name": "AWAKE_MISSION_LIST"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 73
+   },
+   "mid": 2736,
+   "name": "TASK_LOAD_BY_TYPE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 73
+   },
+   "mid": 2737,
+   "name": "TASK_AWAKE_GIVE_UP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 73
+   },
+   "mid": 2738,
+   "name": "TASK_AWAKE_OPEN"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 73
+   },
+   "mid": 2865,
+   "name": "SET_PLAYER_GUIDE_FUNCTION"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/i5_dispatcher.go",
+    "line": 73
+   },
+   "mid": 2866,
+   "name": "SET_PLAYER_RETURN_ID"
+  }
+ ],
+ "name": "i5",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/auditstore",
+  "internal/adapters/postgres/campaignstore",
+  "internal/adapters/postgres/characterstore",
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore"
+ ],
+ "tables": {
+  "owned": [],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "campaign_nodes",
+   "content_awakening_catalogs",
+   "content_dorm_input_catalogs",
+   "content_mission_activity_catalogs",
+   "content_monthly_signin_catalogs",
+   "gameplay_contexts",
+   "gxb_content_activation",
+   "gxb_content_function_gates",
+   "gxb_content_hero_templates",
+   "gxb_content_objective_definitions",
+   "gxb_content_pet_acquisition_policy",
+   "gxb_content_player_progression",
+   "gxb_content_resource_definitions",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "i5_resource_registry",
+   "logical_servers",
+   "mail_attachments",
+   "mail_namespace_counters",
+   "mail_records",
+   "mail_tuning",
+   "objective_definitions",
+   "player_awakening_roots",
+   "player_currency_balances",
+   "player_directory_profiles",
+   "player_economy_owners",
+   "player_function_state_owners",
+   "player_guide_return_state",
+   "player_hero_raw_awakening",
+   "player_hero_roots",
+   "player_heroes",
+   "player_item_stacks",
+   "player_mission_instances",
+   "player_mission_roots",
+   "player_progression",
+   "player_scalar_daily_floors",
+   "player_signin_roots",
+   "player_story_cursors",
+   "player_temporal_resources",
+   "players",
+   "redeem_campaigns",
+   "redeem_codes",
+   "redeem_redemptions",
+   "redeem_reward_bundle_revisions"
+  ],
+  "written": [
+   "gxb_operation_receipts",
+   "mail_attachments",
+   "mail_namespace_counters",
+   "mail_records",
+   "operator_audit_events",
+   "player_awakening_roots",
+   "player_crystal_spend_days",
+   "player_currency_balances",
+   "player_directory_profiles",
+   "player_function_eligibility",
+   "player_function_state_owners",
+   "player_function_unlocks",
+   "player_guide_return_state",
+   "player_guild_activity_days",
+   "player_item_stacks",
+   "player_mission_instances",
+   "player_mission_roots",
+   "player_progression",
+   "player_scalar_daily_floors",
+   "player_signin_roots",
+   "player_story_cursors",
+   "player_temporal_resources",
+   "players",
+   "redeem_codes",
+   "redeem_redemptions"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "guildbroadcast",
+   "guildinvite",
+   "logincapacity",
+   "missions",
+   "playerdisplay",
+   "publicshowcase",
+   "social17upgrade",
+   "socialactivation",
+   "socialprojection"
+  ],
+  "scenarios_naming": [
+   "i9_11_hero_skill.json",
+   "i9_3_fresh_lobby.json",
+   "i9_3_strong_guide.json",
+   "i9_3d_challenge_loss.json",
+   "i9_4_guide17.json",
+   "i9_4_real_pk.json",
+   "i9_4a_missions.json",
+   "i9_4b_chest.json",
+   "i9_4c_signin.json",
+   "i9_4c_signin_bonus.json",
+   "i9_4d_awakening.json",
+   "i9_5c_pet_awakening.json",
+   "i9_tutorial_switches.json"
+  ],
+  "unit": [
+   "awakening_blood_test.go",
+   "awakening_occult_material_test.go",
+   "ca1_test.go",
+   "character_functions_test.go",
+   "composite_functions_test.go",
+   "equipment_resources_test.go",
+   "glue_purchase_test.go",
+   "hero_equipment_resources_test.go",
+   "hero_progression_test.go",
+   "hero_promotion_resources_test.go",
+   "i9_9_binding_test.go",
+   "items_energy_exchange_test.go",
+   "level_function_announcement_test.go",
+   "level_stack_test.go",
+   "march_binding_test.go",
+   "material_exchange_test.go",
+   "max_hero_color_policy_test.go",
+   "mission_bootstrap_test.go",
+   "mission_fact_binding_test.go",
+   "mission_projection_test.go",
+   "missions_test.go",
+   "objective_facts_test.go",
+   "occult_ticket_test.go",
+   "pet_acquisition_test.go",
+   "pet_progression_test.go",
+   "player_display_value_test.go",
+   "promotion_restoration_test.go",
+   "scalar_daily_floor_test.go",
+   "service_test.go",
+   "settlement_projection_changes_test.go",
+   "startup_test.go",
+   "temporal_repin_test.go",
+   "workplace_sp_test.go"
+  ]
+ }
+}

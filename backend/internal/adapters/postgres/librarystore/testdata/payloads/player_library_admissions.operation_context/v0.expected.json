@@ -1,0 +1,70 @@
+{
+  "Operation": {
+    "ID": "12345678-1234-4234-8234-123456789012",
+    "StartedAt": "2026-11-16T03:14:23.607291Z",
+    "EntropySeed": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "Policies": [
+      {
+        "name": "content",
+        "version": "43541b13504ccb7adee1619147fef90f8cdf6a7bd06a5bb382002a8d8d551356"
+      },
+      {
+        "name": "library",
+        "version": "LIBRARY_INPUT_LIFECYCLE_V1"
+      }
+    ]
+  },
+  "DecisionAt": "2026-11-16T03:14:23.607291Z",
+  "Actor": {
+    "Account": "00000000-0000-0000-0000-000000000000",
+    "Session": "00000000-0000-0000-0000-000000000000",
+    "Context": "00000000-0000-0000-0000-000000000000",
+    "AccountUID": "r82b13-library-113016",
+    "Server": 1,
+    "Player": 113016,
+    "Generation": 0,
+    "SessionVersion": 0,
+    "ContextVersion": 0
+  },
+  "Command": {
+    "Family": "LIBRARY_GIFT",
+    "PartnerID": 1,
+    "Value": 100,
+    "Quantity": 1
+  },
+  "ContentRevision": "43541b13504ccb7adee1619147fef90f8cdf6a7bd06a5bb382002a8d8d551356",
+  "State": "COMMITTED"
+}

@@ -30,8 +30,8 @@ func TestCA63BaseAndCA64AutoProductionRoutingIsAtomic(t *testing.T) {
 	if strings.Contains(got, "134") {
 		t.Fatalf("Practice captured foreign PetEXP route: %q", got)
 	}
-	if !strings.Contains(s, "mustRegister(2754, lobbyD)") || strings.Count(s, ", lobbyD)") != 1 {
-		t.Fatal("MID124 was not atomically removed from Lobby routing")
+	if !strings.Contains(s, "mustRegister(2754, lobbyD)") || !strings.Contains(s, "mustRegister(3, lobbyD)") || strings.Count(s, ", lobbyD)") != 2 {
+		t.Fatal("MID124 was not atomically removed from Lobby routing, or the I9-11D MID 3 server-time route is missing")
 	}
 	petRE := regexp.MustCompile(`(?s)for _, mid := range \[\]uint16\{([^}]*)\} \{\s*mustRegister\(mid, petD\)`)
 	pm := petRE.FindStringSubmatch(s)
@@ -85,7 +85,7 @@ func TestCA63DispatcherPreservesTelemetryAndExcludesFutureMIDs(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := string(b)
-	for _, need := range []string{"case 124:", "case 125:", "case 126:", "case 128:", "case 129:", "case 130:", "case 131:", "case 133:", "lobby.BootLegitTimer", "ResolveGameplayBearer", "region_mismatch"} {
+	for _, need := range []string{"case 124:", "case 125:", "case 126:", "case 128:", "case 129:", "case 130:", "case 131:", "case 133:", "lobby.BootLegitTimer", "ResolveGameplayBearer", "req.Envelope.Claims.Region != int64(actor.LogicalServerID)"} {
 		if !strings.Contains(s, need) {
 			t.Errorf("CA6-3 dispatcher missing %q", need)
 		}

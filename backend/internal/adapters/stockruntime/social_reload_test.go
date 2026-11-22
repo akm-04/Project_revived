@@ -13,6 +13,7 @@ import (
 	"gxb.local/backend/v2/internal/protocol/limits"
 	"gxb.local/backend/v2/internal/protocol/mids"
 	rt "gxb.local/backend/v2/internal/protocol/realtime"
+	"gxb.local/backend/v2/internal/testsupport/latency"
 	"net"
 	"sync"
 	"testing"
@@ -173,9 +174,7 @@ func TestSocialSlowWriterBoundedAndReplacementFence(t *testing.T) {
 	if e := h.ReloadAndDeliver(c, raw); e != nil {
 		t.Fatal(e)
 	}
-	if time.Since(at) > time.Second {
-		t.Fatal("slow writer exceededbudget")
-	}
+	latency.Enforce(t, latency.Incidental, time.Since(at), time.Second)
 	nextWriter, _, nextClient := newRegistryPipeWriter(t)
 	defer nextClient.Close()
 	next, e := registry.Replace(registryAdmission(t, "33333333-3333-4333-8333-333333333333", 100001, domainrt.World, 2), nextWriter)

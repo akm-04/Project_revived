@@ -21,6 +21,7 @@ import (
 	"io"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -138,10 +139,12 @@ type HeroPort interface {
 	LockHeroByPartnerIDTx(context.Context, tx.Tx, identity.PlayerID, int64) (character.Hero, error)
 	ReadRootTx(context.Context, tx.Queryer, identity.PlayerID) (character.HeroRoot, error)
 	ReadHeroByPartnerIDTx(context.Context, tx.Queryer, identity.PlayerID, int64) (character.Hero, error)
+	FindHeroByPartnerIDTx(context.Context, tx.Queryer, identity.PlayerID, int64) (character.Hero, bool, error)
 	ListHeroesTx(context.Context, tx.Queryer, identity.PlayerID) ([]character.Hero, error)
 }
 type OwnerPort interface {
 	ReadHeroTx(context.Context, tx.Queryer, identity.PlayerID, int64) (inscription.HeroRoot, error)
+	ListHeroesTx(context.Context, tx.Queryer, identity.PlayerID) ([]inscription.HeroRoot, error)
 	LockHeroTx(context.Context, tx.Tx, identity.PlayerID, int64) (inscription.HeroRoot, error)
 	SaveHeroTx(context.Context, tx.Tx, inscription.HeroRoot, int64) error
 	ReadRootTx(context.Context, tx.Queryer, identity.PlayerID) (inscription.Root, error)
@@ -152,6 +155,7 @@ type OwnerPort interface {
 }
 type ContentPort interface {
 	HeroKindTx(context.Context, tx.Queryer, string, int64) (character.HeroKind, error)
+	HeroKindsTx(context.Context, tx.Queryer, string, []int64) (map[int64]character.HeroKind, error)
 	InscriptionCatalogTx(context.Context, tx.Queryer, string) (inscription.Catalog, error)
 	InscriptionInputsActive(context.Context) (string, bool, error)
 	InscriptionInputsRevisionTx(context.Context, tx.Queryer, string) (bool, error)
@@ -430,11 +434,18 @@ func (s Service) Command(ctx context.Context, a identity.ActorContext, c Command
 	}
 	return Result{}, ErrUnavailable
 }
+
+// finishResult recovers the domain cause from the persisted rejection text so
+// the first attempt and its replay classify identically. A definite abort
+// records e.Error(), which names the resource the player could not pay.
 func finishResult(out Result) (Result, error) {
-	if out.Rejected != "" {
-		return out, fmt.Errorf("%w: %s", ErrRejected, out.Rejected)
+	if out.Rejected == "" {
+		return out, nil
 	}
-	return out, nil
+	if strings.Contains(out.Rejected, economy.InsufficientBalance("crystal").Error()) {
+		return out, fmt.Errorf("%w: %w", ErrRejected, economy.InsufficientBalance("crystal"))
+	}
+	return out, fmt.Errorf("%w: %s", ErrRejected, out.Rejected)
 }
 
 type resolver struct {

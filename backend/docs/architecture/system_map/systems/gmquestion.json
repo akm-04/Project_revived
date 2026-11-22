@@ -1,0 +1,326 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [
+  {
+   "count": 2,
+   "file": "docs/architecture/CUMULATIVE_CONTENT_GENERATION_LOCK.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/GUILD_NAME_LENGTH_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10A_EVENT_CENTRE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10A_NOTICEBOARD_POLICY.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10E_TOP_FIVE_FORCE_POLICY_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_10H_H2_STRUCTURED_KINDS.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11B_ITEMS_ENERGY_V2.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11_GIRLS_LOG_V1.md"
+  },
+  {
+   "count": 4,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_4A_RESEARCH_PLAN.md"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_4B_PREIMPLEMENTATION.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_4C_RESEARCH_PLAN.md"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_4D_RESEARCH_PLAN.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_ADVENTURE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_ADVENTURE_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_AWAKENING_MISSIONS_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_BROADCAST_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_CAMPAIGN_V1.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GM_QUESTION_FOUNDATION_V1.md"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_GUILD_CAMPAIGN_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_GUILD_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_RENTAL_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_I10_GACHA_GUIDE_HANDOFF_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_ILLUSION_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_ILLUSION_V1.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_MARCH_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MAX_HERO_COLOR_POLICY_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MEMOIR_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_MISSIONS_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V3.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_MODE_FRAMEWORK_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_OCCULT_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_OCCULT_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_PVP_TOURNAMENT_CASUAL_V1.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORLD_BOSS_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORLD_BOSS_V1.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/R8_PRIVATE_CACHE_RETENTION_DAYS_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/R8_PRIVATE_RETENTION_DAYS_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/R8_PRIVATE_RETENTION_RUN_BUDGET_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/RULING_I9-12_SEAL_REGISTRY_SYNC.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/gm_question_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 3000,
+    "name": "gm-question"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/gm_question_dispatcher.go",
+    "line": 23
+   },
+   "mid": 4,
+   "name": "LOAD_GM_QUESTIONS"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/gm_question_dispatcher.go",
+    "line": 23
+   },
+   "mid": 5,
+   "name": "ASK_GM_QUESTION"
+  }
+ ],
+ "name": "gmquestion",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/gmquestionstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore"
+ ],
+ "tables": {
+  "owned": [
+   "player_gm_questions"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "gxb_operation_receipts",
+   "player_directory_profiles",
+   "player_gm_questions",
+   "players"
+  ],
+  "written": [
+   "gxb_operation_receipts",
+   "player_gm_questions"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay",
+   "undeliveredreplay"
+  ],
+  "scenarios_naming": [
+   "i9_10_gm_question.json"
+  ],
+  "unit": [
+   "recovery_test.go"
+  ]
+ }
+}

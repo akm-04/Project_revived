@@ -1,0 +1,271 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [
+  {
+   "count": 10,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 7,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 10,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
+   "count": 4,
+   "file": "docs/i9/I9_10A_EVENT_CENTRE_V1.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/i9/I9_10F_MENTOR_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_FURNITURE_COMPOSE_V1.md"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11_GIRLS_LOG_V1.md"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_4B_PREIMPLEMENTATION.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_4D_RESEARCH_PLAN.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 4,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 8,
+   "file": "docs/i9/I9_MISSIONS_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V3.json"
+  },
+  {
+   "count": 10,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/RULING_I9-12_HAVE_FUN_LENDER.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/practice_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "CA6_3_PRACTICE"
+   },
+   {
+    "lock_timeout_ms": 2000,
+    "name": "CA6_4_PRACTICE_AUTO"
+   },
+   {
+    "lock_timeout_ms": 2000,
+    "name": "CA6_PRACTICE_DAILY_GENERATION"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/practice_dispatcher.go",
+    "line": 157
+   },
+   "mid": 124,
+   "name": "GET_PRACTICE_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/practice_dispatcher.go",
+    "line": 157
+   },
+   "mid": 125,
+   "name": "PRACTICE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/practice_dispatcher.go",
+    "line": 157
+   },
+   "mid": 126,
+   "name": "PRACTICE_SAVE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/practice_dispatcher.go",
+    "line": 157
+   },
+   "mid": 127,
+   "name": "PRACTICE_AUTO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/practice_dispatcher.go",
+    "line": 157
+   },
+   "mid": 128,
+   "name": "WASH_BY_TICKET"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/practice_dispatcher.go",
+    "line": 157
+   },
+   "mid": 129,
+   "name": "PET_GET_PRACTICE_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/practice_dispatcher.go",
+    "line": 157
+   },
+   "mid": 130,
+   "name": "PET_PRACTICE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/practice_dispatcher.go",
+    "line": 157
+   },
+   "mid": 131,
+   "name": "PET_PRACTICE_SAVE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/practice_dispatcher.go",
+    "line": 157
+   },
+   "mid": 132,
+   "name": "PET_PRACTICE_AUTO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/practice_dispatcher.go",
+    "line": 157
+   },
+   "mid": 133,
+   "name": "PET_WASH_BY_TICKET"
+  }
+ ],
+ "name": "characterpractice",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore"
+ ],
+ "tables": {
+  "owned": [
+   "player_hero_practice_candidates",
+   "player_pet_practice_candidates",
+   "player_practice_roots"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "gxb_content_activation",
+   "gxb_content_hero_templates",
+   "gxb_content_pet_templates",
+   "gxb_content_practice_locks",
+   "gxb_content_practice_methods",
+   "gxb_content_practice_policy_facts",
+   "gxb_content_practice_vip_bless",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "player_hero_practice_candidates",
+   "player_heroes",
+   "player_pet_practice_candidates",
+   "player_pets",
+   "player_practice_roots"
+  ],
+  "written": [
+   "gxb_operation_receipts",
+   "player_hero_practice_candidates",
+   "player_heroes",
+   "player_pet_practice_candidates",
+   "player_pets",
+   "player_practice_roots"
+  ]
+ },
+ "tests": {
+  "integration": [],
+  "scenarios_naming": [],
+  "unit": [
+   "auto_test.go",
+   "ca7_6_integration_test.go",
+   "contracts_test.go",
+   "contribution_test.go",
+   "daily_generation_test.go",
+   "manual_accounting_test.go",
+   "roll_policy_test.go",
+   "service_semantics_test.go"
+  ]
+ }
+}

@@ -100,7 +100,7 @@ func (s GiftService) ApplyTx(c context.Context, t tx.Tx, p PreparedGift) (Notice
 	return out, MatchGift(out, p.descriptor)
 }
 func PreflightConsumption(n Notice, at time.Time) error {
-	if !n.Active || n.VersionExhausted() || at.Before(n.UpdatedAt) || at.Before(n.NoticeTime) {
+	if !n.Active || n.VersionExhausted() {
 		return ErrInvalidNotice
 	}
 	return nil

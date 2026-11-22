@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentqueries"
+	appdorm "gxb.local/backend/v2/internal/application/dormhouse"
 	app "gxb.local/backend/v2/internal/application/publicprofile"
 	"gxb.local/backend/v2/internal/content/builtin"
 	"gxb.local/backend/v2/internal/content/registry"
@@ -85,6 +86,14 @@ func (Store) ReadPublicProfilePolicy(c context.Context, q tx.Queryer, rev string
 	out.Policy = profile.PublicProfilePolicy(p)
 	return out, out.Validate()
 }
+func (s Store) ModerationPolicyTx(c context.Context, q tx.Queryer, rev string) (appdorm.ModerationPolicy, error) {
+	p, e := s.ReadPublicProfilePolicy(c, q, rev)
+	if e != nil || p.Validate() != nil || p.Revision != rev {
+		return appdorm.ModerationPolicy{}, app.ErrContent
+	}
+	return appdorm.ModerationPolicy{PolicyID: p.Policy.ModerationPolicyID, Words: append([]string(nil), p.Policy.Words...)}, nil
+}
+
 func (Store) HasPublicProfileCapabilityTx(c context.Context, q tx.Queryer, rev string) (bool, error) {
 	if q == nil {
 		return false, app.ErrContent

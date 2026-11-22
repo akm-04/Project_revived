@@ -1,0 +1,332 @@
+{
+ "background": [],
+ "content": [
+  "content_course_input_catalogs",
+  "content_library_input_catalogs"
+ ],
+ "contracts": [
+  {
+   "count": 13,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 17,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 4,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 16,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [
+  "observing"
+ ],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/course_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I7C2E_COURSE_INPUTS"
+   }
+  ],
+  "ranks": [
+   {
+    "name": "course.RootLockRank",
+    "rank": 520
+   },
+   {
+    "name": "elementequipment.RootLockRank",
+    "rank": 560
+   },
+   {
+    "name": "inscription.RootLockRank",
+    "rank": 540
+   },
+   {
+    "name": "spirit.RootLockRank",
+    "rank": 580
+   }
+  ],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "player_course_admissions": [
+    "coursestore.LockAdmissionTx"
+   ],
+   "player_course_heroes": [
+    "coursestore.LockHeroTx"
+   ],
+   "player_course_roots": [
+    "coursestore.LockRootTx"
+   ],
+   "player_economy_owners": [
+    "i5store.LockCoursePlayerStateTx"
+   ],
+   "player_progression": [
+    "i5store.LockCoursePlayerStateTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "player_course_admissions",
+   "player_course_heroes",
+   "player_course_roots",
+   "player_economy_owners",
+   "player_progression",
+   "players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [
+  "OverlayRosterTx"
+ ],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/course_dispatcher.go",
+    "line": 23
+   },
+   "mid": 2128,
+   "name": "APPLY_COURSE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/course_dispatcher.go",
+    "line": 23
+   },
+   "mid": 2129,
+   "name": "GET_COURSE_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/course_dispatcher.go",
+    "line": 23
+   },
+   "mid": 2130,
+   "name": "GET_STUDYROOM_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/course_dispatcher.go",
+    "line": 23
+   },
+   "mid": 2131,
+   "name": "STUDY"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/course_dispatcher.go",
+    "line": 23
+   },
+   "mid": 2132,
+   "name": "SPEED_STUDY"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/course_dispatcher.go",
+    "line": 23
+   },
+   "mid": 2133,
+   "name": "ADD_SKILL"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/course_dispatcher.go",
+    "line": 23
+   },
+   "mid": 2134,
+   "name": "FORGET_COURSE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/course_dispatcher.go",
+    "line": 23
+   },
+   "mid": 2135,
+   "name": "ENTER_ROOM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/course_dispatcher.go",
+    "line": 23
+   },
+   "mid": 2136,
+   "name": "LEAVE_ROOM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/course_dispatcher.go",
+    "line": 23
+   },
+   "mid": 2137,
+   "name": "GET_STUDY_INFOS"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/course_dispatcher.go",
+    "line": 23
+   },
+   "mid": 2138,
+   "name": "CANCEL_STUDY"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/course_dispatcher.go",
+    "line": 23
+   },
+   "mid": 2139,
+   "name": "GET_GIFT_BOX_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/course_dispatcher.go",
+    "line": 23
+   },
+   "mid": 2140,
+   "name": "INCR_COURESE_EXP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/course_dispatcher.go",
+    "line": 23
+   },
+   "mid": 2141,
+   "name": "OPEN_GIFT_BOX"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/course_dispatcher.go",
+    "line": 23
+   },
+   "mid": 2142,
+   "name": "CONTINUE_STUDY"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/course_dispatcher.go",
+    "line": 23
+   },
+   "mid": 2500,
+   "name": "GET_COURSES_RECOMMEND"
+  }
+ ],
+ "name": "course",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/coursestore",
+  "internal/adapters/postgres/elementstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/inscriptionstore",
+  "internal/adapters/postgres/kernelstore",
+  "internal/adapters/postgres/spiritstore"
+ ],
+ "tables": {
+  "owned": [
+   "player_course_admissions",
+   "player_course_heroes",
+   "player_course_roots"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "content_course_input_catalogs",
+   "content_library_input_catalogs",
+   "gameplay_contexts",
+   "gxb_content_activation",
+   "gxb_content_hero_templates",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "player_course_admissions",
+   "player_course_heroes",
+   "player_course_roots",
+   "player_currency_balances",
+   "player_economy_owners",
+   "player_function_unlocks",
+   "player_hero_roots",
+   "player_heroes",
+   "player_item_stacks",
+   "player_progression",
+   "players"
+  ],
+  "written": [
+   "gxb_operation_receipts",
+   "player_course_admissions",
+   "player_course_heroes",
+   "player_course_roots"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [
+   "i9_10b_library.json"
+  ],
+  "unit": []
+ }
+}

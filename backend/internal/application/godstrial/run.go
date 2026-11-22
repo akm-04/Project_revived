@@ -150,12 +150,8 @@ func (s Mode) run(c context.Context, a identity.ActorContext, name string, reque
 		}
 
 		balance, funcs := changes.Recorded(c)
-		if len(balance) > 0 {
-			out["economy_"] = balance
-		}
-		if len(funcs) > 0 {
-			out["new_funcs_"] = funcs
-		}
+		changes.WriteEconomy(out, balance)
+		changes.WriteFunctions(out, funcs)
 		for k, val := range changes.RecordedMissions(c) {
 			out[k] = val
 		}

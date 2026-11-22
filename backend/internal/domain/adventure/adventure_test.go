@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/operation"
 )
 
@@ -33,10 +34,11 @@ func fixedEvent(t *testing.T, id int64) Event {
 
 func TestTriggerMapOnlyUsesFactKindsWithProducers(t *testing.T) {
 	cases := map[string]int64{
-		SweepFactKind:    EventDefense,
-		BattleFactKind:   EventBattle,
-		SummonFactKind:   EventSummon,
-		IllusionFactKind: EventIllusion,
+		SweepFactKind:              EventDefense,
+		BattleFactKind:             EventBattle,
+		SummonFactKind:             EventSummon,
+		IllusionFactKind:           EventIllusion,
+		objective.ShopPurchaseKind: EventShop,
 	}
 	for kind, want := range cases {
 		event, ok := EventForFactKind(kind)
@@ -91,7 +93,7 @@ func TestRollIsDeterministicPerFactKey(t *testing.T) {
 func TestOccurrenceLifetimeAndOneActivePerType(t *testing.T) {
 	at := time.Unix(1700000000, 0).UTC()
 	event := fixedEvent(t, EventDefense)
-	occurrence, err := NewOccurrence("campaign/sweep/1", testPlayer(), event, at)
+	occurrence, err := NewOccurrence("campaign/sweep/1", testPlayer(), event, at, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -147,7 +149,7 @@ func TestOccurrenceSpecialData(t *testing.T) {
 		EventDefense:  func(id int64) bool { return id == 0 },
 	}
 	for eventType, valid := range cases {
-		occurrence, err := NewOccurrence("fact/"+fmt.Sprint(eventType), testPlayer(), fixedEvent(t, eventType), at)
+		occurrence, err := NewOccurrence("fact/"+fmt.Sprint(eventType), testPlayer(), fixedEvent(t, eventType), at, 0)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -279,5 +281,71 @@ func TestGeneratedCatalogPricesAreRecomputed(t *testing.T) {
 	drift.Events[0].Rate = 4
 	if !errors.Is(drift.Validate(), ErrUnavailable) {
 		t.Fatal("rating drift must refuse the catalog")
+	}
+}
+
+// C4: a Favor occurrence carries its partner id, and a stored row with
+// special_data 0 is retired from every read.
+func TestFavorOccurrenceSpecialDataAndRetirement(t *testing.T) {
+	at := time.Unix(1700000000, 0).UTC()
+	event := fixedEvent(t, EventFavor)
+	occurrence, err := NewOccurrence("library/favor/1", testPlayer(), event, at, 10001001)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if occurrence.SpecialData != 10001001 {
+		t.Fatalf("favor special_data %d", occurrence.SpecialData)
+	}
+	if !occurrence.Servable(at) {
+		t.Fatal("a live favor occurrence with a partner id must be served")
+	}
+	retired := occurrence
+	retired.SpecialData = 0
+	if retired.Servable(at) {
+		t.Fatal("a retired favor occurrence must never be served")
+	}
+	defense, err := NewOccurrence("campaign/sweep/1", testPlayer(), fixedEvent(t, EventDefense), at, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !defense.Servable(at) {
+		t.Fatal("an occurrence without a partner id stays servable outside Favor")
+	}
+}
+
+// R2: the gift recipients are the distinct defeaters, ascending, and a position
+// solved before KillerPlayer existed contributes no recipient.
+func TestDefenseRecipientsDistinctAscending(t *testing.T) {
+	state := RoomState{Monsters: []MonsterState{
+		{Killer: "c", KillerPlayer: 30, Solved: true},
+		{Killer: "a", KillerPlayer: 10, Solved: true},
+		{Killer: "c", KillerPlayer: 30, Solved: true},
+	}}
+	if got := state.DefenseRecipients(); len(got) != 2 || got[0] != 10 || got[1] != 30 {
+		t.Fatalf("recipients %v, want [10 30]", got)
+	}
+	if !state.DefenseCompleted() {
+		t.Fatal("three solved positions are a completed room")
+	}
+
+	partial := RoomState{Monsters: []MonsterState{
+		{Killer: "a", KillerPlayer: 10, Solved: true},
+		{Killer: "b", KillerPlayer: 20},
+		{},
+	}}
+	if got := partial.DefenseRecipients(); len(got) != 1 || got[0] != 10 {
+		t.Fatalf("partial recipients %v, want [10]", got)
+	}
+	if partial.DefenseCompleted() {
+		t.Fatal("an unsolved position is not a completed room")
+	}
+
+	carried := RoomState{Monsters: []MonsterState{
+		{Killer: "old", Solved: true},
+		{Killer: "b", KillerPlayer: 20, Solved: true},
+		{Killer: "b", KillerPlayer: 20, Solved: true},
+	}}
+	if got := carried.DefenseRecipients(); len(got) != 1 || got[0] != 20 {
+		t.Fatalf("carried-over recipients %v, want [20]", got)
 	}
 }

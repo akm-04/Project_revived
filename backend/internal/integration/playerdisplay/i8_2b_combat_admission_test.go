@@ -24,14 +24,14 @@ func TestI8_2BCombatAdmissionSoakNative(t *testing.T) {
 	server := rankingServer(t, pool)
 	a, rev, ref := combatOwner(t, pool, server)
 	s := combatService(t, pool)
-	launcher := combatworker.New(combatLimits(t), workers, 300*time.Millisecond)
+	launcher := combatworker.New(combatLimits(t), workers, 300*time.Millisecond, 0)
 	t.Cleanup(launcher.Close)
 	s.Worker = launcher
 	staged := make([]d.Attempt, attempts)
 	for i := range staged {
 		name := fmt.Sprintf("soak-%d", i)
-		locator := d.Locator{DomainKind: "i8-2b-fixture-mode", AuthorityScope: "admission", DomainLocator: fmt.Sprintf("%d/%s", a.PlayerID, name)}
-		started, err := fixtureStart(t, s, rev, combat.StartRequest{Actor: a, Locator: locator, GenerationRef: "g", StartFingerprint: fingerprint(name), Battle: combat.BattleRequest{CampaignType: 1,
+		locator := d.Locator{DomainKind: "EVENT_CENTRE_BOARD", AuthorityScope: "admission", DomainLocator: fmt.Sprintf("%d/%s", a.PlayerID, name)}
+		started, err := fixtureStart(t, s, rev, combat.StartRequest{Mode: d.ModeEventCentreBoard, Actor: a, Locator: locator, GenerationRef: "g", StartFingerprint: fingerprint(name), Battle: combat.BattleRequest{CampaignType: 1,
 			TeamA: []combat.Participant{{Origin: d.OwnedSelf, Kind: d.HeroActor, Player: a.PlayerID, Identity: ref.PartnerID}}, WavesB: [][]combat.Participant{{{Origin: d.Template, Kind: d.HeroActor, Identity: 10001002, TemplateParams: templateParams(10001002)}}}}}, pool)
 		if err != nil {
 			t.Fatal(name, err)

@@ -13,6 +13,7 @@ import (
 	dg "gxb.local/backend/v2/internal/domain/generation"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/modes"
 	dgift "gxb.local/backend/v2/internal/domain/socialgift"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/lockkey"
@@ -44,7 +45,17 @@ type Epoch struct {
 	CreatedAt, UpdatedAt time.Time
 }
 
+// Day is the canonical 05:00 GMT+8 game-day token (I9_MODE_FRAMEWORK_V1 F7).
 func Day(at time.Time) (string, error) {
+	if at.IsZero() {
+		return "", ErrInvalid
+	}
+	return modes.DayBegins(modes.Day(at)).Add(8 * time.Hour).Format("2006-01-02"), nil
+}
+
+// LegacyDay is the pre-R3 GMT+8-midnight token. It exists only to keep rows
+// written under the old calendar valid and to resolve a covering old row.
+func LegacyDay(at time.Time) (string, error) {
 	if at.IsZero() {
 		return "", ErrInvalid
 	}
@@ -117,7 +128,10 @@ func (t Transfer) Validate() error {
 		return ErrConflict
 	}
 	day, err := Day(t.IssuedAt)
-	if err != nil || day != t.SenderDay {
+	if err != nil {
+		return ErrConflict
+	}
+	if legacy, legacyErr := LegacyDay(t.IssuedAt); legacyErr != nil || day != t.SenderDay && legacy != t.SenderDay {
 		return ErrConflict
 	}
 	if t.ClaimOperation.IsZero() {
@@ -129,7 +143,8 @@ func (t Transfer) Validate() error {
 			return ErrConflict
 		}
 		d, e := Day(*t.ClaimedAt)
-		if e != nil || d != t.ClaimDay {
+		legacy, legacyErr := LegacyDay(*t.ClaimedAt)
+		if e != nil || legacyErr != nil || d != t.ClaimDay && legacy != t.ClaimDay {
 			return ErrConflict
 		}
 	}
@@ -161,6 +176,7 @@ type Result struct {
 	GrantReceiptID          string                 `json:"grant_receipt_id,omitempty"`
 	Amount                  int64                  `json:"amount"`
 	Revision                string                 `json:"revision"`
+	MasterInfo              map[string]any         `json:"master_info,omitempty"`
 }
 type ClaimOperation struct {
 	ID                    ids.UUID

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"reflect"
 	"testing"
+	"time"
 
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
@@ -112,10 +113,12 @@ func TestI7C4RawBirthActualCreationAndStrictLegacyRead(t *testing.T) {
 		t.Fatal(e)
 	}
 	if e = statRead(t, p, rev, func(sc ca.CoherentReadScope) error {
-		_, e := rawBirthReader().RawAwakeningTx(ctx, sc, old.Ref())
-		return e
-	}); e == nil {
-		t.Fatal("legacy missing birth became zero")
+		if _, e := rawBirthReader().RawAwakeningTx(ctx, sc, old.Ref()); !errors.Is(e, character.ErrRawAwakeningUnavailable) {
+			t.Fatalf("legacy missing birth was not explicitly unknown: %v", e)
+		}
+		return nil
+	}); e != nil {
+		t.Fatal(e)
 	}
 	if _, e = rawBirthService(p).SummonNormal(ctx, b, legacyDef.Template.TableID, legacyDef.Template.FragmentItemID, legacyDef.FragmentCount, oldOp); e != nil || rawCount(t, p, old.Ref()) != 0 {
 		t.Fatal("historic proof backfilled/rejected", e)
@@ -142,6 +145,35 @@ func TestI7C4RawBirthActualCreationAndStrictLegacyRead(t *testing.T) {
 		t.Fatal("inactive actor read or provenance lost", e)
 	}
 }
+
+// A forwarded server clock stamped this birth in the future. The observation
+// read must use the latest durable fact, not refuse the row as unreadable.
+func TestI7C4RawBirthReadAfterBackwardClockStep(t *testing.T) {
+	p := pool(t)
+	rev := installed(t, p)
+	a := rankingActor(t, p, rankingServer(t, p), true)
+	def := collectionResources(t, p, a, rev, 10001001)
+	h, e := rawBirthService(p).SummonNormal(ctx, a, def.Template.TableID, def.Template.FragmentItemID, def.FragmentCount, op())
+	if e != nil {
+		t.Fatal(e)
+	}
+	forward := time.Now().UTC().Add(8 * time.Hour)
+	exec(t, p, `UPDATE player_heroes SET created_at=$3,updated_at=$3 WHERE player_id=$1 AND partner_id=$2`, int64(a.PlayerID), h.PartnerID, forward)
+	exec(t, p, `UPDATE player_hero_raw_awakening SET birth_at=$3,created_at=$3,updated_at=$3 WHERE player_id=$1 AND partner_id=$2`, int64(a.PlayerID), h.PartnerID, forward)
+	if e = statRead(t, p, rev, func(sc ca.CoherentReadScope) error {
+		got, e := rawBirthReader().RawAwakeningTx(ctx, sc, h.Ref())
+		if e != nil {
+			return e
+		}
+		if !got.Known || got.RawStage != 0 || got.StateVersion != 1 || got.ObservedAt.Before(sc.ObservedAt) {
+			t.Fatalf("forward-dated birth observation %+v", got)
+		}
+		return nil
+	}); e != nil {
+		t.Fatalf("forward-dated raw birth refused after backward clock step: %v", e)
+	}
+}
+
 func TestI7C4RawBirthAtomicRollbackAndPositiveUnknownCommit(t *testing.T) {
 	p := pool(t)
 	rev := installed(t, p)

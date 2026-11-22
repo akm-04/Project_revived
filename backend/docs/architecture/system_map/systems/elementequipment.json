@@ -1,0 +1,232 @@
+{
+ "background": [],
+ "content": [
+  "content_element_input_catalogs"
+ ],
+ "contracts": [
+  {
+   "count": 1,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 6,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/element_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I7C2G_ELEMENT_INPUTS"
+   }
+  ],
+  "ranks": [
+   {
+    "name": "course.RootLockRank",
+    "rank": 520
+   },
+   {
+    "name": "elementequipment.RootLockRank",
+    "rank": 560
+   },
+   {
+    "name": "inscription.RootLockRank",
+    "rank": 540
+   },
+   {
+    "name": "spirit.RootLockRank",
+    "rank": 580
+   }
+  ],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "player_element_admissions": [
+    "elementstore.LockAdmissionTx"
+   ],
+   "player_element_heroes": [
+    "elementstore.LockHeroTx"
+   ],
+   "player_element_roots": [
+    "elementstore.LockRootTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "player_element_admissions",
+   "player_element_heroes",
+   "player_element_roots",
+   "players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [
+  "OverlayRosterTx"
+ ],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/element_dispatcher.go",
+    "line": 24
+   },
+   "mid": 2849,
+   "name": "ELEMENT_EQUIP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/element_dispatcher.go",
+    "line": 24
+   },
+   "mid": 2850,
+   "name": "ELEMENT_LEV_UP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/element_dispatcher.go",
+    "line": 24
+   },
+   "mid": 2851,
+   "name": "ELEMENT_UNLOAD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/element_dispatcher.go",
+    "line": 24
+   },
+   "mid": 2852,
+   "name": "ELEMENT_DESTORY_ON_PARTNER"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/element_dispatcher.go",
+    "line": 24
+   },
+   "mid": 2853,
+   "name": "ELEMENT_DESTORY_IN_BACKPACK"
+  }
+ ],
+ "name": "elementequipment",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/coursestore",
+  "internal/adapters/postgres/elementstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/inscriptionstore",
+  "internal/adapters/postgres/kernelstore",
+  "internal/adapters/postgres/spiritstore"
+ ],
+ "tables": {
+  "owned": [
+   "player_element_admissions",
+   "player_element_heroes",
+   "player_element_roots"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "content_element_input_catalogs",
+   "gameplay_contexts",
+   "gxb_content_activation",
+   "gxb_content_hero_equipment",
+   "gxb_content_hero_templates",
+   "gxb_content_player_progression",
+   "gxb_content_revisions",
+   "gxb_content_super_equipment_positions",
+   "gxb_operation_receipts",
+   "player_element_admissions",
+   "player_element_heroes",
+   "player_element_roots",
+   "player_hero_roots",
+   "player_heroes",
+   "player_item_stacks",
+   "player_progression",
+   "players"
+  ],
+  "written": [
+   "gxb_operation_receipts",
+   "player_element_admissions",
+   "player_element_heroes",
+   "player_element_roots"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [],
+  "unit": [
+   "projection_clock_test.go"
+  ]
+ }
+}

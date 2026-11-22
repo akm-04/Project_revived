@@ -112,7 +112,7 @@ func (service Service) ExpireFriendInvitations(requestContext context.Context, p
 		}
 		previous := root.StateVersion
 		root.StateVersion++
-		root.UpdatedAt = scope.Operation.DecisionAt()
+		root.UpdatedAt = gen.EffectiveObservation(scope.Operation.DecisionAt(), root.UpdatedAt, root.CreatedAt)
 		return service.Store.SaveCompetitionTx(requestContext, scope.Tx, root, previous)
 	})
 	return expired, err

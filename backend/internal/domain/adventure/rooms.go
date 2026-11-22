@@ -2,7 +2,11 @@ package adventure
 
 import (
 	"encoding/json"
+	"slices"
 	"strconv"
+
+	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/sharedroom"
 )
 
 const (
@@ -35,8 +39,40 @@ type BusyState struct {
 
 // MonsterState is one defense monster position's kill state.
 type MonsterState struct {
-	Killer string `json:"killer,omitempty"`
-	Solved bool   `json:"solved,omitempty"`
+	Killer       string            `json:"killer,omitempty"`
+	KillerPlayer identity.PlayerID `json:"killer_player,omitempty"`
+	Solved       bool              `json:"solved,omitempty"`
+}
+
+// DefenseCompleted reports whether every monster position has been solved.
+func (s RoomState) DefenseCompleted() bool {
+	solved := 0
+	for _, monster := range s.Monsters {
+		if monster.Solved {
+			solved++
+		}
+	}
+	return solved >= DefenseMonsterCount
+}
+
+// DefenseRecipients is the distinct players who solved a position, ascending by
+// player id. A position solved before KillerPlayer was recorded has no
+// recipient, so a room carried over from that time mails nobody for it.
+func (s RoomState) DefenseRecipients() []identity.PlayerID {
+	unique := make(map[identity.PlayerID]struct{}, len(s.Monsters))
+	recipients := make([]identity.PlayerID, 0, len(s.Monsters))
+	for _, monster := range s.Monsters {
+		if !monster.Solved || monster.KillerPlayer == 0 {
+			continue
+		}
+		if _, duplicate := unique[monster.KillerPlayer]; duplicate {
+			continue
+		}
+		unique[monster.KillerPlayer] = struct{}{}
+		recipients = append(recipients, monster.KillerPlayer)
+	}
+	slices.Sort(recipients)
+	return recipients
 }
 
 // PushRecord is one room state change the realtime projection delivers once.
@@ -50,6 +86,7 @@ type PushRecord struct {
 
 // RoomState is the opaque sharedroom payload of both Adventure rooms.
 type RoomState struct {
+	sharedroom.ChatRing
 	RoomType    int64                      `json:"room_type"`
 	SpecialData int64                      `json:"special_data"`
 	CampaignID  int64                      `json:"campaign_id,omitempty"`
@@ -67,6 +104,8 @@ type RoomState struct {
 	Damage      int64                      `json:"damage,omitempty"`
 	TeamInfo    json.RawMessage            `json:"team_info,omitempty"`
 	Reports     map[string]json.RawMessage `json:"reports,omitempty"`
+	// Forces is each seat's best-15 AP frozen when the player entered the room.
+	Forces map[string]int64 `json:"forces,omitempty"`
 }
 
 func (s RoomState) Encode() (json.RawMessage, error) { return json.Marshal(s) }
@@ -96,6 +135,15 @@ func LoadRoomState(raw json.RawMessage) (RoomState, error) {
 }
 
 func (s RoomState) Pick(playerID int64) RoomPick { return s.Picks[strconv.FormatInt(playerID, 10)] }
+
+func (s RoomState) Force(playerID int64) int64 { return s.Forces[strconv.FormatInt(playerID, 10)] }
+
+func (s *RoomState) SetForce(playerID, force int64) {
+	if s.Forces == nil {
+		s.Forces = map[string]int64{}
+	}
+	s.Forces[strconv.FormatInt(playerID, 10)] = force
+}
 
 func (s *RoomState) SetPick(playerID int64, pick RoomPick) {
 	if s.Picks == nil {

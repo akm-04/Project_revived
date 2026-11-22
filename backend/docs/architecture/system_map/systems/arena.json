@@ -1,0 +1,649 @@
+{
+ "background": [
+  {
+   "binary": "gxb-api",
+   "entry": "apparena.Reconciler",
+   "kind": "reconcile"
+  }
+ ],
+ "content": [
+  "content_player_display_catalogs",
+  "content_public_profile_policies"
+ ],
+ "contracts": [
+  {
+   "count": 35,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 12,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 41,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 7,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_10A_EVENT_CENTRE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10F_MENTOR_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10_R5_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_POPUP_CATALOGUE_V1.md"
+  },
+  {
+   "count": 6,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 8,
+   "file": "docs/i9/I9_FRIEND_FIGHT_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_CAMPAIGN_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V3.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_MODE_FRAMEWORK_V1.json"
+  },
+  {
+   "count": 39,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 20,
+   "file": "docs/i9/I9_PVP_TOURNAMENT_CASUAL_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_TOP_FLOOR_TASK_MODE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORLD_BOSS_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/arena_dispatcher.go",
+  "internal/adapters/stockruntime/friend_fight_dispatcher.go",
+  "internal/adapters/stockruntime/tournament_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {
+   "PVP_FIGHT": {
+    "adventure": "EventBattle",
+    "missions": [
+     106
+    ],
+    "stages": [
+     "I9-4B"
+    ]
+   }
+  },
+  "emits": [
+   "PVP_FIGHT"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "arena"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "arena_casual_sessions": [
+    "arenastore.ReadCasualSessionTx"
+   ],
+   "arena_competitions": [
+    "arenastore.ReadCompetitionTx"
+   ],
+   "arena_friend_invitations": [
+    "arenastore.ReadFriendInvitationTx"
+   ],
+   "arena_matches": [
+    "arenastore.ReadMatchTx"
+   ],
+   "arena_players": [
+    "arenastore.ReadPlayerTx"
+   ],
+   "arena_tournament_periods": [
+    "arenastore.ReadTournamentTx"
+   ],
+   "arena_tournament_rooms": [
+    "arenastore.ReadTournamentRoomTx",
+    "arenastore.SaveTournamentRoomTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "arena_casual_sessions",
+   "arena_competitions",
+   "arena_friend_invitations",
+   "arena_matches",
+   "arena_players",
+   "arena_tournament_periods",
+   "arena_tournament_rooms",
+   "gameplay_contexts",
+   "players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/tournament_dispatcher.go",
+    "line": 47
+   },
+   "mid": 276,
+   "name": "LOAD_ARENA_RANK"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/arena_dispatcher.go",
+    "line": 43
+   },
+   "mid": 666,
+   "name": "GIVE_UP_REGION_MISSION"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/arena_dispatcher.go",
+    "line": 43
+   },
+   "mid": 768,
+   "name": "GET_REARENA_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/arena_dispatcher.go",
+    "line": 43
+   },
+   "mid": 769,
+   "name": "GET_REARENA_PARTNERS"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/arena_dispatcher.go",
+    "line": 43
+   },
+   "mid": 770,
+   "name": "REARENA_MODIFY_DEFENCE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/arena_dispatcher.go",
+    "line": 43
+   },
+   "mid": 771,
+   "name": "REARENA_MATCH_ENEMY"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/arena_dispatcher.go",
+    "line": 43
+   },
+   "mid": 772,
+   "name": "REARENA_START_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/arena_dispatcher.go",
+    "line": 43
+   },
+   "mid": 773,
+   "name": "REARENA_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/arena_dispatcher.go",
+    "line": 43
+   },
+   "mid": 774,
+   "name": "REARENA_END_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/arena_dispatcher.go",
+    "line": 43
+   },
+   "mid": 775,
+   "name": "REARENA_LOAD_RANKS"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/arena_dispatcher.go",
+    "line": 43
+   },
+   "mid": 776,
+   "name": "REARENA_FIGHT_RECORDS"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/arena_dispatcher.go",
+    "line": 43
+   },
+   "mid": 777,
+   "name": "REARENA_FIGHT_REPORT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/arena_dispatcher.go",
+    "line": 43
+   },
+   "mid": 778,
+   "name": "REARENA_PREPARE_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/arena_dispatcher.go",
+    "line": 43
+   },
+   "mid": 779,
+   "name": "REARENA_STOP_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/arena_dispatcher.go",
+    "line": 43
+   },
+   "mid": 848,
+   "name": "GET_EXCHANGE_AWARD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/arena_dispatcher.go",
+    "line": 43
+   },
+   "mid": 849,
+   "name": "GET_MISSION_AWARD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/tournament_dispatcher.go",
+    "line": 47
+   },
+   "mid": 1281,
+   "name": "PLAYOFFS_READY"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/tournament_dispatcher.go",
+    "line": 47
+   },
+   "mid": 1282,
+   "name": "PLAYOFFS_CHOOSE_MEMBER"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/tournament_dispatcher.go",
+    "line": 47
+   },
+   "mid": 1283,
+   "name": "PLAYOFFS_GET_PLAYOFF_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/tournament_dispatcher.go",
+    "line": 47
+   },
+   "mid": 1284,
+   "name": "PLAYOFFS_SIGN_UP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/tournament_dispatcher.go",
+    "line": 47
+   },
+   "mid": 1285,
+   "name": "PLAYOFFS_GET_SIGN_LIST"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/tournament_dispatcher.go",
+    "line": 47
+   },
+   "mid": 1286,
+   "name": "PLAYOFFS_GET_GROUP_DETAILS"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/tournament_dispatcher.go",
+    "line": 47
+   },
+   "mid": 1287,
+   "name": "PLAYOFFS_SET_DECLARATION"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/tournament_dispatcher.go",
+    "line": 47
+   },
+   "mid": 1288,
+   "name": "PLAYOFFS_SUPPORT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/tournament_dispatcher.go",
+    "line": 47
+   },
+   "mid": 1289,
+   "name": "PLAYOFFS_GET_MATCH_LIST"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/tournament_dispatcher.go",
+    "line": 47
+   },
+   "mid": 1290,
+   "name": "PLAYOFFS_BATTLE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/tournament_dispatcher.go",
+    "line": 47
+   },
+   "mid": 1291,
+   "name": "PLAYOFFS_RECORD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/tournament_dispatcher.go",
+    "line": 47
+   },
+   "mid": 1292,
+   "name": "PLAYOFFS_REQUEST_ROOM_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/tournament_dispatcher.go",
+    "line": 47
+   },
+   "mid": 1294,
+   "name": "PLAYOFFS_CONFIRM_SELECT_TEAM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/friend_fight_dispatcher.go",
+    "line": 28
+   },
+   "mid": 1312,
+   "name": "INVITE_FRIEND_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/friend_fight_dispatcher.go",
+    "line": 28
+   },
+   "mid": 1313,
+   "name": "ACCEPT_FRIEND_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/friend_fight_dispatcher.go",
+    "line": 28
+   },
+   "mid": 1314,
+   "name": "FRIEND_FIGHT_RECORD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/friend_fight_dispatcher.go",
+    "line": 28
+   },
+   "mid": 1315,
+   "name": "REJECT_FRIEND_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/tournament_dispatcher.go",
+    "line": 47
+   },
+   "mid": 1872,
+   "name": "REGION_CASUAL_GET_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/tournament_dispatcher.go",
+    "line": 47
+   },
+   "mid": 1873,
+   "name": "REGION_CASUAL_GET_RECORD_LIST"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/tournament_dispatcher.go",
+    "line": 47
+   },
+   "mid": 1874,
+   "name": "REGION_CASUAL_GET_RECORD_REPORT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/tournament_dispatcher.go",
+    "line": 47
+   },
+   "mid": 1875,
+   "name": "REGION_CASUAL_MATCH_ENEMY"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/tournament_dispatcher.go",
+    "line": 47
+   },
+   "mid": 1876,
+   "name": "REGION_CASUAL_CANCEL_MATCH"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/tournament_dispatcher.go",
+    "line": 47
+   },
+   "mid": 1877,
+   "name": "REGION_CASUAL_GET_FIGHT_REPORT"
+  }
+ ],
+ "name": "arena",
+ "pushes": [
+  {
+   "file": "internal/adapters/stockruntime/friend_fight_notice.go",
+   "kind": "notice",
+   "line": 56,
+   "namespace": "rt.NoticeNamespaceGeneric",
+   "notice_type": 14,
+   "parent_mid": 36854,
+   "roles": [
+    "Role",
+    "World"
+   ]
+  },
+  {
+   "file": "internal/adapters/stockruntime/friend_fight_notice.go",
+   "kind": "notice",
+   "line": 57,
+   "namespace": "rt.NoticeNamespaceGeneric",
+   "notice_type": 15,
+   "parent_mid": 36854,
+   "roles": [
+    "Role",
+    "World"
+   ]
+  }
+ ],
+ "stores": [
+  "internal/adapters/postgres/arenastore",
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/guildrentalread",
+  "internal/adapters/postgres/guildstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore"
+ ],
+ "tables": {
+  "owned": [
+   "arena_casual_entries",
+   "arena_casual_scores",
+   "arena_casual_sessions",
+   "arena_competitions",
+   "arena_friend_invitations",
+   "arena_matches",
+   "arena_partner_usage",
+   "arena_players",
+   "arena_records",
+   "arena_settlement_ranks",
+   "arena_settlements",
+   "arena_tournament_periods",
+   "arena_tournament_rooms"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "arena_casual_entries",
+   "arena_casual_scores",
+   "arena_casual_sessions",
+   "arena_competitions",
+   "arena_friend_invitations",
+   "arena_matches",
+   "arena_partner_usage",
+   "arena_players",
+   "arena_records",
+   "arena_settlement_ranks",
+   "arena_settlements",
+   "arena_tournament_periods",
+   "arena_tournament_rooms",
+   "content_player_display_catalogs",
+   "content_public_profile_policies",
+   "gameplay_contexts",
+   "guild_memberships",
+   "guilds",
+   "gxb_content_activation",
+   "gxb_content_hero_templates",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "logical_servers",
+   "player_currency_balances",
+   "player_directory_profiles",
+   "player_heroes",
+   "players"
+  ],
+  "written": [
+   "arena_casual_entries",
+   "arena_casual_scores",
+   "arena_casual_sessions",
+   "arena_competitions",
+   "arena_friend_invitations",
+   "arena_matches",
+   "arena_partner_usage",
+   "arena_players",
+   "arena_records",
+   "arena_settlement_ranks",
+   "arena_settlements",
+   "arena_tournament_periods",
+   "arena_tournament_rooms",
+   "gxb_operation_receipts"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [
+   "arena.json",
+   "i9_7b_playoffs.json",
+   "i9_7c_friend_fight.json",
+   "i9_7d_production_functions.json",
+   "i9_8a_world_boss.json",
+   "r1_arena_room_pet.json"
+  ],
+  "unit": [
+   "clock_rollback_test.go",
+   "fight_test.go",
+   "partner_stars_test.go",
+   "picks_test.go",
+   "start_choice_conformance_test.go",
+   "tournament_view_test.go"
+  ]
+ }
+}

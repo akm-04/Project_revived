@@ -23,6 +23,7 @@ type Store interface {
 	ReadTx(context.Context, tx.Queryer, identity.PlayerID) (memoir.State, bool, error)
 	LockTx(context.Context, tx.Tx, identity.PlayerID, time.Time) (memoir.State, error)
 	SaveTx(context.Context, tx.Tx, identity.PlayerID, memoir.State, time.Time) error
+	TuningTx(context.Context, tx.Queryer) (memoir.Tuning, bool, error)
 }
 type Content interface {
 	ActiveRevision(context.Context, tx.Queryer) (string, error)
@@ -44,7 +45,7 @@ type Roster interface {
 	OverlayMID1(context.Context, tx.Queryer, identity.ActorContext, bool, time.Time, map[string]any) error
 }
 type Opponents interface {
-	MarchCandidatesTx(context.Context, tx.Queryer, identity.ActorContext, time.Time, int) ([]march.Enemy, error)
+	MarchCandidatesTx(context.Context, tx.Queryer, identity.ActorContext, time.Time, int, bool) ([]march.Enemy, error)
 }
 type Combat interface {
 	StartTx(context.Context, tx.Tx, characterasset.CoherentReadScope, combat.StartRequest) (combat.Started, error)
@@ -57,22 +58,28 @@ type Grants interface {
 	SettleGrantTx(context.Context, tx.Tx, identity.ActorContext, grant.Plan, operation.Context, i5.GrantTxOptions) (i5.GrantResult, error)
 }
 type Mode struct {
-	Timed       generation.TimedRunner
-	Fresh       tx.Queryer
-	Store       Store
-	Content     Content
-	Fence       Fence
-	Functions   Functions
-	Heroes      Heroes
-	HeroLocks   HeroLocks
-	Roster      Roster
-	Pets        Roster
-	Opponents   Opponents
-	Combat      Combat
-	Grants      Grants
-	Costs       i5.TxMaterialCostDebiter
-	Energy      i5.TxTemporalDebiter
-	Exchange    i5.TxMaterialExchange
-	Receipts    receipt.Store
-	ReceiptRead receipt.Reader
+	Timed        generation.TimedRunner
+	Fresh        tx.Queryer
+	Store        Store
+	Content      Content
+	Fence        Fence
+	Functions    Functions
+	Heroes       Heroes
+	HeroLocks    HeroLocks
+	Roster       Roster
+	Pets         Roster
+	Opponents    Opponents
+	Combat       Combat
+	Grants       Grants
+	Costs        i5.TxMaterialCostDebiter
+	Energy       i5.TxTemporalDebiter
+	Exchange     i5.TxMaterialExchange
+	Receipts     receipt.Store
+	ReceiptRead  receipt.Reader
+	BattleCounts BattleCountObserver
+}
+
+// BattleCountObserver records the Girls Log count of one first settled battle.
+type BattleCountObserver interface {
+	ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error
 }

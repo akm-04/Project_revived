@@ -183,11 +183,11 @@ func TestHandlerUnknownUnimplementedImplementedAndSaturation(t *testing.T) {
 		return w
 	}
 	w := call(`{"mid":65001}`)
-	if w.Code != 404 {
+	if w.Code != http.StatusConflict {
 		t.Fatalf("unknown=%d %s", w.Code, w.Body.String())
 	}
 	w = call(`{"mid":50}`)
-	if w.Code != 501 {
+	if w.Code != http.StatusConflict {
 		t.Fatalf("unimplemented=%d %s", w.Code, w.Body.String())
 	}
 	if err := h.Router.Register(50, DispatcherFunc(func(ctx context.Context, req DispatchRequest) Response {
@@ -263,14 +263,14 @@ func TestHandlerResponseEncodingFailureDoesNotRedispatch(t *testing.T) {
 	if calls != 1 {
 		t.Fatalf("dispatcher calls=%d, want 1", calls)
 	}
-	if w.Code != http.StatusInternalServerError {
+	if w.Code != http.StatusUnauthorized {
 		t.Fatalf("status=%d body=%q", w.Code, w.Body.String())
 	}
 	var body map[string]any
 	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
 		t.Fatal(err)
 	}
-	if body["error"] != "response_encoding" {
+	if body["error"] != "response_encoding" || body["error_code"] != float64(20003) || body["error_msg"] != "Unstable network,try to relog in!" {
 		t.Fatalf("body=%v", body)
 	}
 }

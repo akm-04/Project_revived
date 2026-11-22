@@ -11,7 +11,22 @@ def _pairs(ids_raw, nums_raw):
     return [[i, n] for i, n in zip(_ids(ids_raw), _ids(nums_raw)) if i > 0 and n > 0]
 
 
-def build_campaign(blobs, parse, parse_indexed, field):
+def _assist_rewards(campaign_id, row, stones):
+    partners, counts = _ids(row['assist_partner']), _ids(row['assist_stone_num'])
+    if not partners and not counts:
+        return []
+    if len(partners) != len(counts):
+        raise ValueError('campaign assist partner/stone drift: %s' % campaign_id)
+    rewards = []
+    for partner, count in zip(partners, counts):
+        stone = stones.get(partner)
+        if stone is None or count <= 0:
+            raise ValueError('campaign assist stone identity drift: %s' % campaign_id)
+        rewards.append([partner, stone, count])
+    return rewards
+
+
+def build_campaign(blobs, parse, parse_indexed, field, items):
     table = lambda name: parse(blobs['data/tables/' + name + '.lua'].data)
     if 'xyd.EquipQuality.PURPLE = 7' not in blobs['app/common/enums.lua'].data.decode('utf-8-sig'):
         raise ValueError('Prophecy purple quality drift')
@@ -21,6 +36,8 @@ def build_campaign(blobs, parse, parse_indexed, field):
     if functions['31']['level'] != '1|11':
         raise ValueError('Elite Campaign function gate drift')
     campaigns = {r['campaign_id']: r for r in table('campaign')}
+    # Source item type 3 is the hero's stone; partner_id names the hero.
+    stones = {int(r['partner_id']): int(r['id']) for r in items if r['type'] == '3' and int(r['partner_id']) > 0}
     boxes = {}
     for r in table('campaign_dropbox'):
         boxes.setdefault(int(r['dropbox_id']), []).append([int(r['id']), int(r['item_id']), int(r['increase_rate'])])
@@ -44,7 +61,8 @@ def build_campaign(blobs, parse, parse_indexed, field):
                                   defeat_cost=int(r['defeat_cost']), partner_exp=int(r['partner_exp']), mana_gain=int(r['mana_gain']),
                                   star_gift=int(r['star_gift']), daily_limit=int(r['daily_limit']), first_box=first_box, repeat_box=repeat_box,
                                   next=_ids(r['next_campaign_id']), previous=int(r['last_campaign_id']), related=int(r['relate_campaign_id']),
-                                  story_partners=_ids(r['story_drop_partner']), sweep_reward=_pairs(r['sweep_reward'], r['sweep_reward_num'])))
+                                  story_partners=_ids(r['story_drop_partner']), sweep_reward=_pairs(r['sweep_reward'], r['sweep_reward_num']),
+                                  assist_partners=_assist_rewards(campaign_id, r, stones)))
         chapters.append(chapter)
     from generate_combat_corpus import parse_monster
     battle = {int(r['fight_id']): r for r in table('battle')}

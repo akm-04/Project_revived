@@ -13,8 +13,10 @@ func (c Catalog) RoomCampaigns(chapterID, campaignType int64) []Campaign {
 	return campaigns
 }
 
-// Final is the chapter's last fight campaign: not a start point, unlocking nothing.
-func (c Campaign) Final() bool { return !c.StartPoint && len(c.UnlockIDs) == 0 }
+// Final is the chapter's last fight campaign, marked by the source
+// creats_campaign.special_reward column. The unlock graph is not a signal: the
+// chapter 1 final rows keep back edges (10013/10026).
+func (c Campaign) Final() bool { return c.SpecialReward != 0 }
 
 // BindRoom creates the monster stages of every fight campaign of the room.
 // Stage HP is the aggregate absolute HP of the stage's monsters, compiled into

@@ -64,6 +64,10 @@ func (s Service) TemporalBalanceTx(ctx context.Context, t tx.Tx, pid identity.Pl
 	return materialized.Amount, err
 }
 
+func (s Service) prepareTemporalDebitState(state economy.TemporalState, amount int64, now time.Time, policy economy.TemporalPolicy) (economy.TemporalState, error) {
+	return state.Debit(amount, now, policy)
+}
+
 func (s Service) lockTemporalTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, key string, op operation.Context) (economy.TemporalState, economy.TemporalPolicy, time.Time, error) {
 	if s.Store == nil || s.Content == nil || t == nil || !pid.Valid() || key == "" || op.StartedAt.IsZero() {
 		return economy.TemporalState{}, economy.TemporalPolicy{}, time.Time{}, errors.New("invalid temporal access")

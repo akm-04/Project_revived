@@ -2,6 +2,7 @@ package workplace
 
 import (
 	"context"
+	"gxb.local/backend/v2/internal/application/broadcast"
 	ca "gxb.local/backend/v2/internal/application/characterasset"
 	cb "gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -57,6 +58,7 @@ type Combat interface {
 	StartTx(context.Context, tx.Tx, ca.CoherentReadScope, cb.StartRequest) (cb.Started, error)
 	Resolve(context.Context, operation.Context, ids.UUID) (cb.Resolved, error)
 	TerminalTx(context.Context, tx.Tx, cb.TerminalRequest) (cb.Settled, error)
+	CloseTx(context.Context, tx.Tx, cb.TerminalRequest) (cb.Closed, error)
 }
 type Values interface {
 	WorkplaceSPTx(context.Context, tx.Tx, identity.PlayerID, operation.Context) (economy.MaterializedTemporal, error)
@@ -67,27 +69,35 @@ type Facts interface {
 	PrepareTx(context.Context, tx.Tx, identity.PlayerID, gen.TimedOperation) (context.Context, error)
 	RecordTx(context.Context, tx.Tx, operation.Context, ...objective.Fact) error
 }
+
+// BattleObserver is the Library owner's Girls Log battle-count port
+// (I9_11_GIRLS_LOG_V1 G2): one call per first settlement and owned hero.
+type BattleObserver interface {
+	ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error
+}
 type Mode struct {
-	Timed       gen.TimedRunner
-	Fresh       tx.Queryer
-	Store       Store
-	Content     Content
-	Fence       Fence
-	Functions   Functions
-	Directory   Directory
-	Campaigns   Campaigns
-	Heroes      Heroes
-	HeroLocks   HeroLocks
-	HeroWire    func(character.Hero) (map[string]any, error)
-	Opponents   Opponents
-	Combat      Combat
-	Stats       cb.Stats
-	Values      Values
-	Privileges  i5.PrivilegeSnapshotProvider
-	Facts       Facts
-	Receipts    receipt.Store
-	ReceiptRead receipt.Reader
-	Rental      RentalOffers
+	Timed          gen.TimedRunner
+	Fresh          tx.Queryer
+	Store          Store
+	Content        Content
+	Fence          Fence
+	Functions      Functions
+	Directory      Directory
+	Campaigns      Campaigns
+	Heroes         Heroes
+	HeroLocks      HeroLocks
+	HeroWire       func(character.Hero) (map[string]any, error)
+	Opponents      Opponents
+	Combat         Combat
+	Stats          cb.Stats
+	Values         Values
+	Privileges     i5.PrivilegeSnapshotProvider
+	Facts          Facts
+	Receipts       receipt.Store
+	ReceiptRead    receipt.Reader
+	Rental         RentalOffers
+	Broadcast      broadcast.Emitter
+	BattleObserver BattleObserver
 }
 
 // RentalOffers is the guild rental admission read (I9_GUILD_RENTAL_V1 C14).

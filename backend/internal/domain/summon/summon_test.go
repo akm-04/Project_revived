@@ -3,6 +3,7 @@ package summon
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"testing"
 )
@@ -177,10 +178,36 @@ func TestOperatorTuning(t *testing.T) {
 	if c.Rotation(42).Partner == 0 || c.Policy.Classic.Medium.SuperChance == 2000 {
 		t.Fatal("tuning leaked into the source catalog")
 	}
-	for _, bad := range []Tuning{{FeaturedChance: 10001}, {Partner: 50001002}, {Main: sx[:1]}, {Second: []int64{10001002, sx[0], sx[1]}, Main: sx[2:4]}} {
-		if _, err := c.Tune(bad); err == nil {
+	featured := c.Policy.Cohorts.MediumFeatured
+	rejected := []Tuning{
+		{FeaturedChance: 10001},
+		{Partner: 50001002},
+		{Main: sx[:1]},
+		{Second: []int64{10001002, sx[0], sx[1]}, Main: sx[2:4]},
+		{Main: []int64{0, 0}, Second: []int64{0, 0, 0}},
+		{SXCohort: []int64{sx[0], sx[0], sx[0], sx[0], sx[0]}},
+		{SXCohort: []int64{sx[0], sx[0], sx[1], sx[2], sx[3]}},
+		{MediumFeatured: []int64{featured[0]}},
+		{MediumExtension: []int64{0}},
+		{Main: []int64{sx[0], 0}, Second: sx[1:4]},
+		{Main: []int64{sx[0], sx[0]}, Second: sx[1:4]},
+		{Main: sx[:2], Second: []int64{sx[2], sx[2], sx[4]}},
+	}
+	for _, bad := range rejected {
+		got, err := c.Tune(bad)
+		if err == nil {
 			t.Fatal("accepted", bad)
 		}
+		if fmt.Sprint(got.Rotation(42)) != fmt.Sprint(c.Rotation(42)) {
+			t.Fatal("rejected overlay changed the source rotation", bad)
+		}
+	}
+	minima, err := c.Tune(Tuning{SXCohort: sx[:5], MediumFeatured: featured[:2]})
+	if err != nil {
+		t.Fatal("exact minima rejected", err)
+	}
+	if r := minima.Rotation(42); len(r.Main) != 2 || len(r.Second) != 3 {
+		t.Fatal("exact minima rotation", r)
 	}
 }
 

@@ -72,7 +72,7 @@ func (f kindFixture) frozenHPAttribute(t *testing.T, attempt d.Attempt) float64 
 // Accept, H-05 drain, H-42/H-43 rejections, non-finite refusal and the
 // cross-profile guard through one March-shaped locator.
 func TestI8_5BFullReportAttemptNative(t *testing.T) {
-	f := newKindFixture(t, "full-report")
+	f := newKindFixture(t, "full-report", d.ModeMarch)
 	first, err := f.start(f.reportStart("stage-1", "g1", f.slot(0)), 3)
 	if err != nil || first.Attempt.TrustProfile != d.ClientFullReportAttested || first.Attempt.ResolverStatus != d.ResolverNotRequired || first.Package == nil {
 		t.Fatal("client full-report START", first, err)
@@ -147,7 +147,7 @@ func TestI8_5BFullReportAttemptNative(t *testing.T) {
 // H-03: concurrent duplicate full reports settle once; H-04: an ambiguous
 // commit reconciles from the attempt's own receipt.
 func TestI8_5BConcurrentAndAmbiguousReportNative(t *testing.T) {
-	f := newKindFixture(t, "full-report-concurrency")
+	f := newKindFixture(t, "full-report-concurrency", d.ModeMarch)
 	if _, err := f.start(f.reportStart("stage", "g1", f.slot(0)), 3); err != nil {
 		t.Fatal(err)
 	}

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"sort"
 	"time"
 
@@ -15,6 +16,7 @@ import (
 	d "gxb.local/backend/v2/internal/domain/guildcampaign"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/mail"
+	"gxb.local/backend/v2/internal/foundation/observability"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -53,15 +55,19 @@ type NoticeMail struct {
 
 type Guilds interface {
 	ReadMembership(context.Context, identity.PlayerID) (guild.Membership, bool, error)
+	ReadMembershipTx(context.Context, tx.Queryer, identity.PlayerID) (guild.Membership, bool, error)
+	ReadGuildTx(context.Context, tx.Queryer, guild.ID) (guild.Guild, bool, error)
 	LockGuildTx(context.Context, tx.Tx, guild.ID) (guild.Guild, bool, error)
 	LockMembershipTx(context.Context, tx.Tx, identity.PlayerID) (guild.Membership, bool, error)
 	ListMembershipsTx(context.Context, tx.Queryer, guild.ID) ([]guild.Membership, error)
+	ListMemberLogTx(context.Context, tx.Queryer, int64, time.Time, int) ([]MemberLogRow, error)
 	SaveGuildTx(context.Context, tx.Tx, guild.Guild, int64) error
 	FoldActivityTx(context.Context, tx.Tx, []identity.PlayerID) (int64, error)
 	FoldActivityAwardsTx(context.Context, tx.Tx, guild.ID) (int64, error)
 }
 
 type Store interface {
+	BestDamageTx(context.Context, tx.Queryer, identity.PlayerID) (int64, error)
 	LockChapterTx(context.Context, tx.Tx, int64, int64) (d.Chapter, bool, error)
 	ChapterWonTx(context.Context, tx.Queryer, int64, int64) (bool, error)
 	LockGuildChaptersTx(context.Context, tx.Tx, int64) ([]int64, error)
@@ -97,6 +103,7 @@ type Service struct {
 	Fence   Fence
 	Players playerroot.TxLocker
 	Notice  NoticeMail
+	Metrics observability.Metrics
 }
 
 func (s Service) validate() error {
@@ -252,6 +259,9 @@ func (s Service) admitRun(c context.Context, t tx.Tx, guildID int64, definition 
 	return 1, nil
 }
 
+// noticeTx delivers C13's attachment-free notice. It is display-only (D1): a
+// request that fails its own validation is dropped, journalled and counted, and
+// the chapter open or reset commits; a database error stays fatal.
 func (s Service) noticeTx(c context.Context, t tx.Tx, chapter d.Chapter, reset bool, members []identity.PlayerID, at time.Time) error {
 	if !s.Notice.Enabled {
 		return nil
@@ -264,7 +274,11 @@ func (s Service) noticeTx(c context.Context, t tx.Tx, chapter d.Chapter, reset b
 	for _, member := range members {
 		request := i5.SettlementMailRequest{Recipient: member, SourceKind: noticeSource, SourceKey: key, Title: title, Sender: s.Notice.Sender, Body: body, PolicyVersion: policyVersion, At: at}
 		if _, _, err := s.Mail.DeliverNoticeTx(c, t, request); err != nil {
-			return err
+			if !errors.Is(err, i5.ErrSettlementMailInvalid) {
+				return err
+			}
+			log.Printf("guildcampaign: dropped invalid notice recipient=%d: %v", member, err)
+			observability.CountDropped(s.Metrics, "guild_campaign_notice_dropped", "guildcampaign")
 		}
 	}
 	return nil

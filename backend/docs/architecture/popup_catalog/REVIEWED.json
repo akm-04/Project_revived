@@ -1,0 +1,2233 @@
+{
+ "entries": {
+  "LOCAL:app/common/network/Backend.lua:435": {
+   "evidence": [
+    "src_64/data/tables/message.lua:652–655",
+    "src_64/app/common/network/Backend.lua:425–438,562–566",
+    "internal/adapters/stockruntime/activity_dispatcher.go:55–67,90–93"
+   ],
+   "finding": "A-155",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/common/utils.lua:5543": {
+   "evidence": [
+    "src_64/app/windows/TaskWindow.lua:790–801,877–880",
+    "src_64/app/common/utils.lua:5522–5563",
+    "internal/application/i5/mission_activity.go:89–109"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/model/Backpack.lua:214": {
+   "evidence": [
+    "src_64/data/tables/translation.lua:14920–14921",
+    "src_64/app/windows/SweepWindow.lua:674–687",
+    "src_64/app/model/Backpack.lua:204–221",
+    "internal/application/campaign/sweep.go:91–101",
+    "internal/application/i5/service.go:481–503"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/model/Backpack.lua:307": {
+   "evidence": [
+    "src_64/app/windows/OpenChestWindow.lua:78–79",
+    "internal/domain/march/run.go:196–240",
+    "internal/application/march/settle.go:132–192",
+    "src_64/data/tables/translation.lua:14920",
+    "src_64/app/model/Backpack.lua:291–309",
+    "src_64/app/model/SelfPlayer.lua:4366–4394"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/ArenaRecordPlayerInfoWindow.lua:114": {
+   "evidence": [
+    "src_64/app/windows/ArenaRecordPlayerInfoWindow.lua:113–120",
+    "internal/application/topfloor/reads.go:165–184",
+    "src_64/data/tables/translation.lua:9460–9461"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/ArenaRecordPlayerInfoWindow.lua:122": {
+   "evidence": [
+    "src_64/app/windows/ArenaRecordPlayerInfoWindow.lua:121–128",
+    "internal/application/topfloor/reads.go:182–184",
+    "internal/application/topfloor/task_reads.go:236–251",
+    "src_64/data/tables/translation.lua:9456–9457"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/ArenaSelectTeamNewWindow.lua:70": {
+   "evidence": [
+    "src_64/app/windows/ArenaSelectTeamNewWindow.lua:65–75,99–111,154–161",
+    "src_64/data/tables/translation.lua:1080–1081"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/ArenaSelectTeamNewWindow.lua:792": {
+   "evidence": [
+    "src_64/app/windows/ArenaSelectTeamNewWindow.lua:790–814",
+    "src_64/data/tables/translation.lua:12400–12401"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/ArenaWindow.lua:1525": {
+   "evidence": [
+    "src_64/app/windows/ArenaWindow.lua:1520–1532",
+    "docs/i7c5b-top-floor/I7C5B_POLICY.json:10",
+    "src_64/data/tables/translation.lua:14064–14065"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/AssetWindow.lua:121": {
+   "evidence": [
+    "src_64/app/windows/AssetWindow.lua:118–123,145–149",
+    "work/backend_audit_t34b/internal/adapters/stockruntime/items_energy_dispatcher.go:62–159,200–247",
+    "work/backend_audit_t34b/internal/application/itemsenergy/commands.go:29–63,145–204,222–315",
+    "work/backend_audit_t34b/internal/application/itemsenergy/box.go:18–75,88–144"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/AssetWindow.lua:137": {
+   "evidence": [
+    "src_64/app/windows/AssetWindow.lua:125–177"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/AssetWindow.lua:154": {
+   "evidence": [
+    "src_64/app/windows/AssetWindow.lua:153–160,194–201",
+    "work/backend_audit_t34b/internal/adapters/stockruntime/items_energy_dispatcher.go:62–159,200–247",
+    "work/backend_audit_t34b/internal/application/itemsenergy/commands.go:29–63,145–204,222–315",
+    "work/backend_audit_t34b/internal/application/itemsenergy/box.go:18–75,88–144"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/AssetWindow.lua:281": {
+   "evidence": [
+    "src_64/app/windows/AssetWindow.lua:276–293"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/AwakeTwiceSelectTeamWindow.lua:411": {
+   "evidence": [
+    "src_64/app/windows/AwakeTwiceSelectTeamWindow.lua:406–415",
+    "internal/application/i5/awakening_blood.go:27–45",
+    "src_64/data/tables/translation.lua:9380"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/AwakeTwiceSelectTeamWindow.lua:520": {
+   "evidence": [
+    "src_64/app/windows/AwakeTwiceSelectTeamWindow.lua:514–524",
+    "internal/application/i5/awakening_blood.go:27–45",
+    "src_64/data/tables/translation.lua:9376"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/AwakeTwiceSelectTeamWindow.lua:552": {
+   "evidence": [
+    "src_64/app/windows/AwakeTwiceSelectTeamWindow.lua:546–556",
+    "internal/application/i5/awakening_blood.go:27–45",
+    "src_64/data/tables/translation.lua:9384"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/BackpackWindow.lua:1127": {
+   "evidence": [
+    "src_64/app/windows/BackpackWindow.lua:1103–1128",
+    "src_64/app/model/Task.lua:601–614",
+    "internal/application/i5/awakening.go:67–101,343–359",
+    "src_64/data/tables/translation.lua:10972"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/BackpackWindow.lua:1164": {
+   "evidence": [
+    "src_64/app/windows/BackpackWindow.lua:1162–1174"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/BackpackWindow.lua:1362": {
+   "evidence": [
+    "src_64/app/windows/BackpackWindow.lua:1356–1371"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/BaseSelectTeamNewWindow.lua:1056": {
+   "evidence": [
+    "src_64/app/windows/BaseSelectTeamNewWindow.lua:1051–1062",
+    "src_64/data/tables/translation.lua:9444–9445"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/BattleSpecialStory.lua:328": {
+   "evidence": [
+    "src_64/app/windows/BattleSpecialStory.lua:315–328"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/BuyTiLiWindow.lua:287": {
+   "evidence": [
+    "src_64/app/windows/BuyTiLiWindow.lua:281–299",
+    "src_64/data/tables/translation.lua:2764–2765",
+    "work/i9/stages/I9-11/REGISTRY/documents/I9_11B_ITEMS_ENERGY_V2/b55c6ddab5608456-I9_11B_ITEMS_ENERGY_V2.json:65"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/ChapterGachaWindow.lua:186": {
+   "evidence": [
+    "src_64/app/windows/ChapterGachaWindow.lua:177–190",
+    "src_64/app/windows/ChapterGachaCollectionWindow.lua:98–115"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/CloudCityWindow.lua:70": {
+   "evidence": [
+    "src_64/data/tables/translation.lua:1316–1317",
+    "src_64/app/windows/CloudCityWindow.lua:50–89",
+    "src_64/app/windows/TrialTips.lua:17–19",
+    "src_64/app/model/SelfPlayer.lua:392–459",
+    "internal/application/campaign/trials.go:48–71",
+    "internal/domain/campaign/trials.go:59–69"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/GiftbagUseWindow.lua:423": {
+   "evidence": [
+    "src_64/app/windows/GiftbagUseWindow.lua:403–439"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/GoldenHandWindow.lua:241": {
+   "evidence": [
+    "src_64/app/windows/GoldenHandWindow.lua:237–250,278–291,304–318",
+    "work/backend_audit_t34b/internal/adapters/stockruntime/items_energy_dispatcher.go:62–159,200–247",
+    "work/backend_audit_t34b/internal/application/itemsenergy/commands.go:29–63,145–204,222–315",
+    "work/backend_audit_t34b/internal/application/itemsenergy/box.go:18–75,88–144"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/GoldenHandWindow.lua:273": {
+   "evidence": [
+    "src_64/app/windows/GoldenHandWindow.lua:270–275",
+    "work/backend_audit_t34b/internal/adapters/stockruntime/items_energy_dispatcher.go:62–159,200–247",
+    "work/backend_audit_t34b/internal/application/itemsenergy/commands.go:29–63,145–204,222–315",
+    "work/backend_audit_t34b/internal/application/itemsenergy/box.go:18–75,88–144"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/HeroMainWindow.lua:6749": {
+   "evidence": [
+    "src_64/app/windows/HeroMainWindow.lua:6747–6754",
+    "internal/application/i5/awakening.go:67–101",
+    "internal/domain/objective/awakening.go:205–214",
+    "src_64/data/tables/translation.lua:2616"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/HeroMainWindow.lua:6757": {
+   "evidence": [
+    "src_64/app/windows/HeroMainWindow.lua:6755–6776",
+    "src_64/app/model/Task.lua:617–628",
+    "internal/application/i5/awakening.go:67–86",
+    "src_64/data/tables/translation.lua:2648"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/HeroRecommendDetailWindow.lua:165": {
+   "evidence": [
+    "src_64/app/windows/HeroRecommendDetailWindow.lua:132–174,525–540"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/HunqiCampaignWindow.lua:238": {
+   "evidence": [
+    "src_64/app/windows/HunqiCampaignWindow.lua:232–241",
+    "internal/domain/godstrial/state.go:45–68",
+    "src_64/data/tables/translation.lua:26596–26597"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/HunqiCampaignWindow.lua:244": {
+   "evidence": [
+    "src_64/app/windows/HunqiCampaignWindow.lua:242–247",
+    "internal/domain/godstrial/state.go:45–68",
+    "src_64/data/tables/translation.lua:26600–26601"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/HunqiCampaignWindow.lua:301": {
+   "evidence": [
+    "src_64/app/windows/HunqiCampaignWindow.lua:281–301",
+    "internal/domain/godstrial/state.go:45–68"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/HunqiCampaignWindow.lua:465": {
+   "evidence": [
+    "src_64/app/windows/HunqiCampaignWindow.lua:441–465",
+    "internal/domain/godstrial/state.go:45–68"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/MagicSummonResultWindow.lua:424": {
+   "evidence": [
+    "src_64/app/windows/MagicSummonResultWindow.lua:415–434",
+    "src_64/data/tables/translation.lua:223",
+    "internal/application/summon/mode.go:373–389"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/MagicSummonResultWindow.lua:483": {
+   "evidence": [
+    "src_64/app/windows/MagicSummonResultWindow.lua:464–483",
+    "internal/application/summon/mode.go:390–401"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/MapWindow.lua:1346": {
+   "evidence": [
+    "src_64/app/windows/MapWindow.lua:1344–1354",
+    "src_64/data/tables/translation.lua:463",
+    "internal/domain/campaign/projection.go:16–28,49–74",
+    "src_64/app/model/SelfPlayer.lua:286–360"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/MapWindow.lua:1926": {
+   "evidence": [
+    "src_64/app/windows/MapWindow.lua:1908–1929",
+    "src_64/data/tables/translation.lua:6099"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/MapWindow.lua:2102": {
+   "evidence": [
+    "src_64/app/windows/MapWindow.lua:2094–2106",
+    "src_64/data/tables/translation.lua:6143",
+    "internal/domain/campaign/projection.go:16–28,49–74",
+    "src_64/app/model/SelfPlayer.lua:286–360"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/MarchWindow.lua:629": {
+   "evidence": [
+    "src_64/app/windows/MarchWindow.lua:615–631",
+    "internal/domain/march/run.go:196–240",
+    "internal/application/march/settle.go:132–192",
+    "src_64/data/tables/translation.lua:1416"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/MemoriesOfSchoolMainWindow.lua:212": {
+   "evidence": [
+    "src_64/app/windows/MemoriesOfSchoolMainWindow.lua:194–212"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/OpenChestWindow.lua:40": {
+   "evidence": [
+    "src_64/app/windows/OpenChestWindow.lua:38–46",
+    "internal/domain/march/run.go:196–240",
+    "internal/application/march/settle.go:132–192",
+    "src_64/data/tables/translation.lua:224"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/OpenChestWindow.lua:50": {
+   "evidence": [
+    "src_64/app/windows/OpenChestWindow.lua:48–83",
+    "internal/domain/march/run.go:196–240",
+    "internal/application/march/settle.go:132–192",
+    "src_64/data/tables/translation.lua:4056"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/PeakArenaReportWindow.lua:292": {
+   "evidence": [
+    "src_64/app/windows/PeakArenaReportWindow.lua:285–296,425–438",
+    "src_64/data/tables/translation.lua:1784–1785"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/PeakArenaWindow.lua:681": {
+   "evidence": [
+    "src_64/app/windows/PeakArenaWindow.lua:677–689",
+    "src_64/data/tables/translation.lua:1836–1837"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/PeakArenaWindow.lua:693": {
+   "evidence": [
+    "src_64/app/windows/PeakArenaWindow.lua:692–705",
+    "src_64/data/tables/translation.lua:224–225"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/PetCampaignAwardWindow.lua:215": {
+   "evidence": [
+    "src_64/app/windows/PetCampaignAwardWindow.lua:202–225"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/PetMainWindow.lua:800": {
+   "evidence": [
+    "src_64/app/windows/PetMainWindow.lua:793–800,3039–3048",
+    "internal/application/i5/awakening.go:32–38",
+    "src_64/data/tables/translation.lua:8312"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/PetMainWindow.lua:816": {
+   "evidence": [
+    "src_64/app/windows/PetMainWindow.lua:809–816",
+    "internal/application/i5/awakening.go:67–101",
+    "internal/domain/objective/awakening.go:205–214",
+    "src_64/data/tables/translation.lua:2616"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/PlayoffsDeclarationWindow.lua:101": {
+   "evidence": [
+    "src_64/app/windows/PlayoffsDeclarationWindow.lua:91–103",
+    "src_64/data/tables/translation.lua:1896–1897"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/ProduceConfirmWindow.lua:120": {
+   "evidence": [
+    "src_64/app/windows/ProduceConfirmWindow.lua:101–123",
+    "src_64/app/model/SelfPlayer.lua:740–767",
+    "work/backend_audit_t34b/internal/application/dormhouse/compose.go:193–225"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/RegionArenaHeroShopWindow.lua:414": {
+   "evidence": [
+    "src_64/app/windows/RegionArenaHeroShopWindow.lua:413–417",
+    "src_64/data/tables/translation.lua:6380–6381"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/RegionArenaHeroShopWindow.lua:418": {
+   "evidence": [
+    "src_64/app/windows/RegionArenaHeroShopWindow.lua:418–421",
+    "src_64/data/tables/translation.lua:6384–6385"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/RegionArenaHeroShopWindow.lua:441": {
+   "evidence": [
+    "src_64/app/windows/RegionArenaHeroShopWindow.lua:429–445"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/RegionArenaHeroShopWindow.lua:449": {
+   "evidence": [
+    "src_64/app/windows/RegionArenaHeroShopWindow.lua:446–461",
+    "internal/application/arena/service.go:548–578",
+    "src_64/data/tables/translation.lua:6364–6365"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/RegionBattleScoresWindow.lua:254": {
+   "evidence": [
+    "src_64/app/windows/RegionBattleScoresWindow.lua:246–258",
+    "work/i9/stages/I9-10/DECISIONS_DRAFT.md:115",
+    "src_64/data/tables/translation.lua:952–953"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/SelectEquipWindow.lua:60": {
+   "evidence": [
+    "src_64/app/windows/SelectEquipWindow.lua:59–67",
+    "work/backend_audit_t34b/internal/adapters/stockruntime/items_energy_dispatcher.go:62–159,200–247",
+    "work/backend_audit_t34b/internal/application/itemsenergy/commands.go:29–63,145–204,222–315",
+    "work/backend_audit_t34b/internal/application/itemsenergy/box.go:18–75,88–144"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/SelectPeakTeamWindow.lua:1007": {
+   "evidence": [
+    "src_64/app/windows/SelectPeakTeamWindow.lua:1003–1007,1801–1811",
+    "src_64/data/tables/translation.lua:1792–1793"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/SelectPeakTeamWindow.lua:1479": {
+   "evidence": [
+    "src_64/app/windows/SelectPeakTeamWindow.lua:1473–1482",
+    "src_64/data/tables/translation.lua:9448–9449"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/SelectPeakTeamWindow.lua:303": {
+   "evidence": [
+    "src_64/app/windows/SelectPeakTeamWindow.lua:296–307,2182–2192",
+    "src_64/data/tables/translation.lua:1796–1797"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/SelectPetTeamWindow.lua:174": {
+   "evidence": [
+    "src_64/app/windows/SelectPetTeamWindow.lua:162–178",
+    "src_64/data/tables/translation.lua:7259"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/SelectPetTeamWindow.lua:668": {
+   "evidence": [
+    "src_64/app/windows/SelectPetTeamWindow.lua:664–672",
+    "src_64/data/tables/translation.lua:7263"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/SelectTeamNewWindow.lua:2869": {
+   "evidence": [
+    "src_64/app/windows/SelectTeamNewWindow.lua:2863–2871,2964–2967",
+    "src_64/data/tables/translation.lua:6007"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/SelectTeamNewWindow.lua:2969": {
+   "evidence": [
+    "src_64/app/windows/SelectTeamNewWindow.lua:2968–2975",
+    "src_64/data/tables/translation.lua:9435"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/SelectTeamRearenaWindow.lua:1421": {
+   "evidence": [
+    "src_64/app/windows/SelectTeamRearenaWindow.lua:1419–1429",
+    "src_64/data/tables/translation.lua:4188–4189",
+    "internal/adapters/stockruntime/arena_dispatcher.go:93–119,143–153"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/SelectTeamRearenaWindow.lua:1847": {
+   "evidence": [
+    "src_64/app/windows/SelectTeamRearenaWindow.lua:1840–1850",
+    "src_64/data/tables/translation.lua:4192–4193",
+    "internal/adapters/stockruntime/arena_dispatcher.go:93–119,143–153"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/SelectTeamRearenaWindow.lua:2398": {
+   "evidence": [
+    "src_64/app/windows/SelectTeamRearenaWindow.lua:2390–2399,2438–2447",
+    "src_64/data/tables/translation.lua:4180–4181",
+    "internal/adapters/stockruntime/arena_dispatcher.go:93–119,143–153"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/SelectTeamRearenaWindow.lua:2408": {
+   "evidence": [
+    "src_64/app/windows/SelectTeamRearenaWindow.lua:2400–2409,2448–2457",
+    "src_64/data/tables/translation.lua:4176–4177",
+    "internal/adapters/stockruntime/arena_dispatcher.go:93–119,143–153"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/SelectTeamRearenaWindow.lua:401": {
+   "evidence": [
+    "src_64/app/windows/SelectTeamRearenaWindow.lua:398–440",
+    "src_64/data/tables/translation.lua:4196–4197",
+    "internal/adapters/stockruntime/arena_dispatcher.go:93–119,143–153"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/SelectTeamRearenaWindow.lua:616": {
+   "evidence": [
+    "src_64/app/windows/SelectTeamRearenaWindow.lua:602–627,169–179,1034–1072",
+    "src_64/data/tables/translation.lua:7236–7237",
+    "internal/adapters/stockruntime/arena_dispatcher.go:93–119,143–153"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/SelectTeamRearenaWindow.lua:657": {
+   "evidence": [
+    "src_64/app/windows/SelectTeamRearenaWindow.lua:651–661,1034–1072",
+    "src_64/data/tables/translation.lua:2068–2069",
+    "internal/adapters/stockruntime/arena_dispatcher.go:93–119,143–153"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/SelectTeamRearenaWindow.lua:953": {
+   "evidence": [
+    "src_64/app/windows/SelectTeamRearenaWindow.lua:945–955",
+    "src_64/data/tables/translation.lua:4172–4173",
+    "internal/adapters/stockruntime/arena_dispatcher.go:93–119,143–153"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/SelectTeamRearenaWindow.lua:965": {
+   "evidence": [
+    "src_64/app/windows/SelectTeamRearenaWindow.lua:956–967,1863–1884,2242–2267",
+    "src_64/data/tables/translation.lua:4168–4169",
+    "internal/adapters/stockruntime/arena_dispatcher.go:93–119,143–153"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/SelectTrialWindow.lua:261": {
+   "evidence": [
+    "src_64/data/tables/translation.lua:2360–2361",
+    "src_64/app/windows/SelectTrialWindow.lua:254–270",
+    "internal/application/campaign/trials.go:125–166",
+    "internal/content/builtin/generated/campaign_catalog.json:1 (daily_consumes IDs 3–10)"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/SelectTrialWindow.lua:277": {
+   "evidence": [
+    "src_64/data/tables/translation.lua:224–225",
+    "src_64/app/windows/SelectTrialWindow.lua:275–303"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/SellDetailWindow.lua:426": {
+   "evidence": [
+    "src_64/app/windows/SellDetailWindow.lua:419–427"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/SellDetailWindow.lua:484": {
+   "evidence": [
+    "src_64/app/windows/SellDetailWindow.lua:463–499"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/ShopDetailWindow.lua:434": {
+   "evidence": [
+    "src_64/app/windows/ShopDetailWindow.lua:418–526",
+    "work/backend_audit_t34b/internal/application/shop/commands.go:85–134,137–212,413–471",
+    "work/backend_audit_t34b/internal/adapters/stockruntime/shop_dispatcher.go:191–214"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/ShopWindow.lua:520": {
+   "evidence": [
+    "src_64/app/windows/ShopWindow.lua:515–527,1320–1352",
+    "work/backend_audit_t34b/internal/application/shop/commands.go:85–134,137–212,413–471",
+    "work/backend_audit_t34b/internal/adapters/stockruntime/shop_dispatcher.go:191–214"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/ShopWindow.lua:837": {
+   "evidence": [
+    "src_64/app/windows/ShopWindow.lua:835–898"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/ShopWindow.lua:916": {
+   "evidence": [
+    "src_64/app/windows/ShopWindow.lua:913–922"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/ShopWindow.lua:970": {
+   "evidence": [
+    "src_64/app/windows/ShopWindow.lua:968–976"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/ShopWindow.lua:989": {
+   "evidence": [
+    "src_64/app/windows/ShopWindow.lua:985–993"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/SignInWindow.lua:367": {
+   "evidence": [
+    "src_64/app/windows/SignInWindow.lua:360–367",
+    "src_64/data/tables/translation.lua:18483",
+    "src_64/app/windows/SignInDescWindow.lua:8–11"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/SummonWindow.lua:1463": {
+   "evidence": [
+    "src_64/app/windows/SummonWindow.lua:1459–1478,1523–1541",
+    "src_64/data/tables/translation.lua:227",
+    "internal/application/summon/mode.go:454–469"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/SummonWindow.lua:1467": {
+   "evidence": [
+    "src_64/app/windows/SummonWindow.lua:1464–1475",
+    "src_64/data/tables/translation.lua:943",
+    "src_64/app/model/SelfPlayer.lua:278–283"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/SummonWindow.lua:1725": {
+   "evidence": [
+    "src_64/app/windows/SummonWindow.lua:1704–1740",
+    "src_64/data/tables/translation.lua:1643",
+    "internal/application/summon/mode.go:301–316"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/SuperPartnerExchangeWindow.lua:249": {
+   "evidence": [
+    "src_64/app/windows/SuperPartnerExchangeWindow.lua:247–258",
+    "src_64/data/tables/translation.lua:17451",
+    "internal/application/summon/mode.go:437–450",
+    "internal/domain/summon/premium.go:139–145"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/SuperPartnerExchangeWindow.lua:263": {
+   "evidence": [
+    "src_64/app/windows/SuperPartnerExchangeWindow.lua:261–272",
+    "src_64/data/tables/translation.lua:17447",
+    "internal/application/summon/mode.go:437–450",
+    "internal/domain/summon/premium.go:139–145"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/SuperPartnerExchangeWindow.lua:58": {
+   "evidence": [
+    "src_64/app/windows/SuperPartnerExchangeWindow.lua:57–60,225–228",
+    "src_64/data/tables/translation.lua:17295",
+    "internal/application/summon/mode.go:437–450",
+    "internal/domain/summon/premium.go:139–145"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/SuperPartnerExchangeWindow.lua:64": {
+   "evidence": [
+    "src_64/app/windows/SuperPartnerExchangeWindow.lua:62–85",
+    "src_64/data/tables/translation.lua:17415",
+    "internal/application/summon/mode.go:437–450",
+    "internal/domain/summon/premium.go:139–145"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/TaskAwakeCell.lua:373": {
+   "evidence": [
+    "src_64/app/windows/TaskAwakeCell.lua:368–375",
+    "internal/application/i5/awakening.go:54–105,294–359",
+    "internal/domain/objective/awakening.go:135–143,205–214,248–269",
+    "src_64/data/tables/translation.lua:10968"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/TaskAwakeCell.lua:413": {
+   "evidence": [
+    "src_64/app/windows/TaskAwakeCell.lua:396–421",
+    "internal/application/i5/awakening.go:54–105,294–359",
+    "internal/domain/objective/awakening.go:135–143,205–214,248–269",
+    "src_64/data/tables/translation.lua:10972"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/TaskAwakeCell.lua:471": {
+   "evidence": [
+    "src_64/app/windows/TaskAwakeCell.lua:465–475",
+    "src_64/data/tables/translation.lua:14124"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/TaskAwakeCell.lua:520": {
+   "evidence": [
+    "src_64/app/windows/TaskAwakeCell.lua:500–520",
+    "internal/application/i5/awakening.go:54–105,294–359",
+    "internal/domain/objective/awakening.go:135–143,205–214,248–269",
+    "src_64/data/tables/translation.lua:15740"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/TaskAwakeCell.lua:562": {
+   "evidence": [
+    "src_64/app/windows/TaskAwakeCell.lua:550–564",
+    "internal/application/i5/awakening.go:54–105,294–359",
+    "internal/domain/objective/awakening.go:135–143,205–214,248–269",
+    "src_64/data/tables/translation.lua:2616"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/TaskAwakeCell.lua:683": {
+   "evidence": [
+    "src_64/app/windows/TaskAwakeCell.lua:682–687",
+    "src_64/app/common/enums.lua:3044–3063",
+    "internal/content/builtin/generated/objective_catalog.json:1 (awakening.definitions: all named roots present)",
+    "internal/application/i5/awakening.go:28–49,67–101",
+    "docs/i9/I9_AWAKENING_MISSIONS_V1.json:29",
+    "src_64/data/tables/translation.lua:23980"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/TaskAwakeCell.lua:691": {
+   "evidence": [
+    "src_64/app/windows/TaskAwakeCell.lua:690–695",
+    "src_64/app/common/enums.lua:3044–3063",
+    "internal/content/builtin/generated/objective_catalog.json:1 (awakening.definitions: all named roots present)",
+    "internal/application/i5/awakening.go:28–49,67–101",
+    "docs/i9/I9_AWAKENING_MISSIONS_V1.json:29",
+    "src_64/data/tables/translation.lua:25132"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/TaskAwakeCell.lua:725": {
+   "evidence": [
+    "src_64/app/windows/TaskAwakeCell.lua:705–749,837–889",
+    "internal/application/i5/awakening.go:54–105,294–359",
+    "internal/domain/objective/awakening.go:135–143,205–214,248–269",
+    "src_64/data/tables/translation.lua:1284"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/TaskAwakeCell.lua:764": {
+   "evidence": [
+    "src_64/app/windows/TaskAwakeCell.lua:763–775",
+    "src_64/app/common/enums.lua:3044–3063",
+    "internal/content/builtin/generated/objective_catalog.json:1 (awakening.definitions: all named roots present)",
+    "internal/application/i5/awakening.go:28–49,67–101",
+    "docs/i9/I9_AWAKENING_MISSIONS_V1.json:29",
+    "src_64/data/tables/translation.lua:23744"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/TaskAwakeCell.lua:780": {
+   "evidence": [
+    "src_64/app/windows/TaskAwakeCell.lua:777–800",
+    "src_64/app/common/enums.lua:3044–3063",
+    "internal/content/builtin/generated/objective_catalog.json:1 (awakening.definitions: all named roots present)",
+    "internal/application/i5/awakening.go:28–49,67–101",
+    "docs/i9/I9_AWAKENING_MISSIONS_V1.json:29",
+    "src_64/data/tables/translation.lua:23740"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/ThrowSandbagChooseWindow.lua:56": {
+   "evidence": [
+    "src_64/app/windows/ThrowSandbagChooseWindow.lua:50–58",
+    "src_64/data/tables/translation.lua:23836–23837"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/ThrowSandbagChooseWindow.lua:71": {
+   "evidence": [
+    "src_64/app/windows/ThrowSandbagChooseWindow.lua:63–71",
+    "src_64/data/tables/translation.lua:23852–23853"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/ThrowSandbagChooseWindow.lua:99": {
+   "evidence": [
+    "src_64/app/windows/ThrowSandbagChooseWindow.lua:95–100"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/TimeTravelWindow.lua:266": {
+   "evidence": [
+    "src_64/app/windows/MonsterProphecyWindow.lua:97–105,141–156,293–310",
+    "src_64/app/windows/TimeTravelWindow.lua:255–279"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/TreasurePrepareWindow.lua:53": {
+   "evidence": [
+    "src_64/app/windows/TreasurePrepareWindow.lua:39–57",
+    "src_64/data/tables/translation.lua:9995–9997"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/TreasurePrepareWindow.lua:61": {
+   "evidence": [
+    "src_64/app/windows/TreasurePrepareWindow.lua:60–65",
+    "src_64/data/tables/translation.lua:9999–10001"
+   ],
+   "finding": "",
+   "status": "CLIENT_ONLY",
+   "test": ""
+  },
+  "LOCAL:app/windows/TreasureWindow.lua:115": {
+   "evidence": [
+    "src_64/app/windows/TreasureWindow.lua:104–115",
+    "internal/application/workplace/mode.go:237–295",
+    "internal/application/workplace/claim.go:149–169"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/TreasureWindow.lua:181": {
+   "evidence": [
+    "src_64/app/windows/TreasureWindow.lua:171–181",
+    "internal/application/workplace/mode.go:237–295",
+    "internal/application/workplace/claim.go:149–169"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "LOCAL:app/windows/TrialWindow.lua:93": {
+   "evidence": [
+    "src_64/data/tables/translation.lua:1316–1317",
+    "src_64/app/windows/TrialWindow.lua:66–104",
+    "src_64/app/windows/TrialTips.lua:17–19",
+    "src_64/app/model/SelfPlayer.lua:392–459",
+    "internal/application/campaign/trials.go:48–71",
+    "internal/domain/campaign/trials.go:59–69"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "PUSH:app/model/SelfPlayer.lua:4345": {
+   "evidence": [
+    "src_64/app/windows/BattleSpecialStory.lua:329–344",
+    "src_64/app/model/SelfPlayer.lua:4323–4363,4387–4393,4405–4417",
+    "internal/application/campaign/awards.go:126–136"
+   ],
+   "finding": "A-154",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "PUSH:app/model/SelfPlayer.lua:4408": {
+   "evidence": [
+    "src_64/app/windows/MemoriesOfSchoolFinalRewardWindow.lua:43–63",
+    "src_64/app/model/SelfPlayer.lua:4405–4421",
+    "internal/application/memoir/commands.go:212–239,268–280"
+   ],
+   "finding": "A-163",
+   "status": "UNUSED_BACKEND_GAP",
+   "test": ""
+  },
+  "PUSH:app/model/Shop.lua:145": {
+   "evidence": [
+    "work/backend_audit_t34b/internal/application/shop/commands.go:306–310",
+    "src_64/app/model/Shop.lua:95–98",
+    "src_64/app/windows/ShopWindow.lua:1231–1250,1361–1389,1715–1726",
+    "src_64/data/tables/shop_config.lua:299–336"
+   ],
+   "finding": "A-169",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/model/HeroRecommend.lua:150": {
+   "evidence": [
+    "src_64/app/model/HeroRecommend.lua:134–154",
+    "src_64/data/tables/translation.lua:14020–14021",
+    "work/backend_audit_t34b/internal/application/herorecommend/read.go:26–43"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/ArenaRecordPlayerInfoWindow.lua:141": {
+   "evidence": [
+    "src_64/app/windows/ArenaRecordPlayerInfoWindow.lua:135–144",
+    "internal/projection/topfloor/wire.go:78–85",
+    "src_64/data/tables/translation.lua:688–689"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/ArenaRecordPlayerInfoWindow.lua:145": {
+   "evidence": [
+    "src_64/app/windows/ArenaRecordPlayerInfoWindow.lua:145–149",
+    "src_64/data/tables/translation.lua:528–529"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/ArenaWindow.lua:184": {
+   "evidence": [
+    "src_64/app/windows/ArenaWindow.lua:182–198,284–300",
+    "internal/projection/topfloor/wire.go:78–85",
+    "src_64/data/tables/translation.lua:19460–19461"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/ArenaWindow.lua:564": {
+   "evidence": [
+    "src_64/app/windows/ArenaWindow.lua:550–565",
+    "internal/projection/topfloor/wire.go:78–85",
+    "src_64/data/tables/translation.lua:688–689"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/ArenaWindow.lua:568": {
+   "evidence": [
+    "src_64/app/windows/ArenaWindow.lua:566–569,670–702",
+    "internal/projection/topfloor/wire.go:78–85",
+    "src_64/data/tables/translation.lua:528–529"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/ArenaWindow.lua:950": {
+   "evidence": [
+    "src_64/app/windows/ArenaWindow.lua:949–952,1146–1149",
+    "src_64/data/tables/translation.lua:292–293"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/ChapterGachaWindow.lua:237": {
+   "evidence": [
+    "src_64/app/windows/ChapterGachaWindow.lua:211–245",
+    "src_64/app/common/enums.lua:1704,1738",
+    "cmd/gxb-api/main_postgres.go:239–248,870–873",
+    "internal/adapters/stockruntime/activity_dispatcher.go:55–67,90–93"
+   ],
+   "finding": "A-155",
+   "status": "UNUSED_BACKEND_GAP",
+   "test": ""
+  },
+  "REPLY:app/windows/ChapterGachaWindow.lua:88": {
+   "evidence": [
+    "src_64/data/tables/translation.lua:15780–15781",
+    "src_64/app/windows/ChapterGachaWindow.lua:87–105,162–174",
+    "src_64/app/model/SelfPlayer.lua:376–389",
+    "internal/domain/campaign/awards.go:62–75"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/FoundEnemyWindow.lua:82": {
+   "evidence": [
+    "src_64/app/windows/FoundEnemyWindow.lua:49–85",
+    "internal/adapters/stockruntime/arena_dispatcher.go:98–106"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/HeroattributWindow.lua:2170": {
+   "evidence": [
+    "src_64/app/windows/HeroattributWindow.lua:2166–2174",
+    "src_64/data/tables/translation.lua:308–309",
+    "work/backend_audit_t34b/internal/domain/heroassets/rules.go:65–71"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/HeroattributWindow.lua:2187": {
+   "evidence": [
+    "src_64/app/windows/HeroattributWindow.lua:2187–2193",
+    "src_64/data/tables/translation.lua:312–317",
+    "work/backend_audit_t34b/internal/application/heroassets/commands.go:19–66"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/HunqiCampaignWindow.lua:134": {
+   "evidence": [
+    "src_64/app/windows/HunqiCampaignWindow.lua:97–143,179–184",
+    "internal/domain/godstrial/state.go:45–68",
+    "src_64/data/tables/translation.lua:26588–26589"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/HunqiCampaignWindow.lua:154": {
+   "evidence": [
+    "src_64/app/windows/HunqiCampaignWindow.lua:151–159",
+    "internal/domain/godstrial/state.go:45–68",
+    "src_64/data/tables/translation.lua:26604–26605"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/HunqiCampaignWindow.lua:176": {
+   "evidence": [
+    "src_64/app/windows/HunqiCampaignWindow.lua:173–178",
+    "internal/domain/godstrial/state.go:45–68",
+    "src_64/data/tables/translation.lua:26592–26593"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/HunqiCampaignWindow.lua:199": {
+   "evidence": [
+    "src_64/app/windows/HunqiCampaignWindow.lua:194–199",
+    "internal/domain/godstrial/state.go:45–68"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/HunqiCampaignWindow.lua:77": {
+   "evidence": [
+    "src_64/app/windows/HunqiCampaignWindow.lua:69–77",
+    "internal/domain/godstrial/state.go:45–68"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/HunqiCampaignWindow.lua:89": {
+   "evidence": [
+    "src_64/app/windows/HunqiCampaignWindow.lua:85–95,161–168",
+    "internal/domain/godstrial/state.go:45–68",
+    "src_64/data/tables/translation.lua:26624–26625"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/MapDetailWindow.lua:400": {
+   "evidence": [
+    "src_64/app/windows/MapDetailWindow.lua:377–390,489–490",
+    "src_64/data/tables/translation.lua:775",
+    "internal/domain/campaign/projection.go:16–28,49–74",
+    "src_64/app/model/SelfPlayer.lua:286–360",
+    "internal/domain/campaign/sweep.go:13–25,44–76",
+    "internal/application/dailyconsume/service.go:51–86"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/MapDetailWindow.lua:409": {
+   "evidence": [
+    "src_64/app/windows/MapDetailWindow.lua:408–412",
+    "src_64/data/tables/translation.lua:2763",
+    "internal/domain/campaign/projection.go:16–28,49–74",
+    "src_64/app/model/SelfPlayer.lua:286–360",
+    "internal/domain/campaign/sweep.go:13–25,44–76",
+    "internal/application/dailyconsume/service.go:51–86"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/MapDetailWindow.lua:417": {
+   "evidence": [
+    "src_64/app/windows/MapDetailWindow.lua:416–423,667–674,734–743,816–823",
+    "src_64/data/tables/translation.lua:223",
+    "internal/domain/campaign/projection.go:16–28,49–74",
+    "src_64/app/model/SelfPlayer.lua:286–360",
+    "internal/domain/campaign/sweep.go:13–25,44–76",
+    "internal/application/dailyconsume/service.go:51–86"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/MapDetailWindow.lua:482": {
+   "evidence": [
+    "src_64/app/windows/MapDetailWindow.lua:481–486",
+    "src_64/data/tables/translation.lua:459",
+    "internal/domain/campaign/projection.go:16–28,49–74",
+    "src_64/app/model/SelfPlayer.lua:286–360",
+    "internal/domain/campaign/sweep.go:13–25,44–76",
+    "internal/application/dailyconsume/service.go:51–86"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/MapDetailWindow.lua:614": {
+   "evidence": [
+    "src_64/app/windows/MapDetailWindow.lua:606–623",
+    "src_64/data/tables/translation.lua:479",
+    "internal/domain/campaign/projection.go:16–28,49–74",
+    "src_64/app/model/SelfPlayer.lua:286–360",
+    "internal/domain/campaign/sweep.go:13–25,44–76",
+    "internal/application/dailyconsume/service.go:51–86"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/MapDetailWindow.lua:668": {
+   "evidence": [
+    "src_64/app/windows/MapDetailWindow.lua:665–681",
+    "src_64/data/tables/translation.lua:471",
+    "internal/domain/campaign/projection.go:16–28,49–74",
+    "src_64/app/model/SelfPlayer.lua:286–360",
+    "internal/domain/campaign/sweep.go:13–25,44–76",
+    "internal/application/dailyconsume/service.go:51–86"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/MapDetailWindow.lua:676": {
+   "evidence": [
+    "src_64/app/windows/MapDetailWindow.lua:676–681",
+    "src_64/data/tables/translation.lua:475",
+    "internal/domain/campaign/projection.go:16–28,49–74",
+    "src_64/app/model/SelfPlayer.lua:286–360",
+    "internal/domain/campaign/sweep.go:13–25,44–76",
+    "internal/application/dailyconsume/service.go:51–86"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/MapDetailWindow.lua:687": {
+   "evidence": [
+    "src_64/app/windows/MapDetailWindow.lua:684–692",
+    "src_64/data/tables/translation.lua:2363",
+    "internal/domain/campaign/projection.go:16–28,49–74",
+    "src_64/app/model/SelfPlayer.lua:286–360",
+    "internal/domain/campaign/sweep.go:13–25,44–76",
+    "internal/application/dailyconsume/service.go:51–86"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/MapDetailWindow.lua:700": {
+   "evidence": [
+    "src_64/app/windows/MapDetailWindow.lua:694–705",
+    "src_64/data/tables/translation.lua:2359",
+    "internal/domain/campaign/projection.go:16–28,49–74",
+    "src_64/app/model/SelfPlayer.lua:286–360",
+    "internal/domain/campaign/sweep.go:13–25,44–76",
+    "internal/application/dailyconsume/service.go:51–86"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/MapDetailWindow.lua:779": {
+   "evidence": [
+    "src_64/app/windows/MapDetailWindow.lua:778–783,842–847",
+    "src_64/data/tables/translation.lua:467",
+    "internal/domain/campaign/projection.go:16–28,49–74",
+    "src_64/app/model/SelfPlayer.lua:286–360",
+    "internal/domain/campaign/sweep.go:13–25,44–76",
+    "internal/application/dailyconsume/service.go:51–86"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/MapDetailWindow.lua:787": {
+   "evidence": [
+    "src_64/app/windows/MapDetailWindow.lua:786–795",
+    "src_64/data/tables/translation.lua:495",
+    "internal/domain/campaign/projection.go:16–28,49–74",
+    "src_64/app/model/SelfPlayer.lua:286–360",
+    "internal/domain/campaign/sweep.go:13–25,44–76",
+    "internal/application/dailyconsume/service.go:51–86"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/MapDetailWindow.lua:810": {
+   "evidence": [
+    "src_64/app/windows/MapDetailWindow.lua:809–829,862–880",
+    "src_64/data/tables/translation.lua:487",
+    "internal/domain/campaign/projection.go:16–28,49–74",
+    "src_64/app/model/SelfPlayer.lua:286–360",
+    "internal/domain/campaign/sweep.go:13–25,44–76",
+    "internal/application/dailyconsume/service.go:51–86"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/MapWindow.lua:419": {
+   "evidence": [
+    "src_64/app/windows/MapWindow.lua:405–425",
+    "src_64/data/tables/translation.lua:1083",
+    "internal/domain/campaign/projection.go:16–28,49–74",
+    "src_64/app/model/SelfPlayer.lua:286–360"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/MapWindow.lua:863": {
+   "evidence": [
+    "src_64/app/windows/MapWindow.lua:861–871",
+    "src_64/app/model/Shop.lua:301–319",
+    "work/backend_audit_t34b/internal/application/shop/service.go:308–314"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/MarchWindow.lua:168": {
+   "evidence": [
+    "src_64/app/windows/MarchWindow.lua:165–172",
+    "internal/domain/march/run.go:196–240",
+    "internal/application/march/settle.go:132–192",
+    "src_64/data/tables/translation.lua:1288"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/MarchWindow.lua:199": {
+   "evidence": [
+    "src_64/app/windows/MarchWindow.lua:175–199",
+    "internal/domain/march/run.go:196–240",
+    "internal/application/march/settle.go:132–192",
+    "src_64/data/tables/translation.lua:1464"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/MarchWindow.lua:211": {
+   "evidence": [
+    "src_64/app/windows/MarchWindow.lua:203–215",
+    "internal/domain/march/run.go:196–240",
+    "internal/application/march/settle.go:132–192",
+    "src_64/data/tables/translation.lua:6264"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/MemoriesOfSchoolRebornWindow.lua:180": {
+   "evidence": [
+    "src_64/app/windows/MemoriesOfSchoolRebornWindow.lua:175–200",
+    "src_64/data/tables/translation.lua:11444–11445",
+    "internal/application/memoir/commands.go:20–39,129–238"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/MemoriesOfSchoolRebornWindow.lua:182": {
+   "evidence": [
+    "src_64/app/windows/MemoriesOfSchoolRebornWindow.lua:181–188",
+    "src_64/data/tables/translation.lua:224–225",
+    "internal/application/memoir/commands.go:20–39,129–238"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/MemoriesOfSchoolWindow.lua:1111": {
+   "evidence": [
+    "src_64/app/windows/MemoriesOfSchoolWindow.lua:1105–1121",
+    "src_64/data/tables/translation.lua:11488–11489",
+    "internal/application/memoir/commands.go:20–39,129–238"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/MemoriesOfSchoolWindow.lua:843": {
+   "evidence": [
+    "src_64/app/windows/MemoriesOfSchoolWindow.lua:824–843,878–890",
+    "internal/application/memoir/commands.go:20–39,129–238"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/MemoriesOfSchoolWindow.lua:875": {
+   "evidence": [
+    "src_64/app/windows/MemoriesOfSchoolWindow.lua:850–875",
+    "internal/application/memoir/commands.go:20–39,129–238"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/MemoriesOfSchoolWindow.lua:927": {
+   "evidence": [
+    "src_64/app/windows/MemoriesOfSchoolWindow.lua:904–928,938–961",
+    "src_64/data/tables/translation.lua:11448–11449",
+    "internal/application/memoir/commands.go:20–39,129–238"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/MemoriesOfSchoolWindow.lua:974": {
+   "evidence": [
+    "src_64/app/windows/MemoriesOfSchoolWindow.lua:966–1001",
+    "src_64/data/tables/translation.lua:11456–11457",
+    "internal/application/memoir/commands.go:20–39,129–238"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/NewArenaRecordWindow.lua:172": {
+   "evidence": [
+    "src_64/app/windows/NewArenaRecordWindow.lua:145–175",
+    "src_64/app/windows/ArenaRecordPlayerInfoWindow.lua:113–180",
+    "internal/application/topfloor/task_reads.go:236–251",
+    "internal/application/topfloor/fight.go:263–283"
+   ],
+   "finding": "A-164",
+   "status": "UNUSED_BACKEND_GAP",
+   "test": ""
+  },
+  "REPLY:app/windows/NewMapDetailWindow.lua:488": {
+   "evidence": [
+    "src_64/app/windows/NewMapDetailWindow.lua:465–478,579–580",
+    "src_64/data/tables/translation.lua:775",
+    "internal/domain/campaign/projection.go:16–28,49–74",
+    "src_64/app/model/SelfPlayer.lua:286–360",
+    "internal/domain/campaign/sweep.go:13–25,44–76",
+    "internal/application/dailyconsume/service.go:51–86"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/NewMapDetailWindow.lua:497": {
+   "evidence": [
+    "src_64/app/windows/NewMapDetailWindow.lua:496–500",
+    "src_64/data/tables/translation.lua:2763",
+    "internal/domain/campaign/projection.go:16–28,49–74",
+    "src_64/app/model/SelfPlayer.lua:286–360",
+    "internal/domain/campaign/sweep.go:13–25,44–76",
+    "internal/application/dailyconsume/service.go:51–86"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/NewMapDetailWindow.lua:505": {
+   "evidence": [
+    "src_64/app/windows/NewMapDetailWindow.lua:504–511,771–778,838–847,922–929",
+    "src_64/data/tables/translation.lua:223",
+    "internal/domain/campaign/projection.go:16–28,49–74",
+    "src_64/app/model/SelfPlayer.lua:286–360",
+    "internal/domain/campaign/sweep.go:13–25,44–76",
+    "internal/application/dailyconsume/service.go:51–86"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/NewMapDetailWindow.lua:572": {
+   "evidence": [
+    "src_64/app/windows/NewMapDetailWindow.lua:570–576",
+    "src_64/data/tables/translation.lua:459",
+    "internal/domain/campaign/projection.go:16–28,49–74",
+    "src_64/app/model/SelfPlayer.lua:286–360",
+    "internal/domain/campaign/sweep.go:13–25,44–76",
+    "internal/application/dailyconsume/service.go:51–86"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/NewMapDetailWindow.lua:718": {
+   "evidence": [
+    "src_64/app/windows/NewMapDetailWindow.lua:710–727",
+    "src_64/data/tables/translation.lua:479",
+    "internal/domain/campaign/projection.go:16–28,49–74",
+    "src_64/app/model/SelfPlayer.lua:286–360",
+    "internal/domain/campaign/sweep.go:13–25,44–76",
+    "internal/application/dailyconsume/service.go:51–86"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/NewMapDetailWindow.lua:772": {
+   "evidence": [
+    "src_64/app/windows/NewMapDetailWindow.lua:769–785",
+    "src_64/data/tables/translation.lua:471",
+    "internal/domain/campaign/projection.go:16–28,49–74",
+    "src_64/app/model/SelfPlayer.lua:286–360",
+    "internal/domain/campaign/sweep.go:13–25,44–76",
+    "internal/application/dailyconsume/service.go:51–86"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/NewMapDetailWindow.lua:780": {
+   "evidence": [
+    "src_64/app/windows/NewMapDetailWindow.lua:780–785",
+    "src_64/data/tables/translation.lua:475",
+    "internal/domain/campaign/projection.go:16–28,49–74",
+    "src_64/app/model/SelfPlayer.lua:286–360",
+    "internal/domain/campaign/sweep.go:13–25,44–76",
+    "internal/application/dailyconsume/service.go:51–86"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/NewMapDetailWindow.lua:791": {
+   "evidence": [
+    "src_64/app/windows/NewMapDetailWindow.lua:788–796",
+    "src_64/data/tables/translation.lua:2363",
+    "internal/domain/campaign/projection.go:16–28,49–74",
+    "src_64/app/model/SelfPlayer.lua:286–360",
+    "internal/domain/campaign/sweep.go:13–25,44–76",
+    "internal/application/dailyconsume/service.go:51–86"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/NewMapDetailWindow.lua:804": {
+   "evidence": [
+    "src_64/app/windows/NewMapDetailWindow.lua:798–809",
+    "src_64/data/tables/translation.lua:2359",
+    "internal/domain/campaign/projection.go:16–28,49–74",
+    "src_64/app/model/SelfPlayer.lua:286–360",
+    "internal/domain/campaign/sweep.go:13–25,44–76",
+    "internal/application/dailyconsume/service.go:51–86"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/NewMapDetailWindow.lua:885": {
+   "evidence": [
+    "src_64/app/windows/NewMapDetailWindow.lua:883–889,949–955",
+    "src_64/data/tables/translation.lua:467",
+    "internal/domain/campaign/projection.go:16–28,49–74",
+    "src_64/app/model/SelfPlayer.lua:286–360",
+    "internal/domain/campaign/sweep.go:13–25,44–76",
+    "internal/application/dailyconsume/service.go:51–86"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/NewMapDetailWindow.lua:893": {
+   "evidence": [
+    "src_64/app/windows/NewMapDetailWindow.lua:891–901",
+    "src_64/data/tables/translation.lua:21315",
+    "internal/domain/campaign/projection.go:16–28,49–74",
+    "src_64/app/model/SelfPlayer.lua:286–360",
+    "internal/domain/campaign/sweep.go:13–25,44–76",
+    "internal/application/dailyconsume/service.go:51–86"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/NewMapDetailWindow.lua:916": {
+   "evidence": [
+    "src_64/app/windows/NewMapDetailWindow.lua:915–935,970–988",
+    "src_64/data/tables/translation.lua:487",
+    "internal/domain/campaign/projection.go:16–28,49–74",
+    "src_64/app/model/SelfPlayer.lua:286–360",
+    "internal/domain/campaign/sweep.go:13–25,44–76",
+    "internal/application/dailyconsume/service.go:51–86"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/PeakArenaWindow.lua:366": {
+   "evidence": [
+    "src_64/app/windows/PeakArenaWindow.lua:361–374",
+    "src_64/app/windows/ChangeEnemyWindow.lua:48–57",
+    "src_64/data/tables/translation.lua:13552–13553"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/PeakArenaWindow.lua:379": {
+   "evidence": [
+    "src_64/app/windows/PeakArenaWindow.lua:377–384",
+    "src_64/app/windows/../model/PeakArena.lua:49,112–126",
+    "src_64/data/tables/translation.lua:13596–13597"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/PeakArenaWindow.lua:396": {
+   "evidence": [
+    "src_64/app/windows/PeakArenaWindow.lua:389–409",
+    "src_64/data/tables/translation.lua:288–289"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/PeakArenaWindow.lua:420": {
+   "evidence": [
+    "src_64/app/windows/PeakArenaWindow.lua:411–430",
+    "src_64/data/tables/translation.lua:284–285"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/PersonDisplayWindow.lua:1024": {
+   "evidence": [
+    "src_64/app/windows/PersonDisplayWindow.lua:1014–1032,1173–1182",
+    "work/backend_audit_t34b/internal/adapters/stockruntime/achievement_dispatcher.go:51–55",
+    "work/backend_audit_t34b/internal/adapters/stockruntime/achievement_notice.go:57–60"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/PetCampaignWindow.lua:204": {
+   "evidence": [
+    "src_64/app/windows/PetCampaignWindow.lua:198–220",
+    "src_64/data/tables/translation.lua:9404–9405"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/PetCampaignWindow.lua:707": {
+   "evidence": [
+    "src_64/app/windows/PetCampaignWindow.lua:697–715",
+    "src_64/data/tables/translation.lua:5196–5197"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/PetCampaignWindow.lua:729": {
+   "evidence": [
+    "src_64/app/windows/PetCampaignWindow.lua:719–737",
+    "src_64/data/tables/translation.lua:5192–5193"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/PetCampaignWindow.lua:748": {
+   "evidence": [
+    "src_64/app/windows/PetCampaignWindow.lua:742–748"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/PetCampaignWindow.lua:759": {
+   "evidence": [
+    "src_64/app/windows/PetCampaignWindow.lua:752–776",
+    "src_64/data/tables/translation.lua:228–229"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/PetCampaignWindow.lua:858": {
+   "evidence": [
+    "src_64/app/windows/PetCampaignWindow.lua:855–868",
+    "src_64/data/tables/translation.lua:5248–5249"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/PetCampaignWindow.lua:870": {
+   "evidence": [
+    "src_64/app/windows/PetCampaignWindow.lua:869–874",
+    "src_64/data/tables/translation.lua:1288–1289"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/PetCampaignWindow.lua:890": {
+   "evidence": [
+    "src_64/app/windows/PetCampaignWindow.lua:888–893",
+    "src_64/data/tables/translation.lua:8288–8289"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/PetCampaignWindow.lua:897": {
+   "evidence": [
+    "src_64/app/windows/PetCampaignWindow.lua:895–904,1016–1025",
+    "src_64/data/tables/translation.lua:224–225"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/PetCampaignWindow.lua:934": {
+   "evidence": [
+    "src_64/app/windows/PetCampaignWindow.lua:933–938",
+    "src_64/data/tables/translation.lua:8284–8285"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/PetCampaignWindow.lua:94": {
+   "evidence": [
+    "internal/application/petcampaign/bootstrap.go:24–28",
+    "src_64/app/model/PetCampaign.lua:175–178",
+    "src_64/app/windows/PetCampaignWindow.lua:79–121"
+   ],
+   "finding": "A-161",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/PetCampaignWindow.lua:984": {
+   "evidence": [
+    "src_64/app/windows/PetCampaignWindow.lua:983–987,1091–1098",
+    "src_64/data/tables/translation.lua:9032–9033"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/PetCampaignWindow.lua:995": {
+   "evidence": [
+    "src_64/app/windows/PetCampaignWindow.lua:994–998",
+    "src_64/data/tables/translation.lua:456–457"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/PetSweepingWindow.lua:28": {
+   "evidence": [
+    "src_64/app/windows/PetSweepingWindow.lua:24–34",
+    "src_64/data/tables/translation.lua:224–225"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/PetSweepingWindow.lua:36": {
+   "evidence": [
+    "src_64/app/windows/PetSweepingWindow.lua:36–65",
+    "src_64/data/tables/translation.lua:5176–5177"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/PetSweepingWindow.lua:47": {
+   "evidence": [
+    "src_64/app/windows/PetSweepingWindow.lua:41–63,118–144"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/PlayoffsMatchTimeWindow.lua:59": {
+   "evidence": [
+    "src_64/app/windows/PlayoffsMatchTimeWindow.lua:54–73",
+    "internal/adapters/stockruntime/tournament_dispatcher.go:73–85",
+    "internal/application/arena/tournament_commands.go:117–166",
+    "src_64/data/tables/translation.lua:7348–7349"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/PlayoffsPlayerInfoWindow.lua:103": {
+   "evidence": [
+    "src_64/app/windows/PlayoffsPlayerInfoWindow.lua:94–105",
+    "internal/projection/arena/tournament.go:34–58",
+    "internal/application/arena/tournament_progress.go:15–67",
+    "src_64/data/tables/translation.lua:7556–7557"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/PlayoffsPlayerInfoWindow.lua:121": {
+   "evidence": [
+    "src_64/app/windows/PlayoffsPlayerInfoWindow.lua:119–123",
+    "internal/projection/arena/tournament.go:34–58",
+    "internal/application/arena/tournament_progress.go:15–67",
+    "src_64/data/tables/translation.lua:7752–7753"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/PlayoffsPlayerInfoWindow.lua:125": {
+   "evidence": [
+    "src_64/app/windows/PlayoffsPlayerInfoWindow.lua:124–127",
+    "internal/projection/arena/tournament.go:34–58",
+    "internal/application/arena/tournament_progress.go:15–67",
+    "src_64/data/tables/translation.lua:7332–7333"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/PlayoffsPlayerInfoWindow.lua:87": {
+   "evidence": [
+    "src_64/app/windows/PlayoffsPlayerInfoWindow.lua:85–89",
+    "internal/projection/arena/tournament.go:34–58",
+    "internal/application/arena/tournament_progress.go:15–67",
+    "src_64/data/tables/translation.lua:7560–7561"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/PlayoffsScheduleMainWindow.lua:163": {
+   "evidence": [
+    "src_64/app/windows/PlayoffsScheduleMainWindow.lua:154–177,229–242",
+    "internal/projection/arena/tournament.go:17–32,60–106",
+    "src_64/data/tables/translation.lua:7332–7333"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/PlayoffsScheduleMainWindow.lua:197": {
+   "evidence": [
+    "src_64/app/windows/PlayoffsScheduleMainWindow.lua:194–200",
+    "internal/projection/arena/tournament.go:17–32,60–106",
+    "src_64/data/tables/translation.lua:7336–7337"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/RegionArenaHeroShopWindow.lua:511": {
+   "evidence": [
+    "src_64/app/windows/RegionArenaHeroShopWindow.lua:489–545",
+    "internal/projection/arena/wire.go:60–72",
+    "internal/application/arena/service.go:548–578"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/RegionBattleScoresWindow.lua:276": {
+   "evidence": [
+    "src_64/app/windows/RegionBattleScoresWindow.lua:269–282,320–337",
+    "internal/adapters/stockruntime/arena_dispatcher.go:129–143",
+    "src_64/data/tables/translation.lua:1784–1785"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/SelectTeamNewWindow.lua:5621": {
+   "evidence": [
+    "src_64/app/windows/SelectTeamNewWindow.lua:5615–5622",
+    "src_64/data/tables/translation.lua:11452–11453",
+    "internal/application/memoir/commands.go:20–39,129–238"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/SelectTeamRearenaWindow.lua:1992": {
+   "evidence": [
+    "src_64/app/windows/SelectTeamRearenaWindow.lua:1984–2000",
+    "src_64/data/tables/translation.lua:7736–7737",
+    "internal/adapters/stockruntime/arena_dispatcher.go:93–119,143–153"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/SelectTeamRearenaWindow.lua:2040": {
+   "evidence": [
+    "src_64/app/windows/SelectTeamRearenaWindow.lua:2036–2043",
+    "src_64/data/tables/translation.lua:4200–4201",
+    "internal/adapters/stockruntime/arena_dispatcher.go:93–119,143–153"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/SignInWindow.lua:327": {
+   "evidence": [
+    "src_64/app/windows/SignInWindow.lua:319–334",
+    "src_64/data/tables/translation.lua:959",
+    "internal/application/i5/signin.go:64–76,163–176",
+    "internal/domain/objective/signin.go:92–120"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/SignInWindow.lua:343": {
+   "evidence": [
+    "src_64/app/windows/SignInWindow.lua:336–345",
+    "internal/application/i5/signin.go:64–76"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/SignInWindow.lua:469": {
+   "evidence": [
+    "src_64/app/windows/SignInWindow.lua:456–486",
+    "internal/application/i5/signin.go:177–202"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/SignInWindow.lua:492": {
+   "evidence": [
+    "src_64/app/windows/SignInWindow.lua:490–495",
+    "internal/application/i5/signin.go:172–176,244",
+    "src_64/app/windows/AlertAwardWindow.lua:173–176,193–194,360–387"
+   ],
+   "finding": "A-158",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/SummonResultWindow.lua:426": {
+   "evidence": [
+    "src_64/app/windows/SummonResultWindow.lua:423–440,791–806",
+    "src_64/data/tables/translation.lua:227",
+    "internal/application/summon/mode.go:454–469",
+    "src_64/app/model/SelfPlayer.lua:2262–2289"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/SummonResultWindow.lua:798": {
+   "evidence": [
+    "src_64/app/windows/SummonResultWindow.lua:796–805",
+    "src_64/data/tables/translation.lua:943",
+    "internal/application/summon/mode.go:454–469",
+    "src_64/app/model/SelfPlayer.lua:2262–2289"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/SummonResultWindow.lua:821": {
+   "evidence": [
+    "src_64/app/windows/SummonResultWindow.lua:819–839,863–885",
+    "src_64/data/tables/translation.lua:223",
+    "internal/application/summon/mode.go:454–469",
+    "src_64/app/model/SelfPlayer.lua:2262–2289"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/SummonResultWindow.lua:855": {
+   "evidence": [
+    "src_64/app/windows/SummonResultWindow.lua:845–859",
+    "src_64/data/tables/translation.lua:2727",
+    "internal/application/summon/mode.go:454–469",
+    "src_64/app/model/SelfPlayer.lua:2262–2289"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/SummonWindow.lua:1209": {
+   "evidence": [
+    "src_64/app/windows/SummonWindow.lua:1207–1239,1459–1478,1585–1620",
+    "internal/application/summon/mode.go:454–469,518–522",
+    "internal/adapters/stockruntime/summon_dispatcher.go:99–107",
+    "src_64/data/tables/message.lua:58–67"
+   ],
+   "finding": "A-156",
+   "status": "UNUSED_BACKEND_GAP",
+   "test": ""
+  },
+  "REPLY:app/windows/SummonWindow.lua:1223": {
+   "evidence": [
+    "src_64/app/windows/SummonWindow.lua:1222–1231,1585–1620,1704–1734",
+    "src_64/data/tables/translation.lua:223",
+    "internal/application/summon/mode.go:454–469"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/ThrowSandbagMainWindow.lua:104": {
+   "evidence": [
+    "src_64/app/windows/ThrowSandbagMainWindow.lua:96–105",
+    "internal/application/dodgeball/commands.go:29–52,184–197"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/ThrowSandbagMainWindow.lua:127": {
+   "evidence": [
+    "src_64/app/windows/ThrowSandbagMainWindow.lua:123–129",
+    "src_64/data/tables/translation.lua:23828–23829",
+    "internal/application/dodgeball/commands.go:29–52,184–197"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/ThrowSandbagMainWindow.lua:168": {
+   "evidence": [
+    "src_64/app/windows/ThrowSandbagMainWindow.lua:165–170",
+    "src_64/data/tables/translation.lua:23840–23841",
+    "internal/application/dodgeball/commands.go:29–52,184–197"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/ThrowSandbagWindow.lua:870": {
+   "evidence": [
+    "src_64/app/windows/ThrowSandbagWindow.lua:864–873",
+    "internal/application/dodgeball/commands.go:29–52,184–197"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/TreasureWindow.lua:132": {
+   "evidence": [
+    "src_64/app/windows/TreasureWindow.lua:118–132",
+    "internal/application/workplace/mode.go:237–295",
+    "internal/application/workplace/claim.go:149–169"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/TreasureWindow.lua:523": {
+   "evidence": [
+    "src_64/app/windows/TreasureWindow.lua:515–523",
+    "internal/application/workplace/mode.go:237–295",
+    "internal/application/workplace/claim.go:149–169"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  },
+  "REPLY:app/windows/TreasureWindow.lua:547": {
+   "evidence": [
+    "src_64/app/windows/TreasureWindow.lua:535–547",
+    "internal/application/workplace/mode.go:237–295",
+    "internal/application/workplace/claim.go:149–169"
+   ],
+   "finding": "",
+   "status": "REACHABLE",
+   "test": ""
+  }
+ },
+ "note": "seeded from work/audit/t34/popups_t34.json; lead reviews",
+ "schema_version": 1
+}

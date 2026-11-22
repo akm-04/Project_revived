@@ -5,15 +5,21 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"slices"
 	"strconv"
 	"time"
 
+	ca "gxb.local/backend/v2/internal/application/characterasset"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
+	"gxb.local/backend/v2/internal/application/publicstats"
+	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/topfloor"
+	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -64,67 +70,111 @@ func (s Service) Refresh(c context.Context, a identity.ActorContext, op operatio
 	return s.arena(c, a, op, true)
 }
 
+// errEntryRequired makes LOAD join the ladder in a short transaction first; the
+// server-wide ladder root must not stay locked through the offer projection.
+var errEntryRequired = errors.New("topfloor: entry required")
+
 func (s Service) arena(c context.Context, a identity.ActorContext, op operation.Context, refresh bool) (ArenaView, error) {
 	var out ArenaView
 	err := s.mutate(c, a.LogicalServerID, op, func() error {
-		_, _, err := s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.RepeatableRead}, retry(), nil, func(c context.Context, sc gen.TimedScope) error {
-			at := sc.Operation.DecisionAt()
-			if err := s.Fence.FenceActorTx(c, sc.Tx, a, at); err != nil {
-				return err
-			}
-			revision, catalog, err := s.catalogTx(c, sc.Tx)
-			if err != nil {
-				return err
-			}
-			if err = s.open(c, sc.Tx, catalog, a.PlayerID, at); err != nil {
-				return err
-			}
-			p, found, err := s.Store.ReadPlayerTx(c, sc.Tx, a.PlayerID, true)
-			if err != nil {
-				return err
-			}
-			if !found {
-				if p, err = s.enter(c, sc.Tx, catalog, revision, a, at); err != nil {
-					return err
-				}
-			}
-			rank, ok, err := s.Store.RankOfTx(c, sc.Tx, a.LogicalServerID, d.Occupant{Player: a.PlayerID})
-			if err != nil || !ok {
-				return errors.Join(err, d.ErrConflict)
-			}
-			next := catalog.Rolled(p, at)
-			if next.OfferedDay != next.TicketDay {
-				next.OfferedDay, next.RefreshCount = next.TicketDay, 0
-			}
-			if refresh {
-				next.RefreshCount++
-			}
-			if next.Offered, err = s.offers(c, sc.Tx, catalog, next, rank); err != nil {
-				return err
-			}
-			if !samePlayer(p, next) {
-				next.StateVersion, next.UpdatedAt = p.StateVersion+1, at
-				if err = s.Store.SavePlayerTx(c, sc.Tx, next, p.StateVersion); err != nil {
-					return err
-				}
-			}
-			weeklyChallenges, err := s.Store.WeeklyChallengesTx(c, sc.Tx, a.PlayerID, at)
-			if err != nil {
-				return err
-			}
-			out = ArenaView{Player: next, Rank: rank, ServerTime: at, WeeklyChallenges: weeklyChallenges}
-			for _, o := range next.Offered {
-				view, err := s.display(c, sc.Tx, catalog, a.LogicalServerID, o, at)
-				if err != nil {
-					return err
-				}
-				out.Enemies = append(out.Enemies, view)
-			}
-			return nil
-		})
+		err := s.loadArena(c, a, op, refresh, &out)
+		if !errors.Is(err, errEntryRequired) {
+			return err
+		}
+		if err = s.joinLadder(c, a, op); err != nil {
+			return err
+		}
+		if err = s.loadArena(c, a, op, refresh, &out); errors.Is(err, errEntryRequired) {
+			return errors.Join(err, d.ErrConflict)
+		}
 		return err
 	})
 	return out, err
+}
+
+// joinLadder enters the player once, alone in its transaction. Read Committed
+// lets concurrent first entries wait on the ladder root instead of aborting, and
+// keeping the root lock out of the projection keeps the pool from queueing. The
+// ladder update is version-guarded while the row is locked; the player insert is
+// keyed by player_id, so no stale read is written back.
+func (s Service) joinLadder(c context.Context, a identity.ActorContext, op operation.Context) error {
+	_, _, err := s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.ReadCommitted}, retry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		at := sc.Operation.DecisionAt()
+		if err := s.Fence.FenceActorTx(c, sc.Tx, a, at); err != nil {
+			return err
+		}
+		revision, catalog, err := s.catalogTx(c, sc.Tx)
+		if err != nil {
+			return err
+		}
+		if err = s.open(c, sc.Tx, catalog, a.PlayerID, at); err != nil {
+			return err
+		}
+		_, found, err := s.Store.ReadPlayerTx(c, sc.Tx, a.PlayerID, true)
+		if err != nil || found {
+			return err
+		}
+		_, err = s.enter(c, sc.Tx, catalog, revision, a, at)
+		return err
+	})
+	return err
+}
+
+func (s Service) loadArena(c context.Context, a identity.ActorContext, op operation.Context, refresh bool, out *ArenaView) error {
+	_, _, err := s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.RepeatableRead}, retry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		at := sc.Operation.DecisionAt()
+		if err := s.Fence.FenceActorTx(c, sc.Tx, a, at); err != nil {
+			return err
+		}
+		_, catalog, err := s.catalogTx(c, sc.Tx)
+		if err != nil {
+			return err
+		}
+		if err = s.open(c, sc.Tx, catalog, a.PlayerID, at); err != nil {
+			return err
+		}
+		p, found, err := s.Store.ReadPlayerTx(c, sc.Tx, a.PlayerID, true)
+		if err != nil {
+			return err
+		}
+		if !found {
+			return errEntryRequired
+		}
+		rank, ok, err := s.Store.RankOfTx(c, sc.Tx, a.LogicalServerID, d.Occupant{Player: a.PlayerID})
+		if err != nil || !ok {
+			return errors.Join(err, d.ErrConflict)
+		}
+		next := catalog.Rolled(p, at)
+		if next.OfferedDay != next.TicketDay {
+			next.OfferedDay, next.RefreshCount = next.TicketDay, 0
+		}
+		if refresh {
+			next.RefreshCount++
+		}
+		if next.Offered, err = s.offers(c, sc.Tx, catalog, next, rank); err != nil {
+			return err
+		}
+		if !samePlayer(p, next) {
+			next.StateVersion, next.UpdatedAt = p.StateVersion+1, at
+			if err = s.Store.SavePlayerTx(c, sc.Tx, next, p.StateVersion); err != nil {
+				return err
+			}
+		}
+		weeklyChallenges, err := s.Store.WeeklyChallengesTx(c, sc.Tx, a.PlayerID, at)
+		if err != nil {
+			return err
+		}
+		*out = ArenaView{Player: next, Rank: rank, ServerTime: at, WeeklyChallenges: weeklyChallenges}
+		for _, o := range next.Offered {
+			view, err := s.display(c, sc.Tx, catalog, a.LogicalServerID, o, at)
+			if err != nil {
+				return err
+			}
+			out.Enemies = append(out.Enemies, view)
+		}
+		return s.saveOfferSnapshot(c, sc.Tx, a.LogicalServerID, a.PlayerID, d.OfferScopeNormal, 0, rank, out.Enemies, at)
+	})
+	return err
 }
 
 func samePlayer(a, b d.Player) bool {
@@ -133,16 +183,65 @@ func samePlayer(a, b d.Player) bool {
 	return string(x) == string(y)
 }
 
-// enter seeds the server ladder on first use and appends the player at the bottom.
+// saveOfferSnapshot persists the identities and ranks the offer response just
+// returned, so admission can compare them without reserving the opponent.
+func (s Service) saveOfferSnapshot(c context.Context, t tx.Tx, server identity.LogicalServerID, pid identity.PlayerID, scope, generation, challengerRank int64, enemies []d.Display, at time.Time) error {
+	offers := make([]d.Ranked, 0, len(enemies))
+	for _, enemy := range enemies {
+		offers = append(offers, d.Ranked{Rank: enemy.Rank, Occupant: enemy.Occupant})
+	}
+	return s.Store.SaveOfferSnapshotTx(c, t, d.OfferSnapshot{Player: pid, Server: server, Scope: scope, Generation: generation, ChallengerRank: challengerRank, Offers: offers, UpdatedAt: at.UTC()})
+}
+
+// requireAttackDefense refuses a new attack whose owner has no usable saved
+// defense. It reads through the same roster owner SaveDefense validates.
+func (s Service) requireAttackDefense(c context.Context, q tx.Queryer, pid identity.PlayerID, p d.Player, at time.Time) error {
+	if len(p.Defense) == 0 {
+		return d.ErrDefenseRequired
+	}
+	if _, _, err := s.team(c, q, pid, p.Defense, p.DefensePet, at); err != nil {
+		return fmt.Errorf("%w: %v", d.ErrDefenseRequired, err)
+	}
+	return nil
+}
+
+// presetDefense selects the owned subset of the D511 preset girls, choosing the
+// highest-level owned copy of each in policy slot order. No selection means the
+// player owns none and keeps the D487 refusal.
+func (s Service) presetDefense(c context.Context, q tx.Queryer, pid identity.PlayerID) ([]int64, error) {
+	heroes, err := s.OwnedHeroes.ListHeroesTx(c, q, pid)
+	if err != nil {
+		return nil, err
+	}
+	selected, err := d.SelectPresetDefense(heroes, pid)
+	if err != nil {
+		return nil, err
+	}
+	chosen := make([]int64, 0, len(selected))
+	for _, hero := range selected {
+		chosen = append(chosen, hero.PartnerID)
+	}
+	if err = defenseShape(chosen, 0); err != nil {
+		return nil, err
+	}
+	return chosen, nil
+}
+
+// enter seeds the server ladder on first use, appends the player at the bottom
+// and writes the D511 preset defense in the same transaction before the insert.
 func (s Service) enter(c context.Context, t tx.Tx, catalog d.Catalog, revision string, a identity.ActorContext, at time.Time) (d.Player, error) {
 	l, found, err := s.Store.ReadLadderTx(c, t, a.LogicalServerID, true)
 	if err != nil {
 		return d.Player{}, err
 	}
 	if !found {
-		l, _ = catalog.NewLadder(a.LogicalServerID, revision, at)
-		if err = s.Store.CreateLadderTx(c, t, l); err != nil {
+		seed, _ := catalog.NewLadder(a.LogicalServerID, revision, at)
+		if err = s.Store.CreateLadderTx(c, t, seed); err != nil {
 			return d.Player{}, err
+		}
+		l, found, err = s.Store.ReadLadderTx(c, t, a.LogicalServerID, true)
+		if err != nil || !found {
+			return d.Player{}, errors.Join(err, d.ErrConflict)
 		}
 	}
 	if len(catalog.Unsettled(l, at)) > 0 {
@@ -153,11 +252,25 @@ func (s Service) enter(c context.Context, t tx.Tx, catalog d.Catalog, revision s
 		return d.Player{}, err
 	}
 	next := l
-	next.Size, next.StateVersion, next.UpdatedAt = rank, l.StateVersion+1, at
+	// A concurrent first entry can create the root with a later decision instant
+	// than this operation's bound one; the root's timestamps must stay ordered.
+	updatedAt := at.UTC()
+	if updatedAt.Before(l.CreatedAt) {
+		updatedAt = l.CreatedAt
+	}
+	next.Size, next.StateVersion, next.UpdatedAt = rank, l.StateVersion+1, updatedAt
 	if err = s.Store.SaveLadderTx(c, t, next, l.StateVersion); err != nil {
 		return d.Player{}, err
 	}
 	p := catalog.NewPlayer(a.PlayerID, a.LogicalServerID, revision, rank, at)
+	preset, err := s.presetDefense(c, t, a.PlayerID)
+	if err != nil {
+		return d.Player{}, err
+	}
+	if len(preset) > 0 {
+		stamp := at.UTC()
+		p.Defense, p.DefensePet, p.DefenseSetAt = preset, 0, &stamp
+	}
 	return p, s.Store.InsertPlayerTx(c, t, p)
 }
 
@@ -208,6 +321,12 @@ func (s Service) offers(c context.Context, q tx.Queryer, catalog d.Catalog, p d.
 // display builds an occupant's public face: robots from the catalog, players
 // from their canonical owners (directory, guild, roster rows of the defense).
 func (s Service) display(c context.Context, q tx.Queryer, catalog d.Catalog, server identity.LogicalServerID, o d.Occupant, at time.Time) (d.Display, error) {
+	return s.displayTeam(c, q, catalog, server, o, at, true)
+}
+
+// displayTeam leaves player hero rows without force when withForce is false,
+// for callers that freeze the same heroes themselves.
+func (s Service) displayTeam(c context.Context, q tx.Queryer, catalog d.Catalog, server identity.LogicalServerID, o d.Occupant, at time.Time, withForce bool) (d.Display, error) {
 	rank, _, err := s.Store.RankOfTx(c, q, server, o)
 	if err != nil {
 		return d.Display{}, err
@@ -218,13 +337,24 @@ func (s Service) display(c context.Context, q tx.Queryer, catalog d.Catalog, ser
 			return d.Display{}, d.ErrConflict
 		}
 		view := d.Display{Occupant: o, Rank: rank, Name: catalog.RobotName(o.Robot), Level: team.Level, AvatarID: catalog.RobotAvatarID, FrameID: catalog.RobotFrameID}
-		for _, id := range team.Heroes {
-			params, _ := catalog.RobotHeroParams(id)
-			view.Heroes = append(view.Heroes, params)
+		if band, ok := catalog.RobotBand(rank); ok && band.Level > view.Level {
+			view.Level = band.Level
 		}
+		heroes, ok := catalog.RobotHeroesAt(o.Robot, rank)
+		if !ok {
+			return d.Display{}, d.ErrConflict
+		}
+		view.Heroes = append(view.Heroes, heroes...)
+		if pet, ok := catalog.RobotPet(o.Robot, rank); ok {
+			view.Pet = pet
+		}
+		if err = s.fillRobotForce(c, q, view.Heroes, at); err != nil {
+			return d.Display{}, err
+		}
+		view.Force = teamForce(view.Heroes)
 		return view, nil
 	}
-	view, err := s.playerDisplay(c, q, o)
+	view, err := s.playerDisplay(c, q, o, at)
 	if err != nil {
 		return d.Display{}, err
 	}
@@ -235,8 +365,113 @@ func (s Service) display(c context.Context, q tx.Queryer, catalog d.Catalog, ser
 	}
 	view.Wins = p.Wins
 	view.Heroes, view.Pet, err = s.team(c, q, o.Player, p.Defense, p.DefensePet, at)
+	if err != nil {
+		return view, err
+	}
+	if !withForce {
+		return view, nil
+	}
+	if err = s.fillHeroForce(c, q, o.Player, view.Heroes, at); err != nil {
+		return d.Display{}, err
+	}
 	view.Force = teamForce(view.Heroes)
-	return view, err
+	return view, nil
+}
+
+// fillHeroForce adds the canonical public force to each defended hero row. The
+// stock enemy board reads row.force instead of recomputing it.
+func (s Service) fillHeroForce(c context.Context, q tx.Queryer, owner identity.PlayerID, heroes []map[string]any, at time.Time) error {
+	if s.HeroPower == nil || len(heroes) == 0 {
+		return nil
+	}
+	scope, ok, err := s.readScope(c, q, at)
+	if err != nil || !ok {
+		return err
+	}
+	for _, row := range heroes {
+		partnerID, _ := row["partner_id"].(int64)
+		if partnerID <= 0 {
+			continue
+		}
+		result, err := s.HeroPower.HeroTx(c, scope, character.HeroRef{PlayerID: owner, PartnerID: partnerID}, publicstats.View{Kind: publicstats.Self, Viewer: owner})
+		if err != nil {
+			return err
+		}
+		force := math.Round(result.Stats.Force)
+		if math.IsNaN(force) || math.IsInf(force, 0) || force < 0 || force > 100000000000 {
+			return d.ErrUnavailable
+		}
+		row["force"] = int64(force)
+	}
+	return nil
+}
+
+// fillRobotForce gives each robot hero row the power of the same banded team a
+// Top Floor fight resolves, so the enemy board and the team popup show it.
+func (s Service) fillRobotForce(c context.Context, q tx.Queryer, heroes []map[string]any, at time.Time) error {
+	if s.HeroPower == nil || len(heroes) == 0 {
+		return nil
+	}
+	scope, ok, err := s.readScope(c, q, at)
+	if err != nil || !ok {
+		return err
+	}
+	for _, row := range heroes {
+		tableID, _ := row["table_id"].(int64)
+		level, _ := row["lev"].(int64)
+		star, _ := row["star"].(int64)
+		color, _ := row["color"].(int64)
+		flags := integerRows(row["equips"])
+		result, err := s.HeroPower.RobotForceTx(c, scope, tableID, level, star, color, flags)
+		if err != nil {
+			return err
+		}
+		force := math.Round(result.Stats.Force)
+		if math.IsNaN(force) || math.IsInf(force, 0) || force < 0 || force > 100000000000 {
+			return d.ErrUnavailable
+		}
+		row["force"] = int64(force)
+	}
+	return nil
+}
+
+func integerRows(raw any) []int64 {
+	items, _ := raw.([]any)
+	out := make([]int64, 0, len(items))
+	for _, item := range items {
+		switch value := item.(type) {
+		case int64:
+			out = append(out, value)
+		case int:
+			out = append(out, int64(value))
+		case float64:
+			out = append(out, int64(value))
+		}
+	}
+	return out
+}
+
+// readScope is the coherent read the force projection needs. The stock rank
+// list reads on the fresh pool outside a transaction; force is projected only
+// where the owner read already holds one.
+func (s Service) readScope(c context.Context, q tx.Queryer, at time.Time) (ca.CoherentReadScope, bool, error) {
+	raw, ok := q.(tx.Tx)
+	if !ok {
+		return ca.CoherentReadScope{}, false, nil
+	}
+	revision, err := s.Content.ActiveRevision(c, q)
+	if err != nil {
+		return ca.CoherentReadScope{}, false, err
+	}
+	policies, err := policy.NewSet(policy.Ref{Name: "content", Version: revision})
+	if err != nil {
+		return ca.CoherentReadScope{}, false, err
+	}
+	scope, err := ca.NewCoherentReadScope(tx.Scope{Tx: raw, Operation: operation.Context{ID: ids.UUID{15: 1}, StartedAt: at.UTC(), Policies: policies}, Attempt: 1, Options: tx.Options{Isolation: tx.Serializable}}, revision, at)
+	if err != nil {
+		return ca.CoherentReadScope{}, false, err
+	}
+	return scope, true, nil
 }
 
 // team reads the owner's current roster rows for the given heroes and pet.
@@ -272,7 +507,8 @@ func (s Service) team(c context.Context, q tx.Queryer, pid identity.PlayerID, he
 	return nil, nil, fmt.Errorf("%w: pet %d not owned", d.ErrRefused, pet)
 }
 
-func (s Service) SaveDefense(c context.Context, a identity.ActorContext, heroes []int64, pet int64, op operation.Context) error {
+// defenseShape is the formation validation shared by MID278 and the D511 preset.
+func defenseShape(heroes []int64, pet int64) error {
 	seen := map[int64]bool{}
 	for _, id := range heroes {
 		if id <= 0 || seen[id] {
@@ -282,6 +518,13 @@ func (s Service) SaveDefense(c context.Context, a identity.ActorContext, heroes 
 	}
 	if len(heroes) > d.DefenseSlots || pet < 0 {
 		return d.ErrInvalid
+	}
+	return nil
+}
+
+func (s Service) SaveDefense(c context.Context, a identity.ActorContext, heroes []int64, pet int64, op operation.Context) error {
+	if err := defenseShape(heroes, pet); err != nil {
+		return err
 	}
 	if !s.ready() {
 		return d.ErrUnavailable
@@ -308,22 +551,45 @@ func (s Service) SaveDefense(c context.Context, a identity.ActorContext, heroes 
 }
 
 // PreFight checks that the named opponent is currently admissible without
-// consuming anything; revenge sends no enemy and is checked at START.
-func (s Service) PreFight(c context.Context, a identity.ActorContext, enemy int64) error {
+// consuming anything; revenge sends no enemy and is checked at START. A moved
+// challenger or offered target rank is refused before the formation opens.
+func (s Service) PreFight(c context.Context, a identity.ActorContext, enemy int64, op operation.Context) error {
 	if !s.ready() {
 		return d.ErrUnavailable
 	}
-	p, found, err := s.Store.ReadPlayerTx(c, s.Fresh, a.PlayerID, false)
-	if err != nil || !found {
-		return errors.Join(err, d.ErrRefused)
-	}
-	if enemy == 0 {
-		return nil
-	}
-	if _, ok := offered(p, enemy); !ok {
-		return d.ErrRefused
-	}
-	return nil
+	_, _, err := s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, readRetry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		p, found, err := s.Store.ReadPlayerTx(c, sc.Tx, a.PlayerID, false)
+		if err != nil || !found {
+			return errors.Join(err, d.ErrRefused)
+		}
+		if enemy == 0 {
+			return nil
+		}
+		occupant, ok := offered(p, enemy)
+		if !ok {
+			return d.ErrRefused
+		}
+		rank, ok, err := s.Store.RankOfTx(c, sc.Tx, a.LogicalServerID, d.Occupant{Player: a.PlayerID})
+		if err != nil {
+			return err
+		}
+		if !ok {
+			return d.ErrOfferStale
+		}
+		targetRank, ok, err := s.Store.RankOfTx(c, sc.Tx, a.LogicalServerID, occupant)
+		if err != nil {
+			return err
+		}
+		if !ok {
+			return d.ErrOfferStale
+		}
+		snapshot, found, err := s.Store.ReadOfferSnapshotTx(c, sc.Tx, a.PlayerID, d.OfferScopeNormal, false)
+		if err != nil {
+			return err
+		}
+		return d.MatchOfferSnapshot(snapshot, found, 0, rank, occupant, targetRank)
+	})
+	return err
 }
 
 func offered(p d.Player, table int64) (d.Occupant, bool) {
@@ -416,12 +682,20 @@ func (s Service) ResetTimer(c context.Context, a identity.ActorContext, op opera
 	})
 }
 
-func (s Service) playerDisplay(c context.Context, q tx.Queryer, o d.Occupant) (d.Display, error) {
+func (s Service) playerDisplay(c context.Context, q tx.Queryer, o d.Occupant, at time.Time) (d.Display, error) {
 	profile, found, err := s.Directory.ProfileTx(c, q, o.Player)
 	if err != nil || !found {
 		return d.Display{}, errors.Join(err, d.ErrUnavailable)
 	}
-	view := d.Display{Occupant: o, Name: profile.Name, Level: profile.Level, AvatarID: profile.AvatarID, FrameID: profile.AvatarFrameID, ConquerLevel: profile.ConquerLevel, ConquerLoop: profile.ConquerLoopID}
+	revision, err := s.Content.ActiveRevision(c, q)
+	if err != nil {
+		return d.Display{}, err
+	}
+	display, err := s.PlayerDisplay.ReadEffectivePlayerDisplayTx(c, q, o.Player, revision, at)
+	if err != nil {
+		return d.Display{}, err
+	}
+	view := d.Display{Occupant: o, Name: profile.Name, Level: profile.Level, AvatarID: profile.AvatarID, FrameID: profile.AvatarFrameID, ConquerLevel: profile.ConquerLevel, ConquerLoop: profile.ConquerLoopID, TitleInfo: display.TitleInfo}
 	if membership, member, err := s.Guilds.ReadMembershipTx(c, q, o.Player); err != nil {
 		return d.Display{}, err
 	} else if member {

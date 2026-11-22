@@ -1,0 +1,1 @@
+{"Pet": {"Job": null, "PetID": 0, "PendingItem": 0}, "Desk": {"Job": null, "PetID": 0, "PendingItem": 0}, "Admin": {}, "Board": {"Doing": null, "offers": null, "history": null, "award_log": null, "refresh_day": 0, "next_report_id": 1}, "Recycle": {"Energy": 0, "EnergyAt": "0001-01-01T00:00:00Z"}, "AdminDay": 0}

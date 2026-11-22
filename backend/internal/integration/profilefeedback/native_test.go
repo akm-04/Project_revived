@@ -39,6 +39,7 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -111,6 +112,7 @@ func actor(t *testing.T, p *pg.Pool) identity.ActorContext {
 		{`INSERT INTO gameplay_contexts(context_id,session_id,account_id,logical_server_id,player_id,context_generation,created_at)VALUES($1,$2,$3,1,$4,1,clock_timestamp())`, []any{g.String(), s.String(), a.String(), pid}},
 		{`INSERT INTO player_profiles(player_id,display_name,avatar_id,avatar_frame_id,player_type,state_version,created_at,updated_at)VALUES($1,'basis',1,0,0,1,$2::timestamptz-interval '1 day',$2)`, []any{pid, at}},
 		{`INSERT INTO player_progression(player_id,level,exp,state_version,updated_at)VALUES($1,1,0,1,$2)`, []any{pid, at}},
+		{`INSERT INTO player_directory_profiles(player_id,name,lev,vip,avatar_id,avatar_frame_id,conquer_lev,conquer_loop_id,state_version,created_at,updated_at)VALUES($1,'basis',1,0,1,0,0,1,1,$2::timestamptz-interval '1 day',$2)`, []any{pid, at}},
 	}
 	for _, r := range rows {
 		if _, e = tr.Exec(ctx, r.s, r.a...); e != nil {
@@ -125,6 +127,9 @@ func actor(t *testing.T, p *pg.Pool) identity.ActorContext {
 	cid, _ := identity.ContextIDFrom(g)
 	return identity.ActorContext{AccountID: aid, AccountUID: identity.AccountUID(a.String()), SessionID: sid, ContextID: cid, LogicalServerID: 1, PlayerID: identity.PlayerID(pid), ContextGeneration: 1, SessionLivenessVersion: 1, ContextLivenessVersion: 1}
 }
+
+const foreignKeyViolation = "23503"
+
 func sqlExec(t *testing.T, p *pg.Pool, s string, args ...any) {
 	t.Helper()
 	if _, e := p.Raw().Exec(ctx, s, args...); e != nil {
@@ -158,7 +163,7 @@ func installed(t *testing.T, p *pg.Pool) string {
 
 func service(p *pg.Pool, db tx.Beginner) app.Service {
 	basic := pp.BasicReader{Roots: pp.RootService{Store: publicprofilestore.Store{}}, Players: i4store.PlayerRootLocker{}, Fence: i5store.Store{}, PlayerBasis: i5store.Store{}, Relations: socialrelationstore.Store{}, Content: contentstore.Store{}}
-	return app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: db}}, Reads: tx.Runner{DB: p}, Fresh: p, Roots: app.RootService{Store: profilefeedbackstore.Store{}}, Basic: basic, Content: contentstore.Store{}, Receipts: kernelstore.Store{}, Recipients: i4store.PlayerRootLocker{}, Authors: i5store.Store{}}
+	return app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: db}}, Reads: tx.Runner{DB: p}, Fresh: p, Roots: app.RootService{Store: profilefeedbackstore.Store{}}, Basic: basic, Content: contentstore.Store{}, Receipts: kernelstore.Store{}, Recipients: i4store.PlayerRootLocker{}, Authors: i5store.Store{}, Directory: i4store.PlayerDirectoryReader{}}
 }
 func praise(t *testing.T, s app.Service, a identity.ActorContext, target identity.PlayerID, o operation.Context) app.CommandResult {
 	t.Helper()
@@ -514,7 +519,13 @@ func TestPraiseHistoryPagingAndProviderFailure(t *testing.T) {
 		t.Fatal("read deleted/changed facts")
 	}
 	sqlExec(t, p, `DELETE FROM gameplay_contexts WHERE player_id=$1`, int64(actors[22].PlayerID))
-	sqlExec(t, p, `DELETE FROM players WHERE player_id=$1`, int64(actors[22].PlayerID))
+	sqlExec(t, p, `DELETE FROM player_directory_profiles WHERE player_id=$1`, int64(actors[22].PlayerID))
+	// R8-3: players are never deleted; the key refuses it (00161).
+	_, e = p.Raw().Exec(ctx, `DELETE FROM players WHERE player_id=$1`, int64(actors[22].PlayerID))
+	var refusal interface{ SQLState() string }
+	if !errors.As(e, &refusal) || refusal.SQLState() != foreignKeyViolation || !strings.Contains(e.Error(), `"player_profile_praises_actor_player_id_fkey"`) {
+		t.Fatal("retired author deletion not refused by 00161", e)
+	}
 	if _, e = s.List(ctx, target, app.PageRequest{Offset: 1}, op()); !errors.Is(e, app.ErrProvider) {
 		t.Fatal("absent canonical author fabricated", e)
 	}
@@ -592,7 +603,7 @@ func TestPraiseHTTPRawAndCallbacks(t *testing.T) {
 		}
 	}
 	status, _ = send(fmt.Sprintf(`{"mid":1830,"token":%q,"region":2,"to_player_id":%d}`, bearer, b.PlayerID))
-	if status != 403 {
+	if status != http.StatusConflict {
 		t.Fatal("region mismatch", status)
 	}
 }

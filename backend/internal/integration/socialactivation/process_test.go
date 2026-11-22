@@ -5,6 +5,7 @@ package socialactivation_test
 import (
 	"encoding/binary"
 	"encoding/json"
+	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/protocol/amf3"
 	"gxb.local/backend/v2/internal/protocol/limits"
 	"gxb.local/backend/v2/internal/protocol/mids"
@@ -132,6 +133,25 @@ func postProcess(t *testing.T, addr, token string, region int64, mid int, fields
 	}
 	return res.StatusCode, body
 }
+
+// loginProcess sends the MID1 sid/login_token pair the stock client logs in with before any gameplay MID. MID1 marks
+// the game day delivered, so the first gameplay reply of the day carries no daily reset signal.
+func loginProcess(t *testing.T, addr string, f *fixture, a identity.ActorContext) {
+	t.Helper()
+	sidRaw := "process-sid-" + a.SessionID.UUID().String()
+	loginRaw := "process-login-" + a.SessionID.UUID().String()
+	for _, c := range []struct{ kind, label, raw string }{{"SID", "sid", sidRaw}, {"LOGIN_TOKEN", "login_token", loginRaw}} {
+		digest, e := identity.DigestCredential(digestSecret, c.label, c.raw)
+		if e != nil {
+			t.Fatal(e)
+		}
+		f.sql(`INSERT INTO account_session_credentials(credential_id,session_id,kind,digest,issued_at)VALUES(gen_random_uuid(),$1::uuid,$2,$3,clock_timestamp())`, a.SessionID.UUID().String(), c.kind, digest[:])
+	}
+	status, body := postProcess(t, addr, "", int64(a.LogicalServerID), 1, map[string]any{"sid": sidRaw, "login_token": loginRaw})
+	if status != 200 {
+		t.Fatal("MID1 login", status, body)
+	}
+}
 func TestD13UnknownWakeupFailsClosedAndJoinsUnauthenticatedSocket(t *testing.T) {
 	f := fresh(t)
 	api, world := freeAddr(t), freeAddr(t)
@@ -142,7 +162,7 @@ func TestD13UnknownWakeupFailsClosedAndJoinsUnauthenticatedSocket(t *testing.T) 
 	}
 	defer idle.Close()
 	deadline := time.Now().Add(3 * time.Second)
-	for f.number(`SELECT count(*)FROM pg_stat_activity WHERE application_name='gxb-v2-i4-realtime' AND query LIKE 'LISTEN %'`) == 0 {
+	for f.number(`SELECT count(*)FROM pg_stat_activity WHERE application_name='gxb-v2-i4-realtime' AND datname=current_database() AND query LIKE 'LISTEN %'`) == 0 {
 		if time.Now().After(deadline) {
 			t.Fatal("listener absent")
 		}
@@ -164,7 +184,7 @@ func TestD13UnknownWakeupFailsClosedAndJoinsUnauthenticatedSocket(t *testing.T) 
 	if e == nil {
 		t.Fatal("unauthenticated connection retained")
 	}
-	if f.number(`SELECT count(*)FROM pg_locks l JOIN pg_stat_activity a USING(pid)WHERE a.application_name='gxb-v2-i4-realtime' AND l.locktype='advisory'`) != 0 {
+	if f.number(`SELECT count(*)FROM pg_locks l JOIN pg_stat_activity a USING(pid)WHERE a.application_name='gxb-v2-i4-realtime' AND a.datname=current_database() AND l.locktype='advisory'`) != 0 {
 		t.Fatal("owner guard leaked")
 	}
 	t.Log("REAL_PG unknownroute ->production fatal shutdown joins preauth read,listener andwriters beforeowner guardrelease")

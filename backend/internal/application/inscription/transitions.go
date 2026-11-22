@@ -2,6 +2,7 @@ package inscription
 
 import (
 	"context"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	i5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/grant"
@@ -26,9 +27,6 @@ func (s Service) eligible(ctx context.Context, q tx.Queryer, p identity.PlayerID
 	h, err := s.Heroes.ReadHeroByPartnerIDTx(ctx, q, p, id)
 	if err != nil {
 		return false, err
-	}
-	if at.Before(h.UpdatedAt) || at.Before(pop.UpdatedAt) {
-		return false, ErrStale
 	}
 	kind, err := s.Content.HeroKindTx(ctx, q, rev, h.TableID)
 	if err != nil {
@@ -61,9 +59,6 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	if e != nil {
 		return nil, e
 	}
-	if at.Before(r.UpdatedAt) {
-		return nil, ErrStale
-	}
 	c, e := s.Content.InscriptionCatalogTx(ctx, t, d.ContentRevision)
 	if e != nil {
 		return nil, e
@@ -78,9 +73,6 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 		f, e = s.Owner.ReadHeroTx(ctx, t, a.PlayerID, cmd.PartnerID)
 		if e != nil {
 			return nil, e
-		}
-		if at.Before(f.UpdatedAt) {
-			return nil, ErrStale
 		}
 		if e = f.Facts.Validate(c); e != nil {
 			return nil, e
@@ -171,6 +163,9 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 		old := f.Facts.Slots[it.Position-1]
 		if old != cmd.ReplaceID || old == cmd.ItemID {
 			return nil, ins.ErrInvalid
+		}
+		if old != 0 {
+			scalarCost("crystal", c.RemoveCost())
 		}
 		stackCost(cmd.ItemID, 1)
 		stackCredit(old, 1)
@@ -319,7 +314,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 		old := r.Version
 		r.Version++
 		r.Facts = st
-		r.UpdatedAt = at
+		r.UpdatedAt = gen.EffectiveObservation(at, r.UpdatedAt, r.CreatedAt)
 		if e = s.Owner.SaveRootTx(ctx, t, r, old); e != nil {
 			return nil, e
 		}
@@ -327,7 +322,7 @@ func (s Service) apply(ctx context.Context, t tx.Tx, a identity.ActorContext, d 
 	if cmd.PartnerID > 0 && !reflect.DeepEqual(oldHero, f.Facts) {
 		old := f.Version
 		f.Version++
-		f.UpdatedAt = at
+		f.UpdatedAt = gen.EffectiveObservation(at, f.UpdatedAt, f.CreatedAt)
 		if e = s.Owner.SaveHeroTx(ctx, t, f, old); e != nil {
 			return nil, e
 		}

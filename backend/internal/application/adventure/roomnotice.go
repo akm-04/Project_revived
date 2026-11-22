@@ -29,6 +29,7 @@ type RoomNotice struct {
 	Seated   []PlayerBody
 	Removed  []PlayerBody
 	Pushes   []RoomPush
+	Chats    []sharedroom.ChatMessage
 }
 
 // ReadRoomNotice reads a room for the realtime route; it never writes.
@@ -45,7 +46,7 @@ func (s Mode) ReadRoomNotice(c context.Context, reference string) (RoomNotice, b
 	if err != nil {
 		return RoomNotice{}, false, err
 	}
-	out := RoomNotice{RoomID: room.ID, RoomType: state.RoomType}
+	out := RoomNotice{RoomID: room.ID, RoomType: state.RoomType, Chats: state.Chats}
 	if room.Status == sharedroom.StatusOpen {
 		seated, err := s.seatedBodies(c, room, state)
 		if err != nil {
@@ -102,6 +103,9 @@ func (s Mode) removedBodies(c context.Context, room sharedroom.Room, state d.Roo
 	var bodies []PlayerBody
 	for _, seat := range room.Seats {
 		if seat.Stage == sharedroom.SeatSeated && room.Status == sharedroom.StatusOpen {
+			continue
+		}
+		if seat.Stage == sharedroom.SeatLeft {
 			continue
 		}
 		current, found, err := s.RoomStore.ReadPlayerRoomTx(c, s.Fresh, seat.Player, family.Name, family.Slot)

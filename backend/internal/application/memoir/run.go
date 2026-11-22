@@ -32,7 +32,7 @@ type scope struct {
 }
 
 func (mode Mode) pin(ctx context.Context, operationContext operation.Context) (operation.Context, error) {
-	if mode.Timed.Runner.DB == nil || mode.Fresh == nil || mode.Store == nil || mode.Content == nil || mode.Fence == nil || mode.Functions == nil || mode.Heroes == nil || mode.HeroLocks == nil || mode.Roster == nil || mode.Pets == nil || mode.Opponents == nil || mode.Combat == nil || mode.Grants == nil || mode.Costs == nil || mode.Energy == nil || mode.Exchange == nil || mode.Receipts == nil || mode.ReceiptRead == nil {
+	if mode.Timed.Runner.DB == nil || mode.Fresh == nil || mode.Store == nil || mode.Content == nil || mode.Fence == nil || mode.Functions == nil || mode.Heroes == nil || mode.HeroLocks == nil || mode.Roster == nil || mode.Pets == nil || mode.Opponents == nil || mode.Combat == nil || mode.Grants == nil || mode.Costs == nil || mode.Energy == nil || mode.Exchange == nil || mode.Receipts == nil || mode.ReceiptRead == nil || mode.BattleCounts == nil {
 		return operationContext, memoir.ErrUnavailable
 	}
 	if _, found := operationContext.Policies.Get("content"); found {
@@ -115,7 +115,7 @@ func (mode Mode) run(ctx context.Context, actor identity.ActorContext, name stri
 		if state.Active() {
 			current.revision = state.Revision
 		}
-		current.catalog, err = mode.Content.MemoirCatalogTx(ctx, timed.Tx, current.revision)
+		current.catalog, err = mode.catalog(ctx, timed.Tx, current.revision)
 		if err != nil {
 			return err
 		}
@@ -127,12 +127,8 @@ func (mode Mode) run(ctx context.Context, actor identity.ActorContext, name stri
 			return err
 		}
 		balances, functions := changes.Recorded(ctx)
-		if len(balances) > 0 {
-			response["economy_"] = balances
-		}
-		if len(functions) > 0 {
-			response["new_funcs_"] = functions
-		}
+		changes.WriteEconomy(response, balances)
+		changes.WriteFunctions(response, functions)
 		payload, err := json.Marshal(response)
 		if err != nil {
 			return err

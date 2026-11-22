@@ -28,6 +28,12 @@ func ValidateMessage(s string) error {
 type Reader interface {
 	ReadTx(context.Context, tx.Tx, apprealtime.Admission, bool) (playerpresentation.Minimal, error)
 }
+
+// BatchReader authorizes one message's whole recipient set from a single owner
+// transaction, so the fan-out cost does not grow with the room population.
+type BatchReader interface {
+	AuthorizeRecipientsTx(context.Context, tx.Tx, []apprealtime.Admission) ([]bool, error)
+}
 type Service struct {
 	Runner     tx.Runner
 	Operations operation.Factory
@@ -47,6 +53,41 @@ func (s Service) Prepare(ctx context.Context, a apprealtime.Admission, message s
 func (s Service) AuthorizeRecipient(ctx context.Context, a apprealtime.Admission) error {
 	_, err := s.read(ctx, a, false)
 	return err
+}
+
+// AuthorizeRecipients revalidates every delivery of one ordinary message against
+// one fresh read-only snapshot. It returns one verdict per admission, in order.
+func (s Service) AuthorizeRecipients(ctx context.Context, admissions []apprealtime.Admission) ([]bool, error) {
+	if len(admissions) == 0 {
+		return []bool{}, nil
+	}
+	reader, ok := s.Reader.(BatchReader)
+	if !ok {
+		return nil, ErrIncompleteRead
+	}
+	op, err := s.Operations.New(policy.Set{})
+	if err != nil {
+		return nil, err
+	}
+	var authorized []bool
+	result, err := s.Runner.Run(ctx, op, ReadProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, scope tx.Scope) error {
+		values, e := reader.AuthorizeRecipientsTx(ctx, scope.Tx, admissions)
+		if e != nil {
+			return e
+		}
+		authorized = values
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if result.Outcome != tx.DefiniteCommit {
+		return nil, ErrIncompleteRead
+	}
+	if len(authorized) != len(admissions) {
+		return nil, ErrIncompleteRead
+	}
+	return authorized, nil
 }
 func (s Service) read(ctx context.Context, a apprealtime.Admission, prepare bool) (playerpresentation.Minimal, error) {
 	if s.Reader == nil {

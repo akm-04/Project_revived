@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"reflect"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -15,6 +16,11 @@ import (
 )
 
 var ErrSettlementMailConflict = errors.New("i5: settlement mail source already delivered with different content")
+
+// ErrSettlementMailInvalid marks a request whose own fields fail validation.
+// It is the only error an optional notice producer may drop (D1); database
+// errors keep their own type and stay fatal.
+var ErrSettlementMailInvalid = errors.New("i5: settlement mail request invalid")
 
 // Source kinds owned by I5 itself or other producers are never accepted here.
 var reservedMailSources = map[string]bool{"ADMIN": true, "GRANT_OVERFLOW": true, "GUILD_BROADCAST": true}
@@ -46,6 +52,36 @@ type SettlementMail struct {
 	Store SettlementMailStore
 }
 
+// LockRecipientsTx reserves every rank-610 mail namespace before a batch takes Economy locks.
+func (m SettlementMail) LockRecipientsTx(ctx context.Context, t tx.Tx, recipients []identity.PlayerID) error {
+	if m.Store == nil || t == nil {
+		return errors.New("i5 settlement mail lock inputs incomplete")
+	}
+	unique := make(map[identity.PlayerID]struct{}, len(recipients))
+	ordered := make([]identity.PlayerID, 0, len(recipients))
+	for _, recipient := range recipients {
+		if !recipient.Valid() {
+			return errors.New("i5 settlement mail recipient invalid")
+		}
+		if _, exists := unique[recipient]; exists {
+			continue
+		}
+		unique[recipient] = struct{}{}
+		ordered = append(ordered, recipient)
+	}
+	sort.Slice(ordered, func(left, right int) bool {
+		leftIdentity := strconv.FormatInt(int64(ordered[left]), 10) + ":" + mail.Normal.String()
+		rightIdentity := strconv.FormatInt(int64(ordered[right]), 10) + ":" + mail.Normal.String()
+		return leftIdentity < rightIdentity
+	})
+	for _, recipient := range ordered {
+		if err := m.Store.LockMailNamespaceCounterTx(ctx, t, recipient, mail.Normal); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // DeliverTx returns the delivered mail and whether it already existed.
 func (m SettlementMail) DeliverTx(ctx context.Context, t tx.Tx, r SettlementMailRequest) (mail.Record, bool, error) {
 	return m.deliverTx(ctx, t, r, false)
@@ -54,7 +90,7 @@ func (m SettlementMail) DeliverTx(ctx context.Context, t tx.Tx, r SettlementMail
 // DeliverNoticeTx sends one mail with no attachment (I9_GUILD_CAMPAIGN_V1 C13).
 func (m SettlementMail) DeliverNoticeTx(ctx context.Context, t tx.Tx, r SettlementMailRequest) (mail.Record, bool, error) {
 	if len(r.Lines) != 0 {
-		return mail.Record{}, false, errors.New("i5: a notice carries no attachment")
+		return mail.Record{}, false, ErrSettlementMailInvalid
 	}
 	return m.deliverTx(ctx, t, r, true)
 }
@@ -67,8 +103,11 @@ func (m SettlementMail) DeliverLeagueTitleNoticeTx(ctx context.Context, t tx.Tx,
 }
 
 func (m SettlementMail) deliverTx(ctx context.Context, t tx.Tx, r SettlementMailRequest, notice bool) (mail.Record, bool, error) {
-	if m.Store == nil || t == nil || !r.Recipient.Valid() || strings.TrimSpace(r.SourceKind) == "" || reservedMailSources[r.SourceKind] || strings.TrimSpace(r.SourceKey) == "" || strings.TrimSpace(r.PolicyVersion) == "" || (len(r.Lines) == 0 && !notice) || r.At.IsZero() {
-		return mail.Record{}, false, errors.New("i5: settlement mail request incomplete")
+	if m.Store == nil || t == nil {
+		return mail.Record{}, false, errors.New("i5: settlement mail store or transaction missing")
+	}
+	if !r.Recipient.Valid() || strings.TrimSpace(r.SourceKind) == "" || reservedMailSources[r.SourceKind] || strings.TrimSpace(r.SourceKey) == "" || strings.TrimSpace(r.PolicyVersion) == "" || (len(r.Lines) == 0 && !notice) || r.At.IsZero() {
+		return mail.Record{}, false, ErrSettlementMailInvalid
 	}
 	for _, line := range r.Lines {
 		if err := line.Validate(); err != nil {
@@ -88,8 +127,13 @@ func (m SettlementMail) deliverTx(ctx context.Context, t tx.Tx, r SettlementMail
 		}
 		return prior, true, nil
 	}
-	created, err := createMailTx(ctx, t, m.Store, r.Recipient, mail.Normal, r.SourceKind, r.SourceKey, r.Title, r.Sender, r.Body, r.Lines, r.At, nil, r.PolicyVersion)
+	created, err := createMailTx(ctx, t, m.Store, r.Recipient, mail.Normal, r.SourceKind, r.SourceKey, r.Title, r.Sender, r.Body, r.Lines, r.At, expiryAt(r.At, mailTuning(ctx, t, m.Store).Ordinary()), r.PolicyVersion)
 	return created, false, err
+}
+
+func expiryAt(at time.Time, lifetime time.Duration) *time.Time {
+	expires := at.Add(lifetime)
+	return &expires
 }
 
 func sameSettlementMail(m mail.Record, r SettlementMailRequest) bool {

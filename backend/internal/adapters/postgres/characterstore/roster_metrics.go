@@ -31,7 +31,7 @@ func (r RosterMetricReader) ReadRosterMetricsTx(c context.Context, sc ca.Coheren
 		if e != nil {
 			return out, e
 		}
-		if root.Validate() != nil || root.PlayerID != pid || root.UpdatedAt.After(sc.ObservedAt) {
+		if root.Validate() != nil || root.PlayerID != pid {
 			return out, ca.ErrInvalidCoherentReadScope
 		}
 		out.RootVersion = root.StateVersion
@@ -55,7 +55,7 @@ func (r RosterMetricReader) ReadRosterMetricsTx(c context.Context, sc ca.Coheren
 		}
 		for _, h := range heroes {
 			before, found := templates[h.TableID]
-			if h.ValidatePersistent() != nil || h.PlayerID != pid || h.CreatedAt.After(h.UpdatedAt) || h.UpdatedAt.After(sc.ObservedAt) || !found || before < 0 {
+			if h.ValidatePersistent() != nil || h.PlayerID != pid || h.CreatedAt.After(h.UpdatedAt) || !found || before < 0 {
 				return out, ca.ErrInvalidCoherentReadScope
 			}
 			out.Rows = append(out.Rows, ca.RosterMetricRow{InstanceID: h.PartnerID, OriginTableID: h.OriginTableID, TableID: h.TableID, Star: h.Star, Version: h.StateVersion, BeforeAwaken: before})
@@ -65,7 +65,7 @@ func (r RosterMetricReader) ReadRosterMetricsTx(c context.Context, sc ca.Coheren
 		if e != nil {
 			return out, e
 		}
-		if root.Validate() != nil || root.PlayerID != pid || root.UpdatedAt.After(sc.ObservedAt) {
+		if root.Validate() != nil || root.PlayerID != pid {
 			return out, ca.ErrInvalidCoherentReadScope
 		}
 		out.RootVersion = root.StateVersion
@@ -74,7 +74,7 @@ func (r RosterMetricReader) ReadRosterMetricsTx(c context.Context, sc ca.Coheren
 			return out, e
 		}
 		for _, p := range pets {
-			if p.ValidatePersistent() != nil || p.PlayerID != pid || p.CreatedAt.After(p.UpdatedAt) || p.UpdatedAt.After(sc.ObservedAt) {
+			if p.ValidatePersistent() != nil || p.PlayerID != pid || p.CreatedAt.After(p.UpdatedAt) {
 				return out, ca.ErrInvalidCoherentReadScope
 			}
 			out.Rows = append(out.Rows, ca.RosterMetricRow{InstanceID: p.PetID, OriginTableID: p.OriginTableID, TableID: p.TableID, Star: p.Star, Version: p.StateVersion})

@@ -7,12 +7,14 @@ import (
 	"testing"
 	"time"
 
+	"gxb.local/backend/v2/internal/adapters/guildcampaigncontent"
 	"gxb.local/backend/v2/internal/adapters/guildpolicybridge"
 	"gxb.local/backend/v2/internal/adapters/guildviewread"
 	guildwire "gxb.local/backend/v2/internal/adapters/guildwire"
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/guildcampaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildprojection"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
@@ -20,6 +22,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	gen "gxb.local/backend/v2/internal/application/generation"
+	appguildcampaign "gxb.local/backend/v2/internal/application/guildcampaign"
 	"gxb.local/backend/v2/internal/application/guildcore"
 	"gxb.local/backend/v2/internal/application/guildtea"
 	"gxb.local/backend/v2/internal/application/guildview"
@@ -64,7 +67,7 @@ func guildFixture(t *testing.T, p *pg.Pool, leader identity.ActorContext, member
 	now := time.Now().UTC().Add(-time.Hour)
 	var gid int64
 	if err := p.QueryRow(ctx, `INSERT INTO guilds(guild_id,logical_server_id,name,icon,icon_frame,des,apply_type,min_allow_level,vitality,policy_revision,state_version,created_at,updated_at)
-		SELECT $1*1000000+n,$1,'n'||n,20010001,0,'',0,1,20000,'native-fixture',1,$2,$2 FROM (SELECT COALESCE(MAX(guild_id%1000000),0)+1 AS n FROM guilds WHERE logical_server_id=$1) next RETURNING guild_id`, server, now).Scan(&gid); err != nil {
+		SELECT $1::bigint*1000000+n,$1,'n'||n,20010001,0,'',0,1,20000,'native-fixture',1,$2,$2 FROM (SELECT COALESCE(MAX(guild_id%1000000),0)+1 AS n FROM guilds WHERE logical_server_id=$1) next RETURNING guild_id`, server, now).Scan(&gid); err != nil {
 		t.Fatal(err)
 	}
 	exec(t, p, `INSERT INTO guild_memberships(player_id,guild_id,role,joined_at,membership_version,state_version,updated_at)VALUES($1,$2,1,$3,1,1,$3)`, int64(leader.PlayerID), gid, now)
@@ -236,7 +239,11 @@ func guildCoreService(t *testing.T, p *pg.Pool) guildcore.Service {
 	cross := appi5.CrossOwner{Store: i5store.Store{}}
 	return guildcore.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}}, Store: guildstore.Store{Queryer: p},
 		Fencer: i5store.Store{}, PlayerRoots: i4store.PlayerRootLocker{}, Level: cross, Scalar: cross, LevelAndScalar: cross,
-		Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, Policy: binding}
+		Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, Policy: binding,
+		Campaign: appguildcampaign.Service{
+			Store: guildcampaignstore.Store{}, Guilds: guildstore.Store{Queryer: p}, Catalog: guildcampaigncontent.Catalog{},
+			Payout: appguildcampaign.Payout{}, Mail: appi5.SettlementMail{Store: i5store.Store{}}, Fence: i5store.Store{}, Players: i4store.PlayerRootLocker{},
+		}}
 }
 
 // TestI9_9AProductionLeaveAndKickFoldVitality drives guildcore.Leave and Kick
@@ -254,10 +261,16 @@ func TestI9_9AProductionLeaveAndKickFoldVitality(t *testing.T) {
 	day := modes.Day(now)
 	appendActivity(t, pool, leaver, day, 600)
 	appendActivity(t, pool, kicked, day, 400)
+	exec(t, pool, `INSERT INTO guild_campaign_chapters(guild_id,chapter_id,run,start_time)VALUES($1,1,1,clock_timestamp())ON CONFLICT DO NOTHING`, int64(gid))
+	exec(t, pool, `INSERT INTO guild_campaign_registrations(guild_id,chapter_id,player_id)VALUES($1,1,$2)ON CONFLICT DO NOTHING`, int64(gid), int64(leaver.PlayerID))
+	exec(t, pool, `INSERT INTO guild_campaign_registrations(guild_id,chapter_id,player_id)VALUES($1,1,$2)ON CONFLICT DO NOTHING`, int64(gid), int64(kicked.PlayerID))
 	core := guildCoreService(t, pool)
 
 	if _, err = core.Leave(ctx, leaver, op()); err != nil {
 		t.Fatalf("leave: %v", err)
+	}
+	if n := scalar(t, pool, `SELECT count(*) FROM guild_campaign_registrations WHERE guild_id=$1 AND player_id=$2`, int64(gid), int64(leaver.PlayerID)); n != 0 {
+		t.Fatal("campaign registration survived leave")
 	}
 	if got := guildVitality(t, pool, gid); got != 20600 {
 		t.Fatalf("leave folded vitality=%d", got)
@@ -269,6 +282,9 @@ func TestI9_9AProductionLeaveAndKickFoldVitality(t *testing.T) {
 
 	if _, err = core.Kick(ctx, leader, kicked.PlayerID, op()); err != nil {
 		t.Fatalf("kick: %v", err)
+	}
+	if n := scalar(t, pool, `SELECT count(*) FROM guild_campaign_registrations WHERE guild_id=$1 AND player_id=$2`, int64(gid), int64(kicked.PlayerID)); n != 0 {
+		t.Fatal("campaign registration survived kick")
 	}
 	if got := guildVitality(t, pool, gid); got != 21000 {
 		t.Fatalf("kick folded vitality=%d", got)
@@ -336,7 +352,7 @@ func (a teaAuthority) ResolveGameplayBearer(_ context.Context, token string, _ t
 
 func teaService(p *pg.Pool) guildtea.Service {
 	values := i5store.Store{Queryer: p}
-	owner := activityOwner(p)
+	owner := missionOwner(p)
 	teaPolicy, err := guildteapolicy.LoadBuiltin()
 	if err != nil {
 		panic(err)
@@ -344,7 +360,7 @@ func teaService(p *pg.Pool) guildtea.Service {
 	return guildtea.Service{Runner: tx.Runner{DB: p}, Store: guildstore.Store{Queryer: p}, Directory: i4store.PlayerDirectoryReader{},
 		Content: contentstore.Store{Queryer: p}, Heroes: characterstore.Store{Queryer: p}, Inventory: values,
 		Values: owner, Costs: appi5.MaterialCostDebiter{Store: values, Content: contentstore.Store{Queryer: p}}, Facts: appi5.ObjectiveFacts{Owner: owner, Open: values},
-		Fence: values, Players: i4store.PlayerRootLocker{}, Policy: guildtea.Policy{RequestsPerDay: teaPolicy.Policy.RequestsPerDay, NormalNeed: teaPolicy.Policy.NormalNeed, SXNeed: teaPolicy.Policy.SXNeed, DonorFriendMedalPerScroll: teaPolicy.Policy.DonorFriendMedalPerScroll}}
+		Fence: values, Players: i4store.PlayerRootLocker{}, Policy: guildtea.Policy{RequestsPerDay: teaPolicy.Policy.RequestsPerDay, NormalNeed: teaPolicy.Policy.NormalNeed, SXNeed: teaPolicy.Policy.SXNeed, DonorFriendMedalPerScroll: teaPolicy.Policy.DonorFriendMedalPerScroll}, PartnerMissions: libraryService(p, p)}
 }
 
 func scrollForHero(t *testing.T, p *pg.Pool, revision string, table int64) int64 {
@@ -391,10 +407,10 @@ func TestI9_9ATeaWishDonateClaimThroughProductionDispatcher(t *testing.T) {
 	if got := call("receiver", 1809, map[string]any{"item_id": scroll}); got.HTTPStatus != 200 {
 		t.Fatalf("wish=%+v", got)
 	}
-	if got := call("receiver", 1809, map[string]any{"item_id": scroll}); got.HTTPStatus != 409 || got.Body["error_code"] != int64(1) {
+	if got := call("receiver", 1809, map[string]any{"item_id": scroll}); got.HTTPStatus != 409 || got.Body["error_code"] != int64(35028) {
 		t.Fatalf("second wish refusal=%+v", got)
 	}
-	if got := call("donor", 1810, map[string]any{"player_id": int64(a.PlayerID)}); got.HTTPStatus != 409 || got.Body["error_code"] != int64(1) {
+	if got := call("donor", 1810, map[string]any{"player_id": int64(a.PlayerID)}); got.HTTPStatus != 409 || got.Body["error_code"] != int64(35028) {
 		t.Fatalf("self donation refusal=%+v", got)
 	}
 	if got := call("donor", 1810, map[string]any{"player_id": int64(b.PlayerID)}); got.HTTPStatus != 200 {
@@ -413,7 +429,7 @@ func TestI9_9ATeaWishDonateClaimThroughProductionDispatcher(t *testing.T) {
 	if medal != 10 {
 		t.Fatalf("friend medal %d", medal)
 	}
-	if got := call("donor", 1810, map[string]any{"player_id": int64(b.PlayerID)}); got.HTTPStatus != 409 || got.Body["error_code"] != int64(1) {
+	if got := call("donor", 1810, map[string]any{"player_id": int64(b.PlayerID)}); got.HTTPStatus != 409 || got.Body["error_code"] != int64(35028) {
 		t.Fatalf("second donation refusal=%+v", got)
 	}
 
@@ -422,7 +438,7 @@ func TestI9_9ATeaWishDonateClaimThroughProductionDispatcher(t *testing.T) {
 	if got := call("third", 1809, map[string]any{"item_id": scroll}); got.HTTPStatus != 200 {
 		t.Fatalf("third wish=%+v", got)
 	}
-	if got := call("donor", 1810, map[string]any{"player_id": int64(c.PlayerID)}); got.HTTPStatus != 409 || got.Body["error_code"] != int64(1) {
+	if got := call("donor", 1810, map[string]any{"player_id": int64(c.PlayerID)}); got.HTTPStatus != 409 || got.Body["error_code"] != int64(35028) {
 		t.Fatalf("insufficient stock refusal=%+v", got)
 	}
 	if again := scalar(t, pool, `SELECT amount FROM player_currency_balances WHERE player_id=$1 AND resource_key='friend_medal'`, int64(a.PlayerID)); again != 10 {
@@ -439,7 +455,7 @@ func TestI9_9ATeaWishDonateClaimThroughProductionDispatcher(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	projection := i5store.BootstrapProjection{Content: contentstore.Store{Queryer: pool}, Privileges: appi5.BaselinePrivilegeProvider{}, MaxHeroColor: appi5.PreservationMaxHeroColorProvider{}}
+	projection := i5store.BootstrapProjection{Content: contentstore.Store{Queryer: pool}, Privileges: appi5.BaselinePrivilegeProvider{}, MaxHeroColor: appi5.PreservationMaxHeroColorProvider{}, BackpackSort: characterstore.Store{Queryer: pool}}
 	if err = projection.OverlayMID1(ctx, pool, a, false, now, detail); err != nil {
 		t.Fatal(err)
 	}
@@ -462,6 +478,11 @@ func TestI9_9ATeaWishDonateClaimThroughProductionDispatcher(t *testing.T) {
 		t.Fatalf("claim idempotency %+v", again)
 	}
 
+	// A departed member's expired wish has no membership row to attribute it;
+	// the next command still purges it by expiry alone (C15, N7).
+	exec(t, pool, `DELETE FROM guild_memberships WHERE player_id=$1 AND guild_id=$2`, int64(c.PlayerID), int64(gid))
+	exec(t, pool, `INSERT INTO guild_tea_wishes(player_id,game_day,item_id,need_num,current_num)VALUES($1,$2,$3,3,0) ON CONFLICT DO NOTHING`, int64(c.PlayerID), day-1, scroll)
+
 	exec(t, pool, `INSERT INTO guild_tea_wishes(player_id,game_day,item_id,need_num,current_num)VALUES($1,$2,$3,3,0) ON CONFLICT DO NOTHING`, int64(b.PlayerID), day-1, scroll)
 	exec(t, pool, `INSERT INTO guild_tea_gifts(receiver_id,donor_id,game_day,item_id)VALUES($1,$2,$3,$4) ON CONFLICT DO NOTHING`, int64(b.PlayerID), int64(a.PlayerID), day-1, scroll)
 	if got := call("receiver", 1808, map[string]any{"is_self": int64(1)}); got.HTTPStatus != 200 {
@@ -481,6 +502,9 @@ func TestI9_9ATeaWishDonateClaimThroughProductionDispatcher(t *testing.T) {
 	}
 	if expired := scalar(t, pool, `SELECT COUNT(*) FROM guild_tea_wishes WHERE player_id=$1 AND game_day<$2`, int64(b.PlayerID), day); expired != 0 {
 		t.Fatalf("expired wishes not removed by a command: %d", expired)
+	}
+	if expired := scalar(t, pool, `SELECT COUNT(*) FROM guild_tea_wishes WHERE player_id=$1 AND game_day<$2`, int64(c.PlayerID), day); expired != 0 {
+		t.Fatalf("departed member's expired wish not removed by a command: %d", expired)
 	}
 }
 

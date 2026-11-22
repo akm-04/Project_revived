@@ -1,0 +1,258 @@
+{
+ "background": [],
+ "content": [
+  "content_shop_catalogs"
+ ],
+ "contracts": [
+  {
+   "count": 5,
+   "file": "docs/architecture/CUMULATIVE_CONTENT_GENERATION_LOCK.json"
+  },
+  {
+   "count": 7,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 7,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_10A_EVENT_CENTRE_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_10F_MENTOR_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 10,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 4,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 6,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_4C_RESEARCH_PLAN.md"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_ADVENTURE_POLICY_V1.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_ADVENTURE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_DORM_SOCIAL_GLUE_RANKING_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_POLICY_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V2.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V3.json"
+  },
+  {
+   "count": 6,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_OCCULT_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_PVP_RESIDUAL_HANDOFF_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 10,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/RULING_I9-12_SEAL_REGISTRY_SYNC.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/shop_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [
+   "SHOP_PURCHASE"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "shop"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ],
+   "shop_players": [
+    "shopstore.LockShopTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "players",
+   "shop_players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/shop_dispatcher.go",
+    "line": 39
+   },
+   "mid": 32,
+   "name": "LOAD_SHOP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/shop_dispatcher.go",
+    "line": 39
+   },
+   "mid": 33,
+   "name": "BUY_SHOP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/shop_dispatcher.go",
+    "line": 39
+   },
+   "mid": 34,
+   "name": "REFRESH_SHOP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/shop_dispatcher.go",
+    "line": 39
+   },
+   "mid": 37,
+   "name": "LOAD_SHOP_LIST"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/shop_dispatcher.go",
+    "line": 39
+   },
+   "mid": 38,
+   "name": "CLOSE_SHOP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/shop_dispatcher.go",
+    "line": 39
+   },
+   "mid": 2982,
+   "name": "BUY_SHOP_MULTI"
+  }
+ ],
+ "name": "shop",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore",
+  "internal/adapters/postgres/shopstore"
+ ],
+ "tables": {
+  "owned": [
+   "shop_players",
+   "shop_tuning"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "content_shop_catalogs",
+   "gameplay_contexts",
+   "gxb_content_activation",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "player_currency_balances",
+   "player_function_eligibility",
+   "player_item_stacks",
+   "player_progression",
+   "players",
+   "shop_players",
+   "shop_tuning"
+  ],
+  "written": [
+   "gxb_operation_receipts",
+   "shop_players"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [
+   "i9_11c_core_shops.json"
+  ],
+  "unit": [
+   "service_test.go"
+  ]
+ }
+}

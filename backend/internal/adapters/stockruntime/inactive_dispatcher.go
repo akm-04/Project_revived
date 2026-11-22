@@ -2,7 +2,6 @@ package stockruntime
 
 import (
 	"context"
-	"net/http"
 
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -19,5 +18,7 @@ func (d InactiveModeDispatcher) Dispatch(ctx context.Context, req httpedge.Dispa
 	if d.Authority != nil && req.Envelope.Claims.Token != "" {
 		_, _ = d.Authority.ResolveGameplayBearer(ctx, req.Envelope.Claims.Token, req.Envelope.ReceivedAt)
 	}
-	return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"error_code": 1}, Inactive: true}
+	response := failureReply(UnprovenRefusal())
+	response.Inactive = true
+	return response
 }

@@ -7,6 +7,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/character"
 	dorm "gxb.local/backend/v2/internal/domain/dormhouse"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"time"
 )
@@ -49,25 +50,26 @@ func (Store) SaveRootTx(ctx context.Context, t tx.Tx, r dorm.Root, old int64) er
 	return one(tag, "root")
 }
 
-const roomColumns = `player_id,house_id,table_id,house_type,creation_revision,floor,position,comfort,expansion_level,state_version,furniture_record::text,pending_expansion::text,last_enter_at,created_at,updated_at`
+const roomColumns = `player_id,house_id,table_id,house_type,creation_revision,floor,position,comfort,expansion_level,state_version,furniture_record::text,pending_expansion::text,payload_version,last_enter_at,created_at,updated_at`
 
 func scanRoom(row tx.Row) (dorm.Room, error) {
 	var r dorm.Room
 	var p int64
 	var layout string
 	var pending *string
+	var version int16
 	var last *time.Time
-	e := row.Scan(&p, &r.ID, &r.TableID, &r.MainType, &r.CreationRevision, &r.Floor, &r.Position, &r.Comfort, &r.ExpansionLevel, &r.StateVersion, &layout, &pending, &last, &r.CreatedAt, &r.UpdatedAt)
+	e := row.Scan(&p, &r.ID, &r.TableID, &r.MainType, &r.CreationRevision, &r.Floor, &r.Position, &r.Comfort, &r.ExpansionLevel, &r.StateVersion, &layout, &pending, &version, &last, &r.CreatedAt, &r.UpdatedAt)
 	if e != nil {
 		return r, e
 	}
 	r.Player = identity.PlayerID(p)
-	if e = json.Unmarshal([]byte(layout), &r.Layout); e != nil {
+	if e = payload.Decode("player_dorm_rooms", version, []byte(layout), &r.Layout); e != nil {
 		return r, e
 	}
 	if pending != nil {
 		var x dorm.Expansion
-		if e = json.Unmarshal([]byte(*pending), &x); e != nil {
+		if e = payload.Decode("player_dorm_rooms", version, []byte(*pending), &x); e != nil {
 			return r, e
 		}
 		r.Pending = &x
@@ -108,23 +110,23 @@ func (s Store) ListRoomsTx(ctx context.Context, q tx.Queryer, pid identity.Playe
 	}
 	return out, nil
 }
-func roomJSON(r dorm.Room) (string, any, error) {
+func roomJSON(r dorm.Room) (string, any, int16, error) {
 	if r.Validate() != nil {
-		return "", nil, dorm.ErrInvalidFacts
+		return "", nil, 0, dorm.ErrInvalidFacts
 	}
-	layout, e := json.Marshal(r.Layout)
+	layout, version, e := payload.Encode(r.Layout)
 	if e != nil {
-		return "", nil, e
+		return "", nil, 0, e
 	}
 	var pending any
 	if r.Pending != nil {
-		x, e := json.Marshal(r.Pending)
+		x, _, e := payload.Encode(r.Pending)
 		if e != nil {
-			return "", nil, e
+			return "", nil, 0, e
 		}
 		pending = string(x)
 	}
-	return string(layout), pending, nil
+	return string(layout), pending, version, nil
 }
 func nullableTime(t time.Time) any {
 	if t.IsZero() {
@@ -133,40 +135,41 @@ func nullableTime(t time.Time) any {
 	return t.UTC()
 }
 func (Store) InsertRoomTx(ctx context.Context, t tx.Tx, r dorm.Room) error {
-	layout, pending, e := roomJSON(r)
+	layout, pending, version, e := roomJSON(r)
 	if e != nil {
 		return e
 	}
-	tag, e := t.Exec(ctx, `INSERT INTO player_dorm_rooms(player_id,house_id,table_id,house_type,creation_revision,floor,position,comfort,expansion_level,state_version,furniture_record,pending_expansion,last_enter_at,created_at,updated_at)VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12::jsonb,$13,$14,$15)`, int64(r.Player), r.ID, r.TableID, r.MainType, r.CreationRevision, r.Floor, r.Position, r.Comfort, r.ExpansionLevel, r.StateVersion, layout, pending, nullableTime(r.LastEnterAt), r.CreatedAt, r.UpdatedAt)
+	tag, e := t.Exec(ctx, `INSERT INTO player_dorm_rooms(player_id,house_id,table_id,house_type,creation_revision,floor,position,comfort,expansion_level,state_version,furniture_record,pending_expansion,payload_version,last_enter_at,created_at,updated_at)VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12::jsonb,$13,$14,$15,$16)`, int64(r.Player), r.ID, r.TableID, r.MainType, r.CreationRevision, r.Floor, r.Position, r.Comfort, r.ExpansionLevel, r.StateVersion, layout, pending, version, nullableTime(r.LastEnterAt), r.CreatedAt, r.UpdatedAt)
 	if e != nil {
 		return e
 	}
 	return one(tag, "room insert")
 }
 func (Store) SaveRoomTx(ctx context.Context, t tx.Tx, r dorm.Room, old int64) error {
-	layout, pending, e := roomJSON(r)
+	layout, pending, version, e := roomJSON(r)
 	if e != nil {
 		return e
 	}
 	if r.StateVersion != old+1 {
 		return dorm.ErrInvalidFacts
 	}
-	tag, e := t.Exec(ctx, `UPDATE player_dorm_rooms SET comfort=$3,expansion_level=$4,state_version=$5,furniture_record=$6::jsonb,pending_expansion=$7::jsonb,last_enter_at=$8,updated_at=$9 WHERE player_id=$1 AND house_id=$2 AND state_version=$10`, int64(r.Player), r.ID, r.Comfort, r.ExpansionLevel, r.StateVersion, layout, pending, nullableTime(r.LastEnterAt), r.UpdatedAt, old)
+	tag, e := t.Exec(ctx, `UPDATE player_dorm_rooms SET comfort=$3,expansion_level=$4,state_version=$5,furniture_record=$6::jsonb,pending_expansion=$7::jsonb,payload_version=$8,last_enter_at=$9,updated_at=$10 WHERE player_id=$1 AND house_id=$2 AND state_version=$11`, int64(r.Player), r.ID, r.Comfort, r.ExpansionLevel, r.StateVersion, layout, pending, version, nullableTime(r.LastEnterAt), r.UpdatedAt, old)
 	if e != nil {
 		return e
 	}
 	return one(tag, "room update")
 }
 
-const heroColumns = `player_id,partner_id,house_id,state_version,equipment::text,lounge_anchor,lounge_fraction,updated_at`
+const heroColumns = `player_id,partner_id,house_id,state_version,equipment::text,payload_version,lounge_anchor,lounge_fraction,updated_at`
 
 func scanHero(row tx.Row) (dorm.HeroFacts, error) {
 	var f dorm.HeroFacts
 	var p int64
 	var house *int64
+	var version int16
 	var anchor *time.Time
 	var raw string
-	e := row.Scan(&p, &f.PartnerID, &house, &f.StateVersion, &raw, &anchor, &f.LoungeFraction, &f.UpdatedAt)
+	e := row.Scan(&p, &f.PartnerID, &house, &f.StateVersion, &raw, &version, &anchor, &f.LoungeFraction, &f.UpdatedAt)
 	if e != nil {
 		return f, e
 	}
@@ -178,7 +181,7 @@ func scanHero(row tx.Row) (dorm.HeroFacts, error) {
 		f.LoungeAnchor = anchor.UTC()
 	}
 	var flags []int64
-	if e = json.Unmarshal([]byte(raw), &flags); e != nil {
+	if e = payload.Decode("player_dorm_heroes", version, []byte(raw), &flags); e != nil {
 		return f, e
 	}
 	if len(flags) != 5 {
@@ -197,7 +200,7 @@ func (Store) SaveHeroTx(ctx context.Context, t tx.Tx, f dorm.HeroFacts, old int6
 	if f.Validate() != nil || f.StateVersion != old+1 {
 		return dorm.ErrInvalidFacts
 	}
-	raw, e := json.Marshal(f.Equipment)
+	raw, version, e := payload.Encode(f.Equipment)
 	if e != nil {
 		return e
 	}
@@ -205,7 +208,7 @@ func (Store) SaveHeroTx(ctx context.Context, t tx.Tx, f dorm.HeroFacts, old int6
 	if f.HouseID > 0 {
 		house = f.HouseID
 	}
-	tag, e := t.Exec(ctx, `UPDATE player_dorm_heroes SET house_id=$3,state_version=$4,equipment=$5::jsonb,lounge_anchor=$6,lounge_fraction=$7,updated_at=$8 WHERE player_id=$1 AND partner_id=$2 AND state_version=$9`, int64(f.Player), f.PartnerID, house, f.StateVersion, string(raw), nullableTime(f.LoungeAnchor), f.LoungeFraction, f.UpdatedAt, old)
+	tag, e := t.Exec(ctx, `UPDATE player_dorm_heroes SET house_id=$3,state_version=$4,equipment=$5::jsonb,payload_version=$6,lounge_anchor=$7,lounge_fraction=$8,updated_at=$9 WHERE player_id=$1 AND partner_id=$2 AND state_version=$10`, int64(f.Player), f.PartnerID, house, f.StateVersion, string(raw), version, nullableTime(f.LoungeAnchor), f.LoungeFraction, f.UpdatedAt, old)
 	if e != nil {
 		return e
 	}
@@ -221,14 +224,22 @@ func (s Store) EnsureRootTx(ctx context.Context, t tx.Tx, pid identity.PlayerID,
 	if _, e := t.Exec(ctx, `INSERT INTO player_dorm_roots(player_id,next_house_id,state_version,created_at,updated_at)VALUES($1,2,1,$2,$2)ON CONFLICT(player_id)DO NOTHING`, int64(pid), now.UTC()); e != nil {
 		return e
 	}
-	_, e := t.Exec(ctx, `INSERT INTO player_dorm_rooms(player_id,house_id,table_id,house_type,creation_revision,floor,position,comfort,expansion_level,state_version,furniture_record,created_at,updated_at)VALUES($1,1,1000001,1,$2,1,1,0,0,1,'{}'::jsonb,$3,$3)ON CONFLICT(player_id,house_id)DO NOTHING`, int64(pid), revision, now.UTC())
+	layout, version, e := payload.Encode(map[string]string{})
+	if e != nil {
+		return e
+	}
+	_, e = t.Exec(ctx, `INSERT INTO player_dorm_rooms(player_id,house_id,table_id,house_type,creation_revision,floor,position,comfort,expansion_level,state_version,furniture_record,payload_version,created_at,updated_at)VALUES($1,1,1000001,1,$2,1,1,0,0,1,$3::jsonb,$4,$5,$5)ON CONFLICT(player_id,house_id)DO NOTHING`, int64(pid), revision, string(layout), version, now.UTC())
 	return e
 }
 func (Store) InitFreshHeroTx(ctx context.Context, t tx.Tx, ref character.HeroRef, now time.Time) error {
 	if ref.Validate() != nil || now.IsZero() {
 		return dorm.ErrInvalidFacts
 	}
-	tag, e := t.Exec(ctx, `INSERT INTO player_dorm_heroes(player_id,partner_id,house_id,state_version,equipment,lounge_anchor,lounge_fraction,created_at,updated_at)VALUES($1,$2,NULL,1,'[0,0,0,0,0]'::jsonb,NULL,0,$3,$3)`, int64(ref.PlayerID), ref.PartnerID, now.UTC())
+	equipment, version, e := payload.Encode([5]int64{})
+	if e != nil {
+		return e
+	}
+	tag, e := t.Exec(ctx, `INSERT INTO player_dorm_heroes(player_id,partner_id,house_id,state_version,equipment,payload_version,lounge_anchor,lounge_fraction,created_at,updated_at)VALUES($1,$2,NULL,1,$3::jsonb,$4,NULL,0,$5,$5)`, int64(ref.PlayerID), ref.PartnerID, string(equipment), version, now.UTC())
 	if e != nil {
 		return e
 	}
@@ -238,6 +249,10 @@ func (Store) EnsureHeroTx(ctx context.Context, t tx.Tx, ref character.HeroRef, n
 	if ref.Validate() != nil || now.IsZero() {
 		return dorm.ErrInvalidFacts
 	}
-	_, e := t.Exec(ctx, `INSERT INTO player_dorm_heroes(player_id,partner_id,house_id,state_version,equipment,lounge_anchor,lounge_fraction,created_at,updated_at)VALUES($1,$2,NULL,1,'[0,0,0,0,0]'::jsonb,NULL,0,$3,$3)ON CONFLICT(player_id,partner_id)DO NOTHING`, int64(ref.PlayerID), ref.PartnerID, now.UTC())
+	equipment, version, e := payload.Encode([5]int64{})
+	if e != nil {
+		return e
+	}
+	_, e = t.Exec(ctx, `INSERT INTO player_dorm_heroes(player_id,partner_id,house_id,state_version,equipment,payload_version,lounge_anchor,lounge_fraction,created_at,updated_at)VALUES($1,$2,NULL,1,$3::jsonb,$4,NULL,0,$5,$5)ON CONFLICT(player_id,partner_id)DO NOTHING`, int64(ref.PlayerID), ref.PartnerID, string(equipment), version, now.UTC())
 	return e
 }

@@ -4,14 +4,18 @@ package socialactivation_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"gxb.local/backend/v2/internal/adapters/channelchatread"
+	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	cc "gxb.local/backend/v2/internal/application/channelchat"
 	ar "gxb.local/backend/v2/internal/application/realtimeauth"
 	dr "gxb.local/backend/v2/internal/domain/realtimeauth"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"gxb.local/backend/v2/internal/protocol/amf3"
+	"gxb.local/backend/v2/internal/protocol/mids"
+	"gxb.local/backend/v2/internal/testsupport/latency"
 	"os"
 	"strings"
 	"testing"
@@ -38,6 +42,7 @@ func structuredNativeFixtures() []nativeStructuredFixture {
 }
 
 type nativeArenaOwner struct {
+	t      testing.TB
 	w      *readWitness
 	seen   int
 	write  bool
@@ -54,7 +59,7 @@ func (o *nativeArenaOwner) ReadArenaTx(c context.Context, t tx.Tx, a ar.Admissio
 	if e := t.QueryRow(c, `SELECT clock_timestamp(),current_setting('transaction_read_only'),current_setting('transaction_isolation')`).Scan(&now, &ro, &iso); e != nil {
 		return cc.Owned[cc.Arena]{}, e
 	}
-	if ro != "on" || iso != "repeatable read" || now.Before(at) || now.Sub(at) > time.Second {
+	if ro != "on" || iso != "repeatable read" || now.Before(at) || !latency.Within(o.t, latency.Incidental, now.Sub(at), time.Second) {
 		return cc.Owned[cc.Arena]{}, errors.New("wrong DB-time/options")
 	}
 	if o.write {
@@ -84,18 +89,32 @@ func TestChatB17AllNineFiniteSchemasRemainInactiveWithoutReads(t *testing.T) {
 	readChat(t, c, "afterallnine")
 	h.report()
 }
-func TestChatB18InjectedOwnerCannotActivateProductionConstructor(t *testing.T) {
+func TestChatB18WiredOwnerActivatesProductionConstructor(t *testing.T) {
 	f := fresh(t)
 	f.chatPlayers(100001)
 	w := &readWitness{f: f}
-	o := &nativeArenaOwner{w: w}
+	o := &nativeArenaOwner{t: t, w: w, source: cc.SourceObservation{Identity: "fixture:arena", ContentRevisionID: 1}}
 	h := chatHarness(t, f, channelHarnessOptions{db: w, owners: cc.Owners{Arena: o}})
 	c, _, _ := h.login(100001, dr.World, 1)
 	sendChat(t, c, structuredNativeFixtures()[0].message, 0, amf3.Property{Name: "type", Value: 1.0})
-	if !h.report().ProviderGated || o.seen != 0 || w.begins.Load() != 0 {
-		t.Fatal("fake owner activated")
+	frame := frameRead(t, c, mids.MIDChatMessage)
+	m, e := frame.Params.(*amf3.Object).StrictMap()
+	if e != nil || m["type"] != float64(1) {
+		t.Fatal(m, e)
 	}
-	noChat(t, c)
+	var body map[string]any
+	if e = json.Unmarshal([]byte(m["message"].(string)), &body); e != nil {
+		t.Fatal(e)
+	}
+	if body["id"] != float64(1) || body["enemy_name"] != "canonicalenemy" || body["player_id"] != float64(100001) {
+		t.Fatal(body)
+	}
+	if o.seen != 1 || w.begins.Load() != 2 {
+		t.Fatal("owner was not the constructor-wired read", o.seen, w.begins.Load())
+	}
+	if h.report().Outcomes[stockruntime.ChatTransportWriteRecorded] != 1 {
+		t.Fatal("wired owner did not publish")
+	}
 }
 func TestChatB05FiniteMalformedTCPClosesWithoutOwnerRead(t *testing.T) {
 	bad := []string{`{}`, `{"type":1,"type":1}`, structuredNativeFixtures()[0].message + `{}`, strings.Replace(structuredNativeFixtures()[0].message, `"id":1`, `"id":9007199254740992`, 1), strings.Replace(structuredNativeFixtures()[0].message, `"enemy_name":"enemy"`, `"enemy_name":"\uD800"`, 1), structuredNativeFixtures()[0].message + strings.Repeat(" ", 8193)}
@@ -136,7 +155,7 @@ func TestChatB19RealReadOwnerSameTxDBTimeAndPrivateUnknown(t *testing.T) {
 			f := fresh(t)
 			f.chatPlayers(100001)
 			w := &readWitness{f: f, unknown: mode == "unknown"}
-			o := &nativeArenaOwner{w: w, write: mode == "write", source: cc.SourceObservation{Identity: "fixture:1", ContentRevisionID: 1}}
+			o := &nativeArenaOwner{t: t, w: w, write: mode == "write", source: cc.SourceObservation{Identity: "fixture:1", ContentRevisionID: 1}}
 			if mode == "missingrevision" {
 				o.source.ContentRevisionID = 0
 			}
@@ -177,7 +196,7 @@ func TestChatB15StructuredReadRetainsGuildJoinIncarnation(t *testing.T) {
 	f.chatPlayers(100001, 100002)
 	f.chatGuild(1000001, 100001, 100002)
 	w := &readWitness{f: f}
-	o := &nativeArenaOwner{w: w, source: cc.SourceObservation{Identity: "fixture:guildrecord", ContentRevisionID: 1}}
+	o := &nativeArenaOwner{t: t, w: w, source: cc.SourceObservation{Identity: "fixture:guildrecord", ContentRevisionID: 1}}
 	h := chatHarness(t, f, channelHarnessOptions{db: w, owners: cc.Owners{Arena: o}})
 	_, a, _ := h.login(100001, dr.Guild, 1000001)
 	_, recipient, _ := h.login(100002, dr.Guild, 1000001)

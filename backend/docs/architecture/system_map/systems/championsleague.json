@@ -1,0 +1,256 @@
+{
+ "background": [
+  {
+   "binary": "gxb-api",
+   "entry": "appleague.Reconciler",
+   "kind": "reconcile"
+  }
+ ],
+ "content": [],
+ "contracts": [
+  {
+   "count": 7,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 9,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 4,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 8,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/league_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {
+   "PVP_FIGHT": {
+    "adventure": "EventBattle",
+    "missions": [
+     106
+    ],
+    "stages": [
+     "I9-4B"
+    ]
+   }
+  },
+  "emits": [
+   "PVP_FIGHT"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 30000,
+    "name": "champions-league"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "league_competitions": [
+    "leaguestore.RootTx"
+   ],
+   "league_players": [
+    "leaguestore.PlayersTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "league_competitions",
+   "league_players",
+   "players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/league_dispatcher.go",
+    "line": 47
+   },
+   "mid": 2800,
+   "name": "CHAMPIONS_LEAGUE_GET_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/league_dispatcher.go",
+    "line": 47
+   },
+   "mid": 2801,
+   "name": "CHAMPIONS_LEAGUE_GET_ENEMY"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/league_dispatcher.go",
+    "line": 47
+   },
+   "mid": 2802,
+   "name": "CHAMPIONS_LEAGUE_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/league_dispatcher.go",
+    "line": 47
+   },
+   "mid": 2803,
+   "name": "CHAMPIONS_GET_FIGHT_RECORD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/league_dispatcher.go",
+    "line": 47
+   },
+   "mid": 2804,
+   "name": "CHAMPIONS_GET_DAILY_AWARD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/league_dispatcher.go",
+    "line": 47
+   },
+   "mid": 2805,
+   "name": "CHAMPIONS_SET_DEFENSE_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/league_dispatcher.go",
+    "line": 47
+   },
+   "mid": 2806,
+   "name": "CHAMPIONS_SELECT_AWARD_GROUP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/league_dispatcher.go",
+    "line": 47
+   },
+   "mid": 2807,
+   "name": "CHAMPIONS_GET_SEASON_TOP"
+  }
+ ],
+ "name": "championsleague",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/guildrentalread",
+  "internal/adapters/postgres/guildstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore",
+  "internal/adapters/postgres/leaguestore"
+ ],
+ "tables": {
+  "owned": [
+   "league_competitions",
+   "league_cosmetic_origins",
+   "league_matches",
+   "league_players",
+   "league_settlements"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "guild_memberships",
+   "guilds",
+   "gxb_content_activation",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "league_competitions",
+   "league_cosmetic_origins",
+   "league_matches",
+   "league_players",
+   "league_settlements",
+   "mail_attachments",
+   "mail_records",
+   "player_cosmetic_entitlements",
+   "player_directory_profiles",
+   "player_function_eligibility",
+   "player_progression",
+   "players"
+  ],
+  "written": [
+   "gxb_operation_receipts",
+   "league_competitions",
+   "league_cosmetic_origins",
+   "league_matches",
+   "league_players",
+   "league_settlements"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [
+   "league.json"
+  ],
+  "unit": [
+   "fight_test.go",
+   "save_player_test.go"
+  ]
+ }
+}

@@ -3,7 +3,6 @@ package stockruntime
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	app "gxb.local/backend/v2/internal/application/elementequipment"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/domain/economy"
@@ -11,7 +10,6 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
-	"net/http"
 )
 
 type ElementPort interface {
@@ -29,7 +27,7 @@ func (d ElementDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRe
 		return *fail
 	}
 	if d.Service == nil {
-		return failElement(app.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	p := req.Envelope.Params
 	c := app.Command{}
@@ -90,9 +88,13 @@ func (d ElementDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRe
 	}
 	return okI5(body)
 }
+
+var elementFailureRows = []failureRow{
+	{match: app.ErrRejected, class: failureRefusal, code: unprovenRefusalCode},
+	{match: ins.ErrInvalid, class: failureMalformed, detail: "elementequipment_command_rejected"},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+}
+
 func failElement(e error) httpedge.Response {
-	if errors.Is(e, app.ErrRejected) || errors.Is(e, ins.ErrInvalid) || errors.Is(e, economy.ErrInsufficientBalance) {
-		return badHero("elementequipment_command_rejected")
-	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: e, Body: map[string]any{"error": "elementequipment_unavailable_or_unresolved"}}
+	return failureFromRows(elementFailureRows, e)
 }

@@ -4,6 +4,7 @@
 package arena
 
 import (
+	"maps"
 	"strconv"
 
 	d "gxb.local/backend/v2/internal/domain/arena"
@@ -19,7 +20,8 @@ func flag(b bool) int64 {
 func awards(p d.Player) []map[string]any {
 	out := []map[string]any{}
 	for _, a := range p.Awards {
-		out = append(out, map[string]any{"table_id": a.TableID, "add_star": a.AddStar, "is_awake": flag(a.Awake), "is_summon": flag(a.Summon), "region_arena_times": a.Picks})
+		// ARENA_HERO_PICKS_V1: the client adds the roster value to this one.
+		out = append(out, map[string]any{"table_id": a.TableID, "add_star": a.AddStar, "is_awake": flag(a.Awake), "is_summon": flag(a.Summon), "region_arena_times": int64(0)})
 	}
 	return out
 }
@@ -36,7 +38,13 @@ func missions(p d.Player) []map[string]any {
 func Info(v d.InfoView) map[string]any {
 	p := v.Player
 	days := int64(v.At.Sub(v.Season.OpensAt).Hours()/24) + 1
-	body := map[string]any{"daily_fight": p.DailyFights, "defence_formation": p.Defense.Heroes, "pet_id": p.Defense.Pet, "index": int64(1), "win_times": p.WinTimes,
+	// RegionArenaWindow.lua:19 keeps the reply value and :607 iterates it, and
+	// stock cjson decodes null to truthy userdata, so send an empty array.
+	defence := p.Defense.Heroes
+	if defence == nil {
+		defence = []int64{}
+	}
+	body := map[string]any{"daily_fight": p.DailyFights, "defence_formation": defence, "pet_id": p.Defense.Pet, "index": int64(1), "win_times": p.WinTimes,
 		"total_fight": p.TotalFight, "keep_win_times": p.KeepWin, "point": p.Point, "star": p.Star, "total": v.Total, "my_rank": v.Rank, "count": v.Season.Number,
 		"day_count": max(days, 0), "missions": missions(p), "mission_time": p.MissionTime.Unix(), "awards": awards(p), "king_coin": v.KingCoin, "is_close": flag(v.Closed)}
 	for i, times := range p.ExchangeTimes {
@@ -46,15 +54,16 @@ func Info(v d.InfoView) map[string]any {
 }
 
 // Missions answers 666/848/849 with the mission list, mission time and the
-// exchange award or claimed coins; economy_ refreshes SelfPlayer.kingCoin.
+// exchange award or claimed coins; the dispatcher reports king_coin so the
+// decorator refreshes SelfPlayer.kingCoin.
 func Missions(v d.MissionsView) map[string]any {
-	body := map[string]any{"missions": missions(v.Player), "mission_time": v.Player.MissionTime.Unix(), "economy_": map[string]any{"king_coin": v.KingCoin}}
+	body := map[string]any{"missions": missions(v.Player), "mission_time": v.Player.MissionTime.Unix()}
 	if v.Coins > 0 {
 		// AlertAwardWindow shows a named currency as table_id -1 with its eco_type key.
 		body["awards"] = []map[string]any{{"table_id": int64(-1), "item_num": v.Coins, "king_coin": v.Coins}}
 	}
 	if v.Award != nil {
-		body["award"] = map[string]any{"table_id": v.Award.TableID, "add_star": v.Award.AddStar, "is_awake": flag(v.Award.Awake), "is_summon": flag(v.Award.Summon), "region_arena_times": v.Award.Picks}
+		body["award"] = map[string]any{"table_id": v.Award.TableID, "add_star": v.Award.AddStar, "is_awake": flag(v.Award.Awake), "is_summon": flag(v.Award.Summon), "region_arena_times": int64(0)}
 	}
 	return body
 }
@@ -64,7 +73,13 @@ func Partners(v d.PartnersView) map[string]any {
 	rows := []map[string]any{}
 	for _, u := range v.Usage {
 		damage, _ := strconv.ParseFloat(u.Harms, 64)
-		rows = append(rows, map[string]any{"table_id": u.TableID, "total_fight": u.Fights, "win_fight": u.Wins, "total_damage": int64(damage), "total_kill": u.Kills})
+		row := map[string]any{"table_id": u.TableID, "total_fight": u.Fights, "win_fight": u.Wins, "total_damage": int64(damage), "total_kill": u.Kills}
+		// A-174/S17: RegionBattleScoresWindow.initHero sets the girl's star from
+		// this key; a girl the subject no longer owns omits it, never 0.
+		if u.Star != nil {
+			row["star"] = *u.Star
+		}
+		rows = append(rows, row)
 	}
 	return map[string]any{"partner_info": rows, "arena_info": map[string]any{"total_fight": v.Player.TotalFight, "win_times": v.Player.WinTimes, "point": v.Player.Point}}
 }
@@ -79,7 +94,13 @@ func Enemy(v d.EnemyView) map[string]any {
 		"total_fight": v.Standing.TotalFight, "player_name": v.Face.Name, "region_name": v.Face.ServerName, "guild_name": v.Face.GuildName, "player_id": int64(v.Face.Player),
 		"self_region_name": v.SelfServerName, "region": int64(v.Face.Server)}
 	if v.Pet != nil {
-		body["pet_id"], body["pet_info"] = v.Pet["pet_id"], v.Pet
+		// SelectTeamRearenaWindow builds its preview from pet_info.pet_star and
+		// falls back to the table's initial star without it.
+		pet := maps.Clone(v.Pet)
+		if star, present := pet["star"]; present {
+			pet["pet_star"] = star
+		}
+		body["pet_id"], body["pet_info"] = v.Pet["pet_id"], pet
 	}
 	return body
 }
@@ -92,7 +113,7 @@ func Fight(v d.FightView) map[string]any {
 	}
 	return map[string]any{"battle_report": []map[string]any{{"content": string(v.Report)}}, "is_win": flag(v.Win),
 		"arena_info": map[string]any{"star": v.Player.Star, "point": v.Player.Point, "win_times": v.Player.WinTimes, "total_fight": v.Player.TotalFight, "keep_win_times": v.Player.KeepWin},
-		"award":      []map[string]any{}, "economy_": map[string]any{"region_coin": v.RegionCoin}}
+		"award":      []map[string]any{}}
 }
 
 // Records is REARENA_FIGHT_RECORDS for RegionBattleScoresWindow.
@@ -125,5 +146,9 @@ func RankList(list d.RankList) map[string]any {
 	for _, e := range list.Rows {
 		rows = append(rows, rankRow(e))
 	}
-	return map[string]any{"rank_list": []map[string]any{{"rank_type": int64(6), "rank_info": map[string]any{"my_rank": list.Mine.Rank, "rank_info": rows}}}}
+	mine := any(map[string]any{})
+	if list.Mine.Rank > 0 {
+		mine = list.Mine.Rank
+	}
+	return map[string]any{"rank_list": []map[string]any{{"rank_type": int64(6), "rank_info": map[string]any{"my_rank": mine, "rank_info": rows}}}}
 }

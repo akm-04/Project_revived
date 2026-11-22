@@ -1,0 +1,11 @@
+{
+ "name": "i9_11e_achievement_fantasy",
+ "level": 20,
+ "steps": [
+  "window:achievement",
+  "wait:10",
+  "lua:local m=xyd.ModelManager.get():loadModel(xyd.ModelType.ACHIEVEMENT) local seen={} for _,row in ipairs(m.achieveList) do seen[row.achieve_id]=row end if not seen[100006] or not seen[100007] then error('vc-achievement-fantasy-rows') end if type(seen[100006].progress)~='number' or type(seen[100007].progress)~='number' then error('vc-achievement-fantasy-progress') end if seen[100006].progress~=0 or seen[100007].progress~=0 then error('vc-achievement-fantasy-unearned-'..tostring(seen[100006].progress)..'-'..tostring(seen[100007].progress)) end"
+ ],
+ "settle_seconds": 10,
+ "expect_ok": [1302]
+}

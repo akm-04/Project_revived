@@ -1,0 +1,39 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [],
+  "row_lock_methods": {},
+  "row_locks": [],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [],
+ "name": "playerdirectory",
+ "pushes": [],
+ "stores": [],
+ "tables": {
+  "owned": [
+   "player_directory_profiles"
+  ],
+  "read": [],
+  "written": []
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay",
+   "socialprojection"
+  ],
+  "scenarios_naming": [],
+  "unit": []
+ }
+}

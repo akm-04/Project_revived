@@ -68,7 +68,7 @@ func (service Service) tournamentPeriodWork(requestContext context.Context, seas
 			}
 			rootVersion := root.StateVersion
 			root.StateVersion++
-			root.UpdatedAt = scope.Operation.DecisionAt()
+			root.UpdatedAt = gen.EffectiveObservation(scope.Operation.DecisionAt(), root.UpdatedAt, root.CreatedAt)
 			if err := service.Store.SaveCompetitionTx(requestContext, scope.Tx, root, rootVersion); err != nil {
 				return err
 			}
@@ -171,7 +171,7 @@ func (service Service) AdvanceTournament(requestContext context.Context, season 
 				return err
 			}
 			period.Settled = true
-			period.SettledAt = scope.Operation.DecisionAt()
+			period.SettledAt = gen.EffectiveObservation(scope.Operation.DecisionAt(), period.SettledAt)
 		}
 		period.StateVersion++
 		return nil

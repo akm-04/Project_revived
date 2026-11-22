@@ -48,6 +48,18 @@ const PVPFightKind = "PVP_FIGHT"
 // trigger Adventure 10001 (D368).
 const CampaignSweepKind = "CAMPAIGN_SWEEP"
 
+// IntimacyImprovedKind is one settling Library command that raised favor; it
+// feeds mission 10029 and Adventure 10002 (C17, D481).
+const IntimacyImprovedKind = "INTIMACY_IMPROVED"
+
+// ShopPurchaseKind is one settling shop purchase that debited crystal; it feeds
+// Adventure 10003 (C4, D368).
+const ShopPurchaseKind = "SHOP_PURCHASE"
+
+// VoyageFinishedKind is one notice board mission the Event Centre settled; it
+// feeds mission 10030 (fact 125, I9-MISSION-PRODUCERS).
+const VoyageFinishedKind = "VOYAGE_FINISHED"
+
 func (f Fact) Validate() error {
 	if !f.PlayerID.Valid() || strings.TrimSpace(f.SourceDomain) == "" || strings.TrimSpace(f.SourceBusinessKey) == "" || strings.TrimSpace(f.Kind) == "" {
 		return errors.New("invalid objective fact")

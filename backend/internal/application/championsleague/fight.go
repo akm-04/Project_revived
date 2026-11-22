@@ -6,6 +6,9 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"slices"
+	"time"
+
 	ca "gxb.local/backend/v2/internal/application/characterasset"
 	"gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -16,21 +19,29 @@ import (
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
-	"time"
 )
 
 func locator(id ids.UUID) cd.Locator {
 	return cd.Locator{DomainKind: "ACADEMY_LEAGUE", AuthorityScope: d.CompetitionID, DomainLocator: "fight:" + id.String()}
 }
+
+// The stage is the intent and the opponent, not the chosen lineup:
+// I8_PARENT_CONTRACT_V1 generation_supersede replays the frozen START when only
+// the lineup changed.
 func fightHash(a identity.PlayerID, intent int64, cmd Command) string {
 	b, _ := json.Marshal(struct {
 		Player identity.PlayerID
 		Intent int64
 		Enemy  identity.PlayerID
-		Lineup d.Lineup
-	}{a, intent, cmd.Enemy, cmd.Lineup})
+	}{a, intent, cmd.Enemy})
 	h := sha256.Sum256(b)
 	return hex.EncodeToString(h[:])
+}
+
+// sameLineup is the settled-replay gate: a recorded result replays only for the
+// lineup that produced it.
+func sameLineup(frozen, chosen d.Lineup) bool {
+	return frozen.Pet == chosen.Pet && slices.Equal(frozen.Heroes, chosen.Heroes)
 }
 func participants(pid identity.PlayerID, l d.Lineup, origin cd.Origin) ([]combat.Participant, []combat.Participant) {
 	h := []combat.Participant{}
@@ -58,6 +69,9 @@ func (s Service) admit(c context.Context, sc gen.TimedScope, a identity.ActorCon
 		if m.Fingerprint != fp || m.Defender != cmd.Enemy {
 			return m, d.ErrRefused
 		}
+		if m.Status != "FIGHTING" && !sameLineup(m.Attack, cmd.Lineup) {
+			return m, d.ErrRefused
+		}
 		return m, nil
 	}
 	if p.Selected != cmd.Enemy {
@@ -69,7 +83,7 @@ func (s Service) admit(c context.Context, sc gen.TimedScope, a identity.ActorCon
 	}
 	rank := d.Order(*players, p.Season, p.Group)
 	ar, br := d.Rank(rank, p.ID), d.Rank(rank, enemy.ID)
-	if ar == 0 || br == 0 || br < ar-cat.OpponentRadius || br > ar+cat.OpponentRadius || at.Before(cat.Protection(enemy.LastAttacked, at)) {
+	if !cat.CanChallenge(ar, br) || at.Before(cat.Protection(enemy.LastAttacked, at)) {
 		return d.Match{}, d.ErrRefused
 	}
 	selfRows, _, e := s.rows(c, sc.Tx, p.ID, cmd.Lineup, at)
@@ -102,7 +116,7 @@ func (s Service) admit(c context.Context, sc gen.TimedScope, a identity.ActorCon
 	ha, pa := participants(p.ID, cmd.Lineup, cd.OwnedSelf)
 	hb, pb := participants(enemy.ID, enemy.Defense, cd.OwnedForeign)
 	id := op.ID
-	started, e := s.Combat.StartTx(c, sc.Tx, scope, combat.StartRequest{Actor: a, Locator: locator(id), GenerationRef: d.ContractID, StartFingerprint: fp, ResultDeadline: at.Add(time.Duration(d.ResultSeconds) * time.Second), Battle: combat.BattleRequest{CampaignType: d.CampaignType, BattleID: d.BattleID, TeamA: ha, PetsA: pa, WavesB: [][]combat.Participant{hb}, PetsB: pb}})
+	started, e := s.Combat.StartTx(c, sc.Tx, scope, combat.StartRequest{Mode: cd.ModeChampionsLeague, Actor: a, Locator: locator(id), GenerationRef: d.ContractID, StartFingerprint: fp, ResultDeadline: at.Add(time.Duration(d.ResultSeconds) * time.Second), Battle: combat.BattleRequest{CampaignType: d.CampaignType, BattleID: d.BattleID, TeamA: ha, PetsA: pa, WavesB: [][]combat.Participant{hb}, PetsB: pb}})
 	if e != nil {
 		return d.Match{}, e
 	}
@@ -206,9 +220,6 @@ func (s Service) terminal(c context.Context, id ids.UUID, parent operation.Conte
 		if due(cat, root, at) {
 			return d.ErrDue
 		}
-		if at.Before(root.UpdatedAt) {
-			return d.ErrConflict
-		}
 		m, ok, e := s.Store.MatchTx(c, sc.Tx, id)
 		if e != nil || !ok {
 			return errors.Join(e, d.ErrConflict)
@@ -302,8 +313,18 @@ func (s Service) terminal(c context.Context, id ids.UUID, parent operation.Conte
 		}
 		old = root.Version
 		root.Version++
-		root.UpdatedAt = at
-		return s.Store.PutRootTx(c, sc.Tx, root, old)
+		root.UpdatedAt = gen.EffectiveObservation(at, root.UpdatedAt, root.CreatedAt)
+		if e = s.Store.PutRootTx(c, sc.Tx, root, old); e != nil {
+			return e
+		}
+		// A void or closed match applies no result; only a real terminal counts.
+		if void {
+			return nil
+		}
+		if e = s.BattleCounts.ObserveBattleTx(c, sc.Tx, m.Attacker, m.Attack.Heroes, at); e != nil {
+			return e
+		}
+		return s.BattleCounts.ObserveBattleTx(c, sc.Tx, m.Defender, m.Defense.Heroes, at)
 	})
 	return e
 }

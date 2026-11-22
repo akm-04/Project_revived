@@ -253,7 +253,11 @@ func TestPetDispatcherMID782ProjectsAbsoluteCurrentCrystal(t *testing.T) {
 	d := PetDispatcher{Authority: httpAuthority{actor}, Service: svc, Economy: economy}
 	req := env(782, nil, now)
 	req.Envelope.Params = map[string]any{"pet_id": int64(77)}
-	resp := d.Dispatch(context.Background(), req)
+	direct := d.Dispatch(context.Background(), req)
+	if _, written := direct.Body["economy_"]; written {
+		t.Fatalf("dispatcher assembled economy_: %#v", direct.Body)
+	}
+	resp := Decorated{Next: d}.Dispatch(context.Background(), req)
 	if resp.HTTPStatus != 200 {
 		t.Fatalf("status=%d body=%#v", resp.HTTPStatus, resp.Body)
 	}
@@ -273,7 +277,7 @@ func TestPetDispatcherMID782ProjectionFailureDoesNotResettleInDispatcher(t *test
 	actor := actorForHTTP(t)
 	now := time.Unix(100, 0).UTC()
 	svc := &petServiceFake{}
-	economy := &petEconomyFake{err: errors.New("read failed")}
+	economy := &petEconomyFake{err: context.DeadlineExceeded}
 	d := PetDispatcher{Authority: httpAuthority{actor}, Service: svc, Economy: economy}
 	req := env(782, nil, now)
 	req.Envelope.Params = map[string]any{"pet_id": int64(77)}
@@ -349,7 +353,7 @@ func TestPetDispatcherRejectsInventedParamsAndUnownedMIDs(t *testing.T) {
 	unownedReq := env(784, nil, now)
 	unownedReq.Envelope.Params = map[string]any{}
 	unowned := d.Dispatch(context.Background(), unownedReq)
-	if unowned.HTTPStatus != 501 {
+	if unowned.HTTPStatus != 409 {
 		t.Fatalf("unowned mid status=%d", unowned.HTTPStatus)
 	}
 }
@@ -451,21 +455,22 @@ func TestCA75PetStyleErrorTransportMapping(t *testing.T) {
 	tests := []struct {
 		err  error
 		want int
+		code int64
 	}{
-		{apppet.ErrPetAppearanceContentInactive, 503},
-		{apppet.ErrPetNotFound, 404},
-		{apppet.ErrPetAppearanceUnavailable, 400},
-		{apppet.ErrPetStyleSwitchConflict, 409},
-		{economy.ErrInsufficientBalance, 409},
-		{errors.New("infrastructure"), 503},
+		{apppet.ErrPetAppearanceContentInactive, 409, 35028},
+		{apppet.ErrPetNotFound, 409, 35028},
+		{apppet.ErrPetAppearanceUnavailable, 409, 35028},
+		{apppet.ErrPetStyleSwitchConflict, 409, 35028},
+		{economy.ErrInsufficientBalance, 409, 35028},
+		{errors.New("infrastructure"), 500, 35028},
 	}
 	for _, tc := range tests {
 		d := PetDispatcher{Authority: httpAuthority{actor}, Service: &petServiceFake{err: tc.err}}
 		r := env(1894, nil, now)
 		r.Envelope.Params = map[string]any{"pet_id": int64(77), "style_id": int64(50001376)}
 		got := d.Dispatch(context.Background(), r)
-		if got.HTTPStatus != tc.want {
-			t.Fatalf("err=%v status=%d want=%d body=%#v", tc.err, got.HTTPStatus, tc.want, got.Body)
+		if got.HTTPStatus != tc.want || got.Body["error_code"] != tc.code {
+			t.Fatalf("err=%v status=%d want=%d code=%#v want=%d body=%#v", tc.err, got.HTTPStatus, tc.want, got.Body["error_code"], tc.code, got.Body)
 		}
 	}
 }

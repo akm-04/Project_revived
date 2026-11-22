@@ -198,8 +198,10 @@ func TestI7C4BGenuineLibraryAllTiersReplayAndUnavailable(t *testing.T) {
 		t.Fatal("unqualified producer", e)
 	}
 	q.AchievementID = 100014
-	if _, e = readAchievement(t, p, a, rev, q, r.CreatedAt.Add(-time.Second)); e == nil {
-		t.Fatal("future state")
+	// K7: an observation before the stored root no longer refuses the read.
+	past, e := readAchievement(t, p, a, rev, q, r.CreatedAt.Add(-time.Second))
+	if e != nil || past.Progress != 20 || !past.Tiers[2].Earned {
+		t.Fatal("future state read", past, e)
 	}
 	other := pool(t)
 	out, e := readAchievement(t, other, a, rev, q, time.Now())

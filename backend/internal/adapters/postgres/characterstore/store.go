@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/adapters/postgres/characterqueries"
+	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	appboot "gxb.local/backend/v2/internal/application/bootstrap"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -19,7 +20,7 @@ type Store struct{ Queryer tx.Queryer }
 func scanRoot(row tx.Row) (character.HeroRoot, error) {
 	var r character.HeroRoot
 	var pid int64
-	if err := row.Scan(&pid, &r.NextPartnerID, &r.SortType, &r.StateVersion, &r.CreatedAt, &r.UpdatedAt); err != nil {
+	if err := row.Scan(&pid, &r.NextPartnerID, &r.SortType, &r.BackpackSortType, &r.StateVersion, &r.CreatedAt, &r.UpdatedAt); err != nil {
 		return r, err
 	}
 	r.PlayerID = identity.PlayerID(pid)
@@ -57,6 +58,38 @@ func (Store) SaveSortTypeTx(ctx context.Context, t tx.Tx, r character.HeroRoot, 
 		return errors.New("character store: sort update lost race")
 	}
 	return nil
+}
+
+func (Store) SaveBackpackSortTypeTx(ctx context.Context, t tx.Tx, r character.HeroRoot, oldVersion int64) error {
+	if t == nil || r.Validate() != nil || oldVersion <= 0 {
+		return errors.New("character store: invalid backpack sort update")
+	}
+	tag, err := t.Exec(ctx, characterqueries.SaveBackpackSortType, int64(r.PlayerID), r.BackpackSortType, r.UpdatedAt.UTC(), oldVersion)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() != 1 {
+		return errors.New("character store: backpack sort update lost race")
+	}
+	return nil
+}
+
+func (s Store) ReadBackpackSortType(ctx context.Context, pid identity.PlayerID) (int64, error) {
+	if s.Queryer == nil {
+		return 0, errors.New("character store: invalid backpack sort read")
+	}
+	return s.ReadBackpackSortTypeTx(ctx, s.Queryer, pid)
+}
+
+func (Store) ReadBackpackSortTypeTx(ctx context.Context, q tx.Queryer, pid identity.PlayerID) (int64, error) {
+	if q == nil || !pid.Valid() {
+		return 0, errors.New("character store: invalid backpack sort read")
+	}
+	var sortType int64
+	if err := q.QueryRow(ctx, characterqueries.ReadBackpackSortType, int64(pid)).Scan(&sortType); err != nil {
+		return 0, err
+	}
+	return sortType, nil
 }
 
 func (Store) SaveRootAllocatorTx(ctx context.Context, t tx.Tx, r character.HeroRoot, oldVersion int64) error {
@@ -194,6 +227,16 @@ func (Store) ReadHeroByPartnerIDTx(ctx context.Context, q tx.Queryer, pid identi
 	return scanHero(q.QueryRow(ctx, characterqueries.ReadHeroByPartnerID, int64(pid), partnerID))
 }
 
+// FindHeroByPartnerIDTx distinguishes an absent roster row from a read error
+// for projections that must report a retired Hero.
+func (Store) FindHeroByPartnerIDTx(ctx context.Context, q tx.Queryer, pid identity.PlayerID, partnerID int64) (character.Hero, bool, error) {
+	h, e := (Store{}).ReadHeroByPartnerIDTx(ctx, q, pid, partnerID)
+	if errors.Is(e, kernelstore.ErrNoRows) {
+		return h, false, nil
+	}
+	return h, e == nil, e
+}
+
 func (Store) LockHeroByPartnerIDTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, partnerID int64) (character.Hero, error) {
 	if t == nil || !pid.Valid() || partnerID <= 0 {
 		return character.Hero{}, errors.New("character store: invalid Hero lock")
@@ -264,6 +307,20 @@ func (Store) SaveHeroSkillChoiceTx(ctx context.Context, t tx.Tx, h character.Her
 	}
 	if tag.RowsAffected() != 1 {
 		return errors.New("character store: Hero skill choice update lost race")
+	}
+	return nil
+}
+
+func (Store) SaveHeroSkillLevelsTx(ctx context.Context, t tx.Tx, h character.Hero, oldVersion int64) error {
+	if t == nil || h.ValidatePersistent() != nil || oldVersion < 1 || h.StateVersion != oldVersion+1 {
+		return errors.New("character store: invalid Hero skill level update")
+	}
+	tag, err := t.Exec(ctx, characterqueries.SaveHeroSkillLevels, int64(h.PlayerID), h.PartnerID, h.RawSkills.Levels[0], h.RawSkills.Levels[1], h.RawSkills.Levels[2], h.RawSkills.Levels[3], h.RawSkills.Levels[4], h.RawSkills.Levels[5], h.UpdatedAt.UTC(), oldVersion)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() != 1 {
+		return errors.New("character store: Hero skill level update lost race")
 	}
 	return nil
 }

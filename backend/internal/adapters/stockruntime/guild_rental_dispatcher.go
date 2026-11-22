@@ -2,9 +2,8 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
-	"net/http"
 
+	"gxb.local/backend/v2/internal/application/characterasset"
 	"gxb.local/backend/v2/internal/application/guildrental"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/domain/guild"
@@ -16,13 +15,14 @@ import (
 )
 
 // GuildRentalMIDs are the stock guild hero and pet rental callbacks.
-var GuildRentalMIDs = []uint16{593, 594, 595, 618, 619, 620, 621, 2768}
+var GuildRentalMIDs = []uint16{593, 594, 595, 618, 619, 620, 621, 623, 2768}
 
 type GuildRentalPort interface {
 	Place(context.Context, identity.ActorContext, guild.RentalKind, int64, operation.Context) error
 	Recall(context.Context, identity.ActorContext, guild.RentalKind, int64, operation.Context) (int64, int64, error)
 	OwnOffers(context.Context, identity.ActorContext, guild.RentalKind, operation.Context) ([]guildrental.Row, error)
 	GuildOffers(context.Context, identity.ActorContext, guild.RentalKind, int64, operation.Context) (guildrental.List, error)
+	UsedPartners(context.Context, identity.ActorContext, operation.Context) ([]int64, error)
 }
 
 type GuildRentalDispatcher struct {
@@ -36,7 +36,7 @@ func (d GuildRentalDispatcher) Dispatch(c context.Context, r httpedge.DispatchRe
 		return *fail
 	}
 	if d.Service == nil {
-		return rentalFailure(guildrental.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	p, op := r.Envelope.Params, r.Envelope.Operation
 	switch r.Envelope.MID {
@@ -76,6 +76,18 @@ func (d GuildRentalDispatcher) Dispatch(c context.Context, r httpedge.DispatchRe
 			return rentalFailure(err)
 		}
 		return okI5(map[string]any{"rent_list": rentalSentHeroes(rows), "award": interest, "rent_award": rentAward})
+	case 623:
+		if !onlyStockGameplayParams(p) {
+			return rentalBad()
+		}
+		ids, err := d.Service.UsedPartners(c, a, op)
+		if err != nil {
+			return rentalFailure(err)
+		}
+		if ids == nil {
+			ids = []int64{}
+		}
+		return okI5(map[string]any{"used_partners": ids})
 	case 618:
 		if !onlyStockGameplayParams(p) {
 			return rentalBad()
@@ -120,7 +132,11 @@ func (d GuildRentalDispatcher) Dispatch(c context.Context, r httpedge.DispatchRe
 		if err != nil {
 			return rentalFailure(err)
 		}
-		return okI5(map[string]any{"rent_count": list.RentCount, "pets": rentalPartners(list.Rows)})
+		partners, err := rentalPartners(list.Rows)
+		if err != nil {
+			return rentalFailure(err)
+		}
+		return okI5(map[string]any{"rent_count": list.RentCount, "pets": partners})
 	case 2768:
 		if !onlyStockGameplayParams(p, "load_place", "rent_count", "campaign_type", "rent_type") {
 			return rentalBad()
@@ -133,13 +149,17 @@ func (d GuildRentalDispatcher) Dispatch(c context.Context, r httpedge.DispatchRe
 		if err != nil {
 			return rentalFailure(err)
 		}
+		partners, err := rentalPartners(list.Rows)
+		if err != nil {
+			return rentalFailure(err)
+		}
 		return okI5(map[string]any{
-			"guild_rent_heroes": map[string]any{"rent_type": requested, "partners": rentalPartners(list.Rows), "rent_count": list.RentCount},
+			"guild_rent_heroes": map[string]any{"rent_type": requested, "partners": partners, "rent_count": list.RentCount},
 			"rent_count":        list.RentCount,
 			"tutor_rent_heroes": []any{},
 		})
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error": "not_i9_9b_mid"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 }
 
@@ -189,30 +209,36 @@ func rentalSentPets(rows []guildrental.Row) []any {
 	return out
 }
 
-func rentalPartners(rows []guildrental.Row) []any {
+func rentalPartners(rows []guildrental.Row) ([]any, error) {
 	out := make([]any, 0, len(rows))
 	for _, row := range rows {
-		out = append(out, rentalPartner(row))
+		partner, err := rentalPartner(row)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, partner)
 	}
-	return out
+	return out, nil
 }
 
-func rentalPartner(row guildrental.Row) map[string]any {
+func rentalPartner(row guildrental.Row) (map[string]any, error) {
 	body := map[string]any{}
 	if row.Hero != nil {
-		wire, err := heroproj.StockHero(*row.Hero)
-		if err == nil {
-			for key, value := range wire {
-				body[key] = value
-			}
+		wire, err := heroproj.StockHeroDetail(*row.Hero, rentalAppearance(row.Appearance), row.TwiceAwakeStage)
+		if err != nil {
+			return nil, err
+		}
+		for key, value := range wire {
+			body[key] = value
 		}
 	}
 	if row.Pet != nil {
 		wire, err := petproj.StockPrivate(*row.Pet, true)
-		if err == nil {
-			for key, value := range wire {
-				body[key] = value
-			}
+		if err != nil {
+			return nil, err
+		}
+		for key, value := range wire {
+			body[key] = value
 		}
 	}
 	body["player_name"] = row.Profile.Name
@@ -225,22 +251,42 @@ func rentalPartner(row guildrental.Row) map[string]any {
 	body["rent_need_mana"] = row.Price
 	body["can_rent"] = row.CanRent
 	body["have_rent"] = row.HaveRent
-	return body
+	return body, nil
+}
+
+// rentalAppearance converts the Character owner's qualified appearance to the
+// stock projection view; a read without one is not replaced by a default.
+func rentalAppearance(appearance *characterasset.EffectiveHeroAppearance) *heroproj.AppearanceView {
+	if appearance == nil {
+		return nil
+	}
+	view := heroproj.AppearanceView{OwnerStateVersion: appearance.OwnerStateVersion, CurrentSkinID: appearance.CurrentSkinID, IllusionSkinID: appearance.IllusionSkinID}
+	view.Skins = make([]heroproj.QualifiedSkinView, 0, len(appearance.Skins))
+	for _, skin := range appearance.Skins {
+		view.Skins = append(view.Skins, heroproj.QualifiedSkinView{ModelID: skin.ModelID, ExpiresAt: skin.ExpiresAt})
+	}
+	view.LIVE = make([]heroproj.QualifiedLIVEView, 0, len(appearance.LIVE))
+	for _, live := range appearance.LIVE {
+		view.LIVE = append(view.LIVE, heroproj.QualifiedLIVEView{ModelID: live.ModelID, IsShow: live.IsShow})
+	}
+	return &view
 }
 
 func rentalBad() httpedge.Response {
-	return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "guild_rental_invalid_parameter"}}
+	return failureReply(malformed("guild_rental_invalid_parameter"))
+}
+
+var rentalFailureRows = []failureRow{
+	{match: guildrental.ErrNotInGuild, class: failureRefusal, code: unprovenRefusalCode},
+	{match: guildrental.ErrUnitUnavailable, class: failureRefusal, code: unprovenRefusalCode},
+	{match: guildrental.ErrAlreadyOffered, class: failureRefusal, code: unprovenRefusalCode},
+	{match: guildrental.ErrCapReached, class: failureRefusal, code: unprovenRefusalCode},
+	{match: guildrental.ErrNoOffer, class: failureRefusal, code: unprovenRefusalCode},
+	{match: guildrental.ErrRecallTooEarly, class: failureRefusal, code: unprovenRefusalCode},
 }
 
 // rentalFailure refuses with 409 so the client's OK callback never indexes a
 // nil list (Backend.lua:562-566).
 func rentalFailure(err error) httpedge.Response {
-	switch {
-	case errors.Is(err, guildrental.ErrNotInGuild), errors.Is(err, guildrental.ErrUnitUnavailable),
-		errors.Is(err, guildrental.ErrAlreadyOffered), errors.Is(err, guildrental.ErrCapReached),
-		errors.Is(err, guildrental.ErrNoOffer), errors.Is(err, guildrental.ErrRecallTooEarly):
-		return conflictRefusal(1)
-	default:
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "guild_rental_unavailable"}}
-	}
+	return failureFromRows(rentalFailureRows, err)
 }

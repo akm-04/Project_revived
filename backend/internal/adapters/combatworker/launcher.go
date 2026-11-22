@@ -25,6 +25,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/combatresolver"
 	app "gxb.local/backend/v2/internal/application/combat"
 	d "gxb.local/backend/v2/internal/domain/combat"
+	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
 const maxStderrBytes = 64 << 10
@@ -48,14 +49,18 @@ func (l Limits) configured() bool {
 type Launcher struct {
 	limits        Limits
 	admissionWait time.Duration
+	admissionCap  time.Duration
 	slots         chan struct{}
 	spares        chan *process
 	mutex         sync.Mutex
 	closed        bool
+	now           func() time.Time
 }
 
-func New(limits Limits, workers int, admissionWait time.Duration) *Launcher {
-	return &Launcher{limits: limits, admissionWait: admissionWait, slots: make(chan struct{}, max(workers, 0)), spares: make(chan *process, max(workers, 0))}
+// New bounds the number of live workers. admissionWait is the queue bound for jobs without a request; a request
+// carrying the edge's admission deadline waits until it, capped by admissionCap when positive (I8_WORKER_ADMISSION_V2).
+func New(limits Limits, workers int, admissionWait, admissionCap time.Duration) *Launcher {
+	return &Launcher{limits: limits, admissionWait: admissionWait, admissionCap: admissionCap, slots: make(chan struct{}, max(workers, 0)), spares: make(chan *process, max(workers, 0)), now: time.Now}
 }
 
 type process struct {
@@ -107,19 +112,43 @@ func (l *Launcher) Resolve(ctx context.Context, snapshot []byte, snapshotHash st
 	return l.run(ctx, p, request)
 }
 
+// Warm starts the configured spare processes before the first client attempt,
+// so a resolved fight does not pay their one-time Lua preparation.
+func (l *Launcher) Warm() {
+	if !l.limits.configured() || cap(l.slots) == 0 {
+		return
+	}
+	l.fill()
+}
+
+// admissionBound is the request's remaining admission budget when the edge set one (C1-1), capped by the configured
+// maximum. Jobs without a request keep the fixed wait.
+func (l *Launcher) admissionBound(ctx context.Context) time.Duration {
+	deadline, ok := tx.AdmissionDeadline(ctx)
+	if !ok {
+		return l.admissionWait
+	}
+	bound := max(deadline.Sub(l.now()), 0)
+	if l.admissionCap > 0 {
+		bound = min(bound, l.admissionCap)
+	}
+	return bound
+}
+
 // take hands out an idle spare, or starts a process when a slot is free, and
-// refuses once the admission wait elapses with every slot busy.
+// refuses once the request's admission bound elapses with every slot busy.
 func (l *Launcher) take(ctx context.Context) (*process, error) {
-	timer := time.NewTimer(l.admissionWait)
+	bound := l.admissionBound(ctx)
+	timer := time.NewTimer(bound)
 	defer timer.Stop()
 	select {
 	case p := <-l.spares:
 		return p, nil
 	case l.slots <- struct{}{}:
 	case <-timer.C:
-		return nil, fmt.Errorf("%w: %d workers busy for %s", app.ErrWorkerSaturated, cap(l.slots), l.admissionWait)
+		return nil, fmt.Errorf("%w: %d workers busy for %s", app.ErrWorkerSaturated, cap(l.slots), bound)
 	case <-ctx.Done():
-		return nil, retryable("admission: %v", ctx.Err())
+		return nil, fmt.Errorf("%w: %d workers busy: %v", app.ErrWorkerSaturated, cap(l.slots), ctx.Err())
 	}
 	p, err := l.start()
 	if err != nil {

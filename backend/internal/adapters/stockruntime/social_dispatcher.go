@@ -13,10 +13,10 @@ import (
 	sp "gxb.local/backend/v2/internal/application/socialprojection"
 	sr "gxb.local/backend/v2/internal/application/socialrelation"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/projection/lobby"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
-	"net/http"
 	"time"
 )
 
@@ -40,6 +40,14 @@ type SocialGiftCommands interface {
 	Claim(context.Context, identity.ActorContext, []socialinbox.NoticeID, operation.Context) (socialgift.Result, error)
 	ReloadReferences(context.Context, identity.ActorContext, identity.PlayerID, socialgift.Result, operation.Context) ([]sr.ReloadReference, error)
 }
+
+// MentorClassRelation is the Mentor-owned observation the Social dispatcher
+// applies before deleting a friend or adding a blacklist: an active class
+// relation must not be broken through the friend surface.
+type MentorClassRelation interface {
+	ClassRelationActive(context.Context, identity.ActorContext, identity.PlayerID, operation.Context) (bool, error)
+}
+
 type SocialDispatcher struct {
 	Gifts          SocialGiftCommands
 	giftStockReady bool
@@ -48,6 +56,7 @@ type SocialDispatcher struct {
 	Relations      SocialRelationCommands
 	Dismissal      SocialDismissCommands
 	Projection     SocialProjectionQueries
+	Mentor         MentorClassRelation
 	Emitter        SocialReloadEmitter
 	Tracker        *lobby.BootTracker
 }
@@ -124,12 +133,35 @@ func socialTargets(m map[string]any, key string, batch bool) ([]identity.PlayerI
 	}
 	return out, nil
 }
+
+// classPairRefusal names the stock message.lua row for breaking a class pair
+// through the friend surface: 34017 delete friend, 34013 add blacklist.
+func classPairRefusal(mid uint16) (int64, bool) {
+	switch mid {
+	case 181:
+		return 34017, true
+	case 185:
+		return 34013, true
+	default:
+		return 0, false
+	}
+}
+
+// The owner's stale decision time, counter overflow and policy drift are
+// defects, like the gift clock row, so they fall through to 500.
+var socialRelationFailureRows = []failureRow{
+	{match: sr.ErrInvalidCommand, class: failureMalformed, detail: "invalid_social_request"},
+	{match: sr.ErrNotEligible, class: failureRefusal, code: unprovenRefusalCode},
+	{match: sr.ErrStateConflict, class: failureRefusal, code: staleConflictCode},
+	{match: sp.ErrSearchSaturated, class: failureRefusal, code: unprovenRefusalCode},
+}
+
 func socialFailure(e error) httpedge.Response {
 	var stock *sr.StockError
-	if errors.As(e, &stock) {
-		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"error_code": stock.Code}}
+	if errors.As(e, &stock) && stock.Code > 0 {
+		return failureReply(refusal(stock.Code))
 	}
-	return httpedge.Response{HTTPStatus: http.StatusConflict, Body: map[string]any{"error": "social_unavailable"}}
+	return failureFromRows(socialRelationFailureRows, e)
 }
 func (d SocialDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest) httpedge.Response {
 	// One finite parent deadline covers authority, command and postcommit projection.
@@ -139,24 +171,27 @@ func (d SocialDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 		defer cancel()
 	}
 	bad := func() httpedge.Response {
-		return httpedge.Response{HTTPStatus: 400, Body: map[string]any{"error": "invalid_social_request"}}
+		return failureReply(malformed("invalid_social_request"))
 	}
-	if d.Authority == nil || req.Envelope.Claims.Token == "" {
-		return httpedge.Response{HTTPStatus: 401, Body: map[string]any{"error": "gameplay_auth_required"}}
+	if d.Authority == nil {
+		return failureReply(defect(nil))
+	}
+	if req.Envelope.Claims.Token == "" {
+		return failureReply(sessionFailure())
 	}
 	a, e := d.Authority.ResolveGameplayBearer(ctx, req.Envelope.Claims.Token, req.Envelope.ReceivedAt)
 	if e != nil {
 		return authFailure(e)
 	}
 	if req.Envelope.Claims.Region != int64(a.LogicalServerID) {
-		return httpedge.Response{HTTPStatus: 403, Body: map[string]any{"error": "region_mismatch"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 	mid := req.Envelope.MID
 	op := req.Envelope.Operation
 	m := req.Envelope.Params
 	if mid == 176 || mid == 188 || mid == 189 || mid == 190 {
 		if d.Projection == nil {
-			return socialFailure(sp.ErrInvalidRead)
+			return failureReply(defect(nil))
 		}
 		var v sp.Result
 		var body any
@@ -226,17 +261,21 @@ func (d SocialDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 			return bad()
 		}
 		if !d.giftStockReady || d.Gifts == nil || d.Scalar == nil || d.Projection == nil || d.Emitter == nil {
-			return giftFailure()
+			return giftFailure(nil)
 		}
 		result, e := d.Gifts.Send(ctx, a, targets[0], op)
 		if e != nil {
-			return giftFailure()
+			return giftFailure(e)
 		}
 		refs, e := d.Gifts.ReloadReferences(ctx, a, targets[0], result, op)
 		if e == nil && len(refs) > 0 {
 			d.Emitter.Emit(ctx, refs)
 		}
-		return httpedge.Response{HTTPStatus: 200, Body: map[string]any{}}
+		body := map[string]any{}
+		if result.MasterInfo != nil {
+			body["master_info"] = result.MasterInfo
+		}
+		return httpedge.Response{HTTPStatus: 200, Body: body}
 	}
 	if mid == 184 {
 		fields, e := socialFields(m, "notice_ids")
@@ -257,28 +296,29 @@ func (d SocialDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 		}
 		if d.giftStockReady {
 			if d.Gifts == nil || d.Scalar == nil || d.Projection == nil || d.Emitter == nil {
-				return giftFailure()
+				return giftFailure(nil)
 			}
 			result, e := d.Gifts.Claim(ctx, a, ids, op)
 			if e != nil {
-				return giftFailure()
+				return giftFailure(e)
 			}
 			out := result.NoticeIDs
 			if out == nil {
 				out = []socialinbox.NoticeID{}
 			}
-			body := map[string]any{"ids": out, "awards": []any{}}
+			body := map[string]any{"ids": out}
 			if result.Amount > 0 {
+				body["awards"] = []any{}
 				amount, e := d.Scalar.CurrentScalar(ctx, a.PlayerID, "friendship_coin", op)
 				if e != nil || amount < 0 || amount > 9007199254740991 {
-					return giftFailure()
+					return giftFailure(e)
 				}
-				body["economy_"] = map[string]any{"friendship_coin": amount}
+				changes.Balance(ctx, "friendship_coin", amount)
 			}
 			return httpedge.Response{HTTPStatus: 200, Body: body}
 		}
 		if d.Dismissal == nil {
-			return socialFailure(socialinbox.ErrInvalidNotice)
+			return failureReply(defect(nil))
 		}
 		out, e := d.Dismissal.Dismiss(ctx, a, ids, op)
 		if e != nil {
@@ -289,8 +329,8 @@ func (d SocialDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 		}
 		return httpedge.Response{HTTPStatus: 200, Body: map[string]any{"ids": out}}
 	}
-	if d.Relations == nil {
-		return socialFailure(sr.ErrInvalidCommand)
+	if d.Relations == nil || d.Emitter == nil {
+		return failureReply(defect(nil))
 	}
 	command := sr.Command{}
 	batch := false
@@ -343,6 +383,21 @@ func (d SocialDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 			return bad()
 		}
 	}
+	if refusalCode, guarded := classPairRefusal(mid); guarded {
+		if d.Mentor == nil {
+			return failureReply(defect(nil))
+		}
+		if len(command.Targets) != 1 {
+			return bad()
+		}
+		active, e := d.Mentor.ClassRelationActive(ctx, a, command.Targets[0], op)
+		if e != nil {
+			return socialFailure(e)
+		}
+		if active {
+			return failureReply(refusal(refusalCode))
+		}
+	}
 	result, e := d.Relations.Execute(ctx, a, command, op)
 	if e != nil {
 		return socialFailure(e)
@@ -350,13 +405,13 @@ func (d SocialDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 	var body any = map[string]any{}
 	// Projection helpers preserve typed booleans and the source-specific batch object.
 	switch mid {
-	case 180, 182, 185:
+	case 177, 180, 182, 185:
 		body, e = mapSocialMutation(result, mid)
 		if e != nil {
 			return socialFailure(e)
 		}
 	}
-	if d.Emitter != nil && len(result.Reloads) > 0 {
+	if len(result.Reloads) > 0 {
 		d.Emitter.Emit(ctx, result.Reloads)
 	}
 	return httpedge.Response{HTTPStatus: 200, JSON: body}
@@ -364,6 +419,21 @@ func (d SocialDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 
 var _ SocialDismissCommands = socialdismiss.Service{}
 
-func giftFailure() httpedge.Response {
-	return httpedge.Response{HTTPStatus: 409, Body: map[string]any{"error": "social_gift_unavailable"}}
+// Gift refusals are permanent (the client must not retry a permanent failure);
+// only an unknown dependency or database error is a transient 503 fault.
+var socialGiftFailureRows = []failureRow{
+	{match: socialgift.ErrInvalid, class: failureMalformed, detail: "invalid_social_request"},
+	{match: socialgift.ErrConflict, class: failureRefusal, code: staleConflictCode},
+	{match: socialgift.ErrQuota, class: failureRefusal, code: unprovenRefusalCode},
+	{match: socialgift.ErrDuplicate, class: failureRefusal, code: unprovenRefusalCode},
+	{match: socialgift.ErrNotEligible, class: failureRefusal, code: unprovenRefusalCode},
+	{match: socialgift.ErrContent, class: failureRefusal, code: unprovenRefusalCode},
+	{match: socialgift.ErrClock, class: failureDefect},
+}
+
+func giftFailure(err error) httpedge.Response {
+	if err == nil {
+		return failureReply(defect(nil))
+	}
+	return failureFromRows(socialGiftFailureRows, err)
 }

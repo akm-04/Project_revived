@@ -1,0 +1,41 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [],
+  "row_lock_methods": {},
+  "row_locks": [],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [],
+ "name": "socialfriendbase",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/frienddmstore"
+ ],
+ "tables": {
+  "owned": [],
+  "read": [
+   "friend_dm_projection_receipts"
+  ],
+  "written": []
+ },
+ "tests": {
+  "integration": [
+   "socialactivation",
+   "socialprojection"
+  ],
+  "scenarios_naming": [],
+  "unit": []
+ }
+}

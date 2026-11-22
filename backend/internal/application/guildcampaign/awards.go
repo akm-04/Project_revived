@@ -9,6 +9,7 @@ import (
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/grant"
+	d "gxb.local/backend/v2/internal/domain/guildcampaign"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/foundation/ids"
@@ -50,19 +51,27 @@ type Distribution struct {
 
 // AwardRead is 605: the chapter's award pool, queue and the caller's place.
 func (m Mode) AwardRead(c context.Context, a identity.ActorContext, chapterID int64, op operation.Context) (AwardBody, error) {
-	if !m.ready() || chapterID <= 0 {
+	if !m.ready() {
 		return AwardBody{}, ErrUnavailable
 	}
-	membership, joined, err := m.Service.Guilds.ReadMembership(c, a.PlayerID)
-	if err != nil {
-		return AwardBody{}, err
+	if chapterID <= 0 {
+		return AwardBody{}, d.ErrRefused
 	}
-	if !joined {
-		return AwardBody{}, ErrUnavailable
+	// C14: the award-apply queue serves chapter_version 1; a v2 chapter's
+	// reward button opens its team shop instead.
+	if m.Settings.ChapterVersion(chapterID) != 1 {
+		return AwardBody{}, d.ErrRefused
 	}
 	var out AwardBody
-	_, err = m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
+	_, err := m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
 		at := op.StartedAt.UTC()
+		membership, joined, err := m.Service.Guilds.ReadMembershipTx(c, sc.Tx, a.PlayerID)
+		if err != nil {
+			return err
+		}
+		if !joined {
+			return d.ErrRefused
+		}
 		body, err := m.awardBody(c, sc.Tx, int64(membership.GuildID), chapterID, a.PlayerID, at)
 		out = body
 		return err
@@ -72,12 +81,18 @@ func (m Mode) AwardRead(c context.Context, a identity.ActorContext, chapterID in
 
 // ApplyReward is 606: one application per run per member, four a day.
 func (m Mode) ApplyReward(c context.Context, a identity.ActorContext, chapterID, awardID int64, op operation.Context) (AwardBody, error) {
-	if !m.ready() || chapterID <= 0 || awardID <= 0 {
+	if !m.ready() {
 		return AwardBody{}, ErrUnavailable
+	}
+	if chapterID <= 0 || awardID <= 0 {
+		return AwardBody{}, d.ErrRefused
+	}
+	if m.Settings.ChapterVersion(chapterID) != 1 {
+		return AwardBody{}, d.ErrRefused
 	}
 	guildID, err := m.guildOf(c, a)
 	if err != nil {
-		return AwardBody{}, ErrUnavailable
+		return AwardBody{}, err
 	}
 	var out AwardBody
 	_, err = m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.Serializable}, retry(), nil, func(c context.Context, sc tx.Scope) error {
@@ -88,19 +103,28 @@ func (m Mode) ApplyReward(c context.Context, a identity.ActorContext, chapterID,
 		if _, err := m.Players.LockPlayerRootsTx(c, sc.Tx, a.LogicalServerID, []identity.PlayerID{a.PlayerID}); err != nil {
 			return err
 		}
+		// C4: the registration list is fixed at open or reset. Leaving deletes
+		// the row and rejoining does not restore it before the next reset.
+		registered, err := m.ModeStore.IsRegisteredTx(c, sc.Tx, guildID, chapterID, a.PlayerID)
+		if err != nil {
+			return err
+		}
+		if !registered {
+			return d.ErrRefused
+		}
 		chapter, open, err := m.Service.Store.LockChapterTx(c, sc.Tx, guildID, chapterID)
 		if err != nil {
 			return err
 		}
 		if !open || !chapter.Win {
-			return ErrUnavailable
+			return d.ErrRefused
 		}
 		awards, err := m.ModeStore.ListAwardsTx(c, sc.Tx, guildID, chapterID, chapter.Run)
 		if err != nil {
 			return err
 		}
 		if !hasAward(awards, awardID) {
-			return ErrUnavailable
+			return d.ErrRefused
 		}
 		day := modes.Day(at)
 		applied, err := m.ModeStore.ApplicationCountTx(c, sc.Tx, a.PlayerID, day)
@@ -108,7 +132,7 @@ func (m Mode) ApplyReward(c context.Context, a identity.ActorContext, chapterID,
 			return err
 		}
 		if applied >= m.Settings.ApplicationsPerDay {
-			return ErrUnavailable
+			return d.ErrRefused
 		}
 		if err := m.ModeStore.ApplyTx(c, sc.Tx, guildID, chapterID, chapter.Run, a.PlayerID, awardID, at); err != nil {
 			return err
@@ -202,15 +226,15 @@ func (m Mode) DistributeRecord(c context.Context, a identity.ActorContext, op op
 	if !m.ready() {
 		return nil, ErrUnavailable
 	}
-	membership, joined, err := m.Service.Guilds.ReadMembership(c, a.PlayerID)
-	if err != nil {
-		return nil, err
-	}
-	if !joined {
-		return nil, ErrUnavailable
-	}
 	var out []Distribution
-	_, err = m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
+	_, err := m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
+		membership, joined, err := m.Service.Guilds.ReadMembershipTx(c, sc.Tx, a.PlayerID)
+		if err != nil {
+			return err
+		}
+		if !joined {
+			return d.ErrRefused
+		}
 		rows, err := m.ModeStore.ListDistributionsTx(c, sc.Tx, int64(membership.GuildID), 100)
 		if err != nil {
 			return err

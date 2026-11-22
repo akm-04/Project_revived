@@ -84,6 +84,23 @@ func TestDisplayedStarsMatchEveryChapterBonus(t *testing.T) {
 	}
 }
 
+// RULING_I9-11E_100010_STARS: Normal+Super+Challenge best stars reach the
+// achievement's 1200 tier (155+155+144 playable nodes x 3).
+func TestMainChainStarsReachAllAchievementTiers(t *testing.T) {
+	c := loadCatalog(t)
+	p := Progress{Nodes: map[int64]NodeState{}}
+	for _, n := range c.Nodes {
+		p.Nodes[n.ID] = NodeState{CampaignID: n.ID, Star: 3}
+	}
+	var total int64
+	for _, kind := range []int64{Normal, Super, Challenge} {
+		total += c.TotalStars(p, kind)
+	}
+	if total != 1362 {
+		t.Fatalf("main-chain star ceiling = %d, want 1362", total)
+	}
+}
+
 func TestLegacyContentCannotQualifyNewBonusClaims(t *testing.T) {
 	c := loadCatalog(t)
 	p := Progress{Nodes: map[int64]NodeState{}}

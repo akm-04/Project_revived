@@ -1,0 +1,199 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [
+  {
+   "count": 5,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 4,
+   "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 4,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/guild_tea_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {
+   "TEA_PARTY_DONATED": {
+    "missions": [
+     123
+    ],
+    "stages": [
+     "I9-9"
+    ]
+   }
+  },
+  "emits": [
+   "TEA_PARTY_DONATED"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "guild_tea_wishes": [
+    "guildstore.LockWishTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "guild_tea_wishes",
+   "players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_tea_dispatcher.go",
+    "line": 31
+   },
+   "mid": 1808,
+   "name": "GET_TEA_TALK_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_tea_dispatcher.go",
+    "line": 31
+   },
+   "mid": 1809,
+   "name": "TEA_TALK_QUEST"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_tea_dispatcher.go",
+    "line": 31
+   },
+   "mid": 1810,
+   "name": "TEA_TALK_PRESENT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_tea_dispatcher.go",
+    "line": 31
+   },
+   "mid": 1811,
+   "name": "TEA_TALK_CONFIRM_GIFT"
+  }
+ ],
+ "name": "guildtea",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/guildrentalread",
+  "internal/adapters/postgres/guildstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store"
+ ],
+ "tables": {
+  "owned": [],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "guild_memberships",
+   "guild_tea_gifts",
+   "guild_tea_wishes",
+   "gxb_content_activation",
+   "gxb_content_hero_templates",
+   "gxb_content_resource_definitions",
+   "gxb_content_revisions",
+   "player_directory_profiles",
+   "player_heroes",
+   "player_item_stacks",
+   "players"
+  ],
+  "written": [
+   "guild_tea_gifts",
+   "guild_tea_wishes"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [
+   "i9_9a_guild_tea.json"
+  ],
+  "unit": []
+ }
+}

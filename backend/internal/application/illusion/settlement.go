@@ -1,6 +1,7 @@
 package illusion
 
 import (
+	"cmp"
 	"context"
 	"fmt"
 	"slices"
@@ -84,7 +85,7 @@ func (r Reconciler) Reconcile(c context.Context, timed gen.TimedOperation, limit
 		}
 	}
 	_, _, err = s.Timed.Run(c, timed.Operation(), profile(), tx.Options{Isolation: tx.Serializable}, retry(), nil, func(c context.Context, sc gen.TimedScope) error {
-		_, err := s.Store.PurgeExpiredReportsTx(c, sc.Tx, sc.Operation.DecisionAt(), int64(limit))
+		_, err := s.Store.PurgeExpiredReportsTx(c, sc.Tx, sc.Operation.DecisionAt(), s.RetentionDays, int64(limit))
 		return err
 	})
 	return out, err
@@ -156,6 +157,21 @@ func (s Mode) settle(c context.Context, sc gen.TimedScope, occurrence d.Occurren
 			Body:          fmt.Sprintf("Fantasy boss %d on day %d", occurrence.CampaignID, occurrence.OpenDay),
 			PolicyVersion: d.PolicyID, Lines: rewards[recipient], At: at}
 		if _, _, err = s.Mail.DeliverTx(c, sc.Tx, request); err != nil {
+			return err
+		}
+	}
+	// C4: the fact rides this settlement after the owner's ranks and the I5
+	// suffix; achievement rows are locked last, in player order like the mail
+	// recipients. A failure retries the whole settlement (mail keeps its source key).
+	revision, _ := sc.Operation.Operation().Policies.Get("content")
+	positions := make([]int, len(ranks))
+	for index := range positions {
+		positions[index] = index
+	}
+	slices.SortFunc(positions, func(left, right int) int { return cmp.Compare(ranks[left].PlayerID, ranks[right].PlayerID) })
+	for _, index := range positions {
+		entry := ranks[index]
+		if err = s.Achievements.ObserveFantasyTx(c, sc.Tx, revision, identity.PlayerID(entry.PlayerID), occurrence.CampaignID, occurrence.OpenDay, int64(index+1), entry.Hurt, at); err != nil {
 			return err
 		}
 	}

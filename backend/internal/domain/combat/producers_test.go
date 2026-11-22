@@ -1,6 +1,43 @@
 package combat
 
-import "testing"
+import (
+	"encoding/json"
+	"testing"
+)
+
+func petParamsFixture() json.RawMessage {
+	fields := map[string]any{"player_id": int64(9)}
+	for _, key := range []string{"pet_id", "table_id", "star", "lev", "exp", "color", "skills", "equips", "fumos", "practice_attr", "birthday", "is_born", "is_show", "active_style", "pet_styles"} {
+		fields[key] = []any{}
+	}
+	raw, _ := CanonicalJSON(fields)
+	return raw
+}
+
+func TestCurrentProfileRequiresPetProducerKeys(t *testing.T) {
+	current := CurrentProducerProfile()
+	pet := petParamsFixture()
+	if err := current.CheckOwned(PetActor, pet); err != nil {
+		t.Fatal(err)
+	}
+	for _, key := range []string{"pet_id", "table_id", "star", "lev", "exp", "color", "skills", "equips", "fumos", "practice_attr", "birthday", "is_born", "is_show", "active_style", "pet_styles"} {
+		if err := current.CheckOwned(PetActor, withoutParam(pet, key)); err == nil {
+			t.Fatalf("missing pet producer key %s admitted", key)
+		}
+	}
+	for _, id := range []string{LegacyProducerProfileID, AwakeningProducerProfileID, "I9_LIBRARY_BATTLE_PRODUCERS_V1"} {
+		pinned, ok := LookupProducerProfile(id)
+		if !ok {
+			t.Fatal("pinned profile missing", id)
+		}
+		if err := pinned.CheckOwned(PetActor, withoutParam(pet, "fumos")); err != nil {
+			t.Fatalf("pinned profile %s changed an admitted pet row: %v", id, err)
+		}
+	}
+	if current.ID == "I9_LIBRARY_BATTLE_PRODUCERS_V1" {
+		t.Fatal("a registry change takes a new profile ID")
+	}
+}
 
 func TestAwakeningProducerProfilesPreservePinnedSnapshots(t *testing.T) {
 	legacy, ok := LookupProducerProfile(LegacyProducerProfileID)
@@ -11,7 +48,7 @@ func TestAwakeningProducerProfilesPreservePinnedSnapshots(t *testing.T) {
 	if current.ID == legacy.ID {
 		t.Fatal("producer activation must version snapshots")
 	}
-	for _, id := range []string{LegacyProducerProfileID, ProducerProfileID} {
+	for _, id := range []string{LegacyProducerProfileID, AwakeningProducerProfileID, ProducerProfileID} {
 		s := fixtureSnapshot()
 		s.ProducerProfile = id
 		raw, hash, err := s.Canonical()
@@ -43,6 +80,51 @@ func TestAwakeningProducerProfilesPreservePinnedSnapshots(t *testing.T) {
 	}
 	if current.CheckOwned(HeroActor, withParam(params, "buffs", []int64{})) == nil {
 		t.Fatal("unrelated inactive producer activated")
+	}
+	awakening, ok := LookupProducerProfile(AwakeningProducerProfileID)
+	if !ok || awakening.ID != AwakeningProducerProfileID {
+		t.Fatalf("awakening profile identity %+v", awakening)
+	}
+	registered, found := LookupProducerProfile(ProducerProfileID)
+	if !found || registered.ID != ProducerProfileID || current.ID != ProducerProfileID {
+		t.Fatalf("current profile identity %+v / %s", registered, current.ID)
+	}
+	if status := current.Keys(HeroActor)["is_board"]; status != ProducerActive {
+		t.Fatalf("current profile board producer %v", status)
+	}
+	if status, ok := awakening.Keys(HeroActor)["is_board"]; !ok || status != ProducerDeclaredInactive {
+		t.Fatalf("awakening profile board producer %v %v", status, ok)
+	}
+	board := withParam(withParam(withParam(params, "is_board", 1), "board_card", 2), "board_model_id", 7)
+	if awakening.CheckOwned(HeroActor, board) == nil {
+		t.Fatal("awakening profile admitted board keys")
+	}
+	if err := current.CheckOwned(HeroActor, board); err != nil {
+		t.Fatal(err)
+	}
+	if current.CheckOwned(HeroActor, withParam(board, "force", 1)) == nil {
+		t.Fatal("display producer activated")
+	}
+	// ARENA_HERO_PICKS_V1 moves the roster's region_arena_times to its own
+	// active producer in the current profile only.
+	if status, ok := current.Keys(HeroActor)["region_arena_times"]; !ok || status != ProducerActive {
+		t.Fatalf("current profile arena picks producer %v %v", status, ok)
+	}
+	if err := current.CheckOwned(HeroActor, withParam(params, "region_arena_times", 2)); err != nil {
+		t.Fatal("current profile refused arena picks", err)
+	}
+	for _, profile := range []ProducerProfile{legacy, awakening} {
+		if profile.CheckOwned(HeroActor, withParam(params, "region_arena_times", 2)) == nil {
+			t.Fatal("pinned profile admitted arena picks", profile.ID)
+		}
+		if _, ok := profile.Keys(HeroActor)["region_arena_times"]; !ok {
+			t.Fatal("pinned profile lost region_arena_times", profile.ID)
+		}
+		for _, producer := range profile.Producers {
+			if producer.ID == "ARENA_PICKS" {
+				t.Fatal("pinned profile gained ARENA_PICKS", profile.ID)
+			}
+		}
 	}
 	for _, p := range current.Producers {
 		if p.ID == "CHAR_RUNE" && p.Status != ProducerDeclaredInactive {

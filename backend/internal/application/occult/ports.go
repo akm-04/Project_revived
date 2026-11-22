@@ -41,7 +41,7 @@ type Store interface {
 	ReadReportTx(context.Context, tx.Queryer, string, int64, identity.PlayerID, time.Time) (string, bool, error)
 	InsertLogTx(context.Context, tx.Tx, int64, int64, int, identity.PlayerID, string, time.Time) error
 	ReadLogsTx(context.Context, tx.Queryer, int64, identity.PlayerID, int64) ([]json.RawMessage, error)
-	PurgeExpiredReportsTx(context.Context, tx.Tx, time.Time, int64) (int64, error)
+	PurgeExpiredReportsTx(context.Context, tx.Tx, time.Time, int, int64) (int64, error)
 }
 
 type Content interface {
@@ -81,6 +81,7 @@ type Combat interface {
 	AttestSummaryTx(context.Context, tx.Tx, cb.SummaryRequest) (cb.SummaryAttested, error)
 	Resolve(context.Context, operation.Context, ids.UUID) (cb.Resolved, error)
 	TerminalTx(context.Context, tx.Tx, cb.TerminalRequest) (cb.Settled, error)
+	CloseTx(context.Context, tx.Tx, cb.TerminalRequest) (cb.Closed, error)
 	SettleMemberTx(context.Context, tx.Tx, cb.MemberSettleRequest) (cb.MemberSettled, error)
 	MonsterWaves(int64) ([][]cb.Participant, error)
 	SnapshotTx(context.Context, tx.Queryer, ids.UUID) (cd.Snapshot, error)
@@ -90,6 +91,7 @@ type Combat interface {
 // database instant of the read.
 type Presence interface {
 	OnlineAt(context.Context, []identity.PlayerID, time.Time) (map[identity.PlayerID]bool, error)
+	OnlineAtTx(context.Context, tx.Queryer, []identity.PlayerID, time.Time) (map[identity.PlayerID]bool, error)
 }
 
 // Values settles rewards through I5; the mode never writes a stack itself.
@@ -105,33 +107,43 @@ type Facts interface {
 	RecordTx(context.Context, tx.Tx, operation.Context, ...objective.Fact) error
 }
 
+// BattleObserver is the Library owner's Girls Log battle-count port
+// (I9_11_GIRLS_LOG_V1 G2): one call per first settlement and owned hero.
+type BattleObserver interface {
+	ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error
+}
+
 type Mode struct {
-	Timed       gen.TimedRunner
-	Fresh       tx.Queryer
-	Store       Store
-	Content     Content
-	Fence       Fence
-	Players     Players
-	Functions   Functions
-	Directory   Directory
-	Presence    Presence
-	Heroes      Heroes
-	Pets        Heroes
-	Stats       Stats
-	Rooms       sharedroom.Service
-	RoomStore   sharedroom.Store
-	Invites     roominvite.Materializer
-	Combat      Combat
-	Tickets     i5.OccultTicketPort
-	Values      Values
-	Awakening   Awakening
-	Facts       Facts
-	Receipts    receipt.Store
-	ReceiptRead receipt.Reader
+	Timed          gen.TimedRunner
+	Fresh          tx.Queryer
+	Store          Store
+	Content        Content
+	Fence          Fence
+	Players        Players
+	Functions      Functions
+	Directory      Directory
+	Presence       Presence
+	Heroes         Heroes
+	Pets           Heroes
+	Stats          Stats
+	Rooms          sharedroom.Service
+	RoomStore      sharedroom.Store
+	Invites        roominvite.Materializer
+	Combat         Combat
+	Tickets        i5.OccultTicketPort
+	Values         Values
+	Awakening      Awakening
+	Facts          Facts
+	Receipts       receipt.Store
+	ReceiptRead    receipt.Reader
+	BattleObserver BattleObserver
+	// RetentionDays is the R8 cap (U4) on the owner's report window; zero
+	// keeps the owner window alone.
+	RetentionDays int
 }
 
 func (s Mode) ready() bool {
 	return s.Timed.Binder.Time != nil && s.Fresh != nil && s.Store != nil && s.Content != nil && s.Fence != nil && s.Players != nil &&
 		s.Functions != nil && s.Directory != nil && s.Presence != nil && s.Heroes != nil && s.Combat != nil && s.Tickets != nil && s.Values != nil &&
-		s.Awakening != nil && s.Facts != nil && s.Receipts != nil && s.ReceiptRead != nil && s.Rooms.Store != nil && s.RoomStore != nil
+		s.Awakening != nil && s.Facts != nil && s.Receipts != nil && s.ReceiptRead != nil && s.BattleObserver != nil && s.Rooms.Store != nil && s.RoomStore != nil
 }

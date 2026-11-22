@@ -1,0 +1,264 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [
+  {
+   "count": 10,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 10,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 4,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_TRIAL_SWEEP_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 8,
+   "file": "docs/i9/I9_GUILD_RENTAL_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 9,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/RULING_I9-12_HAVE_FUN_LENDER.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/guild_rental_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {
+   "HERO_LENT": {
+    "missions": [
+     116
+    ],
+    "stages": [
+     "I9-9"
+    ]
+   }
+  },
+  "emits": [
+   "HERO_LENT"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "guild_memberships": [
+    "guildstore.LockMembershipTx"
+   ],
+   "guild_rental_offers": [
+    "guildstore.LockLenderRentalOffersTx",
+    "guildstore.LockRentalOfferTx"
+   ],
+   "guild_rental_uses": [
+    "guildstore.LockRentalUseTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "guild_memberships",
+   "guild_rental_offers",
+   "guild_rental_uses",
+   "players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
+    "line": 33
+   },
+   "mid": 593,
+   "name": "LOAD_SENT_HEROS"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
+    "line": 33
+   },
+   "mid": 594,
+   "name": "RENT_HERO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
+    "line": 33
+   },
+   "mid": 595,
+   "name": "CANCEL_RENT_HERO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
+    "line": 33
+   },
+   "mid": 618,
+   "name": "LOAD_RENT_PET"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
+    "line": 33
+   },
+   "mid": 619,
+   "name": "RENT_PET"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
+    "line": 33
+   },
+   "mid": 620,
+   "name": "CANCEL_RENT_PET"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
+    "line": 33
+   },
+   "mid": 621,
+   "name": "LOAD_CAN_RENT_PET_LIST"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
+    "line": 33
+   },
+   "mid": 623,
+   "name": "LOAD_USED_PARTNER"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_rental_dispatcher.go",
+    "line": 33
+   },
+   "mid": 2768,
+   "name": "GET_RENT_HEROS"
+  }
+ ],
+ "name": "guildrental",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/guildrentalread",
+  "internal/adapters/postgres/guildstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store"
+ ],
+ "tables": {
+  "owned": [],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "guild_memberships",
+   "guild_rental_offers",
+   "guild_rental_uses",
+   "gxb_content_activation",
+   "gxb_content_hero_exp",
+   "gxb_content_hero_templates",
+   "player_currency_balances",
+   "player_directory_profiles",
+   "player_hero_live_entitlements",
+   "player_hero_skin_entitlements",
+   "player_heroes",
+   "player_pets",
+   "player_progression",
+   "players"
+  ],
+  "written": [
+   "guild_rental_offers",
+   "guild_rental_uses"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [
+   "i9_9b_guild_rental.json",
+   "i9_9b_guild_rental_cache.json",
+   "playtest4_fixes.json"
+  ],
+  "unit": [
+   "guard_test.go",
+   "reads_test.go"
+  ]
+ }
+}

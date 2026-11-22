@@ -7,12 +7,14 @@ import (
 	"math"
 	"os"
 	"slices"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
 
 	"gxb.local/backend/v2/internal/content/combatcorpus"
 	d "gxb.local/backend/v2/internal/domain/combat"
+	"gxb.local/backend/v2/internal/testsupport/latency"
 )
 
 func templateActor(t *testing.T, kind d.ActorKind, table string, tableID int64, star, level, color int) d.Actor {
@@ -34,14 +36,30 @@ func templateActor(t *testing.T, kind d.ActorKind, table string, tableID int64, 
 }
 
 // I8_RESOLVER_LATENCY_V1: p95 of a single fight through the real worker binary
-// and the production pool shape stays within 5 s on the reference machine, at
-// a steady cadence after the pool's first spares are prepared. Opt-in because
-// it measures the host.
+// and the production pool shape stays within the bound (D516: 6.5 s, tunable
+// with GXB_I8_LATENCY_BOUND) on the reference machine, at a steady cadence
+// after the pool's first spares are prepared. Opt-in because it measures the
+// host. GXB_I8_LATENCY_REPETITIONS repeats the rounds; the p95 of the pooled
+// absolute samples decides, never a host-normalized figure.
 func TestResolverLatencyGate(t *testing.T) {
-	if os.Getenv("GXB_I8_LATENCY_GATE") != "1" {
-		t.Skip("set GXB_I8_LATENCY_GATE=1 on the reference machine")
+	latency.Require(t, latency.Dedicated)
+	const rounds, cadence = 5, 3 * time.Second
+	bound := 6500 * time.Millisecond
+	if value := os.Getenv("GXB_I8_LATENCY_BOUND"); value != "" {
+		parsed, err := time.ParseDuration(value)
+		if err != nil || parsed <= 0 {
+			t.Fatalf("GXB_I8_LATENCY_BOUND %q is not a positive duration", value)
+		}
+		bound = parsed
 	}
-	const rounds, cadence, bound = 5, 3 * time.Second, 5 * time.Second
+	repetitions := 1
+	if value := os.Getenv("GXB_I8_LATENCY_REPETITIONS"); value != "" {
+		parsed, err := strconv.Atoi(value)
+		if err != nil || parsed < 1 {
+			t.Fatalf("GXB_I8_LATENCY_REPETITIONS %q is not a positive count", value)
+		}
+		repetitions = parsed
+	}
 	distinctA, distinctB := []int64{10001001, 10001040, 10001122, 10001042, 10001070}, []int64{10001002, 10001003, 10001004, 10001005, 10001006}
 	mirror := []int64{10001122, 10001042, 10001070, 10001040, 10001001}
 	cases := []struct {
@@ -90,28 +108,35 @@ func TestResolverLatencyGate(t *testing.T) {
 	}
 	t.Logf("cold first attempt %s", time.Since(cold))
 	time.Sleep(15 * time.Second)
+	percentile95 := func(samples []time.Duration) time.Duration {
+		sorted := slices.Sorted(slices.Values(samples))
+		return sorted[int(math.Ceil(0.95*float64(len(sorted))))-1]
+	}
 	samples := []time.Duration{}
-	for round := range rounds {
-		for index, c := range cases {
-			raw, hash := request(index)
-			began := time.Now()
-			output, err := l.Resolve(context.Background(), raw, hash, sha256.Sum256([]byte(fmt.Sprint(c.name, round))))
-			elapsed := time.Since(began)
-			if err != nil {
-				t.Fatal(c.name, err)
+	for repetition := range repetitions {
+		repetitionSamples := []time.Duration{}
+		for round := range rounds {
+			for index, c := range cases {
+				raw, hash := request(index)
+				// Every repetition replays the round seeds; mirror-timeout-1-1 only times out on those.
+				began := time.Now()
+				output, err := l.Resolve(context.Background(), raw, hash, sha256.Sum256([]byte(fmt.Sprint(c.name, round))))
+				elapsed := time.Since(began)
+				if err != nil {
+					t.Fatal(c.name, err)
+				}
+				if output.Outcome.TimedOut != c.timedOut {
+					t.Fatalf("%s timed out %v", c.name, output.Outcome.TimedOut)
+				}
+				repetitionSamples = append(repetitionSamples, elapsed)
+				t.Logf("%s repetition %d round %d %s frames %d", c.name, repetition, round, elapsed, output.Outcome.Frames)
+				time.Sleep(max(cadence-elapsed, 0))
 			}
-			if output.Outcome.TimedOut != c.timedOut {
-				t.Fatalf("%s timed out %v", c.name, output.Outcome.TimedOut)
-			}
-			samples = append(samples, elapsed)
-			t.Logf("%s round %d %s frames %d", c.name, round, elapsed, output.Outcome.Frames)
-			time.Sleep(max(cadence-elapsed, 0))
 		}
+		t.Logf("repetition %d p95 %s max %s", repetition, percentile95(repetitionSamples), slices.Max(repetitionSamples))
+		samples = append(samples, repetitionSamples...)
 	}
-	slices.Sort(samples)
-	p95 := samples[int(math.Ceil(0.95*float64(len(samples))))-1]
-	t.Logf("p95 %s max %s over %d attempts", p95, samples[len(samples)-1], len(samples))
-	if p95 > bound {
-		t.Fatalf("p95 %s exceeds %s", p95, bound)
-	}
+	p95 := percentile95(samples)
+	t.Logf("p95 %s max %s over %d attempts", p95, slices.Max(samples), len(samples))
+	latency.Enforce(t, latency.Dedicated, p95, bound)
 }

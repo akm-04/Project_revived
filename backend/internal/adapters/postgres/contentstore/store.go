@@ -225,6 +225,9 @@ const verifyGuildBroadcastSQL = `SELECT count(*)=1 AND COALESCE(bool_and(payload
 
 const verifySocialGiftSQL = `SELECT count(*)=1 AND COALESCE(bool_and(payload=$2::jsonb),false) FROM content_social_gift_catalogs WHERE revision_id=$1`
 
+const verifySocialInputSQL = `SELECT count(*)=1 AND COALESCE(bool_and(payload=$2::jsonb),false),count(*) FROM content_social_input_catalogs WHERE revision_id=$1`
+const verifyCompatMessagePushSQL = `SELECT count(*)=1 AND COALESCE(bool_and(payload=$2::jsonb),false),count(*) FROM content_compat_catalogs WHERE revision_id=$1`
+
 func (Store) VerifyRevision(ctx context.Context, q tx.Queryer, b registry.Bundle) (registry.Verification, error) {
 	if q == nil {
 		return registry.Verification{}, errors.New("content store: nil queryer")
@@ -315,6 +318,12 @@ func (Store) VerifyRevision(ctx context.Context, q tx.Queryer, b registry.Bundle
 		return registry.Verification{}, err
 	}
 	v.Exact = v.Exact && summonExact
+	var chargeExact bool
+	err = q.QueryRow(ctx, verifyChargeSQL, b.RevisionID(), string(b.ChargeJSON())).Scan(&chargeExact, &v.ChargeCount)
+	if err != nil {
+		return registry.Verification{}, err
+	}
+	v.Exact = v.Exact && chargeExact
 	var oneOnOneExact bool
 	err = q.QueryRow(ctx, verifyOneOnOneSQL, b.RevisionID(), string(b.OneOnOneJSON())).Scan(&oneOnOneExact, &v.OneOnOneCount)
 	if err != nil {
@@ -387,6 +396,18 @@ func (Store) VerifyRevision(ctx context.Context, q tx.Queryer, b registry.Bundle
 		return registry.Verification{}, err
 	}
 	v.Exact = v.Exact && elementExact
+	var dailyBuyExact bool
+	err = q.QueryRow(ctx, verifyDailyBuyInputsSQL, b.RevisionID(), string(b.DailyBuyInputsJSON())).Scan(&dailyBuyExact, &v.DailyBuyInputsCount)
+	if err != nil {
+		return registry.Verification{}, err
+	}
+	v.Exact = v.Exact && dailyBuyExact
+	var shopExact bool
+	err = q.QueryRow(ctx, verifyShopSQL, b.RevisionID(), string(b.ShopJSON())).Scan(&shopExact, &v.ShopCount)
+	if err != nil {
+		return registry.Verification{}, err
+	}
+	v.Exact = v.Exact && shopExact
 	var inscriptionExact bool
 	err = q.QueryRow(ctx, verifyInscriptionInputsSQL, b.RevisionID(), string(b.InscriptionInputsJSON())).Scan(&inscriptionExact, &v.InscriptionInputsCount)
 	if err != nil {
@@ -444,6 +465,18 @@ func (Store) VerifyRevision(ctx context.Context, q tx.Queryer, b registry.Bundle
 	if err != nil {
 		return v, err
 	}
+	var socialInputExact bool
+	err = q.QueryRow(ctx, verifySocialInputSQL, b.RevisionID(), string(b.SocialInputsJSON())).Scan(&socialInputExact, &v.SocialInputCount)
+	if err != nil {
+		return v, err
+	}
+	v.Exact = v.Exact && socialInputExact
+	var compatMessagePushExact bool
+	err = q.QueryRow(ctx, verifyCompatMessagePushSQL, b.RevisionID(), string(b.CompatMessagePushJSON())).Scan(&compatMessagePushExact, &v.CompatMessagePushCount)
+	if err != nil {
+		return v, err
+	}
+	v.Exact = v.Exact && compatMessagePushExact
 	var broadcastExact bool
 	err = q.QueryRow(ctx, verifyGuildBroadcastSQL, b.RevisionID(), string(b.GuildBroadcastJSON())).Scan(&broadcastExact, &v.GuildBroadcastCount)
 	v.Exact = v.Exact && broadcastExact
@@ -481,6 +514,34 @@ func (Store) HeroKindTx(ctx context.Context, q tx.Queryer, revision string, tabl
 		return "", errors.New("content store: invalid Hero kind")
 	}
 	return k, nil
+}
+
+// HeroKindsTx resolves the immutable Hero projection kind of every requested
+// template in one read. Missing tables are reported by the caller's map lookup.
+func (Store) HeroKindsTx(ctx context.Context, q tx.Queryer, revision string, tableIDs []int64) (map[int64]character.HeroKind, error) {
+	if q == nil || len(revision) != 64 || len(tableIDs) == 0 {
+		return nil, errors.New("content store: invalid Hero kind lookup")
+	}
+	var raw string
+	if err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(jsonb_build_object('table_id',table_id,'kind',kind)),'[]'::jsonb)::text FROM gxb_content_hero_templates WHERE revision_id=$1 AND table_id=ANY($2)`, revision, tableIDs).Scan(&raw); err != nil {
+		return nil, err
+	}
+	var rows []struct {
+		TableID int64  `json:"table_id"`
+		Kind    string `json:"kind"`
+	}
+	if err := json.Unmarshal([]byte(raw), &rows); err != nil {
+		return nil, err
+	}
+	out := make(map[int64]character.HeroKind, len(rows))
+	for _, row := range rows {
+		kind := character.HeroKind(row.Kind)
+		if kind != character.NormalHero && kind != character.SuperHero {
+			return nil, errors.New("content store: invalid Hero kind")
+		}
+		out[row.TableID] = kind
+	}
+	return out, nil
 }
 
 // HeroCoreActive reports whether the current immutable revision explicitly
@@ -804,6 +865,17 @@ func (Store) InsertEmoticons(ctx context.Context, t tx.Tx, b registry.Bundle) (i
 
 func (Store) InsertSocialGift(ctx context.Context, t tx.Tx, b registry.Bundle) (int64, error) {
 	tag, e := t.Exec(ctx, `INSERT INTO content_social_gift_catalogs(revision_id,payload)VALUES($1,$2::jsonb)`, b.RevisionID(), string(b.SocialGiftJSON()))
+	if e != nil {
+		return 0, e
+	}
+	return tag.RowsAffected(), nil
+}
+
+func (Store) InsertSocialInputs(ctx context.Context, t tx.Tx, b registry.Bundle) (int64, error) {
+	if t == nil {
+		return 0, errors.New("content store: nil transaction")
+	}
+	tag, e := t.Exec(ctx, `INSERT INTO content_social_input_catalogs(revision_id,payload)VALUES($1,$2::jsonb)`, b.RevisionID(), string(b.SocialInputsJSON()))
 	if e != nil {
 		return 0, e
 	}

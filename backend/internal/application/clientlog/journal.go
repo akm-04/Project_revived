@@ -1,6 +1,7 @@
 package clientlog
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -27,6 +28,7 @@ type JournalRow struct {
 	Cause         string
 	RawEnvelope   []byte
 	RequestSHA256 []byte
+	Replay        bool
 	Class         domain.RetentionClass
 }
 
@@ -113,7 +115,7 @@ func journalRow(record observability.RequestRecord) JournalRow {
 	outcome := outcomeOf(record)
 	row := JournalRow{
 		ReceivedAt: record.ReceivedAt, Outcome: outcome, HTTPStatus: record.HTTPStatus, Latency: record.Latency,
-		RequestBytes: record.RequestBytes, ResponseBytes: record.ResponseBytes, RequestSHA256: record.RequestSHA256, Class: outcome.Class(),
+		RequestBytes: record.RequestBytes, ResponseBytes: record.ResponseBytes, RequestSHA256: record.RequestSHA256, Replay: record.Replay, Class: outcome.Class(),
 	}
 	if record.Actor.AccountUID != "" {
 		row.Owner = &Owner{AccountUID: record.Actor.AccountUID, PlayerID: record.Actor.PlayerID, SessionRef: domain.SessionReference(record.Actor.SessionID)}
@@ -131,8 +133,12 @@ func journalRow(record observability.RequestRecord) JournalRow {
 		row.Cause, _ = domain.Truncate(observability.RedactText(record.Cause.Error()), domain.MaxCauseBytes)
 	}
 	if outcome.KeepsRawEnvelope() && len(record.Raw) > 0 {
-		raw, _ := domain.Truncate(observability.RedactText(unescapeForm(record.Raw)), domain.MaxRawEnvelopeBytes)
-		row.RawEnvelope = []byte(raw)
+		raw := record.Raw
+		if bytes.HasPrefix(raw, []byte("payload=")) {
+			raw = []byte(unescapeForm(raw))
+		}
+		text, _ := domain.Truncate(observability.RedactText(string(raw)), domain.MaxRawEnvelopeBytes)
+		row.RawEnvelope = []byte(text)
 	}
 	return row
 }

@@ -13,19 +13,19 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-func playerInfo(profile playerdirectory.Profile, online bool) map[string]any {
+func playerInfo(profile playerdirectory.Profile, online bool, force int64) map[string]any {
 	presence := int64(0)
 	if online {
 		presence = 1
 	}
 	return map[string]any{"player_id": int64(profile.PlayerID), "player_name": profile.Name, "avatar_id": profile.AvatarID,
 		"avatar_frame_id": profile.AvatarFrameID, "lev": profile.Level, "conquer_lev": profile.ConquerLevel, "conquer_loop_id": profile.ConquerLoopID,
-		"is_online": presence}
+		"is_online": presence, "force": force}
 }
 
-// chapterFraction is the 0..1 chapter completion the client's progress field
-// reads; a cleared chapter ends the sub-map.
-func chapterFraction(state d.RunState, catalog d.Catalog) int64 {
+// chapterClosed is the 0/1 flag that ends the sub-map; progress itself is the
+// fractional completion the client draws.
+func chapterClosed(state d.RunState, catalog d.Catalog) int64 {
 	if state.ChapterCleared(catalog) {
 		return 1
 	}
@@ -45,16 +45,17 @@ func maxPoints(catalog d.Catalog, scores d.Scores) []int64 {
 func (s Mode) stateBody(c context.Context, q tx.Queryer, a identity.ActorContext, catalog d.Catalog, scores d.Scores, tickets i5.OccultTickets, view *roomView) (map[string]any, error) {
 	base := map[string]any{"room_id": int64(0), "chapter_id": int64(0), "cost_energy": tickets.Progress,
 		"max_points": maxPoints(catalog, scores), "dispatch_limit": catalog.DispatchHeroLimit}
-	body := map[string]any{"base_info": base, "occult_ticket": tickets.Tickets, "progress": int64(0)}
+	body := map[string]any{"base_info": base, "occult_ticket": tickets.Tickets, "progress": float64(0)}
 	if view == nil {
 		return body, nil
 	}
 	state := view.state
-	progress := chapterFraction(state, catalog)
+	progress := state.ProgressFraction(catalog)
+	closed := chapterClosed(state, catalog)
 	body["progress"] = progress
 	base["room_id"], base["chapter_id"], base["dispatch_limit"] = view.room.ID, state.ChapterID, state.DispatchLimit
 	members := view.room.Members()
-	online, err := s.Presence.OnlineAt(c, members, view.at)
+	online, err := s.Presence.OnlineAtTx(c, q, members, view.at)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +70,7 @@ func (s Mode) stateBody(c context.Context, q tx.Queryer, a identity.ActorContext
 		if !found {
 			return nil, d.ErrUnavailable
 		}
-		info := playerInfo(record, online[member])
+		info := playerInfo(record, online[member], state.Force(int64(member)))
 		dispatched, dead := state.HeroCounts(int64(member))
 		memberIDs = append(memberIDs, int64(member))
 		memberInfos = append(memberInfos, info)
@@ -77,7 +78,7 @@ func (s Mode) stateBody(c context.Context, q tx.Queryer, a identity.ActorContext
 			"hero_stat": map[string]any{"dispatch": dispatched, "dead": dead, "stay_pos": state.StayPosition(int64(member))}}
 	}
 	body["room_info"] = map[string]any{"owner": int64(view.room.Owner), "members": memberIDs, "member_infos": memberInfos, "chapter_id": state.ChapterID,
-		"room_size": view.room.Capacity, "start_time": state.StartedAt, "campaign_type": state.CampaignType, "is_close": progress}
+		"room_size": view.room.Capacity, "start_time": state.StartedAt, "campaign_type": state.CampaignType, "is_close": closed}
 	body["hero_stat"] = heroStat
 	if !state.Started() {
 		return body, nil

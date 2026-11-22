@@ -31,6 +31,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/domain/player"
+	"gxb.local/backend/v2/internal/domain/summon"
 	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
@@ -57,16 +58,22 @@ type Mode struct {
 	MaxColor     i5.MaxHeroColorPolicyProvider
 	Combat       Combat
 	// StarCaps clamps a winning fight that froze a BORROWED attacker (C13).
-	StarCaps    map[int64]int64
-	Energy      i5.TxTemporalDebiter
-	Grants      Grants
-	Privileges  i5.PrivilegeSnapshotProvider
-	Costs       i5.TxMaterialCostDebiter
-	Progression Progression
-	Stages      Stages
-	Facts       Facts
-	Receipts    receipt.Store
-	ReceiptRead receipt.Reader
+	StarCaps     map[int64]int64
+	Energy       i5.TxTemporalDebiter
+	Grants       Grants
+	Privileges   i5.PrivilegeSnapshotProvider
+	Costs        i5.TxMaterialCostDebiter
+	Progression  Progression
+	Stages       Stages
+	Facts        Facts
+	Receipts     receipt.Store
+	ReceiptRead  receipt.Reader
+	BattleCounts BattleCountObserver
+}
+
+// BattleCountObserver records the Girls Log count of one first settled battle.
+type BattleCountObserver interface {
+	ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error
 }
 
 type Progression interface {
@@ -83,6 +90,7 @@ type Content interface {
 	ActiveRevision(context.Context, tx.Queryer) (string, error)
 	CampaignCatalogTx(context.Context, tx.Queryer, string) (d.Catalog, error)
 	ResolveProgressionPolicyTx(context.Context, tx.Queryer, string) (player.ProgressionPolicy, error)
+	SummonCatalogTx(context.Context, tx.Queryer, string) (summon.Catalog, error)
 }
 
 type Fence interface {
@@ -147,6 +155,7 @@ type Fight struct {
 type Result struct {
 	AwakeMission    int64
 	PetAwakeMission int64
+	AssistPartner   int64
 	CampaignID      int64
 	Type            int64
 	Star            int64
@@ -433,8 +442,8 @@ func (s Mode) Fight(c context.Context, a identity.ActorContext, request Fight, o
 		if err != nil {
 			return err
 		}
-		if balance < node.EnergyCost {
-			return fmt.Errorf("%w: energy %d below %d", d.ErrRefused, balance, node.EnergyCost)
+		if err = energyShortfall(balance, node.EnergyCost); err != nil {
+			return err
 		}
 		stage := generation(node.Type, node.ID)
 		if record.PendingGeneration != stage {
@@ -489,7 +498,7 @@ func (s Mode) start(c context.Context, sc gen.TimedScope, a identity.ActorContex
 	if err != nil {
 		return combat.Started{}, err
 	}
-	battle := combat.BattleRequest{CampaignType: node.Type, BattleID: node.ID, PetsA: []combat.Participant{}, Formation: request.Formation}
+	battle := combat.BattleRequest{CampaignType: node.Type, RentalMode: node.Type, BattleID: node.ID, PetsA: []combat.Participant{}, Formation: request.Formation}
 	for _, id := range heroes {
 		battle.TeamA = append(battle.TeamA, combat.Participant{Origin: cd.OwnedSelf, Kind: cd.HeroActor, Player: a.PlayerID, Identity: id})
 	}
@@ -551,7 +560,7 @@ func (s Mode) start(c context.Context, sc gen.TimedScope, a identity.ActorContex
 		return awakeningStartPackage{Items: items, Awakening: &next}, nil
 	}
 	window := time.Duration(v.catalog.PrivatePolicy.ResultWindowSeconds) * time.Second
-	return s.Combat.StartTx(c, sc.Tx, scope, combat.StartRequest{Actor: a, Locator: locator(a), GenerationRef: generation(node.Type, node.ID),
+	return s.Combat.StartTx(c, sc.Tx, scope, combat.StartRequest{Mode: cd.ModeCampaign, Actor: a, Locator: locator(a), GenerationRef: generation(node.Type, node.ID),
 		StartFingerprint: fingerprint(a, node.Type, node.ID, request.Formation, request.Pet, request.PetFormation, request), ResultDeadline: at.Add(window), Battle: battle,
 		TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK}, Package: drops})
 }
@@ -580,6 +589,9 @@ func (s Mode) Result(c context.Context, a identity.ActorContext, request Result,
 	}
 	if request.PetAwakeMission != 0 {
 		fields["pet_awaken_mission"] = request.PetAwakeMission
+	}
+	if request.AssistPartner != 0 {
+		fields["assist_partner"] = request.AssistPartner
 	}
 	fingerprint, err := receipt.FingerprintRequest(fields)
 	if err != nil {
@@ -727,7 +739,7 @@ func (s Mode) settle(c context.Context, sc gen.TimedScope, a identity.ActorConte
 	}
 	if outcome.Win {
 		body["is_win"], body["result"] = 1, 1
-		if err = s.reward(c, sc, a, v, node, outcome, record, heroes, attested.Attempt.ID.String(), request.Pet, body); err != nil {
+		if err = s.reward(c, sc, a, v, node, outcome, record, heroes, attested.Attempt.ID.String(), request.AssistPartner, request.Pet, body); err != nil {
 			return Settled{}, false, err
 		}
 	}
@@ -753,10 +765,9 @@ func (s Mode) settle(c context.Context, sc gen.TimedScope, a identity.ActorConte
 		body[key] = v.catalog.TrialRow(outcome.Progress, g, v.day, buys[g.ConsumeID], v.groupOpen(g))
 	}
 	balances, functions := changes.Recorded(c)
-	stored := map[string]any{"economy_": balances}
-	if len(functions) > 0 {
-		stored["new_funcs_"] = functions
-	}
+	stored := map[string]any{}
+	changes.WriteEconomy(stored, balances)
+	changes.WriteFunctions(stored, functions)
 	for key, value := range body {
 		stored[key] = value
 	}
@@ -782,9 +793,16 @@ func (s Mode) settle(c context.Context, sc gen.TimedScope, a identity.ActorConte
 		if err = s.Facts.RecordTx(c, sc.Tx, current, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "campaign", SourceBusinessKey: attested.Attempt.ID.String(), Kind: kind, Delta: 1}); err != nil {
 			return Settled{}, false, err
 		}
-		if group, trial := v.catalog.Group(node.Type); trial && group.NextID != 0 {
-			if err = s.Facts.RecordTx(c, sc.Tx, current, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "campaign", SourceBusinessKey: attested.Attempt.ID.String(), Kind: "INFINITY_BOSS_DEFEATED", Delta: 1}); err != nil {
-				return Settled{}, false, err
+		if group, trial := v.catalog.Group(node.Type); trial {
+			if group.NextID != 0 {
+				if err = s.Facts.RecordTx(c, sc.Tx, current, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "campaign", SourceBusinessKey: attested.Attempt.ID.String(), Kind: "INFINITY_BOSS_DEFEATED", Delta: 1}); err != nil {
+					return Settled{}, false, err
+				}
+			}
+			if d.VoyageMission(group.ID) {
+				if err = s.Facts.RecordTx(c, sc.Tx, current, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "campaign", SourceBusinessKey: attested.Attempt.ID.String(), Kind: objective.VoyageFinishedKind, Delta: 1}); err != nil {
+					return Settled{}, false, err
+				}
 			}
 		}
 	}
@@ -799,6 +817,12 @@ func (s Mode) settle(c context.Context, sc gen.TimedScope, a identity.ActorConte
 	next.StateVersion++
 	if err = s.Store.SaveTx(c, sc.Tx, a.PlayerID, next, nil, at); err != nil {
 		return Settled{}, false, err
+	}
+	// The cloud branch carries no own formation, so it counts no battle.
+	if !d.Cloud(request.Type) {
+		if err = s.BattleCounts.ObserveBattleTx(c, sc.Tx, a.PlayerID, heroes, at); err != nil {
+			return Settled{}, false, err
+		}
 	}
 	return Settled{Body: body}, false, nil
 }
@@ -815,22 +839,29 @@ func (s Mode) drained(record d.Record, stage string) (Settled, bool, error) {
 	return Settled{Body: body, Duplicate: true}, false, nil
 }
 
-// debit spends the result's energy (D102); short energy refuses and leaves the attempt open.
+// energyShortfall is the 113 preview: a known short energy balance is the typed
+// D5 balance cause, so the dispatcher can answer 20007 instead of a generic refusal.
+func energyShortfall(balance, cost int64) error {
+	if balance >= cost {
+		return nil
+	}
+	return economy.InsufficientBalance(campaignEnergy)
+}
+
+// debit spends the result's energy (D102); a short balance returns the typed
+// cause and leaves the attempt open.
 func (s Mode) debit(c context.Context, sc gen.TimedScope, pid identity.PlayerID, amount int64) error {
 	if amount <= 0 {
 		return nil
 	}
 	_, err := s.Energy.DebitTemporalTx(c, sc.Tx, pid, campaignEnergy, amount, sc.Operation.Operation())
-	if errors.Is(err, economy.ErrInsufficientBalance) {
-		return fmt.Errorf("%w: energy below %d", d.ErrRefused, amount)
-	}
 	return err
 }
 
 // reward grants a win's value (mana, player exp, star_gift, frozen drops),
 // then hero exp at the player level after that exp, the kind-2 openings of a
 // first Normal clear and the objective fact.
-func (s Mode) reward(c context.Context, sc gen.TimedScope, a identity.ActorContext, v view, node d.Node, outcome d.Outcome, record d.Record, heroes []int64, attempt string, petID int64, body map[string]any) error {
+func (s Mode) reward(c context.Context, sc gen.TimedScope, a identity.ActorContext, v view, node d.Node, outcome d.Outcome, record d.Record, heroes []int64, attempt string, assistPartner, petID int64, body map[string]any) error {
 	at, current := sc.Operation.DecisionAt(), sc.Operation.Operation()
 	lines := []grant.Line{}
 	if outcome.Mana > 0 {
@@ -848,6 +879,17 @@ func (s Mode) reward(c context.Context, sc gen.TimedScope, a identity.ActorConte
 			lines = append(lines, grant.Line{Kind: grant.StackItem, ItemID: item.ItemID, Amount: item.Num})
 		}
 	}
+	// The assist choice exists only on a Normal first clear (MapDetailWindow
+	// assist story gate); the stones belong to the chosen partner.
+	// The row is a plain item award (owner ruling 2026-11-21): a to_stone row
+	// made the client open the summon window for a girl who never joins
+	// (SelfPlayer.lua:4350-4358); the official server showed plain items.
+	if assistPartner != 0 && outcome.FirstClear {
+		if itemID, count, ok := node.AssistStones(assistPartner); ok {
+			lines = append(lines, grant.Line{Kind: grant.StackItem, ItemID: itemID, Amount: count})
+			body["assist_awards"] = []any{map[string]any{"table_id": itemID, "item_num": count}}
+		}
+	}
 	profile, found, err := s.Directory.ProfileTx(c, sc.Tx, a.PlayerID)
 	if err != nil || !found {
 		return errors.Join(err, d.ErrUnavailable)
@@ -855,7 +897,7 @@ func (s Mode) reward(c context.Context, sc gen.TimedScope, a identity.ActorConte
 	level := profile.Level
 	if len(lines) > 0 {
 		plan := grant.Plan{PlayerID: a.PlayerID, Source: grant.SourceIdentity{Domain: "campaign", Operation: "result", BusinessKey: "campaign:attempt:" + attempt, Occurrence: current.ID.String(), PolicyVersion: d.ContractID}, Lines: lines}
-		granted, err := s.Grants.SettleGrantTx(c, sc.Tx, a, plan, current, i5.GrantTxOptions{})
+		granted, err := s.Grants.SettleGrantTx(c, sc.Tx, a, plan, current, i5.GrantTxOptions{AllowOverflowMail: true, CommittedCampaignFirstClears: campaignFirstClears(node, outcome)})
 		if err != nil {
 			return err
 		}
@@ -887,6 +929,13 @@ func (s Mode) reward(c context.Context, sc gen.TimedScope, a identity.ActorConte
 		}
 	}
 	return nil
+}
+
+func campaignFirstClears(node d.Node, outcome d.Outcome) []int64 {
+	if node.Type != d.Normal || !outcome.FirstClear {
+		return nil
+	}
+	return []int64{node.ID}
 }
 
 func (Mode) Name() string     { return "i9-3a.campaign-world" }

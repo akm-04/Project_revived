@@ -1,0 +1,90 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "combat-resolution"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "combat_attempts": [
+    "combatstore.LockAttemptTx"
+   ],
+   "combat_locator_roots": [
+    "combatstore.LockLocatorTx"
+   ]
+  },
+  "row_locks": [
+   "combat_attempts",
+   "combat_locator_roots"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [],
+ "name": "combat",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/combatstore",
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/i5store"
+ ],
+ "tables": {
+  "owned": [
+   "combat_attempt_members",
+   "combat_attempts",
+   "combat_attestations",
+   "combat_locator_roots",
+   "combat_member_settlements",
+   "combat_report_blobs",
+   "combat_resolutions",
+   "combat_snapshots",
+   "combat_start_packages"
+  ],
+  "read": [
+   "combat_attempt_members",
+   "combat_attempts",
+   "combat_attestations",
+   "combat_locator_roots",
+   "combat_member_settlements",
+   "combat_report_blobs",
+   "combat_resolutions",
+   "combat_snapshots",
+   "combat_start_packages",
+   "gxb_content_activation",
+   "gxb_content_revisions",
+   "player_item_stacks"
+  ],
+  "written": [
+   "combat_attempt_members",
+   "combat_attempts",
+   "combat_attestations",
+   "combat_locator_roots",
+   "combat_member_settlements",
+   "combat_report_blobs",
+   "combat_resolutions",
+   "combat_snapshots",
+   "combat_start_packages"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [],
+  "unit": [
+   "service_modes_test.go"
+  ]
+ }
+}

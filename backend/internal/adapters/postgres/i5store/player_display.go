@@ -6,6 +6,7 @@ import (
 	app "gxb.local/backend/v2/internal/application/playerdisplay"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/player"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"time"
 )
@@ -43,11 +44,11 @@ func (s Store) ReadDisplayStateTx(c context.Context, q tx.Queryer, pid identity.
 	return out, out.Validate()
 }
 func (Store) SaveDisplayStateTx(c context.Context, t tx.Tx, old, next app.State, at time.Time) error {
-	if t == nil || old.Validate() != nil || next.Validate() != nil || old.Basis.Profile.PlayerID != next.Basis.Profile.PlayerID || at.IsZero() || at.Before(old.Basis.Profile.UpdatedAt) {
+	if t == nil || old.Validate() != nil || next.Validate() != nil || old.Basis.Profile.PlayerID != next.Basis.Profile.PlayerID || at.IsZero() {
 		return app.ErrConflict
 	}
 	p := next.Basis.Profile
-	tag, e := t.Exec(c, `UPDATE player_profiles SET display_name=$2,avatar_id=$3,avatar_frame_id=$4,state_version=state_version+1,updated_at=$5 WHERE player_id=$1 AND state_version=$6`, int64(p.PlayerID), p.DisplayName, p.AvatarID, p.AvatarFrameID, at, old.Basis.Profile.StateVersion)
+	tag, e := t.Exec(c, `UPDATE player_profiles SET display_name=$2,avatar_id=$3,avatar_frame_id=$4,state_version=state_version+1,updated_at=GREATEST($5,updated_at,created_at) WHERE player_id=$1 AND state_version=$6`, int64(p.PlayerID), p.DisplayName, p.AvatarID, p.AvatarFrameID, at, old.Basis.Profile.StateVersion)
 	if e != nil {
 		return e
 	}
@@ -101,19 +102,20 @@ func (Store) PutDisplayEntitlementTx(c context.Context, t tx.Tx, o app.Origin) e
 }
 func (Store) ReadDisplayAdmissionTx(c context.Context, q tx.Queryer, id string, lock bool) (app.Admission, bool, error) {
 	var out app.Admission
-	sql := `SELECT payload::text,state FROM player_display_admissions WHERE operation_id=$1`
+	sql := `SELECT payload::text,payload_version,state FROM player_display_admissions WHERE operation_id=$1`
 	if lock {
 		sql += " FOR UPDATE"
 	}
 	var raw, state string
-	e := q.QueryRow(c, sql, id).Scan(&raw, &state)
+	var version int16
+	e := q.QueryRow(c, sql, id).Scan(&raw, &version, &state)
 	if noRows(e) {
 		return out, false, nil
 	}
 	if e != nil {
 		return out, false, e
 	}
-	e = json.Unmarshal([]byte(raw), &out)
+	e = payload.Decode("player_display_admissions", version, []byte(raw), &out)
 	out.State = state
 	return out, true, e
 }
@@ -129,11 +131,11 @@ func (s Store) PendingDisplayAdmissionTx(c context.Context, t tx.Tx, pid identit
 	return s.ReadDisplayAdmissionTx(c, t, id, false)
 }
 func (Store) InsertDisplayAdmissionTx(c context.Context, t tx.Tx, j app.Admission) error {
-	raw, e := json.Marshal(j)
+	raw, version, e := payload.Encode(j)
 	if e != nil {
 		return e
 	}
-	_, e = t.Exec(c, `INSERT INTO player_display_admissions(operation_id,player_id,payload,state)VALUES($1,$2,$3::jsonb,'PENDING')`, j.Operation.ID.String(), int64(j.Actor.PlayerID), string(raw))
+	_, e = t.Exec(c, `INSERT INTO player_display_admissions(operation_id,player_id,payload,payload_version,state)VALUES($1,$2,$3::jsonb,$4,'PENDING')`, j.Operation.ID.String(), int64(j.Actor.PlayerID), string(raw), version)
 	return e
 }
 func (Store) SetDisplayAdmissionTx(c context.Context, t tx.Tx, id, old, next string) error {

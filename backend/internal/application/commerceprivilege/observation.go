@@ -4,6 +4,7 @@ package commerceprivilege
 
 import (
 	"context"
+	"gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/privilege"
@@ -14,9 +15,31 @@ import (
 type Store interface {
 	ReadPrivilegeTx(context.Context, tx.Queryer, identity.PlayerID, bool) (d.State, bool, error)
 	SavePrivilegeTx(context.Context, tx.Tx, int64, d.State) error
+	ReadCardsTx(context.Context, tx.Queryer, identity.PlayerID) (d.Cards, error)
+	ReadVIPClaimedTx(context.Context, tx.Queryer, identity.PlayerID) ([]int64, error)
+	ChargeTuningTx(context.Context, tx.Queryer) (d.ChargeTuning, bool, error)
 }
 type Content interface {
 	PrivilegeCatalogTx(context.Context, tx.Queryer, string) (d.Catalog, error)
+	ChargeCatalogTx(context.Context, tx.Queryer, string) (d.ChargeCatalog, error)
+}
+
+// tunedPrivilegeCatalog reads the pinned catalog and applies the charge overlay
+// to its per-VIP skill caps. Callers that also read privilege_skill_max reuse
+// the returned overlay instead of reading it again.
+func tunedPrivilegeCatalog(c context.Context, store Store, content Content, q tx.Queryer, revision string) (d.Catalog, d.ChargeTuning, bool, error) {
+	catalog, e := content.PrivilegeCatalogTx(c, q, revision)
+	if e != nil {
+		return d.Catalog{}, d.ChargeTuning{}, false, e
+	}
+	tuning, tuned, e := store.ChargeTuningTx(c, q)
+	if e != nil {
+		return d.Catalog{}, d.ChargeTuning{}, false, e
+	}
+	if tuned {
+		catalog = tuning.TunedCatalog(catalog)
+	}
+	return catalog, tuning, tuned, nil
 }
 
 // Provider is shared by display and all existing VIP consumers. The old baseline
@@ -36,10 +59,11 @@ func (p Provider) snapshot(c context.Context, q tx.Queryer, pid identity.PlayerI
 	if e != nil || !ok {
 		return out, ok, e
 	}
-	if s.Validate() != nil || s.PlayerID != pid || s.UpdatedAt.After(at) {
+	observedAt := generation.EffectiveObservation(at, s.UpdatedAt)
+	if s.Validate() != nil || s.PlayerID != pid {
 		return out, true, d.ErrConflict
 	}
-	catalog, e := p.Content.PrivilegeCatalogTx(c, q, s.ContentRevision)
+	catalog, tuning, tuned, e := tunedPrivilegeCatalog(c, p.Store, p.Content, q, s.ContentRevision)
 	if e != nil {
 		return out, true, e
 	}
@@ -50,12 +74,33 @@ func (p Provider) snapshot(c context.Context, q tx.Queryer, pid identity.PlayerI
 	if e != nil {
 		return out, true, e
 	}
+	cards, e := p.Store.ReadCardsTx(c, q, pid)
+	if e != nil {
+		return out, true, e
+	}
+	privilegeActive := cards.PrivilegeCardEnd > at.Unix()
+	if privilegeActive {
+		chargeCatalog, e := p.Content.ChargeCatalogTx(c, q, s.ContentRevision)
+		if e != nil {
+			return out, true, e
+		}
+		privilegeSkillMax := chargeCatalog.PrivilegeSkillMax
+		if tuned {
+			privilegeSkillMax = tuning.PrivilegeSkillMaxValue(privilegeSkillMax)
+		}
+		cap += privilegeSkillMax
+	}
 	if revision == "" {
 		revision = s.ContentRevision
 	}
-	out = d.Snapshot{State: s, ObservationRevision: revision, ObservedAt: at.UTC(), SkillPointCap: cap, ProviderRevision: d.ManualPolicy + "/" + s.ContentRevision}
-	return out, true, out.Validate(pid, revision, at)
+	out = d.Snapshot{State: s, ObservationRevision: revision, ObservedAt: observedAt.UTC(), SkillPointCap: cap, MonthCardActive: cards.MonthCardEnd > at.Unix(), PrivilegeCardActive: privilegeActive, ProviderRevision: d.ManualPolicy + "/" + s.ContentRevision}
+	return out, true, out.Validate(pid, revision, observedAt)
 }
+
+// ReadCosmeticPrivilegeTx returns the pinned cosmetic privilege snapshot. The
+// caller's at is the decision time, but the provider observes at
+// EffectiveObservation(at, stored.UpdatedAt); every caller validates the
+// returned Snapshot at Snapshot.ObservedAt, never at the raw decision time.
 func (p Provider) ReadCosmeticPrivilegeTx(c context.Context, q tx.Queryer, pid identity.PlayerID, revision string, at time.Time) (d.Snapshot, error) {
 	if p.Store == nil || p.Content == nil || q == nil || !pid.Valid() || at.IsZero() || !d.RevisionValid(revision) {
 		return d.Snapshot{}, d.ErrUnavailable
@@ -80,7 +125,7 @@ func (p Provider) SnapshotTx(c context.Context, q tx.Queryer, pid identity.Playe
 	if !ok {
 		return (i5.BaselinePrivilegeProvider{}).SnapshotTx(c, q, pid, at)
 	}
-	return i5.PrivilegeSnapshot{ProviderRevision: out.ProviderRevision, VIPLevel: out.State.VIPLevel, MonthlyPrivilegeActive: false, SkillPointNaturalCap: out.SkillPointCap}, nil
+	return i5.PrivilegeSnapshot{ProviderRevision: out.ProviderRevision, VIPLevel: out.State.VIPLevel, MonthlyPrivilegeActive: out.PrivilegeCardActive, MonthCardActive: out.MonthCardActive, SkillPointNaturalCap: out.SkillPointCap}, nil
 }
 
 var _ i5.PrivilegeSnapshotProvider = Provider{}

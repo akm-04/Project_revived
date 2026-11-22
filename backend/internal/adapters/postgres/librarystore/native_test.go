@@ -26,11 +26,36 @@ func TestLibraryNativeFacetPersistenceRollbackBackfill(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	defer p.Close()
+	t.Cleanup(p.Close)
 	s := librarystore.Store{}
-	pid := identity.PlayerID(777301)
+	pid := identity.PlayerID(177301)
 	ref := character.HeroRef{PlayerID: pid, PartnerID: 1}
 	now := time.Now().UTC().Truncate(time.Microsecond)
+	if _, e = p.Raw().Exec(ctx, `INSERT INTO accounts(account_id,account_uid,status,created_at) VALUES(gen_random_uuid(),'library-native-player-177301','ACTIVE',$1) ON CONFLICT (account_uid) DO NOTHING`, now); e != nil {
+		t.Fatal(e)
+	}
+	if _, e = p.Raw().Exec(ctx, `INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version) SELECT $1,account_id,1,$2,'library-native' FROM accounts WHERE account_uid='library-native-player-177301' ON CONFLICT (player_id) DO NOTHING`, int64(pid), now); e != nil {
+		t.Fatal(e)
+	}
+	t.Cleanup(func() {
+		for _, statement := range []string{
+			`DELETE FROM player_library_hero_logs WHERE player_id=177301`,
+			`DELETE FROM player_library_dialogs WHERE player_id=177301`,
+			`DELETE FROM player_library_partner_missions WHERE player_id=177301`,
+			`DELETE FROM player_library_act_awards WHERE player_id=177301`,
+			`DELETE FROM player_library_talk_claims WHERE player_id=177301`,
+			`DELETE FROM player_library_cg_claims WHERE player_id=177301`,
+			`DELETE FROM player_library_backgrounds WHERE player_id=177301`,
+			`DELETE FROM player_library_heroes WHERE player_id=177301`,
+			`DELETE FROM player_library_roots WHERE player_id=177301`,
+			`DELETE FROM players WHERE player_id=177301`,
+			`DELETE FROM accounts WHERE account_uid='library-native-player-177301'`,
+		} {
+			if _, err := p.Raw().Exec(context.Background(), statement); err != nil {
+				t.Errorf("cleanup %q: %v", statement, err)
+			}
+		}
+	})
 	tr, e := p.Begin(ctx, tx.Options{Isolation: tx.Serializable})
 	if e != nil {
 		t.Fatal(e)

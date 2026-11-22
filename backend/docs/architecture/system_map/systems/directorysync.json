@@ -1,0 +1,56 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [],
+  "row_lock_methods": {
+   "player_directory_profiles": [
+    "i4store.LockOwnedDirectoryTx"
+   ]
+  },
+  "row_locks": [
+   "player_directory_profiles"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [
+  "ReconcileDirectoryTx",
+  "Reconciler"
+ ],
+ "mids": [],
+ "name": "directorysync",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store"
+ ],
+ "tables": {
+  "owned": [],
+  "read": [
+   "player_directory_profiles",
+   "player_profiles",
+   "player_progression"
+  ],
+  "written": [
+   "player_directory_profiles"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [],
+  "unit": [
+   "service_test.go"
+  ]
+ }
+}

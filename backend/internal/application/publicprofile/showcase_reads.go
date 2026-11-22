@@ -125,6 +125,12 @@ type ShowcaseRecordBuilder interface {
 	RecordTx(context.Context, characterasset.CoherentReadScope, identity.PlayerID, int64) (map[string]any, error)
 }
 
+// ShowcaseRecordSetBuilder composes every selected record from one read of its
+// sources; RosterRecords implements it so the roster overlay runs once.
+type ShowcaseRecordSetBuilder interface {
+	RecordsTx(context.Context, characterasset.CoherentReadScope, identity.PlayerID, Selection) ([6]map[string]any, error)
+}
+
 func SlotRecordsTx(c context.Context, sc tx.Scope, s ShowcaseSnapshot, b ShowcaseRecordBuilder) ([6]map[string]any, error) {
 	var out [6]map[string]any
 	for i := range out {
@@ -136,6 +142,24 @@ func SlotRecordsTx(c context.Context, sc tx.Scope, s ShowcaseSnapshot, b Showcas
 	scope, e := characterasset.NewCoherentReadScope(sc, s.ContentRevision, s.ObservedAt)
 	if e != nil {
 		return out, e
+	}
+	if set, ok := b.(ShowcaseRecordSetBuilder); ok {
+		records, e := set.RecordsTx(c, scope, s.PlayerID, s.Selection)
+		if e != nil {
+			return [6]map[string]any{}, e
+		}
+		for i, id := range s.Selection {
+			if id == 0 {
+				continue
+			}
+			if len(records[i]) == 0 {
+				return [6]map[string]any{}, ErrShowcaseUnavailable
+			}
+			if out[i], e = cloneRecord(records[i]); e != nil {
+				return [6]map[string]any{}, e
+			}
+		}
+		return out, nil
 	}
 	for i, id := range s.Selection {
 		if id == 0 {

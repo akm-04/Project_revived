@@ -103,7 +103,7 @@ func sendLoginAndReadAck(t *testing.T, client net.Conn) {
 		t.Fatal(err)
 	}
 	buf := make([]byte, 1024)
-	_ = client.SetReadDeadline(time.Now().Add(time.Second))
+	_ = client.SetReadDeadline(time.Now().Add(eventWaitTimeout))
 	n, err := client.Read(buf)
 	if err != nil {
 		t.Fatal(err)
@@ -134,7 +134,7 @@ func TestRealtimePresenceAdmitHeartbeatRetireLifecycle(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-	case <-time.After(time.Second):
+	case <-time.After(eventWaitTimeout):
 		t.Fatal("server did not exit")
 	}
 	proj.mu.Lock()
@@ -191,7 +191,7 @@ func TestMalformedHeartbeatNeverRenewsPresence(t *testing.T) {
 		if !errors.Is(err, ErrMalformedHeartbeat) {
 			t.Fatalf("err=%v", err)
 		}
-	case <-time.After(time.Second):
+	case <-time.After(eventWaitTimeout):
 		t.Fatal("server did not reject malformed heartbeat")
 	}
 	proj.mu.Lock()

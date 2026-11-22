@@ -6,8 +6,8 @@ import (
 	"time"
 )
 
-// Event is a sanitized security/operator audit fact. Durable AdminOperator audit
-// storage is owned by the later control wave; this port cannot authorize writes.
+// Event is a sanitized security/operator audit fact. Durable operator audit
+// storage is internal/adapters/postgres/auditstore; this port cannot authorize writes.
 type Event struct {
 	OccurredAt    time.Time
 	ActorKind     string
@@ -18,6 +18,7 @@ type Event struct {
 	Outcome       string
 	ReasonCode    string
 	CorrelationID string
+	PolicyVersion string
 }
 
 func (e Event) Validate() error {

@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "policy_id": "R8_PRIVATE_CACHE_RETENTION_DAYS_V1",
+  "version": 1,
+  "classification": "PRIVATE_POLICY_NOT_RECOVERED_OFFICIAL_ALGORITHM",
+  "source": "R8_PLAYER_DATA_DESIGN.md section 4 and R8_4_RETENTION_TASKS.md, user ruling P1",
+  "environment": "GXB_CACHE_RETENTION_DAYS",
+  "default": 1,
+  "range": {
+    "minimum": 1,
+    "maximum": "R8_PRIVATE_RETENTION_DAYS_V1",
+    "unit": "days"
+  },
+  "rule": "Derived snapshot generations older than this window are removed unless the latest generation or a period binding still needs them. Values outside the range refuse startup.",
+  "tables": [
+    "ranking_girls_snapshots",
+    "hero_recommend_snapshots",
+    "top_floor_offer_snapshots"
+  ]
+}

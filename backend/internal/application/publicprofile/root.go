@@ -3,6 +3,7 @@ package publicprofile
 import (
 	"context"
 	"errors"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/playerroot"
 	"gxb.local/backend/v2/internal/domain/profile"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -70,6 +71,32 @@ func (s RootService) ApplyPreferencesTx(c context.Context, t tx.Tx, p PreparedRo
 	return r, e == nil, e
 }
 
+// MarkFirstSeenTx records the first self read of MID 1829. The caller holds
+// canonical315 for the player and order391; a later read sees 1 and answers 0.
+func (s RootService) MarkFirstSeenTx(c context.Context, t tx.Tx, p PreparedRoot, at time.Time) (bool, error) {
+	if !s.valid(t, p) || at.IsZero() {
+		return false, ErrInvalidState
+	}
+	if p.root.Preferences.IsFirstTime == 1 {
+		return false, nil
+	}
+	prefs := p.root.Preferences.Clone()
+	prefs.IsFirstTime = 1
+	if p.present {
+		if _, e := s.apply(c, t, p, prefs, at); e != nil {
+			return false, e
+		}
+		return true, nil
+	}
+	// Under RepeatableRead a concurrent creator's row is invisible to this
+	// snapshot, so the insert must yield to the PK instead of failing 23505.
+	r := Root{PlayerID: p.root.PlayerID, Preferences: prefs, StateVersion: 1, CreatedAt: at.UTC(), UpdatedAt: at.UTC()}
+	if e := r.Validate(); e != nil {
+		return false, e
+	}
+	return s.Store.InsertRootIfAbsentTx(c, t, r)
+}
+
 // An actual later owned-child change shares this root version; this port does not create child facts.
 func (s RootService) TouchForChildChangeTx(c context.Context, t tx.Tx, p PreparedRoot, at time.Time) (Root, error) {
 	if !s.valid(t, p) || at.IsZero() {
@@ -82,9 +109,11 @@ func (s RootService) apply(c context.Context, t tx.Tx, p PreparedRoot, prefs pro
 	r.Preferences = prefs
 	r.UpdatedAt = at.UTC()
 	if p.present {
-		if r.StateVersion == math.MaxInt64 || at.Before(p.root.UpdatedAt) {
+		if r.StateVersion == math.MaxInt64 {
 			return Root{}, ErrInvalidState
 		}
+		// K3: keep timestamps monotone instead of refusing a stored forward fact.
+		r.UpdatedAt = gen.EffectiveObservation(at, p.root.UpdatedAt, p.root.CreatedAt)
 		r.StateVersion++
 		if e := r.Validate(); e != nil {
 			return Root{}, e

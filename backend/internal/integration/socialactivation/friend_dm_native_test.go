@@ -49,7 +49,7 @@ func (f *fixture) dmSend(s dm.Service, from, to identity.PlayerID, text string) 
 	return o
 }
 func (f *fixture) dmSnapshot() string {
-	return f.text(`SELECT jsonb_build_object('roots',(SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY recipient_id),'[]') FROM friend_dm_roots t),'occurrences',(SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY recipient_id,recipient_sequence),'[]') FROM friend_dm_occurrences t),'delivery',(SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY occurrence_id),'[]') FROM friend_dm_delivery t),'receipts',(SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY operation_id),'[]') FROM friend_dm_projection_receipts t))::text`)
+	return f.text(`SELECT jsonb_build_object('roots',(SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY recipient_id),'[]') FROM friend_dm_roots t),'occurrences',(SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY recipient_id,recipient_sequence),'[]') FROM friend_dm_occurrences t),'delivery',(SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY occurrence_id),'[]') FROM friend_dm_delivery t),'receipts',(SELECT COALESCE(jsonb_agg(to_jsonb(t)-'payload_version' ORDER BY operation_id),'[]') FROM friend_dm_projection_receipts t))::text`)
 }
 func dmPair(t *testing.T) (*fixture, dm.Service) {
 	f := fresh(t)

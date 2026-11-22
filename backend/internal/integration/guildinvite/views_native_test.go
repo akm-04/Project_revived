@@ -148,6 +148,15 @@ func TestWorkingP4SharedObservationMixedClaimAndInviteReload(t *testing.T) {
 	if e != nil || calls != 1 {
 		t.Fatal("single shared observation", e, calls)
 	}
+	stored := 0
+	for _, n := range result.Notices {
+		if n.Notice.NoticeType == 10 {
+			stored++
+		}
+	}
+	if stored != 1 {
+		t.Fatalf("Invite stored in projection: %d", stored)
+	}
 	wire := socialpresentation.MapBase(result)
 	raw, e := json.Marshal(wire)
 	if e != nil {
@@ -157,21 +166,41 @@ func TestWorkingP4SharedObservationMixedClaimAndInviteReload(t *testing.T) {
 	json.Unmarshal(raw, &doc)
 	var noticeRows []map[string]json.RawMessage
 	json.Unmarshal(doc["notice_list"], &noticeRows)
-	found := false
 	for _, n := range noticeRows {
 		var typ int
 		json.Unmarshal(n["notice_type"], &typ)
 		if typ == 10 {
-			found = true
-			if n["guild_id"] == nil || n["guild_name"] == nil {
-				t.Fatal("missing Invite stock fields", string(raw))
-			}
-		} else if n["guild_id"] != nil || n["guild_name"] != nil {
+			t.Fatal("MID176 type10 listed while hidden", string(raw))
+		}
+		if n["guild_id"] != nil || n["guild_name"] != nil {
 			t.Fatal("changed old notice DTO", string(raw))
 		}
 	}
-	if !found {
-		t.Fatal("eligible Invite missing", string(raw))
+	listSeen := false
+	listViews := views
+	listViews.Invites = observedInvites{InviteNoticeReader: target, observed: &listSeen}
+	listed, e := listViews.LoadList(c, actor, socialprojection.Notice, mustOp(t, policy.Set{}))
+	if e != nil {
+		t.Fatal("MID189 notice list", e)
+	}
+	listWire, e := socialpresentation.MapList(listed, socialprojection.Notice)
+	if e != nil {
+		t.Fatal(e)
+	}
+	listRaw, e := json.Marshal(listWire)
+	if e != nil {
+		t.Fatal(e)
+	}
+	var listRows []map[string]json.RawMessage
+	if e = json.Unmarshal(listRaw, &listRows); e != nil {
+		t.Fatal(e)
+	}
+	for _, n := range listRows {
+		var typ int
+		json.Unmarshal(n["notice_type"], &typ)
+		if typ == 10 {
+			t.Fatal("MID189 type10 listed while hidden", string(listRaw))
+		}
 	}
 	reloader := socialreload.Service{Invites: target, Gifts: gift, Runner: runner, Relations: relations, Inbox: inbox, Observer: socialpresentation.TransactionReader{}}
 	if _, ok, e := reloader.Reload(c, emitter.refs[0], mustOp(t, policy.Set{})); e != nil || !ok {
@@ -191,7 +220,7 @@ func TestWorkingP4SharedObservationMixedClaimAndInviteReload(t *testing.T) {
 	}
 	snapshot := func() string {
 		var raw string
-		e := p.QueryRow(c, `SELECT jsonb_build_object('notes',(SELECT jsonb_agg(to_jsonb(n) ORDER BY notice_id) FROM social_notices n WHERE recipient_player_id=$1),'gifts',(SELECT jsonb_agg(to_jsonb(g) ORDER BY transfer_id) FROM social_gift_transfers g WHERE recipient_player_id=$1),'root',(SELECT to_jsonb(r) FROM player_social_roots r WHERE player_id=$1),'balance',(SELECT jsonb_agg(to_jsonb(b) ORDER BY resource_key) FROM player_currency_balances b WHERE player_id=$1),'claims',(SELECT jsonb_agg(to_jsonb(o) ORDER BY operation_id) FROM social_gift_claim_operations o WHERE recipient_player_id=$1))::text`, int64(actor.PlayerID)).Scan(&raw)
+		e := p.QueryRow(c, `SELECT jsonb_build_object('notes',(SELECT jsonb_agg(to_jsonb(n) ORDER BY notice_id) FROM social_notices n WHERE recipient_player_id=$1),'gifts',(SELECT jsonb_agg(to_jsonb(g) ORDER BY transfer_id) FROM social_gift_transfers g WHERE recipient_player_id=$1),'root',(SELECT to_jsonb(r) FROM player_social_roots r WHERE player_id=$1),'balance',(SELECT jsonb_agg(to_jsonb(b) ORDER BY resource_key) FROM player_currency_balances b WHERE player_id=$1),'claims',(SELECT jsonb_agg(to_jsonb(o)-'payload_version' ORDER BY operation_id) FROM social_gift_claim_operations o WHERE recipient_player_id=$1))::text`, int64(actor.PlayerID)).Scan(&raw)
 		if e != nil {
 			t.Fatal(e)
 		}

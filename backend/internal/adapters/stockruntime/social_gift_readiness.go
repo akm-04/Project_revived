@@ -16,7 +16,16 @@ const SocialGiftStockGroup = "SOCIAL_GIFT_STOCK_I7A7B"
 type PreparedGiftStock struct {
 	dispatcher SocialDispatcher
 	content    socialgift.ContentReader
+	type10     func()
 	prepared   bool
+}
+
+// BindType10Producer makes the guild-owned invitation producer part of this
+// finite activation group. Enable calls it only after the catalog validates, so
+// a readiness error leaves every type10 producer inert.
+func (p PreparedGiftStock) BindType10Producer(activate func()) PreparedGiftStock {
+	p.type10 = activate
+	return p
 }
 
 func PrepareGiftStock(d SocialDispatcher, g socialgift.Service, b socialfriendbase.Service, r socialreload.Service) (PreparedGiftStock, error) {
@@ -29,8 +38,9 @@ func PrepareGiftStock(d SocialDispatcher, g socialgift.Service, b socialfriendba
 	return PreparedGiftStock{dispatcher: d, content: g.Content, prepared: true}, nil
 }
 
-// Enable verifies the active compatible immutable catalog via its owner port.
-// It never changes an active pointer, consumes a notice or grants currency.
+// Enable verifies the active compatible immutable catalog via its owner port,
+// then activates the bound consumers and type10 producer together. It never
+// changes an active content pointer, consumes a notice or grants currency.
 func (p PreparedGiftStock) Enable(c context.Context, q tx.Queryer) (SocialDispatcher, error) {
 	if !p.prepared || p.content == nil || q == nil {
 		return SocialDispatcher{}, errors.New("unprepared Gift consumer group")
@@ -45,6 +55,9 @@ func (p PreparedGiftStock) Enable(c context.Context, q tx.Queryer) (SocialDispat
 	}
 	if e = v.Validate(); e != nil {
 		return SocialDispatcher{}, e
+	}
+	if p.type10 != nil {
+		p.type10()
 	}
 	d := p.dispatcher
 	d.giftStockReady = true

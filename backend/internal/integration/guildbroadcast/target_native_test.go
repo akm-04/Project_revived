@@ -26,6 +26,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"os"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 )
@@ -163,7 +164,7 @@ func TestRealGuildBroadcastTargetLifecycle(t *testing.T) {
 		t.Fatal(proof, e)
 	}
 	m, ok, e := (i5store.Store{}).ReadGuildBroadcastMailTx(c, p, pids[1], s.Operation.ID)
-	if e != nil || !ok || m.Title != s.Request.Title || m.Sender != s.LeaderName || m.CreatedAt.UnixMicro() != s.DecisionAt.UnixMicro() || len(m.Attachments) != 0 || !m.Shown {
+	if e != nil || !ok || m.Title != s.Request.Title || m.Sender != s.LeaderName || m.CreatedAt.UnixMicro() != s.DecisionAt.UnixMicro() || m.ExpiresAt == nil || !m.ExpiresAt.Equal(s.DecisionAt.Add(7*24*time.Hour)) || len(m.Attachments) != 0 || !m.Shown {
 		t.Fatal(m, ok, e)
 	}
 	// A read/hidden Mail is still the same semantic completion.
@@ -261,23 +262,9 @@ func TestRealGuildBroadcastTargetLifecycle(t *testing.T) {
 	if e != nil || ok {
 		t.Fatal("overflow created Mail", ok, e)
 	}
-	// Source facts survive player deletion; typed allocator-backed absence creates
-	// only a terminal receipt, no namespace or Mail.
-	if _, e = fixtureExec(c, p, `DELETE FROM players WHERE player_id=$1`, int64(pids[2])); e != nil {
-		t.Fatal(e)
-	}
-	gone, e := service.Materialize(c, s.Operation.ID, pids[2])
-	if e != nil || gone.State != gb.RecipientGone || gone.WireID != 0 || !gone.MailID.IsZero() {
-		t.Fatal(gone, e)
-	}
-	goneAgain, e := service.Materialize(c, s.Operation.ID, pids[2])
-	if e != nil || goneAgain != gone {
-		t.Fatal("gone replay", goneAgain, e)
-	}
-	var count int
-	if e = p.QueryRow(c, `SELECT count(*) FROM mail_namespace_counters WHERE recipient_player_id=$1`, int64(pids[2])).Scan(&count); e != nil || count != 0 {
-		t.Fatal("gone prepared namespace", count, e)
-	}
+	// R8-3: players are never deleted; the key refuses it (00161).
+	_, e = fixtureExec(c, p, `DELETE FROM players WHERE player_id=$1`, int64(pids[2]))
+	refusedByKey(t, e, "guild_broadcast_recipients_recipient_player_id_fkey")
 	// Partial restored target pair must stop rather than recreate at a new ID.
 	if _, e = fixtureExec(c, p, `DELETE FROM mail_records WHERE mail_uuid=$1::uuid`, proof.MailID.String()); e != nil {
 		t.Fatal(e)
@@ -288,22 +275,10 @@ func TestRealGuildBroadcastTargetLifecycle(t *testing.T) {
 	if e = p.QueryRow(c, `SELECT next_wire_id FROM mail_namespace_counters WHERE recipient_player_id=$1 AND namespace='NORMAL'`, int64(pids[1])).Scan(&next); e != nil || next != proof.WireID+1 {
 		t.Fatal("restore hole allocated again", next, e)
 	}
-	// Historical delivered meaning survives typed recipient deletion. No
-	// new Mail or namespace is manufactured after its original cascade deletion.
-	if _, e = fixtureExec(c, p, `DELETE FROM players WHERE player_id=$1`, int64(pids[0])); e != nil {
-		t.Fatal(e)
-	}
-	historical, e := service.Materialize(c, s.Operation.ID, pids[0])
-	if e != nil || historical != postCommit || historical.State != gb.Delivered {
-		t.Fatal("historical delivered deletion proof", historical, e)
-	}
-	if e = p.QueryRow(c, `SELECT count(*) FROM mail_namespace_counters WHERE recipient_player_id=$1`, int64(pids[0])).Scan(&count); e != nil || count != 0 {
-		t.Fatal("historical delivery recreated namespace", count, e)
-	}
-	if e = delivery.Deliver(c, s.Operation.ID, pids[0]); e != nil {
-		t.Fatal("historical source ACK replay after deletion", e)
-	}
-	t.Log("real PG target commit/replay/read-shown preservation/positive UNKNOWN/absence UNKNOWN/overflow/typed deleted recipient/restore-hole verified; separate source ACK and restart composition verified; production process kill, River worker and full gate NOT_RUN")
+	// R8-3: players are never deleted; the key refuses it (00161).
+	_, e = fixtureExec(c, p, `DELETE FROM players WHERE player_id=$1`, int64(pids[0]))
+	refusedByKey(t, e, "guild_broadcast_recipients_recipient_player_id_fkey")
+	t.Log("real PG target commit/replay/read-shown preservation/positive UNKNOWN/absence UNKNOWN/overflow/typed refused recipient deletion/restore-hole verified; separate source ACK and restart composition verified; production process kill, River worker and full gate NOT_RUN")
 }
 
 func fmtPID(pid identity.PlayerID) string { return strconv.FormatInt(int64(pid), 10) }
@@ -319,4 +294,14 @@ func fixtureExec(c context.Context, p tx.Beginner, sql string, args ...any) (tx.
 		return tag, e
 	}
 	return tag, x.Commit(c)
+}
+
+const foreignKeyViolation = "23503"
+
+func refusedByKey(t *testing.T, e error, constraint string) {
+	t.Helper()
+	var refusal interface{ SQLState() string }
+	if !errors.As(e, &refusal) || refusal.SQLState() != foreignKeyViolation || !strings.Contains(e.Error(), `"`+constraint+`"`) {
+		t.Fatalf("want %s refusal by %s, got %v", foreignKeyViolation, constraint, e)
+	}
 }

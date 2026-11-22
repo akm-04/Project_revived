@@ -374,12 +374,17 @@ func TestI7C2IContradictoryProgressionStaleFactsAndRetiredIdentityFailClosed(t *
 	}
 	exec(t, p, `UPDATE player_progression SET exp=$2 WHERE player_id=$1`, int64(a.PlayerID), rule.Rows[98].TotalExp)
 	exec(t, p, `UPDATE player_hero_evolution SET updated_at=clock_timestamp()+interval '1 hour' WHERE player_id=$1 AND partner_id=1`, int64(a.PlayerID))
-	if _, e = s.Command(ctx, a, c, op()); e == nil {
-		t.Fatal("future facet accepted")
+	forwardStamp := evolutionFacet(t, p, a, 1).UpdatedAt
+	// K3: a decision before the stored facet write is clamped, not refused.
+	if _, e = s.Command(ctx, a, c, op()); e != nil {
+		t.Fatal("future facet refused", e)
 	}
-	if evolutionStock(t, p, a, 40001001) != 900 {
-		t.Fatal("stale-state debit")
+	futureFacet := evolutionFacet(t, p, a, 1)
+	if futureFacet.Version != before.Version+1 || !futureFacet.UpdatedAt.Equal(forwardStamp) {
+		t.Fatal("future facet clamp", futureFacet, before, forwardStamp)
 	}
+	// Fixture reset only: the accepted forward-dated write already debited.
+	exec(t, p, `UPDATE player_item_stacks SET quantity=900 WHERE player_id=$1 AND item_id=40001001`, int64(a.PlayerID))
 	exec(t, p, `UPDATE player_hero_evolution SET updated_at=$2 WHERE player_id=$1 AND partner_id=1`, int64(a.PlayerID), before.UpdatedAt)
 	evolutionCmd(t, s, a, c)
 	saved := evolutionFacet(t, p, a, 1)

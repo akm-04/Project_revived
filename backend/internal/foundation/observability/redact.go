@@ -9,14 +9,14 @@ const Redacted = "[REDACTED]"
 
 // secretText matches key=value, key: value and "key":"value" pairs whose key
 // carries a secret fragment, in free text such as error chains and raw bodies.
-var secretText = regexp.MustCompile(`(?i)("?[a-z_]*(?:authorization|password|passwd|secret|token|sid|cookie|credential|database_url|dsn)[a-z_]*"?\s*[:=]\s*"?)([^"&\s,}]+)`)
+var secretText = regexp.MustCompile(`(?i)("?[a-z_]*(?:authorization|password|passwd|secret|token|sid|cookie|credential|database_url|dsn|capability|log_url)[a-z_]*"?\s*[:=]\s*"?)([^"&\s,}]+)`)
 
 // RedactText masks secret values in free text.
 func RedactText(text string) string {
 	return secretText.ReplaceAllString(text, "${1}"+Redacted)
 }
 
-var secretFragments = []string{"authorization", "password", "passwd", "secret", "token", "sid", "cookie", "credential", "database_url", "dsn", "provider_receipt", "raw_receipt"}
+var secretFragments = []string{"authorization", "password", "passwd", "secret", "token", "sid", "cookie", "credential", "database_url", "dsn", "provider_receipt", "raw_receipt", "capability", "log_url"}
 var contentFragments = []string{"chat_content", "mail_content", "message_body", "user_content"}
 
 func RedactFields(in map[string]any) map[string]any {
@@ -26,11 +26,29 @@ func RedactFields(in map[string]any) map[string]any {
 		if sensitiveKey(n) {
 			out[k] = Redacted
 		} else {
-			out[k] = v
+			out[k] = redactValue(v)
 		}
 	}
 	return out
 }
+
+func redactValue(value any) any {
+	switch typed := value.(type) {
+	case string:
+		return RedactText(typed)
+	case map[string]any:
+		return RedactFields(typed)
+	case []any:
+		out := make([]any, len(typed))
+		for index, item := range typed {
+			out[index] = redactValue(item)
+		}
+		return out
+	default:
+		return value
+	}
+}
+
 func sensitiveKey(k string) bool {
 	for _, x := range secretFragments {
 		if k == x || strings.Contains(k, x) {

@@ -7,6 +7,10 @@ import (
 	"unicode/utf8"
 )
 
+// maxFriendSelectType is xyd.FriendMsgSelectType.RAGNAROK, the last value in
+// the stock client's shared room-chat selector.
+const maxFriendSelectType int64 = 6
+
 func privateInteger(v any) (int64, bool) {
 	switch n := v.(type) {
 	case int:
@@ -41,18 +45,24 @@ func ValidateFriendDM(v any) error {
 	if !ok {
 		return ErrInvalidS2CPayload
 	}
-	fields, e := finitejson.Decode(message, 2048, 2, 16, 3)
-	if e != nil || len(fields) < 2 || len(fields) > 3 {
+	fields, e := finitejson.Decode(message, 2048, 2, 16, 4)
+	if e != nil || len(fields) < 2 || len(fields) > 4 {
 		return ErrInvalidS2CPayload
 	}
 	for k := range fields {
-		if k != "message" && k != "msgType" && k != "selectType" {
+		if k != "message" && k != "msgType" && k != "selectType" && k != "roomID" {
 			return ErrInvalidS2CPayload
 		}
 	}
 	if selector, exists := fields["selectType"]; exists {
 		v, ok := selector.(int64)
-		if !ok || v != 0 {
+		if !ok || v < 0 || v > maxFriendSelectType {
+			return ErrInvalidS2CPayload
+		}
+	}
+	if room, exists := fields["roomID"]; exists {
+		v, ok := room.(int64)
+		if !ok || v < 0 {
 			return ErrInvalidS2CPayload
 		}
 	}

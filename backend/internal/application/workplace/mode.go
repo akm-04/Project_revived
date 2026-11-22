@@ -61,7 +61,7 @@ func withRevision(op operation.Context, rev string) (operation.Context, error) {
 	return op, err
 }
 func (s Mode) pin(c context.Context, op operation.Context) (operation.Context, error) {
-	if s.Fresh == nil || s.Store == nil || s.Content == nil || s.Fence == nil || s.Functions == nil || s.Directory == nil || s.Campaigns == nil || s.Heroes == nil || s.HeroLocks == nil || s.Values == nil || s.Privileges == nil || s.Facts == nil || s.Combat == nil || s.Stats == nil || s.Opponents == nil || s.HeroWire == nil || s.Receipts == nil || s.ReceiptRead == nil {
+	if s.Fresh == nil || s.Store == nil || s.Content == nil || s.Fence == nil || s.Functions == nil || s.Directory == nil || s.Campaigns == nil || s.Heroes == nil || s.HeroLocks == nil || s.Values == nil || s.Privileges == nil || s.Facts == nil || s.Combat == nil || s.Stats == nil || s.Opponents == nil || s.HeroWire == nil || s.Receipts == nil || s.ReceiptRead == nil || s.Broadcast == nil || s.Rental == nil || s.BattleObserver == nil {
 		return op, d.ErrUnavailable
 	}
 	if _, ok := op.Policies.Get("content"); ok {
@@ -128,14 +128,12 @@ func (s Mode) run(c context.Context, a identity.ActorContext, name string, reque
 			if e != nil {
 				return e
 			}
-			if s.Rental != nil {
-				offered, e := s.Rental.HeroOfferedTx(c, sc.Tx, a.PlayerID, pid)
-				if e != nil {
-					return e
-				}
-				if offered {
-					return d.ErrRefused
-				}
+			offered, e := s.Rental.HeroOfferedTx(c, sc.Tx, a.PlayerID, pid)
+			if e != nil {
+				return e
+			}
+			if offered {
+				return d.ErrRefused
 			}
 			h.Kind, e = s.Content.HeroKindTx(c, sc.Tx, h.CreationContentRevision, h.TableID)
 			if e != nil {
@@ -210,12 +208,8 @@ func (s Mode) run(c context.Context, a identity.ActorContext, name string, reque
 		}
 		balances, functions := changes.Recorded(c)
 		delete(balances, i5.WorkplaceSPKey)
-		if len(balances) > 0 {
-			out["economy_"] = balances
-		}
-		if len(functions) > 0 {
-			out["new_funcs_"] = functions
-		}
+		changes.WriteEconomy(out, balances)
+		changes.WriteFunctions(out, functions)
 		for k, val := range changes.RecordedMissions(c) {
 			out[k] = val
 		}
@@ -261,6 +255,7 @@ func team(v view, r *d.State, id int64) map[string]any {
 		}
 		wire["partners"], wire["start_time"], wire["need_time"], wire["treasure_type"] = ids, o.Start, o.Quote.Seconds, o.Job
 		wire["total_lev"], wire["total_star"], wire["total_color"] = o.Quote.TotalLevel, o.Quote.TotalStar, o.Quote.TotalColor
+		wire["award"] = o.Award
 		wire["externa_crystal_award"] = o.Award["externa_crystal_award"]
 		wire["with_external_award"] = int64(0)
 		if n, ok := o.Award["externa_crystal_award"].(int64); ok && n > 0 {
@@ -305,6 +300,12 @@ func (s Mode) Log(c context.Context, a identity.ActorContext, op operation.Conte
 func (s Mode) BusyTx(c context.Context, q tx.Queryer, p identity.PlayerID, partner int64) (bool, error) {
 	r, _, err := s.Store.ReadTx(c, q, p)
 	return r.Busy(partner), err
+}
+
+// BusyPartnersTx is the bounded list form of BusyTx.
+func (s Mode) BusyPartnersTx(c context.Context, q tx.Queryer, p identity.PlayerID) ([]int64, error) {
+	r, _, err := s.Store.ReadTx(c, q, p)
+	return r.BusyPartners(), err
 }
 
 func ownerOp(sc gen.TimedScope) operation.Context {

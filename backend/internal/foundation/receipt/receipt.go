@@ -25,6 +25,7 @@ func (i Identity) Validate() error {
 
 type Receipt struct {
 	ID                  ids.UUID
+	OperationID         ids.UUID
 	Identity            Identity
 	OperationClass      string
 	RequestFingerprint  [32]byte
@@ -65,6 +66,18 @@ type PutResult struct {
 	Receipt  Receipt
 	Inserted bool
 }
+
+// LatestIdentity names the receipts sharing a semantic-key prefix; the newest
+// one under it is the family's last committed answer.
+type LatestIdentity struct{ OwnerKind, OwnerKey, Domain, Operation, SemanticKeyPrefix string }
+
+func (i LatestIdentity) Validate() error {
+	if i.OwnerKind == "" || i.OwnerKey == "" || i.Domain == "" || i.Operation == "" || i.SemanticKeyPrefix == "" {
+		return errors.New("incomplete semantic receipt prefix")
+	}
+	return nil
+}
+
 type Store interface {
 	PutTx(context.Context, tx.Tx, Receipt) (PutResult, error)
 	FindTx(context.Context, tx.Queryer, Identity) (Receipt, bool, error)
@@ -113,7 +126,7 @@ func New(op operation.Context, id Identity, class, resultSchema string, result j
 	if err != nil {
 		return Receipt{}, err
 	}
-	r := Receipt{ID: rid, Identity: id, OperationClass: class, RequestFingerprint: fingerprint, ResultSchema: resultSchema, ResultPayload: append(json.RawMessage(nil), result...), OperationStartedAt: op.StartedAt.UTC(), OperationPolicyRefs: op.Policies}
+	r := Receipt{ID: rid, OperationID: op.ID, Identity: id, OperationClass: class, RequestFingerprint: fingerprint, ResultSchema: resultSchema, ResultPayload: append(json.RawMessage(nil), result...), OperationStartedAt: op.StartedAt.UTC(), OperationPolicyRefs: op.Policies}
 	if err := r.Validate(); err != nil {
 		return Receipt{}, err
 	}

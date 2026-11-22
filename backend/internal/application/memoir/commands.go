@@ -62,7 +62,7 @@ func (mode Mode) Start(ctx context.Context, actor identity.ActorContext, girl in
 	})
 }
 func (mode Mode) createFloor(ctx context.Context, actor identity.ActorContext, current scope, state *memoir.State) error {
-	candidates, err := mode.Opponents.MarchCandidatesTx(ctx, current.timed.Tx, actor, current.timed.Operation.DecisionAt(), 1000)
+	candidates, err := mode.Opponents.MarchCandidatesTx(ctx, current.timed.Tx, actor, current.timed.Operation.DecisionAt(), 1000, true)
 	if err != nil {
 		return err
 	}
@@ -104,7 +104,7 @@ func (mode Mode) SaveMap(ctx context.Context, actor identity.ActorContext, posit
 	}{position, opened}
 	return mode.run(ctx, actor, "save_map", request, operationContext, func(_ context.Context, _ scope, state *memoir.State) (map[string]any, error) {
 		if !state.Active() {
-			return nil, memoir.ErrRefused
+			return nil, fmt.Errorf("%w: save map on an inactive run", memoir.ErrRefused)
 		}
 		if err := state.Board.SaveMap(position, opened); err != nil {
 			return nil, err
@@ -114,8 +114,17 @@ func (mode Mode) SaveMap(ctx context.Context, actor identity.ActorContext, posit
 }
 func (mode Mode) NextFloor(ctx context.Context, actor identity.ActorContext, position int, operationContext operation.Context) (map[string]any, error) {
 	return mode.run(ctx, actor, "next_floor", position, operationContext, func(ctx context.Context, current scope, state *memoir.State) (map[string]any, error) {
-		if !state.Active() || state.Pending != nil || state.Floor >= len(current.catalog.Floors) || !state.Board.CanExit(position) {
-			return nil, memoir.ErrRefused
+		if !state.Active() {
+			return nil, fmt.Errorf("%w: next floor on an inactive run", memoir.ErrRefused)
+		}
+		if state.Pending != nil {
+			return nil, fmt.Errorf("%w: next floor while a battle is pending", memoir.ErrRefused)
+		}
+		if state.Floor >= len(current.catalog.Floors) {
+			return nil, fmt.Errorf("%w: next floor on the last floor", memoir.ErrRefused)
+		}
+		if !state.Board.CanExit(position) {
+			return nil, fmt.Errorf("%w: exit at %d is closed (guardian_won=%t)", memoir.ErrRefused, position, state.Board.GuardianWon)
 		}
 		state.Floor++
 		state.Sequence++
@@ -226,7 +235,9 @@ func (mode Mode) FinalAward(ctx context.Context, actor identity.ActorContext, po
 		state.Abandon()
 		response := projection(*state)
 		response["drops_info"] = dropProjection(drops)
-		response["awards"] = awards
+		if len(awards) > 0 {
+			response["awards"] = awards
+		}
 		return response, nil
 	})
 }

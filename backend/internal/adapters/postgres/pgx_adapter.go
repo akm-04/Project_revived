@@ -5,6 +5,11 @@ package postgres
 import (
 	"context"
 	"errors"
+	"fmt"
+	"log"
+	"os"
+	"runtime"
+	"sync"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -70,19 +75,57 @@ func Open(ctx context.Context, dsn string, s PoolSettings) (*Pool, error) {
 }
 func (p *Pool) Close()                         { p.raw.Close() }
 func (p *Pool) Ping(ctx context.Context) error { return p.raw.Ping(ctx) }
+
+// ErrNestedAcquire: a transaction body asked the pool for a second connection. Enough such requests hold every
+// connection while waiting for another, and the pool starves (C1-2).
+var ErrNestedAcquire = errors.New("postgres: nested connection acquisition inside a transaction body")
+
+// strictOneConnection turns the C1-2 report into a refusal; tests and natives set it so offenders fail loudly.
+var strictOneConnection = os.Getenv("GXB_STRICT_ONE_CONNECTION") == "1"
+
+var reportedNestedSites sync.Map
+
+func nestedAcquire(ctx context.Context) error {
+	if !ftx.HoldsConnection(ctx) {
+		return nil
+	}
+	_, file, line, _ := runtime.Caller(2)
+	site := fmt.Sprintf("%s:%d", file, line)
+	if strictOneConnection {
+		return fmt.Errorf("%w at %s", ErrNestedAcquire, site)
+	}
+	if _, seen := reportedNestedSites.LoadOrStore(site, true); !seen {
+		log.Printf("C1-2 nested connection acquisition at %s", site)
+	}
+	return nil
+}
+
 func (p *Pool) Begin(ctx context.Context, o ftx.Options) (ftx.Tx, error) {
+	if err := nestedAcquire(ctx); err != nil {
+		return nil, err
+	}
 	raw, err := p.raw.BeginTx(ctx, pgx.TxOptions{IsoLevel: iso(o.Isolation), AccessMode: access(o.ReadOnly)})
 	if err != nil {
 		return nil, normalize(err)
 	}
-	return &wrappedTx{raw: raw}, nil
+	return &wrappedTx{raw: raw, readOnly: o.ReadOnly}, nil
 }
 func (p *Pool) QueryRow(ctx context.Context, q string, args ...any) ftx.Row {
+	if err := nestedAcquire(ctx); err != nil {
+		return errorRow{err: err}
+	}
 	return wrappedRow{row: p.raw.QueryRow(ctx, q, args...)}
 }
 func (p *Pool) Raw() *pgxpool.Pool { return p.raw }
 
-type wrappedTx struct{ raw pgx.Tx }
+type wrappedTx struct {
+	raw      pgx.Tx
+	readOnly bool
+}
+
+// ReadOnly lets owner stores avoid row-locking statements that PostgreSQL
+// rejects inside a read-only transaction.
+func (t *wrappedTx) ReadOnly() bool { return t.readOnly }
 
 func (t *wrappedTx) Exec(ctx context.Context, q string, args ...any) (ftx.CommandTag, error) {
 	tag, err := t.raw.Exec(ctx, q, args...)
@@ -96,6 +139,10 @@ func (t *wrappedTx) Rollback(ctx context.Context) error { return normalize(t.raw
 func (t *wrappedTx) RawPGX() pgx.Tx                     { return t.raw }
 
 type wrappedRow struct{ row pgx.Row }
+
+type errorRow struct{ err error }
+
+func (r errorRow) Scan(...any) error { return r.err }
 
 func (r wrappedRow) Scan(dest ...any) error { return normalize(r.row.Scan(dest...)) }
 func iso(i ftx.Isolation) pgx.TxIsoLevel {

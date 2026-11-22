@@ -726,25 +726,31 @@ func TestStackOverflowCreatesDurableMailAndOnlyFitsCanonicalStack(t *testing.T) 
 	}
 }
 
-func TestMailClaimRefusesRecursiveOverflowAndLeavesMailUnclaimed(t *testing.T) {
+func TestMailClaimAtCapacitySavesFitDiscardsOverflowAndClaimsMail(t *testing.T) {
 	actor := testActor(t)
 	def := economy.StackDefinition{ItemID: 9001, StackCap: 5, OverflowToMail: true}
 	now := time.Unix(1700000050, 0).UTC()
 	mu := testUUID(9)
 	addr := mail.Address{Namespace: mail.Normal, WireID: 7}
-	store := &testStore{policies: map[grant.LineKind]ResourcePolicy{grant.StackItem: {Kind: grant.StackItem, WireTableID: 9001, Stack: &def, PolicyVersion: "items-v1"}}, stackExists: true, stack: economy.StackState{PlayerID: actor.PlayerID, ItemID: 9001, Quantity: 5, StateVersion: 1, AcquiredAt: now, UpdatedAt: now}}
-	store.lockedMail = mail.Record{MailUUID: mu, Recipient: actor.PlayerID, Address: addr, SourceKind: "SYSTEM", SourceKey: "m1", CreatedAt: now, Shown: true, Platform: mail.AnyPlatform, CompatibilityPolicyVersion: "items-v1", StateVersion: 1, Attachments: []mail.Attachment{{Ordinal: 0, Line: grant.Line{Kind: grant.StackItem, ItemID: 9001, Amount: 1}}}}
+	store := &testStore{policies: map[grant.LineKind]ResourcePolicy{grant.StackItem: {Kind: grant.StackItem, WireTableID: 9001, Stack: &def, PolicyVersion: "items-v1"}}, stackExists: true, stack: economy.StackState{PlayerID: actor.PlayerID, ItemID: 9001, Quantity: 4, StateVersion: 1, AcquiredAt: now, UpdatedAt: now}}
+	store.lockedMail = mail.Record{MailUUID: mu, Recipient: actor.PlayerID, Address: addr, SourceKind: "SYSTEM", SourceKey: "m1", CreatedAt: now, Shown: true, Platform: mail.AnyPlatform, CompatibilityPolicyVersion: "items-v1", StateVersion: 1, Attachments: []mail.Attachment{{Ordinal: 0, Line: grant.Line{Kind: grant.StackItem, ItemID: 9001, Amount: 3}}}}
 	rs := newMemoryReceipts()
 	svc := testService(store, rs, &testBeginner{})
-	_, err := svc.ClaimMail(context.Background(), actor, addr, testOperation(50))
-	if !errors.Is(err, ErrMailStackFull) {
-		t.Fatalf("expected recursive overflow refusal, got %v", err)
+	out, err := svc.ClaimMail(context.Background(), actor, addr, testOperation(50))
+	if err != nil {
+		t.Fatalf("claim at capacity refused instead of losing the excess: %v", err)
 	}
-	if store.saveMailCalls != 0 || store.lockedMail.ClaimedAt != nil {
-		t.Fatalf("mail was consumed despite failed settlement: %+v", store.lockedMail)
+	if store.stack.Quantity != 5 || store.saveStackCalls != 1 {
+		t.Fatalf("claim did not save the fitting amount: %+v", store.stack)
+	}
+	if store.lockedMail.ClaimedAt == nil || store.saveMailCalls != 1 {
+		t.Fatalf("claimed mail was not marked: %+v", store.lockedMail)
 	}
 	if len(store.insertedMail) != 0 {
 		t.Fatalf("claim recursively created overflow mail: %#v", store.insertedMail)
+	}
+	if len(out.Rewards) != 1 || out.Rewards[0].ItemNum != 1 {
+		t.Fatalf("award did not report only the fitting amount: %#v", out.Rewards)
 	}
 }
 

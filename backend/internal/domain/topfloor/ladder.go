@@ -14,6 +14,10 @@ const (
 	BattleID     int64 = 111001
 	// Wire player ids are table_id + region*100000.
 	RegionStride int64 = 100000
+	// Offer snapshots are isolated per ladder: normal has one generation, special
+	// uses the task rotation number so a new period cannot reuse old ranks.
+	OfferScopeNormal  int64 = 0
+	OfferScopeSpecial int64 = 1
 )
 
 // Occupant is exactly one robot team or one player.
@@ -103,6 +107,7 @@ type Player struct {
 	DefenseSetAt    *time.Time
 	Fights          int64
 	Wins            int64
+	WinStreak       int64
 	StateVersion    int64
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
@@ -110,7 +115,8 @@ type Player struct {
 
 func (p Player) Validate() error {
 	if !p.PlayerID.Valid() || !p.Server.Valid() || int64(p.PlayerID)/RegionStride != int64(p.Server) || len(p.ContentRevision) != 64 || p.BestRank < 1 || p.TicketsLeft < 0 || p.Purchases < 0 ||
-		p.RefreshCount < 0 || len(p.Offered) > 3 || len(p.Defense) > DefenseSlots || p.DefensePet < 0 || p.Fights < 0 || p.Wins < 0 || p.Wins > p.Fights || p.StateVersion < 1 || p.CreatedAt.IsZero() || p.UpdatedAt.Before(p.CreatedAt) {
+		p.RefreshCount < 0 || len(p.Offered) > 3 || len(p.Defense) > DefenseSlots || p.DefensePet < 0 || p.Fights < 0 || p.Wins < 0 || p.Wins > p.Fights || p.WinStreak < 0 || p.WinStreak > p.Wins ||
+		p.StateVersion < 1 || p.CreatedAt.IsZero() || p.UpdatedAt.Before(p.CreatedAt) {
 		return ErrConflict
 	}
 	seen := map[int64]bool{}
@@ -126,6 +132,49 @@ func (p Player) Validate() error {
 		}
 	}
 	return nil
+}
+
+// OfferSnapshot is the latest issued set of offered occupants and the ranks the
+// offer response returned, so admission can refuse a moved challenger or target.
+type OfferSnapshot struct {
+	Player         identity.PlayerID
+	Server         identity.LogicalServerID
+	Scope          int64
+	Generation     int64
+	ChallengerRank int64
+	Offers         []Ranked
+	UpdatedAt      time.Time
+}
+
+func (s OfferSnapshot) Validate() error {
+	if !s.Player.Valid() || !s.Server.Valid() || int64(s.Player)/RegionStride != int64(s.Server) || (s.Scope != OfferScopeNormal && s.Scope != OfferScopeSpecial) ||
+		s.Generation < 0 || s.ChallengerRank < 1 || len(s.Offers) > 3 || s.UpdatedAt.IsZero() {
+		return ErrConflict
+	}
+	for _, offer := range s.Offers {
+		if !offer.Occupant.Valid() || offer.Rank < 1 {
+			return ErrConflict
+		}
+	}
+	return nil
+}
+
+// MatchOfferSnapshot reports ErrOfferStale unless the latest snapshot was issued
+// for this generation with the same challenger rank and still-current target rank.
+func MatchOfferSnapshot(snapshot OfferSnapshot, found bool, generation, challengerRank int64, target Occupant, targetRank int64) error {
+	if !found || snapshot.Generation != generation || snapshot.ChallengerRank != challengerRank {
+		return ErrOfferStale
+	}
+	for _, offer := range snapshot.Offers {
+		if offer.Occupant != target {
+			continue
+		}
+		if offer.Rank != targetRank {
+			return ErrOfferStale
+		}
+		return nil
+	}
+	return ErrOfferStale
 }
 
 func (c Catalog) NewPlayer(pid identity.PlayerID, server identity.LogicalServerID, revision string, rank int64, at time.Time) Player {
@@ -229,9 +278,8 @@ func OfferSeed(server identity.LogicalServerID, player identity.PlayerID, day, r
 	return binary.BigEndian.Uint64(sum[:8])
 }
 
-// OfferRanks lists candidate ranks per band in the private-policy probe order;
-// callers take the first eligible occupant of each band, then nearest others.
-func (c Catalog) OfferRanks(server identity.LogicalServerID, player identity.PlayerID, rank, day, refresh int64) [][]int64 {
+// bandProbes lists the better-rank bands in private-policy probe order.
+func (c Catalog) bandProbes(server identity.LogicalServerID, player identity.PlayerID, rank, day, refresh int64) [][]int64 {
 	out := [][]int64{}
 	for i, band := range c.Bands(rank) {
 		size := band[1] - band[0] + 1
@@ -242,12 +290,28 @@ func (c Catalog) OfferRanks(server identity.LogicalServerID, player identity.Pla
 		}
 		out = append(out, probe)
 	}
+	return out
+}
+
+// BetterOfferRanks is the D512 special-mode probe set: only the better-rank
+// bands, never the lower-rank fallback, so rank 1 gets no offers.
+func (c Catalog) BetterOfferRanks(server identity.LogicalServerID, player identity.PlayerID, rank, day, refresh int64) [][]int64 {
+	return c.bandProbes(server, player, rank, day, refresh)
+}
+
+// OfferRanks lists candidate ranks per band in the private-policy probe order;
+// callers take the first eligible occupant of each band, then nearest better
+// ranks. Rank 1 has nobody above it, so its fallback keeps the lower ranks.
+func (c Catalog) OfferRanks(server identity.LogicalServerID, player identity.PlayerID, rank, day, refresh int64) [][]int64 {
+	out := c.bandProbes(server, player, rank, day, refresh)
 	near := []int64{}
 	for step := int64(1); len(near) < 3 && step < 8; step++ {
-		for _, r := range []int64{rank - step, rank + step} {
-			if r >= 1 {
-				near = append(near, r)
-			}
+		r := rank - step
+		if rank == 1 {
+			r = rank + step
+		}
+		if r >= 1 {
+			near = append(near, r)
 		}
 	}
 	return append(out, near)

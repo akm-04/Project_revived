@@ -323,6 +323,13 @@ func (s Service) EnsureBuiltinInstalled(ctx context.Context, op operation.Contex
 			if gotSummon != 1 {
 				return errors.New("content registry summon count")
 			}
+			gotCharge, err := s.Repo.InsertCharge(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotCharge != 1 {
+				return errors.New("content registry charge count")
+			}
 			gotOneOnOne, err := s.Repo.InsertOneOnOne(tctx, scope.Tx, b)
 			if err != nil {
 				return err
@@ -400,6 +407,20 @@ func (s Service) EnsureBuiltinInstalled(ctx context.Context, op operation.Contex
 			if gotElement != 1 {
 				return errors.New("content registry: Element payload count drift")
 			}
+			gotDailyBuy, err := s.Repo.InsertDailyBuyInputs(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotDailyBuy != 1 {
+				return errors.New("content registry: daily-buy payload count drift")
+			}
+			gotShop, err := s.Repo.InsertShop(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotShop != 1 {
+				return errors.New("content registry: shop payload count drift")
+			}
 			gotInscription, err := s.Repo.InsertInscriptionInputs(tctx, scope.Tx, b)
 			if err != nil {
 				return err
@@ -476,6 +497,20 @@ func (s Service) EnsureBuiltinInstalled(ctx context.Context, op operation.Contex
 			}
 			if gotGift != 1 {
 				return errors.New("content registry: SocialGift payload count drift")
+			}
+			gotSocialInput, err := s.Repo.InsertSocialInputs(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotSocialInput != 1 {
+				return errors.New("content registry: Social input payload count drift")
+			}
+			gotCompatMessagePush, err := s.Repo.InsertCompatMessagePush(tctx, scope.Tx, b)
+			if err != nil {
+				return err
+			}
+			if gotCompatMessagePush != 1 {
+				return errors.New("content registry: compat message push payload count drift")
 			}
 			gotEmoticons, err := s.Repo.InsertEmoticons(tctx, scope.Tx, b)
 			if err != nil {

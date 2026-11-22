@@ -11,6 +11,7 @@ import (
 
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelqueries"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -33,13 +34,13 @@ func (Store) PutTx(ctx context.Context, t tx.Tx, r receipt.Receipt) (receipt.Put
 	if r.RetainUntil != nil {
 		retain = r.RetainUntil.UTC()
 	}
-	policyRefs, err := policy.MarshalCanonicalJSON(r.OperationPolicyRefs)
+	policyRefs, policyRefsVersion, err := payload.Encode(r.OperationPolicyRefs)
 	if err != nil {
 		return receipt.PutResult{}, fmt.Errorf("operation policy refs: %w", err)
 	}
 	err = t.QueryRow(ctx, kernelqueries.InsertOperationReceipt,
-		r.ID.String(), r.Identity.OwnerKind, r.Identity.OwnerKey, r.Identity.Domain, r.Identity.Operation, r.OperationClass, r.Identity.SemanticKey,
-		r.RequestFingerprint[:], r.ResultSchema, string(r.ResultPayload), r.OperationStartedAt.UTC(), r.PolicyVersion, string(policyRefs), r.ActorAccountUID, optionalUUID(r.ContextID), retain,
+		r.ID.String(), optionalUUID(r.OperationID), r.Identity.OwnerKind, r.Identity.OwnerKey, r.Identity.Domain, r.Identity.Operation, r.OperationClass, r.Identity.SemanticKey,
+		r.RequestFingerprint[:], r.ResultSchema, string(r.ResultPayload), r.OperationStartedAt.UTC(), r.PolicyVersion, string(policyRefs), r.ActorAccountUID, optionalUUID(r.ContextID), retain, policyRefsVersion,
 	).Scan(&inserted)
 	if err != nil {
 		return receipt.PutResult{}, err
@@ -64,11 +65,28 @@ func (Store) FindTx(ctx context.Context, q tx.Queryer, id receipt.Identity) (rec
 	if err := id.Validate(); err != nil {
 		return receipt.Receipt{}, false, err
 	}
-	var rid, ownerKind, ownerKey, domain, operation, semanticKey, class, fpHex, schema, payload, policyVersion, policyRefsJSON, actor, contextID string
+	return readReceipt(q.QueryRow(ctx, kernelqueries.FindOperationReceipt, id.OwnerKind, id.OwnerKey, id.Domain, id.Operation, id.SemanticKey))
+}
+
+// FindLatestTx returns the most recently started receipt of a semantic-key
+// family; the owner decides what the prefix identifies.
+func (Store) FindLatestTx(ctx context.Context, q tx.Queryer, id receipt.LatestIdentity) (receipt.Receipt, bool, error) {
+	if q == nil {
+		return receipt.Receipt{}, false, errors.New("nil queryer")
+	}
+	if err := id.Validate(); err != nil {
+		return receipt.Receipt{}, false, err
+	}
+	return readReceipt(q.QueryRow(ctx, kernelqueries.FindLatestOperationReceipt, id.OwnerKind, id.OwnerKey, id.Domain, id.Operation, id.SemanticKeyPrefix))
+}
+
+func readReceipt(row tx.Row) (receipt.Receipt, bool, error) {
+	var rid, operationID, ownerKind, ownerKey, domain, operation, semanticKey, class, fpHex, schema, resultPayload, policyVersion, policyRefsJSON, actor, contextID string
 	var started, recorded, retain time.Time
 	var hasRetain bool
-	err := q.QueryRow(ctx, kernelqueries.FindOperationReceipt, id.OwnerKind, id.OwnerKey, id.Domain, id.Operation, id.SemanticKey).Scan(
-		&rid, &ownerKind, &ownerKey, &domain, &operation, &semanticKey, &class, &fpHex, &schema, &payload, &started, &policyVersion, &policyRefsJSON, &actor, &contextID, &recorded, &hasRetain, &retain,
+	var payloadVersion int16
+	err := row.Scan(
+		&rid, &operationID, &ownerKind, &ownerKey, &domain, &operation, &semanticKey, &class, &fpHex, &schema, &resultPayload, &started, &policyVersion, &policyRefsJSON, &actor, &contextID, &recorded, &hasRetain, &retain, &payloadVersion,
 	)
 	if err != nil {
 		if isNoRows(err) {
@@ -79,6 +97,13 @@ func (Store) FindTx(ctx context.Context, q tx.Queryer, id receipt.Identity) (rec
 	parsedID, err := ids.ParseUUID(rid)
 	if err != nil {
 		return receipt.Receipt{}, false, fmt.Errorf("stored receipt id: %w", err)
+	}
+	var parsedOperationID ids.UUID
+	if operationID != "" {
+		parsedOperationID, err = ids.ParseUUID(operationID)
+		if err != nil {
+			return receipt.Receipt{}, false, fmt.Errorf("stored operation id: %w", err)
+		}
 	}
 	fp, err := hex.DecodeString(fpHex)
 	if err != nil || len(fp) != 32 {
@@ -93,15 +118,15 @@ func (Store) FindTx(ctx context.Context, q tx.Queryer, id receipt.Identity) (rec
 			return receipt.Receipt{}, false, fmt.Errorf("stored context id: %w", err)
 		}
 	}
-	raw := json.RawMessage(payload)
+	raw := json.RawMessage(resultPayload)
 	if !json.Valid(raw) {
 		return receipt.Receipt{}, false, errors.New("stored receipt result JSON invalid")
 	}
-	policyRefs, err := policy.ParseCanonicalJSON([]byte(policyRefsJSON))
-	if err != nil {
+	var policyRefs policy.Set
+	if err := payload.Decode("gxb_operation_receipts", payloadVersion, []byte(policyRefsJSON), &policyRefs); err != nil {
 		return receipt.Receipt{}, false, fmt.Errorf("stored receipt operation policy refs: %w", err)
 	}
-	out := receipt.Receipt{ID: parsedID, Identity: receipt.Identity{OwnerKind: ownerKind, OwnerKey: ownerKey, Domain: domain, Operation: operation, SemanticKey: semanticKey}, OperationClass: class, RequestFingerprint: fpa, ResultSchema: schema, ResultPayload: raw, OperationStartedAt: started.UTC(), PolicyVersion: policyVersion, OperationPolicyRefs: policyRefs, ActorAccountUID: actor, ContextID: cid, RecordedAt: recorded.UTC()}
+	out := receipt.Receipt{ID: parsedID, OperationID: parsedOperationID, Identity: receipt.Identity{OwnerKind: ownerKind, OwnerKey: ownerKey, Domain: domain, Operation: operation, SemanticKey: semanticKey}, OperationClass: class, RequestFingerprint: fpa, ResultSchema: schema, ResultPayload: raw, OperationStartedAt: started.UTC(), PolicyVersion: policyVersion, OperationPolicyRefs: policyRefs, ActorAccountUID: actor, ContextID: cid, RecordedAt: recorded.UTC()}
 	if hasRetain {
 		x := retain.UTC()
 		out.RetainUntil = &x

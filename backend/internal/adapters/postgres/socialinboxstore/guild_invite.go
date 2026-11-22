@@ -3,13 +3,13 @@ package socialinboxstore
 import (
 	"context"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/application/socialinbox"
 	gi "gxb.local/backend/v2/internal/domain/guildinvite"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"time"
 )
@@ -76,7 +76,7 @@ func (Store) InsertInviteMaterializationTx(c context.Context, t tx.Tx, p gi.Targ
 	if t == nil || p.Validate() != nil {
 		return gi.ErrEvidence
 	}
-	raw, e := json.Marshal(p)
+	raw, version, e := payload.Encode(p)
 	if e != nil {
 		return e
 	}
@@ -84,7 +84,7 @@ func (Store) InsertInviteMaterializationTx(c context.Context, t tx.Tx, p gi.Targ
 	if p.NoticeID != 0 {
 		notice = p.NoticeID
 	}
-	tag, e := t.Exec(c, `INSERT INTO social_guild_invite_materializations(source_id,recipient_player_id,source_fingerprint,receipt_id,state,notice_id,root_version,target_payload,decision_at)VALUES($1::uuid,$2,$3,$4::uuid,$5,$6,$7,$8::jsonb,$9)`, p.SourceID.String(), int64(p.Recipient), hex.EncodeToString(p.SourceFingerprint[:]), p.ReceiptID.String(), string(p.State), notice, p.RootVersion, string(raw), p.DecisionAt)
+	tag, e := t.Exec(c, `INSERT INTO social_guild_invite_materializations(source_id,recipient_player_id,source_fingerprint,receipt_id,state,notice_id,root_version,target_payload,decision_at,payload_version)VALUES($1::uuid,$2,$3,$4::uuid,$5,$6,$7,$8::jsonb,$9,$10)`, p.SourceID.String(), int64(p.Recipient), hex.EncodeToString(p.SourceFingerprint[:]), p.ReceiptID.String(), string(p.State), notice, p.RootVersion, string(raw), p.DecisionAt, version)
 	if e != nil {
 		return e
 	}
@@ -100,16 +100,20 @@ func (Store) ReadInviteMaterializationTx(c context.Context, q tx.Queryer, id ids
 	}
 	var raw, fp, rr, state string
 	var pid, notice, root int64
+	var version int16
 	var at time.Time
-	e := q.QueryRow(c, `SELECT recipient_player_id,source_fingerprint,receipt_id::text,state,COALESCE(notice_id,0),root_version,target_payload::text,decision_at FROM social_guild_invite_materializations WHERE source_id=$1::uuid`, id.String()).Scan(&pid, &fp, &rr, &state, &notice, &root, &raw, &at)
+	e := q.QueryRow(c, `SELECT recipient_player_id,source_fingerprint,receipt_id::text,state,COALESCE(notice_id,0),root_version,target_payload::text,decision_at,payload_version FROM social_guild_invite_materializations WHERE source_id=$1::uuid`, id.String()).Scan(&pid, &fp, &rr, &state, &notice, &root, &raw, &at, &version)
 	if errors.Is(e, kernelstore.ErrNoRows) {
 		return gi.TargetProof{}, false, nil
 	}
 	if e != nil {
 		return gi.TargetProof{}, false, e
 	}
-	p, e := gi.DecodeTargetProof([]byte(raw))
-	if e != nil || p.SourceID != id || int64(p.Recipient) != pid || hex.EncodeToString(p.SourceFingerprint[:]) != fp || p.ReceiptID.String() != rr || string(p.State) != state || p.NoticeID != notice || p.RootVersion != root || p.DecisionAt.UnixMicro() != at.UnixMicro() {
+	var p gi.TargetProof
+	if e = payload.Decode("social_guild_invite_materializations", version, []byte(raw), &p); e != nil || p.Validate() != nil {
+		return gi.TargetProof{}, false, gi.ErrEvidence
+	}
+	if p.SourceID != id || int64(p.Recipient) != pid || hex.EncodeToString(p.SourceFingerprint[:]) != fp || p.ReceiptID.String() != rr || string(p.State) != state || p.NoticeID != notice || p.RootVersion != root || p.DecisionAt.UnixMicro() != at.UnixMicro() {
 		return gi.TargetProof{}, false, gi.ErrEvidence
 	}
 	return p, true, nil
@@ -119,7 +123,7 @@ func (Store) InsertInviteInvalidationTx(c context.Context, t tx.Tx, p gi.Invalid
 	if t == nil || p.Validate() != nil {
 		return gi.ErrEvidence
 	}
-	raw, e := json.Marshal(p)
+	raw, version, e := payload.Encode(p)
 	if e != nil {
 		return e
 	}
@@ -127,7 +131,7 @@ func (Store) InsertInviteInvalidationTx(c context.Context, t tx.Tx, p gi.Invalid
 	if p.NoticeID != 0 {
 		notice = p.NoticeID
 	}
-	tag, e := t.Exec(c, `INSERT INTO social_guild_invite_invalidations(marker_id,source_id,source_serial,source_key,recipient_player_id,marker_fingerprint,source_fingerprint,receipt_id,notice_id,root_version,consumed,target_payload,decision_at)VALUES($1::uuid,$2::uuid,$12,$13,$3,$4,$5,$6::uuid,$7,$8,$9,$10::jsonb,$11)`, p.MarkerID.String(), p.SourceID.String(), int64(p.Recipient), hex.EncodeToString(p.MarkerFingerprint[:]), hex.EncodeToString(p.SourceFingerprint[:]), p.ReceiptID.String(), notice, p.RootVersion, p.Consumed, string(raw), p.DecisionAt, p.SourceSerial, p.SourceKey)
+	tag, e := t.Exec(c, `INSERT INTO social_guild_invite_invalidations(marker_id,source_id,source_serial,source_key,recipient_player_id,marker_fingerprint,source_fingerprint,receipt_id,notice_id,root_version,consumed,target_payload,decision_at,payload_version)VALUES($1::uuid,$2::uuid,$12,$13,$3,$4,$5,$6::uuid,$7,$8,$9,$10::jsonb,$11,$14)`, p.MarkerID.String(), p.SourceID.String(), int64(p.Recipient), hex.EncodeToString(p.MarkerFingerprint[:]), hex.EncodeToString(p.SourceFingerprint[:]), p.ReceiptID.String(), notice, p.RootVersion, p.Consumed, string(raw), p.DecisionAt, p.SourceSerial, p.SourceKey, version)
 	if e != nil {
 		return e
 	}
@@ -145,16 +149,20 @@ func (Store) ReadInviteInvalidationTx(c context.Context, q tx.Queryer, marker, s
 	var serial int64
 	var pid, notice, root int64
 	var consumed bool
+	var version int16
 	var at time.Time
-	e := q.QueryRow(c, `SELECT recipient_player_id,marker_fingerprint,source_fingerprint,receipt_id::text,COALESCE(notice_id,0),root_version,consumed,target_payload::text,decision_at,source_serial,source_key FROM social_guild_invite_invalidations WHERE marker_id=$1::uuid AND source_id=$2::uuid`, marker.String(), source.String()).Scan(&pid, &mfp, &sfp, &rr, &notice, &root, &consumed, &raw, &at, &serial, &sourceKey)
+	e := q.QueryRow(c, `SELECT recipient_player_id,marker_fingerprint,source_fingerprint,receipt_id::text,COALESCE(notice_id,0),root_version,consumed,target_payload::text,decision_at,source_serial,source_key,payload_version FROM social_guild_invite_invalidations WHERE marker_id=$1::uuid AND source_id=$2::uuid`, marker.String(), source.String()).Scan(&pid, &mfp, &sfp, &rr, &notice, &root, &consumed, &raw, &at, &serial, &sourceKey, &version)
 	if errors.Is(e, kernelstore.ErrNoRows) {
 		return gi.InvalidationProof{}, false, nil
 	}
 	if e != nil {
 		return gi.InvalidationProof{}, false, e
 	}
-	p, e := gi.DecodeInvalidationProof([]byte(raw))
-	if e != nil || p.MarkerID != marker || p.SourceID != source || int64(p.Recipient) != pid || hex.EncodeToString(p.MarkerFingerprint[:]) != mfp || hex.EncodeToString(p.SourceFingerprint[:]) != sfp || p.ReceiptID.String() != rr || p.NoticeID != notice || p.RootVersion != root || p.Consumed != consumed || p.SourceSerial != serial || p.SourceKey != sourceKey || p.DecisionAt.UnixMicro() != at.UnixMicro() {
+	var p gi.InvalidationProof
+	if e = payload.Decode("social_guild_invite_invalidations", version, []byte(raw), &p); e != nil || p.Validate() != nil {
+		return gi.InvalidationProof{}, false, gi.ErrEvidence
+	}
+	if p.MarkerID != marker || p.SourceID != source || int64(p.Recipient) != pid || hex.EncodeToString(p.MarkerFingerprint[:]) != mfp || hex.EncodeToString(p.SourceFingerprint[:]) != sfp || p.ReceiptID.String() != rr || p.NoticeID != notice || p.RootVersion != root || p.Consumed != consumed || p.SourceSerial != serial || p.SourceKey != sourceKey || p.DecisionAt.UnixMicro() != at.UnixMicro() {
 		return gi.InvalidationProof{}, false, gi.ErrEvidence
 	}
 	return p, true, nil

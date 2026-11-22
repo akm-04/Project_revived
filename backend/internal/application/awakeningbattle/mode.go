@@ -26,6 +26,8 @@ import (
 type Combat interface {
 	StartTx(context.Context, tx.Tx, ca.CoherentReadScope, combat.StartRequest) (combat.Started, error)
 	AttestSummaryTx(context.Context, tx.Tx, combat.SummaryRequest) (combat.SummaryAttested, error)
+	StartEvidenceTx(context.Context, tx.Queryer, cd.Locator, string) (cd.Attempt, bool, error)
+	CloseTx(context.Context, tx.Tx, combat.TerminalRequest) (combat.Closed, error)
 }
 type Mode struct {
 	Timed   gen.TimedRunner
@@ -36,11 +38,17 @@ type Mode struct {
 	Fence interface {
 		FenceActorTx(context.Context, tx.Tx, identity.ActorContext, time.Time) error
 	}
-	Heroes      i5.AwakeningHeroes
-	Missions    i5.AwakeningBloodPort
-	Combat      Combat
-	Receipts    receipt.Store
-	ReceiptRead receipt.Reader
+	Heroes       i5.AwakeningHeroes
+	Missions     i5.AwakeningBloodPort
+	Combat       Combat
+	Receipts     receipt.Store
+	ReceiptRead  receipt.Reader
+	BattleCounts BattleCountObserver
+}
+
+// BattleCountObserver records the Girls Log count of one first settled battle.
+type BattleCountObserver interface {
+	ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error
 }
 
 func locator(a identity.ActorContext) cd.Locator {
@@ -94,8 +102,21 @@ func (s Mode) Start(ctx context.Context, actor identity.ActorContext, id int64, 
 			return e
 		}
 		fp := sha256.Sum256(raw)
+		fingerprint := hex.EncodeToString(fp[:])
+		// An equivalent START replays the stored attempt only within its result
+		// deadline; past it the attempt is retired here so the retry can fight.
+		existing, found, e := s.Combat.StartEvidenceTx(ctx, sc.Tx, locator(actor), fingerprint)
+		if e != nil {
+			return e
+		}
+		if found && !at.Before(existing.ResultDeadline) {
+			closeRequest := combat.TerminalRequest{Locator: locator(actor), GenerationRef: generation(a), TerminalKind: "AWAKENING_BLOOD_EXPIRED", SemanticReceiptID: "blood-expired:" + existing.ID.String(), At: at}
+			if _, e := s.Combat.CloseTx(ctx, sc.Tx, closeRequest); e != nil && !errors.Is(e, combat.ErrAttemptNotFound) {
+				return e
+			}
+		}
 		// Source 866 omits the selected team; this snapshots only its mandatory canonical girl witness.
-		_, e = s.Combat.StartTx(ctx, sc.Tx, scope, combat.StartRequest{Actor: actor, Locator: locator(actor), GenerationRef: generation(a), StartFingerprint: hex.EncodeToString(fp[:]), ResultDeadline: at.Add(time.Duration(frozen.WindowSeconds) * time.Second), TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK}, Battle: combat.BattleRequest{CampaignType: 27, BattleID: id, Formation: []int64{a.OwnerID}, TeamA: []combat.Participant{{Origin: cd.OwnedSelf, Kind: cd.HeroActor, Player: actor.PlayerID, Identity: a.OwnerID}}}})
+		_, e = s.Combat.StartTx(ctx, sc.Tx, scope, combat.StartRequest{Mode: cd.ModeAwakeningBlood, Actor: actor, Locator: locator(actor), GenerationRef: generation(a), StartFingerprint: fingerprint, ResultDeadline: at.Add(time.Duration(frozen.WindowSeconds) * time.Second), TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK}, Battle: combat.BattleRequest{CampaignType: 27, BattleID: id, Formation: []int64{a.OwnerID}, TeamA: []combat.Participant{{Origin: cd.OwnedSelf, Kind: cd.HeroActor, Player: actor.PlayerID, Identity: a.OwnerID}}}})
 		return e
 	})
 	if e != nil {
@@ -134,6 +155,9 @@ func (s Mode) Result(ctx context.Context, actor identity.ActorContext, id, waves
 		return nil, e
 	}
 	var body map[string]any
+	// The refusal body is committed and replayed from its receipt; only the
+	// answer after commit is an error, so the dispatcher can refuse with 409.
+	var refused bool
 	_, res, e := s.Timed.Run(ctx, op, i5.DefaultProfile(), tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true, AllowReplayAfterAuthoritativeNegative: true}, resolver{receipt.Resolver{Reader: s.ReceiptRead, Identity: rid, Fingerprint: fp}}, func(ctx context.Context, sc gen.TimedScope) error {
 		if e := s.Fence.FenceActorTx(ctx, sc.Tx, actor, sc.Operation.DecisionAt()); e != nil {
 			return e
@@ -157,6 +181,7 @@ func (s Mode) Result(ctx context.Context, actor identity.ActorContext, id, waves
 			return e
 		}
 		if attested.Drained && !a.Complete || !attested.Drained && attested.Attestation.Verdict == cd.VerdictRejected {
+			refused = true
 			body = map[string]any{"error_code": int64(1)}
 		} else {
 			body, e = s.Missions.CompleteAwakeningBloodTx(ctx, sc.Tx, actor.PlayerID, a)
@@ -174,7 +199,11 @@ func (s Mode) Result(ctx context.Context, actor identity.ActorContext, id, waves
 		}
 		r.ActorAccountUID, r.ContextID, r.PolicyVersion = string(actor.AccountUID), actor.ContextID.UUID(), objective.AwakeningContract
 		_, e = s.Receipts.PutTx(ctx, sc.Tx, r)
-		return e
+		// A drained RESULT of a completed mission is a replay of its settlement.
+		if e != nil || refused || attested.Drained {
+			return e
+		}
+		return s.BattleCounts.ObserveBattleTx(ctx, sc.Tx, actor.PlayerID, []int64{a.OwnerID}, sc.Operation.DecisionAt())
 	})
 	if e != nil {
 		return nil, e
@@ -186,5 +215,20 @@ func (s Mode) Result(ctx context.Context, actor identity.ActorContext, id, waves
 		}
 		body, e = decode(r, rid, fp)
 	}
+	if e == nil && (refused || refusalBody(body)) {
+		e = objective.ErrAwakeningRefused
+	}
 	return body, e
+}
+
+// refusalBody recognises a committed refusal replayed from its receipt.
+func refusalBody(body map[string]any) bool {
+	switch code := body["error_code"].(type) {
+	case int64:
+		return code == 1
+	case float64:
+		return code == 1
+	default:
+		return false
+	}
 }

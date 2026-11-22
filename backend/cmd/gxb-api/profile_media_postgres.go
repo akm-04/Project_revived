@@ -23,7 +23,7 @@ import (
 	"net/http"
 )
 
-func registerProfileMedia(c context.Context, p *pg.Pool, r tx.Runner, a realtimeauth.GameplayAuthorityPort, receipts receipt.Store, content contentstore.Store, router *httpedge.Router, root, origin string) (http.Handler, error) {
+func registerProfileMedia(c context.Context, p *pg.Pool, r tx.Runner, a realtimeauth.GameplayAuthorityPort, receipts receipt.Store, content contentstore.Store, router *httpedge.Router, root, origin string, getBound int) (http.Handler, error) {
 	if root == "" && origin == "" {
 		inv, e := (publicprofilestore.Store{}).InventoryMediaTx(c, p)
 		if e != nil {
@@ -69,5 +69,9 @@ func registerProfileMedia(c context.Context, p *pg.Pool, r tx.Runner, a realtime
 	if e = router.Register(1844, stockruntime.ProfileMediaDispatcher{Authority: a, Service: s}); e != nil {
 		return nil, e
 	}
-	return stockruntime.ProfileMediaGET{Service: s}, nil
+	bound, e := httpedge.NewAdmission(getBound)
+	if e != nil {
+		return nil, e
+	}
+	return stockruntime.ProfileMediaGET{Service: s, Bound: bound}, nil
 }

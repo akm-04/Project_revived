@@ -52,22 +52,23 @@ func TestReaderUsesCampaignClearsAndExplicitUnavailableSource(t *testing.T) {
 	rows := definitions(t)
 	r := Reader{Campaigns: campaignRows{campaign.Record{Progress: campaign.Progress{Nodes: map[int64]campaign.NodeState{100019: {CampaignID: 100019, Star: 3, ClearCountFloor: 2}}}}}}
 	scope := i5.MissionScope{PlayerID: 100001, DecisionAt: time.Unix(1000, 0)}
-	got, err := r.ObserveMissionTx(context.Background(), nil, scope, rows[30001], 0)
+	got, err := r.ObserveMissionTx(context.Background(), nil, scope, nil, rows[30001], 0, nil)
 	if err != nil || !got.GatePassed || got.Value != 2 {
 		t.Fatalf("story clear count: %+v %v", got, err)
 	}
-	got, err = Reader{}.ObserveMissionTx(context.Background(), nil, scope, rows[30014], 0)
+	got, err = Reader{}.ObserveMissionTx(context.Background(), nil, scope, nil, rows[30014], 0, nil)
 	if err != nil || got.GatePassed {
 		t.Fatalf("source-unavailable mission should stay closed: %+v %v", got, err)
 	}
-	if _, err = (Reader{}).ObserveMissionTx(context.Background(), nil, scope, rows[30001], 0); err == nil {
+	if _, err = (Reader{}).ObserveMissionTx(context.Background(), nil, scope, nil, rows[30001], 0, nil); err == nil {
 		t.Fatal("missing canonical reader treated as zero progress")
 	}
 }
 
 func TestReaderCountsQualifyingHeroesAndBindsPartnerTemplate(t *testing.T) {
 	rows := definitions(t)
-	r := Reader{Heroes: heroRows{{OriginTableID: 10, Color: 5, Level: 20}, {OriginTableID: 11, Color: 8, Level: 30}, {OriginTableID: 12, Color: 2, Level: 50}}}
+	roster := heroRows{{OriginTableID: 10, Color: 5, Level: 20}, {OriginTableID: 11, Color: 8, Level: 30}, {OriginTableID: 12, Color: 2, Level: 50}}
+	r := Reader{Heroes: roster}
 	scope := i5.MissionScope{PlayerID: 100001, DecisionAt: time.Unix(1000, 0)}
 	var quality, partner objective.MissionDefinition
 	for _, d := range rows {
@@ -79,16 +80,16 @@ func TestReaderCountsQualifyingHeroesAndBindsPartnerTemplate(t *testing.T) {
 		}
 	}
 	quality.Prerequisite = objective.MissionPrerequisite{Gate: []int64{0}}
-	got, err := r.ObserveMissionTx(context.Background(), nil, scope, quality, 0)
+	got, err := r.ObserveMissionTx(context.Background(), nil, scope, roster, quality, 0, nil)
 	if err != nil || got.Value != 2 {
 		t.Fatalf("quality count is not maximum color: %+v %v", got, err)
 	}
 	partner.Prerequisite = objective.MissionPrerequisite{Gate: []int64{9}}
-	got, err = r.ObserveMissionTx(context.Background(), nil, scope, partner, 11)
+	got, err = r.ObserveMissionTx(context.Background(), nil, scope, roster, partner, 11, nil)
 	if err != nil || !got.GatePassed || got.Value != 30 {
 		t.Fatalf("partner template binding: %+v %v", got, err)
 	}
-	got, err = r.ObserveMissionTx(context.Background(), nil, scope, partner, 99)
+	got, err = r.ObserveMissionTx(context.Background(), nil, scope, roster, partner, 99, nil)
 	if err != nil || got.GatePassed {
 		t.Fatalf("unowned partner admitted: %+v %v", got, err)
 	}
@@ -98,6 +99,38 @@ type bookRows struct{ bookskill.Inputs }
 
 func (b bookRows) BookInputsTx(context.Context, tx.Queryer, bookskill.InputScope) (bookskill.Inputs, error) {
 	return b.Inputs, nil
+}
+
+type privilegeSnapshot struct {
+	snapshot i5.PrivilegeSnapshot
+}
+
+func (p privilegeSnapshot) SnapshotTx(context.Context, tx.Queryer, identity.PlayerID, time.Time) (i5.PrivilegeSnapshot, error) {
+	return p.snapshot, nil
+}
+
+func TestReaderGatesMonthCardAndPrivilegeCardEntitlements(t *testing.T) {
+	rows := definitions(t)
+	month := rows[10010]
+	privilege := rows[10036]
+	if month.Prerequisite.DeferredUntil != "" || privilege.Prerequisite.DeferredUntil != "" {
+		t.Fatalf("live entitlement rows deferred: %q %q", month.Prerequisite.DeferredUntil, privilege.Prerequisite.DeferredUntil)
+	}
+	scope := i5.MissionScope{PlayerID: 100001, DecisionAt: time.Unix(1000, 0)}
+	closed := Reader{Privileges: privilegeSnapshot{}}
+	if got, err := closed.ObserveMissionTx(context.Background(), nil, scope, nil, month, 0, nil); err != nil || got.GatePassed {
+		t.Fatalf("month card gate did not close: %+v %v", got, err)
+	}
+	if got, err := closed.ObserveMissionTx(context.Background(), nil, scope, nil, privilege, 0, nil); err != nil || got.GatePassed {
+		t.Fatalf("privilege gate did not close: %+v %v", got, err)
+	}
+	open := Reader{Privileges: privilegeSnapshot{snapshot: i5.PrivilegeSnapshot{MonthCardActive: true, MonthlyPrivilegeActive: true}}}
+	if got, err := open.ObserveMissionTx(context.Background(), nil, scope, nil, month, 0, nil); err != nil || !got.GatePassed || got.Value != 1 {
+		t.Fatalf("month card gate: %+v %v", got, err)
+	}
+	if got, err := open.ObserveMissionTx(context.Background(), nil, scope, nil, privilege, 0, nil); err != nil || !got.GatePassed || got.Value != 1 {
+		t.Fatalf("privilege gate: %+v %v", got, err)
+	}
 }
 
 func TestReaderCountsCompletedBooksRatherThanSummingSkillLevels(t *testing.T) {
@@ -111,7 +144,7 @@ func TestReaderCountsCompletedBooksRatherThanSummingSkillLevels(t *testing.T) {
 	}
 	d.Prerequisite = objective.MissionPrerequisite{Gate: []int64{0}}
 	r := Reader{Books: bookRows{bookskill.Inputs{Catalog: book.Catalog{Books: map[int64]book.BookRule{1: {Star: 2, Skills: []int64{10, 11}}, 2: {Star: 3, Skills: []int64{20, 21}}}}, Applied: book.State{Skills: map[int64]int64{10: 2, 11: 2, 20: 3, 21: 2}}}}}
-	got, err := r.ObserveMissionTx(context.Background(), nil, i5.MissionScope{}, d, 0)
+	got, err := r.ObserveMissionTx(context.Background(), nil, i5.MissionScope{}, nil, d, 0, nil)
 	if err != nil || got.Value != 1 {
 		t.Fatalf("completed books: %+v %v", got, err)
 	}

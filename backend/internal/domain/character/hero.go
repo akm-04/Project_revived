@@ -16,20 +16,25 @@ const (
 	HeroRootLockRank              = 400
 	HeroInstanceLockRank          = 410
 	MaxSortType                   = 8191
-	MaxHeroStar                   = 8
+	// MaxBackpackSortType is the largest value the client encodes from its five
+	// filter types and two orders (BackpackWindow.lua:1756-1757,1940; enums.lua:2279-2285).
+	MaxBackpackSortType = 9
+	MaxHeroStar         = 8
+	MaxHeroLevel        = 100
 )
 
 type HeroRoot struct {
-	PlayerID      identity.PlayerID
-	NextPartnerID int64
-	SortType      int64
-	StateVersion  int64
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	PlayerID         identity.PlayerID
+	NextPartnerID    int64
+	SortType         int64
+	BackpackSortType int64
+	StateVersion     int64
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
 }
 
 func (r HeroRoot) Validate() error {
-	if !r.PlayerID.Valid() || r.NextPartnerID <= 0 || r.SortType < 0 || r.SortType > MaxSortType || r.StateVersion <= 0 || r.CreatedAt.IsZero() || r.UpdatedAt.IsZero() {
+	if !r.PlayerID.Valid() || r.NextPartnerID <= 0 || r.SortType < 0 || r.SortType > MaxSortType || r.BackpackSortType < 0 || r.BackpackSortType > MaxBackpackSortType || r.StateVersion <= 0 || r.CreatedAt.IsZero() || r.UpdatedAt.IsZero() {
 		return errors.New("character hero: invalid root")
 	}
 	return nil

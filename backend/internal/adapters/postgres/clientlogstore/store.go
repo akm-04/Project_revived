@@ -13,6 +13,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	app "gxb.local/backend/v2/internal/application/clientlog"
+	domain "gxb.local/backend/v2/internal/domain/clientlog"
 )
 
 type Store struct{ Pool *pgxpool.Pool }
@@ -87,14 +88,14 @@ VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`,
 }
 
 var journalColumns = []string{"received_at", "account_uid", "player_id", "session_ref", "mid", "outcome", "error_code", "http_status", "latency_microseconds",
-	"request_bytes", "response_bytes", "error_class", "cause", "raw_envelope", "request_sha256", "retention_class", "expires_at"}
+	"request_bytes", "response_bytes", "error_class", "cause", "raw_envelope", "request_sha256", "replay", "retention_class", "expires_at"}
 
 func (s Store) SaveJournal(ctx context.Context, rows []app.JournalRow) error {
 	_, err := s.Pool.CopyFrom(ctx, pgx.Identifier{"request_journal"}, journalColumns, pgx.CopyFromSlice(len(rows), func(index int) ([]any, error) {
 		row := rows[index]
 		accountUID, playerID, sessionRef := owned(row.Owner)
 		return []any{row.ReceivedAt, accountUID, playerID, sessionRef, row.MID, string(row.Outcome), row.ErrorCode, row.HTTPStatus, row.Latency.Microseconds(),
-			row.RequestBytes, row.ResponseBytes, nullableText(row.ErrorClass), nullableText(row.Cause), row.RawEnvelope, row.RequestSHA256, string(row.Class),
+			row.RequestBytes, row.ResponseBytes, nullableText(row.ErrorClass), nullableText(row.Cause), row.RawEnvelope, row.RequestSHA256, row.Replay, string(row.Class),
 			row.Class.ExpiresAt(row.ReceivedAt)}, nil
 	}))
 	return err
@@ -102,11 +103,25 @@ func (s Store) SaveJournal(ctx context.Context, rows []app.JournalRow) error {
 
 var purgedTables = []string{"request_journal", "client_log_rows", "client_log_uploads", "client_log_capabilities"}
 
-// PurgeExpired deletes at most batch expired rows from each table.
-func (s Store) PurgeExpired(ctx context.Context, now time.Time, batch int) (int64, error) {
+// PurgeExpired deletes at most batch expired rows from each table. The R8 cap
+// (U4) shortens each retention class' window to min(owner window, retention
+// days); zero keeps the owner's windows alone.
+func (s Store) PurgeExpired(ctx context.Context, now time.Time, retentionDays, batch int) (int64, error) {
 	var total int64
 	for _, table := range purgedTables {
-		tag, err := s.Pool.Exec(ctx, fmt.Sprintf(`DELETE FROM %[1]s WHERE ctid IN (SELECT ctid FROM %[1]s WHERE expires_at<=$1 LIMIT $2)`, table), now, batch)
+		query := fmt.Sprintf(`DELETE FROM %[1]s WHERE ctid IN (SELECT ctid FROM %[1]s WHERE expires_at<=$1 LIMIT $2)`, table)
+		arguments := []any{now, batch}
+		if table != "client_log_capabilities" && retentionDays > 0 {
+			routineCutoff := now.Add(-cappedWindow(domain.RoutineRetention, retentionDays))
+			incidentCutoff := now.Add(-cappedWindow(domain.IncidentRetention, retentionDays))
+			query = fmt.Sprintf(`DELETE FROM %[1]s WHERE ctid IN (
+SELECT ctid FROM %[1]s
+WHERE expires_at<=$1 OR (retention_class='ROUTINE' AND received_at<$2) OR (retention_class<>'ROUTINE' AND received_at<$3)
+ORDER BY expires_at
+LIMIT $4)`, table)
+			arguments = []any{now, routineCutoff, incidentCutoff, batch}
+		}
+		tag, err := s.Pool.Exec(ctx, query, arguments...)
 		if err != nil {
 			return total, err
 		}
@@ -115,11 +130,19 @@ func (s Store) PurgeExpired(ctx context.Context, now time.Time, batch int) (int6
 	return total, nil
 }
 
+func cappedWindow(ownerWindow time.Duration, retentionDays int) time.Duration {
+	window := time.Duration(retentionDays) * 24 * time.Hour
+	if window < ownerWindow {
+		return window
+	}
+	return ownerWindow
+}
+
 // Timeline returns one uid's journal rows, uploads and client rows in time
 // order as JSON objects (I85_REQUEST_JOURNAL_V1 R5).
 func (s Store) Timeline(ctx context.Context, accountUID string, since time.Time, limit int) ([]json.RawMessage, error) {
 	rows, err := s.Pool.Query(ctx, `SELECT entry FROM (
- SELECT received_at, 0 AS source, lpad(journal_id::text,20,'0') AS ordering, jsonb_build_object('source','journal','received_at',received_at,'player_id',player_id,'session_ref',session_ref,'mid',mid,'outcome',outcome,'error_code',error_code,'http_status',http_status,'latency_microseconds',latency_microseconds,'error_class',error_class,'cause',cause,'raw_envelope',encode(raw_envelope,'escape')) AS entry
+ SELECT received_at, 0 AS source, lpad(journal_id::text,20,'0') AS ordering, jsonb_build_object('source','journal','received_at',received_at,'player_id',player_id,'session_ref',session_ref,'mid',mid,'outcome',outcome,'error_code',error_code,'http_status',http_status,'latency_microseconds',latency_microseconds,'error_class',error_class,'cause',cause,'raw_envelope',encode(raw_envelope,'escape'),'replay',replay) AS entry
  FROM request_journal WHERE account_uid=$1 AND received_at>=$2
  UNION ALL
  SELECT received_at, 1, upload_id::text, jsonb_build_object('source','upload','received_at',received_at,'upload_id',upload_id,'kind',kind,'attribution',attribution,'status',status,'quarantine_reason',quarantine_reason,'retention_class',retention_class,'row_count',row_count,'attachment_name',attachment_name,'attachment_bytes',length(attachment))

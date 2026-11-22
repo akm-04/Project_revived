@@ -1,0 +1,210 @@
+{
+ "background": [],
+ "content": [
+  "content_privilege_catalogs"
+ ],
+ "contracts": [
+  {
+   "count": 3,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 4,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10A_EVENT_CENTRE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 7,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/charge_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "charge-read"
+   },
+   {
+    "lock_timeout_ms": 5000,
+    "name": "charge-tap"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "commerce_charge_purchases": [
+    "commerceprivilegestore.ReadPurchaseCountTx"
+   ],
+   "commerce_privilege_roots": [
+    "commerceprivilegestore.ReadPrivilegeTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "player_directory_profiles": [
+    "i4store.PrepareVIPProjectionTx"
+   ],
+   "players": [
+    "i4store.LockBoundRecipientTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "commerce_charge_purchases",
+   "commerce_privilege_roots",
+   "gameplay_contexts",
+   "player_directory_profiles",
+   "players"
+  ],
+  "unresolved_methods": [
+   "commerceprivilegestore.LockCardsTx"
+  ]
+ },
+ "login": [
+  "BootstrapProjection",
+  "OverlayMID1"
+ ],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/charge_dispatcher.go",
+    "line": 30
+   },
+   "mid": 354,
+   "name": "QUERY_CHARGE_DATA"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/charge_dispatcher.go",
+    "line": 30
+   },
+   "mid": 657,
+   "name": "GET_VIP_AWARD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/charge_dispatcher.go",
+    "line": 30
+   },
+   "mid": 32000,
+   "name": ""
+  }
+ ],
+ "name": "commerceprivilege",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/auditstore",
+  "internal/adapters/postgres/commerceprivilegestore",
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore"
+ ],
+ "tables": {
+  "owned": [
+   "commerce_charge_cards",
+   "commerce_charge_purchases",
+   "commerce_privilege_roots",
+   "commerce_recharge_tuning",
+   "commerce_vip_awards"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "commerce_charge_cards",
+   "commerce_charge_purchases",
+   "commerce_privilege_roots",
+   "commerce_recharge_tuning",
+   "commerce_vip_awards",
+   "content_privilege_catalogs",
+   "gameplay_contexts",
+   "gxb_content_activation",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "logical_servers",
+   "player_directory_profiles",
+   "players"
+  ],
+  "written": [
+   "commerce_charge_cards",
+   "commerce_charge_purchases",
+   "commerce_privilege_roots",
+   "commerce_vip_awards",
+   "gxb_operation_receipts",
+   "operator_audit_events",
+   "player_directory_profiles"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "logincapacity",
+   "missions",
+   "playerdisplay",
+   "socialprojection"
+  ],
+  "scenarios_naming": [
+   "i9_10g_charge.json"
+  ],
+  "unit": [
+   "observation_test.go"
+  ]
+ }
+}

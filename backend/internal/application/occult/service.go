@@ -59,10 +59,14 @@ func (s Mode) pin(c context.Context, op operation.Context) (operation.Context, e
 	if !s.ready() {
 		return op, d.ErrUnavailable
 	}
+	return s.pinTx(c, s.Fresh, op)
+}
+
+func (s Mode) pinTx(c context.Context, q tx.Queryer, op operation.Context) (operation.Context, error) {
 	if _, bound := op.Policies.Get("content"); bound {
 		return op, nil
 	}
-	revision, err := s.Content.ActiveRevision(c, s.Fresh)
+	revision, err := s.Content.ActiveRevision(c, q)
 	if err != nil {
 		return op, err
 	}
@@ -136,12 +140,8 @@ func (s Mode) run(c context.Context, a identity.ActorContext, name string, reque
 // piggyback adds the stock balance and mission deltas the transaction recorded.
 func piggyback(c context.Context, body map[string]any) {
 	balance, functions := changes.Recorded(c)
-	if len(balance) > 0 {
-		body["economy_"] = balance
-	}
-	if len(functions) > 0 {
-		body["new_funcs_"] = functions
-	}
+	changes.WriteEconomy(body, balance)
+	changes.WriteFunctions(body, functions)
 	for key, value := range changes.RecordedMissions(c) {
 		body[key] = value
 	}
@@ -216,11 +216,19 @@ func (s Mode) updateRoom(c context.Context, a identity.ActorContext, op operatio
 			if !allowExpired && view.state.RoomExpired(view.at.Unix()) {
 				return fmt.Errorf("%w: room expired", d.ErrRefused)
 			}
+			noticeBoundary := int64(1)
+			if length := len(view.state.Notices); length > 0 {
+				noticeBoundary = view.state.Notices[length-1].Sequence + 1
+			}
 			body, err = command(c, sc, view)
 			if err != nil {
 				return err
 			}
 			*room = view.room
+			closing := view.state.ClearSettled && room.Status == sharedroom.StatusOpen
+			if closing {
+				view.state.ClosingNoticeSequence = noticeBoundary
+			}
 			encoded, err := view.state.Encode()
 			if err != nil {
 				return err
@@ -230,7 +238,7 @@ func (s Mode) updateRoom(c context.Context, a identity.ActorContext, op operatio
 			}
 			// A cleared chapter ends the run; the client's sub-map close reads
 			// the next 2362 as no held room instead of looping on progress 1.
-			if view.state.ClearSettled {
+			if closing {
 				room.Close(view.at)
 			}
 			return nil

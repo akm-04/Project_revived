@@ -34,9 +34,12 @@ func libraryService(p *pg.Pool, db tx.Beginner) app.Service {
 	content := contentstore.Store{Queryer: p}
 	hero := characterstore.Store{Queryer: p}
 	inv := i5store.Store{Queryer: p}
-	s := app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: db}}, Reads: tx.Runner{DB: p}, Heroes: characterstore.LibraryHeroPort{Store: hero}, Library: librarystore.Store{}, Content: content, Players: i4store.PlayerRootLocker{}, Fence: inv, Costs: i5.MaterialCostDebiter{Store: inv, Content: content}, Receipts: kernelstore.Store{}}
+	s := app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: db}}, Reads: tx.Runner{DB: p}, Heroes: characterstore.LibraryHeroPort{Store: hero}, Library: librarystore.Store{}, Content: content, Players: i4store.PlayerRootLocker{}, Fence: inv, Costs: i5.MaterialCostDebiter{Store: inv, Content: content}, Receipts: kernelstore.Store{}, Broadcast: pg.BroadcastEmitter{}}
 	s.Achievements = ach.Service{Store: achievementstore.Store{}, Content: content, Population: s}
 	s.Roster = characterstore.HeroBootstrapProjection{Content: content, Library: s}
+	// Favor-producing commands fail closed without the objective port, so the
+	// fixture composes the same one the production root does.
+	s.Facts = i5.ObjectiveFacts{Owner: compositeI5(p), Open: inv}
 	return s
 }
 
@@ -140,7 +143,7 @@ func TestI7C2BLibraryGiftMarriageFeedingAndReplay(t *testing.T) {
 		t.Fatal(f)
 	}
 	replay, e := s.Command(ctx, a, app.Command{Family: app.Gift, PartnerID: 1, Value: 50005013}, original)
-	if e != nil || replay.StateVersion != originalResult.StateVersion || replay.Favor != 105 {
+	if e != nil || replay.StateVersion != originalResult.StateVersion || replay.Favor != 110 {
 		t.Fatal("historic gift", replay, e)
 	}
 	ring := app.Command{Family: app.Gift, PartnerID: 1, Value: 50001112}

@@ -40,6 +40,12 @@ type I5ServicePort interface {
 type SpiritBackpackProjector interface {
 	Backpack(context.Context, identity.ActorContext, operation.Context) (map[string]any, error)
 }
+
+// BackpackSortReader reads the CharacterHero-owned player preference that the
+// stock backpack load reply carries as sort_type.
+type BackpackSortReader interface {
+	ReadBackpackSortType(context.Context, identity.PlayerID) (int64, error)
+}
 type MissionServicePort interface {
 	ClaimActivityChest(context.Context, identity.ActorContext, string, int64, operation.Context) (map[string]any, error)
 	ReadMissions(context.Context, identity.ActorContext, objective.StockFamily, operation.Context) (map[string]any, error)
@@ -59,6 +65,7 @@ type I5Dispatcher struct {
 	SignIn         SignInServicePort
 	Missions       MissionServicePort
 	SpiritBackpack SpiritBackpackProjector
+	BackpackSort   BackpackSortReader
 	Authority      apprealtime.GameplayAuthorityPort
 	Service        I5ServicePort
 }
@@ -69,17 +76,17 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		return *fail
 	}
 	if d.Service == nil {
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "i5_unavailable"}}
+		return failureReply(defect(nil))
 	}
 	switch req.Envelope.MID {
 	case 163, 164, 165, 166, 167, 168, 171, 2561, 2737, 2738:
 		return d.dispatchAwakening(ctx, actor, req)
 	case 352, 353:
 		if d.SignIn == nil {
-			return failI5(errors.New("sign-in unavailable"))
+			return failureReply(defect(nil))
 		}
 		if !onlyStockGameplayParams(req.Envelope.Params) {
-			return badI5("invalid_sign_in")
+			return badI5()
 		}
 		var body map[string]any
 		var err error
@@ -97,7 +104,7 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		storyState, e2 := requiredInt64(req.Envelope.Params, "story_state")
 		guideID, e3 := storyGuideID(req.Envelope.Params)
 		if e1 != nil || e2 != nil || e3 != nil || storyID < 0 || storyState < 0 || guideID < 0 {
-			return badI5("invalid_story")
+			return badI5()
 		}
 		if err := d.Service.SaveStory(ctx, actor, storyID, storyState, guideID, req.Envelope.Operation); err != nil {
 			return failI5(err)
@@ -106,7 +113,7 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 	case 2865: // SET_PLAYER_GUIDE_FUNCTION
 		functionID, err := requiredInt64(req.Envelope.Params, "guide_function_id")
 		if err != nil || functionID <= 0 {
-			return badI5("invalid_guide_function")
+			return badI5()
 		}
 		guide, err := d.Service.SaveGuideFunction(ctx, actor, functionID, req.Envelope.Operation)
 		if err != nil {
@@ -116,7 +123,7 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 	case 2866: // SET_PLAYER_RETURN_ID
 		returnID, err := requiredInt64(req.Envelope.Params, "guide_return_id")
 		if err != nil || returnID < 0 {
-			return badI5("invalid_guide_return")
+			return badI5()
 		}
 		guide, err := d.Service.SaveGuideReturn(ctx, actor, returnID, req.Envelope.Operation)
 		if err != nil {
@@ -131,11 +138,18 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 			}
 			return okI5(body)
 		}
+		if d.BackpackSort == nil {
+			return failureReply(defect(nil))
+		}
 		stacks, err := d.Service.ListBackpack(ctx, actor)
 		if err != nil {
 			return failI5(err)
 		}
-		body, err := backpackproj.Build(stacks)
+		sortType, err := d.BackpackSort.ReadBackpackSortType(ctx, actor.PlayerID)
+		if err != nil {
+			return failI5(err)
+		}
+		body, err := backpackproj.Build(stacks, sortType)
 		if err != nil {
 			return failI5(err)
 		}
@@ -145,7 +159,7 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		if _, ok := req.Envelope.Params["load_num"]; ok {
 			v, err := requiredInt64(req.Envelope.Params, "load_num")
 			if err != nil || v <= 0 || v > 200 {
-				return badI5("invalid_mail_limit")
+				return badI5()
 			}
 			limit = v
 		}
@@ -161,25 +175,25 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 	case 369: // SET_MAIL_READ / claim attachment
 		id, err := requiredInt64(req.Envelope.Params, "id")
 		if err != nil || id <= 0 {
-			return badI5("invalid_mail_id")
+			return badI5()
 		}
 		ns, err := stockMailNamespace(req.Envelope.Params["is_region"])
 		if err != nil {
-			return badI5("invalid_mail_namespace")
+			return badI5()
 		}
 		got, err := d.Service.ClaimMail(ctx, actor, mail.Address{Namespace: ns, WireID: id}, req.Envelope.Operation)
 		if err != nil {
 			return failI5(err)
 		}
 		body := map[string]any{"changed": got.Changed, "is_new": got.IsNew, "is_shown": got.IsShown, "rewards": appi5.StockMID369Rewards(got.Rewards)}
-		applySettlementProjection(body, got.Projection)
+		applySettlementProjection(ctx, body, got.Projection)
 		return okI5(body)
 	case 370: // MAIL_ONEKEY
 		normal := stringParam(req.Envelope.Params, "normal_ids")
 		region := stringParam(req.Envelope.Params, "region_ids")
 		addrs, err := mail.ParseMID370(normal, region, 200)
 		if err != nil || len(addrs) == 0 {
-			return badI5("invalid_mail_batch")
+			return badI5()
 		}
 		got, err := d.Service.ClaimMailBatch(ctx, actor, addrs, req.Envelope.Operation)
 		if err != nil {
@@ -191,15 +205,15 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 			return failI5(err)
 		}
 		body := map[string]any{"awards": awards, "mail_list": map[string]any{"mail_list": wire, "total": got.Mail.Total, "new_mail_total": got.Mail.NewMailTotal}}
-		applySettlementProjection(body, got.Projection)
+		applySettlementProjection(ctx, body, got.Projection)
 		return okI5(body)
 	case 169, 170:
 		if d.Missions == nil {
-			return failI5(errors.New("mission runtime unavailable"))
+			return failureReply(defect(nil))
 		}
 		index, err := requiredInt64(req.Envelope.Params, "index")
 		if err != nil {
-			return conflictRefusal(1)
+			return badI5()
 		}
 		period := "DAY"
 		if req.Envelope.MID == 170 {
@@ -212,7 +226,7 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		return okI5(body)
 	case 160:
 		if d.Missions == nil {
-			return failI5(errors.New("mission runtime unavailable"))
+			return failureReply(defect(nil))
 		}
 		body, err := d.Missions.ReadMissions(ctx, actor, 0, req.Envelope.Operation)
 		if err != nil {
@@ -239,12 +253,22 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 			familyRaw, err = int64(objective.Daily), nil
 		}
 		if err != nil || familyRaw < int64(objective.Daily) || familyRaw > int64(objective.Challenge) {
-			return badI5("invalid_mission_type")
+			return badI5()
 		}
-		if familyRaw == 5 && d.Awakening != nil {
+		if familyRaw == int64(objective.Awake) && d.Awakening != nil {
 			body, e := d.Awakening.ReadAwakening(ctx, actor, req.Envelope.Operation)
 			if e != nil {
 				return failI5(e)
+			}
+			// The stock Task model seeds its huoyue copy from every 2736 family reply.
+			if d.Missions != nil {
+				missions, e := d.Missions.ReadMissions(ctx, actor, objective.Awake, req.Envelope.Operation)
+				if e != nil {
+					return failI5(e)
+				}
+				if extra, ok := missions["extra_info"]; ok {
+					body["extra_info"] = extra
+				}
 			}
 			return okI5(body)
 		}
@@ -263,7 +287,7 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 	case 161: // TAKE_MISSION_AWARD
 		tableID, err := requiredInt64(req.Envelope.Params, "table_id")
 		if err != nil || tableID <= 0 {
-			return badI5("invalid_mission_id")
+			return badI5()
 		}
 		if d.Awakening != nil {
 			body, handled, e := d.Awakening.ClaimAwakening(ctx, actor, tableID, req.Envelope.Operation)
@@ -278,7 +302,7 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		if raw, ok := req.Envelope.Params["hero_table_id"]; ok {
 			h, err := numericValue(raw)
 			if err != nil || h <= 0 {
-				return badI5("invalid_hero_table_id")
+				return badI5()
 			}
 			generation = "hero:" + strconv.FormatInt(h, 10)
 		}
@@ -295,12 +319,12 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		}
 		awards := appi5.StockRepresentableBulkAwards(got.Awards)
 		body := map[string]any{"awards": awards}
-		applySettlementProjection(body, got.Projection)
+		applySettlementProjection(ctx, body, got.Projection)
 		return okI5(body)
 	case 230: // REDEEM_CODE
 		code, _ := req.Envelope.Params["code"].(string)
 		if code == "" {
-			return badI5("invalid_redeem")
+			return badI5()
 		}
 		platform := fmt.Sprint(req.Envelope.Params["platform"])
 		got, err := d.Service.Redeem(ctx, actor, code, platform, req.Envelope.Operation)
@@ -309,16 +333,20 @@ func (d I5Dispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest
 		}
 		awards := appi5.StockRepresentableBulkAwards(got.Awards)
 		body := map[string]any{"awards": awards}
-		applySettlementProjection(body, got.Projection)
+		applySettlementProjection(ctx, body, got.Projection)
 		return okI5(body)
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error": "not_i5_mid"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 }
 
 func (d I5Dispatcher) actor(ctx context.Context, req httpedge.DispatchRequest) (identity.ActorContext, *httpedge.Response) {
-	if d.Authority == nil || req.Envelope.Claims.Token == "" {
-		r := httpedge.Response{HTTPStatus: http.StatusUnauthorized, Body: map[string]any{"error": "gameplay_auth_required"}}
+	if d.Authority == nil {
+		r := failureReply(defect(nil))
+		return identity.ActorContext{}, &r
+	}
+	if req.Envelope.Claims.Token == "" {
+		r := failureReply(sessionFailure())
 		return identity.ActorContext{}, &r
 	}
 	a, err := d.Authority.ResolveGameplayBearer(ctx, req.Envelope.Claims.Token, req.Envelope.ReceivedAt)
@@ -327,7 +355,7 @@ func (d I5Dispatcher) actor(ctx context.Context, req httpedge.DispatchRequest) (
 		return identity.ActorContext{}, &r
 	}
 	if req.Envelope.Claims.Region != int64(a.LogicalServerID) {
-		r := httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "region_mismatch"}}
+		r := failureReply(refusal(unprovenRefusalCode))
 		return identity.ActorContext{}, &r
 	}
 	return a, nil
@@ -398,10 +426,8 @@ func stockMissionList(f objective.StockFamily, in []objective.Instance) any {
 	}
 	return group
 }
-func applySettlementProjection(body map[string]any, p appi5.SettlementProjection) {
-	if len(p.Economy) > 0 {
-		body["economy_"] = p.Economy
-	}
+func applySettlementProjection(ctx context.Context, body map[string]any, p appi5.SettlementProjection) {
+	p.RecordChanges(ctx)
 	if len(p.ExtraDrops) > 0 {
 		drops := make([]any, 0, len(p.ExtraDrops))
 		for _, a := range p.ExtraDrops {
@@ -413,40 +439,31 @@ func applySettlementProjection(body map[string]any, p appi5.SettlementProjection
 			body["extra_drops_"] = drops
 		}
 	}
-	if len(p.NewFunctionIDs) > 0 {
-		body["new_funcs_"] = append([]int64(nil), p.NewFunctionIDs...)
-	}
-}
-
-// conflictRefusal answers a refusal on a mode whose success callbacks index nested
-// reply tables. Backend.lua hands a 200 body to the callback as OK, which crashes
-// them; on any other status the callback gets ERROR and the toast still shows.
-func conflictRefusal(code int64) httpedge.Response {
-	return httpedge.Response{HTTPStatus: http.StatusConflict, Body: map[string]any{"error_code": code}}
 }
 
 func okI5(body map[string]any) httpedge.Response {
 	return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
 }
-func badI5(code string) httpedge.Response {
-	return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": code}}
+
+// F4(c): malformed stock params answer 400 with the family token, never a
+// per-MID detail.
+func badI5() httpedge.Response {
+	return failureReply(malformed("i5_invalid_parameter"))
 }
+
+var i5FailureRows = []failureRow{
+	{match: objective.ErrSignRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: objective.ErrAwakeningRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: appi5.ErrMissionRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: appi5.ErrMailNotClaimable, class: failureRefusal, code: unprovenRefusalCode},
+	{match: appi5.ErrMailStackFull, class: failureRefusal, code: unprovenRefusalCode},
+	{match: appi5.ErrRedeemInvalid, class: failureMalformed, detail: "invalid_redeem"},
+	{match: appi5.ErrMailNotFound, class: failureRefusal, code: unprovenRefusalCode},
+	{match: appi5.ErrObjectiveNotFound, class: failureRefusal, code: unprovenRefusalCode},
+}
+
 func failI5(err error) httpedge.Response {
-	if errors.Is(err, objective.ErrSignRefused) || errors.Is(err, objective.ErrAwakeningRefused) {
-		return conflictRefusal(1)
-	}
-	switch {
-	case errors.Is(err, appi5.ErrMissionRefused):
-		return conflictRefusal(1)
-	case errors.Is(err, appi5.ErrRedeemInvalid):
-		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "invalid_redeem"}}
-	case errors.Is(err, appi5.ErrMailStackFull):
-		return httpedge.Response{HTTPStatus: http.StatusConflict, Body: map[string]any{"error": "stack_capacity"}}
-	case errors.Is(err, appi5.ErrMailNotFound), errors.Is(err, appi5.ErrObjectiveNotFound):
-		return httpedge.Response{HTTPStatus: http.StatusNotFound, Body: map[string]any{"error": "not_found"}}
-	default:
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "i5_operation_failed"}}
-	}
+	return failureFromRows(i5FailureRows, err)
 }
 
 // storyGuideID floors fractional guide sub-steps (enums.lua GUIDE_SKILL_THREE =
@@ -465,12 +482,12 @@ func storyGuideID(params map[string]any) (int64, error) {
 
 func (d I5Dispatcher) dispatchAwakening(ctx context.Context, actor identity.ActorContext, req httpedge.DispatchRequest) httpedge.Response {
 	if d.Awakening == nil {
-		return failI5(errors.New("awakening unavailable"))
+		return failureReply(defect(nil))
 	}
 	mid, p := req.Envelope.MID, req.Envelope.Params
 	if mid == 2561 {
 		if !onlyStockGameplayParams(p) {
-			return badI5("invalid_awakening_read")
+			return badI5()
 		}
 		body, e := d.Awakening.ReadAwakening(ctx, actor, req.Envelope.Operation)
 		if e != nil {
@@ -483,7 +500,7 @@ func (d I5Dispatcher) dispatchAwakening(ctx context.Context, actor identity.Acto
 	if mid == 171 {
 		n, e := requiredInt64(p, "item_num")
 		if e != nil || n != 1 || !onlyStockGameplayParams(p, "item_num") {
-			return badI5("invalid_awakening_wish")
+			return badI5()
 		}
 		action = "wish"
 	} else if mid == 2737 || mid == 2738 {
@@ -491,7 +508,7 @@ func (d I5Dispatcher) dispatchAwakening(ctx context.Context, actor identity.Acto
 		id, e1 = requiredInt64(p, "mission_id")
 		kind, e2 = requiredInt64(p, "awake_type")
 		if e1 != nil || e2 != nil || id <= 0 || kind < 1 || kind > 3 || !onlyStockGameplayParams(p, "mission_id", "awake_type") {
-			return badI5("invalid_awakening_mission")
+			return badI5()
 		}
 		if mid == 2737 {
 			action = "cancel"
@@ -500,7 +517,7 @@ func (d I5Dispatcher) dispatchAwakening(ctx context.Context, actor identity.Acto
 		var e error
 		id, e = requiredInt64(p, "table_id")
 		if e != nil || id <= 0 || !onlyStockGameplayParams(p, "table_id") {
-			return badI5("invalid_awakening_mission")
+			return badI5()
 		}
 		switch mid {
 		case 163, 164:

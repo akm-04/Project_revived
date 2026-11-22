@@ -60,14 +60,31 @@ func profileIDs(v any, limit int) ([]int64, error) {
 }
 func (d PublicProfileDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequest) httpedge.Response {
 	fail := func(status int) httpedge.Response {
-		return httpedge.Response{HTTPStatus: status, Body: map[string]any{"error_code": int64(1), "error": "public_profile_request_failed"}}
+		switch status {
+		case http.StatusBadRequest:
+			return failureReply(malformed("public_profile_request_failed"))
+		case http.StatusConflict:
+			return failureReply(refusal(unprovenRefusalCode))
+		case http.StatusServiceUnavailable:
+			return failureReply(defect(nil))
+		case http.StatusUnauthorized:
+			return failureReply(sessionFailure())
+		default:
+			return failureReply(refusal(unprovenRefusalCode))
+		}
 	}
-	if d.Authority == nil || d.Service == nil || r.Envelope.Claims.Token == "" {
+	if d.Authority == nil {
+		return failureReply(defect(nil))
+	}
+	if d.Service == nil {
+		return failureReply(defect(nil))
+	}
+	if r.Envelope.Claims.Token == "" {
 		return fail(http.StatusUnauthorized)
 	}
 	a, e := d.Authority.ResolveGameplayBearer(c, r.Envelope.Claims.Token, r.Envelope.ReceivedAt)
 	if e != nil {
-		return fail(http.StatusForbidden)
+		return authFailure(e)
 	}
 	if r.Envelope.Claims.Region != int64(a.LogicalServerID) {
 		return fail(http.StatusForbidden)
@@ -114,15 +131,15 @@ func (d PublicProfileDispatcher) Dispatch(c context.Context, r httpedge.Dispatch
 	if e != nil {
 		switch {
 		case errors.Is(e, publicprofile.ErrContent):
-			return fail(http.StatusConflict)
+			return failureReply(refusal(unprovenRefusalCode))
 		case errors.Is(e, publicprofile.ErrCommand):
 			return fail(http.StatusBadRequest)
 		default:
-			return fail(http.StatusServiceUnavailable)
+			return failureFromRows(nil, e)
 		}
 	}
 	if out.Kind != q.Kind || out.PlayerID != int64(a.PlayerID) || out.Server != int32(a.LogicalServerID) || out.Wire() == nil {
-		return fail(http.StatusServiceUnavailable)
+		return failureReply(defect(nil))
 	}
 	return httpedge.Response{HTTPStatus: http.StatusOK, Body: out.Wire()}
 }

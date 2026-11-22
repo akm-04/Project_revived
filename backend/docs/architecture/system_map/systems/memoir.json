@@ -1,0 +1,216 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [
+  {
+   "count": 11,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 12,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 12,
+   "file": "docs/i9/I9_MEMOIR_V1.json"
+  },
+  {
+   "count": 12,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  }
+ ],
+ "decorated_by": [
+  "observing"
+ ],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/memoir_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "memoir"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "memoir_players": [
+    "memoirstore.LockTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "memoir_players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/memoir_dispatcher.go",
+    "line": 42
+   },
+   "mid": 2304,
+   "name": "MEMORIES_OF_SCHOOL_GET_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/memoir_dispatcher.go",
+    "line": 42
+   },
+   "mid": 2305,
+   "name": "MEMORIES_OF_SCHOOL_START_GAME"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/memoir_dispatcher.go",
+    "line": 42
+   },
+   "mid": 2306,
+   "name": "MEMORIES_OF_SCHOOL_SAVE_MAP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/memoir_dispatcher.go",
+    "line": 42
+   },
+   "mid": 2307,
+   "name": "MEMORIES_OF_SCHOOL_OPEN_BOX"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/memoir_dispatcher.go",
+    "line": 42
+   },
+   "mid": 2308,
+   "name": "MEMORIES_OF_SCHOOL_ENTER_NEXT_FLOOR"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/memoir_dispatcher.go",
+    "line": 42
+   },
+   "mid": 2309,
+   "name": "MEMORIES_OF_SCHOOL_GET_ENEMY_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/memoir_dispatcher.go",
+    "line": 42
+   },
+   "mid": 2310,
+   "name": "MEMORIES_OF_SCHOOL_FIGHT_MONSTER"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/memoir_dispatcher.go",
+    "line": 42
+   },
+   "mid": 2311,
+   "name": "MEMORIES_OF_SCHOOL_FIGHT_PLAYER"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/memoir_dispatcher.go",
+    "line": 42
+   },
+   "mid": 2312,
+   "name": "MEMORIES_OF_SCHOOL_ABANDON_GAME"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/memoir_dispatcher.go",
+    "line": 42
+   },
+   "mid": 2313,
+   "name": "MEMORIES_OF_SCHOOL_GET_FINAL_AWARD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/memoir_dispatcher.go",
+    "line": 42
+   },
+   "mid": 2314,
+   "name": "MEMORIES_OF_SCHOOL_START_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/memoir_dispatcher.go",
+    "line": 42
+   },
+   "mid": 2315,
+   "name": "MEMORIES_OF_SCHOOL_REBORN_HERO"
+  }
+ ],
+ "name": "memoir",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore",
+  "internal/adapters/postgres/memoirstore"
+ ],
+ "tables": {
+  "owned": [
+   "memoir_players",
+   "memoir_tuning"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "gxb_content_activation",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "memoir_players",
+   "memoir_tuning",
+   "player_function_eligibility"
+  ],
+  "written": [
+   "gxb_operation_receipts",
+   "memoir_players"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [
+   "i9_6c_memoir.json",
+   "i9_6c_memoir_map.json"
+  ],
+  "unit": [
+   "battle_test.go",
+   "final_award_test.go",
+   "player_test.go",
+   "reads_test.go",
+   "run_test.go",
+   "start_choice_conformance_test.go"
+  ]
+ }
+}

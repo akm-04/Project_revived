@@ -11,11 +11,18 @@ import (
 	conquerschool "gxb.local/backend/v2/internal/domain/conquerschool"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"io"
+	"sync"
 )
 
 // ConquerCatalogTx reads only the caller-pinned immutable revision. Registration
 // and controlled deployment/backfill must complete before activation.
+var conquerCatalogs sync.Map
+
 func (s Store) ConquerCatalogTx(ctx context.Context, q tx.Queryer, revision string) (conquerschool.Catalog, error) {
+	return memoCatalog(&conquerCatalogs, revision, func() (conquerschool.Catalog, error) { return s.conquerCatalogTx(ctx, q, revision) })
+}
+
+func (s Store) conquerCatalogTx(ctx context.Context, q tx.Queryer, revision string) (conquerschool.Catalog, error) {
 	var out conquerschool.Catalog
 	if q == nil || len(revision) != 64 {
 		return out, conquerschool.ErrUnqualified

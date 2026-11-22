@@ -7,6 +7,7 @@ import (
 	"errors"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
@@ -26,26 +27,33 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/generaldmstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildcampaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildprojection"
+	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
+	"gxb.local/backend/v2/internal/adapters/postgres/leaguestore"
+	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
 	"gxb.local/backend/v2/internal/adapters/postgres/occultstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/sharedroomstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialgiftstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialinboxstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialrelationstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/topfloorstore"
 	"gxb.local/backend/v2/internal/adapters/socialpresentation"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	"gxb.local/backend/v2/internal/application/achievement"
 	appadventure "gxb.local/backend/v2/internal/application/adventure"
 	apparena "gxb.local/backend/v2/internal/application/arena"
+	appbroadcast "gxb.local/backend/v2/internal/application/broadcast"
 	"gxb.local/backend/v2/internal/application/channelchat"
 	"gxb.local/backend/v2/internal/application/frienddm"
 	"gxb.local/backend/v2/internal/application/generaldm"
 	appgeneration "gxb.local/backend/v2/internal/application/generation"
+	"gxb.local/backend/v2/internal/application/guildcore"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	appidentity "gxb.local/backend/v2/internal/application/identitylifecycle"
 	appillusion "gxb.local/backend/v2/internal/application/illusion"
+	applibrary "gxb.local/backend/v2/internal/application/librarylocal"
 	appoccult "gxb.local/backend/v2/internal/application/occult"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/application/realtimewakeup"
@@ -134,6 +142,20 @@ func run() error {
 	if err != nil {
 		log.Fatalf("invalid realtime policy: %v", err)
 	}
+	httpPollIdleTimeout := stockruntime.DefaultHTTPPollIdleTimeout
+	if value := os.Getenv("GXB_REALTIME_HTTP_IDLE_TIMEOUT"); value != "" {
+		httpPollIdleTimeout, err = time.ParseDuration(value)
+		if err != nil || httpPollIdleTimeout <= 0 {
+			log.Fatalf("invalid realtime HTTP poll idle timeout: %q", value)
+		}
+	}
+	httpPollHoldTimeout := stockruntime.DefaultHTTPPollHoldTimeout
+	if value := os.Getenv("GXB_REALTIME_HTTP_HOLD_TIMEOUT"); value != "" {
+		httpPollHoldTimeout, err = time.ParseDuration(value)
+		if err != nil || httpPollHoldTimeout <= 0 {
+			log.Fatalf("invalid realtime HTTP poll hold timeout: %q", value)
+		}
+	}
 	admission, err := stockruntime.NewAdmissionLimiter(runtimePolicy)
 	if err != nil {
 		log.Fatalf("invalid realtime admission policy: %v", err)
@@ -221,10 +243,16 @@ func run() error {
 		return err
 	}
 	channelService := channelchat.Service{Runner: presenceRunner, Operations: presenceOperations, Reader: channelchatread.Reader{},
-		Owners: channelchat.Owners{Illusion: channelchatread.IllusionRoomReader{Store: sharedroomstore.Store{}, Content: contentstore.Store{}},
+		Owners: channelchat.Owners{Arena: channelchatread.ArenaReportReader{TopFloor: topfloorstore.Store{}, Arena: arenastore.Store{}, League: leaguestore.Store{}, Content: contentstore.Store{}},
+			Illusion:          channelchatread.IllusionRoomReader{Store: sharedroomstore.Store{}, Content: contentstore.Store{}},
 			AdventureIllusion: channelchatread.AdventureIllusionRoomReader{Store: sharedroomstore.Store{}, Content: contentstore.Store{}},
-			Occult:            channelchatread.OccultRoomReader{Store: sharedroomstore.Store{}}}}
-	chatDispatcher, err := stockruntime.NewChannelChatDispatcher(connectionsRegistry, channelService, stockruntime.RealtimePublisher{Registry: chatEvents, Limits: limits.Default()}, stockruntime.DefaultChannelChatPolicy(runtimePolicy.MaxConnections))
+			Occult:            channelchatread.OccultRoomReader{Store: sharedroomstore.Store{}},
+			Defense:           channelchatread.DefenseRoomReader{Store: sharedroomstore.Store{}}}}
+	chatPolicy := stockruntime.DefaultChannelChatPolicy(runtimePolicy.MaxConnections)
+	if err := chatPolicy.ApplyEnv(os.Getenv); err != nil {
+		log.Fatalf("invalid channel chat policy: %v", err)
+	}
+	chatDispatcher, err := stockruntime.NewChannelChatDispatcher(connectionsRegistry, channelService, stockruntime.RealtimePublisher{Registry: chatEvents, Limits: limits.Default()}, chatPolicy)
 	if err != nil {
 		return err
 	}
@@ -265,6 +293,16 @@ func run() error {
 	}
 	achievementRuntime := &achievement.Runtime{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: presenceRunner}, Fresh: pool, Active: contentstore.Store{Queryer: pool}}
 	achievementNotices := stockruntime.AchievementNoticeHandler{Service: achievement.Service{Store: achievementstore.Store{}, Content: contentstore.Store{Queryer: pool}, Runtime: achievementRuntime}, Operations: presenceOperations, Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: achievementEvents, Limits: limits.Default()}, Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections, OnDeliveryError: func(e error) { log.Printf("achievement notice delivery degraded: %v", e) }}
+	libraryPartnerLogEvents, err := stockruntime.NewLibraryPartnerLogNoticeRegistry()
+	if err != nil {
+		log.Fatal(err)
+	}
+	libraryPartnerLogNotices := stockruntime.LibraryPartnerLogNoticeHandler{Service: applibrary.PartnerLogReader{Queryer: pool, Library: librarystore.Store{}}, Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: libraryPartnerLogEvents, Limits: limits.Default()}, Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections, OnDeliveryError: func(e error) { log.Printf("library partner log notice delivery degraded: %v", e) }}
+	libraryMissionEvents, err := stockruntime.NewLibraryMissionNoticeRegistry()
+	if err != nil {
+		log.Fatal(err)
+	}
+	libraryMissionNotices := stockruntime.LibraryMissionNoticeHandler{Service: applibrary.MissionNoticeReader{Queryer: pool, Library: librarystore.Store{}}, Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: libraryMissionEvents, Limits: limits.Default()}, Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections, OnDeliveryError: func(e error) { log.Printf("library mission notice delivery degraded: %v", e) }}
 	tournamentEvents, err := stockruntime.NewTournamentNoticeRegistry()
 	if err != nil {
 		log.Fatal(err)
@@ -307,7 +345,7 @@ func run() error {
 	if err != nil {
 		log.Fatal(err)
 	}
-	adventureRooms := stockruntime.AdventureRoomNoticeHandler{Service: appadventure.Mode{Fresh: pool, RoomStore: sharedroomstore.Store{}, Directory: i4store.PlayerDirectoryReader{}},
+	adventureRooms := stockruntime.AdventureRoomNoticeHandler{Service: appadventure.Mode{Fresh: pool, RoomStore: sharedroomstore.Store{}, Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}},
 		Delivery: stockruntime.RoomDelivery{Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: adventureRoomEvents, Limits: limits.Default()},
 			Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections,
 			OnDeliveryError: func(err error) { log.Printf("adventure room notice degraded: %v", err) }},
@@ -318,13 +356,32 @@ func run() error {
 	}
 	guildFightNotices := stockruntime.GuildFightNoticeHandler{Registered: guildcampaignstore.Store{}, Queryer: pool, Registry: connectionsRegistry,
 		Publisher: stockruntime.RealtimePublisher{Registry: guildFightEvents, Limits: limits.Default()}, MaxHandles: runtimePolicy.MaxConnections}
+	guildApplyNoticeEvents, err := stockruntime.NewGuildApplyNoticeRegistry()
+	if err != nil {
+		log.Fatal(err)
+	}
+	guildApplyNotices := stockruntime.GuildApplyNoticeHandler{Members: guildstore.Store{Queryer: pool},
+		Delivery: stockruntime.RoomDelivery{Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: guildApplyNoticeEvents, Limits: limits.Default()},
+			Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections,
+			OnDeliveryError: func(err error) { log.Printf("guild apply notice degraded: %v", err) }}}
 	roomInviteNotices := stockruntime.RoomInviteNoticeListHandler{Delivery: stockruntime.RoomDelivery{Registry: connectionsRegistry, Publisher: stockruntime.RealtimePublisher{Registry: socialEvents, Limits: limits.Default()},
 		Authority: authority, Time: postgres.AuthoritativeTime{Queryer: pool}, MaxHandles: runtimePolicy.MaxConnections,
 		OnDeliveryError: func(err error) { log.Printf("room invite notice list degraded: %v", err) }}}
+	broadcastEvents, err := stockruntime.NewBroadcastNoticeRegistry()
+	if err != nil {
+		log.Fatal(err)
+	}
+	broadcastNotices := stockruntime.BroadcastNoticeHandler{DB: pool, Names: i4store.PlayerRootLocker{}, Registry: connectionsRegistry,
+		Publisher: stockruntime.RealtimePublisher{Registry: broadcastEvents, Limits: limits.Default()}, MaxHandles: runtimePolicy.MaxConnections,
+		OnDeliveryError: func(err error) { log.Printf("broadcast delivery degraded: %v", err) }}
 	wakeups, err := realtimewakeup.NewRegistry(realtimewakeup.Registration{Route: apparena.FriendFightNoticeRoute, Handler: friendNotices}, realtimewakeup.Registration{Route: apparena.TournamentNoticeRoute, Handler: tournamentNotices}, realtimewakeup.Registration{Route: postgres.SocialReloadRoute, Handler: socialHandler}, realtimewakeup.Registration{Route: frienddm.WakeupRoute, Handler: friendReconcile}, realtimewakeup.Registration{Route: generaldm.WakeupRoute, Handler: generalReconcile}, realtimewakeup.Registration{Route: achievement.NoticeRoute, Handler: achievementNotices}, realtimewakeup.Registration{Route: appillusion.RoomNoticeRoute, Handler: illusionRooms}, realtimewakeup.Registration{Route: appoccult.RoomNoticeRoute, Handler: occultRooms}, realtimewakeup.Registration{Route: appadventure.NoticeRoute, Handler: adventureNotices},
 		realtimewakeup.Registration{Route: appadventure.RoomNoticeRoute, Handler: adventureRooms},
 		realtimewakeup.Registration{Route: roominvite.NoticeListRoute, Handler: roomInviteNotices},
-		realtimewakeup.Registration{Route: stockruntime.GuildCampaignNoticeRoute, Handler: guildFightNotices})
+		realtimewakeup.Registration{Route: guildcore.ApplyNoticeRoute, Handler: guildApplyNotices},
+		realtimewakeup.Registration{Route: appbroadcast.Route, Handler: broadcastNotices},
+		realtimewakeup.Registration{Route: stockruntime.GuildCampaignNoticeRoute, Handler: guildFightNotices},
+		realtimewakeup.Registration{Route: applibrary.PartnerLogNoticeRoute, Handler: libraryPartnerLogNotices},
+		realtimewakeup.Registration{Route: applibrary.MissionNoticeRoute, Handler: libraryMissionNotices})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -392,6 +449,41 @@ func run() error {
 	defer ln.Close()
 	go func() { <-ctx.Done(); _ = ln.Close() }()
 	log.Printf("gxb-realtime I4 listening on %s", cfg.RealtimeAddr)
+	httpPollFailure := make(chan error, 1)
+	if address := os.Getenv("GXB_REALTIME_HTTP_ADDR"); address != "" {
+		pollListener, err := net.Listen("tcp", address)
+		if err != nil {
+			stop()
+			<-listenerDone
+			<-reconcileDone
+			<-generalDone
+			return err
+		}
+		pollServer, err := stockruntime.NewHTTPPollServer(ctx, server, httpPollIdleTimeout, httpPollHoldTimeout)
+		if err != nil {
+			_ = pollListener.Close()
+			stop()
+			<-listenerDone
+			<-reconcileDone
+			<-generalDone
+			return err
+		}
+		httpServer := &http.Server{ReadHeaderTimeout: 5 * time.Second, Handler: pollServer.Handler()}
+		pollDone := make(chan struct{})
+		go func() {
+			defer close(pollDone)
+			if e := httpServer.Serve(pollListener); e != nil && !errors.Is(e, http.ErrServerClosed) && ctx.Err() == nil {
+				httpPollFailure <- e
+				stop()
+			}
+		}()
+		defer func() {
+			_ = httpServer.Close()
+			pollServer.Close()
+			<-pollDone
+		}()
+		log.Printf("gxb-realtime HTTP poll listening on %s%s", address, stockruntime.HTTPPollPath)
+	}
 	listenerSlots := make(chan struct{}, runtimePolicy.MaxConnections)
 	var connections sync.WaitGroup
 	defer func() {
@@ -412,6 +504,8 @@ func run() error {
 				case failure := <-reconcileFailure:
 					return failure
 				case failure := <-generalFailure:
+					return failure
+				case failure := <-httpPollFailure:
 					return failure
 				default:
 					return nil

@@ -13,8 +13,10 @@ import (
 	"gxb.local/backend/v2/internal/application/i5"
 	lib "gxb.local/backend/v2/internal/application/librarylocal"
 	d "gxb.local/backend/v2/internal/domain/achievement"
+	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
@@ -33,6 +35,24 @@ type Notice struct {
 	CompleteTime  time.Time
 }
 
+// The achievement_notices CHECK constraint's bounds; a notice outside them
+// cannot be stored, so it is dropped as display-only instead of aborting the
+// earned tier fact's transaction (D1).
+const (
+	minimumNoticeAchievementID int64 = 100001
+	maximumNoticeAchievementID int64 = 100033
+	maximumNoticeTier                = 3
+)
+
+var ErrInvalidNotice = errors.New("achievement: invalid notice")
+
+func (n Notice) Validate() error {
+	if !n.Player.Valid() || n.AchievementID < minimumNoticeAchievementID || n.AchievementID > maximumNoticeAchievementID || n.Tier < 1 || n.Tier > maximumNoticeTier || n.CompleteTime.IsZero() {
+		return ErrInvalidNotice
+	}
+	return nil
+}
+
 type Counter interface {
 	OwnedStateCountsTx(context.Context, ca.CoherentReadScope, identity.PlayerID, []int64) map[int64]int64
 }
@@ -41,6 +61,11 @@ type ActiveContent interface {
 }
 type Fence interface {
 	FenceActorTx(context.Context, tx.Tx, identity.ActorContext, time.Time) error
+}
+
+// StackReader is the I5-owned typed read of one canonical item stack.
+type StackReader interface {
+	ReadStackTx(context.Context, tx.Queryer, identity.PlayerID, int64) (economy.StackState, bool, error)
 }
 
 // Runtime carries the full-catalog collaborators; Service without it keeps
@@ -52,6 +77,7 @@ type Runtime struct {
 	Counts      Counter
 	Fence       Fence
 	Grants      i5.TxGrantSettler
+	Stacks      StackReader
 	Receipts    receipt.Store
 	ReceiptRead receipt.Reader
 	Directory   Directory
@@ -59,18 +85,25 @@ type Runtime struct {
 }
 
 func (r *Runtime) ready() bool {
-	return r != nil && r.Timed.Runner.DB != nil && r.Timed.Binder.Time != nil && r.Fresh != nil && r.Active != nil && r.Counts != nil && r.Fence != nil && r.Grants != nil && r.Receipts != nil && r.ReceiptRead != nil
+	return r != nil && r.Timed.Runner.DB != nil && r.Timed.Binder.Time != nil && r.Fresh != nil && r.Active != nil && r.Counts != nil && r.Fence != nil && r.Grants != nil && r.Stacks != nil && r.Receipts != nil && r.ReceiptRead != nil
 }
 
 // Families selects the owned-state achievements an owner's command can change.
 var Families = map[string][]int64{
-	"Hero":        {d.NormalHeroesID, d.AwakenedHeroesID, d.SkinsID},
-	"Pet":         {d.PetsID},
-	"Book":        {d.TextbooksID},
-	"Conquer":     {d.RegionsID},
-	"Course":      {d.SubjectsID},
-	"Inscription": {d.SuitsID},
-	"Dorm":        {d.RoomsID, d.ExpandedRoomsID},
+	"Hero":          {d.NormalHeroesID, d.AwakenedHeroesID, d.SkinsID, d.TitanID},
+	"Pet":           {d.PetsID},
+	"Book":          {d.TextbooksID},
+	"Conquer":       {d.RegionsID},
+	"Course":        {d.SubjectsID},
+	"Inscription":   {d.SuitsID},
+	"Dorm":          {d.RoomsID, d.ExpandedRoomsID},
+	"GuildCampaign": {d.GuildDamageID},
+	"PetCampaign":   {d.SkyTowerID},
+	"Campaign":      {d.CampaignStarsID},
+	"SchoolStory":   {d.SchoolStoriesID},
+	"Mentor":        {d.GraduatedStudentsID},
+	"Memoir":        {d.MemoirFloorsID},
+	"Occult":        {d.OccultChaptersID},
 }
 
 func allFamilies() []int64 { return append(append([]int64{}, d.OwnedStateIDs...), d.SelectedID) }
@@ -163,7 +196,7 @@ func (s Service) Load(c context.Context, a identity.ActorContext, parent operati
 		if e != nil {
 			return e
 		}
-		out, e = s.viewTx(c, sc.Tx, catalog, a.PlayerID)
+		out, e = s.viewTx(c, sc.Tx, catalog, a.PlayerID, sc.Operation.DecisionAt())
 		return e
 	})
 	return out, e
@@ -182,7 +215,9 @@ func (s Service) observeOwnedTx(c context.Context, sc gen.TimedScope, rev string
 	if e != nil {
 		return catalog, e
 	}
-	// C4F_LEGACY_STATE_BACKFILL_V1: a legacy character gets its root now.
+	// C4F_LEGACY_STATE_BACKFILL_V1: a legacy character gets its root now, and
+	// every owned-state family and 100014 are evaluated at this first instant
+	// even when an owner command triggered the observation for one family.
 	if !tracked {
 		if e = s.Store.InitFreshTx(c, sc.Tx, p, rev, at); e != nil {
 			return catalog, e
@@ -190,9 +225,7 @@ func (s Service) observeOwnedTx(c context.Context, sc gen.TimedScope, rev string
 		if root, _, e = s.Store.ReadRootTx(c, sc.Tx, p, true); e != nil {
 			return catalog, e
 		}
-	}
-	if root.UpdatedAt.After(at) {
-		return catalog, d.ErrConflict
+		families = allFamilies()
 	}
 	scope, e := ca.NewCoherentReadScope(tx.Scope{Tx: sc.Tx, Operation: sc.Operation.Operation(), Attempt: sc.Attempt, Options: sc.Options}, rev, at)
 	if e != nil {
@@ -271,7 +304,7 @@ func (s Service) earnedTx(c context.Context, q tx.Queryer, p identity.PlayerID) 
 	return root, streaks, earned, nil
 }
 
-func (s Service) viewTx(c context.Context, q tx.Queryer, catalog d.Catalog, p identity.PlayerID) (View, error) {
+func (s Service) viewTx(c context.Context, q tx.Queryer, catalog d.Catalog, p identity.PlayerID, at time.Time) (View, error) {
 	var out View
 	root, streaks, earned, e := s.earnedTx(c, q, p)
 	if e != nil {
@@ -279,8 +312,16 @@ func (s Service) viewTx(c context.Context, q tx.Queryer, catalog d.Catalog, p id
 	}
 	progress := map[int64]int64{d.SelectedID: root.Progress}
 	for _, streak := range streaks {
+		if streak.AchievementID == d.GreatCustomerID {
+			continue
+		}
 		progress[streak.AchievementID] = streak.Current
 	}
+	count, e := s.Store.DailyCountTx(c, q, p, d.GreatCustomerID, modes.Day(at))
+	if e != nil {
+		return out, e
+	}
+	progress[d.GreatCustomerID] = count
 	for _, row := range catalog.Rows {
 		entry := Entry{AchievementID: row.ID, Status: d.StatusOf(row.ID), Progress: progress[row.ID]}
 		for i, at := range earned[row.ID] {
@@ -364,6 +405,10 @@ func (s Service) Claim(c context.Context, a identity.ActorContext, op operation.
 		for _, item := range level.Items {
 			lines = append(lines, grant.Line{Kind: grant.StackItem, ItemID: item[0], Amount: item[1]})
 		}
+		heldBefore, e := s.heldItemsTx(c, sc.Tx, a.PlayerID, level.Items)
+		if e != nil {
+			return e
+		}
 		plan := grant.Plan{PlayerID: a.PlayerID, Source: grant.SourceIdentity{Domain: "achievement", Operation: "point-level-award", BusinessKey: strconv.FormatInt(int64(a.PlayerID), 10), Occurrence: strconv.FormatInt(level.ID, 10), PolicyVersion: CatalogPolicy}, Lines: lines}
 		granted, e := s.Runtime.Grants.SettleGrantTx(c, sc.Tx, a, plan, sc.Operation.Operation(), i5.GrantTxOptions{AllowOverflowMail: true})
 		if e != nil {
@@ -377,6 +422,17 @@ func (s Service) Claim(c context.Context, a identity.ActorContext, op operation.
 		for _, award := range granted.Awards {
 			if award.TableID > 0 && award.ItemNum > 0 {
 				out.Awards = append(out.Awards, award)
+			}
+		}
+		// The stock window sets its local stack to awards[1].item_num after the
+		// grant, so an already-held first item must carry the durable total.
+		if len(out.Awards) > 0 && heldBefore[out.Awards[0].TableID] {
+			stack, found, e := s.Runtime.Stacks.ReadStackTx(c, sc.Tx, a.PlayerID, out.Awards[0].TableID)
+			if e != nil {
+				return e
+			}
+			if found && stack.Quantity > 0 {
+				out.Awards[0].ItemNum = stack.Quantity
 			}
 		}
 		raw, e := json.Marshal(out)
@@ -402,6 +458,26 @@ func (s Service) Claim(c context.Context, a identity.ActorContext, op operation.
 			return ClaimResult{}, errors.Join(e, d.ErrConflict)
 		}
 		return out, json.Unmarshal(r.ResultPayload, &out)
+	}
+	return out, nil
+}
+
+// heldItemsTx records which of a claim level's items the player already held
+// before the grant.
+func (s Service) heldItemsTx(c context.Context, q tx.Queryer, p identity.PlayerID, items [][2]int64) (map[int64]bool, error) {
+	out := make(map[int64]bool, len(items))
+	for _, item := range items {
+		if item[0] <= 0 {
+			continue
+		}
+		if _, seen := out[item[0]]; seen {
+			continue
+		}
+		stack, found, e := s.Runtime.Stacks.ReadStackTx(c, q, p, item[0])
+		if e != nil {
+			return nil, e
+		}
+		out[item[0]] = found && stack.Quantity > 0
 	}
 	return out, nil
 }

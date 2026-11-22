@@ -256,3 +256,41 @@ func TestFilledTeamsTopsUpWithStrongestUnusedHeroes(t *testing.T) {
 		t.Fatalf("saved teams beyond the count are kept: %v", got)
 	}
 }
+
+func TestOfferRecomputeDropsTargetWhoseRankMoved(t *testing.T) {
+	c := catalog(t)
+	at := local(21, 12, 0)
+	standing := func(pid identity.PlayerID, points int64) Standing {
+		return Standing{Player: pid, Server: 1, HasDefense: true, Position: Position{Level: LevelJunior3, Points: points, PointsAt: at}}
+	}
+	self, target := identity.PlayerID(100001), identity.PlayerID(200001)
+	before := []Standing{standing(target, 5000), standing(self, 4500), standing(300001, 4450), standing(400001, 4400)}
+	if !slices.Contains(c.Offer(c.Rank(before), self, 1, 1), target) {
+		t.Fatal("better-ranked target was not offered")
+	}
+	issued := c.OfferSnapshot(c.Rank(before), self, []identity.PlayerID{target})
+	if issued == nil || MatchOfferSnapshot(issued, c.Rank(before), self, target) != nil {
+		t.Fatal("an unmoved target was refused")
+	}
+	after := []Standing{standing(self, 4500), standing(300001, 4450), standing(400001, 4400), standing(target, 3000)}
+	if slices.Contains(c.Offer(c.Rank(after), self, 1, 1), target) || MatchOfferSnapshot(issued, c.Rank(after), self, target) == nil {
+		t.Fatal("a target that moved out of the rank band was still accepted")
+	}
+	// The target drops one rank but stays inside the issued band, as when the
+	// first attacker swaps with it: the stored rank still refuses the fight.
+	swapped := []Standing{standing(300001, 4510), standing(target, 4450), standing(self, 4300), standing(400001, 4200)}
+	if !slices.Contains(c.Offer(c.Rank(swapped), self, 1, 1), target) {
+		t.Fatal("fixture target must remain inside the issued band")
+	}
+	if MatchOfferSnapshot(issued, c.Rank(swapped), self, target) == nil {
+		t.Fatal("a target that dropped one rank inside the band was still accepted")
+	}
+	// A challenger that moved to the top of the group has no better-ranked band.
+	movedSelf := []Standing{standing(self, 5000), standing(target, 4500), standing(300001, 4450), standing(400001, 4400)}
+	if MatchOfferSnapshot(issued, c.Rank(movedSelf), self, target) == nil {
+		t.Fatal("a moved challenger still accepted its issued target")
+	}
+	if MatchOfferSnapshot(nil, c.Rank(before), self, target) == nil {
+		t.Fatal("an offer issued before rank recording must be stale")
+	}
+}

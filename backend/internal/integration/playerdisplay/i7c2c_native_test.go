@@ -15,6 +15,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
 	appboot "gxb.local/backend/v2/internal/application/bootstrap"
+	"gxb.local/backend/v2/internal/application/broadcast"
 	hero "gxb.local/backend/v2/internal/application/characterhero"
 	app "gxb.local/backend/v2/internal/application/dormhouse"
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -38,7 +39,7 @@ func dormService(p *pg.Pool, db tx.Beginner) app.Service {
 	runner := tx.Runner{DB: db}
 	exchange := i5.Service{Runner: runner, Store: values, Content: cs, Privileges: i5.BaselinePrivilegeProvider{}, Functions: i5.PetStarterFunctionAnnouncements{}, Directory: i4store.DirectoryLevelProjection{}, Backpack: values, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, RedeemSecret: []byte("i7c2c-fixture-redeem-key-000000000")}
 	exp := hero.Service{ProgressionStore: hs, Progression: cs}
-	return app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner}, Reads: tx.Runner{DB: p}, Heroes: characterstore.LibraryHeroPort{Store: hs}, Owner: owner, Content: cs, Players: i4store.PlayerRootLocker{}, Fence: values, Costs: i5.MaterialCostDebiter{Store: values, Content: cs}, Values: values, EXP: exp, Exchange: exchange, Receipts: kernelstore.Store{}}
+	return app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner}, Reads: tx.Runner{DB: p}, Heroes: characterstore.LibraryHeroPort{Store: hs}, Awakening: hero.RawAwakeningObservationReader{Heroes: hs, Births: characterstore.RawAwakeningStore{}}, Owner: owner, Content: cs, Players: i4store.PlayerRootLocker{}, Fence: values, Costs: i5.MaterialCostDebiter{Store: values, Content: cs}, Values: values, EXP: exp, Exchange: exchange, Receipts: kernelstore.Store{}, Broadcast: pg.BroadcastEmitter{}}
 }
 
 // Explicit canonical prerequisite fixtures qualify Dorm conditional behavior,
@@ -291,8 +292,18 @@ func TestI7C2CLoungeFractionsCapOldComfortForeignAndNaturalExpansion(t *testing.
 		t.Fatal("cap bank", f, e)
 	}
 	exec(t, p, `UPDATE player_dorm_heroes SET lounge_anchor=clock_timestamp()+interval '1 hour' WHERE player_id=$1`, int64(a.PlayerID))
-	if _, e = s.Read(ctx, a, op(), 2514, 0, 1); e == nil {
-		t.Fatal("backward anchor")
+	backwardAnchor, e := s.Owner.ReadHeroTx(ctx, p, h.Ref())
+	if e != nil {
+		t.Fatal(e)
+	}
+	beforeBackward := skillRead(t, p, a, 1).Exp
+	if _, e = s.Read(ctx, a, op(), 2514, 0, 1); e != nil {
+		t.Fatal("backward anchor", e)
+	}
+	afterBackward := skillRead(t, p, a, 1)
+	f, e = s.Owner.ReadHeroTx(ctx, p, h.Ref())
+	if e != nil || afterBackward.Exp != beforeBackward || !f.LoungeAnchor.Equal(backwardAnchor.LoungeAnchor) {
+		t.Fatal("backward anchor settled or moved", afterBackward.Exp, beforeBackward, f, e)
 	}
 }
 func TestI7C2CUnknownCommitRetainedAdmissionAndConcurrentSlot(t *testing.T) {
@@ -665,5 +676,72 @@ func TestI7C2CKeyExchangeOverflowAndActorGate(t *testing.T) {
 	exec(t, p, `UPDATE account_sessions SET revoked_at=clock_timestamp(),revocation_reason='i7c2c-test',liveness_version=liveness_version+1 WHERE session_id=$1::uuid`, a.SessionID.UUID().String())
 	if _, e := s.Command(ctx, a, app.Command{Family: app.Open, ItemID: dormKey(c, 2, false), Floor: 1, Position: 1}, op()); e == nil {
 		t.Fatal("revoked actor succeeded")
+	}
+}
+
+func TestI7C2CFinalExpansionAnnouncesDormExpand(t *testing.T) {
+	p := pool(t)
+	a, _, c := dormFixture(t, p)
+	s := dormService(p, p)
+	villa := dormOpen(t, s, a, c, 4, 1)
+	announcements := func(player identity.PlayerID) int64 {
+		t.Helper()
+		var count int64
+		if e := p.QueryRow(ctx, `SELECT count(*) FROM broadcast_outbox WHERE player_id=$1 AND msg_type=$2`, int64(player), broadcast.DormExpand).Scan(&count); e != nil {
+			t.Fatal(e)
+		}
+		return count
+	}
+	if got := announcements(a.PlayerID); got != 0 {
+		t.Fatal("announcement before final expansion", got)
+	}
+	for level := int64(1); level <= 3; level++ {
+		dormCommand(t, s, a, app.Command{Family: app.Start, HouseID: villa})
+		exec(t, p, `UPDATE player_dorm_rooms SET pending_expansion=jsonb_set(pending_expansion,'{StartedAt}',to_jsonb(date_trunc('second',clock_timestamp()-interval '4 hours'))) WHERE player_id=$1 AND house_id=$2`, int64(a.PlayerID), villa)
+		dormCommand(t, s, a, app.Command{Family: app.Finish, HouseID: villa})
+		room, e := s.Owner.ReadRoomTx(ctx, p, a.PlayerID, villa)
+		if e != nil || room.Pending != nil || room.ExpansionLevel != level {
+			t.Fatal(level, room, e)
+		}
+		want := int64(0)
+		if level == 3 {
+			want = 1
+		}
+		if got := announcements(a.PlayerID); got != want {
+			t.Fatal(level, "announcement count", got)
+		}
+	}
+	var server, mid, msgType, player int64
+	var fields string
+	if e := p.QueryRow(ctx, `SELECT logical_server_id,mid,msg_type,player_id,fields::text FROM broadcast_outbox WHERE player_id=$1 AND msg_type=$2`, int64(a.PlayerID), broadcast.DormExpand).Scan(&server, &mid, &msgType, &player, &fields); e != nil {
+		t.Fatal(e)
+	}
+	if server != int64(a.LogicalServerID) || mid != int64(broadcast.ActivityMID) || msgType != broadcast.DormExpand || player != int64(a.PlayerID) || fields != "{}" {
+		t.Fatal(server, mid, msgType, player, fields)
+	}
+
+	// The client's expansion timer only reads when it runs out; the stock
+	// FINISH_EXPAND_HOUSE command is the paid skip button. A natural deadline
+	// therefore settles through the owner read and must still announce.
+	natural, _, naturalCatalog := dormFixture(t, p)
+	naturalService := dormService(p, p)
+	naturalVilla := dormOpen(t, naturalService, natural, naturalCatalog, 4, 1)
+	for level := int64(1); level <= 3; level++ {
+		dormCommand(t, naturalService, natural, app.Command{Family: app.Start, HouseID: naturalVilla})
+		exec(t, p, `UPDATE player_dorm_rooms SET pending_expansion=jsonb_set(pending_expansion,'{StartedAt}',to_jsonb(date_trunc('second',clock_timestamp()-interval '4 hours'))) WHERE player_id=$1 AND house_id=$2`, int64(natural.PlayerID), naturalVilla)
+		if _, e := naturalService.Read(ctx, natural, op(), 2514, 0, naturalVilla); e != nil {
+			t.Fatal("natural read", level, e)
+		}
+		room, e := naturalService.Owner.ReadRoomTx(ctx, p, natural.PlayerID, naturalVilla)
+		if e != nil || room.Pending != nil || room.ExpansionLevel != level {
+			t.Fatal("natural settlement", level, room, e)
+		}
+		want := int64(0)
+		if level == 3 {
+			want = 1
+		}
+		if got := announcements(natural.PlayerID); got != want {
+			t.Fatal(level, "natural announcement count", got)
+		}
 	}
 }

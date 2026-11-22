@@ -1,0 +1,64 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [
+   {
+    "name": "socialinbox.LockRankNotice",
+    "rank": 370
+   }
+  ],
+  "row_lock_methods": {
+   "social_notices": [
+    "socialinboxstore.LockNoticeSourceTx"
+   ]
+  },
+  "row_locks": [
+   "social_notices"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [],
+ "name": "socialinbox",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/socialinboxstore"
+ ],
+ "tables": {
+  "owned": [
+   "social_guild_invite_invalidations",
+   "social_guild_invite_materializations",
+   "social_notices"
+  ],
+  "read": [
+   "social_notices"
+  ],
+  "written": [
+   "social_notices"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "guildinvite",
+   "playerdisplay",
+   "socialactivation",
+   "socialprojection",
+   "socialrelation"
+  ],
+  "scenarios_naming": [],
+  "unit": [
+   "locks_test.go",
+   "room_invite_notice_test.go"
+  ]
+ }
+}

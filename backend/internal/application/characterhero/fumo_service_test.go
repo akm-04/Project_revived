@@ -12,12 +12,56 @@ import (
 	"testing"
 	"time"
 
+	appconsume "gxb.local/backend/v2/internal/application/dailyconsume"
+	appgeneration "gxb.local/backend/v2/internal/application/generation"
+	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/player"
+	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
+
+type quickFumoCounters struct{}
+
+func (*quickFumoCounters) LockBuyTx(context.Context, tx.Tx, identity.PlayerID, int64, time.Time) (appconsume.LockedCounters, appconsume.BuyCounters, error) {
+	return appconsume.LockedCounters{}, appconsume.BuyCounters{}, nil
+}
+func (*quickFumoCounters) AdvanceDailyTx(context.Context, tx.Tx, identity.PlayerID, appconsume.LockedCounters, int64, int64) (int64, error) {
+	return 1, nil
+}
+
+type quickFumoDebit struct{}
+
+func (quickFumoDebit) DebitMaterialCostTx(context.Context, tx.Tx, identity.PlayerID, appi5.MaterialCost, operation.Context) (appi5.MaterialDebitResult, error) {
+	return appi5.MaterialDebitResult{}, nil
+}
+
+// K3' (I9_11_CLOCK_ROLLBACK_V1): a backwards decision never rewrites a stored
+// forward hero updated_at.
+func TestQuickFumoClampsBackwardDecisionToStoredHero(t *testing.T) {
+	created := time.Unix(1_700_000_000, 0).UTC()
+	stored := created.Add(time.Hour)
+	h := heroAt(11, 1001, 1001, 3, 10, 0, created)
+	h.CreatedAt, h.UpdatedAt = created, stored
+	h.Equipment[0] = 1
+	svc, ps, _ := fumoFixture(t, h, 1000, nil, 20001016, true)
+	runner := tx.Runner{DB: fakeDB{}}
+	svc.Timed = appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: ca73Time{at: created}}, Runner: runner}
+	svc.DailyConsume = &quickFumoCounters{}
+	svc.MaterialCosts = quickFumoDebit{}
+	got, err := svc.QuickFumo(context.Background(), testActor(t), 11, 1, testOp(t, "dddddddd-dddd-4ddd-8ddd-dddddddddddd"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Fumo != 150 || got.Cost != 20 || ps.saves != 1 {
+		t.Fatalf("got=%+v saves=%d", got, ps.saves)
+	}
+	if !ps.heroes[11].UpdatedAt.Equal(stored) {
+		t.Fatalf("quick fumo moved the stored timestamp back: %v want %v", ps.heroes[11].UpdatedAt, stored)
+	}
+}
 
 type fumoOpContent struct {
 	targets   map[int64]character.HeroFumoTarget
@@ -38,6 +82,9 @@ func (c fumoOpContent) HeroFumoMaterialTx(_ context.Context, _ tx.Queryer, _ str
 		return character.HeroFumoMaterial{}, errors.New("missing Fumo material")
 	}
 	return v, nil
+}
+func (fumoOpContent) QuickFumoRuleTx(context.Context, tx.Queryer, string) (character.QuickFumoRule, error) {
+	return character.QuickFumoRule{CrystalCost: 20, FumoGrant: 150, DailyLimit: 1}, nil
 }
 
 func oneStageFumoTarget(id, cap, mana int64) character.HeroFumoTarget {

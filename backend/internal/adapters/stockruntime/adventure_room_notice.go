@@ -36,9 +36,13 @@ type AdventureRoomNoticeSource interface {
 }
 
 func NewAdventureRoomNoticeRegistry() (rt.EventRegistry, error) {
-	return rt.NewEventRegistry(nil, []rt.NoticeRegistration{
-		{ParentMID: mids.MIDPlayerNotice, Namespace: rt.NoticeNamespaceGeneric, NoticeType: AdventureRoomNoticeType, Roles: []rt.Role{rt.World}, Validate: ValidateAdventureRoomNotice},
-	})
+	return rt.NewEventRegistry(
+		[]rt.DirectRegistration{
+			{MID: mids.MIDChatFromFriend, Roles: []rt.Role{rt.World}, Validate: rt.ValidateFriendDM},
+		},
+		[]rt.NoticeRegistration{
+			{ParentMID: mids.MIDPlayerNotice, Namespace: rt.NoticeNamespaceGeneric, NoticeType: AdventureRoomNoticeType, Roles: []rt.Role{rt.World}, Validate: ValidateAdventureRoomNotice},
+		})
 }
 
 func ValidateAdventureRoomNotice(value any) error {
@@ -150,6 +154,34 @@ func (h AdventureRoomNoticeHandler) ReloadAndDeliver(c context.Context, referenc
 			}
 			if err = h.Delivery.Deliver(c, body.Player, mids.MIDPlayerNotice, frame); err != nil {
 				return err
+			}
+		}
+	}
+	if len(view.Chats) > 0 {
+		members := make(map[identity.PlayerID]bool, len(view.Seated))
+		for _, member := range view.Seated {
+			members[member.Player] = true
+		}
+		for _, chat := range view.Chats {
+			if chat.Serial <= 0 {
+				continue
+			}
+			frame := roomChatFrame(chat.Sender, chat.Message, chat.At)
+			for _, raw := range chat.Recipients {
+				player := identity.PlayerID(raw)
+				if !members[player] || !h.Delivered.chatUndelivered(view.RoomID, player, chat.Serial) {
+					continue
+				}
+				delivered, deliverErr := h.Delivery.DeliverOnce(c, player, mids.MIDChatFromFriend, frame)
+				if deliverErr != nil {
+					return deliverErr
+				}
+				if !delivered {
+					// Keep the serial unmarked so a member who is between chat
+					// sockets receives the line on the next room wakeup.
+					continue
+				}
+				h.Delivered.markChat(view.RoomID, player, chat.Serial)
 			}
 		}
 	}

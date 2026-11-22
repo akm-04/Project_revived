@@ -10,9 +10,11 @@ import (
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/application/playerroot"
+	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/mail"
 	d "gxb.local/backend/v2/internal/domain/worldboss"
+	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -31,9 +33,8 @@ type Store interface {
 	ReadTotalTx(context.Context, tx.Queryer, d.Board, identity.PlayerID) (d.Total, bool, error)
 	SaveTotalTx(context.Context, tx.Tx, d.Total, time.Time) error
 	ReadRankTx(context.Context, tx.Queryer, d.Board, int64) ([]d.RankEntry, error)
-	InsertAttemptTx(context.Context, tx.Tx, d.Attempt) error
-	FindAttemptTx(context.Context, tx.Queryer, identity.PlayerID, int64, int64) (d.Attempt, bool, error)
-	SaveAttemptTx(context.Context, tx.Tx, d.Attempt) error
+	InsertSettlementTx(context.Context, tx.Tx, ids.UUID, identity.PlayerID, int64, time.Time) error
+	ReadSettlementTx(context.Context, tx.Queryer, ids.UUID) (int64, bool, error)
 	CountChallengersTx(context.Context, tx.Queryer, int64, int64) (int64, error)
 }
 
@@ -65,8 +66,14 @@ type Heroes interface {
 	OverlayMID1(context.Context, tx.Queryer, identity.ActorContext, bool, time.Time, map[string]any) error
 }
 
+// Guilds is the I6C owner's typed guild identity read for the 276 rank rows.
+type Guilds interface {
+	GuildNamesTx(context.Context, tx.Queryer, identity.LogicalServerID, []identity.PlayerID) (map[identity.PlayerID]string, error)
+}
+
 type Combat interface {
 	StartTx(context.Context, tx.Tx, ca.CoherentReadScope, cb.StartRequest) (cb.Started, error)
+	CurrentAttemptTx(context.Context, tx.Queryer, cd.Locator) (cb.CurrentAttempt, bool, error)
 	AttestSummaryTx(context.Context, tx.Tx, cb.SummaryRequest) (cb.SummaryAttested, error)
 }
 
@@ -79,26 +86,33 @@ type Mail interface {
 }
 
 type Mode struct {
-	Timed       gen.TimedRunner
-	Fresh       tx.Queryer
-	Store       Store
-	Content     Content
-	Fence       Fence
-	Players     Players
-	Directory   Directory
-	Population  Population
-	Heroes      Heroes
-	Combat      Combat
-	Privileges  i5.PrivilegeSnapshotProvider
-	Costs       Costs
-	Mail        Mail
-	Receipts    receipt.Store
-	ReceiptRead receipt.Reader
+	Timed        gen.TimedRunner
+	Fresh        tx.Queryer
+	Store        Store
+	Content      Content
+	Fence        Fence
+	Players      Players
+	Directory    Directory
+	Population   Population
+	Heroes       Heroes
+	Guilds       Guilds
+	Combat       Combat
+	Privileges   i5.PrivilegeSnapshotProvider
+	Costs        Costs
+	Mail         Mail
+	Receipts     receipt.Store
+	ReceiptRead  receipt.Reader
+	BattleCounts BattleCountObserver
+}
+
+// BattleCountObserver records the Girls Log count of one first settled battle.
+type BattleCountObserver interface {
+	ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error
 }
 
 func (s Mode) ready() bool {
 	return s.Fresh != nil && s.Store != nil && s.Content != nil && s.Fence != nil && s.Players != nil && s.Directory != nil && s.Population != nil &&
-		s.Heroes != nil && s.Combat != nil && s.Privileges != nil && s.Costs != nil && s.Mail != nil && s.Receipts != nil && s.ReceiptRead != nil
+		s.Heroes != nil && s.Combat != nil && s.Privileges != nil && s.Costs != nil && s.Mail != nil && s.Receipts != nil && s.ReceiptRead != nil && s.BattleCounts != nil
 }
 
 // StartRequest is the stock 626 request.

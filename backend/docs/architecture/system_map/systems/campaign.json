@@ -1,0 +1,348 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [
+  {
+   "count": 11,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 8,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 11,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_10A_EVENT_CENTRE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10F_MENTOR_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11_CLOCK_ROLLBACK_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_FURNITURE_COMPOSE_V1.md"
+  },
+  {
+   "count": 7,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_11_TRIAL_SWEEP_V1.md"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_4A_RESEARCH_PLAN.md"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_4D_RESEARCH_PLAN.md"
+  },
+  {
+   "count": 11,
+   "file": "docs/i9/I9_CAMPAIGN_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_CAMPAIGN_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_GUILD_RENTAL_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 7,
+   "file": "docs/i9/I9_MISSIONS_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MODE_FRAMEWORK_V1.json"
+  },
+  {
+   "count": 11,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/RULING_I9-12_HAVE_FUN_LENDER.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/RULING_I9-12_SEAL_REGISTRY_SYNC.md"
+  }
+ ],
+ "decorated_by": [
+  "observing"
+ ],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/campaign_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {
+   "CAMPAIGN_NORMAL_WIN": {
+    "missions": [
+     102
+    ]
+   },
+   "CAMPAIGN_SUPER_WIN": {
+    "missions": [
+     103
+    ]
+   },
+   "CAMPAIGN_SWEEP": {
+    "adventure": "EventDefense"
+   },
+   "CAMPAIGN_TRIAL_WIN": {
+    "missions": [
+     105
+    ]
+   },
+   "INFINITY_BOSS_DEFEATED": {
+    "missions": [
+     119
+    ]
+   },
+   "VOYAGE_FINISHED": {
+    "missions": [
+     125
+    ],
+    "stages": [
+     "I9-10"
+    ]
+   }
+  },
+  "emits": [
+   "CAMPAIGN_CHALLENGE_WIN",
+   "CAMPAIGN_NORMAL_WIN",
+   "CAMPAIGN_SUPER_WIN",
+   "CAMPAIGN_SWEEP",
+   "CAMPAIGN_TRIAL_WIN",
+   "INFINITY_BOSS_DEFEATED",
+   "VOYAGE_FINISHED"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "campaign"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "campaign_players": [
+    "campaignstore.LockTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "campaign_players",
+   "gameplay_contexts"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [
+  "OverlayMID1"
+ ],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/campaign_dispatcher.go",
+    "line": 42
+   },
+   "mid": 112,
+   "name": "LOAD_WORLD_MAP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/campaign_dispatcher.go",
+    "line": 42
+   },
+   "mid": 113,
+   "name": "FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/campaign_dispatcher.go",
+    "line": 42
+   },
+   "mid": 114,
+   "name": "FIGHT_RESULT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/campaign_dispatcher.go",
+    "line": 42
+   },
+   "mid": 115,
+   "name": "LOAD_TRIAL_INFOS"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/campaign_dispatcher.go",
+    "line": 42
+   },
+   "mid": 116,
+   "name": "RESET_CAMPAIGN"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/campaign_dispatcher.go",
+    "line": 42
+   },
+   "mid": 117,
+   "name": "SWEEP_CAMPAIGN"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/campaign_dispatcher.go",
+    "line": 42
+   },
+   "mid": 118,
+   "name": "GET_BONUS_AWARD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/campaign_dispatcher.go",
+    "line": 42
+   },
+   "mid": 122,
+   "name": "GET_MAXLEVEL"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/campaign_dispatcher.go",
+    "line": 42
+   },
+   "mid": 123,
+   "name": "CHALLENGEINFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/campaign_dispatcher.go",
+    "line": 42
+   },
+   "mid": 2064,
+   "name": "GET_STORY_DROP_PARTNER"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/campaign_dispatcher.go",
+    "line": 42
+   },
+   "mid": 2576,
+   "name": "GET_CHAPTER_GACHA_AWARD"
+  }
+ ],
+ "name": "campaign",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/campaignstore",
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/guildrentalread",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore"
+ ],
+ "tables": {
+  "owned": [
+   "campaign_nodes",
+   "campaign_players"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "campaign_nodes",
+   "campaign_players",
+   "gameplay_contexts",
+   "gxb_content_activation",
+   "gxb_content_player_progression",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "player_directory_profiles",
+   "player_function_eligibility",
+   "player_heroes",
+   "player_progression"
+  ],
+  "written": [
+   "campaign_nodes",
+   "campaign_players",
+   "gxb_operation_receipts"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [
+   "i9_3a_campaign.json",
+   "i9_3b_crystal.json",
+   "i9_3b_sweep.json",
+   "i9_3c_awards.json",
+   "i9_3d_challenge_loss.json",
+   "i9_3d_trials.json",
+   "i9_4a_missions.json",
+   "i9_4b_chest.json",
+   "i9_9b_guild_rental.json",
+   "i9_tutorial_switches.json"
+  ],
+  "unit": [
+   "awakening_test.go",
+   "awards_test.go",
+   "balance_test.go",
+   "reads_test.go",
+   "start_choice_conformance_test.go"
+  ]
+ }
+}

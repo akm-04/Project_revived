@@ -67,7 +67,7 @@ need(Path('internal/application/i5/service_test.go'),
      'TestSettleGrantAmbiguousCommitReconcilesWithoutReplay',
      'TestSettleGrantRejectsUnimplementedOwnerWithoutMutation',
      'TestStackOverflowCreatesDurableMailAndOnlyFitsCanonicalStack',
-     'TestMailClaimRefusesRecursiveOverflowAndLeavesMailUnclaimed',
+     'TestMailClaimAtCapacitySavesFitDiscardsOverflowAndClaimsMail',
      'TestObjectiveFactReceiptPreventsDoubleProgress','TestObjectiveClaimReplayGrantsOnce',
      'TestAdminGrantUsesCanonicalGrantWithoutGameplayFenceAndAudits','TestAdminSendMailUsesMailOwnerAndSemanticReplay')
 need(Path('internal/adapters/stockruntime/i5_dispatcher_test.go'),

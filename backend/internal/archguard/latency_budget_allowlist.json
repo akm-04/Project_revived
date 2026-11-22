@@ -1,0 +1,37 @@
+[
+ {
+  "file": "internal/adapters/stockruntime/realtime_http_poll_test.go",
+  "line": 167,
+  "reason": "minimum bound (elapsed < 800 ms): load can only make it pass, so it is not a latency member (GATE_LATENCY_SECTION_V1 section 5)"
+ },
+ {
+  "file": "internal/adapters/combatworker/latency_test.go",
+  "line": 50,
+  "reason": "GXB_I8_LATENCY_BOUND text validation (parsed <= 0); a configured input, not a measured duration"
+ },
+ {
+  "file": "internal/application/generaldm/types_test.go",
+  "line": 53,
+  "reason": "table-driven lease offset boundary (d < 0); test-controlled duration, not a measurement"
+ },
+ {
+  "file": "internal/domain/guildinvite/source_test.go",
+  "line": 69,
+  "reason": "table-driven expiry offset boundary (d < 0); test-controlled duration, not a measurement"
+ },
+ {
+  "file": "internal/foundation/tx/admission_test.go",
+  "line": 89,
+  "reason": "recorded queue-to-commit sample is positive (lower bound); not a wall-clock budget"
+ },
+ {
+  "file": "internal/foundation/tx/audit_admission_deadline_test.go",
+  "line": 20,
+  "reason": "admissionWait deadline arithmetic against a remaining hour; domain assertion, not a measured budget"
+ },
+ {
+  "file": "internal/foundation/tx/runner_test.go",
+  "line": 293,
+  "reason": "retry backoff bounds are domain values (wantCap); not a measured duration"
+ }
+]

@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"reflect"
 	"sync"
 	"testing"
 	"time"
@@ -15,6 +16,7 @@ import (
 	cb "gxb.local/backend/v2/internal/application/combat"
 	oc "gxb.local/backend/v2/internal/application/occult"
 	appsharedroom "gxb.local/backend/v2/internal/application/sharedroom"
+	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/occult"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -103,10 +105,10 @@ func TestI9_8COccultTeamRoomPolicyNative(t *testing.T) {
 	if _, err = s.CreateTeam(ctx, a, 2, op()); err != nil {
 		t.Fatal("a repeated create of the held chapter answers the room", err)
 	}
-	if _, err = s.Invite(ctx, a, low.PlayerID, op()); !errors.Is(err, d.ErrRefused) {
+	if _, err = s.Invite(ctx, a, low.PlayerID, op()); !errors.Is(err, d.ErrLevelBand) {
 		t.Fatal("level 84 invite", err)
 	}
-	if _, err = s.Invite(ctx, a, far.PlayerID, op()); !errors.Is(err, d.ErrRefused) {
+	if _, err = s.Invite(ctx, a, far.PlayerID, op()); !errors.Is(err, d.ErrLevelBand) {
 		t.Fatal("outside-band invite", err)
 	}
 	if _, err = s.Invite(ctx, a, b.PlayerID, op()); err != nil {
@@ -119,6 +121,9 @@ func TestI9_8COccultTeamRoomPolicyNative(t *testing.T) {
 	}
 	if _, err = s.JoinRoom(ctx, low, roomID, op()); !errors.Is(err, d.ErrRefused) {
 		t.Fatal("level 84 join", err)
+	}
+	if _, err = s.JoinRoom(ctx, far, roomID, op()); !errors.Is(err, d.ErrLevelBand) {
+		t.Fatal("outside-band join", err)
 	}
 	if _, err = s.Kick(ctx, a, c.PlayerID, op()); err != nil {
 		t.Fatal("kick", err)
@@ -167,7 +172,7 @@ func TestI9_8COccultReentryWaitNative(t *testing.T) {
 		t.Fatalf("left_at not recorded with the removal %#v", state.LeftAt)
 	}
 	clock.Set(leftAt.Add(d.ReentrySeconds*time.Second - time.Second))
-	if _, err = s.JoinRoom(ctx, b, roomID, op()); !errors.Is(err, d.ErrRefused) {
+	if _, err = s.JoinRoom(ctx, b, roomID, op()); !errors.Is(err, d.ErrRoomUnavailable) {
 		t.Fatalf("rejoined at 119 s: %v", err)
 	}
 	clock.Set(leftAt.Add(d.ReentrySeconds * time.Second))
@@ -284,6 +289,36 @@ func TestI9_8COccultTeamFightNative(t *testing.T) {
 	if _, err = s.TeamInvite(ctx, a, 20002, 1, op()); err != nil {
 		t.Fatal("invite fight", err)
 	}
+	// A-178: TEAM_INVITE reaches the starter too, because the stock handler's
+	// teamInviteInfos is the team-selection window's initializer. A-180: the
+	// live FIGHT_STATUS carries the 2362 map projection.
+	live := occultReadNotice(t, p, roomID)
+	starterInvited := false
+	var statusBody map[string]any
+	for _, push := range live.Pushes {
+		switch push.Function {
+		case d.NoticeTeamInvite:
+			for _, body := range push.Bodies {
+				starterInvited = starterInvited || body.Player == a.PlayerID
+			}
+		case d.NoticeFightStatus:
+			for _, body := range push.Bodies {
+				if body.Player == b.PlayerID {
+					statusBody = body.Body
+				}
+			}
+		}
+	}
+	if !starterInvited {
+		t.Fatal("the starter missed its TEAM_INVITE initializer")
+	}
+	info, err := s.Info(ctx, b, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if statusBody == nil || !reflect.DeepEqual(statusBody["open_campaigns"], info["open_campaigns"]) {
+		t.Fatalf("FIGHT_STATUS map %#v, 2362 %#v", statusBody, info["open_campaigns"])
+	}
 	for _, member := range []identity.ActorContext{b, c} {
 		if _, err = s.TeamAccept(ctx, member, 20002, 1, true, op()); err != nil {
 			t.Fatal("accept", err)
@@ -325,6 +360,13 @@ func TestI9_8COccultTeamFightNative(t *testing.T) {
 	if json.Unmarshal([]byte(report), &decoded) != nil || decoded["star"] == nil || decoded["fighter"] == nil {
 		t.Fatalf("report shape %s", report)
 	}
+	detail, ok := fight["award_info"].(map[string]any)["award_detail"].(map[string]any)
+	if !ok {
+		t.Fatalf("live 2377 award_info %#v", fight["award_info"])
+	}
+	if detail["point"] == nil || detail["progress"] == nil {
+		t.Fatalf("live 2377 award_detail %#v", detail)
+	}
 	state := occultRoomState(t, p, roomID)
 	if state.Team == nil || state.Team.ReportKey == "" {
 		t.Fatalf("the room did not freeze the report %+v", state.Team)
@@ -334,9 +376,16 @@ func TestI9_8COccultTeamFightNative(t *testing.T) {
 			t.Fatalf("member %d settled %d times", member.PlayerID, count)
 		}
 	}
+	girlsLogExactlyOnce(t, p, a.PlayerID, 1)
+	girlsLogExactlyOnce(t, p, b.PlayerID, 1)
+	girlsLogExactlyOnce(t, p, c.PlayerID, 1)
 	stored, err := s.TeamReport(ctx, b, state.Team.ReportKey, op())
 	if err != nil || occultStoredReport(t, stored) != report {
 		t.Fatalf("2382 replay %v", err)
+	}
+	storedDetail, ok := stored["award_info"].(map[string]any)["award_detail"].(map[string]any)
+	if !ok || !reflect.DeepEqual(storedDetail, detail) {
+		t.Fatalf("2382 replay award_detail %#v, live %#v", stored["award_info"], detail)
 	}
 	if _, err = s.TeamReport(ctx, nonMember, state.Team.ReportKey, op()); !errors.Is(err, d.ErrRefused) {
 		t.Fatal("a non-member read the report", err)
@@ -348,11 +397,18 @@ func TestI9_8COccultTeamFightNative(t *testing.T) {
 	if err != nil || occultTeamReport(t, replay) != report {
 		t.Fatalf("2377 replay %v", err)
 	}
+	replayDetail, ok := replay["award_info"].(map[string]any)["award_detail"].(map[string]any)
+	if !ok || !reflect.DeepEqual(replayDetail, detail) {
+		t.Fatalf("2377 replay award_detail %#v, live %#v", replay["award_info"], detail)
+	}
 	for _, member := range []identity.ActorContext{a, b, c} {
 		if count := team.settlementCount(member.PlayerID); count != 1 {
 			t.Fatalf("replay settled member %d %d times", member.PlayerID, count)
 		}
 	}
+	girlsLogExactlyOnce(t, p, a.PlayerID, 1)
+	girlsLogExactlyOnce(t, p, b.PlayerID, 1)
+	girlsLogExactlyOnce(t, p, c.PlayerID, 1)
 }
 
 // A lost team fight saves the enemies' and the girls' end states (client rule 6,
@@ -535,7 +591,7 @@ func TestI9_8COccultTeamRoomExpiryNative(t *testing.T) {
 	if status := scalar(t, p, `SELECT count(*) FROM shared_rooms WHERE room_id=$1 AND status='CLOSED'`, roomID); status != 1 {
 		t.Fatal("expired room stayed open")
 	}
-	if _, err = s.JoinRoom(ctx, visitor, roomID, op()); !errors.Is(err, d.ErrRefused) {
+	if _, err = s.JoinRoom(ctx, visitor, roomID, op()); !errors.Is(err, d.ErrRoomUnavailable) {
 		t.Fatal("closed room accepted a join", err)
 	}
 }
@@ -577,4 +633,84 @@ func (occultstoreForTest) insertReport(c context.Context, p *pg.Pool, key string
 	_, err := p.Raw().Exec(c, `INSERT INTO occult_reports(report_id,logical_server_id,room_id,member_ids,content,created_at,expires_at)
 		VALUES($1,$2,$3,ARRAY[$4]::bigint[],'{"battle_report":"{}","awards":{}}'::jsonb,$5,$5::timestamptz+interval '7 days')`, key, server, room, member, at)
 	return err
+}
+
+// TestI9_10OccultCreateReplyAndSingleOverOwnRoomNative covers the real-client
+// retest: a team create must not announce ROOM_CHANGE (the client opens the
+// prepare window itself), member_infos must carry force, and Single may replace
+// the player's own unstarted single-member team room.
+func TestI9_10OccultCreateReplyAndSingleOverOwnRoomNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	a, _ := occultOwner(t, p, server, 2)
+	b, _ := occultOwner(t, p, server, 2)
+	c, _ := occultOwner(t, p, server, 2)
+	empty, _ := occultOwner(t, p, server, 0)
+	s, _ := occultTestMode(t, p)
+
+	created, err := s.CreateTeam(ctx, a, 2, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	roomID := occultRoomID(t, created)
+	if _, announced := created["function_type"]; announced {
+		t.Fatalf("an unstarted team create must not announce ROOM_CHANGE: %#v", created)
+	}
+	roomInfo, _ := created["room_info"].(map[string]any)
+	members, _ := roomInfo["member_infos"].([]map[string]any)
+	if len(members) != 1 {
+		t.Fatalf("member_infos %#v", roomInfo)
+	}
+	force, ok := members[0]["force"].(int64)
+	if !ok || force <= 0 {
+		t.Fatalf("member force %#v", members[0])
+	}
+
+	repeated, err := s.CreateTeam(ctx, a, 2, op())
+	if err != nil {
+		t.Fatal("repeat create", err)
+	}
+	if occultRoomID(t, repeated) != roomID {
+		t.Fatalf("repeat create replaced the room: %#v", repeated)
+	}
+	if _, announced := repeated["function_type"]; announced {
+		t.Fatalf("a repeated team create must not announce ROOM_CHANGE: %#v", repeated)
+	}
+
+	solo, err := s.CreateSolo(ctx, a, 2, op())
+	if err != nil {
+		t.Fatal("single over the own empty team room", err)
+	}
+	soloRoom := occultRoomID(t, solo)
+	if soloRoom == roomID {
+		t.Fatal("single reused the team room")
+	}
+	state := occultRoomState(t, p, soloRoom)
+	if state.CampaignType != d.SingleCampaignType || !state.Started() {
+		t.Fatalf("solo room state %+v", state)
+	}
+	if solo["function_type"] != int64(1) {
+		t.Fatalf("a started solo room drives the sub-map: %#v", solo)
+	}
+	if got := occultTickets(t, p, a.PlayerID); got != 1 {
+		t.Fatalf("single cost one scroll, left %d", got)
+	}
+	if open := scalar(t, p, `SELECT count(*) FROM shared_rooms WHERE room_id=$1 AND status='OPEN'`, roomID); open != 0 {
+		t.Fatal("the replaced team room stayed open")
+	}
+
+	held, err := s.CreateTeam(ctx, b, 2, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = s.JoinRoom(ctx, c, occultRoomID(t, held), op()); err != nil {
+		t.Fatal("join for the member guard", err)
+	}
+	if _, err = s.CreateSolo(ctx, b, 2, op()); !errors.Is(err, d.ErrRefused) {
+		t.Fatal("a team room with a member must block Single", err)
+	}
+
+	if _, err = s.CreateSolo(ctx, empty, 2, op()); !errors.Is(err, economy.ErrInsufficientBalance) {
+		t.Fatal("single with no scrolls", err)
+	}
 }

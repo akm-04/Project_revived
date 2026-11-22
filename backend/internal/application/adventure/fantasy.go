@@ -2,6 +2,7 @@ package adventure
 
 import (
 	"context"
+	"fmt"
 
 	cb "gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -9,8 +10,8 @@ import (
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/illusion"
-	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
 const fantasyTerminalKind = "ADVENTURE_ILLUSION_RESULT"
@@ -38,82 +39,81 @@ func (s Mode) StartSingle(c context.Context, a identity.ActorContext, request Fi
 		if err != nil {
 			return nil, err
 		}
-		placeholder, err := ids.NewUUID()
-		if err != nil {
-			return nil, err
-		}
-		attempt := d.SingleAttempt{ID: placeholder.String(), PlayerID: a.PlayerID, EventType: d.EventIllusion, OccurredAt: occurrence.OccurredAt, CreatedAt: at}
-		if err = s.Store.InsertAttemptTx(c, sc.Tx, attempt); err != nil {
-			return nil, err
-		}
-		started, err := s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Actor: a, Locator: locator(a, occurrence, "ADVENTURE_ILLUSION"),
-			GenerationRef:    "ADVENTURE_ILLUSION/" + occurrence.SourceKey,
-			StartFingerprint: startFingerprint(a, sc.Operation.Operation().ID.String(), request.Formation),
+		_, err = s.startAttempt(c, sc, scope, cb.StartRequest{Mode: cd.ModeAdventureIllusion, Actor: a, Locator: singleLocator(a),
+			GenerationRef:    d.FantasyGeneration(occurrence),
+			StartFingerprint: startFingerprint(a, request.Formation),
 			ResultDeadline:   at.Add(attemptLimit), TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK},
-			Battle: cb.BattleRequest{CampaignType: campaign.CampaignType, BattleID: campaign.FightID,
+			Battle: cb.BattleRequest{CampaignType: campaign.CampaignType, RentalMode: d.IllusionSingleRentalMode, BattleID: campaign.FightID,
 				TeamA: ownedTeam(a.PlayerID, request.Formation), Formation: request.Formation}})
-		if err != nil {
-			return nil, err
-		}
-		if started.Replayed {
-			return map[string]any{}, s.Store.DeleteAttemptTx(c, sc.Tx, placeholder.String(), a.PlayerID)
-		}
-		return map[string]any{}, s.Store.RenameAttemptTx(c, sc.Tx, placeholder.String(), started.Attempt.ID.String(), a.PlayerID)
+		return map[string]any{}, err
 	})
 }
 
 // SettleSingle answers 2422: the attested summary is clamped and credited once
-// to the frozen 10006 occurrence, with the single gift in the reply.
+// to the occurrence its Combat attempt froze, with the single gift in the reply.
 func (s Mode) SettleSingle(c context.Context, a identity.ActorContext, request ResultRequest, op operation.Context) (Response, error) {
 	if request.Star < 0 || request.Star > d.MaxSoloStar || request.Damage < 0 || request.PetID < 0 || validateFormation(request.Formation) != nil {
 		return Response{}, d.ErrInvalid
 	}
-	var response Response
+	var duplicate bool
 	body, err := s.run(c, a, op, func(c context.Context, sc gen.TimedScope, catalog d.Catalog, _ illusion.Catalog) (map[string]any, error) {
 		at := sc.Operation.DecisionAt()
-		occurrence, err := s.activeOccurrence(c, sc.Tx, a.PlayerID, d.EventIllusion, at)
-		if err != nil {
-			if existing, found, readErr := s.Store.ReadOccurrenceTx(c, sc.Tx, a.PlayerID, d.EventIllusion); readErr != nil {
-				return nil, readErr
-			} else if found && existing.Finished() {
-				response.Duplicate = true
-				return map[string]any{}, nil
-			}
-			return nil, err
-		}
-		attempt, found, err := s.Store.FindLatestAttemptTx(c, sc.Tx, a.PlayerID, d.EventIllusion)
+		// shortcut: 2422 carries no attempt token, so a result delayed past a new
+		// 2421 cannot be told from that fresh START; add a client attempt id if the
+		// stock wire ever gains one.
+		current, found, err := s.Combat.CurrentAttemptTx(c, sc.Tx, singleLocator(a))
 		if err != nil {
 			return nil, err
 		}
 		if !found {
-			return nil, d.ErrRefused
+			return nil, fmt.Errorf("%w: no open attempt", d.ErrRefused)
 		}
-		if attempt.Resolved {
-			response.Duplicate = true
+		if current.Attempt.State == cd.Terminal {
+			_, settled, err := s.Store.ReadSettlementTx(c, sc.Tx, current.Attempt.ID)
+			if err != nil {
+				return nil, err
+			}
+			if !settled {
+				return nil, fmt.Errorf("%w: no open attempt", d.ErrRefused)
+			}
+			duplicate = true
 			return map[string]any{}, nil
 		}
-		if !attempt.OccurredAt.Equal(occurrence.OccurredAt) {
-			return nil, d.ErrExpired
+		occurrence, err := s.frozenOccurrence(c, sc.Tx, a.PlayerID, current.Attempt.GenerationRef)
+		if err != nil {
+			return nil, err
 		}
-		attested, err := s.Combat.AttestSummaryTx(c, sc.Tx, cb.SummaryRequest{Locator: locator(a, occurrence, "ADVENTURE_ILLUSION"),
-			GenerationRef: "ADVENTURE_ILLUSION/" + occurrence.SourceKey, TerminalKind: fantasyTerminalKind, At: at, Policy: singleSummaryPolicy,
+		attested, err := s.Combat.AttestSummaryTx(c, sc.Tx, cb.SummaryRequest{Locator: singleLocator(a),
+			GenerationRef: current.Attempt.GenerationRef, TerminalKind: fantasyTerminalKind, At: at, Policy: singleSummaryPolicy,
 			Summary: cd.Summary{Star: request.Star, Win: d.IsWin(request.Star) || request.Damage > 0, Damage: request.Damage, Formation: request.Formation}})
 		if err != nil {
 			return nil, err
 		}
-		if attested.Drained || attested.Attestation.Verdict == cd.VerdictRejected {
-			response.Duplicate = true
+		if attested.Drained {
+			_, settled, err := s.Store.ReadSettlementTx(c, sc.Tx, current.Attempt.ID)
+			if err != nil {
+				return nil, err
+			}
+			if !settled {
+				return nil, fmt.Errorf("%w: summary drained or rejected", d.ErrRefused)
+			}
+			duplicate = true
 			return map[string]any{}, nil
 		}
-		star, damage := d.ClampSolo(request.Star, request.Damage, illusion.DamageCap, 0)
-		attempt.Resolved, attempt.Damage = true, damage
-		if err = s.Store.SaveAttemptTx(c, sc.Tx, attempt); err != nil {
+		if attested.Attestation.Verdict == cd.VerdictRejected {
+			return nil, fmt.Errorf("%w: summary drained or rejected", d.ErrRefused)
+		}
+		star, damage := d.ClampSolo(request.Star, request.Damage, catalog.Limits.IllusionTotalDamage, 0)
+		if err = s.Store.InsertSettlementTx(c, sc.Tx, current.Attempt.ID, a.PlayerID, damage, at); err != nil {
 			return nil, err
 		}
-		awards := []any{}
+		body := map[string]any{}
 		if d.IsWin(star) {
 			reward, lines := giftAwards(catalog, catalog.Limits.IllusionGiftSingle)
-			awards = reward
+			// The client closes the single battle only on a nil awards key.
+			if len(reward) > 0 {
+				body["awards"] = reward
+			}
 			if err = s.settleGrant(c, sc, a, "illusion_single", occurrence, lines); err != nil {
 				return nil, err
 			}
@@ -121,9 +121,37 @@ func (s Mode) SettleSingle(c context.Context, a identity.ActorContext, request R
 		if _, err = s.finish(c, sc.Tx, a, occurrence, at); err != nil {
 			return nil, err
 		}
-		return map[string]any{"awards": awards}, nil
+		// The attempt froze the formation at START; the counter lock is last.
+		if err = s.BattleObserver.ObserveBattleTx(c, sc.Tx, a.PlayerID, current.Formation, at); err != nil {
+			return nil, err
+		}
+		return body, nil
 	})
-	return Response{Body: body, Duplicate: response.Duplicate}, err
+	return Response{Body: body, Duplicate: duplicate}, err
+}
+
+// frozenOccurrence reads the occurrence the attempt's generation names, never
+// the occurrence that has moved on since START.
+func (s Mode) frozenOccurrence(c context.Context, q tx.Queryer, playerID identity.PlayerID, reference string) (d.Occurrence, error) {
+	sourceKey, ok := d.ParseFantasyGeneration(reference)
+	if !ok {
+		return d.Occurrence{}, fmt.Errorf("adventure: malformed attempt generation %q", reference)
+	}
+	occurrence, found, err := s.Store.ReadOccurrenceBySourceKeyTx(c, q, playerID, d.EventIllusion, sourceKey)
+	if err != nil {
+		return d.Occurrence{}, err
+	}
+	if !found {
+		return d.Occurrence{}, d.ErrExpired
+	}
+	return occurrence, nil
+}
+
+// singleLocator is stable across occurrences: 2422 carries no generation, so
+// the attempt must be found from the player alone.
+func singleLocator(a identity.ActorContext) cd.Locator {
+	return cd.Locator{DomainKind: "ADVENTURE_ILLUSION", AuthorityScope: fmt.Sprintf("server:%d", a.LogicalServerID),
+		DomainLocator: fmt.Sprintf("player:%d", a.PlayerID)}
 }
 
 func ownedTeam(player identity.PlayerID, formation []int64) []cb.Participant {

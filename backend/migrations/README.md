@@ -17,6 +17,7 @@ Every canonical SQL migration must begin with the literal `-- +goose Up` directi
 - 00011: R5 foundation repairs.
 - 00012: I6C canonical Guild/GuildMembership authority and Guild workflow ledgers.
 - 00013: F2/I6C data-cleanup-only replay repair removing obsolete Guild applications for players who already have canonical membership.
+- 00040: I7B-2A PublicProfile roots. Correction (I9-12 R5, PERSON_FIRST_CLICK_EDIT): the migration comment "Reads never materialize this root" is superseded; the first self MID 1829 read now materializes the root with is_first_time 1 under the 315 then 391 root locks. The applied migration bytes are unchanged.
 - 00064: I7C-5A Combat foundation: locator roots (lock rank 609), append-only snapshots/resolutions/report blobs and the Pass418 attempt envelope. Empty on upgrade.
 - 00065: I7C-5B Top Floor: content catalog, per-server ladder root (lock rank 601), ranks, player state, fights, last-10 records, partner usage, daily settlements and the Achievement 100001 streak table. Empty on upgrade.
 - 00066: I7C-5C 1 on 1: content catalog, one global competition root (lock rank 602), player state with slots/points/teams/promotion, matches with per-round Combat attempts, last-20 records, partner usage, Wednesday/Sunday settlements with server/global ranks and titles; Achievement streaks keyed by (player, achievement) for 100002/100028. Empty on upgrade.
@@ -27,3 +28,49 @@ Every canonical SQL migration must begin with the literal `-- +goose Up` directi
 - 00076: I8.5-3 client observability: stock ErrorLog/crash uploads (per-upload rows with attribution and quarantine, parsed client rows), per-session log capabilities (digest only), and the HTTP request journal (outcome, error class, redacted cause, masked raw envelope for unknown/undecodable requests). Retention by expires_at (7 days routine, 30 days error/anomaly). No foreign keys. Empty on upgrade.
 - 00077: I8.5-6 F3 player ids above the stock robot range (D63): logical-server cursors move to server*100000+25001 and a check keeps them there, because stock reads a wire table_id <= 25000 as a robot team. Players already allocated below it keep their ids.
 - 00078: I8.5-6 F1 level function announcement (D59): existing players get the eligibility and unlock rows the new announcer writes for every pure level gate they reached in the active content revision (capability NONE; Pet Function 38 keeps its starter-egg path). Empty on a fresh database.
+- 00125: I9-10C per-player I5 scalar daily floor anchors for the glue floor. Empty on upgrade.
+- 00126: I9-10C Dorm daily glue purchase counters. Empty on upgrade.
+- 00127: I9-10C Dorm glue purchase admission lane, widening the per-player Dorm admission family check to DORM_BUY_GLUE.
+- 00128: I9-10C Dorm room social metadata, lifetime praises, comments and comment reactions. Empty on upgrade.
+- 00129: I9-10C Dorm social admission lanes for CHANGE_NAME, HIDE_HOUSE, PRAISE_HOUSE, COMMENT_HOUSE, PRAISE_COMMENT and DELETE_COMMENT.
+- 00130: I9-10E friend invitation binding (one immutable inviter per invitee) and once-only invitation mission claims. Empty on upgrade.
+- 00131: I9-10 bug 29: guild name check allows 20 characters so the stock weighted length (English letters count half) is not refused by the table.
+- 00132: I9-10 Arena D507: the last three issued match-list opponents per player stay fightable after a refresh.
+- 00133: I9-10 bugs 38: shared-room seat stage CLOSED for a seat still occupied when the room ended, distinct from the voluntary LEFT that sends no removal frame.
+- 00135: I9-10 1 on 1 D488 parity: each issued MATCH list stores the challenger and target ranks it showed; an offer without one is stale (35026).
+- 00136: I9-10 D512 special Top Floor is humans-only: a weekly period may start at size 0 instead of seeding robot ranks.
+- 00137: I9-10F Mentor/My Class relationship history, per-player application counters and break cooldown, application rows, mission high-water/award progress and graduation exam receipts. Empty on upgrade.
+- 00138: I9-10A Event Centre Workshop per-player root (recycle energy, desk/pet make jobs, administrator counters). Created lazily on the first command; empty on upgrade. sha256 cf2f39e518a4a5df37e87aa476e6a8c82d8d78e5ae90dad8da4a79469d57d1e7.
+- 00141: I9-10 D510 random Dorm visits: login-activity index for the 256 most recently active same-server players.
+- 00143: I9-10 D512 operator-configurable Top Floor girl bans by mode and rotation.
+- 00150: I9-10A Event Centre notice board (MIDs 1083-1087) stored server combat reports, one row per player report id retained by the board history. Empty on upgrade.
+- 00151: I9-10 bugs 51-53: Girls Log milestones (player, hero, log id) written by the summon facet, favor stages, dialogue awards, marriage, star-up, promotion and awakening. Empty on upgrade.
+- 00154: I9-10 GM question foundation (MIDs 4/5): player questions per player and logical server, history index for the latest 100. Operator replies are I11. Empty on upgrade.
+- 00155: I9-10 SYSTEM_BROADCAST 3002: consecutive Top Floor attack wins on the player row, reset by an attack loss or forfeit. Existing players start at 0.
+- 00156: I9-10 lobby announcements (SYSTEM_BROADCAST 4101, ACTIVITY_BROADCAST 4096): one outbox row per produced announce, removed by the realtime listener after it fans out to the producing logical server. Empty on upgrade.
+- 00157: I9-10 Hero Recommend per-logical-server weekly derived snapshot.
+- 00158: R3 per-player game-day marker of the last delivered daily reset signal. Empty on upgrade.
+- 00159: R7 stored per-board score row (policy, player, score, score_since, revision, metric) with the board ordering index. Empty on upgrade; the R7 backfill seeds it.
+- 00160: C1 guild broadcast daily limit (GUILD_BROADCAST_DAILY_LIMIT_V1): index guild_broadcast_sources(guild_id, decision_at) so the per-guild game-day count scans one guild's decision window. Index only; no data change.
+- 00161: R8-3 part A (A-040): 35 player columns that no foreign key covered now reference players(player_id), NOT VALID (new rows only, short lock), NO ACTION, no index. Client logs, request_journal, the logical_servers counters and the text redeem subject are excluded.
+- 00162: R8-3 part B: NO TRANSACTION, one VALIDATE CONSTRAINT per 00161 key. An orphan row fails the step and is reported; deletions, if any, go in their own reviewed migration.
+- 00163: R8-2 (A-037): payload_version smallint NOT NULL DEFAULT 0 on the 133 tables whose JSON payload the code decodes (docs/data/PAYLOAD_COLUMNS.json). Existing rows are version 0; payload bytes and digests do not change. Metadata-only.
+- 00164: R8-4b (A-039, A-050): gxb_operation_receipts.operation_id records the operation id a receipt was written with so the retention sweep can identify replay-only receipts; existing rows stay NULL and are never purged. Adds the recorded_at and combat_attempts.terminal_at retention scan indexes. Every uuid attempt-id column already carries a key, so no attempt-id key is added.
+- 00165: R8-4 retention Amendment 1 A (U4): combat_append_only and combat_attempt_guard accept a DELETE only inside the retention sweep's transaction (gxb.retention_sweep on), an attempt only when TERMINAL. Every UPDATE still raises.
+- 00166: R6 undelivered-reply replay cache: one row per player for the latest committed reply the edge could not deliver. Cache, never restored; cleared by the player's next state-changing request. Empty on upgrade.
+- 00167: R6 request journal replay flag: the edge marks a line answered from an undelivered-reply mark.
+- 00168: R5D shared combat attempt record: append-only worldboss, illusion and adventure attempt settlements keyed by the Combat attempt id, with a player index. Empty on upgrade; the mode-local attempt tables retire later.
+- 00169: R5D data migration: settled worldboss, illusion and adventure attempt rows become settlement rows on their terminal Combat attempt (settled_at = terminal_at); open rows stay with Combat; stale rows are counted by class and kept; a non-uuid attempt id fails the migration; the three old tables are renamed `<table>_retired_r5d` and kept. `tools/r5d_rename_back.sh` restores the old names for a rollback.
+- 00170: L3 D8 operator audit trail (AC397-25): append-only operator_audit_events for privileged operator commands. OPERATIONAL data, not a player table; the R8 retention sweep owns its retention rule. Empty on upgrade.
+- 00171: L3 D9 whole-database restore history epochs (D13): restore_epochs stays open until the operator records the external-payment reconciliation attestation; gxb-api and gxb-worker refuse to start while an open epoch exists. OPERATIONAL data, not a player table. Empty on upgrade.
+- 00172: L3 D11 (ACHIEVEMENT_EVENT_FACTS_V1): the achievement_streaks_profile CHECK admits the eight owner-fact ids (100004, 100005, 100010, 100020, 100022, 100024, 100027, 100031) to the C4F_OWNED_STATE_COUNT_V1 high-water rows. Constraint only; written as 00161 on repair-l3c and renumbered at the repair-final merge.
+- 00173: playtest bug 99 (MID 88 BACKPACK_SORT_TYPE): player_hero_roots.backpack_sort_type stores the stock backpack filter preference beside the MID 89 hero-list sort. Existing players start at 0.
+- 00174: I9-11B daily buy: content_daily_buy_input_catalogs (one immutable object per content revision) and the items_energy_tuning D476 operator overlay row (absent keeps the source tunables). No player state; empty on upgrade.
+- 00175: I9-11C core shops: content_shop_catalogs per content revision, shop_players (per player and shop type: frozen stock generation, per-slot purchase state, manual refresh counter and game day) and the shop_tuning D476 operator overlay row. Empty on upgrade.
+- 00176: I9-11D compat preferences: content_compat_catalogs per content revision and player_compat_preferences (first main touch, message push ids). Backfill: every existing player gets first_main_touch 1 (already past first touch); a player without a row is new and projects 0.
+- 00177: I9-11E achievements (C5/C8): qualified Fantasy boss facts keyed by (player, achievement, campaign), the 100011 daily counter, and the achievement_streaks profile admission for 100006/100007/100011/100012 under policy I9_11E_ACHIEVEMENT_FACT_V1. Empty on upgrade.
+- 00178: I9-11 seam 4.7 (R8-2, A-037): payload_version on the 00174/00175/00176 content catalogs (content_daily_buy_input_catalogs, content_shop_catalogs, content_compat_catalogs) whose JSON the code decodes. Existing rows are version 0; payload bytes and digests do not change. Metadata-only.
+- 00179: I9-11 G2a (I9_11_GIRLS_LOG_V1): durable per-hero battle counts for the Girls Log type-6 milestones 60001-60004 at 1/50/100/1000 settled battles. Counts start at 0 at deploy; no invented history. Empty on upgrade.
+- 00180: I9-11 A-134 (I9_GUILD_CAMPAIGN_V1 C8): drops the unwritten copy-level replay slot of guild_campaign_copies (settled_by with its 00161 foreign key, settled_index, settled_body); guild campaign replay is per member. No data is read from them.
+- 00181: I9-11 P2 (A-163): the memoir_tuning D476 operator overlay row (box drop rates, absent or invalid keeps the source catalog). No player state; empty on upgrade.
+- 00182: I9-11 T34 S16 (A-168): durable per-hero completed-dialogue counts for the Girls Log type-7 milestones 70001-70004 (1/10/30/50 dialogues; repeats count). Backfill: the existing distinct awarded dialogue rows, the only recorded lower bound.

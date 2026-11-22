@@ -1,0 +1,276 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [
+  {
+   "count": 4,
+   "file": "docs/architecture/CUMULATIVE_CONTENT_GENERATION_LOCK.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_10A_EVENT_CENTRE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10A_NOTICEBOARD_POLICY.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10F_MENTOR_V1.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_10H_H2_STRUCTURED_KINDS.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11B_ITEMS_ENERGY_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_FURNITURE_COMPOSE_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_GIRLS_LOG_V1.md"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11_HERO_RECOMMEND_SCORES_V1.md"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_TRIAL_SWEEP_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_4D_RESEARCH_PLAN.md"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_BROADCAST_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 7,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_I10_GACHA_GUIDE_HANDOFF_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MARCH_IMPLEMENTATION.md"
+  },
+  {
+   "count": 4,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V2.json"
+  },
+  {
+   "count": 4,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V3.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_SKILL_LEVEL_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/summon_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {
+   "SUMMON": {
+    "adventure": "EventSummon",
+    "missions": [
+     17
+    ]
+   },
+   "VENDING_JUICE_PURCHASED": {
+    "missions": [
+     109
+    ]
+   }
+  },
+  "emits": [
+   "SUMMON",
+   "VENDING_JUICE_PURCHASED"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "summon"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "summon_players": [
+    "summonstore.LockTx",
+    "summonstore.ReadTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "summon_players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [
+  "OverlayMID1"
+ ],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/summon_dispatcher.go",
+    "line": 32
+   },
+   "mid": 50,
+   "name": "SUMMON_HERO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/summon_dispatcher.go",
+    "line": 32
+   },
+   "mid": 56,
+   "name": "LOAD_SUMMON_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/summon_dispatcher.go",
+    "line": 32
+   },
+   "mid": 70,
+   "name": "MAGIC_SUMMON_BUY"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/summon_dispatcher.go",
+    "line": 32
+   },
+   "mid": 71,
+   "name": "MAGIC_SUMMON_SWITCH_HERO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/summon_dispatcher.go",
+    "line": 32
+   },
+   "mid": 306,
+   "name": "SUPER_HERO_STONE_EXCHANGE"
+  }
+ ],
+ "name": "summon",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore",
+  "internal/adapters/postgres/summonstore"
+ ],
+ "tables": {
+  "owned": [
+   "summon_players",
+   "summon_tuning"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "gxb_content_activation",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "summon_players",
+   "summon_tuning"
+  ],
+  "written": [
+   "gxb_operation_receipts",
+   "summon_players"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [
+   "i9_11e_achievement_medium_vending.json",
+   "i9_3_strong_guide.json",
+   "i9_3e_summon.json",
+   "i9_3f_premium.json",
+   "i9_4a_missions.json",
+   "i9_4b_chest.json",
+   "i9_8d_adventure.json"
+  ],
+  "unit": [
+   "achievement_test.go",
+   "mode_test.go"
+  ]
+ }
+}

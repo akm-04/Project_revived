@@ -28,6 +28,6 @@ func (b BootstrapProjection) OverlayMID1(ctx context.Context, q tx.Queryer, a id
 		return e
 	}
 	detail["2137"] = v
-	detail["2139"] = map[string]any{"is_has_gift": int64(0)}
+	detail["2139"] = map[string]any{"is_has_gift": v["is_has_gift"]}
 	return nil
 }

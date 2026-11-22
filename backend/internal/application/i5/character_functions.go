@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/logicalserver"
 	"gxb.local/backend/v2/internal/domain/player"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"time"
@@ -21,6 +22,13 @@ type CharacterFunctionObservation struct {
 type CharacterFunctionReader interface {
 	ReadCharacterFunctionPrerequisitesTx(context.Context, tx.Queryer, identity.PlayerID, string, time.Time) (CharacterFunctionObservation, error)
 }
+
+// ServerLevelReader answers the bounded server-wide level fact for kind-8
+// function gates. It is implemented by the owner of player progression.
+type ServerLevelReader interface {
+	ServerHasLevelAtLeastTx(context.Context, tx.Queryer, identity.LogicalServerID, int64) (bool, error)
+}
+
 type CharacterFunctionOpener interface {
 	PrepareCharacterFunctionsTx(context.Context, tx.Tx, identity.PlayerID) error
 	OpenCharacterFunctionsTx(context.Context, tx.Tx, identity.PlayerID, string, time.Time) ([]int64, error)
@@ -52,7 +60,7 @@ func (service Service) PrepareCharacterFunctionsTx(requestContext context.Contex
 	return err
 }
 func (service Service) OpenCharacterFunctionsTx(requestContext context.Context, transaction tx.Tx, player identity.PlayerID, revision string, at time.Time) ([]int64, error) {
-	if service.CharacterFunctions == nil {
+	if service.CharacterFunctions == nil && service.ServerLevels == nil {
 		return nil, nil
 	}
 	if transaction == nil || !player.Valid() || service.Store == nil || service.Content == nil || len(revision) != 64 || at.IsZero() {
@@ -62,18 +70,29 @@ func (service Service) OpenCharacterFunctionsTx(requestContext context.Context, 
 	if err != nil {
 		return nil, err
 	}
-	observation, err := service.CharacterFunctions.ReadCharacterFunctionPrerequisitesTx(requestContext, transaction, player, revision, at)
-	if err != nil {
-		return nil, fmt.Errorf("Character prerequisite observation: %w", err)
-	}
-	if observation.Player != player || observation.Revision != revision || !observation.ObservedAt.Equal(at) || observation.PopulationVersion < 1 || observation.OwnedGirls < 0 {
-		return nil, errors.New("unqualified character function observation")
+	var observation CharacterFunctionObservation
+	if service.CharacterFunctions != nil {
+		observation, err = service.CharacterFunctions.ReadCharacterFunctionPrerequisitesTx(requestContext, transaction, player, revision, at)
+		if err != nil {
+			return nil, fmt.Errorf("Character prerequisite observation: %w", err)
+		}
+		if observation.Player != player || observation.Revision != revision || !observation.ObservedAt.Equal(at) || observation.PopulationVersion < 1 || observation.OwnedGirls < 0 {
+			return nil, errors.New("unqualified character function observation")
+		}
 	}
 	policy, err := service.Content.ResolveFunctionGatePolicyTx(requestContext, transaction, revision)
 	if err != nil {
 		return nil, fmt.Errorf("Character function catalog %s: %w", revision, err)
 	}
 	eligible := characterFunctionEligibility(policy, observation, progression.Level, at)
+	if service.ServerLevels != nil && hasMentorFunctionGate(policy) {
+		server := logicalserver.PlayerRegion(player)
+		qualified, serverErr := service.ServerLevels.ServerHasLevelAtLeastTx(requestContext, transaction, server, MentorServerLevelRequirement)
+		if serverErr != nil {
+			return nil, serverErr
+		}
+		eligible = append(eligible, mentorFunctionEligibility(policy, player, progression.Level, qualified, at)...)
+	}
 	if len(eligible) == 0 {
 		return nil, nil
 	}

@@ -79,17 +79,18 @@ func TestSavedPresetDispatcherRejectsUnknownOrWrongTypedGameplayFields(t *testin
 	}
 }
 
-func TestSavedPresetDispatcherUsesLocalFailuresWithoutInventedStockErrorCode(t *testing.T) {
+func TestSavedPresetDispatcherUsesD5RefusalCodes(t *testing.T) {
 	cases := []struct {
 		err  error
 		want int
+		code int64
 	}{
-		{appsavedpreset.ErrInvalidCommand, http.StatusBadRequest},
-		{characterasset.ErrReferenceNotFound, http.StatusBadRequest},
-		{appsavedpreset.ErrAmbiguousLegacyDelete, http.StatusConflict},
-		{appsavedpreset.ErrStaleLegacyDelete, http.StatusConflict},
-		{&tx.UnknownCommitError{Cause: errors.New("ambiguous commit")}, http.StatusServiceUnavailable},
-		{errors.New("infra"), http.StatusServiceUnavailable},
+		{appsavedpreset.ErrInvalidCommand, http.StatusBadRequest, 0},
+		{characterasset.ErrReferenceNotFound, http.StatusConflict, unprovenRefusalCode},
+		{appsavedpreset.ErrAmbiguousLegacyDelete, http.StatusConflict, staleConflictCode},
+		{appsavedpreset.ErrStaleLegacyDelete, http.StatusConflict, staleConflictCode},
+		{&tx.UnknownCommitError{Cause: errors.New("ambiguous commit")}, http.StatusUnauthorized, sessionFailureCode},
+		{errors.New("infra"), http.StatusInternalServerError, unprovenRefusalCode},
 	}
 	for _, tc := range cases {
 		svc := &savedPresetFakeService{err: tc.err}
@@ -98,8 +99,14 @@ func TestSavedPresetDispatcherUsesLocalFailuresWithoutInventedStockErrorCode(t *
 		if got.HTTPStatus != tc.want {
 			t.Fatalf("err=%v got=%+v", tc.err, got)
 		}
-		if _, invented := got.Body["error_code"]; invented {
-			t.Fatalf("invented stock error code for %v: %+v", tc.err, got.Body)
+		if tc.code == 0 {
+			if got.Body["error_code"] != unprovenRefusalCode || got.Body["error_msg"] != "" {
+				t.Fatalf("malformed code body for %v: %+v", tc.err, got.Body)
+			}
+			continue
+		}
+		if got.Body["error_code"] != tc.code {
+			t.Fatalf("err=%v error_code=%v want=%d", tc.err, got.Body["error_code"], tc.code)
 		}
 	}
 }

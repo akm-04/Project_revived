@@ -7,7 +7,9 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	dm "gxb.local/backend/v2/internal/application/frienddm"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"time"
 )
@@ -72,7 +74,8 @@ func (Store) FindProjection(c context.Context, q tx.Queryer, id string) (dm.Proj
 	r := dm.ProjectionReceipt{OperationID: id}
 	var pid int64
 	var raw []byte
-	e := q.QueryRow(c, `SELECT recipient_id,manifest_digest,projected_at,messages FROM friend_dm_projection_receipts WHERE operation_id=$1::uuid`, id).Scan(&pid, &r.ManifestDigest, &r.ObservedAt, &raw)
+	var version int16
+	e := q.QueryRow(c, `SELECT recipient_id,manifest_digest,projected_at,messages,payload_version FROM friend_dm_projection_receipts WHERE operation_id=$1::uuid`, id).Scan(&pid, &r.ManifestDigest, &r.ObservedAt, &raw, &version)
 	if errors.Is(e, kernelstore.ErrNoRows) {
 		return r, false, nil
 	}
@@ -80,7 +83,7 @@ func (Store) FindProjection(c context.Context, q tx.Queryer, id string) (dm.Proj
 		return r, false, e
 	}
 	r.Recipient = identity.PlayerID(pid)
-	e = json.Unmarshal(raw, &r.Messages)
+	e = payload.Decode("friend_dm_projection_receipts", version, raw, &r.Messages)
 	if e != nil {
 		return r, false, e
 	}
@@ -162,7 +165,7 @@ func (Store) ApplyTx(c context.Context, t tx.Tx, m dm.Manifest, changes []dm.Cha
 	seen := map[string]bool{}
 	for _, v := range changes {
 		before, ok := allowed[v.Before.Occurrence.ID]
-		if !ok || seen[before.Occurrence.ID] || before.Version != v.Before.Version || before.Status != dm.Pending || !v.Status.Valid() || !v.At.Equal(at) || v.ClaimGeneration < before.ClaimGeneration || at.Before(before.UpdatedAt) {
+		if !ok || seen[before.Occurrence.ID] || before.Version != v.Before.Version || before.Status != dm.Pending || !v.Status.Valid() || !v.At.Equal(at) || v.ClaimGeneration < before.ClaimGeneration {
 			return dm.ErrInvalid
 		}
 		seen[before.Occurrence.ID] = true
@@ -171,7 +174,7 @@ func (Store) ApplyTx(c context.Context, t tx.Tx, m dm.Manifest, changes []dm.Cha
 		after.ClaimGeneration = v.ClaimGeneration
 		after.OwnerFence = v.OwnerFence
 		after.ExpiresAt = v.ExpiresAt
-		after.UpdatedAt = at
+		after.UpdatedAt = gen.EffectiveObservation(at, before.UpdatedAt)
 		after.Version++
 		if after.Validate() != nil {
 			return dm.ErrInvalid
@@ -192,11 +195,11 @@ func (Store) InsertProjectionTx(c context.Context, t tx.Tx, r dm.ProjectionRecei
 	if r.OperationID == "" || !r.Recipient.Valid() || len(r.ManifestDigest) != 64 || r.ObservedAt.IsZero() || r.Messages == nil || len(r.Messages) > 50 {
 		return dm.ErrInvalid
 	}
-	raw, e := json.Marshal(r.Messages)
+	raw, version, e := payload.Encode(r.Messages)
 	if e != nil {
 		return e
 	}
-	return one(c, t, `INSERT INTO friend_dm_projection_receipts(operation_id,recipient_id,manifest_digest,projected_at,messages)VALUES($1::uuid,$2,$3,$4,$5::jsonb)`, r.OperationID, int64(r.Recipient), r.ManifestDigest, r.ObservedAt, string(raw))
+	return one(c, t, `INSERT INTO friend_dm_projection_receipts(operation_id,recipient_id,manifest_digest,projected_at,messages,payload_version)VALUES($1::uuid,$2,$3,$4,$5::jsonb,$6)`, r.OperationID, int64(r.Recipient), r.ManifestDigest, r.ObservedAt, string(raw), version)
 }
 func (Store) PendingRecipients(c context.Context, q tx.Queryer, after, high identity.PlayerID, limit int) ([]identity.PlayerID, error) {
 	if after < 0 || high < 0 || limit < 1 || limit > 64 {

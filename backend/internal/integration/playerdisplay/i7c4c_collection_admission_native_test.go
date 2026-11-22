@@ -114,7 +114,11 @@ func TestI7C4CCollectionAdmissionCanonicalPolicyAndLegacyReceiptReplay(t *testin
 	}
 }
 
-func TestI7C4CCollectionAdmissionStaleInstantRejectsBeforeDebit(t *testing.T) {
+// I9_11_CLOCK_ROLLBACK_V1 K2': an operation whose decision instant is older
+// than a stored UpdatedAt is not refused by a time comparison; row locks and
+// state versions remain the concurrency guards. Receipt replay still settles
+// the older operation exactly once.
+func TestI7C4CCollectionAdmissionOlderInstantIsNotAFutureGuard(t *testing.T) {
 	p := pool(t)
 	rev := installed(t, p)
 	a := rankingActor(t, p, rankingServer(t, p), true)
@@ -127,37 +131,40 @@ func TestI7C4CCollectionAdmissionStaleInstantRejectsBeforeDebit(t *testing.T) {
 	if _, e := s.SummonNormal(ctx, a, 10001001, first.Template.FragmentItemID, first.FragmentCount, op()); e != nil {
 		t.Fatal(e)
 	}
-	store := characterstore.Store{}
-	before, e := store.ReadRootTx(ctx, p, a.PlayerID)
+	created, e := s.SummonNormal(ctx, a, 10001002, next.Template.FragmentItemID, next.FragmentCount, stale)
 	if e != nil {
+		t.Fatalf("older decision instant was refused by a time comparison: %v", e)
+	}
+	replay, e := s.SummonNormal(ctx, a, 10001002, next.Template.FragmentItemID, next.FragmentCount, stale)
+	if e != nil || !reflect.DeepEqual(created, replay) {
+		t.Fatalf("older instant replay: %+v %+v %v", created, replay, e)
+	}
+	rows, e := (characterstore.Store{}).ListHeroesTx(ctx, p, a.PlayerID)
+	if e != nil || len(rows) != 2 {
+		t.Fatalf("roster after older-instant summon: %d %v", len(rows), e)
+	}
+}
+
+// A forwarded server clock stamped the roster in the future. The admission
+// authorization must accept it once the corrected decision time is earlier.
+func TestI7C4CCollectionAdmissionBackwardClockKeepsForwardRoster(t *testing.T) {
+	p := pool(t)
+	rev := installed(t, p)
+	a := rankingActor(t, p, rankingServer(t, p), true)
+	first := collectionResources(t, p, a, rev, 10001001)
+	next := collectionResources(t, p, a, rev, 10001002)
+	s := collectionService(p)
+	if _, e := s.SummonNormal(ctx, a, 10001001, first.Template.FragmentItemID, first.FragmentCount, op()); e != nil {
 		t.Fatal(e)
 	}
-	var mana, stones int64
-	if e = p.QueryRow(ctx, `SELECT amount FROM player_currency_balances WHERE player_id=$1 AND resource_key='mana'`, int64(a.PlayerID)).Scan(&mana); e != nil {
-		t.Fatal(e)
+	exec(t, p, `UPDATE player_hero_roots SET created_at=clock_timestamp()+interval '8 hours',updated_at=clock_timestamp()+interval '8 hours' WHERE player_id=$1`, int64(a.PlayerID))
+	exec(t, p, `UPDATE player_heroes SET created_at=clock_timestamp()+interval '8 hours',updated_at=clock_timestamp()+interval '8 hours' WHERE player_id=$1`, int64(a.PlayerID))
+	if _, e := s.SummonNormal(ctx, a, 10001002, next.Template.FragmentItemID, next.FragmentCount, op()); e != nil {
+		t.Fatalf("forward-dated roster refused after backward clock step: %v", e)
 	}
-	if e = p.QueryRow(ctx, `SELECT quantity FROM player_item_stacks WHERE player_id=$1 AND item_id=$2`, int64(a.PlayerID), next.Template.FragmentItemID).Scan(&stones); e != nil {
-		t.Fatal(e)
-	}
-	if _, e = s.SummonNormal(ctx, a, 10001002, next.Template.FragmentItemID, next.FragmentCount, stale); !errors.Is(e, hero.ErrHeroCapacityUnavailable) {
-		t.Fatal("older instant accepted or resampled", e)
-	}
-	after, e := store.ReadRootTx(ctx, p, a.PlayerID)
-	if e != nil || !reflect.DeepEqual(before, after) {
-		t.Fatal("root/allocator changed", before, after, e)
-	}
-	var actualMana, actualStones int64
-	if e = p.QueryRow(ctx, `SELECT amount FROM player_currency_balances WHERE player_id=$1 AND resource_key='mana'`, int64(a.PlayerID)).Scan(&actualMana); e != nil {
-		t.Fatal(e)
-	}
-	if e = p.QueryRow(ctx, `SELECT quantity FROM player_item_stacks WHERE player_id=$1 AND item_id=$2`, int64(a.PlayerID), next.Template.FragmentItemID).Scan(&actualStones); e != nil {
-		t.Fatal(e)
-	}
-	if mana != actualMana || stones != actualStones {
-		t.Fatal("stale admission paid", mana, actualMana, stones, actualStones)
-	}
-	if _, ok, e := (kernelstore.Store{}).FindTx(ctx, p, receipt.Identity{OwnerKind: "player", OwnerKey: strconv.FormatInt(int64(a.PlayerID), 10), Domain: "character-hero", Operation: "stone-summon", SemanticKey: stale.ID.String()}); e != nil || ok {
-		t.Fatal("stale admission receipt", ok, e)
+	rows, e := (characterstore.Store{}).ListHeroesTx(ctx, p, a.PlayerID)
+	if e != nil || len(rows) != 2 {
+		t.Fatalf("roster after second summon: %d %v", len(rows), e)
 	}
 }
 

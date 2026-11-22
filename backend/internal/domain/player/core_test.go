@@ -45,6 +45,34 @@ func TestSaveStoryGuideEndIsPresentationMarkerOnly(t *testing.T) {
 	}
 }
 
+func TestSaveStoryClearsFirstEntryAtTheOpeningStoryCursor(t *testing.T) {
+	now := time.Unix(1700000000, 0).UTC()
+	cur := CompatibilityBootstrap(identity.PlayerID(100001), now).Story
+	for _, tc := range []struct {
+		name       string
+		storyID    int64
+		storyState int64
+		guideID    int64
+		want       bool
+	}{
+		{"opening cursor", 0, 0, GuideOpeningDoneID, true},
+		{"before the opening cursor", 0, 0, GuideOpeningDoneID - 1, false},
+		{"first skill cursor", 10002, 3, 100198, true},
+		{"later skill cursor", 10002, 3, 100200, true},
+		{"guide below GUIDE_END after the opening", 10002, 3, GuideEndID - 1, true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			_, done, err := SaveStory(cur, tc.storyID, tc.storyState, tc.guideID, now.Add(time.Second))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if done != tc.want {
+				t.Fatalf("done=%v want %v", done, tc.want)
+			}
+		})
+	}
+}
+
 func TestGuideFunctionsProjectAsStringKeyedCompletionMap(t *testing.T) {
 	now := time.Unix(1700000000, 0).UTC()
 	core := CompatibilityBootstrap(identity.PlayerID(100001), now)
@@ -80,5 +108,57 @@ func TestGuideFunctionsProjectAsStringKeyedCompletionMap(t *testing.T) {
 	}
 	if _, err := SetGuideReturn(back, -1, now); err == nil {
 		t.Fatal("negative guide return id accepted")
+	}
+}
+
+// BUGS #114: SAVE_STORY with an announcement's guide cursor proves the client
+// saw that function; every other cursor acknowledges no function.
+func TestFunctionAnnouncementAcknowledgementMapping(t *testing.T) {
+	for functionID, cursor := range map[int64]int64{
+		SkillUpFunctionID:       SkillUpGuideCursor,
+		superCampaignFunctionID: superBattleGuideCursor,
+		cloudCityFunctionID:     cloudCityGuideCursor,
+		conquerSchoolFunctionID: conquerSchoolGuideCursor,
+	} {
+		if got, ok := FunctionAnnouncementAcknowledgement(functionID); !ok || got != cursor {
+			t.Fatalf("function %d cursor=%d ok=%v", functionID, got, ok)
+		}
+		if got, ok := AcknowledgedFunction(cursor); !ok || got != functionID {
+			t.Fatalf("cursor %d function=%d ok=%v", cursor, got, ok)
+		}
+	}
+	if _, ok := FunctionAnnouncementAcknowledgement(99); ok {
+		t.Fatal("an unacknowledged function was marked acknowledgeable")
+	}
+	if _, ok := AcknowledgedFunction(GuideEndID); ok {
+		t.Fatal("the guide end cursor acknowledged a function")
+	}
+}
+
+// BUGS #114 follow-up: only announcements with an acknowledgement cursor that
+// the saved story cursor has not reached may be replayed.
+func TestReplayableFunctionAnnouncements(t *testing.T) {
+	cases := []struct {
+		name   string
+		ids    []int64
+		guide  int64
+		wanted []int64
+	}{
+		{name: "no cursor is never replayed", ids: []int64{1, 5, 7}, guide: 0, wanted: []int64{}},
+		{name: "pending before its cursor", ids: []int64{33}, guide: 0, wanted: []int64{33}},
+		{name: "reached cursor counts as acknowledged", ids: []int64{33}, guide: SkillUpGuideCursor, wanted: []int64{}},
+		{name: "passed cursor counts as acknowledged", ids: []int64{31, 33}, guide: 100500, wanted: []int64{}},
+		{name: "mixed rows keep only replayable", ids: []int64{1, 33, 42}, guide: 100198, wanted: []int64{42}},
+	}
+	for _, tc := range cases {
+		got := ReplayableFunctionAnnouncements(tc.ids, tc.guide)
+		if len(got) != len(tc.wanted) {
+			t.Fatalf("%s: got %v want %v", tc.name, got, tc.wanted)
+		}
+		for index := range got {
+			if got[index] != tc.wanted[index] {
+				t.Fatalf("%s: got %v want %v", tc.name, got, tc.wanted)
+			}
+		}
 	}
 }

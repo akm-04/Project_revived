@@ -2,6 +2,7 @@ package adventure
 
 import (
 	"context"
+	"time"
 
 	cb "gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -42,7 +43,7 @@ func (s Mode) Fight(c context.Context, a identity.ActorContext, request FightReq
 		if err = s.ownedHeroes(c, sc.Tx, a, at, request.Formation); err != nil {
 			return err
 		}
-		enemy, err := s.opponent(c, sc.Tx, a, catalog, eventOrdinal(sc.Operation.Operation(), "adventure.pvp.fight/v1", occurrence.SourceKey))
+		enemy, err := s.opponent(c, sc.Tx, a, catalog, at, eventOrdinal(sc.Operation.Operation(), "adventure.pvp.fight/v1", occurrence.SourceKey))
 		if err != nil {
 			return err
 		}
@@ -50,9 +51,7 @@ func (s Mode) Fight(c context.Context, a identity.ActorContext, request FightReq
 		if err != nil {
 			return err
 		}
-		started, err = s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Actor: a, Locator: locator(a, occurrence, "ADVENTURE_PVP"),
-			GenerationRef: "ADVENTURE_PVP/" + occurrence.SourceKey, StartFingerprint: startFingerprint(a, sc.Operation.Operation().ID.String(), request.Formation),
-			ResultDeadline: at.Add(attemptLimit), Battle: pvpBattle(a, request, enemy)})
+		started, err = s.startAttempt(c, sc, scope, pvpStart(a, occurrence, request, enemy, at))
 		return err
 	})
 	if err != nil {
@@ -96,6 +95,16 @@ func (s Mode) Fight(c context.Context, a identity.ActorContext, request FightReq
 		if _, err = s.finish(c, sc.Tx, a, current, at); err != nil {
 			return err
 		}
+		// A same-stage retry replays the frozen attempt whatever formation it
+		// carries, so the Girls Log count follows the heroes that actually
+		// fought, not this call's request.
+		snapshot, err := s.Combat.SnapshotTx(c, sc.Tx, started.Attempt.ID)
+		if err != nil {
+			return err
+		}
+		if err = s.BattleObserver.ObserveBattleTx(c, sc.Tx, a.PlayerID, frozenPartners(snapshot, a.PlayerID), at); err != nil {
+			return err
+		}
 		response.Body = map[string]any{"battle_report": string(terminal.Report), "is_win": boolNumber(d.IsWin(star)), "awards": awards}
 		return nil
 	})
@@ -105,27 +114,31 @@ func (s Mode) Fight(c context.Context, a identity.ActorContext, request FightReq
 	return response, nil
 }
 
+// pvpStart is the PVP START identity: the locator and generation name the
+// occurrence (the stage); the formation is the player's choice, so a same-stage
+// START replays the frozen attempt when only it changed
+// (I8_PARENT_CONTRACT_V1 generation_supersede).
+func pvpStart(a identity.ActorContext, occurrence d.Occurrence, request FightRequest, enemy Opponent, at time.Time) cb.StartRequest {
+	return cb.StartRequest{Mode: cd.ModeAdventurePVP, Actor: a, Locator: locator(a, occurrence, "ADVENTURE_PVP"),
+		GenerationRef: "ADVENTURE_PVP/" + occurrence.SourceKey, StartFingerprint: pvpFingerprint(a),
+		ResultDeadline: at.Add(attemptLimit), Battle: pvpBattle(a, request, enemy)}
+}
+
+func pvpFingerprint(a identity.ActorContext) string {
+	return startFingerprint(a, nil)
+}
+
 func pvpBattle(a identity.ActorContext, request FightRequest, enemy Opponent) cb.BattleRequest {
 	teamA := make([]cb.Participant, 0, len(request.Formation))
 	for _, id := range request.Formation {
 		teamA = append(teamA, cb.Participant{Origin: cd.OwnedSelf, Kind: cd.HeroActor, Player: a.PlayerID, Identity: id})
 	}
-	battle := cb.BattleRequest{CampaignType: darena.CampaignType, BattleID: darena.BattleID, TeamA: teamA}
+	battle := cb.BattleRequest{CampaignType: darena.CampaignType, BattleID: darena.BattleID, TeamA: teamA, Context: &cd.BattleContext{Transform: darena.Transform}}
 	if request.PetID > 0 {
 		battle.PetsA = []cb.Participant{{Origin: cd.OwnedSelf, Kind: cd.PetActor, Player: a.PlayerID, Identity: request.PetID}}
 	}
-	if len(enemy.TemplateHeroes) > 0 {
-		battle.WavesB = [][]cb.Participant{enemy.TemplateHeroes}
-		return battle
-	}
-	teamB := make([]cb.Participant, 0, len(enemy.Heroes))
-	for _, id := range enemy.Heroes {
-		teamB = append(teamB, cb.Participant{Origin: cd.OwnedForeign, Kind: cd.HeroActor, Player: enemy.PlayerID, Identity: id})
-	}
-	battle.WavesB = [][]cb.Participant{teamB}
-	if enemy.PetID > 0 {
-		battle.PetsB = []cb.Participant{{Origin: cd.OwnedForeign, Kind: cd.PetActor, Player: enemy.PlayerID, Identity: enemy.PetID}}
-	}
+	battle.WavesB = [][]cb.Participant{enemy.Heroes}
+	battle.PetsB = enemy.Pets
 	return battle
 }
 

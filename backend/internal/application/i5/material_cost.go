@@ -62,8 +62,9 @@ func (c MaterialCost) validate() error {
 }
 
 type MaterialDebitResult struct {
-	Scalars []economy.ScalarBalance
-	Stacks  []economy.StackState
+	dailyFloors []preparedScalarDailyFloor
+	Scalars     []economy.ScalarBalance
+	Stacks      []economy.StackState
 }
 
 // TxMaterialCostDebiter is the shared I5-owned debit-only composition seam.
@@ -82,6 +83,57 @@ type MaterialCostStore interface {
 	LockStackTx(context.Context, tx.Tx, identity.PlayerID, int64, time.Time) (economy.StackState, bool, error)
 	SaveStackTx(context.Context, tx.Tx, economy.StackState, bool) error
 	DeleteStackTx(context.Context, tx.Tx, economy.StackState) error
+}
+
+type FrameStackRequest struct {
+	Player identity.PlayerID
+	ItemID int64
+}
+
+// LockFrameStackOwnershipTx preserves I5's canonical Economy-before-Stack lock order for batches.
+func LockFrameStackOwnershipTx(ctx context.Context, transaction tx.Tx, store MaterialCostStore, requests []FrameStackRequest, at time.Time) (map[FrameStackRequest]bool, error) {
+	if store == nil || transaction == nil || at.IsZero() {
+		return nil, errors.New("i5 frame stack lock inputs incomplete")
+	}
+	uniqueRequests := make(map[FrameStackRequest]struct{}, len(requests))
+	uniqueOwners := make(map[identity.PlayerID]struct{}, len(requests))
+	orderedRequests := make([]FrameStackRequest, 0, len(requests))
+	orderedOwners := make([]identity.PlayerID, 0, len(requests))
+	for _, request := range requests {
+		if !request.Player.Valid() || request.ItemID <= 0 {
+			return nil, errors.New("i5 frame stack request invalid")
+		}
+		if _, exists := uniqueRequests[request]; exists {
+			continue
+		}
+		uniqueRequests[request] = struct{}{}
+		orderedRequests = append(orderedRequests, request)
+		if _, exists := uniqueOwners[request.Player]; exists {
+			continue
+		}
+		uniqueOwners[request.Player] = struct{}{}
+		orderedOwners = append(orderedOwners, request.Player)
+	}
+	sort.Slice(orderedOwners, func(left, right int) bool { return orderedOwners[left] < orderedOwners[right] })
+	for _, owner := range orderedOwners {
+		if err := store.LockEconomyOwnerTx(ctx, transaction, owner); err != nil {
+			return nil, err
+		}
+	}
+	sort.Slice(orderedRequests, func(left, right int) bool {
+		leftIdentity := fmt.Sprintf("%d:%d", int64(orderedRequests[left].Player), orderedRequests[left].ItemID)
+		rightIdentity := fmt.Sprintf("%d:%d", int64(orderedRequests[right].Player), orderedRequests[right].ItemID)
+		return leftIdentity < rightIdentity
+	})
+	ownership := make(map[FrameStackRequest]bool, len(orderedRequests))
+	for _, request := range orderedRequests {
+		stack, exists, err := store.LockStackTx(ctx, transaction, request.Player, request.ItemID, at)
+		if err != nil {
+			return nil, err
+		}
+		ownership[request] = exists && stack.Quantity > 0
+	}
+	return ownership, nil
 }
 
 // MaterialCostDebiter composes immutable I5 content qualification with canonical
@@ -139,6 +191,10 @@ func (d MaterialCostDebiter) preflightMaterialCostTx(ctx context.Context, t tx.T
 		if p.Kind != grant.ScalarCurrency {
 			return materialCostPreflight{}, economy.ErrUnknownResource
 		}
+		p.DailyFloorMinimum, err = dailyFloorMinimumTx(ctx, t, d.Content, x.ResourceKey)
+		if err != nil {
+			return materialCostPreflight{}, err
+		}
 		pf.Scalars = append(pf.Scalars, preparedScalarDebit{Cost: x, Policy: p})
 	}
 	pf.Stacks = make([]preparedStackDebit, 0, len(cost.Stacks))
@@ -191,10 +247,22 @@ func (d MaterialCostDebiter) acquireMaterialCostLocksTx(ctx context.Context, t t
 				return err
 			}
 		case grantLockScalar:
-			if _, exists, err := d.Store.LockScalarTx(ctx, t, pid, r.ResourceKey, pf.Now); err != nil {
+			_, exists, err := d.Store.LockScalarTx(ctx, t, pid, r.ResourceKey, pf.Now)
+			if err != nil {
 				return err
-			} else if !exists {
-				return economy.ErrInsufficientBalance
+			}
+			if exists {
+				continue
+			}
+			floorEnabled := false
+			for _, scalar := range pf.Scalars {
+				if scalar.Cost.ResourceKey == r.ResourceKey {
+					floorEnabled = scalar.Policy.DailyFloorMinimum != nil
+					break
+				}
+			}
+			if !floorEnabled {
+				return economy.InsufficientBalance(r.ResourceKey)
 			}
 		case grantLockStack:
 			if _, exists, err := d.Store.LockStackTx(ctx, t, pid, r.ItemID, pf.Now); err != nil {
@@ -214,13 +282,28 @@ func (d MaterialCostDebiter) acquireMaterialCostLocksTx(ctx context.Context, t t
 // a new identity here is not.
 func (d MaterialCostDebiter) prepareMaterialDebitStateTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, pf materialCostPreflight) (MaterialDebitResult, error) {
 	nextScalars := make([]economy.ScalarBalance, 0, len(pf.Scalars))
+	floors := []preparedScalarDailyFloor{}
 	for _, x := range pf.Scalars {
 		b, exists, err := d.Store.LockScalarTx(ctx, t, pid, x.Cost.ResourceKey, pf.Now)
 		if err != nil {
 			return MaterialDebitResult{}, err
 		}
+		if !exists && x.Policy.DailyFloorMinimum != nil {
+			b = economy.ScalarBalance{PlayerID: pid, ResourceKey: x.Cost.ResourceKey, StateVersion: 1, UpdatedAt: pf.Now}
+		}
+		floor, err := prepareDailyFloorTx(ctx, t, d.Store, b, exists, x.Policy.DailyFloorMinimum, pf.Now)
+		if err != nil {
+			return MaterialDebitResult{}, err
+		}
+		if floor != nil {
+			b = floor.Plan.Balance
+			exists = exists || floor.Plan.Changed
+			if floor.Plan.Changed {
+				floors = append(floors, *floor)
+			}
+		}
 		if !exists {
-			return MaterialDebitResult{}, economy.ErrInsufficientBalance
+			return MaterialDebitResult{}, economy.InsufficientBalance(x.Cost.ResourceKey)
 		}
 		next, err := b.Debit(x.Cost.Amount, pf.Now)
 		if err != nil {
@@ -243,10 +326,15 @@ func (d MaterialCostDebiter) prepareMaterialDebitStateTx(ctx context.Context, t 
 		}
 		nextStacks = append(nextStacks, adjusted.State)
 	}
-	return MaterialDebitResult{Scalars: nextScalars, Stacks: nextStacks}, nil
+	return MaterialDebitResult{Scalars: nextScalars, Stacks: nextStacks, dailyFloors: floors}, nil
 }
 
 func (d MaterialCostDebiter) applyPreparedMaterialDebitTx(ctx context.Context, t tx.Tx, prepared MaterialDebitResult) error {
+	for _, floor := range prepared.dailyFloors {
+		if err := applyDailyFloorTx(ctx, t, d.Store, floor); err != nil {
+			return err
+		}
+	}
 	for _, next := range prepared.Scalars {
 		if err := d.Store.SaveScalarTx(ctx, t, next, true); err != nil {
 			return err

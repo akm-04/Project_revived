@@ -71,7 +71,7 @@ type Store interface {
 	Grant(ctx context.Context, digest [32]byte) (Grant, bool, error)
 	SaveUpload(context.Context, Upload) error
 	SaveJournal(context.Context, []JournalRow) error
-	PurgeExpired(ctx context.Context, now time.Time, batch int) (int64, error)
+	PurgeExpired(ctx context.Context, now time.Time, retentionDays, batch int) (int64, error)
 }
 
 // BearerResolver resolves the type 1 form token (the stock gameplay token).
@@ -92,6 +92,14 @@ type UploadRequest struct {
 	AttachmentName string
 	Attachment     []byte
 	Malformed      string
+	// RawBody is nil when the multipart body parsed, else the request body R4
+	// keeps as the quarantined raw record.
+	RawBody []byte
+	// EnvelopeSummary is a bounded text-only description of a parsed multipart
+	// envelope: part names, byte lengths and free-text values, never part bytes.
+	// It becomes the quarantine record when framing succeeded with no payload
+	// (A-132).
+	EnvelopeSummary []byte
 }
 
 // Quarantine reasons (R4).
@@ -108,7 +116,9 @@ type Service struct {
 	Bearers BearerResolver
 	Clock   clock.Clock
 	BaseURL string
-	limiter rateLimiter
+	// RetentionDays is the R8 cap (U4); zero keeps the owner's class windows.
+	RetentionDays int
+	limiter       rateLimiter
 }
 
 // IssueLogURL returns the per-session log_url for a MID1 response. An empty
@@ -141,7 +151,11 @@ func (s *Service) Ingest(ctx context.Context, request UploadRequest) int {
 	if err != nil {
 		return http.StatusServiceUnavailable
 	}
-	if attribution == AttributedByCapability && !s.limiter.allow(request.Capability, now) {
+	bucket := request.Capability
+	if attribution != AttributedByCapability {
+		bucket = unattributedBucket
+	}
+	if !s.limiter.allow(bucket, now) {
 		return http.StatusTooManyRequests
 	}
 	id, err := ids.NewUUID()
@@ -151,10 +165,18 @@ func (s *Service) Ingest(ctx context.Context, request UploadRequest) int {
 	upload := Upload{ID: id, ReceivedAt: now, Kind: request.Kind, Owner: owner, Attribution: attribution, BodyBytes: request.BodyBytes,
 		AppVersion: request.AppVersion, Version: request.Version, AttachmentName: request.AttachmentName, Attachment: request.Attachment}
 	upload.QuarantineReason, upload.Rows = parseUpload(request)
-	if upload.QuarantineReason != "" && request.Kind == domain.KindErrorLog {
-		upload.Attachment, upload.AttachmentTruncated = boundedCopy(request.Payload, domain.MaxErrorLogBodyBytes)
+	if upload.QuarantineReason != "" {
+		raw := request.Payload
+		if request.RawBody != nil {
+			raw = redactedRawBody(request.RawBody, presentedCapability(request.Capability))
+		}
+		if len(raw) == 0 {
+			raw = redactedRawBody(request.EnvelopeSummary, presentedCapability(request.Capability))
+		}
+		upload.Attachment, upload.AttachmentTruncated = boundedCopy(raw, domain.MaxErrorLogBodyBytes)
 	}
 	upload.Class = uploadClass(upload)
+	domain.ClassifyUploadRows(upload.Rows, upload.Owner != nil, upload.QuarantineReason != "")
 	if err := s.Store.SaveUpload(ctx, upload); err != nil {
 		return http.StatusServiceUnavailable
 	}
@@ -182,19 +204,61 @@ func parseUpload(request UploadRequest) (string, []domain.Row) {
 	if err != nil {
 		return QuarantineBadRows, nil
 	}
-	return "", redactRows(rows)
+	return "", redactRows(rows, presentedCapability(request.Capability))
 }
 
-// redactRows masks secrets in client text before persistence (I85_CLIENT_LOG_INGEST_V1 R8).
-func redactRows(rows []domain.Row) []domain.Row {
+// presentedCapability returns a path segment only when it has the issued
+// capability shape; a malformed segment is not a secret and must not mangle text.
+func presentedCapability(segment string) string {
+	if _, valid := domain.CapabilityDigest(segment); !valid {
+		return ""
+	}
+	return segment
+}
+
+// redactRows masks secrets in client text before persistence (I85_CLIENT_LOG_INGEST_V1 R8). The
+// presented capability is a bare URL path segment, so its value is masked as well as keyed pairs.
+func redactRows(rows []domain.Row, capability string) []domain.Row {
 	for index := range rows {
-		rows[index].Log = observability.RedactText(rows[index].Log)
-		rows[index].Dump = observability.RedactText(rows[index].Dump)
+		rows[index].Log = redactCapability(observability.RedactText(rows[index].Log), capability)
+		rows[index].Dump = redactCapability(observability.RedactText(rows[index].Dump), capability)
 		if rows[index].Extras != nil {
 			rows[index].Extras = observability.RedactFields(rows[index].Extras)
+			for key, value := range rows[index].Extras {
+				rows[index].Extras[key] = redactCapabilityValue(value, capability)
+			}
 		}
 	}
 	return rows
+}
+
+func redactCapability(text, capability string) string {
+	if capability == "" {
+		return text
+	}
+	return strings.ReplaceAll(text, capability, observability.Redacted)
+}
+
+func redactCapabilityValue(value any, capability string) any {
+	if capability == "" {
+		return value
+	}
+	switch typed := value.(type) {
+	case string:
+		return redactCapability(typed, capability)
+	case map[string]any:
+		for key, inner := range typed {
+			typed[key] = redactCapabilityValue(inner, capability)
+		}
+		return typed
+	case []any:
+		for index, inner := range typed {
+			typed[index] = redactCapabilityValue(inner, capability)
+		}
+		return typed
+	default:
+		return value
+	}
 }
 
 func uploadClass(upload Upload) domain.RetentionClass {
@@ -204,6 +268,12 @@ func uploadClass(upload Upload) domain.RetentionClass {
 		return domain.Error
 	}
 	return domain.UploadClass(upload.Rows, attributed, quarantined)
+}
+
+// redactedRawBody keeps the malformed body as the quarantine record with the
+// same secret redaction parsed rows get (R8).
+func redactedRawBody(body []byte, capability string) []byte {
+	return []byte(redactCapability(observability.RedactText(string(body)), capability))
 }
 
 func boundedCopy(data []byte, limit int) ([]byte, bool) {
@@ -253,6 +323,10 @@ func (s *Service) byCapability(ctx context.Context, capability string, now time.
 	return &Owner{AccountUID: grant.AccountUID, PlayerID: grant.PlayerID, SessionRef: grant.SessionRef}, AttributedByCapability, nil
 }
 
+// unattributedBucket is shared by every upload that resolves to no grant; a
+// granted capability is never empty, so the two cannot collide.
+const unattributedBucket = ""
+
 // rateLimiter is a fixed one-minute window per capability (R5, D47).
 // shortcut: per-process counts; a multi-replica gxb-api needs a shared limiter (I12).
 type rateLimiter struct {
@@ -277,7 +351,7 @@ func (s *Service) Purge(ctx context.Context) (int64, error) {
 	const batch = 5000
 	var total int64
 	for {
-		deleted, err := s.Store.PurgeExpired(ctx, s.Clock.Now(), batch)
+		deleted, err := s.Store.PurgeExpired(ctx, s.Clock.Now(), s.RetentionDays, batch)
 		total += deleted
 		if err != nil || deleted < batch {
 			return total, err

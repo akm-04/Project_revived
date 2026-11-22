@@ -104,12 +104,14 @@ func Test7A_RecoverySeedCompare(t *testing.T) {
 		f.sql(`DELETE FROM gameplay_contexts WHERE player_id=500001`)
 		clearBirthOwners(f, f.p.Raw(), 500001)
 		f.sql(`DELETE FROM player_directory_profiles WHERE player_id=500001`)
-		f.sql(`DELETE FROM players WHERE player_id=500001`)
+		// R8-3: players are never deleted; the key refuses it (00161).
+		_, e = f.p.Raw().Exec(ctx, `DELETE FROM players WHERE player_id=500001`)
+		f.refusedByPlayerKey(e, "player_dorm_roots_player_id_fkey")
 		// Synthetic future immutable gift revision: exact same vector/catalog, no
 		// assertion about an original server or a full future content installation.
 		rev := strings.Repeat("e", 64)
 		f.sql(`INSERT INTO gxb_content_revisions(revision_id,content_sha256,schema_version,compiler_version,parser_version,manifest)SELECT $1,decode($1,'hex'),schema_version,compiler_version,parser_version,jsonb_set(manifest,'{revision_id}',to_jsonb($1::text)) FROM gxb_content_revisions WHERE revision_id=$2 ON CONFLICT DO NOTHING`, rev, got.Revision)
-		f.sql(`INSERT INTO content_social_gift_catalogs SELECT $1,payload FROM content_social_gift_catalogs WHERE revision_id=$2 ON CONFLICT DO NOTHING`, rev, got.Revision)
+		f.sql(`INSERT INTO content_social_gift_catalogs(revision_id,payload) SELECT $1,payload FROM content_social_gift_catalogs WHERE revision_id=$2 ON CONFLICT DO NOTHING`, rev, got.Revision)
 		f.sql(`UPDATE social_gift_transfers SET reward_revision=$1 WHERE recipient_player_id=200001 AND claim_operation_id IS NULL AND sender_player_id=500001`, rev)
 		sequence := f.number(`SELECT last_value FROM social_notice_id_seq`)
 		rec := giftRecovery{ActorAccount: b.AccountID.UUID().String(), ActorSession: b.SessionID.UUID().String(), ActorContext: b.ContextID.UUID().String(), ActorUID: string(b.AccountUID), ActorPlayer: b.PlayerID, ActorServer: b.LogicalServerID, SenderAccount: a.AccountID.UUID().String(), SenderSession: a.SessionID.UUID().String(), SenderContext: a.ContextID.UUID().String(), SenderUID: string(a.AccountUID), SenderPlayer: a.PlayerID, SenderServer: a.LogicalServerID, Claim: op, ClaimInput: claimed, Old: old.NoticeIDs, Current: current.NoticeIDs, Deleted: gone.NoticeIDs, Result: got, Snapshot: f.giftState(), Sequence: sequence, At: f.now()}
@@ -117,7 +119,7 @@ func Test7A_RecoverySeedCompare(t *testing.T) {
 		if e = os.WriteFile(path, raw, 0600); e != nil {
 			t.Fatal(e)
 		}
-		t.Log("REAL_PG nonempty restore seed: nine current claimed, old unclaimed, current unclaimed, deleted sender with synthetic equivalent issued revision, full semantic operation and sequence witness")
+		t.Log("REAL_PG nonempty restore seed: nine current claimed, old unclaimed, current unclaimed, refused sender deletion with synthetic equivalent issued revision, full semantic operation and sequence witness")
 		return
 	}
 	if mode != "compare" {
@@ -160,7 +162,7 @@ func Test7A_RecoverySeedCompare(t *testing.T) {
 	if e != nil || next.Amount != 10 || f.number(`SELECT amount FROM player_currency_balances WHERE player_id=200001 AND resource_key='friendship_coin'`) != 60 {
 		t.Fatal("rollover mixed equivalent source revisions/tombstone", next, e)
 	}
-	t.Log("REAL_PG separately restored full backup: all facts+sequence identical, claimed replay/no recredit, natural uniqueness, last-slot quota, next-day mixed issued revisions and deleted sender value")
+	t.Log("REAL_PG separately restored full backup: all facts+sequence identical, claimed replay/no recredit, natural uniqueness, last-slot quota, next-day mixed issued revisions and refused-deletion sender value")
 }
 func Test7A_UpgradeActivationCompatibility(t *testing.T) {
 	if os.Getenv("GXB_I7A7A_UPGRADE_MODE") == "" {

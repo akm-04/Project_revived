@@ -12,17 +12,15 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/oneonone"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
 // rankListSize is the private-policy length of the 1 on 1 rank lists.
 const rankListSize = 50
 
-// reportRetention is the 1 on 1 replay window (D25a private policy, at the D9 Q6 ceiling).
-var reportRetention = cd.Retention{ID: "C5C_ONE_ON_ONE_REPORT_RETENTION_V1", Version: 1, Window: cd.RetentionCeiling}
-
 // Report replays a round while a retained record references its match; nil is ARENA_RECORD_OUT_OF_DATE.
-func (s Service) Report(c context.Context, key string) ([]byte, error) {
+func (s Service) Report(c context.Context, key string, op operation.Context) ([]byte, error) {
 	if !s.ready() {
 		return nil, d.ErrUnavailable
 	}
@@ -30,72 +28,83 @@ func (s Service) Report(c context.Context, key string) ([]byte, error) {
 	if err != nil {
 		return nil, nil
 	}
-	retained, err := s.Store.RetainedRoundTx(c, s.Fresh, id)
-	if err != nil || !retained {
-		return nil, err
-	}
-	now, err := s.Timed.Binder.Time.Now(c)
-	if err != nil {
-		return nil, err
-	}
-	result, _, err := s.Combat.ReplayTx(c, s.Fresh, id, reportRetention, now)
-	return result.Report, err
+	var report []byte
+	_, _, err = s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, readRetry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		retained, err := s.Store.RetainedRoundTx(c, sc.Tx, id)
+		if err != nil || !retained {
+			return err
+		}
+		result, _, err := s.Combat.ReplayTx(c, sc.Tx, id, *cd.MustMode(cd.ModeOneOnOne).Retention, sc.Operation.DecisionAt())
+		report = result.Report
+		return err
+	})
+	return report, err
 }
 
 // DefenseReportKeys lists the round reports of the player's retained defense
 // records, newest first (source red-dot list for 2485 without a key).
-func (s Service) DefenseReportKeys(c context.Context, a identity.ActorContext) ([]string, error) {
+func (s Service) DefenseReportKeys(c context.Context, a identity.ActorContext, op operation.Context) ([]string, error) {
 	if !s.ready() {
 		return nil, d.ErrUnavailable
 	}
-	records, err := s.Store.RecordsTx(c, s.Fresh, a.PlayerID)
-	if err != nil {
-		return nil, err
-	}
-	out := []string{}
-	for _, r := range records {
-		if r.Attack {
-			continue
+	var out []string
+	_, _, err := s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, readRetry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		records, err := s.Store.RecordsTx(c, sc.Tx, a.PlayerID)
+		if err != nil {
+			return err
 		}
-		m, found, err := s.Store.ReadMatchTx(c, s.Fresh, r.MatchID, false)
-		if err != nil || !found || m.Outcome == nil {
-			return nil, errors.Join(err, d.ErrConflict)
-		}
-		for _, key := range reportKeys(m) {
-			if key != "" {
-				out = append(out, key)
+		out = []string{}
+		for _, r := range records {
+			if r.Attack {
+				continue
+			}
+			m, found, err := s.Store.ReadMatchTx(c, sc.Tx, r.MatchID, false)
+			if err != nil || !found || m.Outcome == nil {
+				return errors.Join(err, d.ErrConflict)
+			}
+			for _, key := range reportKeys(m) {
+				if key != "" {
+					out = append(out, key)
+				}
 			}
 		}
-	}
-	return out, nil
+		return nil
+	})
+	return out, err
 }
 
 // Records lists the player's retained matches, newest first.
-func (s Service) Records(c context.Context, a identity.ActorContext) ([]d.RecordView, error) {
+func (s Service) Records(c context.Context, a identity.ActorContext, op operation.Context) ([]d.RecordView, error) {
 	if !s.ready() {
 		return nil, d.ErrUnavailable
 	}
-	records, err := s.Store.RecordsTx(c, s.Fresh, a.PlayerID)
-	if err != nil {
-		return nil, err
-	}
-	out := []d.RecordView{}
-	for _, r := range records {
-		m, found, err := s.Store.ReadMatchTx(c, s.Fresh, r.MatchID, false)
-		if err != nil || !found {
-			return nil, errors.Join(err, d.ErrConflict)
+	var out []d.RecordView
+	_, _, err := s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, readRetry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		records, err := s.Store.RecordsTx(c, sc.Tx, a.PlayerID)
+		if err != nil {
+			return err
 		}
-		view := d.RecordView{Record: r}
-		if view.Attacker, err = s.face(c, s.Fresh, m.Attacker); err != nil {
-			return nil, err
+		out = []d.RecordView{}
+		for _, r := range records {
+			m, found, err := s.Store.ReadMatchTx(c, sc.Tx, r.MatchID, false)
+			if err != nil || !found {
+				return errors.Join(err, d.ErrConflict)
+			}
+			view := d.RecordView{Record: r}
+			if view.Attacker, err = s.face(c, sc.Tx, m.Attacker); err != nil {
+				return err
+			}
+			if view.Defender, err = s.face(c, sc.Tx, m.Defender); err != nil {
+				return err
+			}
+			out = append(out, view)
 		}
-		if view.Defender, err = s.face(c, s.Fresh, m.Defender); err != nil {
-			return nil, err
-		}
-		out = append(out, view)
-	}
-	return out, nil
+		return nil
+	})
+	return out, err
 }
+
+func readRetry() tx.RetryPolicy { return tx.RetryPolicy{MaxAttempts: 1} }
 
 // d.RecordDetail serves any retained record (records are shared through chat).
 func (s Service) RecordDetail(c context.Context, record int64) (d.RecordDetail, error) {

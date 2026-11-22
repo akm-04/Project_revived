@@ -4,17 +4,21 @@ package playerdisplay_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
+	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	"gxb.local/backend/v2/internal/application/awakeningbattle"
 	ca "gxb.local/backend/v2/internal/application/characterasset"
 	hero "gxb.local/backend/v2/internal/application/characterhero"
 	pet "gxb.local/backend/v2/internal/application/characterpet"
+	"gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/publicstats"
@@ -59,13 +63,24 @@ func i94AwakeningOwners(p *pg.Pool) (i5.Service, hero.Service) {
 	return owner, heroes
 }
 
-func TestI9_4DBloodRealCombatAttemptAndTerminal(t *testing.T) {
-	p := pool(t)
+// bloodNativeFixture is the qualified stage-2 Blood occurrence shared by the
+// Blood natives: the owner hero is awakened to raw stage 2 with its gear.
+type bloodNativeFixture struct {
+	actor   identity.ActorContext
+	ref     character.HeroRef
+	owner   i5.Service
+	heroes  hero.Service
+	fight   combat.Service
+	content contentstore.Store
+	values  i5store.Store
+}
+
+func newBloodNativeFixture(t *testing.T, p *pg.Pool) bloodNativeFixture {
+	t.Helper()
 	actor, rev, ref := combatOwner(t, p, rankingServer(t, p))
 	store := characterstore.Store{Queryer: p}
 	content := contentstore.Store{Queryer: p}
 	values := i5store.Store{Queryer: p}
-	runner := tx.Runner{DB: p}
 	// Declared awakened/progression/equipment fixture; ordinary origin and progression are qualified separately.
 	exec(t, p, `UPDATE player_heroes SET table_id=11001001,level=100,color=15,equip_1=1,equip_2=1,equip_3=1,equip_4=1,equip_5=1,equip_6=1 WHERE player_id=$1 AND partner_id=$2`, int64(actor.PlayerID), ref.PartnerID)
 	// This older explicit Character fixture also needs the production function-state owner for D359.
@@ -103,10 +118,26 @@ func TestI9_4DBloodRealCombatAttemptAndTerminal(t *testing.T) {
 	stats.Owned = owned
 	fight.Inputs.Stats = stats
 	fight.Inputs.Heroes = characterstore.HeroBootstrapProjection{Content: content, Awakening: heroes, AwakeningPositions: heroes.AwakeningPositions, Library: libraryService(p, p), Dorm: dormService(p, p), Book: bookService(p, p), Course: courseService(p, p), Inscription: inscriptionService(p, p), Element: elementService(p, p), Spirit: spiritService(p, p), Evolution: evolutionService(p, p)}
-	mode := awakeningbattle.Mode{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner}, Fresh: p, Content: content, Fence: values, Heroes: heroes, Missions: owner, Combat: fight, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+	return bloodNativeFixture{actor: actor, ref: ref, owner: owner, heroes: heroes, fight: fight, content: content, values: values}
+}
+
+func (f bloodNativeFixture) mode(p *pg.Pool, clock gen.TimeAuthority) awakeningbattle.Mode {
+	return awakeningbattle.Mode{Timed: gen.TimedRunner{Binder: gen.Binder{Time: clock}, Runner: tx.Runner{DB: p}}, Fresh: p, Content: f.content, Fence: f.values, Heroes: f.heroes, Missions: f.owner, Combat: f.fight, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, BattleCounts: battleCountObserver(p)}
+}
+
+func TestI9_4DBloodRealCombatAttemptAndTerminal(t *testing.T) {
+	p := pool(t)
+	f := newBloodNativeFixture(t, p)
+	mode := f.mode(p, pg.AuthoritativeTime{Queryer: p})
+	actor, ref, owner, fight := f.actor, f.ref, f.owner, f.fight
 	absent, e := mode.Result(ctx, actor, 2001002, 20, op())
-	if e != nil || absent["error_code"] != int64(1) {
+	if !errors.Is(e, objective.ErrAwakeningRefused) || absent["error_code"] != int64(1) {
 		t.Fatal("unstarted result", absent, e)
+	}
+	dispatcher := stockruntime.AwakeningBloodDispatcher{Authority: playtestAuthority{actor}, Service: mode}
+	response := dispatcher.Dispatch(ctx, playtestRequest(actor, 867, map[string]any{"twice_awake_mission": json.Number("2001002"), "incubus_id": json.Number("2001002"), "num": json.Number("20"), "npc_ids": map[string]any{}}))
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(35028) {
+		t.Fatalf("unstarted result reached the OK callback: %+v", response)
 	}
 	// A positive number without the genuine mission producer is not an input.
 	badFight := fight
@@ -126,7 +157,7 @@ func TestI9_4DBloodRealCombatAttemptAndTerminal(t *testing.T) {
 	if _, err := broken.Result(ctx, actor, 2001002, 20, op()); err == nil {
 		t.Fatal("completion failure committed Combat")
 	}
-	root, err := values.ReadAwakeningTx(ctx, p, actor.PlayerID)
+	root, err := f.values.ReadAwakeningTx(ctx, p, actor.PlayerID)
 	if err != nil || root.Active[1].Complete {
 		t.Fatal("failed terminal mutated objective", err)
 	}
@@ -137,11 +168,24 @@ func TestI9_4DBloodRealCombatAttemptAndTerminal(t *testing.T) {
 	if e != nil || body["twice_awake_mission_"] == nil {
 		t.Fatal(body, e)
 	}
+	if exps, ok := body["exps"].([]any); !ok || len(exps) != 0 || body["old_num"] != float64(0) || body["add_exp"] != float64(0) {
+		t.Fatalf("Blood result win-window fields: exps=%#v old_num=%#v add_exp=%#v", body["exps"], body["old_num"], body["add_exp"])
+	}
+	if got := battleCount(t, p, actor.PlayerID, ref.PartnerID); got != 1 {
+		t.Fatalf("Girls Log awakening count = %d, want 1", got)
+	}
 	if _, e = mode.Result(ctx, actor, 2001002, 20, terminal); e != nil {
 		t.Fatal("exact result replay", e)
 	}
 	if _, e = mode.Result(ctx, actor, 2001002, 20, op()); e != nil {
 		t.Fatal("terminal drain", e)
+	}
+	if got := battleCount(t, p, actor.PlayerID, ref.PartnerID); got != 1 {
+		t.Fatalf("Girls Log awakening count after replay and drain = %d, want 1", got)
+	}
+	drained := dispatcher.Dispatch(ctx, playtestRequest(actor, 867, map[string]any{"twice_awake_mission": json.Number("2001002"), "incubus_id": json.Number("2001002"), "num": json.Number("20"), "npc_ids": map[string]any{}}))
+	if exps, ok := drained.Body["exps"].([]any); drained.HTTPStatus != 200 || !ok || len(exps) != 0 || fmt.Sprint(drained.Body["old_num"]) != "0" || fmt.Sprint(drained.Body["add_exp"]) != "0" {
+		t.Fatalf("Blood result wire: %+v", drained)
 	}
 	if _, e = owner.ChangeAwakening(ctx, actor, "claim", 2001002, 2, op()); e != nil {
 		t.Fatal(e)

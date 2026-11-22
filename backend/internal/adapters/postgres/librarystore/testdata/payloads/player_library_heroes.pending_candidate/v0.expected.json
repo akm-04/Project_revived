@@ -1,0 +1,31 @@
+{
+  "OperationID": "12345678-1234-4234-8234-123456789012",
+  "Revision": 2,
+  "PolicyVersion": "LIBRARY_FEED_RECONSTRUCTION_V1",
+  "ContentRevision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "Base": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "Proposed": [
+    60,
+    5,
+    5,
+    2,
+    2,
+    2
+  ],
+  "Delta": [
+    60,
+    5,
+    5,
+    2,
+    2,
+    2
+  ],
+  "CreatedAt": "2026-11-16T03:14:24.607291Z"
+}

@@ -163,6 +163,12 @@ func testService(store *fakeStore) (Service, *fakeFence, *fakePlayers) {
 	}, fence, players
 }
 
+func testServiceAt(store *fakeStore, at time.Time) Service {
+	service, _, _ := testService(store)
+	service.Timed = gen.TimedRunner{Binder: gen.Binder{Time: testTime{at: at}}, Runner: tx.Runner{DB: &testDB{}}}
+	return service
+}
+
 func testOperation(t *testing.T) operation.Context {
 	t.Helper()
 	id, err := ids.NewUUID()
@@ -208,11 +214,11 @@ func TestJoinReadyAndAdmission(t *testing.T) {
 	store := newFakeStore()
 	service, _, players := testService(store)
 	openRoom(t, service)
-	if _, err := service.Join(context.Background(), actor(11), illusionFamily(), 1, testOperation(t)); err != nil {
+	if _, err := service.Join(context.Background(), actor(11), JoinRequest{Family: illusionFamily(), RoomID: 1}, testOperation(t)); err != nil {
 		t.Fatal(err)
 	}
 	wakes := len(store.wakes)
-	if _, err := service.Join(context.Background(), actor(11), illusionFamily(), 1, testOperation(t)); err != nil || len(store.wakes) != wakes {
+	if _, err := service.Join(context.Background(), actor(11), JoinRequest{Family: illusionFamily(), RoomID: 1}, testOperation(t)); err != nil || len(store.wakes) != wakes {
 		t.Fatalf("idempotent join err=%v wakes=%d", err, len(store.wakes))
 	}
 	last := players.calls[len(players.calls)-1]
@@ -250,24 +256,43 @@ func admissionScope(t *testing.T) ca.CoherentReadScope {
 	return scope
 }
 
+func TestJoinThrottlesSameRoomFor30Seconds(t *testing.T) {
+	store := newFakeStore()
+	service, _, _ := testService(store)
+	openRoom(t, service)
+	if _, err := service.Join(context.Background(), actor(11), JoinRequest{Family: illusionFamily(), RoomID: 1}, testOperation(t)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := service.Leave(context.Background(), actor(11), illusionFamily(), testOperation(t)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := service.Join(context.Background(), actor(11), JoinRequest{Family: illusionFamily(), RoomID: 1}, testOperation(t)); !errors.Is(err, d.ErrJoinThrottled) {
+		t.Fatalf("rejoin inside the join throttle %v", err)
+	}
+	after := testServiceAt(store, testAt.Add(d.JoinThrottle))
+	if _, err := after.Join(context.Background(), actor(11), JoinRequest{Family: illusionFamily(), RoomID: 1}, testOperation(t)); err != nil {
+		t.Fatalf("rejoin after the throttle %v", err)
+	}
+}
+
 func TestJoinRefusesASecondRoomKickedRejoinAndFullRoom(t *testing.T) {
 	store := newFakeStore()
 	service, _, _ := testService(store)
 	openRoom(t, service)
-	if _, err := service.Join(context.Background(), actor(11), illusionFamily(), 1, testOperation(t)); err != nil {
+	if _, err := service.Join(context.Background(), actor(11), JoinRequest{Family: illusionFamily(), RoomID: 1}, testOperation(t)); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := service.Join(context.Background(), actor(12), Family{Name: "ILLUSION", Slot: 3, Route: "illusion.notice.v1"}, 1, testOperation(t)); err != nil {
+	if _, err := service.Join(context.Background(), actor(12), JoinRequest{Family: Family{Name: "ILLUSION", Slot: 3, Route: "illusion.notice.v1"}, RoomID: 1}, testOperation(t)); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := service.Join(context.Background(), actor(13), illusionFamily(), 1, testOperation(t)); !errors.Is(err, d.ErrFull) {
+	if _, err := service.Join(context.Background(), actor(13), JoinRequest{Family: illusionFamily(), RoomID: 1}, testOperation(t)); !errors.Is(err, d.ErrFull) {
 		t.Fatalf("full room %v", err)
 	}
 	other, err := service.Open(context.Background(), actor(20), OpenRequest{Family: illusionFamily(), Capacity: 2, Lease: time.Hour, Payload: json.RawMessage(`{}`)}, testOperation(t))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := service.Join(context.Background(), actor(12), illusionFamily(), other.ID, testOperation(t)); !errors.Is(err, ErrAlreadyInRoom) {
+	if _, err := service.Join(context.Background(), actor(12), JoinRequest{Family: illusionFamily(), RoomID: other.ID}, testOperation(t)); !errors.Is(err, ErrAlreadyInRoom) {
 		t.Fatalf("must not hold two rooms in one family slot: %v", err)
 	}
 }
@@ -276,7 +301,7 @@ func TestKickBlocksRejoinAndOwnerLeaveCloses(t *testing.T) {
 	store := newFakeStore()
 	service, _, _ := testService(store)
 	openRoom(t, service)
-	if _, err := service.Join(context.Background(), actor(11), illusionFamily(), 1, testOperation(t)); err != nil {
+	if _, err := service.Join(context.Background(), actor(11), JoinRequest{Family: illusionFamily(), RoomID: 1}, testOperation(t)); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := service.Kick(context.Background(), actor(11), illusionFamily(), 10, testOperation(t)); !errors.Is(err, d.ErrNotOwner) {
@@ -285,7 +310,7 @@ func TestKickBlocksRejoinAndOwnerLeaveCloses(t *testing.T) {
 	if _, err := service.Kick(context.Background(), actor(10), illusionFamily(), 11, testOperation(t)); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := service.Join(context.Background(), actor(11), illusionFamily(), 1, testOperation(t)); !errors.Is(err, d.ErrKicked) {
+	if _, err := service.Join(context.Background(), actor(11), JoinRequest{Family: illusionFamily(), RoomID: 1}, testOperation(t)); !errors.Is(err, d.ErrKicked) {
 		t.Fatalf("kicked rejoin %v", err)
 	}
 	left, err := service.Leave(context.Background(), actor(10), illusionFamily(), testOperation(t))
@@ -304,7 +329,7 @@ func TestVersionChangeRetriesTheCommand(t *testing.T) {
 	openRoom(t, service)
 	before := fence.calls
 	store.lockMismatches = 1
-	if _, err := service.Join(context.Background(), actor(11), illusionFamily(), 1, testOperation(t)); err != nil {
+	if _, err := service.Join(context.Background(), actor(11), JoinRequest{Family: illusionFamily(), RoomID: 1}, testOperation(t)); err != nil {
 		t.Fatalf("retry did not converge: %v", err)
 	}
 	if fence.calls != before+2 {
@@ -325,7 +350,7 @@ func TestExpiredEntryIsRefusedAndReconcileCloses(t *testing.T) {
 		room.UpdatedAt = testAt
 		return room
 	}()
-	if _, err := service.Join(context.Background(), actor(11), illusionFamily(), 1, testOperation(t)); !errors.Is(err, d.ErrExpired) {
+	if _, err := service.Join(context.Background(), actor(11), JoinRequest{Family: illusionFamily(), RoomID: 1}, testOperation(t)); !errors.Is(err, d.ErrExpired) {
 		t.Fatalf("expired join %v", err)
 	}
 	store.expired = []int64{1, 99}
@@ -423,7 +448,7 @@ func TestFamilyValidationAndUnavailableService(t *testing.T) {
 		"no route": {Name: "ILLUSION", Slot: 1},
 		"bad slot": {Name: "ILLUSION", Slot: -1, Route: "r"},
 	} {
-		if _, err := service.Join(context.Background(), actor(10), family, 1, testOperation(t)); !errors.Is(err, ErrInvalidFamily) {
+		if _, err := service.Join(context.Background(), actor(10), JoinRequest{Family: family, RoomID: 1}, testOperation(t)); !errors.Is(err, ErrInvalidFamily) {
 			t.Fatalf("%s: %v", name, err)
 		}
 	}
@@ -438,7 +463,7 @@ func TestAdmissionRouterAndConvenerFirst(t *testing.T) {
 	openRoom(t, service)
 	for _, player := range []identity.PlayerID{10, 11} {
 		if player == 11 {
-			if _, err := service.Join(context.Background(), actor(11), illusionFamily(), 1, testOperation(t)); err != nil {
+			if _, err := service.Join(context.Background(), actor(11), JoinRequest{Family: illusionFamily(), RoomID: 1}, testOperation(t)); err != nil {
 				t.Fatal(err)
 			}
 		}

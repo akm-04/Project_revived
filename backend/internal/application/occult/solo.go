@@ -48,31 +48,35 @@ type snapshot struct {
 
 // read gates function 67 and loads the player's held room without writing.
 func (s Mode) read(c context.Context, a identity.ActorContext, op operation.Context) (snapshot, error) {
-	op, err := s.pin(c, op)
-	if err != nil {
-		return snapshot{}, err
-	}
 	at, err := s.Timed.Binder.Time.Now(c)
 	if err != nil {
 		return snapshot{}, err
 	}
-	catalog, err := s.readCatalog(c, s.Fresh, op)
+	return s.readTx(c, s.Fresh, a, op, at)
+}
+
+func (s Mode) readTx(c context.Context, q tx.Queryer, a identity.ActorContext, op operation.Context, at time.Time) (snapshot, error) {
+	bound, err := s.pinTx(c, q, op)
 	if err != nil {
 		return snapshot{}, err
 	}
-	if err = s.admit(c, s.Fresh, a, catalog, at); err != nil {
-		return snapshot{}, err
-	}
-	scores, err := s.Store.ReadScoresTx(c, s.Fresh, a.PlayerID)
+	catalog, err := s.readCatalog(c, q, bound)
 	if err != nil {
 		return snapshot{}, err
 	}
-	tickets, err := s.Tickets.OccultTicketsTx(c, s.Fresh, a.PlayerID)
+	if err = s.admit(c, q, a, catalog, at); err != nil {
+		return snapshot{}, err
+	}
+	scores, err := s.Store.ReadScoresTx(c, q, a.PlayerID)
+	if err != nil {
+		return snapshot{}, err
+	}
+	tickets, err := s.Tickets.OccultTicketsTx(c, q, a.PlayerID)
 	if err != nil {
 		return snapshot{}, err
 	}
 	loaded := snapshot{catalog: catalog, scores: scores, tickets: tickets, at: at}
-	room, found, err := s.RoomStore.ReadPlayerRoomTx(c, s.Fresh, a.PlayerID, RoomFamily, RoomSlot)
+	room, found, err := s.RoomStore.ReadPlayerRoomTx(c, q, a.PlayerID, RoomFamily, RoomSlot)
 	if err != nil || !found {
 		return loaded, err
 	}
@@ -102,31 +106,38 @@ func (s Mode) Info(c context.Context, a identity.ActorContext, op operation.Cont
 
 // CampaignInfo answers 2364 with the monsters of every stage of a reachable campaign.
 func (s Mode) CampaignInfo(c context.Context, a identity.ActorContext, campaignID int64, op operation.Context) (map[string]any, error) {
-	loaded, err := s.read(c, a, op)
-	if err != nil {
-		return nil, err
-	}
-	campaign, err := reachableCampaign(loaded.view, campaignID)
-	if err != nil {
-		return nil, err
-	}
-	stages := loaded.view.state.StagesOf(campaign.ID)
-	monsterInfos := make([][]map[string]any, 0, len(campaign.FightIDs))
-	for index, fightID := range campaign.FightIDs {
-		waves, err := s.Combat.MonsterWaves(fightID)
+	var out map[string]any
+	_, _, err := s.Timed.Run(c, op, profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, readRetry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		loaded, err := s.readTx(c, sc.Tx, a, sc.Operation.Operation(), sc.Operation.DecisionAt())
 		if err != nil {
-			return nil, err
+			return err
 		}
-		monsters := []map[string]any{}
-		for _, wave := range waves {
-			for _, monster := range wave {
-				monsters = append(monsters, map[string]any{"monster_id": monster.Identity, "partner_id": monster.Identity, "hp": stages[index].HP, "total_hp": stages[index].TotalHP})
+		campaign, err := reachableCampaign(loaded.view, campaignID)
+		if err != nil {
+			return err
+		}
+		stages := loaded.view.state.StagesOf(campaign.ID)
+		monsterInfos := make([][]map[string]any, 0, len(campaign.FightIDs))
+		for index, fightID := range campaign.FightIDs {
+			waves, err := s.Combat.MonsterWaves(fightID)
+			if err != nil {
+				return err
 			}
+			monsters := []map[string]any{}
+			for _, wave := range waves {
+				for _, monster := range wave {
+					monsters = append(monsters, map[string]any{"monster_id": monster.Identity, "partner_id": monster.Identity, "hp": stages[index].HP, "total_hp": stages[index].TotalHP})
+				}
+			}
+			monsterInfos = append(monsterInfos, monsters)
 		}
-		monsterInfos = append(monsterInfos, monsters)
-	}
-	return map[string]any{"monster_infos": monsterInfos}, nil
+		out = map[string]any{"monster_infos": monsterInfos}
+		return nil
+	})
+	return out, err
 }
+
+func readRetry() tx.RetryPolicy { return tx.RetryPolicy{MaxAttempts: 1} }
 
 // MemberStat answers 2365 for a seated member: dispatched heroes with their
 // remaining status and the rest of the roster.
@@ -213,7 +224,18 @@ func (s Mode) CreateSolo(c context.Context, a identity.ActorContext, chapterID i
 		return nil, d.ErrInvalid
 	}
 	if loaded.view != nil {
-		return s.heldRoom(c, a, loaded, chapterID, d.SingleCampaignType)
+		if loaded.view.state.ChapterID == chapterID && loaded.view.state.CampaignType == d.SingleCampaignType {
+			return s.heldRoom(c, a, loaded, chapterID, d.SingleCampaignType)
+		}
+		// PRIVATE_POLICY: the stock client's Single button sends 2366 without
+		// leaving a held room, and shows no toast for a bare refusal. Close the
+		// player's own unstarted, single-member team room and start Single. Any
+		// other held room still refuses.
+		ownEmptyTeamRoom := loaded.view.state.CampaignType == d.MultiCampaignType &&
+			loaded.view.room.Owner == a.PlayerID && !loaded.view.state.Started() && len(loaded.view.room.Members()) == 1
+		if !ownEmptyTeamRoom {
+			return nil, fmt.Errorf("%w: a held %d room blocks a single room", d.ErrRefused, loaded.view.state.CampaignType)
+		}
 	}
 	if loaded.tickets.Tickets < 1 {
 		return nil, economy.ErrInsufficientBalance
@@ -253,7 +275,9 @@ func (s Mode) heldRoom(c context.Context, a identity.ActorContext, loaded snapsh
 	if err != nil {
 		return nil, err
 	}
-	body["function_type"] = int64(roomChangeFunction)
+	if loaded.view.state.Started() {
+		body["function_type"] = int64(roomChangeFunction)
+	}
 	return body, nil
 }
 
@@ -336,12 +360,18 @@ func (s Mode) roomChange(c context.Context, a identity.ActorContext, op operatio
 	if err != nil {
 		return nil, err
 	}
-	body["function_type"] = int64(roomChangeFunction)
+	// ROOM_CHANGE tells the client to leave prepare for the sub-map or to close
+	// it after leaving. An unstarted room reply must not carry it: the create and
+	// join callbacks open occult_prepare themselves, and the client's deferred
+	// close coroutine would otherwise close the window they just opened.
+	if loaded.view == nil || loaded.view.state.Started() {
+		body["function_type"] = int64(roomChangeFunction)
+	}
 	return body, nil
 }
 
-// Prepare answers 2371: the campaign's event fires once, and an auto pass
-// clears the campaign without a fight.
+// Prepare answers 2371: the campaign's prepare event fires once, and an auto
+// pass clears the campaign without a fight. Clear-result events wait for 2372.
 func (s Mode) Prepare(c context.Context, a identity.ActorContext, campaignID, subID int64, op operation.Context) (map[string]any, error) {
 	return s.update(c, a, op, func(c context.Context, sc gen.TimedScope, view *roomView) (map[string]any, error) {
 		campaign, err := reachableCampaign(view, campaignID)
@@ -363,15 +393,14 @@ func (s Mode) Prepare(c context.Context, a identity.ActorContext, campaignID, su
 	})
 }
 
-// fireCampaignEvent applies the campaign's event once, logs it, and reports
-// whether the campaign passes without a fight.
+// fireCampaignEvent applies the campaign's prepare event once, logs it, and
+// reports whether the campaign passes without a fight.
 func (s Mode) fireCampaignEvent(c context.Context, sc gen.TimedScope, a identity.ActorContext, view *roomView, campaign d.Campaign) (bool, error) {
 	outcomes := view.state.TriggerEvent(view.catalog, campaign)
 	if len(outcomes) == 0 {
 		return false, nil
 	}
-	view.state.RecordEvents(outcomes)
-	if err := s.Store.InsertLogTx(c, sc.Tx, int64(view.room.LogicalServerID), view.room.ID, eventLogType, a.PlayerID, mustJSON(logEntry(view.at, eventLogType, campaign.ID, a.PlayerID)), view.at); err != nil {
+	if err := s.recordEventOutcomes(c, sc, a, view, campaign.ID, outcomes); err != nil {
 		return false, err
 	}
 	autoPass := false
@@ -379,6 +408,32 @@ func (s Mode) fireCampaignEvent(c context.Context, sc gen.TimedScope, a identity
 		autoPass = autoPass || outcome.Type == d.EventAutoPass
 	}
 	return autoPass, nil
+}
+
+// applyClearEvents consumes the campaign's clear-result event with the accepted
+// final result.
+func (s Mode) applyClearEvents(c context.Context, sc gen.TimedScope, a identity.ActorContext, view *roomView, campaign d.Campaign, finalTeam []d.CampaignHero) error {
+	outcomes := view.state.ClearEvents(view.catalog, campaign, finalTeam)
+	if len(outcomes) == 0 {
+		return nil
+	}
+	return s.recordEventOutcomes(c, sc, a, view, campaign.ID, outcomes)
+}
+
+// recordEventOutcomes keeps the event for the room's EVENT push and in the
+// affair log.
+func (s Mode) recordEventOutcomes(c context.Context, sc gen.TimedScope, a identity.ActorContext, view *roomView, campaignID int64, outcomes []d.EventOutcome) error {
+	view.state.RecordEvents(outcomes)
+	return s.Store.InsertLogTx(c, sc.Tx, int64(view.room.LogicalServerID), view.room.ID, eventLogType, a.PlayerID, mustJSON(logEntry(view.at, eventLogType, campaignID, a.PlayerID)), view.at)
+}
+
+// soloCampaignHeroes is the frozen formation of one accepted solo result.
+func soloCampaignHeroes(playerID int64, formation []int64) []d.CampaignHero {
+	heroes := make([]d.CampaignHero, 0, len(formation))
+	for _, heroID := range formation {
+		heroes = append(heroes, d.CampaignHero{PlayerID: playerID, HeroID: heroID})
+	}
+	return heroes
 }
 
 // StartFight answers 2379: the stage is held by the player. A player holds one
@@ -465,19 +520,32 @@ func (s Mode) Settle(c context.Context, a identity.ActorContext, request SettleR
 		if err != nil {
 			return nil, err
 		}
+		finalTeam := soloCampaignHeroes(int64(a.PlayerID), request.Formation)
+		view.state.RecordCampaignHeroes(campaign.ID, finalTeam)
 		if err = s.Store.InsertLogTx(c, sc.Tx, int64(view.room.LogicalServerID), view.room.ID, battleLogType, a.PlayerID, mustJSON(logEntry(view.at, battleLogType, campaign.ID, a.PlayerID)), view.at); err != nil {
 			return nil, err
 		}
 		view.state.AddNotice(d.NoticeRecord{Function: d.NoticeSingleFight, Actor: int64(a.PlayerID), CampaignID: campaign.ID})
 		view.state.AddNotice(d.NoticeRecord{Function: d.NoticeFightStatus, Actor: int64(a.PlayerID), CampaignID: campaign.ID})
+		if err = s.applyClearEvents(c, sc, a, view, campaign, finalTeam); err != nil {
+			return nil, err
+		}
+		baseScore := view.state.ChapterScore(view.catalog, int64(a.PlayerID), view.at.Unix(), 0)
+		view.state.Points = baseScore + view.state.ExtraPoints
 		body := map[string]any{"award_info": map[string]any{"awards": []map[string]any{}}}
 		if !result.Won {
-			return body, s.fillState(c, sc, a, view, body, result.Score)
+			if err = s.BattleObserver.ObserveBattleTx(c, sc.Tx, a.PlayerID, request.Formation, view.at); err != nil {
+				return nil, err
+			}
+			return body, s.fillState(c, sc, a, view, body, baseScore)
 		}
 		if err = s.settleIfCleared(c, sc, a, view, body); err != nil {
 			return nil, err
 		}
-		return body, s.fillState(c, sc, a, view, body, result.Score)
+		if err = s.BattleObserver.ObserveBattleTx(c, sc.Tx, a.PlayerID, request.Formation, view.at); err != nil {
+			return nil, err
+		}
+		return body, s.fillState(c, sc, a, view, body, baseScore)
 	})
 	return SettleResponse{Body: body, Duplicate: duplicate}, err
 }
@@ -502,7 +570,7 @@ func (s Mode) attest(c context.Context, sc gen.TimedScope, a identity.ActorConte
 	// shortcut: stock 2379 carries no formation and ClientSummaryAttested needs a
 	// frozen one, so Combat starts and attests inside 2372; the 150 s fight timer
 	// is the room's own, checked above.
-	started, err := s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Actor: a, Locator: locator(a), GenerationRef: reference, StartFingerprint: startFingerprint(a, reference, op),
+	started, err := s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Mode: cd.ModeOccultSolo, Actor: a, Locator: locator(a), GenerationRef: reference, StartFingerprint: startFingerprint(a, reference, op),
 		ResultDeadline: view.at.Add(d.FightSeconds * time.Second), Battle: battle, TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK}})
 	if err != nil {
 		return nil, err

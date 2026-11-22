@@ -1,0 +1,48 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [],
+  "row_lock_methods": {},
+  "row_locks": [],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [],
+ "name": "playerpresentation",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store"
+ ],
+ "tables": {
+  "owned": [],
+  "read": [
+   "player_directory_profiles",
+   "player_function_unlocks",
+   "player_profiles",
+   "player_progression"
+  ],
+  "written": []
+ },
+ "tests": {
+  "integration": [
+   "socialactivation",
+   "socialprojection",
+   "socialrelation"
+  ],
+  "scenarios_naming": [],
+  "unit": [
+   "service_test.go"
+  ]
+ }
+}

@@ -2,7 +2,7 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
+
 	"gxb.local/backend/v2/internal/application/memoir"
 	"gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/domain/combat"
@@ -10,7 +10,6 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	domain "gxb.local/backend/v2/internal/domain/memoir"
 	"gxb.local/backend/v2/internal/foundation/operation"
-	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 	"sort"
 	"strconv"
@@ -46,10 +45,10 @@ func (dispatcher MemoirDispatcher) Dispatch(ctx context.Context, request httpedg
 		return *failure
 	}
 	if dispatcher.Service == nil {
-		return memoirFailure(domain.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	parameters, operationContext := request.Envelope.Params, request.Envelope.Operation
-	invalid := badHero("memoir_invalid_parameter")
+	invalid := failureReply(malformed("memoir_invalid_parameter"))
 	var response map[string]any
 	var err error
 	switch request.Envelope.MID {
@@ -126,22 +125,30 @@ func (dispatcher MemoirDispatcher) Dispatch(ctx context.Context, request httpedg
 		}
 		response, err = dispatcher.Service.MonsterResult(ctx, actor, result, operationContext)
 	default:
-		return httpedge.Response{HTTPStatus: 501, Body: map[string]any{"error_code": int64(1)}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 	if err != nil {
 		return memoirFailure(err)
 	}
 	return okI5(response)
 }
+
+// The stock fightPlayer callback indexes battle_info on OK, so a failed player
+// fight must not be an HTTP 200 body. 35027/35028 are stock message rows.
+var memoirFailureRows = []failureRow{
+	{match: domain.ErrInvalid, class: failureMalformed, detail: "memoir_invalid_parameter"},
+	{match: domain.ErrReportExpired, class: failureRefusal, code: domain.ReportExpiredCode},
+	{match: domain.ErrFightUnavailable, class: failureRefusal, code: domain.FightUnavailableCode},
+	{match: domain.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+	{match: combat.ErrStartConflict, class: failureRefusal, code: unprovenRefusalCode},
+	// The owner's ErrUnavailable means a catalog that fails validation or a corrupt saved state: a
+	// permanent defect, not a refusal and not a fault a retry clears (R4 amendment items 4 and 13).
+	{match: domain.ErrUnavailable, class: failureDefect},
+}
+
 func memoirFailure(err error) httpedge.Response {
-	var conflict *receipt.ConflictError
-	if errors.Is(err, domain.ErrInvalid) || errors.As(err, &conflict) {
-		return badHero("memoir_invalid_parameter")
-	}
-	if errors.Is(err, domain.ErrRefused) || errors.Is(err, economy.ErrInsufficientBalance) || errors.Is(err, combat.ErrStartConflict) {
-		return conflictRefusal(1)
-	}
-	return httpedge.Response{HTTPStatus: 503, Body: map[string]any{"error_code": int64(1), "error": "memoir_failed"}, Cause: err}
+	return failureFromRows(memoirFailureRows, err)
 }
 func memoirOpened(raw any) ([]int, bool) {
 	if fields, valid := raw.(map[string]any); valid && len(fields) == 0 {

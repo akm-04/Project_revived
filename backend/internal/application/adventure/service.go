@@ -12,6 +12,7 @@ import (
 	"time"
 
 	ca "gxb.local/backend/v2/internal/application/characterasset"
+	cb "gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	d "gxb.local/backend/v2/internal/domain/adventure"
@@ -30,6 +31,9 @@ const (
 	NoticeRoute = "adventure.notice.v1"
 
 	attemptLimit = 5 * time.Minute
+
+	// startClosedKind ends an unresolved attempt a different START replaces.
+	startClosedKind = "ADVENTURE_START_CLOSED"
 
 	listLimit           = 64
 	noticeLimit         = 64
@@ -51,10 +55,14 @@ func (s Mode) pin(c context.Context, op operation.Context) (operation.Context, e
 	if !s.ready() {
 		return op, d.ErrUnavailable
 	}
+	return s.pinTx(c, s.Fresh, op)
+}
+
+func (s Mode) pinTx(c context.Context, q tx.Queryer, op operation.Context) (operation.Context, error) {
 	if _, bound := op.Policies.Get("content"); bound {
 		return op, nil
 	}
-	revision, err := s.Content.ActiveRevision(c, s.Fresh)
+	revision, err := s.Content.ActiveRevision(c, q)
 	if err != nil {
 		return op, err
 	}
@@ -63,6 +71,10 @@ func (s Mode) pin(c context.Context, op operation.Context) (operation.Context, e
 }
 
 func (s Mode) readCatalogs(c context.Context, q tx.Queryer, op operation.Context) (d.Catalog, illusion.Catalog, error) {
+	op, err := s.pin(c, op)
+	if err != nil {
+		return d.Catalog{}, illusion.Catalog{}, err
+	}
 	revision, _ := op.Policies.Get("content")
 	catalog, err := s.Content.AdventureCatalogTx(c, q, revision)
 	if err != nil {
@@ -124,12 +136,8 @@ func piggyback(c context.Context, body map[string]any) {
 		return
 	}
 	balance, functions := changes.Recorded(c)
-	if len(balance) > 0 {
-		body["economy_"] = balance
-	}
-	if len(functions) > 0 {
-		body["new_funcs_"] = functions
-	}
+	changes.WriteEconomy(body, balance)
+	changes.WriteFunctions(body, functions)
 	for key, value := range changes.RecordedMissions(c) {
 		body[key] = value
 	}
@@ -208,7 +216,7 @@ func (s Mode) settleGrant(c context.Context, sc gen.TimedScope, a identity.Actor
 	}
 	current := sc.Operation.Operation()
 	plan := grant.Plan{PlayerID: a.PlayerID, Source: grant.SourceIdentity{Domain: "adventure", Operation: name, BusinessKey: occurrence.SourceKey, Occurrence: occurrence.SourceKey, PolicyVersion: d.PolicyID}, Lines: lines}
-	_, err := s.Grants.SettleGrantTx(c, sc.Tx, a, plan, current, i5.GrantTxOptions{})
+	_, err := s.Grants.SettleGrantTx(c, sc.Tx, a, plan, current, i5.GrantTxOptions{AllowOverflowMail: true})
 	return err
 }
 
@@ -230,14 +238,34 @@ func locator(a identity.ActorContext, occurrence d.Occurrence, kind string) cd.L
 		DomainLocator: fmt.Sprintf("player:%d/%d/%d", a.PlayerID, occurrence.EventType, occurrence.OccurredAt.Unix())}
 }
 
-func startFingerprint(a identity.ActorContext, operationID string, formation []int64) string {
+// startFingerprint identifies the START by its gameplay input, not by the
+// operation that carried it, so a retried START resumes the frozen attempt.
+func startFingerprint(a identity.ActorContext, formation []int64) string {
 	raw, _ := json.Marshal(struct {
 		Player    int64
-		Operation string
 		Formation []int64
-	}{int64(a.PlayerID), operationID, formation})
+	}{int64(a.PlayerID), formation})
 	sum := sha256.Sum256(raw)
 	return hex.EncodeToString(sum[:])
+}
+
+// startAttempt freezes the locator's fight. A different START replaces an
+// unresolved attempt the mode may close, so an attempt the resolver can never
+// finish does not own the locator until its occurrence expires.
+func (s Mode) startAttempt(c context.Context, sc gen.TimedScope, scope ca.CoherentReadScope, request cb.StartRequest) (cb.Started, error) {
+	started, err := s.Combat.StartTx(c, sc.Tx, scope, request)
+	if !errors.Is(err, cd.ErrStartConflict) {
+		return started, err
+	}
+	_, closeErr := s.Combat.CloseTx(c, sc.Tx, cb.TerminalRequest{Locator: request.Locator, GenerationRef: request.GenerationRef,
+		TerminalKind: startClosedKind, SemanticReceiptID: "adventure-start-closed:" + sc.Operation.Operation().ID.String(), At: sc.Operation.DecisionAt()})
+	if closeErr != nil {
+		if errors.Is(closeErr, cd.ErrStale) {
+			return cb.Started{}, err
+		}
+		return cb.Started{}, closeErr
+	}
+	return s.Combat.StartTx(c, sc.Tx, scope, request)
 }
 
 func (s Mode) coherentScope(sc gen.TimedScope, at time.Time) (ca.CoherentReadScope, error) {

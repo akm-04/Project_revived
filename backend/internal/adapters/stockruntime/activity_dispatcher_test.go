@@ -77,7 +77,7 @@ func TestActivityDispatcherRejectsForgedRegion(t *testing.T) {
 	d := ActivityDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: appactivity.Runtime{Directory: appactivity.Directory{Registry: r}}}
 	req := activityReq(229, map[string]any{}, time.Unix(10, 0).UTC())
 	req.Envelope.Claims.Region = 2
-	if got := d.Dispatch(context.Background(), req); got.HTTPStatus != 403 {
+	if got := d.Dispatch(context.Background(), req); got.HTTPStatus != 409 {
 		t.Fatalf("%+v", got)
 	}
 }

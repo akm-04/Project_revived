@@ -2,7 +2,6 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"gxb.local/backend/v2/internal/application/realtimeauth"
 	app "gxb.local/backend/v2/internal/application/topfloor"
@@ -25,18 +24,27 @@ type TopFloorTaskPort interface {
 	StartTask(context.Context, identity.ActorContext, app.TaskStartCommand, operation.Context) (app.FightView, error)
 	PurchaseTask(context.Context, identity.ActorContext, operation.Context, bool) (domain.Player, error)
 	TaskFormation(context.Context, identity.ActorContext, int64) (domain.Display, error)
-	TaskReport(context.Context, identity.ActorContext, string) ([]byte, error)
+	TaskReport(context.Context, identity.ActorContext, string, operation.Context) ([]byte, error)
 	TaskRecordInfo(context.Context, identity.ActorContext, int64) (app.RecordInfo, error)
-	TaskSchedule(context.Context) ([]domain.TaskModeRotation, error)
+	TaskSchedule(context.Context, operation.Context) ([]domain.TaskModeRotation, error)
 }
 type TopFloorTaskDispatcher struct {
 	Authority realtimeauth.GameplayAuthorityPort
 	Service   TopFloorTaskPort
 }
 
+// topFloorTaskNotOpen is the stock message.lua row 40001 ("活動未開啟" /
+// "Event hasn't started!"), the closest recovered "not open" text.
+const topFloorTaskNotOpen int64 = 40001
+
+var topFloorTaskFailureRows = []failureRow{
+	{match: domain.ErrInvalid, class: failureMalformed, detail: "invalid_top_floor_task_parameter"},
+	{match: domain.ErrRefused, class: failureRefusal, code: topFloorTaskNotOpen},
+}
+
 func failTopFloorTask(err error) httpedge.Response {
-	if errors.Is(err, domain.ErrInvalid) {
-		return badHero("invalid_top_floor_task_parameter")
+	if classified := classifyFailure(topFloorTaskFailureRows, err); classified != nil {
+		return failureReply(classified)
 	}
 	return failTopFloor(err)
 }
@@ -46,7 +54,7 @@ func (dispatcher TopFloorTaskDispatcher) Dispatch(requestContext context.Context
 		return *failure
 	}
 	if dispatcher.Service == nil {
-		return failTopFloor(domain.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	parameters, op := request.Envelope.Params, request.Envelope.Operation
 	bad := badHero("invalid_top_floor_task_parameter")
@@ -91,7 +99,7 @@ func (dispatcher TopFloorTaskDispatcher) Dispatch(requestContext context.Context
 		if err := dispatcher.Service.SaveTaskDefense(requestContext, actor, domain.TaskModeDefense{Heroes: heroes, Pet: pet, Leader: leader}, op); err != nil {
 			return failTopFloorTask(err)
 		}
-		return okI5(map[string]any{})
+		return okI5(map[string]any{"pet_id": pet})
 	case 285:
 		enemy, valid := topFloorInteger(parameters, "enemy_id", false)
 		if !valid || !onlyStockGameplayParams(parameters, "enemy_id") {
@@ -142,7 +150,7 @@ func (dispatcher TopFloorTaskDispatcher) Dispatch(requestContext context.Context
 		if !valid || !playerOK || player != 0 && player != int64(actor.PlayerID) || !onlyStockGameplayParams(parameters, "player_id", "report_key") {
 			return bad
 		}
-		report, err := dispatcher.Service.TaskReport(requestContext, actor, key)
+		report, err := dispatcher.Service.TaskReport(requestContext, actor, key, request.Envelope.Operation)
 		if err != nil {
 			return failTopFloorTask(err)
 		}
@@ -161,7 +169,7 @@ func (dispatcher TopFloorTaskDispatcher) Dispatch(requestContext context.Context
 		if !onlyStockGameplayParams(parameters) {
 			return bad
 		}
-		schedule, err := dispatcher.Service.TaskSchedule(requestContext)
+		schedule, err := dispatcher.Service.TaskSchedule(requestContext, request.Envelope.Operation)
 		if err != nil {
 			return failTopFloorTask(err)
 		}

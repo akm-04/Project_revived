@@ -212,6 +212,19 @@ func (Store) ReadPetByIDTx(ctx context.Context, q tx.Queryer, pid identity.Playe
 	}
 	return scanPet(q.QueryRow(ctx, characterqueries.ReadPetByID, int64(pid), petID))
 }
+
+// FindPetByIDTx distinguishes an absent pet from a read error for callers that
+// resolve an owned instance without locking it.
+func (Store) FindPetByIDTx(ctx context.Context, q tx.Queryer, pid identity.PlayerID, petID int64) (character.Pet, bool, error) {
+	p, err := (Store{}).ReadPetByIDTx(ctx, q, pid, petID)
+	if errors.Is(err, kernelstore.ErrNoRows) {
+		return character.Pet{}, false, nil
+	}
+	if err != nil {
+		return character.Pet{}, false, err
+	}
+	return p, true, nil
+}
 func (Store) LockPetByIDTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, petID int64) (character.Pet, bool, error) {
 	if t == nil || !pid.Valid() || petID <= 0 {
 		return character.Pet{}, false, errors.New("character store: invalid Pet lock")

@@ -1,0 +1,57 @@
+{
+ "schema_version": 1,
+ "contract_id": "I9_COMMERCE_CHARGE_V1",
+ "node": "ROOT/I9/I9-10/I9-10G",
+ "status": "WORKING_RESEARCH_DESIGN_NOT_STAGE_ACCEPTED",
+ "owner": "commerce-privilege",
+ "extends": [
+  "I9_PARENT_CONTRACT_V1",
+  "I9_MODE_FRAMEWORK_V1",
+  "I9_MODE_FOUNDATION_V3"
+ ],
+ "mids": [
+  354,
+  657,
+  32000
+ ],
+ "pushes": [
+  36857
+ ],
+ "decisions": [
+  "D453",
+  "D455",
+  "D456",
+  "D457",
+  "D460",
+  "D461",
+  "D462",
+  "D463",
+  "D469",
+  "D470",
+  "D471",
+  "D476",
+  "D502"
+ ],
+ "C1_scope": "Server side of recharge: product catalog, per-product history, tap grant, cards, VIP awards, card missions and privilege perks. No payment provider exists or will be called: a tap is a PRIVATE_POLICY grant (D455).",
+ "C2_client_boundary": "The stock client sends nothing on a tap (VipRechargeWindow.lua:1171). The client bridge is deferred to the I11 OTA system (D460, obligation I10-RECHARGE-CLIENT-BRIDGE). Until then real clients cannot buy; the VC proves the path with a Lua step that sends the private MID and dispatches xyd.event.RECHARGE so stock onRecharge_ consumes the reply. No APK rebuild for this leaf.",
+ "C3_transport": "Private HTTP MID 32000 PRESERVATION_RECHARGE_TAP in mids.sourcePlaneAliases, outside mid.lua and outside the realtime and GM masks. Params: charge_id, intent_id (client generated, 1..64 printable ASCII). Reply: {recharge_event:{mid:36857,params:{...}}, economy_}. Socket push 36857 is not produced.",
+ "C4_catalog": "Content artifact charge_catalog.json from data/tables/charge.lua (23 rows), table content_charge_catalogs, capability COMMERCE_CHARGE_I9_10G, pattern summon_catalog. Card days from misc.lua: monthly_card_time2 30, season_privilege_card 90, halfyear_privilege_card 180, keyed by month_card and type. Row 013 is priced as a discount in the original; here it grants the same 30 days as 010 (PRIVATE_POLICY).",
+ "C5_grant": "crystal = diamond + extra_diamond + (first_extra_diamond when charge_count is 0). VIP progress adds diamond only (D456). month_card 1 sets the month card, month_card 4 or 5 sets the privilege card. A product granting neither crystal nor a card (028, 029) is refused 409. Items are not granted: the client has no purchase path for the season and halfyear gift rows (D471).",
+ "C6_cards": "D463: new_end = max(now,end) + days*86400. left days = ceil((end-now)/86400), 0 when past. Expiry is lazy; nothing writes at expiry. Week and energy cards keep their columns at 0 and no product sets them (D461).",
+ "C7_tuning": "commerce_recharge_tuning singleton overlay {version, mode GRANT|DISABLED, products:{charge_id:{crystal,vip_xp,card_days,off}}}. Absent or invalid leaves the source policy. DISABLED refuses 409. D476: a validated off product is hidden from 354 and its tap is refused 409. No endpoint: I11 writes it (obligation I11-OPERATOR-TUNABLES).",
+ "C8_tap_transaction": "One serializable timed transaction: FenceActorTx (315), receipt find by player+intent_id, privilege root and charge rows FOR UPDATE, SettleGrantTx crystal (700, 720, overflow not needed for scalar), PreparePrivilegeTransitionTx (700 held, 721, 730), PrepareVIPProjectionTx (740), saves, effect.Apply, directory.Apply, receipt PutTx. Ranks strictly ascend. Replay of intent_id returns the stored reply; a different charge_id on the same intent_id is a conflict.",
+ "C9_identity": "Tap origin is its own class: policy_version I10_CHARGE_TAP_V1, origin_class PLAYER_TAP_PRESERVATION. The manual import keeps working on a tap-origin root and restores its own origin. monthly_state stays QUALIFIED_ABSENT: card truth lives in commerce_charge_cards.",
+ "C10_354": "charges[] {charge_id,charge_count,last_buy_time}, giftbags [] until I10 events, server_time (SelfPlayer.lua:3577-3603). All non-off catalog rows are returned, including never-bought rows with charge_count=0 and last_buy_time=0; D476 off products are excluded. Read-only, no locks. Registered before the inactive loop.",
+ "C11_657": "params {id=level}; reply {awards:[...]}. Admission: level 1..15, level <= VIP level, not claimed. Refusals 409 (the client only reads awards under OK). Items from vip.lua reward_item through gift.lua via SettleGrantTx with AllowOverflowMail. Transaction: 315, commerce_vip_awards row insert guarded by its primary key, grant, receipt. Replay safe per level. Lead amendment: the gift's crystal is granted as ledger section 4 records.",
+ "C12_mid1": "BootstrapProjection also claims month_card_start, month_card_end, left_card_day, left_week_card_day, left_month_tili_day, privilege_left_card_day, privilege_month_card_end, vip_awards (length 15, 0/1, SelfPlayer.lua:179-186, 206). Lead amendment: a baseline vip_awards [] with vip 0 is tolerated by the client. D502: canonical VIP claim flags project independently of unknown privilege state, so the first same-session VIP purchase exposes the existing award button. A missing privilege root remains unknown and is not created or qualified by this read; do not invent VIP, charge or monthly truth.",
+ "C13_missions": "Row 10010 (kind 110, gate 4|1) and 10036 (kind 131, gate 8|1) go live. 10014, 10034, 10035 stay deferred (D470, D461). missions_content.py deferrals narrow accordingly; missioninputs reader gains gates 4 and 8 reading the Privileges port.",
+ "C14_perks": "SnapshotTx sets MonthlyPrivilegeActive from privilege_card_end>now. SkillPointNaturalCap adds monthly_privilege.skill_max (10) while active (SelfPlayer.lua:1445-1453). Existing readers (campaign sweep, conquer school, 1on1, course) then see the perk unchanged. A tap crossing into active raises the cap through PreparePrivilegeTransitionTx; lazy expiry lowers the reported cap with no write.",
+ "C15_refusals": "Business refusals HTTP 409 with error_code (D426). Malformed params 400. No 200 refusal: Backend.lua:562-566 treats any 200 as OK.",
+ "C16_reads_for_10E": "commerceprivilegestore exposes a bounded read of other players' charge (at most 200 ids, no lock) for recall and invite.",
+ "C17_proof": "Native tests through the production constructor: first buy bonus, second buy without it, replay, conflicting replay, card stacking, DISABLED, 028 refusal, VIP crossing raises the skill cap, concurrent taps with different intents sum correctly, 657 double claim, tap on a manual-origin root and manual import on a tap-origin root. VC scenario i9_10g_charge: stock load of VipRechargeWindow data, Lua tap dispatching RECHARGE, 354 and 657 through stock callers, MID 1 after a card.",
+ "UNKNOWN": [
+  "Original discount mechanics of row 013 and monthly_card_time 7",
+  "Whether original granted season and halfyear gift rows at purchase",
+  "Row 10014 versus 10010 for the month card reward"
+ ]
+}

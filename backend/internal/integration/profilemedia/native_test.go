@@ -225,11 +225,15 @@ func TestMediaStableTimeAndConcurrentAssignments(t *testing.T) {
 	first := upload(t, s, a, pngBytes(t, 40), op())
 	stale := s
 	stale.Commands.Timed.Binder.Time = fixedTime{first.History.DecisionAt.Add(-time.Second)}
-	if _, e := publish(t, stale, a, pngBytes(t, 41), op()); e == nil {
-		t.Fatal("staleDecisionAtclamped")
+	clamped := upload(t, stale, a, pngBytes(t, 41), op())
+	if current(t, p, a).Operation != clamped.History.Operation {
+		t.Fatal("staledidnotchangecurrent")
 	}
-	if current(t, p, a).Operation != first.History.Operation {
-		t.Fatal("stalechangedcurrent")
+	if clamped.History.DecisionAt.Before(first.History.DecisionAt) {
+		t.Fatal("staledecisionmovedbackwards")
+	}
+	if row, _ := root(t, p, a.PlayerID); row.UpdatedAt.Before(first.History.DecisionAt) {
+		t.Fatalf("staleclampmovedrootbackwards %v %v", row.UpdatedAt, first.History.DecisionAt)
 	}
 	var wg sync.WaitGroup
 	results := make(chan app.MediaResult, 6)
@@ -263,7 +267,7 @@ func TestMediaStableTimeAndConcurrentAssignments(t *testing.T) {
 			t.Fatal("unexpectedraceerror", e)
 		}
 	}
-	if committed == 0 || current(t, p, a).RootVersion != highest || highest != int64(1+committed) {
+	if committed == 0 || current(t, p, a).RootVersion != highest || highest != int64(2+committed) {
 		t.Fatal("canonicalversions", committed, highest)
 	}
 	if e := maintenance(s).Validate(ctx); e != nil {

@@ -1,0 +1,356 @@
+{
+ "background": [
+  {
+   "binary": "gxb-api",
+   "entry": "appillusion.Reconciler",
+   "kind": "reconcile"
+  }
+ ],
+ "content": [],
+ "contracts": [
+  {
+   "count": 18,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 6,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 18,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
+  },
+  {
+   "count": 17,
+   "file": "docs/i9/I9_ILLUSION_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 17,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/illusion_dispatcher.go",
+  "internal/adapters/stockruntime/illusion_room_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {
+   "FANTASY": {
+    "adventure": "EventIllusion"
+   }
+  },
+  "emits": [
+   "FANTASY"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "illusion"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "illusion_occurrence_results": [
+    "illusionstore.LockResultTx"
+   ],
+   "illusion_occurrences": [
+    "illusionstore.LockOccurrenceTx"
+   ],
+   "illusion_players": [
+    "illusionstore.LockPlayerTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "illusion_occurrence_results",
+   "illusion_occurrences",
+   "illusion_players",
+   "players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/illusion_dispatcher.go",
+    "line": 38
+   },
+   "mid": 1344,
+   "name": "ILLUSION_LOAD_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/illusion_dispatcher.go",
+    "line": 38
+   },
+   "mid": 1345,
+   "name": "ILLUSION_BUY_TIMES"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/illusion_dispatcher.go",
+    "line": 38
+   },
+   "mid": 1346,
+   "name": "ILLUSION_START_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/illusion_dispatcher.go",
+    "line": 38
+   },
+   "mid": 1347,
+   "name": "ILLUSION_FIGHT_RESULT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
+    "line": 50
+   },
+   "mid": 1349,
+   "name": "ILLUSION_CREATE_ROOM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
+    "line": 50
+   },
+   "mid": 1350,
+   "name": "ILLUSION_GET_ROOM_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
+    "line": 50
+   },
+   "mid": 1351,
+   "name": "ILLUSION_PREPARE_ROOM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
+    "line": 50
+   },
+   "mid": 1352,
+   "name": "ILLUSION_ENTER_ROOM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
+    "line": 50
+   },
+   "mid": 1353,
+   "name": "ILLUSION_REMOVE_PLAYER"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
+    "line": 50
+   },
+   "mid": 1354,
+   "name": "ILLUSION_EXIT_ROOM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
+    "line": 50
+   },
+   "mid": 1356,
+   "name": "ILLUSION_SET_PARTNER"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
+    "line": 50
+   },
+   "mid": 1357,
+   "name": "ILLUSION_PREPARE_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
+    "line": 50
+   },
+   "mid": 1358,
+   "name": "ILLUSION_START_TEAM_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
+    "line": 50
+   },
+   "mid": 1360,
+   "name": "ILLUSION_INVITE_FRIEND"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
+    "line": 50
+   },
+   "mid": 1362,
+   "name": "ILLUSION_GET_REPORT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/illusion_room_dispatcher.go",
+    "line": 50
+   },
+   "mid": 1363,
+   "name": "ILLUSION_CANCEL_PREPARE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/illusion_dispatcher.go",
+    "line": 38
+   },
+   "mid": 1364,
+   "name": "ILLUSION_RANK_HEROS"
+  }
+ ],
+ "name": "illusion",
+ "pushes": [
+  {
+   "file": "internal/adapters/stockruntime/illusion_room_notice.go",
+   "kind": "direct",
+   "line": 139,
+   "mid": 516,
+   "roles": [
+    "Role",
+    "World"
+   ]
+  },
+  {
+   "file": "internal/adapters/stockruntime/illusion_room_notice.go",
+   "kind": "direct",
+   "line": 138,
+   "mid": 518,
+   "roles": [
+    "Role",
+    "World"
+   ]
+  }
+ ],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/guildrentalread",
+  "internal/adapters/postgres/guildstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/illusionstore",
+  "internal/adapters/postgres/kernelstore",
+  "internal/adapters/postgres/sharedroomstore"
+ ],
+ "tables": {
+  "owned": [
+   "illusion_attempt_settlements",
+   "illusion_attempts",
+   "illusion_occurrence_results",
+   "illusion_occurrences",
+   "illusion_players",
+   "illusion_reports",
+   "illusion_settlements"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "gxb_content_activation",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "illusion_attempt_settlements",
+   "illusion_occurrence_results",
+   "illusion_occurrences",
+   "illusion_players",
+   "illusion_reports",
+   "player_directory_profiles",
+   "player_function_eligibility",
+   "players",
+   "shared_room_seats",
+   "shared_rooms"
+  ],
+  "written": [
+   "guild_activity_awards",
+   "gxb_operation_receipts",
+   "illusion_attempt_settlements",
+   "illusion_occurrence_results",
+   "illusion_occurrences",
+   "illusion_players",
+   "illusion_reports"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [
+   "i9_8b_illusion.json"
+  ],
+  "unit": [
+   "member_team_test.go",
+   "rank_test.go",
+   "service_test.go",
+   "settlement_achievement_test.go",
+   "start_choice_conformance_test.go",
+   "team_test.go"
+  ]
+ }
+}

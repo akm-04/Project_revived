@@ -83,7 +83,7 @@ func honest(pack d.DrawPackage) d.Derivation {
 // the policy version, a lost START returns the same entropy, RESULT is judged
 // against the stored draws and a duplicate RESULT converges.
 func TestI8_5CServerEntropyAttemptNative(t *testing.T) {
-	f := newKindFixture(t, "server-entropy")
+	f := newKindFixture(t, "server-entropy", d.ModeDodgeball)
 	before := f.counts(t)
 	missing := f.challengeStart("stage-0", "g0")
 	missing.Package = nil
@@ -161,7 +161,7 @@ func TestI8_5CServerEntropyAttemptNative(t *testing.T) {
 // H-03: concurrent duplicate derivations settle once; H-04: an ambiguous
 // commit reconciles from the attempt's own receipt.
 func TestI8_5CConcurrentAndAmbiguousDerivationNative(t *testing.T) {
-	f := newKindFixture(t, "server-entropy-concurrency")
+	f := newKindFixture(t, "server-entropy-concurrency", d.ModeDodgeball)
 	started, err := f.start(f.challengeStart("stage", "g1"), 3)
 	if err != nil {
 		t.Fatal(err)
@@ -212,7 +212,7 @@ func TestI8_5CConcurrentAndAmbiguousDerivationNative(t *testing.T) {
 // H-28/HRC-50: a practice attempt closes as PRACTICE with no attestation, and
 // no value-bearing RESULT path can close it.
 func TestI8_5CPracticeSettlesNoValueNative(t *testing.T) {
-	f := newKindFixture(t, "practice")
+	f := newKindFixture(t, "practice", d.ModePetCampaignPractice)
 	practice := func(stage string) combat.StartRequest {
 		request := f.request(stage, "g1")
 		request.TrustProfile, request.Package = d.PracticeNoValue, nil
@@ -250,13 +250,14 @@ func TestI8_5CPracticeSettlesNoValueNative(t *testing.T) {
 	if again, err := f.endPractice("g1"); err != nil || !again.Drained {
 		t.Fatal("duplicate practice RESULT must drain", again, err)
 	}
-	if _, err = f.start(f.request("stage-2", "g1"), 3); err != nil {
-		t.Fatal(err)
+	// No registered value-bearing mode shares the practice family, so the
+	// registry refuses a value-bearing START on a practice locator outright.
+	valued := f.request("stage-2", "g1")
+	valued.Mode, valued.TrustProfile, valued.Replay = d.ModePetCampaign, d.ClientSummaryAttested, d.MustMode(d.ModePetCampaign).Replay
+	if _, err = f.start(valued, 1); !errors.Is(err, d.ErrInvalid) {
+		t.Fatal("a value-bearing START on a practice locator must be refused", err)
 	}
-	if _, err = f.endPractice("g1"); !errors.Is(err, d.ErrStale) {
-		t.Fatal("a practice RESULT must not close a value-bearing attempt", err)
-	}
-	if n := f.counts(t); n != [3]int{2, 1, 0} {
+	if n := f.counts(t); n != [3]int{1, 0, 0} {
 		t.Fatal("rows: practice writes no package and no attestation", n)
 	}
 }

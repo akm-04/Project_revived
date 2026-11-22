@@ -1,0 +1,22 @@
+{
+ "name": "i9_10e_invite",
+ "level": 30,
+ "social_invite_fixture": true,
+ "steps": [
+  "wait:5",
+  "lua:local backend=xyd.Backend.get() local original=backend.request backend.request=function(self,mid,params,cb,showError,skip,showLoading) return original(self,mid,params,function(code,reply) if mid==xyd.mid.LOAD_INVITE_INFOS then __vc_384={code=code,reply=reply} elseif mid==xyd.mid.GET_INVITE_AWARD then table.insert(__vc_385 or {}, {code=code,reply=reply}) elseif mid==xyd.mid.SEND_INVITE_CODE then __vc_386={code=code,reply=reply} end if cb then cb(code,reply) end end,showError,skip,showLoading) end",
+  "lua:local m=xyd.ModelManager.get():loadModel(xyd.ModelType.INVITE_FRIENDS_INFOS) m:loadInviteInfos(function(code) if code~=xyd.error.OK then error('vc-invite-384-'..tostring(code)) end end)",
+  "wait:8",
+  "lua:local m=xyd.ModelManager.get():loadModel(xyd.ModelType.INVITE_FRIENDS_INFOS) local code=m:getInviteCode() if type(code)~='string' or code=='' then error('vc-invite-code') end local friends=m:getInviteFriends() if type(friends)~='table' or #friends~=1 then error('vc-invite-friends-'..tostring(#(friends or {}))) end local peer=friends[1] if tonumber(peer.lev)~=50 then error('vc-invite-peer-lev-'..tostring(peer.lev)) end if tonumber(peer.partner_num)~=1 then error('vc-invite-peer-partner-'..tostring(peer.partner_num)) end if type(peer.player_name)~='string' or type(peer.region_name)~='string' or type(peer.avatar_id)~='number' then error('vc-invite-peer-shape') end local mission=nil for _,row in ipairs(m:getInviteMissions()) do if tonumber(row.mission_id)==100016 then mission=row end end if not mission or mission.can_award~=true then error('vc-invite-100016-not-claimable') end if not __vc_384 or __vc_384.code~=xyd.error.OK then error('vc-invite-384-capture') end",
+  "lua:__vc_385={} local m=xyd.ModelManager.get():loadModel(xyd.ModelType.INVITE_FRIENDS_INFOS) m:getMissionReward({mission_id=100016}, function(code,reply) if code~=xyd.error.OK then error('vc-invite-385-'..tostring(code)) end if type(reply.awards)~='table' or #reply.awards~=1 then error('vc-invite-awards-shape') end local row=reply.awards[1] if tonumber(row.crystal)~=90 or tonumber(row.item_num)~=90 then error('vc-invite-awards-value') end if type(reply.new_infos)~='table' or type(reply.new_infos.missions)~='table' then error('vc-invite-new-infos') end for _,r in ipairs(reply.new_infos.missions) do if tonumber(r.mission_id)==100016 and r.can_award~=false then error('vc-invite-claim-not-cleared') end end end)",
+  "wait:3",
+  "lua:local m=xyd.ModelManager.get():loadModel(xyd.ModelType.INVITE_FRIENDS_INFOS) m:getMissionReward({mission_id=100016}, function(code,reply) if code==xyd.error.OK then error('vc-invite-second-claim-accepted') end if tonumber(reply and reply.error_code)~=1 then error('vc-invite-second-claim-body-'..tostring(reply and reply.error_code)) end end)",
+  "wait:3",
+  "lua:local m=xyd.ModelManager.get():loadModel(xyd.ModelType.INVITE_FRIENDS_INFOS) local code=m:getInviteCode() xyd.Backend.get():request(xyd.mid.SEND_INVITE_CODE,{invite_code=code},function(status,reply) if status==xyd.error.OK then error('vc-invite-self-bind-accepted') end if tonumber(reply and reply.error_code)~=1 then error('vc-invite-self-bind-body-'..tostring(reply and reply.error_code)) end end)",
+  "wait:3"
+ ],
+ "settle_seconds": 10,
+ "expect_ok": [384, 385],
+ "expect_lua_errors": [],
+ "note": "Stock InviteFriends model (the window's willOpen path calls the same loadInviteInfos) on the driven inviter: MID 384 reload with the durably bound peer (the peer's first battle girl is raised to level 50 and the peer is bound to the driven player's code by the social_invite_fixture, because the virtual client drives one player), MID 385 once-only claim of type-3 mission 100016 for 90 crystal, a second 385 refusal, and the stock SEND_INVITE_CODE 386 refusal for the player's own code. InviteFriendsWindow itself cannot be opened here because windows/invite_friends/invite_friends.csb is absent from the supplied apk/update-tree; the model entry it calls is exercised instead. The successful 386 bind and its concurrency, same-account, cross-server and level rules are proven by the native PostgreSQL tests."
+}

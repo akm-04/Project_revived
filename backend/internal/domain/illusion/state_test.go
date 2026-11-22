@@ -126,6 +126,15 @@ func TestResultKeepsPersonalBest(t *testing.T) {
 	if killed.CostTime != 30 {
 		t.Fatalf("a slower kill replaced a faster one: %+v", killed)
 	}
+	// A-085: the kept personal best follows the board order (equal-time kills rank by higher hurt).
+	killed.Record(900, 30, true)
+	if killed.Hurt != 900 {
+		t.Fatalf("an equal-time kill with higher hurt must replace the kept one: %+v", killed)
+	}
+	killed.Record(850, 30, true)
+	if killed.Hurt != 900 {
+		t.Fatalf("an equal-time kill with lower hurt replaced the kept one: %+v", killed)
+	}
 }
 
 func TestCyclePhaseSettlementAndRestDay(t *testing.T) {
@@ -262,6 +271,29 @@ func TestRankBestHitAndShorterTimeTies(t *testing.T) {
 	}
 }
 
+func TestOrderRankKillsFirstThenShorterTimeAndHurt(t *testing.T) {
+	entries := []Result{
+		{PlayerID: 1, Hurt: 900, CostTime: 3},
+		{PlayerID: 2, Hurt: 500, CostTime: 7, Killed: true},
+		{PlayerID: 3, Hurt: 800, CostTime: 5, Killed: true},
+		{PlayerID: 4, Hurt: 700, CostTime: 5, Killed: true},
+		{PlayerID: 5, Hurt: 1000, CostTime: 9},
+	}
+	ordered := OrderRank(entries)
+	want := []int64{3, 4, 2, 5, 1}
+	for index, entry := range ordered {
+		if entry.PlayerID != want[index] {
+			t.Fatalf("rank %d = %+v, want player %d; order %+v", index+1, entry, want[index], ordered)
+		}
+	}
+	if rank, hurt := RankOf(entries, 2); rank != 3 || hurt != 500 {
+		t.Fatalf("RankOf kill = (%d,%d), want (3,500)", rank, hurt)
+	}
+	if rank, hurt := RankOf(entries, 5); rank != 4 || hurt != 1000 {
+		t.Fatalf("RankOf loss = (%d,%d), want (4,1000)", rank, hurt)
+	}
+}
+
 func TestTeamRules(t *testing.T) {
 	valid := func() Team {
 		return Team{Members: []TeamMember{
@@ -293,6 +325,26 @@ func TestTeamRules(t *testing.T) {
 		mutate(&team)
 		if err := team.Validate(); err == nil {
 			t.Fatalf("%s accepted", name)
+		}
+	}
+}
+
+func TestAttemptGenerationRoundTrip(t *testing.T) {
+	generation := AttemptGeneration{LogicalServerID: 7, OpenDay: 49000, CampaignID: FirstCampaignID + 1}
+	parsed, ok := ParseAttemptGeneration(generation.Reference())
+	if !ok || parsed != generation {
+		t.Fatalf("round trip %+v %v", parsed, ok)
+	}
+	if !generation.Matches(Occurrence{LogicalServerID: 7, OpenDay: 49000, CampaignID: FirstCampaignID + 1}) {
+		t.Fatal("same occurrence did not match")
+	}
+	next := Occurrence{LogicalServerID: 7, OpenDay: 49000 + CycleDays, CampaignID: FirstCampaignID + 1}
+	if generation.Matches(next) {
+		t.Fatal("advanced occurrence matched")
+	}
+	for _, reference := range []string{"", "ILLUSION/7/49000", "ILLUSION/0/49000/100001", "ILLUSION/7/-1/100001", "ILLUSION/7/49000/100013", "ILLUSION_TEAM/1/49000/100001", "ILLUSION/7/49000/100001/x"} {
+		if _, ok := ParseAttemptGeneration(reference); ok {
+			t.Fatalf("%q parsed", reference)
 		}
 	}
 }

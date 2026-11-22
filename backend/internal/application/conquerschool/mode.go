@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"time"
 
+	"gxb.local/backend/v2/internal/application/broadcast"
 	ca "gxb.local/backend/v2/internal/application/characterasset"
 	"gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -34,24 +35,31 @@ import (
 // row, Combat 609, I5 mail 610 and values 700+, directory 740. START and
 // RESULT bind a Combat CLIENT_SUMMARY_ATTESTED attempt (I8-5D).
 type Mode struct {
-	Facts       Service
-	Timed       gen.TimedRunner
-	Fresh       tx.Queryer
-	Store       ModeStore
-	Content     ModeContent
-	Fence       Fence
-	Functions   Functions
-	Privileges  i5.PrivilegeSnapshotProvider
-	Costs       i5.TxMaterialCostDebiter
-	Grants      Grants
-	Mail        Mail
-	Heroes      Roster
-	Pets        Roster
-	Combat      Combat
-	Directory   Directory
-	Projection  Projection
-	Receipts    receipt.Store
-	ReceiptRead receipt.Reader
+	Facts        Service
+	Timed        gen.TimedRunner
+	Fresh        tx.Queryer
+	Store        ModeStore
+	Content      ModeContent
+	Fence        Fence
+	Functions    Functions
+	Privileges   i5.PrivilegeSnapshotProvider
+	Costs        i5.TxMaterialCostDebiter
+	Grants       Grants
+	Mail         Mail
+	Heroes       Roster
+	Pets         Roster
+	Combat       Combat
+	Directory    Directory
+	Projection   Projection
+	Receipts     receipt.Store
+	ReceiptRead  receipt.Reader
+	Broadcast    broadcast.Emitter
+	BattleCounts BattleCountObserver
+}
+
+// BattleCountObserver records the Girls Log count of one first settled battle.
+type BattleCountObserver interface {
+	ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error
 }
 
 type ModeStore interface {
@@ -148,7 +156,8 @@ func retry() tx.RetryPolicy {
 func (s Mode) ready() bool {
 	return s.Facts.Owner != nil && s.Facts.Content != nil && s.Facts.Players != nil && s.Timed.Runner.DB != nil && s.Timed.Binder.Time != nil && s.Fresh != nil &&
 		s.Store != nil && s.Content != nil && s.Fence != nil && s.Functions != nil && s.Privileges != nil && s.Costs != nil && s.Grants != nil && s.Mail != nil &&
-		s.Heroes != nil && s.Pets != nil && s.Combat != nil && s.Directory != nil && s.Projection != nil && s.Receipts != nil && s.ReceiptRead != nil
+		s.Heroes != nil && s.Pets != nil && s.Combat != nil && s.Directory != nil && s.Projection != nil && s.Receipts != nil && s.ReceiptRead != nil &&
+		s.Broadcast != nil
 }
 
 // pin binds the active content revision to the operation once, so the facts
@@ -157,10 +166,14 @@ func (s Mode) pin(c context.Context, op operation.Context) (operation.Context, e
 	if !s.ready() {
 		return op, d.ErrUnavailable
 	}
+	return s.pinTx(c, s.Fresh, op)
+}
+
+func (s Mode) pinTx(c context.Context, q tx.Queryer, op operation.Context) (operation.Context, error) {
 	if _, bound := op.Policies.Get("content"); bound {
 		return op, nil
 	}
-	revision, err := s.Content.ActiveRevision(c, s.Fresh)
+	revision, err := s.Content.ActiveRevision(c, q)
 	if err != nil {
 		return op, err
 	}
@@ -327,7 +340,7 @@ func (s Mode) bind(c context.Context, sc gen.TimedScope, a identity.ActorContext
 	if pet > 0 {
 		battle.PetsA = append(battle.PetsA, combat.Participant{Origin: cd.OwnedSelf, Kind: cd.PetActor, Player: a.PlayerID, Identity: pet})
 	}
-	return s.Combat.StartTx(c, sc.Tx, scope, combat.StartRequest{Actor: a, Locator: locator(a), GenerationRef: generation(st.run), StartFingerprint: fingerprint(a, st.run, formation, pet, op),
+	return s.Combat.StartTx(c, sc.Tx, scope, combat.StartRequest{Mode: cd.ModeConquerSchool, Actor: a, Locator: locator(a), GenerationRef: generation(st.run), StartFingerprint: fingerprint(a, st.run, formation, pet, op),
 		ResultDeadline: at.Add(resultWindow), Battle: battle, TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK}})
 }
 
@@ -469,7 +482,7 @@ func (s Mode) Result(c context.Context, a identity.ActorContext, result d.Result
 				lines = append(lines, grant.Line{Kind: grant.StackItem, ItemID: reward[0], Amount: reward[1]})
 			}
 			plan := grant.Plan{PlayerID: a.PlayerID, Source: grant.SourceIdentity{Domain: "conquer-school", Operation: "promote", BusinessKey: attempt, Occurrence: current.ID.String(), PolicyVersion: d.ModeContractID}, Lines: lines}
-			if _, err = s.Grants.SettleGrantTx(c, sc.Tx, a, plan, current, i5.GrantTxOptions{}); err != nil {
+			if _, err = s.Grants.SettleGrantTx(c, sc.Tx, a, plan, current, i5.GrantTxOptions{AllowOverflowMail: true}); err != nil {
 				return d.ResultView{}, err
 			}
 		}
@@ -480,6 +493,14 @@ func (s Mode) Result(c context.Context, a identity.ActorContext, result d.Result
 		}
 		if settled.Promoted {
 			err = s.Projection.ProjectConquerTx(c, sc.Tx, a.PlayerID, settled.Progress.Level, settled.Progress.Loop, at)
+		}
+		if err == nil && settled.Promoted {
+			message := broadcast.Message{MID: broadcast.SystemMID, MsgType: broadcast.ConquerSchool, Server: a.LogicalServerID, Player: a.PlayerID,
+				Fields: broadcast.Fields{Region: settled.Region, ConquerLoopID: settled.Attempt.Loop, ConquerLev: settled.Progress.Level}}
+			err = s.Broadcast.EmitTx(c, sc.Tx, message)
+		}
+		if err == nil {
+			err = s.BattleCounts.ObserveBattleTx(c, sc.Tx, a.PlayerID, settled.Attempt.Formation, at)
 		}
 		return view, err
 	})
@@ -537,17 +558,24 @@ func (s Mode) keep(c context.Context, sc gen.TimedScope, a identity.ActorContext
 
 // Reports answers 1571 with the best kept reports of one team, across servers.
 func (s Mode) Reports(c context.Context, loop, mission, team int64, op operation.Context) ([]d.Report, error) {
-	op, err := s.pin(c, op)
-	if err != nil {
-		return nil, err
-	}
-	revision, _ := op.Policies.Get("content")
-	catalog, err := s.Content.ConquerModeCatalogTx(c, s.Fresh, revision)
-	if err != nil {
-		return nil, err
-	}
-	return s.Store.ReportsTx(c, s.Fresh, loop, mission, team, catalog.ReportLimit)
+	var out []d.Report
+	_, _, err := s.Timed.Run(c, op, ModeProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, readRetry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		bound, err := s.pinTx(c, sc.Tx, sc.Operation.Operation())
+		if err != nil {
+			return err
+		}
+		revision, _ := bound.Policies.Get("content")
+		catalog, err := s.Content.ConquerModeCatalogTx(c, sc.Tx, revision)
+		if err != nil {
+			return err
+		}
+		out, err = s.Store.ReportsTx(c, sc.Tx, loop, mission, team, catalog.ReportLimit)
+		return err
+	})
+	return out, err
 }
+
+func readRetry() tx.RetryPolicy { return tx.RetryPolicy{MaxAttempts: 1} }
 
 // Report answers 1572. A viewer's first view of another player's report on a
 // 05:00 day mails its owner the view reward, at most report_reward_limit a day.

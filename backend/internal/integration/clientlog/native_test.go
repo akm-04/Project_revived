@@ -24,6 +24,9 @@ import (
 	domain "gxb.local/backend/v2/internal/domain/clientlog"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/observability"
+	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/protocol/httpedge"
+	"gxb.local/backend/v2/internal/protocol/limits"
 )
 
 var ctx = context.Background()
@@ -166,6 +169,28 @@ func TestStockErrorLogUploadIsStoredPerUID(t *testing.T) {
 	}
 }
 
+// I85_CLIENT_LOG_INGEST_V1 R8: no persisted row may keep the capability the
+// upload presented, whether it is logged as a bare URL or a key=value pair.
+func TestStockErrorLogRedactsThePresentedCapability(t *testing.T) {
+	f := newFixture(t)
+	logURL := f.logURL(t)
+	capability := strings.TrimPrefix(logURL, f.server.URL+"/client-log/")
+	payload := deflated(t, `[{"rowid":1,"log":"post failed `+logURL+`","dump":"log_url=`+logURL+`","note":"`+logURL+`"}]`)
+	if status := stockPost(t, logURL, map[string][]byte{"payload": payload}, "", nil); status != http.StatusOK {
+		t.Fatalf("status=%d", status)
+	}
+	var logText, dumpText, extras string
+	if err := f.pool.Raw().QueryRow(ctx, `SELECT log, dump, coalesce(extras::text,'') FROM client_log_rows WHERE account_uid=$1`, f.uid).Scan(&logText, &dumpText, &extras); err != nil {
+		t.Fatal(err)
+	}
+	if stored := logText + dumpText + extras; strings.Contains(stored, capability) {
+		t.Fatalf("capability stored: %q", stored)
+	}
+	if logText != "post failed "+strings.TrimSuffix(logURL, capability)+observability.Redacted || !strings.Contains(dumpText, observability.Redacted) || !strings.Contains(extras, observability.Redacted) {
+		t.Fatalf("log=%q dump=%q extras=%q", logText, dumpText, extras)
+	}
+}
+
 func TestStockCrashUploadKeepsTheDumpAndPrefersTheToken(t *testing.T) {
 	f := newFixture(t)
 	fields := map[string][]byte{"app_v": []byte("1.0.4"), "v": []byte("2.3"), "token": []byte("live-" + f.uid)}
@@ -198,6 +223,164 @@ func TestBadUploadsAreQuarantinedUnattributedWhenNoOwnerIsProven(t *testing.T) {
 	unknown := f.uploads(t, `account_uid IS NULL AND upload_id IN (SELECT upload_id FROM client_log_rows WHERE log=$1)`, marker)
 	if len(unknown) != 1 || unknown[0].attribution != "UNATTRIBUTED_UNKNOWN" || unknown[0].status != "PARSED" {
 		t.Fatalf("unknown=%+v", unknown)
+	}
+	var rowRetention string
+	var rowExpiresIn time.Duration
+	if err := f.pool.Raw().QueryRow(ctx, `SELECT retention_class, expires_at-received_at FROM client_log_rows WHERE account_uid IS NULL AND log=$1`, marker).Scan(&rowRetention, &rowExpiresIn); err != nil || rowRetention != "ANOMALY" || rowExpiresIn != lifetime(domain.Anomaly) {
+		t.Fatalf("unattributed row retention=%s expiresIn=%s err=%v", rowRetention, rowExpiresIn, err)
+	}
+}
+
+// A-109: a malformed multipart upload keeps its raw body as the quarantine
+// record (I85_CLIENT_LOG_INGEST_V1 R4), including when the Content-Type carries
+// no boundary at all.
+func TestMalformedMultipartKeepsTheRawRecord(t *testing.T) {
+	f := newFixture(t)
+	body := "malformed-" + f.uid + "-body without multipart framing"
+	response, err := http.Post(f.logURL(t), "multipart/form-data", strings.NewReader(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+	response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		t.Fatalf("status=%d", response.StatusCode)
+	}
+	got := f.uploads(t, `account_uid=$1`, f.uid)
+	if len(got) != 1 || got[0].reason == nil || *got[0].reason != app.QuarantineMalformedMultipart || got[0].attachment != len(body) {
+		t.Fatalf("uploads=%+v", got)
+	}
+	var stored string
+	if err := f.pool.Raw().QueryRow(ctx, `SELECT encode(attachment,'escape') FROM client_log_uploads WHERE account_uid=$1`, f.uid).Scan(&stored); err != nil {
+		t.Fatal(err)
+	}
+	if stored != body {
+		t.Fatalf("attachment=%q", stored)
+	}
+}
+
+// A-132: a well-framed multipart with metadata but no payload persists a
+// redacted envelope summary as its quarantine record before answering 200.
+func TestMetadataOnlyMultipartKeepsTheEnvelopeDiagnostic(t *testing.T) {
+	f := newFixture(t)
+	fields := map[string][]byte{"app_v": []byte("1.0"), "token": []byte("secret-token")}
+	if status := stockPost(t, f.logURL(t), fields, "", nil); status != http.StatusOK {
+		t.Fatalf("status=%d", status)
+	}
+	got := f.uploads(t, `account_uid=$1`, f.uid)
+	if len(got) != 1 || got[0].reason == nil || *got[0].reason != app.QuarantineBadCompression || got[0].attachment == 0 {
+		t.Fatalf("uploads=%+v", got)
+	}
+	var stored string
+	if err := f.pool.Raw().QueryRow(ctx, `SELECT encode(attachment,'escape') FROM client_log_uploads WHERE account_uid=$1`, f.uid).Scan(&stored); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(stored, "app_v=1.0") || !strings.Contains(stored, "token=") {
+		t.Fatalf("attachment=%q", stored)
+	}
+	if strings.Contains(stored, "secret-token") {
+		t.Fatalf("attachment leaked a secret: %q", stored)
+	}
+}
+
+// TestRequestJournalKeepsRedactedMultipartEnvelope drives the production edge,
+// journal and store: an undecodable multipart upload must persist an envelope
+// with its field names but no file body and no token value (I85_REQUEST_JOURNAL_V1 R3).
+func TestRequestJournalKeepsRedactedMultipartEnvelope(t *testing.T) {
+	f := newFixture(t)
+	journal := app.NewJournal(f.store, nil)
+	admission, err := httpedge.NewAdmission(4)
+	if err != nil {
+		t.Fatal(err)
+	}
+	handler := httpedge.Handler{Limits: limits.Default(), Admission: admission, Operations: operation.Factory{Clock: f.clock}, Router: httpedge.NewRouter(), Journal: journal}
+	server := httptest.NewServer(handler)
+	t.Cleanup(server.Close)
+
+	const fileBody = "FILE-BODY-MARKER-must-not-be-stored"
+	marker := "journal-probe-" + f.uid
+	var body bytes.Buffer
+	writer := multipart.NewWriter(&body)
+	part, err := writer.CreateFormFile("avatar", "avatar.png")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := part.Write([]byte(fileBody)); err != nil {
+		t.Fatal(err)
+	}
+	for _, field := range [][2]string{{"mid", "65000"}, {"token", "multipart-secret"}, {"note", marker}} {
+		if err := writer.WriteField(field[0], field[1]); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+	response, err := http.Post(server.URL, writer.FormDataContentType(), &body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	response.Body.Close()
+	if response.StatusCode != http.StatusBadRequest {
+		t.Fatalf("status=%d", response.StatusCode)
+	}
+	stopped, stop := context.WithCancel(ctx)
+	stop()
+	journal.Run(stopped)
+
+	var raw, retention string
+	err = f.pool.Raw().QueryRow(ctx, `SELECT encode(raw_envelope,'escape'), retention_class FROM request_journal WHERE encode(raw_envelope,'escape') LIKE $1`, "%"+marker+"%").Scan(&raw, &retention)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(raw, `name="mid"`) || !strings.Contains(raw, "65000") || retention != "ANOMALY" {
+		t.Fatalf("raw=%q retention=%s", raw, retention)
+	}
+	if strings.Contains(raw, fileBody) {
+		t.Fatalf("file body stored: %q", raw)
+	}
+	if strings.Contains(raw, "multipart-secret") {
+		t.Fatalf("token value stored: %q", raw)
+	}
+}
+
+// A-110: a saturated decoding admission persists a SERVER_ERROR row with its error class and cause (R2).
+func TestRequestJournalRecordsSaturatedAdmissionCause(t *testing.T) {
+	f := newFixture(t)
+	journal := app.NewJournal(f.store, nil)
+	admission, err := httpedge.NewAdmission(4)
+	if err != nil {
+		t.Fatal(err)
+	}
+	decoding, err := httpedge.NewAdmission(1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !decoding.TryAcquire() {
+		t.Fatal("acquire")
+	}
+	handler := httpedge.Handler{Limits: limits.Default(), Admission: admission, Decoding: decoding, Operations: operation.Factory{Clock: f.clock}, Router: httpedge.NewRouter(), Journal: journal}
+	server := httptest.NewServer(handler)
+	t.Cleanup(server.Close)
+
+	response, err := http.Post(server.URL, "application/x-www-form-urlencoded", strings.NewReader("payload=%7B%22mid%22%3A18%7D"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	response.Body.Close()
+	if response.StatusCode != http.StatusServiceUnavailable {
+		t.Fatalf("status=%d", response.StatusCode)
+	}
+	stopped, stop := context.WithCancel(ctx)
+	stop()
+	journal.Run(stopped)
+
+	var outcome, errorClass, cause, retention string
+	err = f.pool.Raw().QueryRow(ctx, `SELECT outcome, error_class, cause, retention_class FROM request_journal WHERE http_status = 503 AND cause LIKE 'SATURATED:%' ORDER BY journal_id DESC LIMIT 1`).Scan(&outcome, &errorClass, &cause, &retention)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if outcome != "SERVER_ERROR" || errorClass == "" || !strings.Contains(cause, "decoding limit saturated") || retention != "ERROR" {
+		t.Fatalf("outcome=%s class=%q cause=%q retention=%s", outcome, errorClass, cause, retention)
 	}
 }
 

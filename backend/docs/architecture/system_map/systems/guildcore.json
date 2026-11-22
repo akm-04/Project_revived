@@ -1,0 +1,413 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [
+  {
+   "count": 22,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 21,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_10A_EVENT_CENTRE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 6,
+   "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_CAMPAIGN_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 20,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/guild_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I6C_GUILD_WRITE"
+   }
+  ],
+  "ranks": [
+   {
+    "name": "guildcore.LockRankAllocator",
+    "rank": 300
+   },
+   {
+    "name": "guildcore.LockRankApplication",
+    "rank": 330
+   },
+   {
+    "name": "guildcore.LockRankAudit",
+    "rank": 350
+   },
+   {
+    "name": "guildcore.LockRankGuild",
+    "rank": 310
+   },
+   {
+    "name": "guildcore.LockRankInvite",
+    "rank": 340
+   },
+   {
+    "name": "guildcore.LockRankMembership",
+    "rank": 320
+   }
+  ],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "guild_applications": [
+    "guildstore.LockApplicationTx",
+    "guildstore.PrepareMembershipCleanupTx"
+   ],
+   "guild_invites": [
+    "guildstore.LockInviteTx"
+   ],
+   "guild_memberships": [
+    "guildstore.LockMembershipTx"
+   ],
+   "guild_server_allocators": [
+    "guildstore.LockAllocatorTx"
+   ],
+   "guilds": [
+    "guildstore.LockGuildTx"
+   ],
+   "player_guild_activity_days": [
+    "guildstore.FoldActivityTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "guild_applications",
+   "guild_invites",
+   "guild_memberships",
+   "guild_server_allocators",
+   "guilds",
+   "player_guild_activity_days",
+   "players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
+   "mid": 576,
+   "name": "LOAD_ALL_TEAMS"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
+   "mid": 577,
+   "name": "CREATE_TEAM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
+   "mid": 578,
+   "name": "DISSOLUTION_TEAM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
+   "mid": 579,
+   "name": "LOAD_TEAM_BY_ID"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
+   "mid": 580,
+   "name": "APPLY_TEAM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
+   "mid": 581,
+   "name": "LOAD_APPLY_LIST_TEAM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
+   "mid": 582,
+   "name": "ACCEPT_APPLY_TEAM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
+   "mid": 583,
+   "name": "REFUSE_APPLY_TEAM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
+   "mid": 584,
+   "name": "LEAVE_TEAM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
+   "mid": 585,
+   "name": "UPDATE_DES_TEAM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
+   "mid": 586,
+   "name": "APPOINT_JOB_TEAM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
+   "mid": 587,
+   "name": "KICK_TEAM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
+   "mid": 589,
+   "name": "SETTING_TEAM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
+   "mid": 598,
+   "name": "PLAYER_LOAD_APPLY_LIST_TEAM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
+   "mid": 599,
+   "name": "CANCEL_APPLY_TEAM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
+   "mid": 612,
+   "name": "GET_SELF_GUILD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
+   "mid": 616,
+   "name": "GUILD_RANK"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
+   "mid": 2563,
+   "name": "INVITE_TO_GUILD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
+   "mid": 2564,
+   "name": "ACCEPT_INVITE_TO_GUILD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/guild_dispatcher.go",
+    "line": 56
+   },
+   "mid": 2565,
+   "name": "GET_GUILD_INFO"
+  }
+ ],
+ "name": "guildcore",
+ "pushes": [
+  {
+   "file": "internal/adapters/stockruntime/guild_apply_notice.go",
+   "kind": "notice",
+   "line": 40,
+   "namespace": "rt.NoticeNamespaceGeneric",
+   "notice_type": 7,
+   "parent_mid": 36854,
+   "roles": [
+    "Role",
+    "World"
+   ]
+  }
+ ],
+ "stores": [
+  "internal/adapters/postgres/guildstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore"
+ ],
+ "tables": {
+  "owned": [
+   "guild_activity_awards",
+   "guild_applications",
+   "guild_audit_log",
+   "guild_invite_send_events",
+   "guild_invites",
+   "guild_membership_events",
+   "guild_memberships",
+   "guild_rental_offers",
+   "guild_rental_uses",
+   "guild_server_allocators",
+   "guild_tea_gifts",
+   "guild_tea_wishes",
+   "guilds",
+   "player_guild_activity_days",
+   "player_guild_activity_totals"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "guild_applications",
+   "guild_audit_log",
+   "guild_invite_send_events",
+   "guild_invites",
+   "guild_membership_events",
+   "guild_memberships",
+   "guild_server_allocators",
+   "guilds",
+   "gxb_operation_receipts",
+   "player_guild_activity_days",
+   "player_guild_activity_totals",
+   "players"
+  ],
+  "written": [
+   "guild_applications",
+   "guild_audit_log",
+   "guild_invite_send_events",
+   "guild_invites",
+   "guild_membership_events",
+   "guild_memberships",
+   "guild_server_allocators",
+   "guilds",
+   "gxb_operation_receipts",
+   "player_guild_activity_days",
+   "player_guild_activity_totals"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "guildinvite",
+   "playerdisplay",
+   "publicshowcase"
+  ],
+  "scenarios_naming": [
+   "guild.json",
+   "i9_8a_world_boss.json",
+   "i9_9a_guild_tea.json",
+   "playtest4_fixes.json"
+  ],
+  "unit": [
+   "lock_plan_test.go",
+   "service_test.go"
+  ]
+ }
+}

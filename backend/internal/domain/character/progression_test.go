@@ -37,6 +37,41 @@ func TestAddSourceEXPClampsAtPlayerQualifiedHeroMaxLevel(t *testing.T) {
 	}
 }
 
+func TestAddSourceEXPRepairsLegacyPlaceholderToCumulativeFloor(t *testing.T) {
+	now := time.Unix(100, 0).UTC()
+	h := testProgressHero(now)
+	thresholds := []HeroExpThreshold{{1, 25}, {2, 55}, {3, 95}, {4, 155}}
+	h.Level, h.Exp = 3, 0
+	got, err := h.AddSourceEXP(10, 4, thresholds, now.Add(time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Exp != 65 || got.Level != 3 {
+		t.Fatalf("writer persisted exp=%d level=%d want 65/3", got.Exp, got.Level)
+	}
+}
+
+func TestSourceCumulativeEXPReadsLegacyPlaceholderAsLevelFloor(t *testing.T) {
+	now := time.Unix(100, 0).UTC()
+	h := testProgressHero(now)
+	thresholds := []HeroExpThreshold{{1, 25}, {2, 55}, {3, 95}, {4, 155}}
+	h.Level = 3
+	h.Exp = 0
+	got, err := h.SourceCumulativeEXP(thresholds)
+	if err != nil || got != 55 {
+		t.Fatalf("legacy placeholder exp=%d err=%v", got, err)
+	}
+	h.Exp = 70
+	got, err = h.SourceCumulativeEXP(thresholds)
+	if err != nil || got != 70 {
+		t.Fatalf("real cumulative exp=%d err=%v", got, err)
+	}
+	h.Level = 5
+	if _, err := h.SourceCumulativeEXP(thresholds); err == nil {
+		t.Fatal("level beyond the supplied curve must refuse")
+	}
+}
+
 func TestEvolveOneStarNeverCrossesEffectiveClientCeiling(t *testing.T) {
 	now := time.Unix(100, 0).UTC()
 	h := testProgressHero(now)

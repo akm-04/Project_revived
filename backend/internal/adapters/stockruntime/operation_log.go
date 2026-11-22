@@ -17,14 +17,17 @@ type OperationLogDispatcher struct {
 }
 
 func (d OperationLogDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest) httpedge.Response {
-	if d.Authority == nil || req.Envelope.Claims.Token == "" {
-		return httpedge.Response{HTTPStatus: http.StatusUnauthorized, Body: map[string]any{"error": "gameplay_auth_required"}}
+	if d.Authority == nil {
+		return failureReply(defect(nil))
+	}
+	if req.Envelope.Claims.Token == "" {
+		return failureReply(sessionFailure())
 	}
 	if _, err := d.Authority.ResolveGameplayBearer(ctx, req.Envelope.Claims.Token, req.Envelope.ReceivedAt); err != nil {
 		return authFailure(err)
 	}
 	if _, err := requiredInt64(req.Envelope.Params, "operation_id"); err != nil {
-		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Cause: err, Body: map[string]any{"error": "invalid_operation_id"}}
+		return failureReply(&classifiedFailure{class: failureMalformed, detail: "invalid_operation_id", cause: err})
 	}
 	return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
 }

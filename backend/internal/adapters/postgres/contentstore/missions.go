@@ -7,14 +7,21 @@ import (
 
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	"sync"
 )
 
-func (Store) MissionDefinitionsTx(ctx context.Context, q tx.Queryer, revision string) ([]objective.MissionDefinition, error) {
+var missionDefinitionCatalogs sync.Map
+
+func (s Store) MissionDefinitionsTx(ctx context.Context, q tx.Queryer, revision string) ([]objective.MissionDefinition, error) {
+	return memoCatalog(&missionDefinitionCatalogs, revision, func() ([]objective.MissionDefinition, error) { return s.missionDefinitionsTx(ctx, q, revision) })
+}
+
+func (s Store) missionDefinitionsTx(ctx context.Context, q tx.Queryer, revision string) ([]objective.MissionDefinition, error) {
 	if q == nil || len(revision) != 64 {
 		return nil, errors.New("content store: mission revision/queryer required")
 	}
 	var raw string
-	err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(to_jsonb(d)-'revision_id' ORDER BY objective_id),'[]'::jsonb)::text
+	err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(to_jsonb(d)-ARRAY['revision_id','payload_version'] ORDER BY objective_id),'[]'::jsonb)::text
 FROM gxb_content_objective_definitions d WHERE revision_id=$1 AND definition_revision='I9_MISSIONS_V1'`, revision).Scan(&raw)
 	if err != nil {
 		return nil, err

@@ -3,10 +3,13 @@ package workplace
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"gxb.local/backend/v2/internal/application/broadcast"
 	cb "gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
+	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/workplace"
@@ -14,8 +17,11 @@ import (
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	"sort"
 	"time"
 )
+
+const closedKind = "WORKPLACE_JOB_CLOSED"
 
 func (s Mode) Claim(c context.Context, a identity.ActorContext, teamID int64, op operation.Context) (map[string]any, error) {
 	if teamID < 1 || teamID > 6 {
@@ -67,13 +73,17 @@ func (s Mode) Claim(c context.Context, a identity.ActorContext, teamID int64, op
 	if replay != nil {
 		return replay, nil
 	}
+	resolverFailed := false
 	if pending != nil && pending.Attempt != "" {
 		id, err := ids.ParseUUID(pending.Attempt)
 		if err != nil {
 			return nil, d.ErrUnavailable
 		}
 		if _, err = s.Combat.Resolve(c, op, id); err != nil {
-			return nil, err
+			if !errors.Is(err, cd.ErrResolverPermanent) {
+				return nil, err
+			}
+			resolverFailed = true
 		}
 	}
 	generation := ""
@@ -100,15 +110,24 @@ func (s Mode) Claim(c context.Context, a identity.ActorContext, teamID int64, op
 		}
 		won := false
 		if o.Attempt != "" {
-			settled, err := s.Combat.TerminalTx(c, sc.Tx, cb.TerminalRequest{Locator: locator(a, teamID), GenerationRef: o.ID, TerminalKind: "WORKPLACE_JOB", SemanticReceiptID: "workplace:" + o.ID, At: sc.Operation.DecisionAt()})
-			if err != nil {
-				return nil, err
-			}
-			won = settled.Resolution.Outcome.Star > 0
-			if won {
-				reward := o.RivalReward
-				o.Award["battle_award"] = map[string]any{"item_id": reward[0], "item_num": reward[1], "award_time": sc.Operation.DecisionAt().Unix()}
-				o.Lines = append(o.Lines, grant.Line{Kind: grant.StackItem, ItemID: reward[0], Amount: reward[1]})
+			if resolverFailed {
+				// PRIVATE_POLICY WORKPLACE_UNRESOLVED_RIVAL_V1: a permanently
+				// unresolvable rival fight is closed without a result; the job
+				// still pays its frozen base lines and skips the rival bonus.
+				if _, err := s.Combat.CloseTx(c, sc.Tx, cb.TerminalRequest{Locator: locator(a, teamID), GenerationRef: o.ID, TerminalKind: closedKind, SemanticReceiptID: "workplace:" + o.ID, At: sc.Operation.DecisionAt()}); err != nil {
+					return nil, err
+				}
+			} else {
+				settled, err := s.Combat.TerminalTx(c, sc.Tx, cb.TerminalRequest{Locator: locator(a, teamID), GenerationRef: o.ID, TerminalKind: "WORKPLACE_JOB", SemanticReceiptID: "workplace:" + o.ID, At: sc.Operation.DecisionAt()})
+				if err != nil {
+					return nil, err
+				}
+				won = settled.Resolution.Outcome.Star > 0
+				if won {
+					reward := o.RivalReward
+					o.Award["battle_award"] = map[string]any{"item_id": reward[0], "item_num": reward[1], "award_time": sc.Operation.DecisionAt().Unix()}
+					o.Lines = append(o.Lines, grant.Line{Kind: grant.StackItem, ItemID: reward[0], Amount: reward[1]})
+				}
 			}
 		}
 		if len(o.Lines) > 0 {
@@ -119,6 +138,12 @@ func (s Mode) Claim(c context.Context, a identity.ActorContext, teamID int64, op
 			plan := grant.Plan{PlayerID: a.PlayerID, Source: grant.SourceIdentity{Domain: "workplace", Operation: "claim", BusinessKey: "workplace:" + o.ID, Occurrence: o.ID, PolicyVersion: policyID}, Lines: o.Lines}
 			if _, err = s.Values.SettleGrantTx(c, sc.Tx, a, plan, bound, i5.GrantTxOptions{AllowOverflowMail: true}); err != nil {
 				return nil, err
+			}
+			if amount := externalCrystalAward(o.Award); amount > 0 {
+				message := broadcast.Message{MID: broadcast.SystemMID, MsgType: broadcast.TreasureDiamond, Server: a.LogicalServerID, Player: a.PlayerID, Fields: broadcast.Fields{CrystalAward: amount}}
+				if err = s.Broadcast.EmitTx(c, sc.Tx, message); err != nil {
+					return nil, err
+				}
 			}
 		}
 		entry := map[string]any{"team_id": teamID, "treasure_type": o.Job, "award": o.Award, "partners_info": o.PartnersInfo, "with_battle": int64(0), "is_win": int64(0), "time": sc.Operation.DecisionAt().Unix()}
@@ -135,10 +160,52 @@ func (s Mode) Claim(c context.Context, a identity.ActorContext, teamID int64, op
 		delete(r.Slots, teamID)
 		out := map[string]any{"team_info": team(v, r, teamID), "award": o.Award}
 		r.Last[teamID] = out
+		if o.Attempt != "" && !resolverFailed {
+			partners := rivalCrewPartners(o.Workers, cat.Policy.MaxCombatCrew)
+			if err = s.BattleObserver.ObserveBattleTx(c, sc.Tx, a.PlayerID, partners, sc.Operation.DecisionAt()); err != nil {
+				return nil, err
+			}
+		}
 		return out, nil
 	})
+}
+
+// rivalCrewPartners is the frozen crew the rival battle fielded: the outgoing
+// workers by power, capped at the policy's combat crew size.
+func rivalCrewPartners(workers []d.Worker, max int) []int64 {
+	crew := append([]d.Worker(nil), workers...)
+	sort.SliceStable(crew, func(i, j int) bool { return crew[i].Power > crew[j].Power })
+	if len(crew) > max {
+		crew = crew[:max]
+	}
+	partners := make([]int64, 0, len(crew))
+	for _, worker := range crew {
+		partners = append(partners, worker.PartnerID)
+	}
+	return partners
 }
 
 type fixedTime struct{ at time.Time }
 
 func (f fixedTime) Now(context.Context) (time.Time, error) { return f.at, nil }
+
+// externalCrystalAward reads the job's bounty bonus, which the store decodes
+// from jsonb as json.Number.
+func externalCrystalAward(award map[string]any) int64 {
+	switch value := award["externa_crystal_award"].(type) {
+	case int64:
+		return value
+	case int32:
+		return int64(value)
+	case float64:
+		return int64(value)
+	case json.Number:
+		amount, err := value.Int64()
+		if err != nil {
+			return 0
+		}
+		return amount
+	default:
+		return 0
+	}
+}

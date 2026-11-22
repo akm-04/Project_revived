@@ -16,6 +16,7 @@ import (
 // transaction (notably MID1 bootstrap projection).
 type HeroRosterTxContent interface {
 	HeroKindTx(context.Context, tx.Queryer, string, int64) (character.HeroKind, error)
+	HeroExpPolicyTx(context.Context, tx.Queryer, string, int64) ([]character.HeroExpThreshold, error)
 	heroFumoPositionTxReader
 	heroFumoTargetTxReader
 	characterasset.AppearanceTxContent
@@ -37,6 +38,10 @@ func BuildRosterViewsTx(ctx context.Context, q tx.Queryer, rosterRevision string
 	if q == nil || store == nil || content == nil || len(rosterRevision) != 64 || observedAt.IsZero() {
 		return nil, errors.New("character hero: invalid roster projection input")
 	}
+	thresholds, err := content.HeroExpPolicyTx(ctx, q, rosterRevision, character.MaxHeroLevel)
+	if err != nil {
+		return nil, err
+	}
 	out := make([]HeroRosterView, 0, len(heroes))
 	for i := range heroes {
 		h := heroes[i]
@@ -46,6 +51,11 @@ func BuildRosterViewsTx(ctx context.Context, q tx.Queryer, rosterRevision string
 		}
 		h.Kind = kind
 		if err := h.Validate(); err != nil {
+			return nil, err
+		}
+		// Stock windows print exp - totalExp(level-1); legacy rows below their
+		// level floor project the source cumulative floor without rewriting state.
+		if h.Exp, err = h.SourceCumulativeEXP(thresholds); err != nil {
 			return nil, err
 		}
 		view := HeroRosterView{Hero: h}

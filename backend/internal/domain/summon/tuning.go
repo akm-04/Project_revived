@@ -64,31 +64,80 @@ func (c Catalog) Tune(t Tuning) (Catalog, error) {
 	if t.JuicePerPull != nil {
 		p.Juice.PerPull = *t.JuicePerPull
 	}
-	if err := c.summonable(append(append([]int64{t.Partner, t.Pet}, p.Cohorts.MediumFeatured...), p.Cohorts.MediumExtension...), false); err != nil {
+	if err := c.summonable([]int64{t.Partner, t.Pet}, false); err != nil {
 		return c, err
 	}
-	if err := c.summonable(append(append(append([]int64(nil), p.Cohorts.SX...), t.Main...), t.Second...), true); err != nil {
+	if err := c.summonableStrict(p.Cohorts.MediumFeatured, false); err != nil {
 		return c, err
 	}
-	sxPinned := len(t.Main) > 0 || len(t.Second) > 0
-	if len(p.Cohorts.SX) < 5 || (sxPinned && (len(t.Main) != 2 || len(t.Second) != 3)) {
+	if err := c.summonableStrict(p.Cohorts.MediumExtension, false); err != nil {
+		return c, err
+	}
+	if err := c.summonableStrict(p.Cohorts.SX, true); err != nil {
+		return c, err
+	}
+	if distinctIDs(p.Cohorts.SX) < 5 || distinctIDs(p.Cohorts.MediumFeatured) < 2 {
+		return c, errTuning
+	}
+	if len(t.Main) > 0 || len(t.Second) > 0 {
+		if err := c.summonableStrict(t.Main, true); err != nil {
+			return c, err
+		}
+		if err := c.summonableStrict(t.Second, true); err != nil {
+			return c, err
+		}
+		if distinctIDs(t.Main) != len(t.Main) || distinctIDs(t.Second) != len(t.Second) {
+			return c, errTuning
+		}
+	}
+	if (len(t.Main) > 0 || len(t.Second) > 0) && (len(t.Main) != 2 || len(t.Second) != 3) {
 		return c, errTuning
 	}
 	c.Policy, c.tuning = p, t
 	return c, nil
 }
 
+// summonable accepts the optional Partner/Pet scalars, where zero means "keep the source".
 func (c *Catalog) summonable(ids []int64, sx bool) error {
 	for _, id := range ids {
 		if id == 0 {
 			continue
 		}
-		h, ok := c.heroes[id]
-		if _, err := c.Fragments(id); !ok || err != nil || (sx && !h.SX) {
-			return fmt.Errorf("%w: hero %d", errTuning, id)
+		if err := c.summonableID(id, sx); err != nil {
+			return err
 		}
 	}
 	return nil
+}
+
+// summonableStrict checks a replacement list: every entry must be a positive,
+// summonable ID, so an operator overlay cannot pin zero or unknown heroes.
+func (c *Catalog) summonableStrict(ids []int64, sx bool) error {
+	for _, id := range ids {
+		if id <= 0 {
+			return fmt.Errorf("%w: hero %d", errTuning, id)
+		}
+		if err := c.summonableID(id, sx); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *Catalog) summonableID(id int64, sx bool) error {
+	h, ok := c.heroes[id]
+	if _, err := c.Fragments(id); !ok || err != nil || (sx && !h.SX) {
+		return fmt.Errorf("%w: hero %d", errTuning, id)
+	}
+	return nil
+}
+
+func distinctIDs(ids []int64) int {
+	seen := make(map[int64]struct{}, len(ids))
+	for _, id := range ids {
+		seen[id] = struct{}{}
+	}
+	return len(seen)
 }
 
 func override(source, tuned int64) int64 {

@@ -14,7 +14,7 @@ import (
 var EmbeddedMID1Records = [...]uint16{
 	17, 780, 49, 81, 112, 115, 2561, 229, 289, 336, 352, 384, 2485,
 	1408, 368, 56, 624, 612, 822, 530, 1056, 1152, 1808, 1304, 1856,
-	836, 2137, 2139, 2416, 2501, 2560, 2984, 3101,
+	836, 2137, 2139, 2416, 2560, 2984, 3101,
 }
 
 type BootstrapView struct {
@@ -63,6 +63,10 @@ func Explicit(mid uint16, v BootstrapView) (any, bool) {
 			"point_level": int64(1), "total_points": int64(0), "rank": int64(0),
 			"award_status": []any{int64(-1), int64(-1)},
 		}}, true
+	case 3:
+		// SelfPlayer.lua:3607 resets every countdown from this reply; the server
+		// has no extra body field to restore.
+		return map[string]any{"server_time": v.Now.Unix()}, true
 	case 2754:
 		return map[string]any{}, true // source callback ignores response fields
 	case 2784:
@@ -119,7 +123,7 @@ func baseline(mid uint16, v BootstrapView) (any, bool) {
 
 			"func_ids": zeroList(), "skill_point": int64(0), "skill_time": int64(0),
 			"guide_function_ids": zeroMap(), "guide_return_id": int64(0),
-			"save_team": "", "save_team_name": "", "save_pet": "", "message_pushes": zeroMap(),
+			"save_team": "", "save_team_name": "", "save_pet": "", "message_pushes": zeroList(),
 
 			"arena_beat_flag": int64(0), "month_card_start": int64(0), "month_card_end": int64(0),
 			"privilege_left_card_day": int64(0), "privilege_month_card_end": int64(0),
@@ -197,9 +201,6 @@ func baseline(mid uint16, v BootstrapView) (any, bool) {
 		return map[string]any{"adventure_list": map[string]any{"list": zeroMap()}}, true
 	case 2485:
 		return map[string]any{"records": zeroList()}, true
-	case 2501:
-		// Current HeroRecommend stores the response itself as the keyed score map.
-		return zeroMap(), true
 	case 2560:
 		return zeroMap(), true
 	case 2561:

@@ -26,7 +26,8 @@ if 'registry.DefaultProviderSet()' not in api:errors.append('providers not expli
 for p in ['internal/content/registry/service_test.go','internal/adapters/postgres/contentstore/store_test.go']:need(p)
 # No new migrations or operation/policy/I5 pinning in R4C.
 nums=sorted(int(p.name[:5]) for p in (R/'migrations').glob('*.sql'));
-if nums[:10] != list(range(1,11)) or nums != list(range(1,max(nums)+1)):errors.append('historical R4C/Pass474 migration prefix changed or sequence is not contiguous')
+retired=set(json.loads((R/'tools'/'retired_migration_numbers.json').read_text())['retired'])
+if nums[:10] != list(range(1,11)) or nums != [n for n in range(1,max(nums)+1) if n not in retired]:errors.append('historical R4C/Pass474 migration prefix changed or sequence has a gap outside tools/retired_migration_numbers.json')
 for script in ['generate_content_querytext.py','check_schema_query_ownership.py','check_sqlc_generation_policy.py']:
  cmd=[sys.executable,str(R/'tools'/script)]+(['--check'] if script.startswith('generate_') else [])
  if subprocess.run(cmd,cwd=R).returncode:errors.append(script+' failed')

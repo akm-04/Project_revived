@@ -31,6 +31,7 @@ import (
 var (
 	ErrUnsupportedGrantDestination = errors.New("grant destination belongs to an unimplemented owner")
 	ErrMailNotFound                = errors.New("mail not found")
+	ErrMailNotClaimable            = errors.New("mail attachments are not claimable")
 	ErrMailStackFull               = errors.New("mail attachment would exceed canonical stack capacity")
 	ErrObjectiveNotFound           = errors.New("objective not found")
 	ErrRedeemInvalid               = errors.New("invalid redeem code")
@@ -178,7 +179,9 @@ type Service struct {
 	Content            ContentRuntime
 	Privileges         PrivilegeSnapshotProvider
 	Functions          FunctionAnnouncementProvider
+	CampaignClears     CampaignFirstClearReader
 	CharacterFunctions CharacterFunctionReader
+	ServerLevels       ServerLevelReader
 	Directory          DirectoryLevelProjectionPort
 	Backpack           BackpackReader
 	PartnerEntities    PartnerEntityMaterializer
@@ -210,21 +213,40 @@ func (s Service) validate() error {
 	return nil
 }
 
+// ValidateStartup rejects a composition without its privilege provider. The
+// active builtin content enables the VIP-capped Skill temporal policy, so the
+// missing port is a startup error, not a per-operation one.
+func (s Service) ValidateStartup() error {
+	if s.Privileges == nil {
+		return errors.New("I5 privilege snapshot provider missing")
+	}
+	return nil
+}
+
 func (s Service) SettleGrant(ctx context.Context, actor identity.ActorContext, plan grant.Plan, op operation.Context) (GrantResult, error) {
 	if plan.PlayerID != actor.PlayerID {
 		return GrantResult{}, errors.New("grant actor/player mismatch")
 	}
-	return s.runGrant(ctx, actor, plan, op, true)
+	return s.runGrant(ctx, actor, plan, op, true, false)
 }
 
 // GrantTxOptions controls only orchestration behavior that is part of the
 // canonical Grant contract. It never changes resource policy/content.
 type GrantTxOptions struct {
 	AllowOverflowMail bool
+	// DropOverflow saves what fits and discards the rest. A mail claim uses it
+	// because the client warns that collecting at capacity loses the excess.
+	DropOverflow bool
 	// SkipCappedStacks drops a stack line that would exceed a catalog cap with
 	// no mail overflow policy; a mode that re-pays display rewards uses it so a
 	// once-owned unique item cannot fail the whole grant.
 	SkipCappedStacks bool
+	// SystemSettlement marks a grant the owner did not request while present,
+	// so overflow mail waits for the owner's login to receive an expiry.
+	SystemSettlement bool
+	// CommittedCampaignFirstClears names Campaign milestone nodes whose first
+	// clear commits in this same transaction (the caller owns that proof).
+	CommittedCampaignFirstClears []int64
 }
 
 // SettleGrantTx settles one semantic Grant inside a caller-owned Wave-A
@@ -244,7 +266,7 @@ func (s Service) SettleGrantTx(ctx context.Context, t tx.Tx, actor identity.Acto
 	return s.settleGrantTx(ctx, t, actor, plan, op, opts)
 }
 
-func (s Service) runGrant(ctx context.Context, actor identity.ActorContext, plan grant.Plan, op operation.Context, fenceActor bool) (GrantResult, error) {
+func (s Service) runGrant(ctx context.Context, actor identity.ActorContext, plan grant.Plan, op operation.Context, fenceActor, systemSettlement bool) (GrantResult, error) {
 	if err := s.validate(); err != nil {
 		return GrantResult{}, err
 	}
@@ -266,7 +288,7 @@ func (s Service) runGrant(ctx context.Context, actor identity.ActorContext, plan
 			return err
 		}
 		boundOp = prepared
-		got, err := s.SettleGrantTx(txctx, scope.Tx, actor, plan, boundOp, GrantTxOptions{AllowOverflowMail: true})
+		got, err := s.SettleGrantTx(txctx, scope.Tx, actor, plan, boundOp, GrantTxOptions{AllowOverflowMail: true, SystemSettlement: systemSettlement})
 		if err == nil {
 			out = got
 		}
@@ -333,8 +355,8 @@ func (s Service) settleGrantTx(ctx context.Context, t tx.Tx, actor identity.Acto
 			if err != nil {
 				return GrantResult{}, err
 			}
-			if exists && (op.StartedAt.Before(balance.UpdatedAt) || balance.StateVersion == math.MaxInt64) {
-				return GrantResult{}, errors.New("SocialGift scalar clock/version regression")
+			if exists && balance.StateVersion == math.MaxInt64 {
+				return GrantResult{}, errors.New("SocialGift scalar version regression")
 			}
 		}
 	}
@@ -367,6 +389,14 @@ func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identi
 			if err != nil {
 				return GrantResult{}, err
 			}
+			storedUpdatedAt := st.UpdatedAt
+			if !exists && policy.DailyFloorMinimum != nil {
+				st = economy.ScalarBalance{PlayerID: plan.PlayerID, ResourceKey: line.ResourceKey, StateVersion: 1, UpdatedAt: now}
+			}
+			st, exists, err = settleDailyFloorTx(ctx, t, s.Store, st, exists, policy.DailyFloorMinimum, now)
+			if err != nil {
+				return GrantResult{}, err
+			}
 			if !exists {
 				st = economy.ScalarBalance{PlayerID: plan.PlayerID, ResourceKey: line.ResourceKey, Amount: line.Amount, StateVersion: 1, UpdatedAt: now}
 			} else {
@@ -374,6 +404,7 @@ func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identi
 				if err != nil {
 					return GrantResult{}, err
 				}
+				st.UpdatedAt = gen.EffectiveObservation(now, storedUpdatedAt)
 			}
 			if err := s.Store.SaveScalarTx(ctx, t, st, exists); err != nil {
 				return GrantResult{}, err
@@ -450,7 +481,7 @@ func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identi
 			if err != nil {
 				return GrantResult{}, err
 			}
-			if cr.Overflow > 0 && !allowOverflowMail {
+			if cr.Overflow > 0 && !allowOverflowMail && !opts.DropOverflow {
 				return GrantResult{}, ErrMailStackFull
 			}
 			if cr.Fit > 0 {
@@ -459,16 +490,23 @@ func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identi
 				}
 			}
 			if cr.Overflow > 0 {
-				sourceKey, err := plan.OverflowMailSourceKey(line.ItemID, ordinal)
-				if err != nil {
-					return GrantResult{}, err
-				}
-				over := line
-				over.Amount = cr.Overflow
-				if _, err := s.createMailTx(ctx, t, plan.PlayerID, mail.Normal, "GRANT_OVERFLOW", sourceKey, "", "System", "", []grant.Line{over}, now, nil, plan.Source.PolicyVersion); err != nil {
-					return GrantResult{}, err
-				}
 				award.ItemNum = cr.Fit
+				if allowOverflowMail {
+					sourceKey, err := plan.OverflowMailSourceKey(line.ItemID, ordinal)
+					if err != nil {
+						return GrantResult{}, err
+					}
+					over := line
+					over.Amount = cr.Overflow
+					var expires *time.Time
+					if !opts.SystemSettlement {
+						at := now.Add(mailTuning(ctx, t, s.Store).OverflowAfterLogin())
+						expires = &at
+					}
+					if _, err := s.createMailTx(ctx, t, plan.PlayerID, mail.Normal, "GRANT_OVERFLOW", sourceKey, overflowMailTitle, overflowMailSender, overflowMailBody, []grant.Line{over}, now, expires, plan.Source.PolicyVersion); err != nil {
+						return GrantResult{}, err
+					}
+				}
 			}
 
 		case grant.PlayerExp:
@@ -510,6 +548,10 @@ func (s Service) applyPreparedGrantTx(ctx context.Context, t tx.Tx, actor identi
 				return GrantResult{}, err
 			}
 			eligible, err := pureLevelEligibility(*pf.FunctionPolicy, plan.PlayerID, transition.After.Level, now)
+			if err != nil {
+				return GrantResult{}, err
+			}
+			eligible, err = s.filterMilestoneEligibilityTx(ctx, t, plan.PlayerID, *pf.FunctionPolicy, eligible, opts.CommittedCampaignFirstClears)
 			if err != nil {
 				return GrantResult{}, err
 			}
@@ -702,6 +744,9 @@ type mailWriter interface {
 }
 
 func createMailTx(ctx context.Context, t tx.Tx, store mailWriter, playerID identity.PlayerID, ns mail.Namespace, sourceKind, sourceKey, title, sender, body string, lines []grant.Line, now time.Time, expires *time.Time, policyVersion string) (mail.Record, error) {
+	if strings.TrimSpace(title) == "" || strings.TrimSpace(body) == "" {
+		return mail.Record{}, errors.New("i5: mail title and body required")
+	}
 	wireID, err := store.AllocateMailWireIDTx(ctx, t, playerID, ns)
 	if err != nil {
 		return mail.Record{}, err
@@ -757,6 +802,11 @@ func (s Service) SaveStory(ctx context.Context, actor identity.ActorContext, sto
 		}
 		if next.StateVersion != old {
 			if err := s.Store.SaveStoryTx(txctx, scope.Tx, next, old); err != nil {
+				return err
+			}
+		}
+		if functionID, acknowledge := player.AcknowledgedFunction(guideID); acknowledge {
+			if err := s.Store.AcknowledgeFunctionAnnouncementTx(txctx, scope.Tx, actor.PlayerID, functionID, op.StartedAt); err != nil {
 				return err
 			}
 		}
@@ -904,7 +954,7 @@ func (s Service) ClaimMail(ctx context.Context, actor identity.ActorContext, add
 		var nested *GrantResult
 		if len(r.Attachments) > 0 {
 			if !r.Claimable(now) {
-				return errors.New("mail attachments are not claimable")
+				return ErrMailNotClaimable
 			}
 			lines := make([]grant.Line, 0, len(r.Attachments))
 			for _, a := range r.Attachments {
@@ -916,7 +966,7 @@ func (s Service) ClaimMail(ctx context.Context, actor identity.ActorContext, add
 				return err
 			}
 			boundOp = prepared
-			gr, err := s.SettleGrantTx(txctx, scope.Tx, actor, plan, boundOp, GrantTxOptions{AllowOverflowMail: false})
+			gr, err := s.SettleGrantTx(txctx, scope.Tx, actor, plan, boundOp, GrantTxOptions{DropOverflow: true})
 			if err != nil {
 				return err
 			}
@@ -1029,7 +1079,7 @@ func (s Service) ClaimMailBatch(ctx context.Context, actor identity.ActorContext
 				return err
 			}
 			boundOp = prepared
-			gr, err := s.SettleGrantTx(txctx, scope.Tx, actor, plan, boundOp, GrantTxOptions{AllowOverflowMail: false})
+			gr, err := s.SettleGrantTx(txctx, scope.Tx, actor, plan, boundOp, GrantTxOptions{DropOverflow: true})
 			if err != nil {
 				return err
 			}
@@ -1598,7 +1648,7 @@ func (s Service) AdminGrant(ctx context.Context, admin AdminOperator, target ide
 		return GrantResult{}, errors.New("admin grant command incomplete or audit unavailable")
 	}
 	plan := grant.Plan{PlayerID: target, Source: grant.SourceIdentity{Domain: "admin", Operation: "grant", BusinessKey: admin.ID + ":" + commandKey, PolicyVersion: policyVersion}, Lines: append([]grant.Line(nil), lines...)}
-	got, err := s.runGrant(ctx, identity.ActorContext{PlayerID: target}, plan, op, false)
+	got, err := s.runGrant(ctx, identity.ActorContext{PlayerID: target}, plan, op, false, true)
 	outcome := "COMMITTED"
 	if err != nil {
 		outcome = "REJECTED"

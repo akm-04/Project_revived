@@ -109,7 +109,7 @@ func decode(r receipt.Receipt, a Authority, q Import, fp [32]byte) (Result, erro
 		return Result{}, d.ErrConflict
 	}
 	var extra any
-	if dec.Decode(&extra) != io.EOF || out.Schema != resultSchema || out.Authority != a || out.Request != q || out.State.Validate() != nil || out.State.PlayerID != q.PlayerID || out.State.LogicalServerID != q.LogicalServerID || out.State.Charge != q.Charge || out.DecisionAt.IsZero() || !d.RevisionValid(out.ContentRevision) || out.State.UpdatedAt.After(out.DecisionAt) {
+	if dec.Decode(&extra) != io.EOF || out.Schema != resultSchema || out.Authority != a || out.Request != q || out.State.Validate() != nil || out.State.PlayerID != q.PlayerID || out.State.LogicalServerID != q.LogicalServerID || out.State.Charge != q.Charge || out.DecisionAt.IsZero() || !d.RevisionValid(out.ContentRevision) {
 		return Result{}, d.ErrConflict
 	}
 	pin, ok := r.OperationPolicyRefs.Get("content")
@@ -197,7 +197,7 @@ func (s Service) ImportManual(c context.Context, a Authority, q Import, op opera
 			out, e = decode(prior, a, q, fp)
 			return e
 		}
-		catalog, e := s.Content.PrivilegeCatalogTx(c, sc.Tx, rev)
+		catalog, _, _, e := tunedPrivilegeCatalog(c, s.Store, s.Content, sc.Tx, rev)
 		if e != nil {
 			return e
 		}
@@ -217,10 +217,12 @@ func (s Service) ImportManual(c context.Context, a Authority, q Import, op opera
 		next := d.State{PlayerID: q.PlayerID, LogicalServerID: q.LogicalServerID, Charge: q.Charge, VIPLevel: level, MonthlyState: q.MonthlyState, ContentRevision: rev, PolicyVersion: d.ManualPolicy, OriginClass: d.ManualClass, Issuer: a.Operator.ID, Reason: a.Operator.ReasonCode, StateVersion: 1, CreatedAt: at, UpdatedAt: at}
 		changed := true
 		if ok {
-			if old.Validate() != nil || old.LogicalServerID != q.LogicalServerID || old.UpdatedAt.After(at) || q.Charge < old.Charge || old.StateVersion == math.MaxInt64 {
+			if old.Validate() != nil || old.LogicalServerID != q.LogicalServerID || q.Charge < old.Charge || old.StateVersion == math.MaxInt64 {
 				return d.ErrConflict
 			}
-			oc, e := s.Content.PrivilegeCatalogTx(c, sc.Tx, old.ContentRevision)
+			// K3: keep timestamps monotone instead of refusing a stored forward fact.
+			next.UpdatedAt = gen.EffectiveObservation(at, old.UpdatedAt, old.CreatedAt)
+			oc, _, _, e := tunedPrivilegeCatalog(c, s.Store, s.Content, sc.Tx, old.ContentRevision)
 			if e != nil {
 				return e
 			}

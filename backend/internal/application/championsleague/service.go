@@ -88,14 +88,13 @@ func set(players []d.Player, p d.Player) []d.Player {
 	return append(players, p)
 }
 
-// ReportRetention is the league replay window (D25a private policy; the
-// accepted C5F five days, under the D9 Q6 ceiling).
-var ReportRetention = cd.Retention{ID: "C5F_LEAGUE_REPORT_RETENTION_V1", Version: 1, Window: 5 * 24 * time.Hour}
+// ReportRetention is the league replay window, the mode registry's row.
+var ReportRetention = *cd.MustMode(cd.ModeChampionsLeague).Retention
 
 func (s Service) savePlayer(c context.Context, t tx.Tx, p *d.Player, at time.Time) error {
 	old := p.Version
 	p.Version++
-	p.UpdatedAt = at
+	p.UpdatedAt = gen.EffectiveObservation(at, p.UpdatedAt, p.CreatedAt)
 	return s.Store.PutPlayerTx(c, t, *p, old)
 }
 func (s Service) rows(c context.Context, q tx.Queryer, pid identity.PlayerID, l d.Lineup, at time.Time) ([]map[string]any, map[string]any, error) {
@@ -158,7 +157,7 @@ func (s Service) enemy(c context.Context, q tx.Queryer, players []d.Player, p d.
 	if v.Face, e = s.face(c, q, p.ID); e != nil {
 		return v, e
 	}
-	v.Heroes, v.Pet, e = s.displayRows(c, q, p.ID, p.Defense, at)
+	v.Lineup, v.Heroes, v.Pet, e = s.displayRows(c, q, p.ID, p.Defense, at)
 	return v, e
 }
 
@@ -227,9 +226,6 @@ func (s Service) Execute(c context.Context, a identity.ActorContext, cmd Command
 		}
 		if due(cat, root, at) {
 			return d.ErrDue
-		}
-		if at.Before(root.UpdatedAt) {
-			return d.ErrConflict
 		}
 		players, e := s.Store.PlayersTx(c, sc.Tx, true)
 		if e != nil {
@@ -302,7 +298,7 @@ func (s Service) Execute(c context.Context, a identity.ActorContext, cmd Command
 			ordered := d.Order(players, p.Season, p.Group)
 			for i, x := range ordered {
 				r := int64(i + 1)
-				if x.ID == p.ID || r < v.Rank-cat.OpponentRadius || r > v.Rank+cat.OpponentRadius {
+				if x.ID != p.ID && !cat.CanChallenge(v.Rank, r) {
 					continue
 				}
 				ev := EnemyView{Player: x, Rank: r}
@@ -327,7 +323,7 @@ func (s Service) Execute(c context.Context, a identity.ActorContext, cmd Command
 			}
 			ordered := d.Order(players, p.Season, p.Group)
 			rank, er := d.Rank(ordered, p.ID), d.Rank(ordered, enemy.ID)
-			if er < rank-cat.OpponentRadius || er > rank+cat.OpponentRadius {
+			if !cat.CanChallenge(rank, er) {
 				return d.ErrRefused
 			}
 			p.Selected = enemy.ID
@@ -424,7 +420,7 @@ func (s Service) Execute(c context.Context, a identity.ActorContext, cmd Command
 		}
 		old := root.Version
 		root.Version++
-		root.UpdatedAt = at
+		root.UpdatedAt = gen.EffectiveObservation(at, root.UpdatedAt, root.CreatedAt)
 		if len(cat.LegacyTitles) > 0 && root.LegacyTitlesSince.IsZero() {
 			root.LegacyTitlesSince = at
 		}

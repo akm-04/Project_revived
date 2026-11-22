@@ -4,6 +4,11 @@ import "gxb.local/backend/v2/internal/domain/modes"
 
 func Cloud(kind int64) bool { return kind >= 40 && kind <= 42 }
 
+// VoyageMission is true for a trial group the stock Voyage (time_travel) window
+// lists: source time_travel.lua ids 11..21. Cloud City groups 40..42 are a
+// separate window and do not count as a Voyage mission.
+func VoyageMission(kind int64) bool { return kind >= 11 && kind <= 21 }
+
 type TrialGroup struct {
 	ID         int64   `json:"id"`
 	Nodes      []int64 `json:"nodes"`
@@ -99,6 +104,13 @@ func (c Catalog) AllowFaction(kind, tableID int64) bool {
 }
 
 func (p Progress) withTrialWin(kind, day int64) (Progress, error) {
+	return p.withTrialWins(kind, day, 1)
+}
+
+func (p Progress) withTrialWins(kind, day, count int64) (Progress, error) {
+	if count < 1 {
+		return p, ErrRefused
+	}
 	old := p.TrialWins[kind]
 	if old.Period > day {
 		return p, ErrRefused
@@ -108,7 +120,7 @@ func (p Progress) withTrialWin(kind, day int64) (Progress, error) {
 		wins[k] = v
 	}
 	counter := old.In(day)
-	counter.Used++
+	counter.Used += count
 	wins[kind] = counter
 	p.TrialWins = wins
 	return p, nil

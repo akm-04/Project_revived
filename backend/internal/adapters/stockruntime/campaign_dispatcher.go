@@ -2,16 +2,14 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
-	"net/http"
 
 	app "gxb.local/backend/v2/internal/application/campaign"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
 	d "gxb.local/backend/v2/internal/domain/campaign"
 	cd "gxb.local/backend/v2/internal/domain/combat"
+	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
-	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
@@ -47,7 +45,7 @@ func (o CampaignDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 		return *fail
 	}
 	if o.Service == nil {
-		return failCampaign(d.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	p, op := req.Envelope.Params, req.Envelope.Operation
 	bad := badHero("campaign_invalid_parameter")
@@ -212,28 +210,25 @@ func campaignResult(p map[string]any) (app.Result, bool) {
 		formation = nil
 		formationOK = (p["formation"] == nil || p["formation"] == "") && pet == 0
 	}
-	// assist_partner remains the existing unsupported rental input; awakening markers are validated by their owner.
+	assist, assistOK := topFloorInteger(p, "assist_partner", false)
 	awake, awakeOK := topFloorInteger(p, "awake_mission", false)
 	petAwake, petAwakeOK := topFloorInteger(p, "pet_awaken_mission", false)
 	allowed := onlyStockGameplayParams(p, "campaign_id", "campaign_type", "star", "formation", "pet_id", "awake_mission", "pet_awaken_mission", "assist_partner")
-	if !allowed || !idOK || !kindOK || !starOK || !petOK || !formationOK || !awakeOK || !petAwakeOK || awake < 0 || petAwake < 0 {
+	if !allowed || !idOK || !kindOK || !starOK || !petOK || !formationOK || !assistOK || !awakeOK || !petAwakeOK || awake < 0 || petAwake < 0 {
 		return app.Result{}, false
 	}
-	return app.Result{AwakeMission: awake, PetAwakeMission: petAwake, CampaignID: id, Type: kind, Star: star, Formation: formation, Pet: pet}, true
+	return app.Result{AwakeMission: awake, PetAwakeMission: petAwake, AssistPartner: assist, CampaignID: id, Type: kind, Star: star, Formation: formation, Pet: pet}, true
+}
+
+var campaignModeFailureRows = []failureRow{
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+	{match: d.ErrInvalid, class: failureMalformed, detail: "campaign_invalid_parameter"},
+	{match: cd.ErrLoanRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
 }
 
 func failCampaign(err error) httpedge.Response {
-	var conflict *receipt.ConflictError
-	if errors.Is(err, d.ErrInvalid) || errors.As(err, &conflict) {
-		return badHero("campaign_invalid_parameter")
-	}
-	if errors.Is(err, cd.ErrLoanRefused) {
-		return conflictRefusal(1)
-	}
-	if errors.Is(err, d.ErrRefused) {
-		return conflictRefusal(1)
-	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "campaign_unavailable"}}
+	return failureFromRows(campaignModeFailureRows, err)
 }
 
 // campaignSweep reads SweepWindow's forwarded stock params; UI-only compose keys do not affect awards.
@@ -246,5 +241,5 @@ func campaignSweep(p map[string]any) (app.Sweep, bool) {
 	_, compose := topFloorInteger(p, "itemComposeID", false)
 	_, need := topFloorInteger(p, "needItemComposeNum", false)
 	allowed := onlyStockGameplayParams(p, "campaign_id", "campaign_type", "sweep_num", "sweep_type", "awake_mission", "itemComposeID", "needItemComposeNum")
-	return app.Sweep{CampaignID: id, Type: kind, Count: count, Kind: method}, a && b && c && e && awake && compose && need && allowed && (kind == d.Normal || kind == d.Super) && count >= 1 && count <= 10 && (method == 1 || method == 2)
+	return app.Sweep{CampaignID: id, Type: kind, Count: count, Kind: method}, a && b && c && e && awake && compose && need && allowed && kind != d.Challenge && count >= 1 && count <= 10 && (method == 1 || method == 2)
 }

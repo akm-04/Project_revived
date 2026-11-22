@@ -35,29 +35,28 @@ func (Store) LockCopyTx(ctx context.Context, t tx.Tx, guildID, chapterID, copyID
 }
 
 func readCopy(ctx context.Context, q tx.Queryer, guildID, chapterID, copyID int64, lock bool) (d.Copy, bool, error) {
-	query := `SELECT run,waves::text,current_index,is_win,percent,COALESCE(holder_id,0),holder_stage,last_fight_time,start_fight_time,COALESCE(attempt_generation,''),COALESCE(settled_by,0),settled_index,COALESCE(settled_body::text,'')
+	query := `SELECT run,waves::text,current_index,is_win,percent,COALESCE(holder_id,0),holder_stage,last_fight_time,start_fight_time,COALESCE(attempt_generation,'')
 		FROM guild_campaign_copies WHERE guild_id=$1 AND chapter_id=$2 AND copy_id=$3`
 	if lock {
 		query += ` FOR UPDATE`
 	}
-	var waves, settledBody string
+	var waves string
 	copy := d.Copy{GuildID: guildID, ChapterID: chapterID, CopyID: copyID}
 	err := q.QueryRow(ctx, query, guildID, chapterID, copyID).
-		Scan(&copy.Run, &waves, &copy.CurrentIndex, &copy.Win, &copy.Percent, &copy.HolderID, &copy.HolderStage, &copy.LastFightTime, &copy.StartFightTime, &copy.AttemptGeneration, &copy.SettledBy, &copy.SettledIndex, &settledBody)
+		Scan(&copy.Run, &waves, &copy.CurrentIndex, &copy.Win, &copy.Percent, &copy.HolderID, &copy.HolderStage, &copy.LastFightTime, &copy.StartFightTime, &copy.AttemptGeneration)
 	if errors.Is(err, kernelstore.ErrNoRows) {
 		return d.Copy{}, false, nil
 	}
-	copy.Waves, copy.SettledBody = []byte(waves), []byte(settledBody)
+	copy.Waves = []byte(waves)
 	return copy, err == nil, err
 }
 
 func (Store) SaveCopyTx(ctx context.Context, t tx.Tx, copy d.Copy) error {
 	_, err := t.Exec(ctx, `UPDATE guild_campaign_copies SET waves=$4::jsonb,current_index=$5,is_win=$6,percent=$7,
-		holder_id=NULLIF($8,0),holder_stage=$9,last_fight_time=$10,start_fight_time=$11,attempt_generation=$12,
-		settled_by=NULLIF($13,0),settled_index=$14,settled_body=NULLIF($15,'')::jsonb
+		holder_id=NULLIF($8,0),holder_stage=$9,last_fight_time=$10,start_fight_time=$11,attempt_generation=$12
 		WHERE guild_id=$1 AND chapter_id=$2 AND copy_id=$3`,
 		copy.GuildID, copy.ChapterID, copy.CopyID, string(copy.Waves), copy.CurrentIndex, copy.Win, copy.Percent,
-		copy.HolderID, copy.HolderStage, copy.LastFightTime, copy.StartFightTime, copy.AttemptGeneration, copy.SettledBy, copy.SettledIndex, string(copy.SettledBody))
+		copy.HolderID, copy.HolderStage, copy.LastFightTime, copy.StartFightTime, copy.AttemptGeneration)
 	return err
 }
 
@@ -151,6 +150,13 @@ func (Store) UpsertDamageTx(ctx context.Context, t tx.Tx, guildID, chapterID, ru
 		best_damage=GREATEST(guild_campaign_damage.best_damage,EXCLUDED.best_damage)`,
 		guildID, chapterID, run, player, damage, at)
 	return err
+}
+
+// BestDamageTx is the player's highest recorded hit across the guild's runs.
+func (Store) BestDamageTx(ctx context.Context, q tx.Queryer, player identity.PlayerID) (int64, error) {
+	var damage int64
+	err := q.QueryRow(ctx, `SELECT COALESCE(MAX(best_damage),0) FROM guild_campaign_damage WHERE player_id=$1`, int64(player)).Scan(&damage)
+	return damage, err
 }
 
 func (Store) ListDamageTx(ctx context.Context, q tx.Queryer, guildID, chapterID, run int64, limit int) ([]app.DamageRow, error) {
@@ -338,7 +344,9 @@ func (Store) ApplicationTx(ctx context.Context, q tx.Queryer, guildID, chapterID
 func (Store) ApplicationsByAwardTx(ctx context.Context, q tx.Queryer, guildID, chapterID, run int64) ([]app.ApplicationRow, error) {
 	var raw string
 	err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(jsonb_build_object('player_id',player_id,'award_id',award_id,'applied',EXTRACT(EPOCH FROM applied_at)::bigint) ORDER BY applied_at,player_id),'[]'::jsonb)::text
-		FROM guild_campaign_applications WHERE guild_id=$1 AND chapter_id=$2 AND run=$3`, guildID, chapterID, run).Scan(&raw)
+		FROM guild_campaign_applications a WHERE a.guild_id=$1 AND a.chapter_id=$2 AND a.run=$3
+		AND EXISTS (SELECT 1 FROM guild_campaign_registrations r
+			WHERE r.guild_id=a.guild_id AND r.chapter_id=a.chapter_id AND r.player_id=a.player_id)`, guildID, chapterID, run).Scan(&raw)
 	if err != nil {
 		return nil, err
 	}

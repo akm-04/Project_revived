@@ -103,6 +103,60 @@ func TestSparseTournamentByesNeverBecomePlayerIdentities(t *testing.T) {
 	}
 }
 
+func TestTournamentQualifiersAreEmptyUntilGroupPlayDecides(t *testing.T) {
+	period := bracketFixture(32)
+	if err := period.LockRoster(operation.Context{EntropySeed: [32]byte{3}}); err != nil {
+		t.Fatal(err)
+	}
+	if qualifiers := period.Qualifiers(); len(qualifiers) != 0 {
+		t.Fatalf("undecided group play listed quarterfinalists: %v", qualifiers)
+	}
+}
+
+func TestTournamentQualifiersListEachDecidedRealPlayerOnce(t *testing.T) {
+	for _, size := range []int{7, 8, 32} {
+		period := bracketFixture(size)
+		if err := period.LockRoster(operation.Context{EntropySeed: [32]byte{3}}); err != nil {
+			t.Fatal(size, err)
+		}
+		for index, contest := range period.Contests {
+			if contest.Stage != 3 || contest.Complete {
+				continue
+			}
+			if err := period.CompleteContest(index, contest.Players[0]); err != nil {
+				t.Fatal(err)
+			}
+		}
+		if err := period.AdvanceBracket(4); err != nil {
+			t.Fatal(err)
+		}
+		qualifiers := period.Qualifiers()
+		seen := map[identity.PlayerID]bool{}
+		for _, player := range qualifiers {
+			if player == 0 || player > identity.PlayerID(size) {
+				t.Fatalf("size %d listed a BYE identity: %v", size, qualifiers)
+			}
+			if seen[player] {
+				t.Fatalf("size %d listed %d twice: %v", size, player, qualifiers)
+			}
+			seen[player] = true
+		}
+		expected := 0
+		for _, seats := range period.Groups {
+			real := 0
+			for _, player := range seats {
+				if player != 0 {
+					real++
+				}
+			}
+			expected += min(real, 2)
+		}
+		if len(qualifiers) != expected {
+			t.Fatalf("size %d qualifiers %v, want %d", size, qualifiers, expected)
+		}
+	}
+}
+
 func TestEntirelyForfeitedTournamentCancelsWithoutInventedChampion(t *testing.T) {
 	period := bracketFixture(32)
 	if err := period.LockRoster(operation.Context{EntropySeed: [32]byte{1}}); err != nil {

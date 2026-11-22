@@ -19,7 +19,7 @@ func (s Service) BackpackSnapshot(ctx context.Context, a identity.ActorContext, 
 		return BackpackSnapshot{}, e
 	}
 	body := BackpackSnapshot{}
-	res, e := s.Reads.Run(ctx, op, Profile(), tx.Options{Isolation: tx.RepeatableRead}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, sc tx.Scope) error {
+	res, e := s.Reads.Run(ctx, op, Profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, sc tx.Scope) error {
 		if e := s.Fence.FenceActorTx(ctx, sc.Tx, a, bound.DecisionAt()); e != nil {
 			return e
 		}
@@ -33,11 +33,6 @@ func (s Service) BackpackSnapshot(ctx context.Context, a identity.ActorContext, 
 		stacks, e := s.Values.ListStacksTx(ctx, sc.Tx, a.PlayerID)
 		if e != nil {
 			return e
-		}
-		for _, x := range stacks {
-			if bound.DecisionAt().Before(x.UpdatedAt) {
-				return ErrStale
-			}
 		}
 		spirits, e := s.InventoryTx(ctx, sc.Tx, InputScope{a.PlayerID, rev, bound.DecisionAt()})
 		if e != nil {

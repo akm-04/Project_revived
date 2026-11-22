@@ -9,14 +9,21 @@ import (
 )
 
 // Sweep applies C7 after the ordinary node/function admission. Crystal sweeps
-// pay for every run and leave cards alone (SweepWindow, D106).
-func (c Catalog) Sweep(p Progress, n Node, count, kind, day, vip int64, monthly bool) (Progress, error) {
+// pay for every run and leave cards alone (SweepWindow, D106). A trial group
+// sweep spends `count` of the group's daily uses (T2).
+func (c Catalog) Sweep(p Progress, n Node, count, kind, day, buys, vip int64, monthly bool) (Progress, error) {
 	if kind != 1 && kind != 2 || count < 1 || count > c.NormalSweepMax {
 		return p, ErrInvalid
 	}
+	g, trial := c.Group(n.Type)
 	limit := c.NormalSweepMax
-	if n.Type == Super {
+	switch {
+	case trial:
+		limit = c.TrialRemaining(p, g, day, buys)
+	case n.Type == Super:
 		limit = c.Remaining(p, n, day)
+	case n.Type != Normal:
+		return p, ErrInvalid
 	}
 	if vip < 0 || vip >= int64(len(c.VIP)) {
 		return p, ErrUnavailable
@@ -32,6 +39,13 @@ func (c Catalog) Sweep(p Progress, n Node, count, kind, day, vip int64, monthly 
 	if n.Type == Super {
 		var err error
 		state.Wins, err = state.Wins.Use(day, count, n.DailyLimit)
+		if err != nil {
+			return p, ErrRefused
+		}
+	}
+	if trial {
+		var err error
+		p, err = p.withTrialWins(n.Type, day, count)
 		if err != nil {
 			return p, ErrRefused
 		}

@@ -63,6 +63,26 @@ func StockHero(h character.Hero) (map[string]any, error) {
 	}
 	return out, nil
 }
+
+// StockHeroDetail is one Hero as the stock detail window indexes it: the
+// qualified effective appearance and the raw twice-awake stage, which the
+// roster format carries but the plain roster row does not.
+func StockHeroDetail(h character.Hero, appearance *AppearanceView, twiceAwakeStage *int64) (map[string]any, error) {
+	out, err := StockHero(h)
+	if err != nil {
+		return nil, err
+	}
+	if appearance != nil {
+		if err := applyAppearance(out, h, *appearance); err != nil {
+			return nil, err
+		}
+	}
+	if twiceAwakeStage != nil {
+		out["twice_awake_stage"] = *twiceAwakeStage
+	}
+	return out, nil
+}
+
 func StockHeroWithFumoLevels(h character.Hero, levels character.HeroFumoSlots) (map[string]any, error) {
 	out, err := StockHero(h)
 	if err != nil {
@@ -82,6 +102,18 @@ func StockHeroWithFumoLevels(h character.Hero, levels character.HeroFumoSlots) (
 	return out, nil
 }
 
+// illusionSkinWire maps the stored default -1 onto the selector the client's
+// skin tab indexes (skinDatas[illusion+1]); it reads skinDatas[0] on -1.
+func illusionSkinWire(h character.Hero, stored int64) int64 {
+	if stored >= 0 {
+		return stored
+	}
+	if h.TableID != h.OriginTableID {
+		return 1
+	}
+	return 0
+}
+
 func applyAppearance(out map[string]any, h character.Hero, appearance AppearanceView) error {
 	if out == nil || appearance.OwnerStateVersion <= 0 || appearance.OwnerStateVersion != h.StateVersion || appearance.CurrentSkinID < 0 || appearance.IllusionSkinID < -1 {
 		return errors.New("hero projection: invalid effective appearance")
@@ -98,7 +130,7 @@ func applyAppearance(out map[string]any, h character.Hero, appearance Appearance
 		skins[strconv.FormatInt(skin.ModelID, 10)] = value
 	}
 	out["current_skin_id"] = appearance.CurrentSkinID
-	out["illusion_skin_id"] = appearance.IllusionSkinID
+	out["illusion_skin_id"] = illusionSkinWire(h, appearance.IllusionSkinID)
 	out["skin_ids"] = skins
 	if h.Kind == character.NormalHero {
 		models := make([]string, 0, len(appearance.LIVE))

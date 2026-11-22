@@ -23,12 +23,16 @@ import (
 type BootstrapSpiritInventory interface {
 	InventoryForBootstrapTx(context.Context, tx.Queryer, identity.PlayerID, string, time.Time) ([]map[string]any, error)
 }
+type BackpackSortReader interface {
+	ReadBackpackSortTypeTx(context.Context, tx.Queryer, identity.PlayerID) (int64, error)
+}
 type BootstrapProjection struct {
 	Spirit       BootstrapSpiritInventory
 	Display      appi5.TxEffectivePlayerDisplayReader
 	Content      appi5.ContentRuntime
 	Privileges   appi5.PrivilegeSnapshotProvider
 	MaxHeroColor appi5.MaxHeroColorPolicyProvider
+	BackpackSort BackpackSortReader
 }
 
 func (BootstrapProjection) Name() string { return "i5.player-core-economy-mail-r5" }
@@ -56,7 +60,7 @@ func (b BootstrapProjection) Claims() []string {
 
 func (b BootstrapProjection) OverlayMID1(ctx context.Context, q tx.Queryer, actor identity.ActorContext, created bool, now time.Time, detail map[string]any) error {
 	pid := actor.PlayerID
-	if q == nil || !pid.Valid() || now.IsZero() || detail == nil || b.Content == nil || b.Privileges == nil || b.MaxHeroColor == nil {
+	if q == nil || !pid.Valid() || now.IsZero() || detail == nil || b.Content == nil || b.Privileges == nil || b.MaxHeroColor == nil || b.BackpackSort == nil {
 		return errors.New("invalid I5 R5 bootstrap projection input")
 	}
 	core, err := loadPlayerCore(ctx, q, pid)
@@ -99,7 +103,11 @@ func (b BootstrapProjection) OverlayMID1(ctx context.Context, q tx.Queryer, acto
 	if err != nil {
 		return err
 	}
-	backpackWire, err := backpackproj.Build(stacks)
+	sortType, err := b.BackpackSort.ReadBackpackSortTypeTx(ctx, q, pid)
+	if err != nil {
+		return err
+	}
+	backpackWire, err := backpackproj.Build(stacks, sortType)
 	if err != nil {
 		return err
 	}
@@ -215,6 +223,11 @@ func (b BootstrapProjection) overlayEconomy(ctx context.Context, q tx.Queryer, p
 		return fmt.Errorf("MID1 max-level policy: %w", err)
 	}
 	out["max_lev"] = activeProgression.MaxLevel()
+	glue, err := appi5.EffectiveScalarTx(ctx, q, Store{}, b.Content, pid, appi5.GlueResourceKey, now)
+	if err != nil {
+		return fmt.Errorf("MID1 glue floor: %w", err)
+	}
+	out[appi5.GlueResourceKey] = glue
 
 	var temporalRaw string
 	qsql := `SELECT COALESCE(jsonb_agg(jsonb_build_object('resource_key',r.resource_key,'stored_amount',r.stored_amount,'regen_anchor_at',r.regen_anchor_at,'policy_version',r.policy_version,'content_revision',COALESCE(r.content_revision,''),'state_version',r.state_version,'updated_at',r.updated_at) ORDER BY r.resource_key),'[]'::jsonb)::text FROM player_temporal_resources r WHERE r.player_id=$1`

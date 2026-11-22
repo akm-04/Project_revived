@@ -2,10 +2,8 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
 	app "gxb.local/backend/v2/internal/application/achievement"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
-	d "gxb.local/backend/v2/internal/domain/achievement"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -30,7 +28,7 @@ func (o AchievementDispatcher) Dispatch(c context.Context, req httpedge.Dispatch
 		return *fail
 	}
 	if o.Service == nil {
-		return failAchievement(d.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	if !onlyStockGameplayParams(req.Envelope.Params) {
 		return badHero("invalid_achievement_parameter")
@@ -56,11 +54,13 @@ func (o AchievementDispatcher) Dispatch(c context.Context, req httpedge.Dispatch
 	}
 	return okI5(map[string]any{"achieve_list": list, "base_info": map[string]any{"point_level": v.PointLevel, "total_points": v.TotalPoints, "rank": v.Rank, "award_status": v.AwardStatus}})
 }
+
+var achievementFailureRows = []failureRow{
+	{match: app.ErrNothingToClaim, class: failureRefusal, code: unprovenRefusalCode},
+}
+
 func failAchievement(e error) httpedge.Response {
-	if errors.Is(e, app.ErrNothingToClaim) {
-		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "achievement_nothing_to_claim"}}
-	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: e, Body: map[string]any{"error": "achievement_unavailable"}}
+	return failureFromRows(achievementFailureRows, e)
 }
 
 type AchievementObserver interface {

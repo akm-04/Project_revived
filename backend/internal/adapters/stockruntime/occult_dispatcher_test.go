@@ -2,6 +2,7 @@ package stockruntime
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -211,8 +212,12 @@ func TestOccultForgedParametersAre400(t *testing.T) {
 		"zero sub":              {2379, map[string]any{"campaign_id": int64(1), "sub_id": int64(0)}},
 		"unknown campaign type": {2366, map[string]any{"chapter_id": int64(1), "campaign_type": int64(3)}},
 	} {
-		if got := dispatcher.Dispatch(context.Background(), illusionRequest(request.mid, request.params, now)); got.HTTPStatus != 400 {
+		got := dispatcher.Dispatch(context.Background(), illusionRequest(request.mid, request.params, now))
+		if got.HTTPStatus != 400 {
 			t.Fatalf("%s: %d %#v", name, got.HTTPStatus, got.Body)
+		}
+		if request.mid == 2366 && got.Cause == nil {
+			t.Fatalf("%s: 2366 rejection must keep a cause", name)
 		}
 	}
 }
@@ -233,25 +238,75 @@ func TestOccultTeamCommandsReachTheService(t *testing.T) {
 	}
 }
 
-func TestOccultRoomRefusalsAreBareErrorCodes(t *testing.T) {
+func TestOccultRoomRefusalsCarryStockCodesAndCauses(t *testing.T) {
 	now := time.Unix(100, 0).UTC()
-	for _, refusal := range []error{sharedroom.ErrFull, sharedroom.ErrKicked, sharedroom.ErrNotOwner, sharedroom.ErrExpired, sr.ErrNotFound, economy.ErrInsufficientBalance} {
-		dispatcher := OccultDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: &occultStub{err: refusal}}
-		got := dispatcher.Dispatch(context.Background(), illusionRequest(2367, map[string]any{"room_id": int64(7)}, now))
-		if got.HTTPStatus != 409 || got.Body["error_code"] != int64(1) {
-			t.Fatalf("%v: %d %#v", refusal, got.HTTPStatus, got.Body)
+	cases := []struct {
+		name    string
+		refusal error
+		code    int64
+	}{
+		{"full", sharedroom.ErrFull, 35002},
+		{"kicked", sharedroom.ErrKicked, 35002},
+		{"not owner", sharedroom.ErrNotOwner, 35002},
+		{"expired", sharedroom.ErrExpired, 35002},
+		{"not found", sr.ErrNotFound, 35002},
+		{"held room", fmt.Errorf("%w: a held 1 room blocks a single room", d.ErrRefused), 35002},
+		{"no scrolls", economy.ErrInsufficientBalance, 35003},
+	}
+	causes := map[string]bool{}
+	for _, c := range cases {
+		stub := &occultStub{err: c.refusal}
+		dispatcher := OccultDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: stub}
+		params := map[string]any{"chapter_id": int64(2), "campaign_type": int64(1)}
+		if c.name == "held room" || c.name == "no scrolls" {
+			params["campaign_type"] = int64(2)
+		}
+		got := dispatcher.Dispatch(context.Background(), illusionRequest(2366, params, now))
+		if got.HTTPStatus != 409 || got.Body["error_code"] != c.code {
+			t.Fatalf("%s: %d %#v", c.name, got.HTTPStatus, got.Body)
+		}
+		if got.Cause == nil {
+			t.Fatalf("%s: refusal must keep an internal cause", c.name)
+		}
+		causes[got.Cause.Error()] = true
+	}
+	if len(causes) != len(cases) {
+		t.Fatalf("refusal causes must be distinct: %v", causes)
+	}
+}
+
+func TestOccultJoinAndTeamRefusalsCarryStockCodes(t *testing.T) {
+	now := time.Unix(100, 0).UTC()
+	cases := []struct {
+		name    string
+		mid     uint16
+		params  map[string]any
+		refusal error
+		code    int64
+	}{
+		{"join unavailable", 2367, map[string]any{"room_id": int64(9)}, d.ErrRoomUnavailable, occultRoomMissingCode},
+		{"level band", 2367, map[string]any{"room_id": int64(9)}, d.ErrLevelBand, occultLevelBandCode},
+		{"duplicate girl", 2383, map[string]any{"campaign_id": int64(2), "sub_id": int64(1), "partner_id": int64(10001002), "pos": int64(1)}, d.ErrDuplicateGirl, occultDuplicateGirlCode},
+		{"stage held", 2374, map[string]any{"campaign_id": int64(2), "sub_id": int64(1)}, d.ErrStageHeld, occultTeammateHeldCode},
+	}
+	for _, c := range cases {
+		stub := &occultStub{err: c.refusal}
+		dispatcher := OccultDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: stub}
+		got := dispatcher.Dispatch(context.Background(), illusionRequest(c.mid, c.params, now))
+		if got.HTTPStatus != 409 || got.Body["error_code"] != c.code || got.Cause == nil {
+			t.Fatalf("%s: %d %#v", c.name, got.HTTPStatus, got.Body)
 		}
 	}
 }
 
-func TestOccultRefusalIsBareErrorCodeAndFailureIs503(t *testing.T) {
+func TestOccultRefusalIsStockErrorCodeAndUnavailableIs503(t *testing.T) {
 	now := time.Unix(100, 0).UTC()
 	refused := OccultDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: &occultStub{err: d.ErrRefused}}
-	if got := refused.Dispatch(context.Background(), illusionRequest(2362, map[string]any{}, now)); got.HTTPStatus != 409 || got.Body["error_code"] != int64(1) {
-		t.Fatalf("%d %#v", got.HTTPStatus, got.Body)
+	if got := refused.Dispatch(context.Background(), illusionRequest(2362, map[string]any{}, now)); got.HTTPStatus != 409 || got.Body["error_code"] != int64(35002) || got.Cause == nil {
+		t.Fatalf("%d %#v %v", got.HTTPStatus, got.Body, got.Cause)
 	}
 	failed := OccultDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: &occultStub{err: d.ErrUnavailable}}
-	if got := failed.Dispatch(context.Background(), illusionRequest(2362, map[string]any{}, now)); got.HTTPStatus != 503 {
+	if got := failed.Dispatch(context.Background(), illusionRequest(2362, map[string]any{}, now)); got.HTTPStatus != 503 || got.Body["error_code"] != serverBusyCode {
 		t.Fatalf("%d %#v", got.HTTPStatus, got.Body)
 	}
 }

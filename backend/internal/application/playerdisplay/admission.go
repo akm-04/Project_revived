@@ -98,9 +98,6 @@ func (s Service) admit(c context.Context, a identity.ActorContext, q Command, o 
 		if e != nil {
 			return e
 		}
-		if at.Before(state.Basis.Profile.UpdatedAt) {
-			return ErrConflict
-		}
 		needed = q.Kind == "purchase" || q.Kind == "rename" && state.Basis.Profile.DisplayName != "" && state.Basis.Profile.DisplayName != q.Name
 		if !needed {
 			return nil

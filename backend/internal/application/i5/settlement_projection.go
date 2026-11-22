@@ -9,6 +9,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/player"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -24,6 +25,17 @@ type SettlementProjection struct {
 
 func (p SettlementProjection) Empty() bool {
 	return len(p.Economy) == 0 && len(p.NewFunctionIDs) == 0 && len(p.ExtraDrops) == 0
+}
+
+// RecordChanges reports the projected absolute balances and opened functions to the request change set (F17), so the
+// decorator writes the wire keys instead of the replying owner.
+func (p SettlementProjection) RecordChanges(ctx context.Context) {
+	for key, amount := range p.Economy {
+		changes.Balance(ctx, key, amount)
+	}
+	for _, id := range p.NewFunctionIDs {
+		changes.FunctionOpened(ctx, id)
+	}
 }
 
 func (s Service) projectSettlement(ctx context.Context, actor identity.ActorContext, grants []GrantResult, op operation.Context, recognizedReplay bool) (SettlementProjection, error) {

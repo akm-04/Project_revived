@@ -6,8 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"gxb.local/backend/v2/internal/application/broadcast"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	i5 "gxb.local/backend/v2/internal/application/i5"
+	"gxb.local/backend/v2/internal/application/playerdirectory"
 	"gxb.local/backend/v2/internal/application/playerroot"
 	"gxb.local/backend/v2/internal/domain/character"
 	dorm "gxb.local/backend/v2/internal/domain/dormhouse"
@@ -34,6 +36,7 @@ const (
 	Exchange = "DORM_EXCHANGE"
 	Start    = "DORM_START"
 	Finish   = "DORM_FINISH"
+	BuyGlue  = "DORM_BUY_GLUE"
 )
 
 var ErrUnavailable = errors.New("dorm: unavailable or unresolved admission")
@@ -46,15 +49,52 @@ var ErrProof = errors.New("dorm: invalid operation proof")
 type Command struct {
 	Family                                          string
 	HouseID, ItemID, Amount, Floor, Position, Index int64
+	HostID, CommentID                               int64
+	HouseName, Content                              string
 	Partners                                        []int64
 	Furniture                                       map[string]string
 }
 
+func (c Command) noNestedFields() bool {
+	return c.ItemID == 0 && c.Amount == 0 && c.Floor == 0 && c.Position == 0 && c.Index == 0 && len(c.Partners) == 0 && c.Furniture == nil
+}
+
 func (c Command) Validate() error {
-	if c.HouseID < 0 || c.HouseID > dorm.MaxWireID || c.ItemID < 0 || c.ItemID > dorm.MaxWireID {
+	if c.HouseID < 0 || c.HouseID > dorm.MaxWireID || c.ItemID < 0 || c.ItemID > dorm.MaxWireID || c.HostID < 0 || c.HostID > dorm.MaxWireID || c.CommentID < 0 || c.CommentID > dorm.MaxWireID {
+		return dorm.ErrInvalidFacts
+	}
+	if !socialFamily(c.Family) && (c.HostID != 0 || c.CommentID != 0 || c.HouseName != "" || c.Content != "") {
 		return dorm.ErrInvalidFacts
 	}
 	switch c.Family {
+	case ChangeName:
+		if c.HouseID <= 0 || c.HostID != 0 || c.CommentID != 0 || c.Content != "" || !c.noNestedFields() {
+			return dorm.ErrInvalidFacts
+		}
+	case HideHouse:
+		if c.HouseID <= 0 || c.CommentID != 0 || c.HouseName != "" || c.Content != "" || !c.noNestedFields() {
+			return dorm.ErrInvalidFacts
+		}
+	case PraiseHouse:
+		if c.HouseID <= 0 || c.HostID <= 0 || c.CommentID != 0 || c.HouseName != "" || c.Content != "" || !c.noNestedFields() {
+			return dorm.ErrInvalidFacts
+		}
+	case CommentHouse:
+		if c.HouseID <= 0 || c.HostID <= 0 || c.Content == "" || c.CommentID != 0 || c.HouseName != "" || !c.noNestedFields() {
+			return dorm.ErrInvalidFacts
+		}
+	case PraiseComment:
+		if c.HouseID <= 0 || c.HostID <= 0 || c.CommentID <= 0 || c.HouseName != "" || c.Content != "" || !c.noNestedFields() {
+			return dorm.ErrInvalidFacts
+		}
+	case DeleteComment:
+		if c.HouseID <= 0 || c.HostID != 0 || c.CommentID <= 0 || c.HouseName != "" || c.Content != "" || !c.noNestedFields() {
+			return dorm.ErrInvalidFacts
+		}
+	case BuyGlue:
+		if c.HouseID != 0 || c.ItemID != 0 || c.Amount != 0 || c.Floor != 0 || c.Position != 0 || c.Index != 0 || len(c.Partners) != 0 || c.Furniture != nil {
+			return dorm.ErrInvalidFacts
+		}
 	case Open:
 		if c.ItemID <= 0 || c.Floor <= 0 || c.Position < 1 || c.Position > 6 {
 			return dorm.ErrInvalidFacts
@@ -178,25 +218,53 @@ type CostPort interface {
 	ApplyMaterialDebitTx(context.Context, tx.Tx, *i5.PreparedMaterialDebit) (i5.MaterialDebitResult, error)
 }
 type Service struct {
-	Timed    gen.TimedRunner
-	Reads    tx.Runner
-	Heroes   HeroPort
-	Owner    OwnerPort
-	Content  ContentPort
-	Players  playerroot.TxLocker
-	Fence    ActorFence
-	Costs    CostPort
-	Values   ValuePort
-	EXP      CharacterEXPOwner
-	Exchange i5.TxMaterialExchange
-	Receipts receipt.Store
+	Timed          gen.TimedRunner
+	Reads          tx.Runner
+	Heroes         HeroPort
+	Awakening      RawAwakeningObserver
+	Owner          OwnerPort
+	Content        ContentPort
+	Players        playerroot.TxLocker
+	Fence          ActorFence
+	Costs          CostPort
+	Values         ValuePort
+	EXP            CharacterEXPOwner
+	Exchange       i5.TxMaterialExchange
+	Receipts       receipt.Store
+	ReceiptRead    receipt.Reader
+	GluePurchases  GluePurchaseOwner
+	GlueValues     i5.TxGluePurchase
+	GluePrivileges GluePrivilegeReader
+	Social         SocialStore
+	Directory      playerdirectory.TxDiscoveryReader
+	Moderation     ModerationReader
+	Broadcast      broadcast.Emitter
 }
 
 func (s Service) complete() bool {
-	return s.Timed.Binder.Time != nil && s.Timed.Runner.DB != nil && s.Reads.DB != nil && s.Heroes != nil && s.Owner != nil && s.Content != nil && s.Players != nil && s.Fence != nil && s.Costs != nil && s.Values != nil && s.EXP != nil && s.Exchange != nil && s.Receipts != nil
+	return s.Timed.Binder.Time != nil && s.Timed.Runner.DB != nil && s.Reads.DB != nil && s.Heroes != nil && s.Awakening != nil && s.Owner != nil && s.Content != nil && s.Players != nil && s.Fence != nil && s.Costs != nil && s.Values != nil && s.EXP != nil && s.Exchange != nil && s.Receipts != nil && s.Broadcast != nil
+}
+
+// Social commands do not touch Character progression, materials or exchange, so
+// they require only the ports their transaction uses.
+func (s Service) socialComplete() bool {
+	return s.Timed.Binder.Time != nil && s.Timed.Runner.DB != nil && s.Reads.DB != nil && s.Heroes != nil && s.Awakening != nil && s.Owner != nil && s.Content != nil && s.Players != nil && s.Fence != nil && s.Values != nil && s.Receipts != nil && s.Social != nil && s.Directory != nil && s.Moderation != nil
 }
 func receiptID(d Admission) receipt.Identity {
 	return receipt.Identity{OwnerKind: "player", OwnerKey: strconv.FormatInt(d.Actor.Player, 10), Domain: "dorm-house", Operation: d.Command.Family, SemanticKey: d.Operation.ID.String()}
+}
+
+// bindModerationPolicy retains the published corpus identity on the receipt,
+// as the public-profile writers do.
+func bindModerationPolicy(policies policy.Set, policyID string) (policy.Set, error) {
+	if value, ok := policies.Get("profile-moderation"); ok {
+		if value != policyID {
+			return policies, ErrProof
+		}
+		return policies, nil
+	}
+	refs := append(policies.Refs(), policy.Ref{Name: "profile-moderation", Version: policyID})
+	return policy.NewSet(refs...)
 }
 func fingerprint(c Command) ([32]byte, error) {
 	return receipt.FingerprintRequest(map[string]any{"command": c, "policy": LifecyclePolicy})
@@ -267,6 +335,9 @@ func (s Service) putReceipt(ctx context.Context, t tx.Tx, d Admission, out Resul
 // The population lock makes the enumeration a closed plan; no later discovery
 // of Hero keys occurs after Dorm/value locks or mutation.
 func (s Service) lockPlan(ctx context.Context, t tx.Tx, a identity.ActorContext, c Command, at time.Time) error {
+	if socialFamily(c.Family) {
+		return s.socialLockPlan(ctx, t, a, c, at)
+	}
 	if e := s.Fence.FenceActorTx(ctx, t, a, at); e != nil {
 		if e.Error() == "actor liveness fence rejected" {
 			return ErrActor
@@ -297,7 +368,11 @@ func (s Service) lockPlan(ctx context.Context, t tx.Tx, a identity.ActorContext,
 	return e
 }
 func (s Service) Command(ctx context.Context, a identity.ActorContext, c Command, op operation.Context) (Result, error) {
-	if !s.complete() || c.Validate() != nil || op.ID.IsZero() || op.StartedAt.IsZero() {
+	complete := s.complete()
+	if socialFamily(c.Family) {
+		complete = s.socialComplete()
+	}
+	if !complete || c.Validate() != nil || op.ID.IsZero() || op.StartedAt.IsZero() {
 		return Result{}, dorm.ErrUnqualified
 	}
 	timed, e := s.Timed.Binder.Bind(ctx, op)
@@ -460,7 +535,20 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 			return ErrUnavailable
 		}
 		out = Result{Schema: ResultSchema, Command: d.Command, Actor: d.Actor, OperationID: d.Operation.ID, Entropy: d.Operation.EntropySeed, ContentRevision: d.ContentRevision, DecisionAt: d.DecisionAt}
-		out.Body, e = s.apply(ctx, sc.Tx, a, d)
+		words := []string(nil)
+		if d.Command.Family == ChangeName || d.Command.Family == CommentHouse {
+			moderation, err := s.Moderation.ModerationPolicyTx(ctx, sc.Tx, d.ContentRevision)
+			if err != nil {
+				return err
+			}
+			bound, err := bindModerationPolicy(d.Operation.Policies, moderation.PolicyID)
+			if err != nil {
+				return err
+			}
+			d.Operation.Policies = bound
+			words = moderation.Words
+		}
+		out.Body, e = s.apply(ctx, sc.Tx, a, d, words)
 		if e != nil {
 			return e
 		}
@@ -534,7 +622,7 @@ func (s Service) execute(ctx context.Context, d Admission) (Result, error) {
 // Infrastructure/proof/unknown failures retain PENDING; only definite domain or
 // lifecycle rejection may advance a lane without its economic effect.
 func terminalRejection(e error) bool {
-	for _, x := range []error{dorm.ErrUnqualified, dorm.ErrInvalidFacts, dorm.ErrInvalidLayout, dorm.ErrInUse, dorm.ErrCooldown, dorm.ErrStaleTime, economy.ErrInsufficientBalance, ErrStale, ErrRetired, ErrActor} {
+	for _, x := range []error{dorm.ErrGlueDailyLimit, i5.ErrGluePurchaseLimit, dorm.ErrUnqualified, dorm.ErrInvalidFacts, dorm.ErrInvalidLayout, dorm.ErrInUse, dorm.ErrCooldown, dorm.ErrStaleTime, dorm.ErrHidden, economy.ErrInsufficientBalance, ErrStale, ErrRetired, ErrActor} {
 		if errors.Is(e, x) {
 			return true
 		}

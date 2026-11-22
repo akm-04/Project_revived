@@ -45,7 +45,9 @@ func (m *memoryStore) SaveJournal(_ context.Context, rows []JournalRow) error {
 	m.journal = append(m.journal, rows...)
 	return nil
 }
-func (m *memoryStore) PurgeExpired(context.Context, time.Time, int) (int64, error) { return 0, nil }
+func (m *memoryStore) PurgeExpired(context.Context, time.Time, int, int) (int64, error) {
+	return 0, nil
+}
 
 type tokenResolver map[string]string
 
@@ -104,6 +106,31 @@ func TestIngestRedactsSecretsInClientRows(t *testing.T) {
 	}
 }
 
+// I85_CLIENT_LOG_INGEST_V1 R8: the capability the upload presented is a secret;
+// it never reaches persisted row text, even as a bare URL path segment.
+func TestIngestRedactsThePresentedCapability(t *testing.T) {
+	service, store, _ := newService()
+	capability := issue(t, service)
+	logURL := "http://api.test/client-log/" + capability
+	payload := deflate(t, `[{"log":"post failed `+logURL+`","dump":"log_url=`+logURL+`","note":"`+logURL+`","keep":"value"}]`)
+	service.Ingest(context.Background(), UploadRequest{Capability: capability, Kind: domain.KindErrorLog, Payload: payload})
+	row := store.uploads[0].Rows[0]
+	if row.Log != "post failed http://api.test/client-log/"+observability.Redacted {
+		t.Fatalf("log=%q", row.Log)
+	}
+	if row.Dump != "log_url="+observability.Redacted || row.Extras["keep"] != "value" {
+		t.Fatalf("dump=%q extras=%v", row.Dump, row.Extras)
+	}
+	if note, _ := row.Extras["note"].(string); note != "http://api.test/client-log/"+observability.Redacted {
+		t.Fatalf("extras=%v", row.Extras)
+	}
+	other, otherStore, _ := newService()
+	other.Ingest(context.Background(), UploadRequest{Capability: "x", Kind: domain.KindErrorLog, Payload: deflate(t, `[{"log":"x marks the spot"}]`)})
+	if got := otherStore.uploads[0].Rows[0].Log; got != "x marks the spot" {
+		t.Fatalf("malformed segment mangled text: %q", got)
+	}
+}
+
 func TestIngestNeverGuessesAnOwner(t *testing.T) {
 	service, store, clock := newService()
 	capability := issue(t, service)
@@ -114,7 +141,7 @@ func TestIngestNeverGuessesAnOwner(t *testing.T) {
 	service.Ingest(context.Background(), UploadRequest{Capability: capability, Kind: domain.KindErrorLog, Payload: payload})
 	want := []Attribution{UnattributedMissing, UnattributedUnknown, UnattributedExpired}
 	for index, upload := range store.uploads {
-		if upload.Attribution != want[index] || upload.Owner != nil || upload.Class != domain.Anomaly {
+		if upload.Attribution != want[index] || upload.Owner != nil || upload.Class != domain.Anomaly || upload.Rows[0].Class != domain.Anomaly {
 			t.Errorf("upload %d=%+v", index, upload)
 		}
 	}
@@ -139,7 +166,7 @@ func TestBadInputIsQuarantinedAndAcknowledged(t *testing.T) {
 	cases := map[string]UploadRequest{
 		QuarantineBadCompression:     {Capability: capability, Kind: domain.KindErrorLog, Payload: []byte("plain")},
 		QuarantineBadRows:            {Capability: capability, Kind: domain.KindErrorLog, Payload: deflate(t, `"text"`)},
-		QuarantineMalformedMultipart: {Capability: capability, Malformed: QuarantineMalformedMultipart},
+		QuarantineMalformedMultipart: {Capability: capability, Malformed: QuarantineMalformedMultipart, RawBody: []byte("short malformed body")},
 	}
 	for reason, request := range cases {
 		store.uploads = nil
@@ -147,9 +174,24 @@ func TestBadInputIsQuarantinedAndAcknowledged(t *testing.T) {
 			t.Fatalf("%s status=%d", reason, status)
 		}
 		upload := store.uploads[0]
-		if upload.QuarantineReason != reason || upload.Class != domain.Anomaly || !bytes.Equal(upload.Attachment, request.Payload) {
+		raw := request.Payload
+		if request.RawBody != nil {
+			raw = request.RawBody
+		}
+		if upload.QuarantineReason != reason || upload.Class != domain.Anomaly || !bytes.Equal(upload.Attachment, raw) {
 			t.Errorf("%s upload=%+v", reason, upload)
 		}
+	}
+}
+
+// I85_CLIENT_LOG_INGEST_V1 R8: a malformed raw record is redacted like parsed rows.
+func TestMalformedRawRecordRedactsSecrets(t *testing.T) {
+	service, store, _ := newService()
+	capability := issue(t, service)
+	service.Ingest(context.Background(), UploadRequest{Capability: capability, Malformed: QuarantineMalformedMultipart, RawBody: []byte("token=abc123 log_url=" + capability)})
+	stored := string(store.uploads[0].Attachment)
+	if strings.Contains(stored, "abc123") || strings.Contains(stored, capability) {
+		t.Fatalf("raw record leaked a secret: %q", stored)
 	}
 }
 
@@ -189,13 +231,14 @@ func TestJournalRowsRedactAndClassify(t *testing.T) {
 	journal.Record(observability.RequestRecord{Disposition: observability.RequestDispatched, MID: 7, HasMID: true, HTTPStatus: 503, Cause: errors.New("dial: password=hunter2"), Actor: observability.RequestActor{AccountUID: "u1", SessionID: "s"}})
 	journal.Record(observability.RequestRecord{Disposition: observability.RequestUnknownMID, MID: 65000, HasMID: true, HTTPStatus: 404, Raw: []byte("payload=%7B%22mid%22%3A65000%2C%22token%22%3A%22abc%22%7D")})
 	journal.Record(observability.RequestRecord{Disposition: observability.RequestDispatched, MID: 7, HasMID: true, HTTPStatus: 200, Cause: errors.New("ignored")})
+	journal.Record(observability.RequestRecord{Disposition: observability.RequestDispatched, MID: 1, HasMID: true, HTTPStatus: 503, Cause: errors.New("log post failed log_url=https://api.test/client-log/secret")})
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 	journal.Run(ctx)
-	if len(store.journal) != 3 {
+	if len(store.journal) != 4 {
 		t.Fatalf("rows=%d", len(store.journal))
 	}
-	failure, unknown, ok := store.journal[0], store.journal[1], store.journal[2]
+	failure, unknown, ok, logURL := store.journal[0], store.journal[1], store.journal[2], store.journal[3]
 	if failure.Outcome != domain.OutcomeServerError || failure.Class != domain.Error || failure.Cause != "dial: password=[REDACTED]" || failure.ErrorClass != "*errors.errorString" || failure.Owner.AccountUID != "u1" {
 		t.Fatalf("failure=%+v", failure)
 	}
@@ -204,5 +247,46 @@ func TestJournalRowsRedactAndClassify(t *testing.T) {
 	}
 	if ok.Outcome != domain.OutcomeOK || ok.Cause != "" || ok.Class != domain.Routine {
 		t.Fatalf("ok=%+v", ok)
+	}
+	if logURL.Cause != "log post failed log_url=[REDACTED]" {
+		t.Fatalf("log url cause=%q", logURL.Cause)
+	}
+}
+
+func TestJournalKeepsMultipartEnvelopeWithoutFormUnescaping(t *testing.T) {
+	store := &memoryStore{}
+	journal := NewJournal(store, nil)
+	const envelope = "--x\r\nContent-Disposition: form-data; name=\"file_path\"\r\n\r\n/a+b%2Fc\r\n"
+	journal.Record(observability.RequestRecord{Disposition: observability.RequestUndecodable, Raw: []byte(envelope)})
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	journal.Run(ctx)
+	if got := string(store.journal[0].RawEnvelope); got != envelope {
+		t.Fatalf("raw=%q", got)
+	}
+}
+
+// A-048: uploads that resolve to no grant share one bucket, so a poster without
+// a capability cannot store without bound.
+func TestIngestRateLimitsUnattributedUploads(t *testing.T) {
+	service, store, _ := newService()
+	payload := deflate(t, `{}`)
+	for index := range domain.UploadsPerMinute {
+		request := UploadRequest{Capability: strings.Repeat("A", 42) + string(rune('a'+index%26)), Kind: domain.KindErrorLog, Payload: payload}
+		if status := service.Ingest(context.Background(), request); status != http.StatusOK {
+			t.Fatalf("upload %d status=%d", index, status)
+		}
+	}
+	for _, capability := range []string{"", strings.Repeat("B", 43)} {
+		if status := service.Ingest(context.Background(), UploadRequest{Capability: capability, Kind: domain.KindErrorLog, Payload: payload}); status != http.StatusTooManyRequests {
+			t.Fatalf("capability %q over limit status=%d", capability, status)
+		}
+	}
+	if len(store.uploads) != domain.UploadsPerMinute {
+		t.Fatalf("stored=%d", len(store.uploads))
+	}
+	attributed := UploadRequest{Capability: issue(t, service), Kind: domain.KindErrorLog, Payload: payload}
+	if status := service.Ingest(context.Background(), attributed); status != http.StatusOK {
+		t.Fatalf("attributed upload shares the unattributed bucket: status=%d", status)
 	}
 }

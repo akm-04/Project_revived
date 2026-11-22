@@ -1,0 +1,466 @@
+{
+ "background": [],
+ "content": [
+  "content_library_input_catalogs"
+ ],
+ "contracts": [
+  {
+   "count": 1,
+   "file": "docs/architecture/CUMULATIVE_CONTENT_GENERATION_LOCK.json"
+  },
+  {
+   "count": 23,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 10,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 24,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_10A_EVENT_CENTRE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10H_H2_STRUCTURED_KINDS.md"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11_GIRLS_LOG_V1.md"
+  },
+  {
+   "count": 9,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_ADVENTURE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_ADVENTURE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 24,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V3.json"
+  },
+  {
+   "count": 23,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [
+  "observing"
+ ],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/library_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {
+   "INTIMACY_IMPROVED": {
+    "missions": [
+     124
+    ],
+    "stages": [
+     "I9-10"
+    ]
+   }
+  },
+  "emits": [
+   "INTIMACY_IMPROVED"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I7C2B_LIBRARY_INPUTS"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "player_library_admissions": [
+    "librarystore.LockAdmissionTx"
+   ],
+   "player_library_heroes": [
+    "librarystore.LockHeroTx"
+   ],
+   "player_library_roots": [
+    "librarystore.LockRootTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "player_library_admissions",
+   "player_library_heroes",
+   "player_library_roots",
+   "players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [
+  "OverlayRosterTx"
+ ],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/library_dispatcher.go",
+    "line": 26
+   },
+   "mid": 72,
+   "name": "ALBUM_PARTNER_UNLOCK"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/library_dispatcher.go",
+    "line": 26
+   },
+   "mid": 835,
+   "name": "SET_BOARD_HERO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/library_dispatcher.go",
+    "line": 26
+   },
+   "mid": 836,
+   "name": "GET_LIBRARY_INFOS"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/library_dispatcher.go",
+    "line": 26
+   },
+   "mid": 837,
+   "name": "READ_DIALOG"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/library_dispatcher.go",
+    "line": 26
+   },
+   "mid": 838,
+   "name": "GET_HERO_DIALOG"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/library_dispatcher.go",
+    "line": 26
+   },
+   "mid": 839,
+   "name": "BUY_GIFT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/library_dispatcher.go",
+    "line": 26
+   },
+   "mid": 840,
+   "name": "ADD_FAVOR"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/library_dispatcher.go",
+    "line": 26
+   },
+   "mid": 841,
+   "name": "GET_PARTNER_MISSION"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/library_dispatcher.go",
+    "line": 26
+   },
+   "mid": 842,
+   "name": "GET_HERO_ACT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/library_dispatcher.go",
+    "line": 26
+   },
+   "mid": 843,
+   "name": "GET_HERO_TALK_AWARD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/library_dispatcher.go",
+    "line": 26
+   },
+   "mid": 844,
+   "name": "GET_HERO_ACT_AWARD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/library_dispatcher.go",
+    "line": 26
+   },
+   "mid": 845,
+   "name": "GET_HERO_MISSION_AWARD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/library_dispatcher.go",
+    "line": 26
+   },
+   "mid": 846,
+   "name": "ACCEPT_HERO_MISSION"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/library_dispatcher.go",
+    "line": 26
+   },
+   "mid": 847,
+   "name": "ABANDON_MISSION"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/library_dispatcher.go",
+    "line": 26
+   },
+   "mid": 851,
+   "name": "GET_SCHOOL_STORY_REWARD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/library_dispatcher.go",
+    "line": 26
+   },
+   "mid": 852,
+   "name": "HERO_FEED"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/library_dispatcher.go",
+    "line": 26
+   },
+   "mid": 853,
+   "name": "GET_FEED_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/library_dispatcher.go",
+    "line": 26
+   },
+   "mid": 854,
+   "name": "SAVE_HERO_FEED"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/library_dispatcher.go",
+    "line": 26
+   },
+   "mid": 855,
+   "name": "GET_CG_AWARD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/library_dispatcher.go",
+    "line": 26
+   },
+   "mid": 856,
+   "name": "UNLOCK_BG"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/library_dispatcher.go",
+    "line": 26
+   },
+   "mid": 857,
+   "name": "SET_BG"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/library_dispatcher.go",
+    "line": 26
+   },
+   "mid": 2784,
+   "name": "ALBUM_SPECIAL_COLLECT_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/library_dispatcher.go",
+    "line": 26
+   },
+   "mid": 2785,
+   "name": "ALBUM_SPECIAL_COLLECT_REWARD"
+  }
+ ],
+ "name": "librarylocal",
+ "pushes": [
+  {
+   "file": "internal/adapters/stockruntime/library_notice.go",
+   "kind": "notice",
+   "line": 74,
+   "namespace": "rt.NoticeNamespaceGeneric",
+   "notice_type": 20,
+   "parent_mid": 36854,
+   "roles": [
+    "Role",
+    "World"
+   ]
+  },
+  {
+   "file": "internal/adapters/stockruntime/library_notice.go",
+   "kind": "notice",
+   "line": 222,
+   "namespace": "rt.NoticeNamespaceGeneric",
+   "notice_type": 24,
+   "parent_mid": 36854,
+   "roles": [
+    "Role",
+    "World"
+   ]
+  }
+ ],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore",
+  "internal/adapters/postgres/librarystore"
+ ],
+ "tables": {
+  "owned": [
+   "library_hero_battle_counts",
+   "library_hero_dialogue_counts",
+   "player_library_act_awards",
+   "player_library_admissions",
+   "player_library_backgrounds",
+   "player_library_cg_claims",
+   "player_library_dialogs",
+   "player_library_hero_logs",
+   "player_library_heroes",
+   "player_library_partner_missions",
+   "player_library_roots",
+   "player_library_talk_claims"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "content_library_input_catalogs",
+   "gameplay_contexts",
+   "gxb_content_activation",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "library_hero_dialogue_counts",
+   "player_hero_roots",
+   "player_hero_skin_entitlements",
+   "player_heroes",
+   "player_item_stacks",
+   "player_library_act_awards",
+   "player_library_admissions",
+   "player_library_backgrounds",
+   "player_library_cg_claims",
+   "player_library_dialogs",
+   "player_library_hero_logs",
+   "player_library_heroes",
+   "player_library_partner_missions",
+   "player_library_roots",
+   "player_library_talk_claims",
+   "players"
+  ],
+  "written": [
+   "gxb_operation_receipts",
+   "library_hero_battle_counts",
+   "library_hero_dialogue_counts",
+   "player_library_act_awards",
+   "player_library_admissions",
+   "player_library_backgrounds",
+   "player_library_cg_claims",
+   "player_library_dialogs",
+   "player_library_hero_logs",
+   "player_library_heroes",
+   "player_library_partner_missions",
+   "player_library_roots",
+   "player_library_talk_claims"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [
+   "i9_10b_library.json"
+  ],
+  "unit": [
+   "battle_count_native_test.go",
+   "command_reward_test.go",
+   "commands_log_test.go",
+   "commands_mission_test.go",
+   "inputs_test.go",
+   "journal_policy_native_test.go",
+   "notice_test.go",
+   "partner_missions_test.go",
+   "roll_policy_test.go"
+  ]
+ }
+}

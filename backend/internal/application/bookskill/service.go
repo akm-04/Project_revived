@@ -53,7 +53,7 @@ type Command struct {
 func (c Command) Validate() error {
 	switch c.Family {
 	case Start, Cancel, Speed, Confirm:
-		if c.Type != 1 && c.Type != 3 && c.Type != 4 {
+		if c.Type != 1 && c.Type != 3 && c.Type != 4 && !book.ExtensionBuilding(c.Type) {
 			return book.ErrInvalid
 		}
 	case Learn, GiveUp, SpeedSkill:
@@ -145,6 +145,12 @@ type ValuePort interface {
 	ReadScalarTx(context.Context, tx.Queryer, identity.PlayerID, string) (economy.ScalarBalance, bool, error)
 	ListStacksTx(context.Context, tx.Queryer, identity.PlayerID) ([]economy.StackState, error)
 }
+type MakeInfoPort interface {
+	MakeInfoTx(context.Context, tx.Queryer, identity.PlayerID, time.Time) (map[string]any, map[string]any, error)
+}
+type RecycleInfoPort interface {
+	RecycleInfoTx(context.Context, tx.Queryer, identity.PlayerID, string, time.Time) (map[string]any, error)
+}
 type GrantPort interface {
 	SettleGrantTx(context.Context, tx.Tx, identity.ActorContext, grant.Plan, operation.Context, i5.GrantTxOptions) (i5.GrantResult, error)
 }
@@ -153,22 +159,24 @@ type CostPort interface {
 	ApplyMaterialDebitTx(context.Context, tx.Tx, *i5.PreparedMaterialDebit) (i5.MaterialDebitResult, error)
 }
 type Service struct {
-	Timed    gen.TimedRunner
-	Reads    tx.Runner
-	Heroes   HeroPort
-	Owner    OwnerPort
-	Content  ContentPort
-	Players  playerroot.TxLocker
-	Fence    ActorFence
-	Costs    CostPort
-	Values   ValuePort
-	Grants   GrantPort
-	Exchange i5.TxMaterialExchange
-	Receipts receipt.Store
+	Timed       gen.TimedRunner
+	Reads       tx.Runner
+	Heroes      HeroPort
+	Owner       OwnerPort
+	Content     ContentPort
+	Players     playerroot.TxLocker
+	Fence       ActorFence
+	Costs       CostPort
+	Values      ValuePort
+	Grants      GrantPort
+	Exchange    i5.TxMaterialExchange
+	MakeInfo    MakeInfoPort
+	RecycleInfo RecycleInfoPort
+	Receipts    receipt.Store
 }
 
 func (s Service) complete() bool {
-	return s.Timed.Binder.Time != nil && s.Timed.Runner.DB != nil && s.Reads.DB != nil && s.Heroes != nil && s.Owner != nil && s.Content != nil && s.Players != nil && s.Fence != nil && s.Costs != nil && s.Values != nil && s.Grants != nil && s.Exchange != nil && s.Receipts != nil
+	return s.Timed.Binder.Time != nil && s.Timed.Runner.DB != nil && s.Reads.DB != nil && s.Heroes != nil && s.Owner != nil && s.Content != nil && s.Players != nil && s.Fence != nil && s.Costs != nil && s.Values != nil && s.Grants != nil && s.Exchange != nil && s.MakeInfo != nil && s.Receipts != nil
 }
 func receiptID(d Admission) receipt.Identity {
 	return receipt.Identity{OwnerKind: "player", OwnerKey: strconv.FormatInt(d.Actor.Player, 10), Domain: "book-skill", Operation: d.Command.Family, SemanticKey: d.Operation.ID.String()}
@@ -238,13 +246,20 @@ func (s Service) putReceipt(ctx context.Context, t tx.Tx, d Admission, out Resul
 	return nil
 }
 
-// All Book mutations share player315 then Book510. I5 closes its value suffix before writes.
-func (s Service) lockPlan(ctx context.Context, t tx.Tx, a identity.ActorContext, c Command, at time.Time) error {
-	if e := s.Fence.FenceActorTx(ctx, t, a, at); e != nil {
-		if e.Error() == "actor liveness fence rejected" {
+func (s Service) fenceActor(ctx context.Context, t tx.Tx, a identity.ActorContext, at time.Time) error {
+	if err := s.Fence.FenceActorTx(ctx, t, a, at); err != nil {
+		if err.Error() == "actor liveness fence rejected" {
 			return ErrActor
 		}
-		return e
+		return err
+	}
+	return nil
+}
+
+// All Book mutations share player315 then Book510. I5 closes its value suffix before writes.
+func (s Service) lockPlan(ctx context.Context, t tx.Tx, a identity.ActorContext, c Command, at time.Time) error {
+	if err := s.fenceActor(ctx, t, a, at); err != nil {
+		return err
 	}
 	roots, e := s.Players.LockPlayerRootsTx(ctx, t, a.LogicalServerID, []identity.PlayerID{a.PlayerID})
 	if e != nil {
@@ -256,6 +271,45 @@ func (s Service) lockPlan(ctx context.Context, t tx.Tx, a identity.ActorContext,
 	_, e = s.Owner.LockRootTx(ctx, t, a.PlayerID)
 	return e
 }
+
+// OwnsComposeItem answers MID 83 category routing before any owner command. It
+// reads only the pinned or active Book catalog and writes no admission.
+func (s Service) OwnsComposeItem(ctx context.Context, itemID int64, op operation.Context) (bool, error) {
+	if s.Content == nil || s.Reads.DB == nil || itemID <= 0 {
+		return false, ErrUnavailable
+	}
+	revision, pinned := op.Policies.Get("content")
+	if !pinned {
+		active, on, err := s.Content.BookInputsActive(ctx)
+		if err != nil {
+			return false, err
+		}
+		if !on {
+			return false, nil
+		}
+		revision = active
+	}
+	var owned bool
+	outcome, err := s.Reads.Run(ctx, op, Profile(), tx.Options{Isolation: tx.RepeatableRead}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, sc tx.Scope) error {
+		catalog, err := s.Content.BookCatalogTx(ctx, sc.Tx, revision)
+		if err != nil {
+			return err
+		}
+		_, owned = catalog.Books[itemID]
+		return nil
+	})
+	if errors.Is(err, book.ErrUnqualified) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	if outcome.Outcome != tx.DefiniteCommit {
+		return false, ErrUnavailable
+	}
+	return owned, nil
+}
+
 func (s Service) Command(ctx context.Context, a identity.ActorContext, c Command, op operation.Context) (Result, error) {
 	if !s.complete() || c.Validate() != nil || op.ID.IsZero() || op.StartedAt.IsZero() {
 		return Result{}, book.ErrUnqualified

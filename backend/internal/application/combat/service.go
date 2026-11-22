@@ -18,7 +18,10 @@ import (
 var ErrAttemptNotFound = errors.New("combat: no attempt for locator; RESULT cannot create one")
 
 type StartRequest struct {
-	Actor            identity.ActorContext
+	Actor identity.ActorContext
+	// Mode is the registered I8-4 tuple this START belongs to; START refuses an
+	// unregistered mode or a request that differs from its registration.
+	Mode             d.ModeKey
 	Locator          d.Locator
 	GenerationRef    string
 	StartFingerprint string
@@ -88,7 +91,34 @@ func (s Service) StartManyTx(ctx context.Context, t tx.Tx, scope ca.CoherentRead
 	return out, nil
 }
 
+// validateStartMode refuses a START that is not the tuple its registered mode
+// declares, before anything is read or staged (PASS763 I8-REGISTRATION-TUPLE).
+func validateStartMode(request StartRequest) error {
+	registration, ok := d.LookupMode(request.Mode)
+	if !ok || request.Locator.DomainKind != registration.Family {
+		return d.ErrInvalid
+	}
+	profile, replay, _ := request.kind()
+	if profile != registration.Trust || replay != registration.Replay {
+		return d.ErrInvalid
+	}
+	if request.Battle.Context != nil && request.Battle.Context.Transform != registration.Transform {
+		return d.ErrInvalid
+	}
+	producer := d.ProducerProfileID
+	if request.Challenge != nil {
+		producer = ""
+	}
+	if registration.Producer != producer {
+		return d.ErrInvalid
+	}
+	return nil
+}
+
 func (s Service) start(ctx context.Context, t tx.Tx, scope ca.CoherentReadScope, request StartRequest, f *freezer) (Started, error) {
+	if err := validateStartMode(request); err != nil {
+		return Started{}, err
+	}
 	profile, replay, status := request.kind()
 	if t == nil || scope.Validate() != nil || scope.Queryer() != tx.Queryer(t) || !request.Actor.PlayerID.Valid() || request.Actor.ContextID.UUID().IsZero() || !request.Locator.Valid() || request.GenerationRef == "" || len(request.StartFingerprint) != 64 || !request.ResultDeadline.After(scope.ObservedAt) {
 		return Started{}, d.ErrInvalid
@@ -498,6 +528,14 @@ func (s Service) CloseTx(ctx context.Context, t tx.Tx, request TerminalRequest) 
 	if open.GenerationRef != request.GenerationRef {
 		return Closed{}, d.ErrStale
 	}
+	// A replayed close whose receipt already closed an earlier attempt must not close this successor (A-058).
+	_, used, err := s.Store.FindTerminalTx(ctx, t, request.Locator, request.SemanticReceiptID)
+	if err != nil {
+		return Closed{}, err
+	}
+	if used {
+		return Closed{}, d.ErrStale
+	}
 	current, err := s.Store.LockAttemptTx(ctx, t, open.ID)
 	if err != nil {
 		return Closed{}, err
@@ -858,4 +896,31 @@ func (s Service) ReplayTx(ctx context.Context, q tx.Queryer, id ids.UUID, retent
 // AttemptTx reads one attempt so its owning mode can decide closure.
 func (s Service) AttemptTx(ctx context.Context, q tx.Queryer, id ids.UUID) (d.Attempt, bool, error) {
 	return s.Store.ReadAttemptTx(ctx, q, id)
+}
+
+// CurrentAttempt is a locator's attempt with the frozen START facts its mode
+// credits at RESULT: the formation the START froze and, on Attempt, the
+// generation the board was frozen under and the start time.
+type CurrentAttempt struct {
+	Attempt   d.Attempt
+	Formation []int64
+}
+
+// CurrentAttemptTx returns the locator's open attempt, else its newest terminal
+// one, for a mode's START/RESULT bookkeeping. found is false when the locator
+// never had an attempt.
+func (s Service) CurrentAttemptTx(ctx context.Context, q tx.Queryer, locator d.Locator) (CurrentAttempt, bool, error) {
+	attempt, found, err := s.Store.CurrentAttemptTx(ctx, q, locator)
+	if err != nil || !found {
+		return CurrentAttempt{}, false, err
+	}
+	raw, err := s.Store.ReadSnapshotTx(ctx, q, attempt.SnapshotHash)
+	if err != nil {
+		return CurrentAttempt{}, false, err
+	}
+	snapshot, err := d.DecodeSnapshot(raw, attempt.SnapshotHash)
+	if err != nil {
+		return CurrentAttempt{}, false, err
+	}
+	return CurrentAttempt{Attempt: attempt, Formation: snapshot.Battle.Formation}, true, nil
 }

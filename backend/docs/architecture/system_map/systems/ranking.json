@@ -1,0 +1,213 @@
+{
+ "background": [],
+ "content": [
+  "content_player_display_catalogs",
+  "content_public_profile_policies"
+ ],
+ "contracts": [
+  {
+   "count": 2,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10A_EVENT_CENTRE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10F_MENTOR_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_DORM_SOCIAL_GLUE_RANKING_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_ILLUSION_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_TOP_FLOOR_TASK_MODE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/R8_PRIVATE_CACHE_RETENTION_DAYS_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/RULING_I9-12_SEAL_REGISTRY_SYNC.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/ranking.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I7C4C_GIRLS_RANKING"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ],
+   "ranking_girls_roots": [
+    "rankingstore.LockBoardRootTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "players",
+   "ranking_girls_roots"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/ranking.go",
+    "line": 65
+   },
+   "mid": 301,
+   "name": "LOAD_RANK_LIST"
+  }
+ ],
+ "name": "ranking",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/dormstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore",
+  "internal/adapters/postgres/occultstore",
+  "internal/adapters/postgres/presencestore",
+  "internal/adapters/postgres/rankingstore"
+ ],
+ "tables": {
+  "owned": [
+   "ranking_board_scores",
+   "ranking_girls_awards",
+   "ranking_girls_birth_tracking",
+   "ranking_girls_periods",
+   "ranking_girls_roots",
+   "ranking_girls_snapshots"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "content_player_display_catalogs",
+   "content_public_profile_policies",
+   "gameplay_contexts",
+   "gxb_content_activation",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "occult_players",
+   "player_cosmetic_entitlements",
+   "player_directory_profiles",
+   "player_dorm_heroes",
+   "player_dorm_rooms",
+   "player_dorm_roots",
+   "player_login_observations",
+   "player_social_presence",
+   "players",
+   "ranking_board_scores",
+   "ranking_girls_awards",
+   "ranking_girls_birth_tracking",
+   "ranking_girls_periods",
+   "ranking_girls_roots",
+   "ranking_girls_snapshots"
+  ],
+  "written": [
+   "gxb_operation_receipts",
+   "ranking_board_scores",
+   "ranking_girls_awards",
+   "ranking_girls_periods",
+   "ranking_girls_roots",
+   "ranking_girls_snapshots"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [
+   "i9_10_topfloor_team_info_popup.json",
+   "i9_8_rank_boards.json",
+   "i9_8b_illusion.json"
+  ],
+  "unit": []
+ }
+}

@@ -78,6 +78,13 @@ def inscription_pool(row, inscriptions):
     return [dict(item_id=item, weight=weight) for item, weight in zip(items, weights)]
 
 
+LIVE_ENTITLEMENTS = {(110, (4, 1)), (131, (8, 1))}
+
+
+def live_entitlement(kind, gate):
+    return (kind, tuple(gate)) in LIVE_ENTITLEMENTS
+
+
 def build_missions(blobs, parse):
     rows = sorted(parse(blobs['data/tables/mission.lua'].data), key=lambda row: int(row['id']))
     if Counter(int(row['new_type']) for row in rows) != {1: 35, 2: 184, 4: 250, 6: 7}:
@@ -110,9 +117,9 @@ def build_missions(blobs, parse):
             target = 1
         if target <= 0 or (kind in (15, 19, 111) and len(parameters) != 2) or (kind not in (15, 19, 111) and len(parameters) != 1):
             raise ValueError('Mission condition arity/target drift')
-        if kind in (110, 129, 130, 131):
+        if kind in (110, 129, 130, 131) and not live_entitlement(kind, gate):
             deferred = 'I10_COMMERCE_ACTIVE_ENTITLEMENTS'
-        gate_deferred = 'I10_COMMERCE_ACTIVE_ENTITLEMENTS' if gate[0] in (4, 6, 7, 8) else ''
+        gate_deferred = 'I10_COMMERCE_ACTIVE_ENTITLEMENTS' if gate[0] in (4, 6, 7, 8) and not live_entitlement(kind, gate) else ''
         unavailable = 'UNKNOWN_SOURCE_CAMPAIGN_200114' if gate == [2, 200114] else ''
         if int(row['march_coin_new'] or 0) > 0 and row['detail_type'] != '6':
             raise ValueError('Unqualified non-growth March Coin reward')

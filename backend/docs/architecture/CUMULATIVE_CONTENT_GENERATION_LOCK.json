@@ -514,13 +514,97 @@
       "parser_version": "lua-generated-v18-guild-invite",
       "revision_id": "414a5de9a6af42b55948fe77e40a25d764c6bb9b3d2cab14d8bb1a5b670d537b",
       "scope": "Exactly one named-scalar resource row for team_dungeon_coin (I9_GUILD_CAMPAIGN_V1 rules 11, 14); every other payload byte-identical."
+    },
+    {
+      "ordinal": 70,
+      "stage": "I9-10E Social Content",
+      "compiler_version": "i9-10e-social-content",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "a7d69b70e4044f0be8f5ec32f464e1b27b64d18a2a1939a72e6ebccf58f066e3",
+      "scope": "New social_input_catalog.json artifact and SOCIAL_CONTENT_I9_10E capability from the exact archive; every existing artifact byte-identical.",
+      "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE",
+      "provenance": {
+        "accepted_generation_69": {
+          "backend_head": "af440962b45ab99b43d87c24bb661ae86ae67842",
+          "revision_id": "414a5de9a6af42b55948fe77e40a25d764c6bb9b3d2cab14d8bb1a5b670d537b",
+          "sources": 395,
+          "status": "ACCEPTED_HISTORY_RETAINED_UNCHANGED"
+        },
+        "actual_parent": {
+          "backend_head": "fff27c38077db8e7113c40e872d2fc3338f53e44",
+          "revision_id": "4afc9fad8807b6648021611bad69d4e28e6cc0fa2a3c562bd5c22c25355f5c2c",
+          "sources": 404,
+          "status": "UNSEALED_STAGE_WORKING_MANIFEST"
+        },
+        "baseline_regeneration": {
+          "revision_id": "20061f6ef0ed188887898432cc6a3eccd31c228ee974e03e76dfd399c285cbc6",
+          "sources": 407,
+          "status": "SCRATCH_REGENERATION_WITH_STAGED_SOCIAL_SOURCE_PINS_NOT_PARENT_OR_ACCEPTED_REVISION"
+        },
+        "relation": "Compiler-generation succession is not a contiguous accepted artifact or backend upgrade history. Existing payload identity comparison uses actual_parent; full historical upgrade remains separate proof."
+      }
+    },
+    {
+      "ordinal": 71,
+      "stage": "I9-10F Occult Score",
+      "compiler_version": "i9-10f-occult-score",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "43541b13504ccb7adee1619147fef90f8cdf6a7bd06a5bb382002a8d8d551356",
+      "scope": "occult_catalog.json gains the single-player score profile and creats_campaign extra_integral/event_condition; every other artifact byte-identical.",
+      "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
+    },
+    {
+      "ordinal": 72,
+      "stage": "Repair L1 Campaign Assist",
+      "compiler_version": "repair-l1-campaign-assist",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "6dae1539f42d3c6d26bb550be2d6d8fd68a03f4bbc024b696f6d42dc7216d838",
+      "scope": "campaign_catalog.json nodes gain [partner_id, stone_item_id, stone_count] from campaign.lua assist_partner/assist_stone_num (repair-l1 #92); every other artifact byte-identical.",
+      "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
+    },
+    {
+      "ordinal": 73,
+      "stage": "I9-11B Items and Energy",
+      "compiler_version": "i9-11b-items-energy",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "e0f3fb07877d9375937058291110ca64cb6294c9263926c2900fa83155fd464e",
+      "scope": "New daily_buy_input_catalog.json artifact and DAILY_BUY_INPUTS_I9_11B capability from the exact archive: all stock item rows, referenced gift rows and their dropbox groups, VIP/monthly/refresh_cost/misc/daily_consume tunables; every existing artifact byte-identical.",
+      "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
+    },
+    {
+      "ordinal": 74,
+      "stage": "I9-11A Hero Assets",
+      "compiler_version": "i9-11a-hero-assets",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "585dc763dc513a6416718194d8363c61e50d1c1c26d46a85fdb3e568d7a11987",
+      "scope": "daily_buy_input_catalog.json gains vip.skill_buy/skill_max and refresh_cost.buy_skill_cost from the same exact archive for the I9-11A skill-point buy and cap rules; every other artifact byte-identical.",
+      "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
+    },
+    {
+      "ordinal": 75,
+      "stage": "I9-11C Core Shops",
+      "compiler_version": "i9-11c-core-shops",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "752d85fa407113c695678d4a6d323396acacb5d04f27dae0debaa1d3d7bcdd25",
+      "scope": "New shop_catalog.json artifact and CORE_SHOPS_I9_11C capability from the exact archive (shop_config plus the 30 shop item tables); every other artifact byte-identical. Registered by the lead at the 11D merge (the 11C merge 782fc150 omitted it).",
+      "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
+    },
+    {
+      "stage": "I9-11D Compatibility",
+      "compiler_version": "i9-11d-compat",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "11902b0a5e92186765236aa0295d4e5939704c2cbeb46190e293c5fda46cc3bc",
+      "scope": "New compat_message_push_catalog.json artifact and COMPAT_MESSAGE_PUSH_I9_11D capability from the exact archive (message_push.lua ids and sha256); every existing artifact byte-identical. Merged onto I9-11C core shops (lead, 11D merge): revision recomputed over both artifact sets.",
+      "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE",
+      "ordinal": 76
     }
   ],
   "current": {
-    "stage": "I9-9C Guild Campaign",
-    "compiler_version": "i9-9c-guild-campaign",
+    "stage": "I9-11D Compatibility",
+    "compiler_version": "i9-11d-compat",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "414a5de9a6af42b55948fe77e40a25d764c6bb9b3d2cab14d8bb1a5b670d537b",
-    "scope": "Exactly one named-scalar resource row for team_dungeon_coin (I9_GUILD_CAMPAIGN_V1 rules 11, 14); every other payload byte-identical."
+    "revision_id": "11902b0a5e92186765236aa0295d4e5939704c2cbeb46190e293c5fda46cc3bc",
+    "scope": "New compat_message_push_catalog.json artifact and COMPAT_MESSAGE_PUSH_I9_11D capability from the exact archive (message_push.lua ids and sha256); every existing artifact byte-identical. Merged onto I9-11C core shops (lead, 11D merge): revision recomputed over both artifact sets.",
+    "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
   }
 }

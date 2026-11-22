@@ -1,0 +1,184 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [
+  {
+   "count": 5,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_10A_EVENT_CENTRE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_HERO_RECOMMEND_SCORES_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/i9/I9_WORKPLACE_V1.json"
+  }
+ ],
+ "decorated_by": [
+  "observing"
+ ],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/workplace_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {
+   "WORKPLACE_TEAM_SENT": {
+    "missions": [
+     115
+    ]
+   }
+  },
+  "emits": [
+   "WORKPLACE_TEAM_SENT"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "workplace"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "workplace_players": [
+    "workplacestore.LockTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "workplace_players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/workplace_dispatcher.go",
+    "line": 30
+   },
+   "mid": 528,
+   "name": "TREASURE_LOAD_SP_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/workplace_dispatcher.go",
+    "line": 30
+   },
+   "mid": 530,
+   "name": "TREASURE_LOAD_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/workplace_dispatcher.go",
+    "line": 30
+   },
+   "mid": 531,
+   "name": "TREASURE_SET_PARTNER"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/workplace_dispatcher.go",
+    "line": 30
+   },
+   "mid": 532,
+   "name": "TREASURE_FINISH_ONE_TEAM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/workplace_dispatcher.go",
+    "line": 30
+   },
+   "mid": 533,
+   "name": "TREASURE_LOG"
+  }
+ ],
+ "name": "workplace",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/campaignstore",
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/guildrentalread",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore",
+  "internal/adapters/postgres/workplacestore"
+ ],
+ "tables": {
+  "owned": [
+   "workplace_players"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "campaign_nodes",
+   "campaign_players",
+   "gameplay_contexts",
+   "gxb_content_activation",
+   "gxb_content_hero_templates",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "player_directory_profiles",
+   "player_function_eligibility",
+   "workplace_players"
+  ],
+  "written": [
+   "gxb_operation_receipts",
+   "workplace_players"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [
+   "i9_5b_workplace.json",
+   "r1_workplace_award.json"
+  ],
+  "unit": [
+   "start_choice_conformance_test.go"
+  ]
+ }
+}

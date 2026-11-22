@@ -1,6 +1,10 @@
 package memoir
 
-import "gxb.local/backend/v2/internal/domain/campaign"
+import (
+	"fmt"
+
+	"gxb.local/backend/v2/internal/domain/campaign"
+)
 
 const (
 	Road int64 = iota
@@ -131,12 +135,15 @@ func neighbors(position int) []int {
 	return result
 }
 
+// walkable mirrors the stock map walk: findRoad stops only on walls and fog,
+// and the final point is a standing cell whether or not the guardian is dead.
+// The guardian gates CanExit, not the approach.
 func (board Board) walkable(position int) bool {
 	if position < 1 || position > len(board.Cells) {
 		return false
 	}
 	kind := board.Cells[position-1]
-	return kind == Road || kind == Endpoint && board.GuardianWon
+	return kind == Road || kind == Endpoint
 }
 func (board Board) reachable() map[int]bool {
 	visited := map[int]bool{board.Position: true}
@@ -174,11 +181,11 @@ func (board *Board) Reveal(position int) {
 }
 func (board *Board) SaveMap(position int, opened []int) error {
 	if board.Validate() != nil {
-		return ErrUnavailable
+		return fmt.Errorf("%w: stored board is invalid", ErrUnavailable)
 	}
 	reachable := board.reachable()
 	if !reachable[position] {
-		return ErrRefused
+		return fmt.Errorf("%w: position %d is not reachable from %d", ErrRefused, position, board.Position)
 	}
 	allowed := map[int]bool{}
 	for cell := range reachable {
@@ -190,7 +197,7 @@ func (board *Board) SaveMap(position int, opened []int) error {
 	seen := map[int]bool{}
 	for _, cell := range opened {
 		if !allowed[cell] || seen[cell] {
-			return ErrInvalid
+			return fmt.Errorf("%w: opened cell %d is outside the reachable component", ErrInvalid, cell)
 		}
 		seen[cell] = true
 	}

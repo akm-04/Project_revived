@@ -5,9 +5,11 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"sort"
 	"time"
 
+	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 )
 
@@ -42,4 +44,44 @@ func (p RosterMetricPopulation) Digest() string {
 	}{p.PlayerID, p.Family, p.Revision, p.RootVersion, rows})
 	d := sha256.Sum256(b)
 	return hex.EncodeToString(d[:])
+}
+
+const RosterMetricPolicy = "C4C_PRIVATE_CURRENT_ROSTER_V1"
+const RosterMetricSemantics = "CURRENT_DISTINCT_ORIGIN_HERO_PET_STARS_BEFORE_AWAKEN_V1"
+const maxRosterMetricInteger int64 = 9007199254740991
+
+var ErrInvalidRosterPopulation = errors.New("character: invalid current roster population")
+
+type RosterMetricSummary struct {
+	OwnedCount    int64
+	StarCount     int64
+	AwakenedCount int64
+}
+
+// Summary validates rows; callers still qualify the coherent scope and population witness.
+func (population RosterMetricPopulation) Summary() (RosterMetricSummary, error) {
+	var summary RosterMetricSummary
+	maximumStar := int64(character.MaxHeroStar)
+	if population.Family == "Pet" {
+		maximumStar = character.MaxPetStar
+	} else if population.Family != "Hero" {
+		return summary, ErrInvalidRosterPopulation
+	}
+	origins, instances := map[int64]bool{}, map[int64]bool{}
+	for _, row := range population.Rows {
+		if row.InstanceID <= 0 || row.OriginTableID <= 0 || row.TableID <= 0 || row.Version <= 0 || row.Star < 1 || row.Star > maximumStar || row.BeforeAwaken < 0 || (population.Family == "Pet" && row.BeforeAwaken != 0) || origins[row.OriginTableID] || instances[row.InstanceID] {
+			return RosterMetricSummary{}, ErrInvalidRosterPopulation
+		}
+		origins[row.OriginTableID] = true
+		instances[row.InstanceID] = true
+		if summary.OwnedCount >= maxRosterMetricInteger || summary.StarCount > maxRosterMetricInteger-row.Star {
+			return RosterMetricSummary{}, ErrInvalidRosterPopulation
+		}
+		summary.OwnedCount++
+		summary.StarCount += row.Star
+		if row.BeforeAwaken > 0 {
+			summary.AwakenedCount++
+		}
+	}
+	return summary, nil
 }

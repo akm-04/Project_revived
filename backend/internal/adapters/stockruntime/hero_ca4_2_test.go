@@ -128,7 +128,7 @@ func TestCA42MID54StrictShapeAndSemanticRejection(t *testing.T) {
 		}
 	}
 	svc.equipErr = apphero.ErrHeroEquipmentUnavailable
-	if r := d.Dispatch(context.Background(), heroReq(t, 54, map[string]any{"partner_id": int64(1), "equip_index": int64(1)})); r.HTTPStatus != 400 || r.Body["error"] != "hero_operation_rejected" {
+	if r := d.Dispatch(context.Background(), heroReq(t, 54, map[string]any{"partner_id": int64(1), "equip_index": int64(1)})); r.HTTPStatus != 409 || r.Body["error_code"] != unprovenRefusalCode {
 		t.Fatalf("semantic rejection=%+v", r)
 	}
 }
@@ -139,7 +139,12 @@ func TestCA42MID62ProjectsCanonicalEquipsAndCurrentManaForNoWork(t *testing.T) {
 	economy := &ca42HeroEconomy{amount: 987654}
 	d := HeroDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: svc, Economy: economy}
 
-	r := d.Dispatch(context.Background(), heroReq(t, 62, map[string]any{"partner_id": int64(77)}))
+	direct := d.Dispatch(context.Background(), heroReq(t, 62, map[string]any{"partner_id": int64(77)}))
+	if _, written := direct.Body["economy_"]; written {
+		t.Fatalf("dispatcher assembled economy_: %#v", direct.Body)
+	}
+	economy.calls = 0
+	r := Decorated{Next: d}.Dispatch(context.Background(), heroReq(t, 62, map[string]any{"partner_id": int64(77)}))
 	if r.HTTPStatus != 200 || svc.onePartner != 77 || economy.calls != 1 || economy.key != "mana" {
 		t.Fatalf("response=%+v partner=%d economy=%+v", r, svc.onePartner, economy)
 	}
@@ -171,11 +176,11 @@ func TestCA42MID62StrictShapeAndProjectionFailure(t *testing.T) {
 	}
 
 	d.Economy = nil
-	if r := d.Dispatch(context.Background(), heroReq(t, 62, map[string]any{"partner_id": int64(1)})); r.HTTPStatus != 503 || r.Body["error"] != "hero_projection_unavailable" {
+	if r := d.Dispatch(context.Background(), heroReq(t, 62, map[string]any{"partner_id": int64(1)})); r.HTTPStatus != 500 || r.Body["error_code"] != unprovenRefusalCode {
 		t.Fatalf("missing projection=%+v", r)
 	}
 	d.Economy = &ca42HeroEconomy{err: errors.New("projection failed")}
-	if r := d.Dispatch(context.Background(), heroReq(t, 62, map[string]any{"partner_id": int64(1)})); r.HTTPStatus != 503 || r.Body["error"] != "hero_projection_failed" {
+	if r := d.Dispatch(context.Background(), heroReq(t, 62, map[string]any{"partner_id": int64(1)})); r.HTTPStatus != 500 || r.Body["error_code"] != unprovenRefusalCode {
 		t.Fatalf("failed projection=%+v", r)
 	}
 }

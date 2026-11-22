@@ -3,7 +3,6 @@ package stockruntime
 import (
 	"context"
 	"errors"
-	"net"
 	"sort"
 	"sync"
 
@@ -63,7 +62,7 @@ type registrySession struct {
 	guildBinding apprealtime.GuildBinding
 	meta         SessionMetadata
 	writer       *connWriter
-	conn         net.Conn
+	chatSender   chatSenderBucket
 
 	lifecycle sync.Mutex
 	retired   bool
@@ -121,11 +120,8 @@ func (s *registrySession) retire() {
 	s.retired = true
 	s.lifecycle.Unlock()
 
-	// Closing the socket first interrupts an in-progress/blocked writer. The
-	// writer owns every conn.Write; the registry only owns private teardown.
-	if s.conn != nil {
-		_ = s.conn.Close()
-	}
+	// The writer owns every transport write; the registry only owns private
+	// teardown. Its Close interrupts a blocked write by closing the transport.
 	if s.writer != nil {
 		s.writer.Close()
 	}
@@ -155,7 +151,7 @@ func NewConnectionRegistry() *ConnectionRegistry {
 // mutation and index removal occur under r.mu; socket/writer teardown occurs
 // only after that mutex is released.
 func (r *ConnectionRegistry) Replace(admission domainrt.Admission, writer *connWriter) (SessionHandle, error) {
-	if r == nil || writer == nil || writer.conn == nil || !admission.Role.Valid() || admission.RoomID <= 0 {
+	if r == nil || writer == nil || !admission.Role.Valid() || admission.RoomID <= 0 {
 		return SessionHandle{}, ErrInvalidRealtimeSession
 	}
 	return r.replace(admission, apprealtime.GuildBinding{}, writer)
@@ -174,7 +170,7 @@ func (r *ConnectionRegistry) ReplaceAdmission(admission apprealtime.Admission, w
 }
 
 func (r *ConnectionRegistry) replace(admission domainrt.Admission, binding apprealtime.GuildBinding, writer *connWriter) (SessionHandle, error) {
-	if r == nil || writer == nil || writer.conn == nil || !admission.Role.Valid() || admission.RoomID <= 0 {
+	if r == nil || writer == nil || !admission.Role.Valid() || admission.RoomID <= 0 {
 		return SessionHandle{}, ErrInvalidRealtimeSession
 	}
 	a := admission.Actor
@@ -193,7 +189,7 @@ func (r *ConnectionRegistry) replace(admission domainrt.Admission, binding appre
 		LogicalServerID: a.LogicalServerID, PlayerID: a.PlayerID, ContextGeneration: a.ContextGeneration,
 		SessionLivenessVersion: a.SessionLivenessVersion, ContextLivenessVersion: a.ContextLivenessVersion,
 		PhysicalRole: admission.Role, RoomID: admission.RoomID, RegistryGeneration: r.next,
-	}, guildBinding: binding, writer: writer, conn: writer.conn}
+	}, guildBinding: binding, writer: writer}
 	old = r.by[key]
 	if old != nil {
 		r.removeIndicesLocked(old)

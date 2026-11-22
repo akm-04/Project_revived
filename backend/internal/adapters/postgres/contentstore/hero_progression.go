@@ -4,14 +4,24 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"sync"
 
 	"gxb.local/backend/v2/internal/adapters/postgres/contentqueries"
 	"gxb.local/backend/v2/internal/content/registry"
 	"gxb.local/backend/v2/internal/domain/character"
+	"gxb.local/backend/v2/internal/domain/summon"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
+// Installed revisions are immutable, so a manifest decoded once stays valid
+// for that revision. Every Hero facet read verifies the same pinned revision.
+var manifestCapabilities sync.Map
+
 func manifestHasCapability(raw []byte, revision, capability string) (bool, error) {
+	key := revision + "\x00" + capability
+	if cached, ok := manifestCapabilities.Load(key); ok {
+		return cached.(bool), nil
+	}
 	m, err := registry.DecodeManifestStrict(raw)
 	if err != nil {
 		return false, err
@@ -19,12 +29,29 @@ func manifestHasCapability(raw []byte, revision, capability string) (bool, error
 	if m.RevisionID != revision {
 		return false, errors.New("content store: Hero progression manifest revision mismatch")
 	}
+	good := false
 	for _, c := range m.EnabledCapabilities {
 		if c == capability {
-			return true, nil
+			good = true
+			break
 		}
 	}
-	return false, nil
+	manifestCapabilities.Store(key, good)
+	return good, nil
+}
+
+// storedCapability verifies a capability on the pinned immutable revision and
+// reuses the decoded manifest across every Hero facet read of the same revision.
+func storedCapability(ctx context.Context, q tx.Queryer, revision, capability string) (bool, error) {
+	key := revision + "\x00" + capability
+	if cached, ok := manifestCapabilities.Load(key); ok {
+		return cached.(bool), nil
+	}
+	var raw string
+	if err := q.QueryRow(ctx, contentqueries.ReadContentRevisionManifest, revision).Scan(&raw); err != nil {
+		return false, err
+	}
+	return manifestHasCapability([]byte(raw), revision, capability)
 }
 
 // HeroProgressionActive reports the current immutable revision only when it
@@ -34,7 +61,14 @@ func (s Store) HeroProgressionActive(ctx context.Context) (string, bool, error) 
 	if s.Queryer == nil {
 		return "", false, errors.New("content store: nil Hero progression queryer")
 	}
-	summary, ok, err := (Store{}).ReadActiveSummary(ctx, s.Queryer)
+	return (Store{}).HeroProgressionActiveTx(ctx, s.Queryer)
+}
+
+func (Store) HeroProgressionActiveTx(ctx context.Context, q tx.Queryer) (string, bool, error) {
+	if q == nil {
+		return "", false, errors.New("content store: nil Hero progression queryer")
+	}
+	summary, ok, err := (Store{}).ReadActiveSummary(ctx, q)
 	if err != nil || !ok {
 		return "", false, err
 	}
@@ -172,11 +206,18 @@ func (Store) HeroSuperPrerequisitesTx(ctx context.Context, q tx.Queryer, revisio
 }
 
 func (s Store) HeroPieceMappings(ctx context.Context, revision string) ([]character.HeroPieceMapping, error) {
-	if s.Queryer == nil || len(revision) != 64 {
+	if s.Queryer == nil {
+		return nil, errors.New("content store: invalid Hero piece mapping lookup")
+	}
+	return (Store{}).HeroPieceMappingsTx(ctx, s.Queryer, revision)
+}
+
+func (Store) HeroPieceMappingsTx(ctx context.Context, q tx.Queryer, revision string) ([]character.HeroPieceMapping, error) {
+	if q == nil || len(revision) != 64 {
 		return nil, errors.New("content store: invalid Hero piece mapping lookup")
 	}
 	var raw string
-	if err := s.Queryer.QueryRow(ctx, contentqueries.ReadHeroPieceMappings, revision).Scan(&raw); err != nil {
+	if err := q.QueryRow(ctx, contentqueries.ReadHeroPieceMappings, revision).Scan(&raw); err != nil {
 		return nil, err
 	}
 	var out []character.HeroPieceMapping
@@ -216,6 +257,33 @@ func (Store) HeroAcquisitionByItemTx(ctx context.Context, q tx.Queryer, revision
 		return character.HeroAcquisitionTemplate{}, errors.New("content store: invalid Hero acquisition mapping")
 	}
 	return out, nil
+}
+
+// HeroScrollSXByItemTx reports the source partner is_sx flag for an
+// acquisition scroll item. The compiled Vending catalog carries the partner
+// table's is_sx; the caller-pinned revision is immutable.
+func (s Store) HeroScrollSXByItemTx(ctx context.Context, q tx.Queryer, revision string, itemID int64) (bool, error) {
+	if q == nil || len(revision) != 64 || itemID <= 0 {
+		return false, errors.New("content store: invalid Hero scroll SX lookup")
+	}
+	catalog, err := s.SummonCatalogTx(ctx, q, revision)
+	if err != nil {
+		return false, err
+	}
+	sx, found := heroScrollSX(catalog, itemID)
+	if !found {
+		return false, errors.New("content store: scroll item has no source partner")
+	}
+	return sx, nil
+}
+
+func heroScrollSX(catalog summon.Catalog, itemID int64) (sx, found bool) {
+	for _, hero := range catalog.Heroes {
+		if hero.StoneItemID == itemID {
+			return hero.SX, true
+		}
+	}
+	return false, false
 }
 
 func (Store) HeroNormalSummonTx(ctx context.Context, q tx.Queryer, revision string, tableID int64) (character.HeroNormalSummonPolicy, error) {

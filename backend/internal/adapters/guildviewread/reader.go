@@ -46,7 +46,7 @@ func (r Reader) read(c context.Context, a identity.ActorContext, fn func(guildvi
 	if e != nil {
 		return e
 	}
-	result, e := r.Runner.Run(c, o, i5.DefaultProfile(), tx.Options{Isolation: tx.RepeatableRead}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
+	result, e := r.Runner.Run(c, o, i5.DefaultProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
 		at, e := (postgres.AuthoritativeTime{Queryer: sc.Tx}).Now(c)
 		if e != nil {
 			return e

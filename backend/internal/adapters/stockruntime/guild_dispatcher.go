@@ -65,7 +65,7 @@ func (d GuildDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 		return okGuild(map[string]any{})
 	}
 	if d.View == nil {
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "guild_view_unavailable"}}
+		return failureReply(defect(nil))
 	}
 
 	switch req.Envelope.MID {
@@ -77,6 +77,12 @@ func (d GuildDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 		return okGuild(map[string]any{"guild_infos": guildproj.InfoList(rows)})
 	case 579: // LOAD_TEAM_BY_ID: canonical self Guild/member roster
 		info, members, err := d.View.Members(ctx, actor)
+		if errors.Is(err, guildview.ErrForbidden) {
+			// DormWindow.lua:96-109 and its siblings open the guild visit with
+			// no guild precondition; a guildless caller owes OK plus a zero
+			// roster (SelfGuild.lua:32-63 takes its own not-in-a-guild branch).
+			return okGuild(guildproj.Roster(guildview.GuildInfo{}, nil))
+		}
 		if err != nil {
 			return failGuild(err)
 		}
@@ -126,13 +132,15 @@ func (d GuildDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 			return failGuild(err)
 		}
 		if !found {
-			return httpedge.Response{HTTPStatus: http.StatusNotFound, Body: map[string]any{"error": "guild_not_found"}}
+			// 30015 is message.lua's "Can't find the guild" row, the same code
+			// failGuild already uses for ErrGuildNotFound (A-191).
+			return failureReply(refusal(guildNotFoundCode))
 		}
 		return okGuild(guildproj.Detail2565(info))
 	}
 
 	if d.Core == nil {
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "guild_core_unavailable"}}
+		return failureReply(defect(nil))
 	}
 	op := req.Envelope.Operation
 	switch req.Envelope.MID {
@@ -251,13 +259,17 @@ func (d GuildDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequ
 		_, err = d.Core.AcceptInvite(ctx, actor, guild.ID(gid), op)
 		return guildMutationResult(err)
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error": "not_i6c_guild_mid"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 }
 
 func (d GuildDispatcher) guildActor(ctx context.Context, req httpedge.DispatchRequest) (identity.ActorContext, *httpedge.Response) {
-	if d.Authority == nil || req.Envelope.Claims.Token == "" {
-		r := httpedge.Response{HTTPStatus: http.StatusUnauthorized, Body: map[string]any{"error": "gameplay_auth_required"}}
+	if d.Authority == nil {
+		r := failureReply(defect(nil))
+		return identity.ActorContext{}, &r
+	}
+	if req.Envelope.Claims.Token == "" {
+		r := failureReply(sessionFailure())
 		return identity.ActorContext{}, &r
 	}
 	a, err := d.Authority.ResolveGameplayBearer(ctx, req.Envelope.Claims.Token, req.Envelope.ReceivedAt)
@@ -266,7 +278,7 @@ func (d GuildDispatcher) guildActor(ctx context.Context, req httpedge.DispatchRe
 		return identity.ActorContext{}, &r
 	}
 	if req.Envelope.Claims.Region != int64(a.LogicalServerID) {
-		r := httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "region_mismatch"}}
+		r := failureReply(refusal(unprovenRefusalCode))
 		return identity.ActorContext{}, &r
 	}
 	return a, nil
@@ -279,7 +291,7 @@ func jsonGuild(v any) httpedge.Response {
 	return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}, JSON: v}
 }
 func badGuild(code string) httpedge.Response {
-	return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": code}}
+	return failureReply(malformed(code))
 }
 func guildMutationResult(err error) httpedge.Response {
 	if err == nil {
@@ -293,69 +305,85 @@ func guildMutationResult(err error) httpedge.Response {
 
 // sourceGuildProtocolError exposes only Guild application codes whose semantics
 // are present in the hash-bound effective-client message table. SOURCE_FACT:
-// Backend.lua treats HTTP 200 as a successful transport callback while the body
-// may still carry error_code. Fields beyond the recovered message semantics are
-// intentionally not invented.
+// Backend.lua treats any HTTP 200 as a successful transport callback; a stock
+// callback therefore runs its success branch even though the body carries an
+// error_code. These refusals answer 409 so the callback takes its error branch
+// while Backend.lua still shows the message table's toast for error_code.
 func sourceGuildProtocolError(err error) (httpedge.Response, bool) {
-	body := map[string]any{}
 	var wait *guildcore.CantJoinError
 	if errors.As(err, &wait) {
 		switch wait.Kind {
 		case guildcore.JoinCooldownOtherGuild:
-			body["error_code"] = int64(30010)
-			body["time"] = wait.RemainingSeconds
-			return okGuild(body), true
+			return failureReply(refusalWithBody(30010, map[string]any{"time": wait.RemainingSeconds})), true
 		case guildcore.JoinCooldownSameGuild:
-			body["error_code"] = int64(30011)
-			return okGuild(body), true
+			return failureReply(refusal(30011)), true
 		default:
 			return httpedge.Response{}, false
 		}
 	}
-	var code int64
 	switch {
 	case errors.Is(err, guildcore.ErrJoinLimit):
-		code = 30012
+		return failureReply(refusal(30012)), true
 	case errors.Is(err, guildcore.ErrApplicationLimit):
-		code = 30013
+		return failureReply(refusal(30013)), true
 	case errors.Is(err, guildcore.ErrGuildClosed):
-		code = 30014
+		return failureReply(refusal(30014)), true
 	case errors.Is(err, guildcore.ErrGuildNotFound), errors.Is(err, guildcore.ErrGuildRetired):
-		code = 30015
+		return failureReply(refusal(30015)), true
 	case errors.Is(err, guildcore.ErrGuildApplicationFull):
-		code = 30016
+		return failureReply(refusal(30016)), true
 	case errors.Is(err, guildcore.ErrDissolveRequiresSolo):
-		code = 30017
+		return failureReply(refusal(30017)), true
 	case errors.Is(err, guildcore.ErrDeputyLimit):
-		code = 30018
+		return failureReply(refusal(30018)), true
 	case errors.Is(err, guildcore.ErrGuildNameTaken):
-		code = 30019
+		return failureReply(refusal(30019)), true
 	case errors.Is(err, guildcore.ErrGuildFull):
-		code = 30020
+		return failureReply(refusal(30020)), true
 	default:
 		return httpedge.Response{}, false
 	}
-	body["error_code"] = code
-	return okGuild(body), true
 }
+
+// Guild not-found and permission errors are refusals too (R4 amendment items 5
+// and 7): failGuild answers them 409 before these rows are consulted.
+var guildFailureRows = []failureRow{
+	{match: guildcore.ErrGuildClosed, class: failureRefusal, code: 30014},
+	{match: guildcore.ErrGuildFull, class: failureRefusal, code: 30020},
+	{match: guildcore.ErrGuildApplicationFull, class: failureRefusal, code: 30016},
+	{match: guildcore.ErrGuildNameTaken, class: failureRefusal, code: 30019},
+	{match: guildcore.ErrApplicationLimit, class: failureRefusal, code: 30013},
+	{match: guildcore.ErrJoinLimit, class: failureRefusal, code: 30012},
+	{match: guildcore.ErrDissolveRequiresSolo, class: failureRefusal, code: 30017},
+	{match: guildcore.ErrDeputyLimit, class: failureRefusal, code: 30018},
+	{match: guildcore.ErrAlreadyInGuild, class: failureRefusal, code: unprovenRefusalCode},
+	{match: guildcore.ErrGuildRetired, class: failureRefusal, code: unprovenRefusalCode},
+	{match: guildcore.ErrLevelTooLow, class: failureRefusal, code: unprovenRefusalCode},
+	{match: guildcore.ErrApplicantLimit, class: failureRefusal, code: unprovenRefusalCode},
+	{match: guildcore.ErrInviteExpired, class: failureRefusal, code: unprovenRefusalCode},
+	{match: guildcore.ErrInviteLimit, class: failureRefusal, code: unprovenRefusalCode},
+	{match: guildcore.ErrTargetAlreadyMember, class: failureRefusal, code: unprovenRefusalCode},
+	{match: guildcore.ErrTargetNotMember, class: failureRefusal, code: unprovenRefusalCode},
+	{match: guildcore.ErrCannotLeaveLeader, class: failureRefusal, code: unprovenRefusalCode},
+	{match: guildcore.ErrInvalidRoleChange, class: failureMalformed, detail: "guild_invalid_parameter"},
+	{match: guildcore.ErrInvalidDescription, class: failureMalformed, detail: "guild_invalid_parameter"},
+	{match: guildcore.ErrInvalidSettings, class: failureMalformed, detail: "guild_invalid_parameter"},
+	{match: guildcore.ErrInvalidGuildPolicyInput, class: failureMalformed, detail: "guild_invalid_parameter"},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+}
+
+// guildNotFoundCode is message.lua row 30015 ("Can't find the guild"), the
+// only guild-specific not-found text in the stock table. There is no stock row
+// for "not a member" or "no permission", so those refusals use 35028.
+const guildNotFoundCode int64 = 30015
 
 func failGuild(err error) httpedge.Response {
 	switch {
-	case errors.Is(err, guildcore.ErrGuildNotFound), errors.Is(err, guildcore.ErrApplicationNotFound), errors.Is(err, guildcore.ErrInviteNotFound):
-		return httpedge.Response{HTTPStatus: http.StatusNotFound, Body: map[string]any{"error": "guild_not_found"}}
-	case errors.Is(err, guildcore.ErrGuildPermission), errors.Is(err, guildcore.ErrNotGuildMember):
-		return httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "guild_forbidden"}}
-	case errors.Is(err, guildcore.ErrAlreadyInGuild), errors.Is(err, guildcore.ErrGuildRetired), errors.Is(err, guildcore.ErrGuildClosed),
-		errors.Is(err, guildcore.ErrGuildFull), errors.Is(err, guildcore.ErrGuildApplicationFull), errors.Is(err, guildcore.ErrGuildNameTaken), errors.Is(err, guildcore.ErrApplicationLimit), errors.Is(err, guildcore.ErrJoinLimit),
-		errors.Is(err, guildcore.ErrLevelTooLow), errors.Is(err, guildcore.ErrApplicantLimit), errors.Is(err, guildcore.ErrInviteExpired),
-		errors.Is(err, guildcore.ErrInviteLimit), errors.Is(err, guildcore.ErrTargetAlreadyMember), errors.Is(err, guildcore.ErrTargetNotMember),
-		errors.Is(err, guildcore.ErrCannotLeaveLeader), errors.Is(err, guildcore.ErrDissolveRequiresSolo), errors.Is(err, guildcore.ErrDeputyLimit), errors.Is(err, guildcore.ErrInvalidRoleChange),
-		errors.Is(err, guildcore.ErrInvalidDescription), errors.Is(err, guildcore.ErrInvalidSettings), errors.Is(err, guildcore.ErrInvalidGuildPolicyInput),
-		errors.Is(err, economy.ErrInsufficientBalance):
-		// Exact historical numeric codes for these policy denials are not
-		// source-recovered. Keep them fail-closed instead of fabricating codes.
-		return httpedge.Response{HTTPStatus: http.StatusConflict, Body: map[string]any{"error": "guild_policy_rejected"}}
-	default:
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "guild_operation_failed"}}
+	case errors.Is(err, guildcore.ErrGuildNotFound):
+		return failureReply(refusal(guildNotFoundCode))
+	case errors.Is(err, guildcore.ErrApplicationNotFound), errors.Is(err, guildcore.ErrInviteNotFound),
+		errors.Is(err, guildcore.ErrGuildPermission), errors.Is(err, guildcore.ErrNotGuildMember), errors.Is(err, guildview.ErrForbidden):
+		return failureReply(refusal(unprovenRefusalCode))
 	}
+	return failureFromRows(guildFailureRows, err)
 }

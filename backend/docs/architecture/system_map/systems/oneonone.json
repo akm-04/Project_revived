@@ -1,0 +1,250 @@
+{
+ "background": [
+  {
+   "binary": "gxb-api",
+   "entry": "apponeonone.Reconciler",
+   "kind": "reconcile"
+  }
+ ],
+ "content": [
+  "content_player_display_catalogs",
+  "content_public_profile_policies"
+ ],
+ "contracts": [
+  {
+   "count": 10,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 10,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 10,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/oneonone_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {
+   "PVP_FIGHT": {
+    "adventure": "EventBattle",
+    "missions": [
+     106
+    ],
+    "stages": [
+     "I9-4B"
+    ]
+   }
+  },
+  "emits": [
+   "PVP_FIGHT"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "one-on-one"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "one_on_one_competitions": [
+    "oneononestore.ReadCompetitionTx"
+   ],
+   "one_on_one_matches": [
+    "oneononestore.ReadMatchTx"
+   ],
+   "one_on_one_players": [
+    "oneononestore.ReadPlayerTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "one_on_one_competitions",
+   "one_on_one_matches",
+   "one_on_one_players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
+    "line": 55
+   },
+   "mid": 2480,
+   "name": "LOAD_PEAK_ARENA"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
+    "line": 55
+   },
+   "mid": 2481,
+   "name": "PEAK_CHANGE_TEAMS"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
+    "line": 55
+   },
+   "mid": 2482,
+   "name": "MATCH_ENEMIES"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
+    "line": 55
+   },
+   "mid": 2483,
+   "name": "GET_ENEMY_TEAM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
+    "line": 55
+   },
+   "mid": 2484,
+   "name": "PEAK_START_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
+    "line": 55
+   },
+   "mid": 2485,
+   "name": "PEAK_RECORDS"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
+    "line": 55
+   },
+   "mid": 2486,
+   "name": "BUY_PEAK_TIMES"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
+    "line": 55
+   },
+   "mid": 2487,
+   "name": "PEAK_RECORDS_LIST"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
+    "line": 55
+   },
+   "mid": 2488,
+   "name": "RESET_PEAK_TIME"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/oneonone_dispatcher.go",
+    "line": 55
+   },
+   "mid": 2489,
+   "name": "PEAK_RECORDS_DETAIL"
+  }
+ ],
+ "name": "oneonone",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/guildrentalread",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore",
+  "internal/adapters/postgres/oneononestore"
+ ],
+ "tables": {
+  "owned": [
+   "one_on_one_competitions",
+   "one_on_one_matches",
+   "one_on_one_partner_usage",
+   "one_on_one_players",
+   "one_on_one_records",
+   "one_on_one_rounds",
+   "one_on_one_settlement_ranks",
+   "one_on_one_settlements"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "content_player_display_catalogs",
+   "content_public_profile_policies",
+   "gameplay_contexts",
+   "gxb_content_activation",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "one_on_one_competitions",
+   "one_on_one_matches",
+   "one_on_one_partner_usage",
+   "one_on_one_players",
+   "one_on_one_records",
+   "one_on_one_rounds",
+   "one_on_one_settlement_ranks",
+   "player_cosmetic_entitlements",
+   "player_directory_profiles"
+  ],
+  "written": [
+   "gxb_operation_receipts",
+   "one_on_one_competitions",
+   "one_on_one_matches",
+   "one_on_one_partner_usage",
+   "one_on_one_players",
+   "one_on_one_records",
+   "one_on_one_rounds",
+   "one_on_one_settlement_ranks",
+   "one_on_one_settlements"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [
+   "i9_7a_oneonone_purchase.json",
+   "oneonone.json"
+  ],
+  "unit": [
+   "competition_test.go",
+   "match_test.go"
+  ]
+ }
+}

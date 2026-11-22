@@ -1,0 +1,70 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [
+   {
+    "name": "character.HeroInstanceLockRank",
+    "rank": 410
+   },
+   {
+    "name": "character.PetInstanceLockRank",
+    "rank": 430
+   },
+   {
+    "name": "characterasset.SavedPresetRootLockRank",
+    "rank": 440
+   }
+  ],
+  "row_lock_methods": {},
+  "row_locks": [],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [],
+ "name": "characterasset",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/contentstore"
+ ],
+ "tables": {
+  "owned": [],
+  "read": [
+   "gxb_content_appearance_live",
+   "gxb_content_appearance_pet_styles",
+   "gxb_content_appearance_skins"
+  ],
+  "written": []
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay",
+   "publicshowcase"
+  ],
+  "scenarios_naming": [],
+  "unit": [
+   "appearance_projection_test.go",
+   "battle_contribution_test.go",
+   "borrowed_composite_test.go",
+   "ca8_foundation_test.go",
+   "contracts_test.go",
+   "mode_guild_test.go",
+   "owned_composite_test.go",
+   "practice_contribution_test.go",
+   "public_showcase_test.go",
+   "references_test.go",
+   "roster_summary_test.go",
+   "saved_preset_reference_state_test.go",
+   "synthetic_projection_test.go"
+  ]
+ }
+}

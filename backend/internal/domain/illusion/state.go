@@ -1,6 +1,7 @@
 package illusion
 
 import (
+	"fmt"
 	"time"
 
 	"gxb.local/backend/v2/internal/domain/modes"
@@ -166,48 +167,49 @@ type Result struct {
 	Killed   bool  `json:"killed"`
 }
 
-// Record keeps only the personal best (D428): a kill beats any loss, between
-// kills the shorter time wins, and between losses the higher damage, then the
-// shorter time.
+// Record keeps only the personal best, ordered exactly as the board ranks it
+// (OrderRank, D428): the result a board would place higher replaces the kept one.
 func (r *Result) Record(hurt, costTime int64, killed bool) {
-	better := hurt > r.Hurt || hurt == r.Hurt && costTime < r.CostTime
-	if killed && r.Killed {
-		better = costTime < r.CostTime
-	}
-	if killed != r.Killed {
-		better = killed
-	}
-	if better {
+	candidate := Result{PlayerID: r.PlayerID, Hurt: hurt, CostTime: costTime, Killed: killed}
+	if compareRank(candidate, *r) < 0 {
 		r.Hurt, r.CostTime, r.Killed = hurt, costTime, killed
 	}
 }
 
-// Attempt is frozen to the occurrence it started against; room_id stays zero
-// for a solo chance.
-type Attempt struct {
-	ID              string `json:"attempt_id"`
-	PlayerID        int64  `json:"player_id"`
-	LogicalServerID int64  `json:"logical_server_id"`
-	OpenDay         int64  `json:"open_day"`
-	CampaignID      int64  `json:"campaign_id"`
-	RoomID          int64  `json:"room_id"`
-	Formation       string `json:"formation"`
-	FrozenAt        int64  `json:"frozen_at"`
-	Resolved        bool   `json:"resolved"`
-	Damage          int64  `json:"damage"`
+// AttemptGeneration is the occurrence an attempt's frozen Combat START names;
+// a late result credits only this occurrence.
+type AttemptGeneration struct {
+	LogicalServerID int64 `json:"logical_server_id"`
+	OpenDay         int64 `json:"open_day"`
+	CampaignID      int64 `json:"campaign_id"`
 }
 
-func (a Attempt) Validate() error {
-	if a.ID == "" || a.PlayerID <= 0 || a.LogicalServerID <= 0 || a.OpenDay < 0 || a.CampaignID < FirstCampaignID || a.CampaignID > LastCampaignID {
+func (g AttemptGeneration) Validate() error {
+	if g.LogicalServerID <= 0 || g.OpenDay < 0 || g.CampaignID < FirstCampaignID || g.CampaignID > LastCampaignID {
 		return ErrInvalid
 	}
 	return nil
 }
 
-// Matches reports whether the attempt still belongs to the current occurrence;
-// a late result may credit only its own frozen results row.
-func (a Attempt) Matches(o Occurrence) bool {
-	return a.LogicalServerID == o.LogicalServerID && a.OpenDay == o.OpenDay && a.CampaignID == o.CampaignID
+// Reference is the Combat generation_ref a solo START freezes.
+func (g AttemptGeneration) Reference() string {
+	return fmt.Sprintf("ILLUSION/%d/%d/%d", g.LogicalServerID, g.OpenDay, g.CampaignID)
+}
+
+// Matches reports whether the frozen generation still belongs to the current
+// occurrence.
+func (g AttemptGeneration) Matches(o Occurrence) bool {
+	return g.LogicalServerID == o.LogicalServerID && g.OpenDay == o.OpenDay && g.CampaignID == o.CampaignID
+}
+
+// ParseAttemptGeneration reads a solo START's generation_ref.
+func ParseAttemptGeneration(reference string) (AttemptGeneration, bool) {
+	var g AttemptGeneration
+	read, err := fmt.Sscanf(reference, "ILLUSION/%d/%d/%d", &g.LogicalServerID, &g.OpenDay, &g.CampaignID)
+	if err != nil || read != 3 || g.Validate() != nil || g.Reference() != reference {
+		return AttemptGeneration{}, false
+	}
+	return g, true
 }
 
 func SecondOfDay(at time.Time) int64 {

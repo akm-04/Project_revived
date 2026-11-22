@@ -1,0 +1,27 @@
+{
+  "name": "r1_social_mids",
+  "level": 100,
+  "heroes": [],
+  "friend_fixture": true,
+  "note": "R1 case C (BUGS #93). Drives the stock SocialSystem model: MID 176 loadFriends (both client decoders read disjoint key sets), MID 177 REQUEST_FRIEND through SendRequestPlayers.requestFriend after the fixture friendship is deleted, and MID 185 ADD_BLACK_LIST through SocialSystem.addBlackList. The final check reports the observed count/list/lev/blacklist values; before the fix they are nil/blank/unchanged.",
+  "steps": [
+    "wait:3",
+    "lua:local s=xyd.ModelManager.get():loadModel(xyd.ModelType.SOCIAL_SYSTEM) _G.vcR1Social=s _G.vcR1LoadCode=nil s:loadFriends({}, function(code,reply) _G.vcR1LoadCode=code _G.vcR1LoadReply=reply end)",
+    "wait:3",
+    "lua:if vcR1LoadCode~=xyd.error.OK then error('vc-r1c-load-code-'..tostring(vcR1LoadCode)) end _G.vcR1Count=vcR1LoadReply.count _G.vcR1List=vcR1LoadReply.list if type(vcR1LoadReply.friend_list)~='table' or #vcR1LoadReply.friend_list<1 then error('vc-r1c-no-friend') end _G.vcR1Peer=tonumber(vcR1LoadReply.friend_list[1].player_id) if not vcR1Peer then error('vc-r1c-no-peer') end",
+    "lua:_G.vcR1DeleteCode=nil vcR1Social:deleteFriend({player_id=vcR1Peer}, function(code,reply) _G.vcR1DeleteCode=code end)",
+    "wait:3",
+    "lua:if vcR1DeleteCode~=xyd.error.OK then error('vc-r1c-delete-'..tostring(vcR1DeleteCode)) end local r=xyd.ModelManager.get():loadModel(xyd.ModelType.SEND_REQUEST_PLAYERS) if not r.players_ then r.players_={} end _G.vcR1Send=r _G.vcR1SendCode=nil _G.vcR1SendReply=nil r:requestFriend({player_id=vcR1Peer}, function(code,reply) _G.vcR1SendCode=code _G.vcR1SendReply=reply end)",
+    "wait:3",
+    "lua:if vcR1SendCode~=xyd.error.OK then error('vc-r1c-send-'..tostring(vcR1SendCode)) end local row=vcR1Send.players_[#vcR1Send.players_] _G.vcR1Lev=row and row.lev _G.vcR1Name=row and row.playerName _G.vcR1BlackBefore=#(vcR1Social.blacklist or {}) _G.vcR1BlackCode=nil vcR1Social:addBlackList({player_id=vcR1Peer}, function(code,reply) _G.vcR1BlackCode=code _G.vcR1BlackReply=reply end)",
+    "wait:3",
+    "lua:if vcR1BlackCode~=xyd.error.OK then error('vc-r1c-black-'..tostring(vcR1BlackCode)) end local playerInfo=vcR1BlackReply and vcR1BlackReply.player_info if playerInfo then table.insert(vcR1Social.blacklist, playerInfo) end _G.vcR1Black=#(vcR1Social.blacklist or {}) local ok=(vcR1Count~=nil and type(vcR1List)=='table' and vcR1Lev~=nil and vcR1Name~=nil and vcR1Black==vcR1BlackBefore+1) if not ok then error(string.format('vc-r1c-observed count=%s list=%s lev=%s name=%s black=%d/%d pi=%s listtype=%s bltype=%s', tostring(vcR1Count), type(vcR1List), tostring(vcR1Lev), tostring(vcR1Name), vcR1Black, vcR1BlackBefore, tostring(playerInfo), type(vcR1Social.blacklist), type(vcR1BlackReply))) end"
+  ],
+  "settle_seconds": 5,
+  "expect_ok": [
+    176,
+    177,
+    181,
+    185
+  ]
+}

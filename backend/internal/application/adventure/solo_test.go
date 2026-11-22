@@ -2,14 +2,17 @@ package adventure
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
 	cb "gxb.local/backend/v2/internal/application/combat"
 	d "gxb.local/backend/v2/internal/domain/adventure"
+	darena "gxb.local/backend/v2/internal/domain/arena"
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -24,19 +27,17 @@ func (s *noticeStore) ListOccurrencesTx(context.Context, tx.Queryer, identity.Lo
 func (s *noticeStore) ReadOccurrenceTx(context.Context, tx.Queryer, identity.PlayerID, int64) (d.Occurrence, bool, error) {
 	return d.Occurrence{}, false, nil
 }
+func (s *noticeStore) ReadOccurrenceBySourceKeyTx(context.Context, tx.Queryer, identity.PlayerID, int64, string) (d.Occurrence, bool, error) {
+	return d.Occurrence{}, false, nil
+}
 func (s *noticeStore) FinishOccurrenceTx(context.Context, tx.Tx, identity.PlayerID, int64, time.Time, time.Time) (bool, error) {
 	return false, nil
 }
-func (s *noticeStore) InsertAttemptTx(context.Context, tx.Tx, d.SingleAttempt) error { return nil }
-func (s *noticeStore) FindLatestAttemptTx(context.Context, tx.Queryer, identity.PlayerID, int64) (d.SingleAttempt, bool, error) {
-	return d.SingleAttempt{}, false, nil
-}
-func (s *noticeStore) SaveAttemptTx(context.Context, tx.Tx, d.SingleAttempt) error { return nil }
-func (s *noticeStore) RenameAttemptTx(context.Context, tx.Tx, string, string, identity.PlayerID) error {
+func (s *noticeStore) InsertSettlementTx(context.Context, tx.Tx, ids.UUID, identity.PlayerID, int64, time.Time) error {
 	return nil
 }
-func (s *noticeStore) DeleteAttemptTx(context.Context, tx.Tx, string, identity.PlayerID) error {
-	return nil
+func (s *noticeStore) ReadSettlementTx(context.Context, tx.Queryer, ids.UUID) (int64, bool, error) {
+	return 0, false, nil
 }
 func (s *noticeStore) InsertReportTx(context.Context, tx.Tx, string, int64, int64, []int64, string, time.Time) error {
 	return nil
@@ -44,7 +45,7 @@ func (s *noticeStore) InsertReportTx(context.Context, tx.Tx, string, int64, int6
 func (s *noticeStore) ReadReportTx(context.Context, tx.Queryer, string, int64, identity.PlayerID, time.Time) (string, bool, error) {
 	return "", false, nil
 }
-func (s *noticeStore) PurgeExpiredReportsTx(context.Context, tx.Tx, time.Time, int64) (int64, error) {
+func (s *noticeStore) PurgeExpiredReportsTx(context.Context, tx.Tx, time.Time, int, int64) (int64, error) {
 	return 0, nil
 }
 func (s *noticeStore) PurgeOccurrencesTx(context.Context, tx.Tx, time.Time, int64) (int64, error) {
@@ -61,7 +62,7 @@ func (queryerStub) QueryRow(context.Context, string, ...any) tx.Row { return nil
 
 func testOccurrence(eventType int64, at time.Time, finished bool) d.Occurrence {
 	event, _ := d.Profile(eventType)
-	occurrence, _ := d.NewOccurrence("fact/"+time.Unix(int64(eventType), 0).String(), identity.PlayerID(7001), event, at)
+	occurrence, _ := d.NewOccurrence("fact/"+time.Unix(int64(eventType), 0).String(), identity.PlayerID(7001), event, at, 0)
 	if finished {
 		occurrence.Finish(at.Add(time.Minute))
 	}
@@ -121,12 +122,53 @@ func TestRoomPushesRespectAllAndActor(t *testing.T) {
 func TestPVPBattleUsesOpponentDefenseOrRobotTeam(t *testing.T) {
 	actor := identity.ActorContext{PlayerID: identity.PlayerID(7001)}
 	request := FightRequest{Formation: []int64{11, 12}, PetID: 21}
-	player := pvpBattle(actor, request, Opponent{PlayerID: identity.PlayerID(7002), Heroes: []int64{31, 32}, PetID: 41})
+	player := pvpBattle(actor, request, Opponent{PlayerID: identity.PlayerID(7002), Heroes: []cb.Participant{
+		{Origin: cd.OwnedForeign, Kind: cd.HeroActor, Player: identity.PlayerID(7002), Identity: 31},
+		{Origin: cd.OwnedForeign, Kind: cd.HeroActor, Player: identity.PlayerID(7002), Identity: 32}},
+		Pets: []cb.Participant{{Origin: cd.OwnedForeign, Kind: cd.PetActor, Player: identity.PlayerID(7002), Identity: 41}}})
 	if len(player.TeamA) != 2 || player.TeamA[0].Origin != cd.OwnedSelf || len(player.WavesB) != 1 || player.WavesB[0][0].Origin != cd.OwnedForeign || player.WavesB[0][0].Player != identity.PlayerID(7002) || len(player.PetsB) != 1 {
 		t.Fatalf("player battle %+v", player)
 	}
-	robot := pvpBattle(actor, request, Opponent{TemplateHeroes: []cb.Participant{{Origin: cd.Template, Kind: cd.HeroActor, Identity: 51}}})
+	robot := pvpBattle(actor, request, Opponent{Heroes: []cb.Participant{{Origin: cd.Template, Kind: cd.HeroActor, Identity: 51}}})
 	if len(robot.WavesB) != 1 || robot.WavesB[0][0].Origin != cd.Template || len(robot.PetsB) != 0 {
 		t.Fatalf("robot battle %+v", robot)
+	}
+}
+
+func TestPVPBattleQualifiesArenaAwardTransforms(t *testing.T) {
+	battle := pvpBattle(identity.ActorContext{PlayerID: 100001}, FightRequest{Formation: []int64{1}}, Opponent{PlayerID: 100002, Heroes: []cb.Participant{{Origin: cd.OwnedForeign, Kind: cd.HeroActor, Player: 100002, Identity: 2, Transform: map[string]int64{"arena_add_star": 1}}}})
+	if battle.Context == nil || battle.Context.Transform != darena.Transform {
+		t.Fatal("Arena awards lack their qualified battle context")
+	}
+	if battle.WavesB[0][0].Transform["arena_add_star"] != 1 {
+		t.Fatal("Arena award silently lost")
+	}
+}
+
+type unavailableOpponentSource struct {
+	arenaFound bool
+	robotReads int
+}
+
+func (source *unavailableOpponentSource) ArenaOpponentTx(context.Context, tx.Queryer, identity.PlayerID, int64, uint64, time.Time) (Opponent, bool, error) {
+	return Opponent{PlayerID: 100002}, source.arenaFound, nil
+}
+
+func (source *unavailableOpponentSource) RobotOpponentTx(context.Context, tx.Queryer, uint64) (Opponent, bool, error) {
+	source.robotReads++
+	return Opponent{}, true, nil
+}
+
+func TestUnavailableOpponentRefusesWithoutMaskingPlayer(t *testing.T) {
+	for _, arenaFound := range []bool{true, false} {
+		source := &unavailableOpponentSource{arenaFound: arenaFound}
+		mode := Mode{Opponents: source}
+		_, err := mode.opponent(context.Background(), nil, identity.ActorContext{PlayerID: 100001}, d.Catalog{}, time.Unix(1, 0), 0)
+		if !errors.Is(err, d.ErrRefused) {
+			t.Fatalf("empty resolved team admitted: %v", err)
+		}
+		if arenaFound && source.robotReads != 0 {
+			t.Fatal("unavailable player silently replaced by robot")
+		}
 	}
 }

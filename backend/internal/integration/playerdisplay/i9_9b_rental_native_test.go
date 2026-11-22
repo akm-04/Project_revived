@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"strconv"
 	"testing"
 	"time"
@@ -25,18 +26,23 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/workplacestore"
+	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	appcombat "gxb.local/backend/v2/internal/application/combat"
 	"gxb.local/backend/v2/internal/application/guildcore"
 	"gxb.local/backend/v2/internal/application/guildrental"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/workplace"
 	"gxb.local/backend/v2/internal/content/guildrentalpolicy"
+	"gxb.local/backend/v2/internal/domain/character"
 	d "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/grant"
 
 	"gxb.local/backend/v2/internal/domain/guild"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	"gxb.local/backend/v2/internal/protocol/httpedge"
+	"gxb.local/backend/v2/internal/protocol/wire"
 )
 
 // rentalUnits is the I9-9B fixture port: level comes from the production
@@ -89,13 +95,14 @@ func guildrentalPolicy(p guildrentalpolicy.Policy) guildrental.Policy {
 func rentalService(t *testing.T, p *postgres.Pool) guildrental.Service {
 	t.Helper()
 	artifact := must(guildrentalpolicy.LoadBuiltin())(t, "rental policy")
-	values := activityOwner(p)
+	values := missionOwner(p)
 	return guildrental.Service{
 		Runner: tx.Runner{DB: p}, Store: guildstore.Store{Queryer: p}, Units: rentalUnits{}, Levels: productionLevels{},
 		Workplace: workplace.Mode{Store: workplacestore.Store{}}, Privileges: appi5.BaselinePrivilegeProvider{},
 		Values: values, Costs: appi5.MaterialCostDebiter{Store: i5store.Store{Queryer: p}, Content: contentstore.Store{Queryer: p}},
 		Facts: appi5.ObjectiveFacts{Owner: values, Open: i5store.Store{Queryer: p}}, Mail: appi5.SettlementMail{Store: i5store.Store{Queryer: p}},
 		Fence: i5store.Store{Queryer: p}, Players: i4store.PlayerRootLocker{}, Content: contentstore.Store{Queryer: p}, Policy: guildrentalPolicy(artifact.Policy),
+		PartnerMissions: libraryService(p, p),
 	}
 }
 
@@ -151,9 +158,16 @@ func newRentalFixture(t *testing.T) rentalFixture {
 
 func (f rentalFixture) borrow(t *testing.T, scope string, campaignType int64, hero, pet int64) (appcombat.Started, error) {
 	t.Helper()
-	locator := d.Locator{DomainKind: "i9-9b-rental", AuthorityScope: fmt.Sprint(f.borrower.LogicalServerID), DomainLocator: fmt.Sprint(f.borrower.PlayerID) + "/" + scope}
-	request := appcombat.StartRequest{Actor: f.borrower, Locator: locator, GenerationRef: "gen-" + scope, StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
-		Battle: appcombat.BattleRequest{CampaignType: campaignType,
+	return f.borrowMode(t, scope, campaignType, campaignType, hero, pet)
+}
+
+// borrowMode separates the battle content type from the rent-list mode the
+// client sent, the split I9_GUILD_RENTAL_V1 C3/C4 requires.
+func (f rentalFixture) borrowMode(t *testing.T, scope string, campaignType, rentalMode int64, hero, pet int64) (appcombat.Started, error) {
+	t.Helper()
+	locator := d.Locator{DomainKind: "EVENT_CENTRE_BOARD", AuthorityScope: fmt.Sprint(f.borrower.LogicalServerID), DomainLocator: fmt.Sprint(f.borrower.PlayerID) + "/" + scope}
+	request := appcombat.StartRequest{Mode: d.ModeEventCentreBoard, Actor: f.borrower, Locator: locator, GenerationRef: "gen-" + scope, StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
+		Battle: appcombat.BattleRequest{CampaignType: campaignType, RentalMode: rentalMode,
 			WavesB: [][]appcombat.Participant{{{Origin: d.Template, Kind: d.HeroActor, Identity: 10001002, TemplateParams: templateParams(10001002)}}}}}
 	if hero > 0 {
 		request.Battle.TeamA = []appcombat.Participant{{Origin: d.Borrowed, Kind: d.HeroActor, Player: f.lender.PlayerID, Identity: hero}}
@@ -166,9 +180,9 @@ func (f rentalFixture) borrow(t *testing.T, scope string, campaignType int64, he
 
 func (f rentalFixture) borrowBoth(t *testing.T, scope string, campaignType int64, hero int64, heroLender identity.PlayerID, pet int64, petLender identity.PlayerID) (appcombat.Started, error) {
 	t.Helper()
-	locator := d.Locator{DomainKind: "i9-9b-rental", AuthorityScope: fmt.Sprint(f.borrower.LogicalServerID), DomainLocator: fmt.Sprint(f.borrower.PlayerID) + "/" + scope}
-	request := appcombat.StartRequest{Actor: f.borrower, Locator: locator, GenerationRef: "gen-" + scope, StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
-		Battle: appcombat.BattleRequest{CampaignType: campaignType,
+	locator := d.Locator{DomainKind: "EVENT_CENTRE_BOARD", AuthorityScope: fmt.Sprint(f.borrower.LogicalServerID), DomainLocator: fmt.Sprint(f.borrower.PlayerID) + "/" + scope}
+	request := appcombat.StartRequest{Mode: d.ModeEventCentreBoard, Actor: f.borrower, Locator: locator, GenerationRef: "gen-" + scope, StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
+		Battle: appcombat.BattleRequest{CampaignType: campaignType, RentalMode: campaignType,
 			TeamA:  []appcombat.Participant{{Origin: d.Borrowed, Kind: d.HeroActor, Player: heroLender, Identity: hero}},
 			PetsA:  []appcombat.Participant{{Origin: d.Borrowed, Kind: d.PetActor, Player: petLender, Identity: pet}},
 			WavesB: [][]appcombat.Participant{{{Origin: d.Template, Kind: d.HeroActor, Identity: 10001002, TemplateParams: templateParams(10001002)}}}}}
@@ -201,6 +215,111 @@ func TestI9_9BProductionUnitsForceMatchesPlace(t *testing.T) {
 	}
 }
 
+func TestI9_9BGuildOffersProjectHeroDetail(t *testing.T) {
+	f := newRentalFixture(t)
+	if err := f.service.Place(ctx, f.lender, guild.RentalHero, f.hero, opPinned(f.revision)); err != nil {
+		t.Fatal("place", err)
+	}
+	// Legacy source rows keep their visible level without the cumulative curve;
+	// the stock detail window subtracts totalExp(level-1) from the wire exp.
+	exec(t, f.pool, `UPDATE player_heroes SET level=100,exp=0,updated_at=clock_timestamp() WHERE player_id=$1 AND partner_id=$2`, int64(f.lender.PlayerID), f.hero)
+	content := contentstore.Store{Queryer: f.pool}
+	reads := guildrental.Reader{
+		Runner: tx.Runner{DB: f.pool}, Store: guildstore.Store{Queryer: f.pool},
+		Characters: guildrentalread.Characters{Content: content}, Profiles: guildrentalread.Profiles{}, Levels: guildrentalread.Levels{},
+		Mana: guildrentalread.Mana{}, Privileges: appi5.BaselinePrivilegeProvider{},
+		Workplace: workplace.Mode{Store: workplacestore.Store{}}, Policy: f.service.Policy, Content: content,
+		Now: func(c context.Context, q tx.Queryer) (time.Time, error) {
+			return (postgres.AuthoritativeTime{Queryer: q}).Now(c)
+		},
+	}
+	list, err := reads.GuildOffers(ctx, f.borrower, guild.RentalHero, 0, opPinned(f.revision))
+	if err != nil {
+		t.Fatal("guild offers", err)
+	}
+	for _, row := range list.Rows {
+		if row.Offer.Unit != f.hero {
+			continue
+		}
+		if row.Hero == nil || row.Hero.Level != 100 || row.Hero.Exp != 1844095 {
+			t.Fatalf("detail exp lev=%v exp=%v", row.Hero, row.Hero.Exp)
+		}
+		if row.Appearance == nil || row.Appearance.OwnerStateVersion != row.Hero.StateVersion {
+			t.Fatalf("qualified appearance %+v", row.Appearance)
+		}
+		if row.TwiceAwakeStage == nil || *row.TwiceAwakeStage != 0 {
+			t.Fatalf("raw twice-awake stage %v", row.TwiceAwakeStage)
+		}
+		return
+	}
+	t.Fatal("lender offer missing from 2768 projection")
+}
+
+// TestI9_9BEmptyListCacheKeysNative drives the production Reader and stock 2768
+// dispatcher over both early-empty answers: a campaign type with no borrow row and
+// a caller without a guild. Each carries the kind/type/empty-rows key a materialized
+// empty list uses; one shared literal would let the client keep another type's list.
+func TestI9_9BEmptyListCacheKeysNative(t *testing.T) {
+	f := newRentalFixture(t)
+	reads := rentalReader(f, contentstore.Store{Queryer: f.pool}, authoritativeObservation)
+	readOp := opPinned(f.revision)
+	outsider, _ := genuinePlayer(t, f.pool, f.borrower.LogicalServerID)
+	dispatcher := stockruntime.GuildRentalDispatcher{Authority: rentalFixtureAuthority{"borrower": f.borrower, "outsider": outsider},
+		Service: rentalListOnlyPort{Reader: reads}}
+
+	// The guild has no offers here, so this is the materialized empty list key.
+	materialized, err := reads.GuildOffers(ctx, f.borrower, guild.RentalHero, 1, readOp)
+	if err != nil {
+		t.Fatal("materialized empty list", err)
+	}
+	if materialized.RentCount == 0 || len(materialized.Rows) != 0 {
+		t.Fatalf("materialized empty list key %d rows %d", materialized.RentCount, len(materialized.Rows))
+	}
+
+	unlistedKeys := map[int64]int64{}
+	for _, requestedType := range []int64{67, 99} {
+		list, err := reads.GuildOffers(ctx, f.borrower, guild.RentalHero, requestedType, readOp)
+		if err != nil {
+			t.Fatal("unlisted type", requestedType, err)
+		}
+		if list.RentCount == 1 || list.RentCount == 0 || len(list.Rows) != 0 {
+			t.Fatalf("unlisted type %d key %d rows %d", requestedType, list.RentCount, len(list.Rows))
+		}
+		again, err := reads.GuildOffers(ctx, f.borrower, guild.RentalHero, requestedType, readOp)
+		if err != nil || again.RentCount != list.RentCount {
+			t.Fatalf("unlisted type %d key unstable %d %d %v", requestedType, list.RentCount, again.RentCount, err)
+		}
+		unlistedKeys[requestedType] = list.RentCount
+		response := rentalDispatch(t, dispatcher, "borrower", f.borrower, 2768, map[string]any{"campaign_type": requestedType}, readOp)
+		nested := response.Body["guild_rent_heroes"].(map[string]any)
+		if response.HTTPStatus != http.StatusOK || len(nested["partners"].([]any)) != 0 ||
+			response.Body["rent_count"] != list.RentCount || nested["rent_count"] != list.RentCount {
+			t.Fatalf("unlisted type %d wire %d %v", requestedType, response.HTTPStatus, response.Body)
+		}
+	}
+	if unlistedKeys[67] == unlistedKeys[99] {
+		t.Fatalf("unlisted types share one cache key %d", unlistedKeys[67])
+	}
+
+	guildless, err := reads.GuildOffers(ctx, outsider, guild.RentalHero, 1, readOp)
+	if err != nil {
+		t.Fatal("guildless list", err)
+	}
+	if guildless.RentCount != materialized.RentCount || len(guildless.Rows) != 0 {
+		t.Fatalf("guildless key %d materialized %d", guildless.RentCount, materialized.RentCount)
+	}
+	otherType, err := reads.GuildOffers(ctx, outsider, guild.RentalHero, 2, readOp)
+	if err != nil || otherType.RentCount == guildless.RentCount {
+		t.Fatalf("guildless key ignores the type %d %d %v", guildless.RentCount, otherType.RentCount, err)
+	}
+	response := rentalDispatch(t, dispatcher, "outsider", outsider, 2768, map[string]any{"campaign_type": int64(1)}, readOp)
+	nested := response.Body["guild_rent_heroes"].(map[string]any)
+	if response.HTTPStatus != http.StatusOK || len(nested["partners"].([]any)) != 0 ||
+		response.Body["rent_count"] != guildless.RentCount || nested["rent_count"] != guildless.RentCount {
+		t.Fatalf("guildless wire %d %v", response.HTTPStatus, response.Body)
+	}
+}
+
 func TestI9_9BBorrowedTableCollisionRefunds(t *testing.T) {
 	f := newRentalFixture(t)
 	op := opPinned(f.revision)
@@ -209,9 +328,9 @@ func TestI9_9BBorrowedTableCollisionRefunds(t *testing.T) {
 	}
 	definition := must(contentstore.Store{Queryer: f.pool}.HeroNormalSummonTx(ctx, f.pool, f.revision, genuineHeroTable))(t, "summon policy")
 	owned := must(genuineHeroService(f.pool).SummonNormal(ctx, f.borrower, genuineHeroTable, int64(definition.Template.FragmentItemID), definition.FragmentCount, op))(t, "borrower summon")
-	locator := d.Locator{DomainKind: "i9-9b-rental", AuthorityScope: fmt.Sprint(f.borrower.LogicalServerID), DomainLocator: fmt.Sprint(f.borrower.PlayerID) + "/collision"}
-	request := appcombat.StartRequest{Actor: f.borrower, Locator: locator, GenerationRef: "gen-collision", StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
-		Battle: appcombat.BattleRequest{CampaignType: 1,
+	locator := d.Locator{DomainKind: "EVENT_CENTRE_BOARD", AuthorityScope: fmt.Sprint(f.borrower.LogicalServerID), DomainLocator: fmt.Sprint(f.borrower.PlayerID) + "/collision"}
+	request := appcombat.StartRequest{Mode: d.ModeEventCentreBoard, Actor: f.borrower, Locator: locator, GenerationRef: "gen-collision", StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
+		Battle: appcombat.BattleRequest{CampaignType: 1, RentalMode: 1,
 			TeamA: []appcombat.Participant{
 				{Origin: d.OwnedSelf, Kind: d.HeroActor, Player: f.borrower.PlayerID, Identity: owned.PartnerID},
 				{Origin: d.Borrowed, Kind: d.HeroActor, Player: f.lender.PlayerID, Identity: f.hero},
@@ -359,20 +478,13 @@ func TestI9_9BCampaignBorrowedStarCap(t *testing.T) {
 	}
 }
 
-// C17: with the Gods Trial borrow row on, START accepts a BORROWED actor.
-func TestI9_9BGodsTrialBorrowedStart(t *testing.T) {
+// C17: the shipped Gods Trial borrow row lets START accept a BORROWED actor,
+// and the loan is charged once through a START/RESULT pair. Resending START and
+// settling RESULT never lend a second time.
+func TestI9_9BGodsTrialBorrowedStartAndResult(t *testing.T) {
 	f := newRentalFixture(t)
 	op := opPinned(f.revision)
-	rental := f.service
-	policyCopy := rental.Policy
-	policyCopy.Modes = map[int64]guildrental.ModeRule{}
-	for kind, rule := range rental.Policy.Modes {
-		policyCopy.Modes[kind] = rule
-	}
-	policyCopy.Modes[79] = guildrental.ModeRule{Enabled: true}
-	rental.Policy = policyCopy
-	f.combat.Inputs.Lending = rental
-	if err := rental.Place(ctx, f.lender, guild.RentalHero, f.second, op); err != nil {
+	if err := f.service.Place(ctx, f.lender, guild.RentalHero, f.second, op); err != nil {
 		t.Fatal("place", err)
 	}
 	compositeLevel(t, f.pool, f.borrower, f.revision, 100)
@@ -386,8 +498,32 @@ func TestI9_9BGodsTrialBorrowedStart(t *testing.T) {
 	s.Rules = f.combat.Rules
 	exec(t, f.pool, `UPDATE player_temporal_resources SET stored_amount=180,regen_anchor_at=NULL WHERE player_id=$1 AND resource_key='spirit_energy'`, int64(f.borrower.PlayerID))
 	campaign := int64(dayOfWeek(clock.at))*1000 + 1
-	if _, err := s.Start(ctx, f.borrower, appgodstrial.Fight{Campaign: campaign, Formation: []int64{own.PartnerID}, RentPlayer: int64(f.lender.PlayerID), RentUnit: f.second}, op); err != nil {
+	fight := appgodstrial.Fight{Campaign: campaign, Formation: []int64{own.PartnerID}, RentPlayer: int64(f.lender.PlayerID), RentUnit: f.second}
+	uses := func() int64 {
+		return scalar(t, f.pool, `SELECT count(*) FROM guild_rental_uses WHERE borrower_id=$1 AND lender_id=$2 AND kind='HERO' AND campaign_type=79 AND unit_id=$3`, int64(f.borrower.PlayerID), int64(f.lender.PlayerID), f.second)
+	}
+	award := func() int64 {
+		return scalar(t, f.pool, `SELECT rent_award FROM guild_rental_offers WHERE lender_id=$1 AND kind='HERO' AND unit_id=$2`, int64(f.lender.PlayerID), f.second)
+	}
+	mana := libraryAmount(t, f.pool, f.borrower, "mana")
+	if _, err := s.Start(ctx, f.borrower, fight, op); err != nil {
 		t.Fatal("C17 Gods Trial borrowed START", err)
+	}
+	charged := mana - libraryAmount(t, f.pool, f.borrower, "mana")
+	if charged <= 0 || uses() != 1 || award() != charged {
+		t.Fatalf("C17 loan charged mana %d uses %d award %d", charged, uses(), award())
+	}
+	if _, err := s.Start(ctx, f.borrower, fight, op); err != nil {
+		t.Fatal("C17 Gods Trial START replay", err)
+	}
+	if libraryAmount(t, f.pool, f.borrower, "mana") != mana-charged || uses() != 1 {
+		t.Fatal("C17 START replay charged the loan again")
+	}
+	if _, err := s.Result(ctx, f.borrower, appgodstrial.Result{Campaign: campaign, Star: 1, Formation: []int64{own.PartnerID}}, op); err != nil {
+		t.Fatal("C17 Gods Trial borrowed RESULT", err)
+	}
+	if libraryAmount(t, f.pool, f.borrower, "mana") != mana-charged || uses() != 1 || award() != charged {
+		t.Fatal("C17 RESULT charged the loan again")
 	}
 }
 
@@ -409,9 +545,9 @@ func rentalDeparture(t *testing.T) (rentalFixture, guildcore.Service, int64, int
 	if err := f.service.Place(ctx, f.borrower, guild.RentalHero, idle.PartnerID, opPinned(revision)); err != nil {
 		t.Fatal("place idle offer", err)
 	}
-	locator := d.Locator{DomainKind: "i9-9b-rental", AuthorityScope: fmt.Sprint(f.lender.LogicalServerID), DomainLocator: fmt.Sprint(f.lender.PlayerID) + "/departure"}
-	request := appcombat.StartRequest{Actor: f.lender, Locator: locator, GenerationRef: "gen-departure", StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
-		Battle: appcombat.BattleRequest{CampaignType: 1,
+	locator := d.Locator{DomainKind: "EVENT_CENTRE_BOARD", AuthorityScope: fmt.Sprint(f.lender.LogicalServerID), DomainLocator: fmt.Sprint(f.lender.PlayerID) + "/departure"}
+	request := appcombat.StartRequest{Mode: d.ModeEventCentreBoard, Actor: f.lender, Locator: locator, GenerationRef: "gen-departure", StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
+		Battle: appcombat.BattleRequest{CampaignType: 1, RentalMode: 1,
 			TeamA:  []appcombat.Participant{{Origin: d.Borrowed, Kind: d.HeroActor, Player: f.borrower.PlayerID, Identity: borrowed.PartnerID}},
 			WavesB: [][]appcombat.Participant{{{Origin: d.Template, Kind: d.HeroActor, Identity: 10001002, TemplateParams: templateParams(10001002)}}}}}
 	if _, err := fixtureStart(t, f.combat, revision, request, f.pool); err != nil {
@@ -473,9 +609,9 @@ func TestI9_9BDepartureClosesRentals(t *testing.T) {
 		if err := f.service.Place(ctx, f.lender, guild.RentalHero, f.second, op); err != nil {
 			t.Fatal("place idle offer", err)
 		}
-		locator := d.Locator{DomainKind: "i9-9b-rental", AuthorityScope: fmt.Sprint(f.borrower.LogicalServerID), DomainLocator: fmt.Sprint(f.borrower.PlayerID) + "/dissolve"}
-		request := appcombat.StartRequest{Actor: f.borrower, Locator: locator, GenerationRef: "gen-dissolve", StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
-			Battle: appcombat.BattleRequest{CampaignType: 1,
+		locator := d.Locator{DomainKind: "EVENT_CENTRE_BOARD", AuthorityScope: fmt.Sprint(f.borrower.LogicalServerID), DomainLocator: fmt.Sprint(f.borrower.PlayerID) + "/dissolve"}
+		request := appcombat.StartRequest{Mode: d.ModeEventCentreBoard, Actor: f.borrower, Locator: locator, GenerationRef: "gen-dissolve", StartFingerprint: fingerprint(locator.AuthorityScope + locator.DomainLocator),
+			Battle: appcombat.BattleRequest{CampaignType: 1, RentalMode: 1,
 				TeamA:  []appcombat.Participant{{Origin: d.Borrowed, Kind: d.HeroActor, Player: f.lender.PlayerID, Identity: f.hero}},
 				WavesB: [][]appcombat.Participant{{{Origin: d.Template, Kind: d.HeroActor, Identity: 10001002, TemplateParams: templateParams(10001002)}}}}}
 		if _, err := fixtureStart(t, f.combat, f.revision, request, f.pool); err != nil {
@@ -521,9 +657,9 @@ func TestI9_9BRentalNative(t *testing.T) {
 		t.Fatal("C8 cap", err)
 	}
 
-	// C4: a disabled borrow mode refuses at START through Lending.
-	if _, err := f.borrow(t, "gods", 79, f.second, 0); !errors.Is(err, d.ErrLoanRefused) {
-		t.Fatal("C4 disabled mode", err)
+	// C4: a mode with no policy row refuses at START through Lending.
+	if _, err := f.borrowMode(t, "unlisted", 8, 67, f.second, 0); !errors.Is(err, d.ErrLoanRefused) {
+		t.Fatal("C4 unlisted mode", err)
 	}
 
 	// C11: VIP 0 gives no rent level-up, so a level 50 unit is above the level 1 borrower.
@@ -533,7 +669,7 @@ func TestI9_9BRentalNative(t *testing.T) {
 	}
 	exec(t, f.pool, `UPDATE player_heroes SET level=1 WHERE player_id=$1 AND partner_id=$2`, int64(f.lender.PlayerID), f.second)
 
-	// C3 and C16: one paid borrow debits mana once and adds the offer's rent_award.
+	// C3: one paid borrow debits mana once and adds the offer's rent_award.
 	mana := libraryAmount(t, f.pool, f.borrower, "mana")
 	price := int64(1000)
 	_, err := f.borrow(t, "one", 1, f.hero, 0)
@@ -630,5 +766,396 @@ func TestI9_9BRentalNative(t *testing.T) {
 	}
 	if mail := scalar(t, f.pool, `SELECT count(*) FROM mail_records WHERE recipient_player_id IN ($1,$2) AND source_kind='GUILD_RENTAL_DEPARTURE'`, int64(f.lender.PlayerID), int64(f.petLender.PlayerID)); mail != 2 {
 		t.Fatal("C15 second close mailed again", mail)
+	}
+}
+
+// BUGS #131: daily mission 10018 "Have Fun! Lend 1 battle girl" counts the
+// lender's offer placement (fact 116), not the borrower's paid START.
+func TestI9_12HaveFunLendMissionNative(t *testing.T) {
+	f := newRentalFixture(t)
+	// Mission 10018's prerequisite is player level 32 (mission.lua req "1|32").
+	exec(t, f.pool, `UPDATE player_progression SET level=32,updated_at=clock_timestamp()-interval '1 hour' WHERE player_id=$1`, int64(f.lender.PlayerID))
+	progress := func(player identity.PlayerID) int64 {
+		return scalar(t, f.pool, `SELECT COALESCE((SELECT progress FROM player_mission_instances WHERE player_id=$1 AND objective_id=10018 AND definition_revision='I9_MISSIONS_V1' ORDER BY generation_id LIMIT 1),0)`, int64(player))
+	}
+	started := time.Now().UTC().Truncate(time.Microsecond)
+	firstOp := opPinned(f.revision)
+	firstOp.StartedAt = started
+	if err := f.service.Place(ctx, f.lender, guild.RentalHero, f.hero, firstOp); err != nil {
+		t.Fatal("place hero", err)
+	}
+	if got := progress(f.lender.PlayerID); got != 1 {
+		t.Fatalf("lend mission progress = %d want 1", got)
+	}
+	if rows := scalar(t, f.pool, `SELECT count(*) FROM player_mission_instances WHERE player_id=$1 AND objective_id=10018 AND definition_revision='I9_MISSIONS_V1'`, int64(f.lender.PlayerID)); rows != 1 {
+		t.Fatalf("mission 10018 rows = %d want 1", rows)
+	}
+
+	// The borrower's paid START no longer credits a mission that says "lend".
+	if _, err := f.borrow(t, "havefun", 1, f.hero, 0); err != nil {
+		t.Fatal("borrow", err)
+	}
+	if got := progress(f.borrower.PlayerID); got != 0 {
+		t.Fatalf("borrower lend-mission progress = %d want 0", got)
+	}
+
+	// A pet offer is not a battle girl.
+	if err := f.service.Place(ctx, f.petLender, guild.RentalPet, f.pet, opPinned(f.revision)); err != nil {
+		t.Fatal("place pet", err)
+	}
+	if got := progress(f.petLender.PlayerID); got != 0 {
+		t.Fatalf("pet lend-mission progress = %d want 0", got)
+	}
+
+	// Recall, then place the same girl again at the same operation instant: the
+	// offer business key repeats and the fact is applied once.
+	recallOp := opPinned(f.revision)
+	recallOp.StartedAt = started.Add(1801 * time.Second)
+	if _, _, err := f.service.Recall(ctx, f.lender, guild.RentalHero, f.hero, recallOp); err != nil {
+		t.Fatal("recall", err)
+	}
+	repeatOp := opPinned(f.revision)
+	repeatOp.StartedAt = started
+	if err := f.service.Place(ctx, f.lender, guild.RentalHero, f.hero, repeatOp); err != nil {
+		t.Fatal("repeat place", err)
+	}
+	if got := progress(f.lender.PlayerID); got != 1 {
+		t.Fatalf("repeat lend progress = %d want 1", got)
+	}
+	ownerKey := strconv.FormatInt(int64(f.lender.PlayerID), 10)
+	if facts := scalar(t, f.pool, `SELECT count(*) FROM gxb_operation_receipts WHERE owner_kind='player' AND owner_key=$1 AND domain='objective-fact' AND operation='mission:1' AND semantic_key LIKE '%:10018:%'`, ownerKey); facts != 1 {
+		t.Fatalf("mission fact receipts = %d want 1", facts)
+	}
+}
+
+// rentalContent is both the Reader's policy content and the qualified owner
+// read's appearance content; production binds the same content store to both.
+type rentalContent interface {
+	guildrental.Content
+	guildrentalread.CharacterContent
+}
+
+func authoritativeObservation(c context.Context, q tx.Queryer) (time.Time, error) {
+	return (postgres.AuthoritativeTime{Queryer: q}).Now(c)
+}
+
+func observationOffset(delta time.Duration) func(context.Context, tx.Queryer) (time.Time, error) {
+	return func(c context.Context, q tx.Queryer) (time.Time, error) {
+		at, err := authoritativeObservation(c, q)
+		return at.Add(delta), err
+	}
+}
+
+// rentalReader builds the production Reader composition the canonical wiring
+// uses: existing owner reads only, no fixture projection DTOs.
+func rentalReader(f rentalFixture, content rentalContent, now func(context.Context, tx.Queryer) (time.Time, error)) guildrental.Reader {
+	return guildrental.Reader{
+		Runner: tx.Runner{DB: f.pool}, Store: guildstore.Store{Queryer: f.pool},
+		Characters: guildrentalread.Characters{Content: content}, Profiles: guildrentalread.Profiles{}, Levels: guildrentalread.Levels{},
+		Mana: guildrentalread.Mana{}, Privileges: appi5.BaselinePrivilegeProvider{},
+		Workplace: workplace.Mode{Store: workplacestore.Store{}}, Policy: f.service.Policy, Content: content, Now: now,
+	}
+}
+
+// heroExpFailureContent is the production content store with one policy read
+// made to fail, so a 621 answer proves the pet path never asks for a Hero curve.
+type heroExpFailureContent struct {
+	contentstore.Store
+}
+
+func (heroExpFailureContent) HeroExpPolicyTx(context.Context, tx.Queryer, string, int64) ([]character.HeroExpThreshold, error) {
+	return nil, errors.New("fixture: hero EXP curve unavailable")
+}
+
+var errRentalListOnlyPort = errors.New("fixture: rental proof port wires only list reads")
+
+// rentalListOnlyPort forwards GuildOffers to the production Reader. The other
+// port methods are unused by 2768/621 and refuse instead of fabricating data.
+type rentalListOnlyPort struct {
+	Reader guildrental.Reader
+}
+
+func (p rentalListOnlyPort) GuildOffers(c context.Context, a identity.ActorContext, kind guild.RentalKind, requestedType int64, op operation.Context) (guildrental.List, error) {
+	return p.Reader.GuildOffers(c, a, kind, requestedType, op)
+}
+func (rentalListOnlyPort) Place(context.Context, identity.ActorContext, guild.RentalKind, int64, operation.Context) error {
+	return errRentalListOnlyPort
+}
+func (rentalListOnlyPort) Recall(context.Context, identity.ActorContext, guild.RentalKind, int64, operation.Context) (int64, int64, error) {
+	return 0, 0, errRentalListOnlyPort
+}
+func (rentalListOnlyPort) OwnOffers(context.Context, identity.ActorContext, guild.RentalKind, operation.Context) ([]guildrental.Row, error) {
+	return nil, errRentalListOnlyPort
+}
+func (rentalListOnlyPort) UsedPartners(context.Context, identity.ActorContext, operation.Context) ([]int64, error) {
+	return nil, errRentalListOnlyPort
+}
+
+// rentalFixtureAuthority is a test bearer map to the fixture actors. It is not
+// the production login proof and does not claim to be.
+type rentalFixtureAuthority map[string]identity.ActorContext
+
+func (a rentalFixtureAuthority) ResolveGameplayBearer(_ context.Context, token string, _ time.Time) (identity.ActorContext, error) {
+	actor, ok := a[token]
+	if !ok {
+		return identity.ActorContext{}, errors.New("fixture: unknown bearer")
+	}
+	return actor, nil
+}
+
+func rentalDispatch(t *testing.T, dispatcher stockruntime.GuildRentalDispatcher, bearer string, actor identity.ActorContext, mid uint16, params map[string]any, op operation.Context) httpedge.Response {
+	t.Helper()
+	return dispatcher.Dispatch(ctx, httpedge.DispatchRequest{Envelope: wire.RequestEnvelope{Operation: op, MID: mid, Params: params,
+		Claims: wire.CredentialClaims{Token: bearer, Region: int64(actor.LogicalServerID)}, ReceivedAt: time.Now().UTC()}})
+}
+
+func rentalWirePartner(t *testing.T, body map[string]any, unit int64) map[string]any {
+	t.Helper()
+	nested, ok := body["guild_rent_heroes"].(map[string]any)
+	if !ok {
+		t.Fatalf("2768 guild_rent_heroes shape %T", body["guild_rent_heroes"])
+	}
+	partners, ok := nested["partners"].([]any)
+	if !ok {
+		t.Fatalf("2768 partners shape %T", nested["partners"])
+	}
+	for _, raw := range partners {
+		partner := raw.(map[string]any)
+		if partner["partner_id"] == unit {
+			return partner
+		}
+	}
+	t.Fatalf("2768 partner %d missing from %v", unit, partners)
+	return nil
+}
+
+func rentalWirePet(t *testing.T, body map[string]any, unit int64) map[string]any {
+	t.Helper()
+	pets, ok := body["pets"].([]any)
+	if !ok {
+		t.Fatalf("621 pets shape %T", body["pets"])
+	}
+	for _, raw := range pets {
+		pet := raw.(map[string]any)
+		if pet["pet_id"] == unit {
+			return pet
+		}
+	}
+	t.Fatalf("621 pet %d missing from %v", unit, pets)
+	return nil
+}
+
+func rentalListRow(t *testing.T, list guildrental.List, kind guild.RentalKind, unit int64) guildrental.Row {
+	t.Helper()
+	for _, row := range list.Rows {
+		if row.Offer.Kind == kind && row.Offer.Unit == unit {
+			return row
+		}
+	}
+	t.Fatalf("%s row %d missing from projection", kind, unit)
+	return guildrental.Row{}
+}
+
+func rentalOfferState(t *testing.T, f rentalFixture) string {
+	t.Helper()
+	return fmt.Sprint(
+		scalar(t, f.pool, `SELECT state_version FROM player_heroes WHERE player_id=$1 AND partner_id=$2`, int64(f.lender.PlayerID), f.hero),
+		scalar(t, f.pool, `SELECT current_skin_id FROM player_heroes WHERE player_id=$1 AND partner_id=$2`, int64(f.lender.PlayerID), f.hero),
+		scalar(t, f.pool, `SELECT exp FROM player_heroes WHERE player_id=$1 AND partner_id=$2`, int64(f.lender.PlayerID), f.hero),
+		scalar(t, f.pool, `SELECT count(*) FROM player_hero_skin_entitlements WHERE player_id=$1 AND partner_id=$2`, int64(f.lender.PlayerID), f.hero),
+		scalar(t, f.pool, `SELECT count(*) FROM guild_rental_offers WHERE lender_id IN ($1,$2)`, int64(f.lender.PlayerID), int64(f.petLender.PlayerID)),
+		scalar(t, f.pool, `SELECT count(*) FROM guild_rental_uses WHERE borrower_id=$1`, int64(f.borrower.PlayerID)),
+	)
+}
+
+// TestI9_9BProjectionCacheKeyAndWireNative drives the production Reader and
+// stock GuildRentalDispatcher over the actual fixture owner rows: an equipped
+// and then expired skin, a nonzero raw awakening stage, EXP and equipment
+// changes, a stable key across observation times, and the 621 pet path under a
+// content owner whose Hero EXP curve read fails.
+func TestI9_9BProjectionCacheKeyAndWireNative(t *testing.T) {
+	f := newRentalFixture(t)
+	rev := f.revision
+	readOp := opPinned(rev)
+	if err := f.service.Place(ctx, f.lender, guild.RentalHero, f.hero, readOp); err != nil {
+		t.Fatal("place hero offer", err)
+	}
+	if err := f.service.Place(ctx, f.petLender, guild.RentalPet, f.pet, readOp); err != nil {
+		t.Fatal("place pet offer", err)
+	}
+	content := contentstore.Store{Queryer: f.pool}
+	reader := rentalReader(f, content, authoritativeObservation)
+	dispatcher := stockruntime.GuildRentalDispatcher{Authority: rentalFixtureAuthority{"borrower": f.borrower},
+		Service: rentalListOnlyPort{Reader: reader}}
+
+	readHero := func(t *testing.T) (guildrental.List, map[string]any) {
+		t.Helper()
+		list, err := reader.GuildOffers(ctx, f.borrower, guild.RentalHero, 1, readOp)
+		if err != nil {
+			t.Fatal("2768 projection", err)
+		}
+		response := rentalDispatch(t, dispatcher, "borrower", f.borrower, 2768, map[string]any{"campaign_type": int64(1)}, readOp)
+		if response.HTTPStatus != http.StatusOK {
+			t.Fatalf("2768 wire status %d body %v", response.HTTPStatus, response.Body)
+		}
+		return list, response.Body
+	}
+
+	baseline, baselineBody := readHero(t)
+	baselineRow := rentalListRow(t, baseline, guild.RentalHero, f.hero)
+	if baselineRow.Hero == nil || baselineRow.Hero.Level != 1 || baselineRow.Appearance == nil ||
+		baselineRow.Appearance.CurrentSkinID != 0 || len(baselineRow.Appearance.Skins) != 0 ||
+		baselineRow.TwiceAwakeStage == nil || *baselineRow.TwiceAwakeStage != 0 {
+		t.Fatalf("baseline real owner projection %+v", baselineRow)
+	}
+	if !baselineRow.CanRent || baselineRow.HaveRent {
+		t.Fatalf("baseline admission can=%v have=%v", baselineRow.CanRent, baselineRow.HaveRent)
+	}
+	baselinePartner := rentalWirePartner(t, baselineBody, f.hero)
+	nestedRentCount, _ := baselineBody["guild_rent_heroes"].(map[string]any)["rent_count"].(int64)
+	if baseline.RentCount == 0 || baselineBody["rent_count"] != baseline.RentCount || nestedRentCount != baseline.RentCount ||
+		baselinePartner["table_id"] != int64(genuineHeroTable) || baselinePartner["player_id"] != int64(f.lender.PlayerID) ||
+		baselinePartner["exp"] != baselineRow.Hero.Exp || baselinePartner["current_skin_id"] != int64(0) ||
+		baselinePartner["twice_awake_stage"] != int64(0) || baselinePartner["rent_need_mana"] != baselineRow.Price ||
+		baselinePartner["can_rent"] != true || baselinePartner["have_rent"] != false {
+		t.Fatalf("baseline wire row %v", baselinePartner)
+	}
+	if tutors, ok := baselineBody["tutor_rent_heroes"].([]any); !ok || len(tutors) != 0 {
+		t.Fatalf("baseline tutor list %v", baselineBody["tutor_rent_heroes"])
+	}
+
+	// The borrower grows first so the offered girl can level and keep admission.
+	compositeLevel(t, f.pool, f.borrower, rev, 100)
+	heroes := genuineHeroService(f.pool)
+	must(heroes.UseExpItems(ctx, f.lender, f.hero, []appi5.HeroExpItemDebit{{ItemID: heroExpItem, Count: 5}}, opPinned(rev)))(t, "hero exp")
+	experience, experienceBody := readHero(t)
+	experienceRow := rentalListRow(t, experience, guild.RentalHero, f.hero)
+	if experience.RentCount == baseline.RentCount || !experienceRow.CanRent {
+		t.Fatalf("progression key %d baseline %d can=%v", experience.RentCount, baseline.RentCount, experienceRow.CanRent)
+	}
+	if experienceRow.Hero.Level == baselineRow.Hero.Level && experienceRow.Hero.Exp == baselineRow.Hero.Exp {
+		t.Fatalf("progression did not change the projection %+v", experienceRow.Hero)
+	}
+	if rentalWirePartner(t, experienceBody, f.hero)["exp"] != experienceRow.Hero.Exp ||
+		rentalWirePartner(t, experienceBody, f.hero)["lev"] != experienceRow.Hero.Level {
+		t.Fatalf("progression wire %v", rentalWirePartner(t, experienceBody, f.hero))
+	}
+
+	// A genuine content skin item: SkinOn validates item, model and origin table.
+	must(heroes.SkinOn(ctx, f.lender, f.hero, genuineSkinItem, opPinned(rev)))(t, "skin unlock")
+	must(heroes.SkinOn(ctx, f.lender, f.hero, genuineSkinItem, opPinned(rev)))(t, "skin wear")
+	skinned, skinnedBody := readHero(t)
+	skinnedRow := rentalListRow(t, skinned, guild.RentalHero, f.hero)
+	skinnedWire := rentalWirePartner(t, skinnedBody, f.hero)
+	if skinned.RentCount == experience.RentCount || skinnedRow.Appearance.CurrentSkinID != 40001001 ||
+		len(skinnedRow.Appearance.Skins) != 1 || skinnedRow.Appearance.OwnerStateVersion != skinnedRow.Hero.StateVersion {
+		t.Fatalf("skin projection %+v", skinnedRow.Appearance)
+	}
+	if skinnedWire["current_skin_id"] != int64(40001001) || skinnedWire["skin_ids"].(map[string]any)["40001001"] != int64(-1) {
+		t.Fatalf("skin wire %v", skinnedWire)
+	}
+
+	// The same durable entitlement past its deadline is fixture data; no clock moves.
+	exec(t, f.pool, `UPDATE player_hero_skin_entitlements SET expires_at=$3 WHERE player_id=$1 AND partner_id=$2 AND model_id=$4`,
+		int64(f.lender.PlayerID), f.hero, time.Now().UTC().Add(-time.Hour), int64(40001001))
+	expired, expiredBody := readHero(t)
+	expiredRow := rentalListRow(t, expired, guild.RentalHero, f.hero)
+	expiredWire := rentalWirePartner(t, expiredBody, f.hero)
+	if expired.RentCount == skinned.RentCount || expiredRow.Appearance.CurrentSkinID != 0 || len(expiredRow.Appearance.Skins) != 0 {
+		t.Fatalf("expired skin projection %+v", expiredRow.Appearance)
+	}
+	if expiredWire["current_skin_id"] != int64(0) || len(expiredWire["skin_ids"].(map[string]any)) != 0 {
+		t.Fatalf("expired skin wire %v", expiredWire)
+	}
+
+	// A valid version-2 awakening facet (nonzero raw stage) through the owner store.
+	awakeningTx, err := f.pool.Begin(ctx, tx.Options{Isolation: tx.Serializable})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer awakeningTx.Rollback(ctx)
+	birthStore := characterstore.RawAwakeningStore{}
+	birth, err := birthStore.ReadRawAwakeningBirthTx(ctx, awakeningTx, character.HeroRef{PlayerID: f.lender.PlayerID, PartnerID: f.hero})
+	if err != nil {
+		t.Fatal("raw awakening birth", err)
+	}
+	birth.Version++
+	birth.RawStage = 2
+	birth.UpdatedAt = time.Now().UTC()
+	birth.ProducerReference = "I9_AWAKENING_MISSIONS_V1/native-proof03"
+	if err = birthStore.SaveRawAwakeningTx(ctx, awakeningTx, birth, birth.Version-1); err != nil {
+		t.Fatal("raw awakening save", err)
+	}
+	if err = awakeningTx.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+	awakened, awakenedBody := readHero(t)
+	awakenedRow := rentalListRow(t, awakened, guild.RentalHero, f.hero)
+	if awakened.RentCount == expired.RentCount || awakenedRow.TwiceAwakeStage == nil || *awakenedRow.TwiceAwakeStage != 2 ||
+		rentalWirePartner(t, awakenedBody, f.hero)["twice_awake_stage"] != int64(2) {
+		t.Fatalf("awakening key %d prev %d stage %v", awakened.RentCount, expired.RentCount, awakenedRow.TwiceAwakeStage)
+	}
+
+	// Unchanged real owner state at a different observation time keeps the key and writes nothing.
+	before := rentalOfferState(t, f)
+	later := rentalReader(f, content, observationOffset(2*time.Hour))
+	laterList, err := later.GuildOffers(ctx, f.borrower, guild.RentalHero, 1, readOp)
+	if err != nil {
+		t.Fatal("future observation read", err)
+	}
+	if laterList.RentCount != awakened.RentCount {
+		t.Fatalf("observation time changed key %d vs %d", laterList.RentCount, awakened.RentCount)
+	}
+	if after := rentalOfferState(t, f); after != before {
+		t.Fatalf("read mutated owner state\nbefore %s\nafter  %s", before, after)
+	}
+
+	// The pet path is 621 with a content owner that fails the Hero EXP curve.
+	failingContent := heroExpFailureContent{Store: contentstore.Store{Queryer: f.pool}}
+	petReader := rentalReader(f, failingContent, authoritativeObservation)
+	petDispatcher := stockruntime.GuildRentalDispatcher{Authority: rentalFixtureAuthority{"borrower": f.borrower},
+		Service: rentalListOnlyPort{Reader: petReader}}
+	basePets, err := petReader.GuildOffers(ctx, f.borrower, guild.RentalPet, 0, readOp)
+	if err != nil {
+		t.Fatalf("621 pet list under failing Hero curve: %v", err)
+	}
+	basePetResponse := rentalDispatch(t, petDispatcher, "borrower", f.borrower, 621, map[string]any{"load_place": int64(0)}, readOp)
+	if basePetResponse.HTTPStatus != http.StatusOK || basePetResponse.Body["rent_count"] != basePets.RentCount {
+		t.Fatalf("621 baseline %d %v", basePetResponse.HTTPStatus, basePetResponse.Body)
+	}
+	basePetRow := rentalListRow(t, basePets, guild.RentalPet, f.pet)
+	basePetWire := rentalWirePet(t, basePetResponse.Body, f.pet)
+	if basePetRow.Pet == nil || basePetWire["table_id"] != int64(genuinePetTable) || basePetWire["player_id"] != int64(f.petLender.PlayerID) ||
+		basePetWire["lev"] != basePetRow.Pet.Level || basePetWire["exp"] != basePetRow.Pet.Exp {
+		t.Fatalf("621 baseline row %v", basePetWire)
+	}
+
+	// A real Pet EXP command changes the pet and must change the 621 key.
+	grantGenuine(t, f.pool, f.petLender, rev, "pet exp proof", []grant.Line{{Kind: grant.StackItem, ItemID: petExpItem, Amount: 5}})
+	pets := genuinePetService(f.pool)
+	must(pets.UseExpItems(ctx, f.petLender, f.pet, []appi5.PetExpItemDebit{{ItemID: petExpItem, Count: 1}}, opPinned(rev)))(t, "pet exp")
+	changedPets, err := petReader.GuildOffers(ctx, f.borrower, guild.RentalPet, 0, readOp)
+	if err != nil {
+		t.Fatal("621 changed pet list", err)
+	}
+	changedPetResponse := rentalDispatch(t, petDispatcher, "borrower", f.borrower, 621, map[string]any{"load_place": int64(0)}, readOp)
+	if changedPets.RentCount == basePets.RentCount || changedPetResponse.Body["rent_count"] != changedPets.RentCount {
+		t.Fatalf("621 pet detail did not invalidate key %d vs %d", changedPets.RentCount, basePets.RentCount)
+	}
+	changedPetRow := rentalListRow(t, changedPets, guild.RentalPet, f.pet)
+	changedPetWire := rentalWirePet(t, changedPetResponse.Body, f.pet)
+	if changedPetRow.Pet.Exp == basePetRow.Pet.Exp && changedPetRow.Pet.Level == basePetRow.Pet.Level {
+		t.Fatalf("621 pet command did not change pet %+v", changedPetRow.Pet)
+	}
+	if changedPetWire["exp"] != changedPetRow.Pet.Exp || changedPetWire["lev"] != changedPetRow.Pet.Level ||
+		changedPetWire["table_id"] != int64(genuinePetTable) || changedPetWire["player_id"] != int64(f.petLender.PlayerID) {
+		t.Fatalf("621 changed wire %v", changedPetWire)
+	}
+
+	// Negative control: the same failing content owner refuses the Hero list.
+	heroFailDispatcher := stockruntime.GuildRentalDispatcher{Authority: rentalFixtureAuthority{"borrower": f.borrower},
+		Service: rentalListOnlyPort{Reader: rentalReader(f, failingContent, authoritativeObservation)}}
+	if failed := rentalDispatch(t, heroFailDispatcher, "borrower", f.borrower, 2768, map[string]any{"campaign_type": int64(1)}, readOp); failed.HTTPStatus != http.StatusInternalServerError || failed.Body["error_code"] != int64(35028) {
+		t.Fatalf("2768 failing Hero curve returned %d %v", failed.HTTPStatus, failed.Body)
 	}
 }

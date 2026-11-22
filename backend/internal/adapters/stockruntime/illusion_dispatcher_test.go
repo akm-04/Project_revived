@@ -6,6 +6,7 @@ import (
 	"time"
 
 	app "gxb.local/backend/v2/internal/application/illusion"
+	sr "gxb.local/backend/v2/internal/application/sharedroom"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/illusion"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -74,7 +75,7 @@ func TestIllusionRefusalIsConflictErrorCode(t *testing.T) {
 	now := time.Unix(100, 0).UTC()
 	dispatcher := IllusionDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: illusionStub{err: d.ErrRefused}}
 	got := dispatcher.Dispatch(context.Background(), illusionRequest(1344, map[string]any{}, now))
-	if got.HTTPStatus != 409 || len(got.Body) != 1 || got.Body["error_code"] != int64(1) {
+	if got.HTTPStatus != 409 || got.Body["error_code"] != unprovenRefusalCode {
 		t.Fatalf("%d %#v", got.HTTPStatus, got.Body)
 	}
 }
@@ -96,6 +97,47 @@ func TestIllusionForgedAndRentedInputIsBadRequest(t *testing.T) {
 	}
 	if got := dispatcher.Dispatch(context.Background(), illusionRequest(1347, map[string]any{"star": int64(2), "total_damage": float64(5), "formation": "1", "cost_time": int64(10)}, now)); got.HTTPStatus != 400 {
 		t.Fatalf("bad star: %d %#v", got.HTTPStatus, got.Body)
+	}
+}
+
+type illusionRoomStub struct {
+	IllusionRoomPort
+	err error
+}
+
+func (s illusionRoomStub) SetPartner(context.Context, identity.ActorContext, app.PartnerRequest, operation.Context) (map[string]any, error) {
+	return nil, s.err
+}
+
+func (s illusionRoomStub) EnterRoom(context.Context, identity.ActorContext, int64, operation.Context) (map[string]any, error) {
+	return nil, s.err
+}
+
+func TestIllusionEnterRoomRefusalsCarryStockCodes(t *testing.T) {
+	now := time.Unix(100, 0).UTC()
+	cases := []struct {
+		name    string
+		refusal error
+		code    int64
+	}{
+		{"level band", sr.ErrLevelBand, illusionLevelBandCode},
+		{"room unavailable", sr.ErrJoinUnavailable, illusionRoomUnavailableCode},
+	}
+	for _, c := range cases {
+		dispatcher := IllusionRoomDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: illusionRoomStub{err: c.refusal}}
+		got := dispatcher.Dispatch(context.Background(), illusionRequest(1352, map[string]any{"room_id": int64(9)}, now))
+		if got.HTTPStatus != 409 || got.Body["error_code"] != c.code || got.Cause == nil {
+			t.Fatalf("%s: %d %#v", c.name, got.HTTPStatus, got.Body)
+		}
+	}
+}
+
+func TestIllusionOutOfTurnPickIsConflict(t *testing.T) {
+	now := time.Unix(100, 0).UTC()
+	dispatcher := IllusionRoomDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: illusionRoomStub{err: d.ErrRefused}}
+	got := dispatcher.Dispatch(context.Background(), illusionRequest(1356, map[string]any{"partner_str": "10001005|10001006", "pet_id": int64(0)}, now))
+	if got.HTTPStatus != 409 || got.Body["error_code"] != unprovenRefusalCode {
+		t.Fatalf("%d %#v", got.HTTPStatus, got.Body)
 	}
 }
 

@@ -178,7 +178,9 @@ func TestRealGuildBroadcastSourceTransaction(t *testing.T) {
 		t.Fatal(e)
 	}
 	runner := tx.Runner{DB: p}
-	svc := app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: runner}, Reads: runner, Fresh: p, Store: guildbroadcaststore.Store{}, Guild: gdb, Names: i4store.PlayerRootLocker{}, Players: i4store.PlayerRootLocker{}, Fence: i5store.Store{}, Receipts: kernelstore.Store{}, Content: contentstore.Store{}, Enqueue: queue}
+	// The daily cap has its own native; the full-roster probe below is this
+	// scenario's fifth source, so leave one slot for the fresh nonleader probe.
+	svc := app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: runner}, Reads: runner, Fresh: p, Store: guildbroadcaststore.Store{}, Guild: gdb, Names: i4store.PlayerRootLocker{}, Players: i4store.PlayerRootLocker{}, Fence: i5store.Store{}, Receipts: kernelstore.Store{}, Content: contentstore.Store{}, Enqueue: queue, DailyLimit: app.DefaultDailyLimit + 1}
 	refs, e := policy.NewSet(policy.Ref{Name: "content", Version: bundle.RevisionID()})
 	if e != nil {
 		t.Fatal(e)
@@ -273,26 +275,30 @@ func TestRealGuildBroadcastSourceTransaction(t *testing.T) {
 	if e = p.QueryRow(c, `SELECT count(*) FROM river_job WHERE args->>'semantic_key' LIKE $1`, goodOp.ID.String()+":%").Scan(&count); e != nil || count != 2 {
 		t.Fatal("concurrent replay enqueued again", count, e)
 	}
-	// Database time is sampled once; a backwards bound instant rejects newer
-	// Guild/member/name snapshots before any semantic or River write.
-	past := at.Add(-time.Second)
-	clockProbe := &countedDBTime{Inner: postgres.AuthoritativeTime{Queryer: p}, Override: &past}
-	stale := svc
-	stale.Timed.Binder.Time = clockProbe
-	staleOp := newOp()
-	if _, e = stale.Submit(c, actor, request, staleOp); !errors.Is(e, app.ErrStale) || clockProbe.Calls != 1 {
-		t.Fatal("stale bound database time", clockProbe.Calls, e)
+	// K7: a decision time one hour before the stored Guild/member/name
+	// UpdatedAt is accepted; the source records the latest stored fact as its
+	// decision instant instead of refusing (I9_11_CLOCK_ROLLBACK_V1 K2').
+	back := at.Add(-time.Hour)
+	clockProbe := &countedDBTime{Inner: postgres.AuthoritativeTime{Queryer: p}, Override: &back}
+	rolled := svc
+	rolled.Timed.Binder.Time = clockProbe
+	rolledOp := newOp()
+	rolledOut, e := rolled.Submit(c, actor, request, rolledOp)
+	if e != nil || rolledOut.SourceID != rolledOp.ID || clockProbe.Calls != 1 {
+		t.Fatalf("rolled-back decision time refused: calls=%d out=%+v err=%v", clockProbe.Calls, rolledOut, e)
 	}
-	if e = p.QueryRow(c, `SELECT count(*) FROM guild_broadcast_sources WHERE source_id=$1::uuid`, staleOp.ID.String()).Scan(&count); e != nil || count != 0 {
-		t.Fatal("stale snapshot mutated source", count, e)
+	rolledSource, ok, e := (guildbroadcaststore.Store{}).ReadSourceTx(c, p, rolledOp.ID)
+	if e != nil || !ok || !rolledSource.DecisionAt.Equal(at) {
+		t.Fatalf("rolled-back source decision %v ok=%v err=%v, want the stored fact %v", rolledSource.DecisionAt, ok, e, at)
 	}
-	// Conservative directory timestamp rejects a fresh submit with a future
-	// projection while a committed occurrence retains its original snapshot.
+	// A future name projection is likewise observed at its stored time, not
+	// refused, while a committed occurrence retains its original snapshot.
 	if _, e = fixtureExec(c, p, `UPDATE player_directory_profiles SET name='later name',updated_at=clock_timestamp()+interval '1 hour',state_version=state_version+1 WHERE player_id=$1`, int64(pids[0])); e != nil {
 		t.Fatal(e)
 	}
-	if _, e = svc.Submit(c, actor, request, newOp()); !errors.Is(e, app.ErrStale) {
-		t.Fatal("future name snapshot admitted", e)
+	futureOp := newOp()
+	if _, e = svc.Submit(c, actor, request, futureOp); e != nil {
+		t.Fatalf("future name snapshot refused: %v", e)
 	}
 	retained, e := svc.Submit(c, actor, request, goodOp)
 	if e != nil || retained != out {

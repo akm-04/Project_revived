@@ -11,11 +11,18 @@ import (
 	dorm "gxb.local/backend/v2/internal/domain/dormhouse"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"io"
+	"sync"
 )
 
 // DormCatalogTx reads only the caller-pinned immutable revision. Registration
 // and controlled deployment/backfill must complete before activation.
+var dormCatalogs sync.Map
+
 func (s Store) DormCatalogTx(ctx context.Context, q tx.Queryer, revision string) (dorm.Catalog, error) {
+	return memoCatalog(&dormCatalogs, revision, func() (dorm.Catalog, error) { return s.dormCatalogTx(ctx, q, revision) })
+}
+
+func (s Store) dormCatalogTx(ctx context.Context, q tx.Queryer, revision string) (dorm.Catalog, error) {
 	var out dorm.Catalog
 	if q == nil || len(revision) != 64 {
 		return out, dorm.ErrUnqualified
@@ -103,6 +110,32 @@ func dormCatalogDomain(d builtin.DormInputCatalog) (dorm.Catalog, error) {
 	for _, r := range d.Furniture {
 		out.Furniture[r.ItemID] = dorm.FurnitureRule{ItemID: r.ItemID, Comfort: r.Comfort, Floor: r.Floor, PaperItem: r.PaperItem, SpecialType: r.SpecialType, Length: r.Length, Width: r.Width, Height: r.Height, CanRotate: r.CanRotate, CanPile: r.CanPile, CanBePile: r.CanBePile, PileLimit: r.PileLimit, Panels: append([]int64(nil), r.Panels...), PileStart: append([]int64(nil), r.PileStart...), PileEnd: append([]int64(nil), r.PileEnd...)}
 	}
+	if d.Glue != nil {
+		glue := dorm.GlueRules{DailyFloor: d.Glue.DailyFloor, PurchaseAmount: d.Glue.PurchaseAmount, PurchaseStartLimit: d.Glue.PurchaseStartLimit, VIPDailyCaps: map[int64]int64{}, PurchaseCosts: map[int64]int64{}}
+		for _, r := range d.Glue.VIPDailyCaps {
+			if _, exists := glue.VIPDailyCaps[r.VIP]; exists {
+				return out, dorm.ErrUnqualified
+			}
+			glue.VIPDailyCaps[r.VIP] = r.Cap
+		}
+		for _, r := range d.Glue.PurchaseCosts {
+			if _, exists := glue.PurchaseCosts[r.Ordinal]; exists {
+				return out, dorm.ErrUnqualified
+			}
+			glue.PurchaseCosts[r.Ordinal] = r.Cost
+		}
+		out.Glue = &glue
+	}
+	if d.FurnitureRecipes != nil {
+		out.FurnitureRecipes = make(map[int64]dorm.FurnitureRecipe, len(d.FurnitureRecipes.Furniture))
+		out.BlueprintRecipes = make(map[int64]dorm.BlueprintRecipe, len(d.FurnitureRecipes.Blueprints))
+		for _, r := range d.FurnitureRecipes.Furniture {
+			out.FurnitureRecipes[r.ItemID] = dorm.FurnitureRecipe{ItemID: r.ItemID, Materials: append([]int64(nil), r.Materials...), Counts: append([]int64(nil), r.Counts...), Glue: r.Glue, BlueprintItem: r.BlueprintItem}
+		}
+		for _, r := range d.FurnitureRecipes.Blueprints {
+			out.BlueprintRecipes[r.ItemID] = dorm.BlueprintRecipe{ItemID: r.ItemID, Pieces: append([]int64(nil), r.Pieces...), Counts: append([]int64(nil), r.Counts...), Level: r.Level}
+		}
+	}
 	return out, nil
 }
 
@@ -129,9 +162,33 @@ func (s Store) DormInputsActive(ctx context.Context) (string, bool, error) {
 }
 
 func (Store) DormInputsRevisionTx(ctx context.Context, q tx.Queryer, revision string) (bool, error) {
-	var raw string
-	if e := q.QueryRow(ctx, `SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1`, revision).Scan(&raw); e != nil {
-		return false, e
+	return storedCapability(ctx, q, revision, "DORM_INPUTS_I7C2C")
+}
+
+// ScalarDailyFloorMinimumTx observes today's owner policy independently of a
+// retained reward/job revision. Old catalogs without glue rules keep legacy behavior.
+func (store Store) ScalarDailyFloorMinimumTx(ctx context.Context, query tx.Queryer) (int64, bool, error) {
+	revision, err := store.ActiveRevision(ctx, query)
+	if err != nil {
+		return 0, false, err
 	}
-	return manifestHasCapability([]byte(raw), revision, "DORM_INPUTS_I7C2C")
+	var manifest string
+	if err = query.QueryRow(ctx, `SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1`, revision).Scan(&manifest); err != nil {
+		return 0, false, err
+	}
+	qualified, err := manifestHasCapability([]byte(manifest), revision, "DORM_INPUTS_I7C2C")
+	if err != nil {
+		return 0, false, err
+	}
+	if !qualified {
+		return 0, false, nil
+	}
+	catalog, err := store.DormCatalogTx(ctx, query, revision)
+	if err != nil {
+		return 0, false, err
+	}
+	if catalog.Glue == nil {
+		return 0, false, nil
+	}
+	return catalog.Glue.DailyFloor, true, nil
 }

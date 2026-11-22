@@ -2,8 +2,11 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
-	"net/http"
+	"encoding/json"
+	"fmt"
+	"math"
+	"strconv"
+	"strings"
 
 	app "gxb.local/backend/v2/internal/application/adventure"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
@@ -23,6 +26,10 @@ var AdventureMIDs = []uint16{2410, 2411, 2412, 2413, 2416, 2417, 2418, 2419, 242
 const (
 	adventureFightExist = 30005
 	adventureExpired    = 35029
+	// Adventure does not enable a borrow mode (I9_GUILD_RENTAL_V1 C4), so a
+	// stock rent field is refused. 35028 "Not Available" is the stock message
+	// row; the client has no rent-specific row.
+	adventureRentRefused = 35028
 )
 
 type AdventurePort interface {
@@ -63,9 +70,12 @@ func (o AdventureDispatcher) Dispatch(ctx context.Context, req httpedge.Dispatch
 		return *fail
 	}
 	if o.Service == nil {
-		return failAdventure(d.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	params, op := req.Envelope.Params, req.Envelope.Operation
+	if adventureRented(params) {
+		return failureReply(refusal(adventureRentRefused))
+	}
 	switch req.Envelope.MID {
 	case 2416:
 		if !onlyStockGameplayParams(params) {
@@ -224,8 +234,22 @@ func (o AdventureDispatcher) singleEvent(ctx context.Context, a identity.ActorCo
 	return adventureResponse(body, app.Response{}, err)
 }
 
-// adventureFight reads 2419/2421: formation plus an optional pet; the client's
-// rent_ fields are accepted and ignored.
+func adventureRented(params map[string]any) bool {
+	for _, key := range []string{"rent_player_id", "rent_formation", "rent_pet_player_id", "rent_pet_id"} {
+		raw, present := params[key]
+		if !present || raw == nil {
+			continue
+		}
+		text := fmt.Sprint(raw)
+		if text != "" && text != "0" {
+			return true
+		}
+	}
+	return false
+}
+
+// adventureFight reads 2419/2421: formation plus an optional pet; a nonzero
+// rent field is refused in Dispatch before this parser runs.
 func adventureFight(params map[string]any) (app.FightRequest, bool) {
 	formation, formationOK := topFloorFormation(params["formation"])
 	pet, petOK := topFloorInteger(params, "pet_id", false)
@@ -246,13 +270,34 @@ func adventureResult(params map[string]any) (app.ResultRequest, bool) {
 // adventureDefenseResult reads 2410: the client's star, position and damage.
 func adventureDefenseResult(params map[string]any) (app.ResultRequest, int64, bool) {
 	star, starOK := topFloorInteger(params, "star", true)
-	damage, damageOK := topFloorInteger(params, "total_damage", true)
+	damage, damageOK := adventureDamage(params["total_damage"])
 	position, positionOK := topFloorInteger(params, "monster_pos", true)
 	pet, petOK := topFloorInteger(params, "pet_id", false)
 	formation, formationOK := topFloorFormation(params["formation"])
 	allowed := onlyStockGameplayParams(params, "star", "total_damage", "monster_pos", "formation", "pet_id", "table_id", "rent_pet_id", "rent_pet_player_id", "rent_formation", "rent_player_id")
 	request := app.ResultRequest{Star: star, Damage: damage, PetID: pet, Formation: formation}
 	return request, position, allowed && starOK && damageOK && positionOK && petOK && formationOK
+}
+
+// maxStockDamage is the largest exactly representable integer in the client's
+// Lua double (2^53-1).
+const maxStockDamage = 9007199254740991
+
+// adventureDamage reads total_damage, the battle scene's raw harm sum: a Lua
+// double that can carry a fraction (BattleCreate.lua:3175,3182). The sibling
+// result paths floor it before sending (math.floor, BattleCreate.lua:18,3239),
+// so the same floor is the wire conversion here.
+func adventureDamage(raw any) (int64, bool) {
+	number, fractional := raw.(json.Number)
+	if !fractional || !strings.ContainsAny(number.String(), ".eE") {
+		value, err := feedbackInteger(raw, 0, maxStockDamage)
+		return value, err == nil
+	}
+	value, err := strconv.ParseFloat(number.String(), 64)
+	if err != nil || math.IsNaN(value) || math.IsInf(value, 0) || value < 0 || value > maxStockDamage {
+		return 0, false
+	}
+	return int64(math.Floor(value)), true
 }
 
 func adventureDefenseStart(params map[string]any) (app.FightRequest, bool) {
@@ -287,22 +332,29 @@ func adventureResponse(body map[string]any, response app.Response, err error) ht
 	return okI5(body)
 }
 
+// Adventure keeps refusals on 409 so the stock callbacks never receive an OK
+// body; 35029 and the room codes come from the R4 mapper table.
+var adventureFailureRows = []failureRow{
+	{match: d.ErrInvalid, class: failureMalformed, detail: "adventure_invalid_parameter"},
+	{match: d.ErrExpired, class: failureRefusal, code: adventureExpired},
+	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+	{match: sr.ErrNotInRoom, class: failureRefusal, code: unprovenRefusalCode},
+	{match: sr.ErrAlreadyInRoom, class: failureRefusal, code: adventureExpired}, // I9_ADVENTURE_POLICY_V1 rooms.second_room_for_slot
+	{match: sr.ErrNotFound, class: failureRefusal, code: unprovenRefusalCode},
+	{match: room.ErrFull, class: failureRefusal, code: unprovenRefusalCode},
+	{match: room.ErrKicked, class: failureRefusal, code: unprovenRefusalCode},
+	// The shared-room join callback toasts 35029 "Time limited!" (AdventureEvent.lua:481).
+	{match: room.ErrJoinThrottled, class: failureRefusal, code: adventureExpired},
+	{match: room.ErrExpired, class: failureRefusal, code: unprovenRefusalCode},
+	{match: room.ErrClosed, class: failureRefusal, code: unprovenRefusalCode},
+	{match: room.ErrNotOwner, class: failureRefusal, code: unprovenRefusalCode},
+	{match: room.ErrNotSeated, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrUnknownResource, class: failureDefect},
+}
+
 func failAdventure(err error) httpedge.Response {
-	if errors.Is(err, d.ErrInvalid) {
-		return badAdventure()
-	}
-	if errors.Is(err, d.ErrExpired) {
-		return conflictRefusal(adventureExpired)
-	}
-	if errors.Is(err, d.ErrRefused) || errors.Is(err, economy.ErrInsufficientBalance) ||
-		errors.Is(err, sr.ErrNotInRoom) || errors.Is(err, sr.ErrAlreadyInRoom) || errors.Is(err, sr.ErrNotFound) ||
-		errors.Is(err, room.ErrFull) || errors.Is(err, room.ErrKicked) ||
-		errors.Is(err, room.ErrExpired) || errors.Is(err, room.ErrClosed) || errors.Is(err, room.ErrNotOwner) || errors.Is(err, room.ErrNotSeated) {
-		return conflictRefusal(1)
-	}
-	// Server failures (including d.ErrUnavailable and economy.ErrUnknownResource)
-	// are F4 503 answers, never a stock refusal body.
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "adventure_unavailable"}}
+	return failureFromRows(adventureFailureRows, err)
 }
 
 func badAdventure() httpedge.Response {

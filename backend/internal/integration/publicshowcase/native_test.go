@@ -100,6 +100,7 @@ func actor(t *testing.T, p *pg.Pool) identity.ActorContext {
 		{`INSERT INTO gameplay_contexts(context_id,session_id,account_id,logical_server_id,player_id,context_generation,created_at)VALUES($1,$2,$3,1,$4,1,clock_timestamp())`, []any{g.String(), s.String(), a.String(), pid}},
 		{`INSERT INTO player_profiles(player_id,display_name,avatar_id,avatar_frame_id,player_type,state_version,created_at,updated_at)VALUES($1,'basis',1,0,0,1,$2::timestamptz-interval '1 day',$2)`, []any{pid, at}},
 		{`INSERT INTO player_progression(player_id,level,exp,state_version,updated_at)VALUES($1,1,0,1,$2)`, []any{pid, at}},
+		{`INSERT INTO player_directory_profiles(player_id,name,lev,avatar_id,avatar_frame_id,vip,conquer_lev,conquer_loop_id,state_version,created_at,updated_at)VALUES($1,'basis',1,110001001,0,0,0,1,1,$2,$2)`, []any{pid, at}},
 	}
 	for _, r := range rows {
 		if _, e = tr.Exec(ctx, r.s, r.a...); e != nil {
@@ -419,8 +420,8 @@ func TestRetryUnknownProofAndStaleActor(t *testing.T) {
 	}
 	stale := showcase(p, p)
 	stale.Timed.Binder.Time = fixedTime{r.DecisionAt.Add(-time.Microsecond)}
-	if got, e := stale.Execute(ctx, a, app.Selection{2}, op()); !errors.Is(e, app.ErrInvalidState) || got.Schema != "" {
-		t.Fatal("old decision", e)
+	if _, e := stale.Execute(ctx, a, app.Selection{2}, op()); e != nil {
+		t.Fatal("old decision was not clamped", e)
 	}
 	s = showcase(p, faultDB{p, true})
 	known := op()

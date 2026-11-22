@@ -1,0 +1,292 @@
+{
+ "background": [],
+ "content": [
+  "content_book_input_catalogs"
+ ],
+ "contracts": [
+  {
+   "count": 12,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 12,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_10A_EVENT_CENTRE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10F_MENTOR_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_FURNITURE_COMPOSE_V1.md"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GM_QUESTION_FOUNDATION_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 11,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/RULING_I9-12_SEAL_REGISTRY_SYNC.md"
+  }
+ ],
+ "decorated_by": [
+  "observing"
+ ],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/book_dispatcher.go",
+  "internal/adapters/stockruntime/compose_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I7C2D_BOOK_INPUTS"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "player_book_admissions": [
+    "bookstore.LockAdmissionTx"
+   ],
+   "player_book_roots": [
+    "bookstore.LockRootTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "player_book_admissions",
+   "player_book_roots",
+   "players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [
+  "BootstrapProjection",
+  "OverlayRosterTx"
+ ],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/compose_dispatcher.go",
+    "line": 47
+   },
+   "mid": 83,
+   "name": "COMPOSE_ITEM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/book_dispatcher.go",
+    "line": 27
+   },
+   "mid": 1056,
+   "name": "GET_BUILDING_LIST"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/book_dispatcher.go",
+    "line": 27
+   },
+   "mid": 1057,
+   "name": "UPGRADE_BUILDING"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/book_dispatcher.go",
+    "line": 27
+   },
+   "mid": 1058,
+   "name": "CANCEL_EVOLVE_BUILDING"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/book_dispatcher.go",
+    "line": 27
+   },
+   "mid": 1059,
+   "name": "GET_CABINET_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/book_dispatcher.go",
+    "line": 27
+   },
+   "mid": 1060,
+   "name": "LEARN_SKILL"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/book_dispatcher.go",
+    "line": 27
+   },
+   "mid": 1061,
+   "name": "GIVE_UP_LEARN_SKILL"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/book_dispatcher.go",
+    "line": 27
+   },
+   "mid": 1077,
+   "name": "SPEED_UP_BUILDING"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/book_dispatcher.go",
+    "line": 27
+   },
+   "mid": 1078,
+   "name": "SPEED_UP_SKILL"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/book_dispatcher.go",
+    "line": 27
+   },
+   "mid": 1079,
+   "name": "CABINET_SKILL_CONFIRM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/book_dispatcher.go",
+    "line": 27
+   },
+   "mid": 1080,
+   "name": "CONFIRM_BUILDING_UPGRADE"
+  }
+ ],
+ "name": "bookskill",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/bookstore",
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore"
+ ],
+ "tables": {
+  "owned": [
+   "player_book_admissions",
+   "player_book_roots"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "content_book_input_catalogs",
+   "gameplay_contexts",
+   "gxb_content_activation",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "player_book_admissions",
+   "player_book_roots",
+   "player_currency_balances",
+   "player_hero_roots",
+   "player_heroes",
+   "player_item_stacks",
+   "players"
+  ],
+  "written": [
+   "gxb_operation_receipts",
+   "player_book_admissions",
+   "player_book_roots"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "missions",
+   "playerdisplay"
+  ],
+  "scenarios_naming": [
+   "i9_10a_event_centre.json"
+  ],
+  "unit": [
+   "a44_boundary_test.go",
+   "audit_a075_snapshot_fence_test.go",
+   "audit_a129_transition_test.go",
+   "audit_a130_transition_test.go",
+   "clock_rollback_test.go",
+   "extension_start_test.go",
+   "pinned_buildings_test.go",
+   "pins_a55_test.go",
+   "read_snapshot_test.go"
+  ]
+ }
+}

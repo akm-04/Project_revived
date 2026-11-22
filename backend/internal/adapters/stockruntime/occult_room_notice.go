@@ -41,9 +41,13 @@ type OccultRoomNoticeHandler struct {
 }
 
 func NewOccultRoomNoticeRegistry() (rt.EventRegistry, error) {
-	return rt.NewEventRegistry(nil, []rt.NoticeRegistration{
-		{ParentMID: mids.MIDPlayerNotice, Namespace: rt.NoticeNamespaceGeneric, NoticeType: OccultRoomNoticeType, Roles: []rt.Role{rt.World}, Validate: ValidateOccultRoomNotice},
-	})
+	return rt.NewEventRegistry(
+		[]rt.DirectRegistration{
+			{MID: mids.MIDChatFromFriend, Roles: []rt.Role{rt.World}, Validate: rt.ValidateFriendDM},
+		},
+		[]rt.NoticeRegistration{
+			{ParentMID: mids.MIDPlayerNotice, Namespace: rt.NoticeNamespaceGeneric, NoticeType: OccultRoomNoticeType, Roles: []rt.Role{rt.World}, Validate: ValidateOccultRoomNotice},
+		})
 }
 
 func noticeParams(value any) (map[string]any, bool) {
@@ -108,13 +112,20 @@ func (h OccultRoomNoticeHandler) ReloadAndDeliver(c context.Context, reference s
 		seated = append(seated, member.Player)
 	}
 	h.Delivered.reseat(view.RoomID, occultRoomNoticeKey, seated)
-	steps := []func(context.Context, app.RoomNotice, []identity.PlayerID) error{h.deliverRemovals, h.deliverRoomChanges, h.deliverEvents, h.deliverPushes, h.deliverPositions, h.deliverOnline}
+	steps := []func(context.Context, app.RoomNotice, []identity.PlayerID) error{h.deliverRemovals, h.deliverRoomChanges, h.deliverEvents, h.deliverPushes, h.deliverChats, h.deliverPositions, h.deliverOnline}
+	if view.Closed {
+		// The final report must open the team window before the no-room removal
+		// closes it, and the closing write's notices are the only pushes left.
+		steps = []func(context.Context, app.RoomNotice, []identity.PlayerID) error{h.deliverPushes, h.deliverRemovals}
+	}
 	for _, step := range steps {
 		if err = step(c, view, seated); err != nil {
 			return err
 		}
 	}
-	if len(seated) == 0 {
+	// A closed room keeps its terminal-push cursor: a redelivered wakeup must
+	// not send the final report again.
+	if len(seated) == 0 && !view.Closed {
 		h.Delivered.forget(view.RoomID)
 	}
 	return nil
@@ -144,6 +155,9 @@ func (h OccultRoomNoticeHandler) deliverRemovals(c context.Context, view app.Roo
 }
 
 func (h OccultRoomNoticeHandler) deliverRoomChanges(c context.Context, view app.RoomNotice, _ []identity.PlayerID) error {
+	if !h.Delivered.roomShapeChanged(view.RoomID, view.Signature) {
+		return nil
+	}
 	for _, member := range view.Seated {
 		frame, err := occultRoomFrame(occultFunctionRoomChange, member.Body)
 		if err = h.send(c, member.Player, frame, err); err != nil {
@@ -177,12 +191,47 @@ func (h OccultRoomNoticeHandler) deliverEvents(c context.Context, view app.RoomN
 
 // deliverPushes sends each recorded team or fight-status push once, in server order.
 func (h OccultRoomNoticeHandler) deliverPushes(c context.Context, view app.RoomNotice, _ []identity.PlayerID) error {
-	for _, push := range h.Delivered.newPushes(view.RoomID, view.Pushes) {
+	var fresh []app.RoomPush
+	if view.Closed {
+		fresh = h.Delivered.terminalPushes(view.RoomID, view.Pushes)
+	} else {
+		fresh = h.Delivered.newPushes(view.RoomID, view.Pushes)
+	}
+	for _, push := range fresh {
 		for _, body := range push.Bodies {
 			frame, err := occultRoomFrame(push.Function, body.Body)
 			if err = h.send(c, body.Player, frame, err); err != nil {
 				return err
 			}
+		}
+	}
+	return nil
+}
+
+// deliverChats sends each addressed room-chat line once as a direct 516, the
+// same frame Illusion publishes.
+func (h OccultRoomNoticeHandler) deliverChats(c context.Context, view app.RoomNotice, _ []identity.PlayerID) error {
+	if len(view.Chats) == 0 {
+		return nil
+	}
+	seated := make(map[identity.PlayerID]bool, len(view.Seated))
+	for _, member := range view.Seated {
+		seated[member.Player] = true
+	}
+	for _, chat := range view.Chats {
+		if chat.Serial <= 0 {
+			continue
+		}
+		frame := roomChatFrame(chat.Sender, chat.Message, chat.At)
+		for _, raw := range chat.Recipients {
+			player := identity.PlayerID(raw)
+			if !seated[player] || !h.Delivered.chatUndelivered(view.RoomID, player, chat.Serial) {
+				continue
+			}
+			if err := h.Delivery.Deliver(c, player, mids.MIDChatFromFriend, frame); err != nil {
+				return err
+			}
+			h.Delivered.markChat(view.RoomID, player, chat.Serial)
 		}
 	}
 	return nil

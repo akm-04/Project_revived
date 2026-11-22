@@ -10,6 +10,7 @@ import (
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerdirectory"
+	"gxb.local/backend/v2/internal/domain/character"
 	dcombat "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/grant"
 	d "gxb.local/backend/v2/internal/domain/guildcampaign"
@@ -18,6 +19,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
+	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -34,6 +36,8 @@ const (
 	dungeonCoinResource = "team_dungeon_coin"
 	crystalResource     = "crystal"
 	duplicateResultCode = 30005
+	resultReceiptClass  = "I9_9C_GUILD_CAMPAIGN"
+	resultReceiptSchema = "gxb.guildcampaign.result.v1"
 	factKind            = "GUILD_ACTIVITY"
 	payoutSource        = "GUILD_CAMPAIGN_PAYOUT"
 	awardSource         = "GUILD_CAMPAIGN_AWARD"
@@ -56,6 +60,15 @@ type Settings struct {
 	RecordRewardBadge     int64
 	LastStrikeCoin        int64
 	MaxFightDamage        int64
+	ChapterVersions       map[int64]int64
+}
+
+// ChapterVersion is the chapter's emitted chapter_version; an absent entry is 1.
+func (s Settings) ChapterVersion(chapterID int64) int64 {
+	if version, known := s.ChapterVersions[chapterID]; known {
+		return version
+	}
+	return 1
 }
 
 func (s Settings) InRestWindow(secondsOfDay int64) bool {
@@ -93,15 +106,17 @@ type CopyRow struct {
 	StartFight   *time.Time
 }
 
-// EnemyRow is one wave entry as stored.
+// EnemyRow is one wave entry as stored. PartnerID is the enemy identity the
+// stock 604 row exposes through Hero.getHeroID and 610 reports as hero_id.
 type EnemyRow struct {
-	TableID int64 `json:"table_id"`
-	Lev     int64 `json:"lev"`
-	Star    int64 `json:"star"`
-	Color   int64 `json:"color"`
-	Health  int64 `json:"health"`
-	HP      int64 `json:"hp,omitempty"`
-	Reborn  int64 `json:"is_reborn,omitempty"`
+	PartnerID int64 `json:"partner_id"`
+	TableID   int64 `json:"table_id"`
+	Lev       int64 `json:"lev"`
+	Star      int64 `json:"star"`
+	Color     int64 `json:"color"`
+	Health    int64 `json:"health"`
+	HP        int64 `json:"hp,omitempty"`
+	Reborn    int64 `json:"is_reborn,omitempty"`
 }
 
 // GuildLogRow is one 609 log entry.
@@ -109,6 +124,15 @@ type GuildLogRow struct {
 	Type      int64
 	PlayerID  int64
 	ChapterID int64
+	At        time.Time
+}
+
+// MemberLogRow is one guild_audit_log membership event as 609 needs it.
+type MemberLogRow struct {
+	Kind      string
+	ActorID   int64
+	SubjectID int64
+	Role      int64
 	At        time.Time
 }
 
@@ -253,6 +277,16 @@ type Directory interface {
 	ProfileTx(context.Context, tx.Queryer, identity.PlayerID) (playerdirectory.Profile, bool, error)
 }
 
+// Roster reads one player's Character-owned Hero rows.
+type Roster interface {
+	ListHeroesTx(context.Context, tx.Queryer, identity.PlayerID) ([]character.Hero, error)
+}
+
+// Awakenings reads one player's Character-owned raw twice-awake stages.
+type Awakenings interface {
+	ListRawAwakeningsTx(context.Context, tx.Queryer, identity.PlayerID, []int64) (map[int64]character.RawAwakeningBirth, error)
+}
+
 // Mailer is i5's settlement mail.
 type Mailer interface {
 	DeliverTx(context.Context, tx.Tx, i5.SettlementMailRequest) (mail.Record, bool, error)
@@ -297,23 +331,39 @@ type Content interface {
 	ChapterOfCopy(int64) (int64, bool)
 }
 
+// ResultReceipts is the receipt surface of one settled result: it stores the
+// complete answer and reads back the member's latest answer at a wave.
+type ResultReceipts interface {
+	PutTx(context.Context, tx.Tx, receipt.Receipt) (receipt.PutResult, error)
+	FindLatestTx(context.Context, tx.Queryer, receipt.LatestIdentity) (receipt.Receipt, bool, error)
+}
+
 // Mode is the Guild Campaign gameplay owner. Service keeps the lead-owned open,
 // reset and departure paths; Mode adds claim, fight, settle, awards and reads.
 type Mode struct {
 	Service
-	ModeStore ModeStore
-	Content   Content
-	Tables    map[int64]ChapterInfo
-	Settings  Settings
-	Combat    ModeCombat
-	Grants    Grants
-	Facts     Facts
-	Directory Directory
-	Mail      Mailer
-	Notifier  Notifier
-	Timed     gen.TimedRunner
-	Fresh     tx.Queryer
-	Revisions ContentRevisions
+	ModeStore    ModeStore
+	Content      Content
+	Tables       map[int64]ChapterInfo
+	Settings     Settings
+	Combat       ModeCombat
+	Grants       Grants
+	Facts        Facts
+	Directory    Directory
+	Roster       Roster
+	Awakenings   Awakenings
+	Mail         Mailer
+	Notifier     Notifier
+	Timed        gen.TimedRunner
+	Fresh        tx.Queryer
+	Revisions    ContentRevisions
+	Receipts     ResultReceipts
+	BattleCounts BattleCountObserver
+}
+
+// BattleCountObserver records the Girls Log count of one first settled battle.
+type BattleCountObserver interface {
+	ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error
 }
 
 // ContentRevisions names the installed content a live request binds.
@@ -339,7 +389,7 @@ func (m Mode) BindContent(c context.Context, op operation.Context) (operation.Co
 }
 
 func (m Mode) ready() bool {
-	return m.ModeStore != nil && m.Content != nil && m.Combat != nil && m.Grants != nil && m.Facts != nil && m.Directory != nil && m.Mail != nil && m.Fence != nil && m.Players != nil
+	return m.ModeStore != nil && m.Content != nil && m.Combat != nil && m.Grants != nil && m.Facts != nil && m.Directory != nil && m.Mail != nil && m.Fence != nil && m.Players != nil && m.Receipts != nil
 }
 
 // TxProfile resolves one member's display row inside a transaction.

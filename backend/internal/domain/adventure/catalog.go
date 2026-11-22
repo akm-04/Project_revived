@@ -27,6 +27,13 @@ const (
 	EventSummon   int64 = 10005
 	EventIllusion int64 = 10006
 
+	// Rental modes the stock adventure windows ask under; 0 means the client
+	// sends no rent fields on that site. AdventureIllusionWindow.lua:51 sends
+	// CampaignType.ADVENTURE_ILLUSION_SINGLE = 60, AdventureDefenseMonsterDetail
+	// Window.lua:73 sends CampaignType.ADVENTURE_DEFENSE = 62.
+	IllusionSingleRentalMode int64 = 60
+	DefenseRentalMode        int64 = 62
+
 	SweepFactKind    = objective.CampaignSweepKind
 	BattleFactKind   = objective.PVPFightKind
 	SummonFactKind   = "SUMMON"
@@ -91,8 +98,7 @@ func Profile(id int64) (Event, bool) {
 	return sourceEvents[index], true
 }
 
-// EventForFactKind is the one fact-kind to event map. 10002 and 10003 have no
-// producer yet (C4, D368) and are deliberately absent.
+// EventForFactKind is the one fact-kind to event map.
 func EventForFactKind(kind string) (Event, bool) {
 	switch kind {
 	case SweepFactKind:
@@ -103,6 +109,10 @@ func EventForFactKind(kind string) (Event, bool) {
 		return Profile(EventSummon)
 	case IllusionFactKind:
 		return Profile(EventIllusion)
+	case objective.IntimacyImprovedKind:
+		return Profile(EventFavor)
+	case objective.ShopPurchaseKind:
+		return Profile(EventShop)
 	default:
 		return Event{}, false
 	}

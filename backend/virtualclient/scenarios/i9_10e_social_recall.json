@@ -1,0 +1,11 @@
+{
+  "name": "i9_10e_social_recall",
+  "level": 20,
+  "steps": [
+    "window:social_system",
+    "wait:10",
+    "lua:local system=xyd.ModelManager.get():loadModel(xyd.ModelType.SOCIAL_SYSTEM) local info=system.socialSystemInfo assert(info and type(info.doing_recall)=='table' and type(info.done_recall)=='table' and type(info.got_recall)=='table' and type(info.recall_awarded)=='table','vc-recall-base-fields') local lists=system:getRecallFriendLists() assert(type(lists.canRecall)=='table' and type(lists.onDoing)=='table' and type(lists.doneRecall)=='table' and type(lists.awarded)=='table','vc-recall-model-lists') local window=xyd.WindowManager.get():getWindow('social_system') assert(window,'vc-recall-window') window:swapWindowState(7) for state=1,4 do window:swapRecallState(state) assert(type(window.recallData)=='table','vc-recall-screen-'..state) end"
+  ],
+  "settle_seconds": 15,
+  "expect_ok": [176]
+}

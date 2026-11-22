@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -17,13 +18,17 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/sharedroomstore"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
+	ca "gxb.local/backend/v2/internal/application/characterasset"
 	cb "gxb.local/backend/v2/internal/application/combat"
 	il "gxb.local/backend/v2/internal/application/illusion"
+	"gxb.local/backend/v2/internal/application/publicstats"
 	appsharedroom "gxb.local/backend/v2/internal/application/sharedroom"
+	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	di "gxb.local/backend/v2/internal/domain/illusion"
 	"gxb.local/backend/v2/internal/domain/modes"
+	"gxb.local/backend/v2/internal/domain/statrules"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -47,6 +52,14 @@ func (c *illusionTeamCombat) SettleMemberTx(ctx context.Context, t tx.Tx, reques
 	}
 	c.settlements[request.Member]++
 	return settled, nil
+}
+
+// illusionForceStats pins each partner's public force so the C5 power floor
+// can be told apart from the summed picked force.
+type illusionForceStats map[int64]float64
+
+func (s illusionForceStats) HeroTx(_ context.Context, _ ca.CoherentReadScope, ref character.HeroRef, _ publicstats.View) (publicstats.Result, error) {
+	return publicstats.Result{Stats: statrules.Result{Force: s[ref.PartnerID]}}, nil
 }
 
 func (c *illusionTeamCombat) settlementCount(member identity.PlayerID) int {
@@ -110,6 +123,9 @@ func TestI9_8BIllusionTeamFightNative(t *testing.T) {
 			t.Fatal("join", err)
 		}
 	}
+	if _, err = s.Prepare(ctx, a, op()); err != nil {
+		t.Fatal("master 1351", err)
+	}
 	// IllusionSelectHeroWindow.lua sends one pick at a time as table ids, the
 	// master's pet separately, and 0 for a slot still empty.
 	for _, step := range []struct {
@@ -140,14 +156,10 @@ func TestI9_8BIllusionTeamFightNative(t *testing.T) {
 	if _, err = s.SetPartner(ctx, c, il.PartnerRequest{Heroes: []int64{10001005, 10001006}}, op()); err != nil {
 		t.Fatal("mate 2 repick", err)
 	}
-	if _, err = s.Prepare(ctx, a, op()); err != nil {
-		t.Fatal(err)
-	}
-	if _, err = s.Prepare(ctx, b, op()); err != nil {
-		t.Fatal(err)
-	}
-	if _, err = s.Ready(ctx, c, op()); err != nil {
-		t.Fatal(err)
+	for _, member := range []identity.ActorContext{a, b, c} {
+		if _, err = s.Ready(ctx, member, op()); err != nil {
+			t.Fatal("1357", err)
+		}
 	}
 	fight, err := s.StartTeam(ctx, a, op())
 	if err != nil {
@@ -166,9 +178,18 @@ func TestI9_8BIllusionTeamFightNative(t *testing.T) {
 			t.Fatalf("member %d settlement count %d", member.PlayerID, n)
 		}
 	}
+	girlsLogExactlyOnce(t, p, a.PlayerID, 1)
+	girlsLogExactlyOnce(t, p, b.PlayerID, 2)
+	girlsLogExactlyOnce(t, p, c.PlayerID, 2)
+	frozen := readTeamReport(t, content)
+	for _, table := range []int64{10001002, 10001003, 10001004, 10001005, 10001006, 10010001} {
+		if !frozen.heroes[table] {
+			t.Fatalf("team report is missing C5 hero %d", table)
+		}
+	}
 	accepted := scalar(t, p, `SELECT hurt FROM illusion_occurrence_results WHERE logical_server_id=$1 AND player_id=$2`, int64(server), int64(a.PlayerID))
-	if accepted <= 0 {
-		t.Fatal("team damage was not accepted")
+	if accepted != frozen.hurt {
+		t.Fatalf("team damage %d was not accepted: report carries %d", accepted, frozen.hurt)
 	}
 	for _, member := range []identity.ActorContext{a, b, c} {
 		if n := scalar(t, p, `SELECT hurt FROM illusion_occurrence_results WHERE logical_server_id=$1 AND open_day=(SELECT open_day FROM illusion_occurrences WHERE logical_server_id=$1) AND player_id=$2`, int64(server), int64(member.PlayerID)); n != accepted {
@@ -185,6 +206,9 @@ func TestI9_8BIllusionTeamFightNative(t *testing.T) {
 			t.Fatalf("team replay settled member %d %d times", member.PlayerID, n)
 		}
 	}
+	girlsLogExactlyOnce(t, p, a.PlayerID, 1)
+	girlsLogExactlyOnce(t, p, b.PlayerID, 2)
+	girlsLogExactlyOnce(t, p, c.PlayerID, 2)
 	report, err := s.GetReport(ctx, a, state.ReportID, op())
 	if err != nil || !sameReport(t, reportContent(t, report), content) {
 		t.Fatalf("1362 replay %v", err)
@@ -192,6 +216,188 @@ func TestI9_8BIllusionTeamFightNative(t *testing.T) {
 	other, _ := illusionOwner(t, p, rankingServer(t, p))
 	if _, err = s.GetReport(ctx, other, state.ReportID, op()); !errors.Is(err, di.ErrRefused) {
 		t.Fatalf("1362 crossed a logical server: %v", err)
+	}
+	// DL-2ffb0688: a member seated after the report stores no damage_result,
+	// so the 518 projection must tell that seat is_report 0.
+	late, _ := illusionTeamOwner(t, p, server)
+	if _, err = s.RemovePlayer(ctx, a, c.PlayerID, op()); err != nil {
+		t.Fatal("kick for late seat", err)
+	}
+	if _, err = s.EnterRoom(ctx, late, roomID, op()); err != nil {
+		t.Fatal("late join", err)
+	}
+	state = illusionRoomState(t, p, roomID)
+	if _, ok := state.DamageResults[fmt.Sprint(int64(late.PlayerID))]; ok {
+		t.Fatalf("late seat has a damage_result %+v", state.DamageResults)
+	}
+	reader := stockruntime.IllusionRoomNoticeReader{Store: sharedroomstore.Store{},
+		Directory: i4store.PlayerDirectoryReader{}, Queryer: p}
+	notice, found, err := reader.ReadRoomNotice(ctx, fmt.Sprint(roomID))
+	if err != nil || !found || notice.ReportID != state.ReportID {
+		t.Fatalf("late seat notice %v %v %+v", found, err, notice)
+	}
+	if _, ok := notice.DamageResults[fmt.Sprint(int64(late.PlayerID))]; ok {
+		t.Fatalf("late seat notice has a damage_result %+v", notice.DamageResults)
+	}
+}
+
+// TestI9_8BIllusionTeamFightPositiveHarmsNative pins that a team START credits
+// the clamped A-side damage, not zero and not the enemy's hurts. Maxed fixture
+// stats make the team strike every attempt UUID, so a wrong credit is
+// distinguishable from a legitimately harmless fight.
+func TestI9_8BIllusionTeamFightPositiveHarmsNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	clock := illusionTime(t)
+	s := illusionService(t, p, clock, illusionPrivileges{level: 3}, illusionGuildSource{})
+	team := &illusionTeamCombat{Service: s.Combat.(cb.Service)}
+	s.Combat = team
+	master, _ := illusionTeamOwner(t, p, server, 10001002)
+	mateOne, _ := illusionTeamOwner(t, p, server, 10001003, 10001004)
+	mateTwo, _ := illusionTeamOwner(t, p, server, 10001005, 10001006)
+	revision := installed(t, p)
+	contentStore := contentstore.Store{Queryer: p}
+	definition, err := contentStore.PetAcquisitionTx(ctx, p, revision, 10010001)
+	if err != nil {
+		t.Fatal(err)
+	}
+	grantGenuine(t, p, master, revision, "illusion master pet", []grant.Line{
+		{Kind: grant.StackItem, ItemID: definition.EggItemID, Amount: 1},
+		{Kind: grant.ScalarCurrency, ResourceKey: "crystal", Amount: 10000}})
+	pets := genuinePetService(p)
+	ricky := must(pets.Summon(ctx, master, 10010001, op()))(t, "pet summon")
+	must(pets.CleanCD(ctx, master, ricky.PetID, op()))(t, "pet hatch")
+	for _, member := range []identity.ActorContext{master, mateOne, mateTwo} {
+		exec(t, p, `UPDATE player_heroes SET level=100,star=5,color=15,raw_skill_1=100,raw_skill_2=100,raw_skill_3=100,raw_skill_4=100,raw_skill_5=100,raw_skill_6=100,state_version=state_version+1,updated_at=clock_timestamp() WHERE player_id=$1`, int64(member.PlayerID))
+	}
+
+	created, err := s.CreateRoom(ctx, master, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	roomID := illusionRoomID(t, created)
+	for _, member := range []identity.ActorContext{mateOne, mateTwo} {
+		if _, err = s.EnterRoom(ctx, member, roomID, op()); err != nil {
+			t.Fatal("join", err)
+		}
+	}
+	if _, err = s.Prepare(ctx, master, op()); err != nil {
+		t.Fatal("master 1351", err)
+	}
+	for _, step := range []struct {
+		member identity.ActorContext
+		pick   il.PartnerRequest
+	}{
+		{master, il.PartnerRequest{Heroes: []int64{}, PetID: 10010001}},
+		{master, il.PartnerRequest{Heroes: []int64{10001002}, PetID: 10010001}},
+		{mateOne, il.PartnerRequest{Heroes: []int64{10001003, 10001004}}},
+		{mateTwo, il.PartnerRequest{Heroes: []int64{10001005, 10001006}}},
+	} {
+		if _, err = s.SetPartner(ctx, step.member, step.pick, op()); err != nil {
+			t.Fatal("pick", err)
+		}
+	}
+	for _, member := range []identity.ActorContext{master, mateOne, mateTwo} {
+		if _, err = s.Ready(ctx, member, op()); err != nil {
+			t.Fatal("1357", err)
+		}
+	}
+
+	fight, err := s.StartTeam(ctx, master, op())
+	if err != nil {
+		t.Fatal("team start", err)
+	}
+	content := reportContent(t, fight)
+	frozen := readTeamReport(t, content)
+	if frozen.hurt <= 0 {
+		t.Fatalf("A-side clamped damage %d is not positive", frozen.hurt)
+	}
+	if frozen.opponentHurt == frozen.hurt {
+		t.Fatalf("A and B harms are both %d", frozen.hurt)
+	}
+	state := illusionRoomState(t, p, roomID)
+	if state.AttemptID == "" || state.ReportID != state.AttemptID {
+		t.Fatalf("room did not freeze the report %+v", state)
+	}
+	durableHurt := func(member identity.PlayerID) int64 {
+		return scalar(t, p, `SELECT hurt FROM illusion_occurrence_results WHERE logical_server_id=$1 AND open_day=(SELECT open_day FROM illusion_occurrences WHERE logical_server_id=$1) AND player_id=$2`, int64(server), int64(member))
+	}
+	for _, member := range []identity.ActorContext{master, mateOne, mateTwo} {
+		if n := team.settlementCount(member.PlayerID); n != 1 {
+			t.Fatalf("member %d settlement count %d", member.PlayerID, n)
+		}
+		if got := durableHurt(member.PlayerID); got != frozen.hurt {
+			t.Fatalf("member %d durable hurt %d want %d", member.PlayerID, got, frozen.hurt)
+		}
+	}
+
+	replay, err := s.StartTeam(ctx, master, op())
+	if err != nil || !sameReport(t, reportContent(t, replay), content) {
+		t.Fatalf("team replay %v", err)
+	}
+	for _, member := range []identity.ActorContext{master, mateOne, mateTwo} {
+		if n := team.settlementCount(member.PlayerID); n != 1 {
+			t.Fatalf("team replay settled member %d %d times", member.PlayerID, n)
+		}
+		if got := durableHurt(member.PlayerID); got != frozen.hurt {
+			t.Fatalf("team replay changed member %d hurt %d want %d", member.PlayerID, got, frozen.hurt)
+		}
+	}
+}
+
+// TestI9_8BIllusionTeamPowerFloorNative pins C5 through the production pick
+// path: a hero's own force must reach the player's best-15 force divided by
+// team_power_limit (30), not the selected heroes' sum.
+func TestI9_8BIllusionTeamPowerFloorNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	clock := illusionTime(t)
+	s := illusionService(t, p, clock, illusionPrivileges{level: 3}, illusionGuildSource{})
+	a, masterPartners := illusionTeamOwner(t, p, server, 10001002)
+	b, matePartners := illusionTeamOwner(t, p, server, 10001003, 10001004, 10001005, 10001008)
+	c, _ := illusionTeamOwner(t, p, server, 10001006, 10001007)
+	if len(masterPartners) != 1 || len(matePartners) != 4 {
+		t.Fatalf("partners %v %v", masterPartners, matePartners)
+	}
+	s.Stats = illusionForceStats{masterPartners[0]: 30000, matePartners[0]: 30000, matePartners[3]: 30000,
+		matePartners[1]: 100, matePartners[2]: 100}
+
+	revision := installed(t, p)
+	contentStore := contentstore.Store{Queryer: p}
+	definition, err := contentStore.PetAcquisitionTx(ctx, p, revision, 10010001)
+	if err != nil {
+		t.Fatal(err)
+	}
+	grantGenuine(t, p, a, revision, "illusion master pet", []grant.Line{
+		{Kind: grant.StackItem, ItemID: definition.EggItemID, Amount: 1},
+		{Kind: grant.ScalarCurrency, ResourceKey: "crystal", Amount: 10000}})
+	pets := genuinePetService(p)
+	ricky := must(pets.Summon(ctx, a, 10010001, op()))(t, "pet summon")
+	must(pets.CleanCD(ctx, a, ricky.PetID, op()))(t, "pet hatch")
+
+	created, err := s.CreateRoom(ctx, a, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	roomID := illusionRoomID(t, created)
+	for _, member := range []identity.ActorContext{b, c} {
+		if _, err = s.EnterRoom(ctx, member, roomID, op()); err != nil {
+			t.Fatal("join", err)
+		}
+	}
+	if _, err = s.Prepare(ctx, a, op()); err != nil {
+		t.Fatal("master 1351", err)
+	}
+	if _, err = s.SetPartner(ctx, a, il.PartnerRequest{Heroes: []int64{10001002}, PetID: 10010001}, op()); err != nil {
+		t.Fatal("master hero", err)
+	}
+	// Mate one's best-15 is 60200 and the floor 2006; its two 100-force heroes
+	// pass the old selected-sum floor (200/30) but not the player floor.
+	if _, err = s.SetPartner(ctx, b, il.PartnerRequest{Heroes: []int64{10001004, 10001005}}, op()); !errors.Is(err, di.ErrRefused) {
+		t.Fatalf("two 100-force heroes against a 60200 best-15 were accepted: %v", err)
+	}
+	if _, err = s.SetPartner(ctx, b, il.PartnerRequest{Heroes: []int64{10001003, 10001008}}, op()); err != nil {
+		t.Fatalf("two 30000-force heroes against a 60200 best-15 were refused: %v", err)
 	}
 }
 
@@ -212,6 +418,48 @@ func reportContent(t *testing.T, body map[string]any) string {
 	}
 	content, _ := report[0]["content"].(string)
 	return content
+}
+
+// teamReport is C6's frozen report: its A-side harms (the accepted team
+// damage, clamped like the mode), the B side the mode must not credit, and the
+// C5 heroes the report actually fielded.
+type teamReport struct {
+	hurt         int64
+	opponentHurt int64
+	heroes       map[int64]bool
+}
+
+func readTeamReport(t *testing.T, content string) teamReport {
+	t.Helper()
+	var parsed struct {
+		Fighter map[string]struct {
+			Harms float64 `json:"harms"`
+			Hero  struct {
+				TableID int64 `json:"table_id"`
+			} `json:"hero"`
+		} `json:"fighter"`
+	}
+	if err := json.Unmarshal([]byte(content), &parsed); err != nil {
+		t.Fatal("team report", err)
+	}
+	out := teamReport{heroes: map[int64]bool{}}
+	total := 0.0
+	opponent := 0.0
+	for key, fighter := range parsed.Fighter {
+		switch {
+		case strings.HasPrefix(key, "A"):
+			total += fighter.Harms
+			out.heroes[fighter.Hero.TableID] = true
+		case strings.HasPrefix(key, "B"):
+			opponent += fighter.Harms
+		}
+	}
+	out.hurt = int64(total)
+	if out.hurt > di.DamageCap {
+		out.hurt = di.DamageCap
+	}
+	out.opponentHurt = int64(opponent)
+	return out
 }
 
 func TestI9_8BIllusionRoomPolicyNative(t *testing.T) {
@@ -250,7 +498,7 @@ func TestI9_8BIllusionRoomPolicyNative(t *testing.T) {
 	if _, err = s.EnterRoom(ctx, c, roomID, op()); err == nil {
 		t.Fatal("kicked player rejoined")
 	}
-	if _, err = s.Prepare(ctx, b, op()); err != nil {
+	if _, err = s.Ready(ctx, b, op()); err != nil {
 		t.Fatal(err)
 	}
 	reader := stockruntime.IllusionRoomNoticeReader{Store: sharedroomstore.Store{}, Directory: i4store.PlayerDirectoryReader{}, Queryer: p}
@@ -379,20 +627,18 @@ func TestI9_8BIllusionMemberTeamNative(t *testing.T) {
 		t.Fatal(err)
 	}
 	_, openDay, _ := illusionOccurrence(t, p, server)
-	exec(t, p, `INSERT INTO illusion_attempts(attempt_id,player_id,logical_server_id,open_day,campaign_id,room_id,formation,frozen_at,resolved,damage)
-		VALUES('stale-illusion-attempt',$1,$2,$3,$4,NULL,$5,$6,true,0)`,
-		int64(member.PlayerID), int64(server), openDay-2, int64(di.FirstCampaignID), fmt.Sprint(picks[1]), clock.at.Unix())
+	staleIllusionAttempt(t, p, member, openDay-2, clock.at)
 
 	body, err := s.MemberTeam(ctx, member, member.PlayerID, op())
 	if err != nil {
 		t.Fatal(err)
 	}
 	heroes, ok := body["heros"].([]map[string]any)
-	if !ok || len(heroes) != 1 || heroes[0]["partner_id"] != picks[0] {
+	if !ok || len(heroes) != 1 || heroes[0]["partner_id"] != float64(picks[0]) {
 		t.Fatalf("1364 read the wrong occurrence %#v", body)
 	}
 	pet, ok := body["pet"].(map[string]any)
-	if !ok || pet["pet_id"] != ricky.PetID {
+	if !ok || pet["pet_id"] != float64(ricky.PetID) {
 		t.Fatalf("1364 pet %#v", body["pet"])
 	}
 	if _, err = s.MemberTeam(ctx, member, other.PlayerID, op()); !errors.Is(err, di.ErrRefused) {
@@ -425,7 +671,26 @@ func TestI9_8BIllusionMemberTeamFrozenBoardNative(t *testing.T) {
 		t.Fatal(err)
 	}
 	heroes, ok := body["heros"].([]map[string]any)
-	if !ok || len(heroes) != 1 || heroes[0]["partner_id"] != partner {
+	if !ok || len(heroes) != 1 || heroes[0]["partner_id"] != float64(partner) {
 		t.Fatalf("1364 lost the frozen team on the rest day %#v", body)
+	}
+}
+
+// staleIllusionAttempt stores an older terminal Combat attempt for the same
+// player and locator, so 1364 must answer from the current attempt of the board
+// day, not from an older stored attempt.
+func staleIllusionAttempt(t *testing.T, p *pg.Pool, member identity.ActorContext, openDay int64, at time.Time) {
+	t.Helper()
+	var sourceID string
+	if err := p.Raw().QueryRow(ctx, `SELECT attempt_id::text FROM combat_attempts WHERE domain_kind='ILLUSION' AND actor_player_id=$1 AND state='TERMINAL' ORDER BY terminal_at DESC LIMIT 1`, int64(member.PlayerID)).Scan(&sourceID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := p.Raw().Exec(ctx, `INSERT INTO combat_attempts SELECT (jsonb_populate_record(NULL::combat_attempts,to_jsonb(a)||jsonb_build_object(
+		'attempt_id',gen_random_uuid(),'generation_ref',$2::text,
+		'started_at',$3::timestamptz,'result_deadline',$4::timestamptz,'terminal_at',$5::timestamptz,'semantic_receipt_id',$6::text))).*
+		FROM combat_attempts a WHERE attempt_id=$1`,
+		sourceID, fmt.Sprintf("ILLUSION/%d/%d/%d", member.LogicalServerID, openDay, di.FirstCampaignID),
+		at.Add(-48*time.Hour), at.Add(-47*time.Hour), at.Add(-48*time.Hour), "stale-illusion-native"); err != nil {
+		t.Fatal(err)
 	}
 }

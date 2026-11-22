@@ -2,6 +2,9 @@ package socialpresentation
 
 import (
 	sp "gxb.local/backend/v2/internal/application/socialprojection"
+	sr "gxb.local/backend/v2/internal/application/socialrelation"
+	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/logicalserver"
 	sv "gxb.local/backend/v2/internal/projection/socialview"
 	"time"
 )
@@ -21,7 +24,20 @@ func wirePlayer(p sp.Player) sv.Player {
 // wireInput is the finite application-to-view bridge at the allowed edge. It
 // copies only committed response values; it performs no read or selection.
 func wireInput(r sp.Result) sv.Result {
-	v := sv.Result{ObservedAt: r.ObservedAt, SendCount: r.SendCount, ReceiveCount: r.ReceiveCount}
+	v := sv.Result{ObservedAt: r.ObservedAt, SendCount: r.SendCount, ReceiveCount: r.ReceiveCount, ShowGuildInviteNotices: r.ShowGuildInviteNotices, Recalling: map[int64]bool{}}
+	for _, row := range r.Recall.Doing {
+		v.RecallDoing = append(v.RecallDoing, sv.RecallDoing{PlayerID: int64(row.PlayerID), PlayerName: r.RecallNames[row.PlayerID], RecallingTime: row.RecallingTime})
+	}
+	for _, row := range r.Recall.Done {
+		v.RecallDone = append(v.RecallDone, sv.RecallDone{PlayerID: int64(row.PlayerID), PlayerName: r.RecallNames[row.PlayerID], Lev: row.Baseline.AcademyLevel, CurLev: row.Current.AcademyLevel, PartnerNum: row.Baseline.OwnedHeroCount, CurPartnerNum: row.Current.OwnedHeroCount, Charge: row.Baseline.ChargeTotal, CurCharge: row.Current.ChargeTotal})
+	}
+	for _, player := range r.Recall.Got {
+		v.RecallGot = append(v.RecallGot, int64(player))
+	}
+	v.RecallAwarded = append(v.RecallAwarded, r.Recall.Awarded...)
+	for _, player := range r.Recall.Recalling {
+		v.Recalling[int64(player)] = true
+	}
 	for _, p := range r.Friends {
 		v.Friends = append(v.Friends, wirePlayer(p))
 	}
@@ -41,6 +57,12 @@ func wireInput(r sp.Result) sv.Result {
 }
 func MapBase(r sp.Result) sv.Base {
 	out := sv.MapBase(wireInput(r))
+	out.Count = int(sr.FriendCapacity)
+	for index := range out.Friends {
+		region := int64(logicalserver.PlayerRegion(identity.PlayerID(out.Friends[index].PlayerID)))
+		out.Friends[index].Region = &region
+	}
+	out.List = out.Friends
 	for _, m := range r.PrivateMessages {
 		out.Offline = append(out.Offline, sv.PrivateMessage{PlayerID: int64(m.PlayerID), Message: m.Message, Time: m.Time})
 	}

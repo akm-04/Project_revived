@@ -82,14 +82,9 @@ func (s Mode) run(c context.Context, a identity.ActorContext, name string, reque
 		if out.Body == nil {
 			out.Body = map[string]any{}
 		}
-		if balance, functions := changes.Recorded(c); len(balance) > 0 || len(functions) > 0 {
-			if len(balance) > 0 {
-				out.Body["economy_"] = balance
-			}
-			if len(functions) > 0 {
-				out.Body["new_funcs_"] = functions
-			}
-		}
+		balance, functions := changes.Recorded(c)
+		changes.WriteEconomy(out.Body, balance)
+		changes.WriteFunctions(out.Body, functions)
 		for key, value := range changes.RecordedMissions(c) {
 			out.Body[key] = value
 		}
@@ -153,35 +148,39 @@ func (s Mode) open(c context.Context, sc gen.TimedScope, a identity.ActorContext
 
 // Info answers 624 from canonical state; the lazy counter reset is projected
 // without a write.
-func (s Mode) Info(c context.Context, a identity.ActorContext, _ operation.Context) (map[string]any, error) {
+func (s Mode) Info(c context.Context, a identity.ActorContext, op operation.Context) (map[string]any, error) {
 	if !s.ready() {
 		return nil, d.ErrUnavailable
 	}
-	at, err := s.Timed.Binder.Time.Now(c)
-	if err != nil {
-		return nil, err
-	}
-	occurrence, found, err := s.Store.ReadOccurrenceTx(c, s.Fresh, int64(a.LogicalServerID))
-	if err != nil {
-		return nil, err
-	}
-	if !found {
-		occurrence = d.Occurrence{LogicalServerID: int64(a.LogicalServerID), Generation: 1, CurrentBoss: d.FirstBossID}
-	}
-	player, found, err := s.Store.ReadPlayerTx(c, s.Fresh, a.PlayerID)
-	if err != nil {
-		return nil, err
-	}
-	if !found {
-		player = d.Player{PlayerID: int64(a.PlayerID)}
-	}
-	player.Reset(modes.Day(at))
-	rank, hurt, err := s.rankAndHurt(c, s.Fresh, occurrence.Board(), a.PlayerID)
-	if err != nil {
-		return nil, err
-	}
-	return infoBody(occurrence, player, rank, hurt), nil
+	var out map[string]any
+	_, _, err := s.Timed.Run(c, op, profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, readRetry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		at := sc.Operation.DecisionAt()
+		occurrence, found, err := s.Store.ReadOccurrenceTx(c, sc.Tx, int64(a.LogicalServerID))
+		if err != nil {
+			return err
+		}
+		if !found {
+			occurrence = d.Occurrence{LogicalServerID: int64(a.LogicalServerID), Generation: 1, CurrentBoss: d.FirstBossID}
+		}
+		player, found, err := s.Store.ReadPlayerTx(c, sc.Tx, a.PlayerID)
+		if err != nil {
+			return err
+		}
+		if !found {
+			player = d.Player{PlayerID: int64(a.PlayerID)}
+		}
+		player.Reset(modes.Day(at))
+		rank, hurt, err := s.rankAndHurt(c, sc.Tx, occurrence.Board(), a.PlayerID)
+		if err != nil {
+			return err
+		}
+		out = infoBody(occurrence, player, rank, hurt)
+		return nil
+	})
+	return out, err
 }
+
+func readRetry() tx.RetryPolicy { return tx.RetryPolicy{MaxAttempts: 1} }
 
 func infoBody(occurrence d.Occurrence, player d.Player, rank, hurt int64) map[string]any {
 	return map[string]any{
@@ -238,13 +237,12 @@ func (s Mode) preInfo(c context.Context, q tx.Queryer, ranks []d.RankEntry, play
 		return nil, nil
 	}
 	ahead := ordered[position-1]
-	profile, found, err := s.Directory.ProfileTx(c, q, identity.PlayerID(ahead.PlayerID))
+	profile, _, err := s.Directory.ProfileTx(c, q, identity.PlayerID(ahead.PlayerID))
 	if err != nil {
 		return nil, err
 	}
-	if !found {
-		return nil, nil
-	}
+	// The sweep window indexes pre_info whenever the viewer is not first; a
+	// missing profile still owes the client a shaped row (zero identity).
 	return map[string]any{"player_name": profile.Name, "avatar_id": profile.AvatarID, "avatar_frame_id": profile.AvatarFrameID, "lev": profile.Level, "hurt": ahead.TotalHurt, "pre_rank": int64(position)}, nil
 }
 

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/adapters/postgres"
+	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	appactivity "gxb.local/backend/v2/internal/application/activitydirectory"
 	appboot "gxb.local/backend/v2/internal/application/bootstrap"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -36,7 +37,14 @@ func (b BootstrapProjection) OverlayMID1(ctx context.Context, q tx.Queryer, acto
 			return err
 		}
 	}
-	rows, err := b.Directory.ListAt(ctx, actor, at)
+	level := func(c context.Context, pid identity.PlayerID) (int64, bool, error) {
+		profile, found, err := (i4store.PlayerDirectoryReader{}).ProfileTx(c, q, pid)
+		if err != nil || !found {
+			return 0, found, err
+		}
+		return profile.Level, true, nil
+	}
+	rows, err := b.Directory.ListAt(ctx, actor, at, level)
 	if err != nil {
 		return err
 	}

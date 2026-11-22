@@ -307,6 +307,12 @@ func (s Store) OnlineAt(ctx context.Context, playerIDs []identity.PlayerID, obse
 	return states, nil
 }
 
+// OnlineAtTx is the same read through a caller transaction, so a request that
+// already holds a snapshot never opens a second connection.
+func (s Store) OnlineAtTx(ctx context.Context, q tx.Queryer, playerIDs []identity.PlayerID, observedAt time.Time) (map[identity.PlayerID]bool, error) {
+	return (Store{Queryer: q}).OnlineAt(ctx, playerIDs, observedAt)
+}
+
 const expiredPlayersSQL = `
 SELECT COALESCE(jsonb_agg(player_id ORDER BY player_id),'[]'::jsonb)::text
 FROM (
@@ -378,4 +384,22 @@ func (Store) ReadOwnerFenceTx(ctx context.Context, q tx.Queryer) (int64, error) 
 		return 0, socialpresence.ErrStaleRealtimeOwner
 	}
 	return current, nil
+}
+
+func (Store) LatestExpiredLeaseAt(ctx context.Context, query tx.Queryer, player identity.PlayerID, at time.Time) (*time.Time, error) {
+	if query == nil || !player.Valid() || at.IsZero() {
+		return nil, socialpresence.ErrInvalidObservation
+	}
+	var raw any
+	if err := query.QueryRow(ctx, `SELECT max(lease_expires_at) FROM realtime_presence_leases WHERE player_id=$1 AND lease_expires_at<=$2`, int64(player), at.UTC()).Scan(&raw); err != nil {
+		return nil, err
+	}
+	expiredAt, err := nullableTime(raw)
+	if err != nil {
+		return nil, err
+	}
+	if expiredAt != nil && (expiredAt.IsZero() || expiredAt.After(at)) {
+		return nil, socialpresence.ErrInvalidObservation
+	}
+	return expiredAt, nil
 }

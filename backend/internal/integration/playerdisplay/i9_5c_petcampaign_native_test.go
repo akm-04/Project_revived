@@ -24,6 +24,7 @@ import (
 	d "gxb.local/backend/v2/internal/domain/petcampaign"
 	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 	"sync"
 	"testing"
 	"time"
@@ -36,7 +37,7 @@ func petCampaignMode(t *testing.T, p *pg.Pool, clock *workplaceTime) app.Mode {
 	owner.Awakening = awake.Awakening
 	owner.Missions.Awakening = i5store.Store{Queryer: p}
 	fight := combatService(t, p)
-	mode := app.Mode{Directory: i4store.PlayerDirectoryReader{}, Timed: m.Timed, Fresh: p, Store: petcampaignstore.Store{}, Content: contentstore.Store{Queryer: p}, Fence: m.Fence, Functions: m.Functions, Heroes: m.Heroes, HeroLocks: m.HeroLocks, Pets: pet.Service{Store: characterstore.Store{Queryer: p}}, Combat: fight, Rules: fight.Rules, Values: owner, Costs: m.Costs, Privileges: owner.Privileges, Facts: i5.ObjectiveFacts{Owner: owner, Open: i5store.Store{Queryer: p}}, Awakening: owner, Receipts: m.Receipts, ReceiptRead: m.ReceiptRead}
+	mode := app.Mode{Directory: i4store.PlayerDirectoryReader{}, Timed: m.Timed, Fresh: p, Store: petcampaignstore.Store{}, Content: contentstore.Store{Queryer: p}, Fence: m.Fence, Functions: m.Functions, Heroes: m.Heroes, HeroLocks: m.HeroLocks, Pets: pet.Service{Store: characterstore.Store{Queryer: p}}, Combat: fight, Rules: fight.Rules, Values: owner, Costs: m.Costs, Privileges: owner.Privileges, Facts: i5.ObjectiveFacts{Owner: owner, Open: i5store.Store{Queryer: p}}, Awakening: owner, Receipts: m.Receipts, ReceiptRead: m.ReceiptRead, BattleCounts: battleCountObserver(p)}
 	mode.Timed.Binder.Time = clock
 	return mode
 }
@@ -98,6 +99,10 @@ func TestI9_5CTowerNativeProgressAndTimedSweep(t *testing.T) {
 			}
 		}
 	}
+	// Every one of the 77 first settlements counts once; the exact replay counts nothing.
+	if got := battleCount(t, p, a.PlayerID, 1); got != 77 {
+		t.Fatalf("Girls Log count after 77 settled floors = %d, want 77", got)
+	}
 	r := petCampaignRecord(t, p, a)
 	if r.Current != 77 || r.Max != 77 {
 		t.Fatal(r)
@@ -127,8 +132,27 @@ func TestI9_5CTowerNativeProgressAndTimedSweep(t *testing.T) {
 		t.Fatal("forged finish must not avoid crystal requirement")
 	}
 	clock.at = time.Unix(r.Sweep.Due, 0).UTC()
-	if _, e = s.Detail(ctx, a, op()); e != nil {
+	detail, e := s.Detail(ctx, a, op())
+	if e != nil {
 		t.Fatal("redpoint", e)
+	}
+	if _, ok := detail["awards"]; ok {
+		t.Fatalf("822 detail carries an uncommitted award: %v", detail)
+	}
+	replyconformance.Check(t, 822, detail)
+	login := map[string]any{}
+	if e = s.OverlayMID1(ctx, p, a, false, clock.at, login); e != nil {
+		t.Fatal("login detail", e)
+	}
+	redpoint, ok := login["822"].(map[string]any)
+	if !ok {
+		t.Fatalf("login detail 822 missing: %v", login)
+	}
+	if _, ok = redpoint["awards"]; ok {
+		t.Fatalf("822 login redpoint carries an uncommitted award: %v", redpoint)
+	}
+	if _, ok = redpoint["begin_sweep_time"]; !ok {
+		t.Fatalf("822 login redpoint lost begin_sweep_time: %v", redpoint)
 	}
 	before := petCampaignRecord(t, p, a)
 	if before.Current != 0 || before.Sweep == nil {
@@ -193,6 +217,15 @@ func TestI9_5CTowerNativeProgressAndTimedSweep(t *testing.T) {
 	t.Log(fmt.Sprintf("genuine77 victories -> reset ->4620s durable sweep -> next78, revision%s", rev))
 }
 
+func requireFloorArrays(t *testing.T, body map[string]any, fields ...string) {
+	t.Helper()
+	for _, field := range fields {
+		values, ok := body[field].([]int64)
+		if !ok || len(values) != 20 {
+			t.Fatalf("%s is not a 20-element int array: %#v", field, body[field])
+		}
+	}
+}
 func seedTowerProgress(t *testing.T, p *pg.Pool, a identity.ActorContext, r d.State, at time.Time) {
 	t.Helper()
 	tr, e := p.Begin(ctx, tx.Options{})
@@ -335,14 +368,20 @@ func TestI9_5CEliteAndPetMaterialOrigins(t *testing.T) {
 	if stackQuantity(t, p, a.PlayerID, 50001328) != tickets-1 {
 		t.Fatal("exact START double charged")
 	}
-	if _, e := s.Result(ctx, a, app.Result{Win: true, Kind: 2, Floor: 1}, op()); e != nil {
+	result, e := s.Result(ctx, a, app.Result{Win: true, Kind: 2, Floor: 1}, op())
+	if e != nil {
 		t.Fatal(e)
 	}
+	requireFloorArrays(t, result["info"].(map[string]any)["super"].(map[string]any), "buy_info", "sweep_info")
+	replyconformance.Check(t, 820, result)
 	for i := 0; i < 3; i++ {
 		call := op()
-		if _, e := s.EliteSweep(ctx, a, 230001, call); e != nil {
+		sweepOut, e := s.EliteSweep(ctx, a, 230001, call)
+		if e != nil {
 			t.Fatal("raid", i, e)
 		}
+		requireFloorArrays(t, sweepOut, "sweep_info")
+		replyconformance.Check(t, 824, sweepOut)
 		if _, e := s.EliteSweep(ctx, a, 230001, call); e != nil {
 			t.Fatal("exact elite retry", e)
 		}
@@ -351,9 +390,12 @@ func TestI9_5CEliteAndPetMaterialOrigins(t *testing.T) {
 		t.Fatal("fourth free raid", e)
 	}
 	buy := op()
-	if _, e := s.BuyElite(ctx, a, 1, buy); e != nil {
+	buyOut, e := s.BuyElite(ctx, a, 1, buy)
+	if e != nil {
 		t.Fatal("buy3", e)
 	}
+	requireFloorArrays(t, buyOut, "buy_info", "sweep_info")
+	replyconformance.Check(t, 825, buyOut)
 	if _, e := s.BuyElite(ctx, a, 1, buy); e != nil {
 		t.Fatal("exact buy retry", e)
 	}
@@ -367,6 +409,8 @@ func TestI9_5CEliteAndPetMaterialOrigins(t *testing.T) {
 	if e != nil || reloaded["super"].(map[string]any)["max_floor"] != int64(1) {
 		t.Fatal(reloaded, e)
 	}
+	requireFloorArrays(t, reloaded["super"].(map[string]any), "buy_info", "sweep_info")
+	replyconformance.Check(t, 816, reloaded)
 
 	// Stage1 equipment is an explicit prior-crafting fixture, not a claim that this test earned30 fragments.
 	// The new source producer above earns real fragments; the final challenge below must use real Cloud START/RESULT.
@@ -396,6 +440,7 @@ func TestI9_5CEliteAndPetMaterialOrigins(t *testing.T) {
 	cloud := campaignMode(t, p)
 	cloud.Awakening = owner
 	cloud.PetAwakening = owner
+	cloudCounts := battleCount(t, p, a.PlayerID, 1)
 	cc, e := content.CampaignCatalogTx(ctx, p, rev)
 	if e != nil {
 		t.Fatal(e)
@@ -425,6 +470,10 @@ func TestI9_5CEliteAndPetMaterialOrigins(t *testing.T) {
 			t.Fatal("Cloud accepted pet goal", id, e)
 		}
 	}
+	// The cloud branch carries no own formation, so it counts no battle.
+	if got := battleCount(t, p, a.PlayerID, 1); got != cloudCounts {
+		t.Fatalf("cloud campaigns counted %d battles, want 0", got-cloudCounts)
+	}
 	root, e := (i5store.Store{}).ReadAwakeningTx(ctx, p, a.PlayerID)
 	if e != nil || !root.Active[2].Complete {
 		t.Fatal("genuine final missing", root, e)
@@ -436,12 +485,81 @@ func TestI9_5CEliteAndPetMaterialOrigins(t *testing.T) {
 	if e != nil || actual.TableID != 110010001 {
 		t.Fatal("same pet awakening persisted", actual, e)
 	}
-	board, e := s.RankList(ctx, a, op())
+	board, e := s.RankList(ctx, a, 22, op())
 	if e != nil || len(board["rank_list"].([]map[string]any)) != 1 {
 		t.Fatal("rank22", board, e)
 	}
 }
 
+func petSweepGraceFixture(t *testing.T) (*pg.Pool, app.Mode, identity.ActorContext, *workplaceTime, d.Sweep, func() int64) {
+	t.Helper()
+	p := pool(t)
+	a, rev := bornActor(t, p), installed(t, p)
+	clock := &workplaceTime{at: time.Now().UTC().Add(time.Hour)}
+	s := petCampaignMode(t, p, clock)
+	compositeLevel(t, p, a, rev, 100)
+	if _, e := s.Load(ctx, a, op()); e != nil {
+		t.Fatal(e)
+	}
+	r := petCampaignRecord(t, p, a)
+	r.Max = 2
+	seedTowerProgress(t, p, a, r, clock.at)
+	grantGenuine(t, p, a, rev, "sweep finish grace balance", []grant.Line{{Kind: grant.ScalarCurrency, ResourceKey: "crystal", Amount: 100}})
+	if _, e := s.BeginSweep(ctx, a, op()); e != nil {
+		t.Fatal(e)
+	}
+	job := petCampaignRecord(t, p, a).Sweep
+	if job == nil {
+		t.Fatal("no pending sweep")
+	}
+	balance := func() int64 {
+		return leagueScalar(t, p, `SELECT amount FROM player_currency_balances WHERE player_id=$1 AND resource_key='crystal'`, int64(a.PlayerID))
+	}
+	return p, s, a, clock, *job, balance
+}
+func TestI9_5CSweepFinishGrace(t *testing.T) {
+	t.Run("within grace settles free", func(t *testing.T) {
+		p, s, a, clock, job, balance := petSweepGraceFixture(t)
+		clock.at = time.Unix(job.Due-1, 0).UTC()
+		before := balance()
+		out, e := s.FinishSweep(ctx, a, job.Due, op())
+		if e != nil {
+			t.Fatal(e)
+		}
+		if got := balance(); got != before {
+			t.Fatal("grace charged", before, got)
+		}
+		rows, ok := out["awards"].([]map[string]any)
+		if !ok || len(rows) == 0 {
+			t.Fatal("no awards", out)
+		}
+		if r := petCampaignRecord(t, p, a); r.Current != job.To || r.Sweep != nil {
+			t.Fatal(r)
+		}
+	})
+	t.Run("three seconds short stays paid", func(t *testing.T) {
+		_, s, a, clock, job, balance := petSweepGraceFixture(t)
+		clock.at = time.Unix(job.Due-3, 0).UTC()
+		before := balance()
+		if _, e := s.FinishSweep(ctx, a, job.Due, op()); e != nil {
+			t.Fatal(e)
+		}
+		if got := balance(); got != before-10 {
+			t.Fatal("early finish price", before, got)
+		}
+	})
+	t.Run("finish before due stays paid", func(t *testing.T) {
+		_, s, a, clock, job, balance := petSweepGraceFixture(t)
+		clock.at = time.Unix(job.Due-1, 0).UTC()
+		before := balance()
+		if _, e := s.FinishSweep(ctx, a, job.Due-1, op()); e != nil {
+			t.Fatal(e)
+		}
+		if got := balance(); got != before-10 {
+			t.Fatal("early finish price", before, got)
+		}
+	})
+}
 func TestI9_5CTimedPaidFinishUsesServerClock(t *testing.T) {
 	ctx, _ := changes.Track(ctx)
 	p := pool(t)

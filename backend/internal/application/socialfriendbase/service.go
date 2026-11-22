@@ -44,7 +44,7 @@ func (s Service) LoadBase(c context.Context, a identity.ActorContext, op operati
 			if e != nil {
 				return e
 			}
-			base, e := s.Projection.ReadBasePreparedTx(c, sc.Tx, a, privacy.RecipientRootPresent)
+			base, e := s.Projection.ReadBasePreparedTx(c, sc.Tx, a, privacy.RecipientRootPresent, sc.Operation.Operation())
 			if e != nil {
 				return e
 			}

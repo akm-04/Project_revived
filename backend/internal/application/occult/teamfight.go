@@ -5,9 +5,9 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
-	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -27,6 +27,7 @@ const (
 	// teamCombatCampaignType is the stock CampaignType.OCCULT_COOPERATION.
 	teamCombatCampaignType = 56
 	teamTerminalKind       = "OCCULT_TEAM_RESULT"
+	teamClosedKind         = "OCCULT_TEAM_CLOSED"
 )
 
 // FormationRequest is a 2383 pick: one hero at a position, or the member's pet.
@@ -68,7 +69,19 @@ func memberIDs(view *roomView) []int64 {
 	return out
 }
 
-// TeamInvite answers 2374. The stage's event fires once and may pass it; else the
+// teamCampaignHeroes is every fielded girl of one accepted team fight, the
+// frozen final team a clear-result event is applied to.
+func teamCampaignHeroes(view *roomView, team *d.TeamFight) []d.CampaignHero {
+	var heroes []d.CampaignHero
+	for _, member := range teamRoster(view, team.StartPlayer) {
+		for _, heroID := range team.Pick(int64(member)).Fielded() {
+			heroes = append(heroes, d.CampaignHero{PlayerID: int64(member), HeroID: heroID})
+		}
+	}
+	return heroes
+}
+
+// TeamInvite answers 2374. The stage's prepare event fires once and may pass it; else the
 // caller becomes start_player, holds the stage and the other members are asked.
 func (s Mode) TeamInvite(c context.Context, a identity.ActorContext, campaignID, subID int64, op operation.Context) (map[string]any, error) {
 	return s.update(c, a, op, func(c context.Context, sc gen.TimedScope, view *roomView) (map[string]any, error) {
@@ -199,7 +212,7 @@ func (s Mode) pickHero(c context.Context, q tx.Queryer, view *roomView, team *d.
 		return err
 	}
 	if used[tableIDOf(row, request.PartnerID)] {
-		return fmt.Errorf("%w: duplicate hero", d.ErrRefused)
+		return fmt.Errorf("%w: duplicate hero", d.ErrDuplicateGirl)
 	}
 	if err = view.state.CanField(int64(player), request.PartnerID, int(request.Position), team.Pick(int64(player)).Heroes); err != nil {
 		return err
@@ -339,7 +352,10 @@ func (s Mode) StartTeamFight(c context.Context, a identity.ActorContext, campaig
 		return nil, d.ErrInvalid
 	}
 	if _, err = s.Combat.Resolve(c, op, attempt); err != nil {
-		return nil, err
+		if !errors.Is(err, cd.ErrResolverPermanent) {
+			return nil, err
+		}
+		return nil, errors.Join(err, s.closeUnresolvedTeam(c, a, op, attempt))
 	}
 	return s.update(c, a, op, func(c context.Context, sc gen.TimedScope, view *roomView) (map[string]any, error) {
 		stored, err := s.storedFight(c, sc.Tx, a, view, campaignID, subID)
@@ -348,6 +364,25 @@ func (s Mode) StartTeamFight(c context.Context, a identity.ActorContext, campaig
 		}
 		return s.settleAttempt(c, sc, a, view, attempt)
 	})
+}
+
+// closeUnresolvedTeam ends a team fight the resolver can never finish and
+// returns the stage to selection, so the next start freezes a new attempt.
+func (s Mode) closeUnresolvedTeam(c context.Context, a identity.ActorContext, op operation.Context, attempt ids.UUID) error {
+	_, err := s.update(c, a, op, func(c context.Context, sc gen.TimedScope, view *roomView) (map[string]any, error) {
+		team := view.state.Team
+		if team == nil || team.AttemptID != attempt.String() {
+			return nil, fmt.Errorf("%w: the team fight is gone", d.ErrRefused)
+		}
+		if _, err := s.Combat.CloseTx(c, sc.Tx, cb.TerminalRequest{Locator: teamLocator(view.room.ID, view.room.LogicalServerID),
+			GenerationRef: teamGeneration(view.room.ID, *team), TerminalKind: teamClosedKind,
+			SemanticReceiptID: teamClosedReceipt(attempt.String()), At: view.at}); err != nil {
+			return nil, err
+		}
+		team.AttemptID, team.FightStartedAt = "", 0
+		return map[string]any{}, nil
+	})
+	return err
 }
 
 // storedFight answers a repeated 2377 of a settled stage from its stored report.
@@ -440,8 +475,8 @@ func (s Mode) startTeamAttempt(c context.Context, sc gen.TimedScope, a identity.
 	if err != nil {
 		return cb.Started{}, err
 	}
-	return s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Actor: a, Locator: teamLocator(view.room.ID, view.room.LogicalServerID), GenerationRef: teamGeneration(view.room.ID, team),
-		StartFingerprint: teamFingerprint(view.room.ID, team, roster), ResultDeadline: view.at.Add(d.FightSeconds * time.Second), Battle: battle,
+	return s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Mode: cd.ModeOccultTeam, Actor: a, Locator: teamLocator(view.room.ID, view.room.LogicalServerID), GenerationRef: teamGeneration(view.room.ID, team),
+		StartFingerprint: teamFingerprint(view.room.ID, team), ResultDeadline: view.at.Add(d.FightSeconds * time.Second), Battle: battle,
 		TrustProfile: cd.ServerReport, Members: roster})
 }
 
@@ -471,9 +506,16 @@ func (s Mode) settleAttempt(c context.Context, sc gen.TimedScope, a identity.Act
 		return nil, err
 	}
 	view.state.RecordTeamHeroes(members)
+	finalTeam := teamCampaignHeroes(view, team)
+	view.state.RecordCampaignHeroes(team.CampaignID, finalTeam)
 	result, err := view.state.ApplyTeamResult(terminal.Resolution.Outcome.Star, enemies)
 	if err != nil {
 		return nil, err
+	}
+	if campaign, known := view.catalog.Campaign(team.CampaignID); known {
+		if err = s.applyClearEvents(c, sc, a, view, campaign, finalTeam); err != nil {
+			return nil, err
+		}
 	}
 	awards := map[identity.PlayerID][]d.Reward{}
 	if result.Won {
@@ -486,7 +528,7 @@ func (s Mode) settleAttempt(c context.Context, sc gen.TimedScope, a identity.Act
 		return nil, err
 	}
 	reportKey := attempt.String()
-	if err = s.storeReport(c, sc.Tx, view, reportKey, report, awards); err != nil {
+	if err = s.storeReport(c, sc.Tx, view, reportKey, report, awards, awardDetailOf(view, result.Score)); err != nil {
 		return nil, err
 	}
 	entry := logEntry(view.at, battleLogType, team.CampaignID, view.room.Members()...)
@@ -500,8 +542,30 @@ func (s Mode) settleAttempt(c context.Context, sc gen.TimedScope, a identity.Act
 	if err = s.unreadyAll(view); err != nil {
 		return nil, err
 	}
+	// Each frozen member's own heroes; the counter lock is last.
+	for _, member := range teamRoster(view, team.StartPlayer) {
+		if err = s.BattleObserver.ObserveBattleTx(c, sc.Tx, member, frozenPartners(snapshot, member), view.at); err != nil {
+			return nil, err
+		}
+	}
 	body := map[string]any{"battle_report": string(report), "award_info": map[string]any{"awards": rewardRows(awards[a.PlayerID])}}
 	return body, s.fillState(c, sc, a, view, body, result.Score)
+}
+
+// frozenPartners is the owned hero roster the attempt froze for one player:
+// borrowed, template and foreign actors never count.
+func frozenPartners(snapshot cd.Snapshot, player identity.PlayerID) []int64 {
+	partners := make([]int64, 0, len(snapshot.Battle.TeamA))
+	for _, actor := range snapshot.Battle.TeamA {
+		if actor.Kind != cd.HeroActor || identity.PlayerID(actor.Player) != player {
+			continue
+		}
+		if actor.Origin != cd.OwnedSelf && actor.Origin != cd.OwnedMember {
+			continue
+		}
+		partners = append(partners, actor.Identity)
+	}
+	return partners
 }
 
 func (s Mode) unreadyAll(view *roomView) error {
@@ -590,10 +654,11 @@ func withStar(report []byte, star int64) ([]byte, error) {
 type storedContent struct {
 	BattleReport string                      `json:"battle_report"`
 	Awards       map[string][]map[string]any `json:"awards"`
+	AwardDetail  *awardDetail                `json:"award_detail,omitempty"`
 }
 
-func (s Mode) storeReport(c context.Context, t tx.Tx, view *roomView, reportKey string, report []byte, awards map[identity.PlayerID][]d.Reward) error {
-	content := storedContent{BattleReport: string(report), Awards: map[string][]map[string]any{}}
+func (s Mode) storeReport(c context.Context, t tx.Tx, view *roomView, reportKey string, report []byte, awards map[identity.PlayerID][]d.Reward, detail awardDetail) error {
+	content := storedContent{BattleReport: string(report), Awards: map[string][]map[string]any{}, AwardDetail: &detail}
 	for member, rewards := range awards {
 		content.Awards[numberKey(int64(member))] = rewardRows(rewards)
 	}
@@ -621,7 +686,11 @@ func (s Mode) storedReport(c context.Context, q tx.Queryer, a identity.ActorCont
 	if awards == nil {
 		awards = []map[string]any{}
 	}
-	return map[string]any{"battle_report": content.BattleReport, "award_info": map[string]any{"awards": awards}}, nil
+	info := map[string]any{"awards": awards}
+	if content.AwardDetail != nil {
+		info["award_detail"] = content.AwardDetail.fields()
+	}
+	return map[string]any{"battle_report": content.BattleReport, "award_info": info}, nil
 }
 
 // TeamReport answers 2382: the stored report of a fight the caller was in, in the
@@ -630,21 +699,26 @@ func (s Mode) TeamReport(c context.Context, a identity.ActorContext, reportKey s
 	if reportKey == "" {
 		return nil, d.ErrInvalid
 	}
-	loaded, err := s.read(c, a, op)
-	if err != nil {
-		return nil, err
-	}
-	stored, err := s.storedReport(c, s.Fresh, a, reportKey, loaded.at)
-	if err != nil {
-		return nil, err
-	}
-	body, err := s.body(c, a, loaded)
-	if err != nil {
-		return nil, err
-	}
-	body["battle_report"] = []map[string]any{{"report": stored["battle_report"]}}
-	body["award_info"] = stored["award_info"]
-	return body, nil
+	var out map[string]any
+	_, _, err := s.Timed.Run(c, op, profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, readRetry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		loaded, err := s.readTx(c, sc.Tx, a, sc.Operation.Operation(), sc.Operation.DecisionAt())
+		if err != nil {
+			return err
+		}
+		stored, err := s.storedReport(c, sc.Tx, a, reportKey, loaded.at)
+		if err != nil {
+			return err
+		}
+		body, err := s.stateBody(c, sc.Tx, a, loaded.catalog, loaded.scores, loaded.tickets, loaded.view)
+		if err != nil {
+			return err
+		}
+		body["battle_report"] = []map[string]any{{"report": stored["battle_report"]}}
+		body["award_info"] = stored["award_info"]
+		out = body
+		return nil
+	})
+	return out, err
 }
 
 func teamLocator(roomID int64, server identity.LogicalServerID) cd.Locator {
@@ -657,23 +731,20 @@ func teamGeneration(roomID int64, team d.TeamFight) string {
 
 func teamReceipt(attemptID string) string { return "occult-team:" + attemptID }
 
+func teamClosedReceipt(attemptID string) string { return "occult-team-closed:" + attemptID }
+
 func teamMemberReceipt(attemptID string, member identity.PlayerID) string {
 	return fmt.Sprintf("occult-team:%s:%d", attemptID, member)
 }
 
 // teamFingerprint is deterministic so a replayed start is a Combat replay, not a
-// new attempt: it never names the request operation.
-func teamFingerprint(roomID int64, team d.TeamFight, roster []identity.PlayerID) string {
-	picks := make([]d.TeamPick, 0, len(roster))
-	for _, member := range roster {
-		picks = append(picks, team.Pick(int64(member)))
-	}
+// new attempt: the stage is the room and the generation, while the roster and its
+// picks are not (START_REPLAY_IDENTITY_V1 ruling 1; replayStartTx keeps the roster).
+func teamFingerprint(roomID int64, team d.TeamFight) string {
 	raw, _ := json.Marshal(struct {
-		Room   int64
-		Team   string
-		Roster []identity.PlayerID
-		Picks  []d.TeamPick
-	}{roomID, teamGeneration(roomID, team), slices.Clone(roster), picks})
+		Room int64
+		Team string
+	}{roomID, teamGeneration(roomID, team)})
 	sum := sha256.Sum256(raw)
 	return hex.EncodeToString(sum[:])
 }

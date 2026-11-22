@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"mime"
 	"mime/multipart"
@@ -13,6 +14,7 @@ import (
 
 	app "gxb.local/backend/v2/internal/application/clientlog"
 	domain "gxb.local/backend/v2/internal/domain/clientlog"
+	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
 // ClientLogIngest is the ClientLog service seen by the log URL route.
@@ -26,6 +28,9 @@ type ClientLogIngest interface {
 type ClientLogHandler struct {
 	Ingest   ClientLogIngest
 	BasePath string
+	// Bound caps concurrent uploads. This route bypasses the HTTP edge on the
+	// raw gameplay pool, so without it one host can take every connection (C1-9).
+	Bound *httpedge.Admission
 }
 
 // ClientLogBasePath is the route path of GXB_CLIENT_LOG_URL.
@@ -46,6 +51,13 @@ func (h ClientLogHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
+	if h.Bound != nil && !h.Bound.TryAcquire() {
+		busyReply(w, "client_log_busy")
+		return
+	}
+	if h.Bound != nil {
+		defer h.Bound.Release()
+	}
 	request := readUpload(r)
 	request.Capability = strings.TrimPrefix(strings.TrimPrefix(r.URL.Path, h.BasePath), "/")
 	w.WriteHeader(h.Ingest.Ingest(r.Context(), request))
@@ -53,23 +65,24 @@ func (h ClientLogHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func readUpload(r *http.Request) app.UploadRequest {
 	body, err := io.ReadAll(io.LimitReader(r.Body, domain.MaxCrashBodyBytes+1))
-	request := app.UploadRequest{BodyBytes: len(body)}
 	if err != nil {
-		request.Malformed = app.QuarantineMalformedMultipart
-		return request
+		return malformedUpload(body, app.QuarantineMalformedMultipart)
 	}
 	if len(body) > domain.MaxCrashBodyBytes {
-		request.Malformed = app.QuarantineOverCap
-		return request
+		return malformedUpload(body, app.QuarantineOverCap)
 	}
 	mediaType, parameters, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
 	if err != nil || mediaType != "multipart/form-data" || parameters["boundary"] == "" {
-		request.Malformed = app.QuarantineMalformedMultipart
-		return request
+		return malformedUpload(body, app.QuarantineMalformedMultipart)
 	}
-	if err := readParts(multipart.NewReader(bytes.NewReader(body), parameters["boundary"]), &request); err != nil {
-		request.Malformed = app.QuarantineMalformedMultipart
-		return request
+	request := app.UploadRequest{BodyBytes: len(body)}
+	envelope := &bytes.Buffer{}
+	if err := readParts(multipart.NewReader(bytes.NewReader(body), parameters["boundary"]), &request, envelope); err != nil {
+		return malformedUpload(body, app.QuarantineMalformedMultipart)
+	}
+	if len(request.Payload) == 0 {
+		summary, _ := domain.Truncate(envelope.String(), domain.MaxRawEnvelopeBytes)
+		request.EnvelopeSummary = []byte(summary)
 	}
 	if request.Kind == domain.KindErrorLog && len(body) > domain.MaxErrorLogBodyBytes {
 		request.Malformed = app.QuarantineOverCap
@@ -77,9 +90,13 @@ func readUpload(r *http.Request) app.UploadRequest {
 	return request
 }
 
+func malformedUpload(body []byte, reason string) app.UploadRequest {
+	return app.UploadRequest{BodyBytes: len(body), Malformed: reason, RawBody: body}
+}
+
 var errNoParts = errors.New("multipart body has no parts")
 
-func readParts(reader *multipart.Reader, request *app.UploadRequest) error {
+func readParts(reader *multipart.Reader, request *app.UploadRequest, envelope *bytes.Buffer) error {
 	for parts := 0; ; parts++ {
 		part, err := reader.NextPart()
 		if errors.Is(err, io.EOF) && parts == 0 {
@@ -95,6 +112,7 @@ func readParts(reader *multipart.Reader, request *app.UploadRequest) error {
 		if err != nil {
 			return err
 		}
+		writePartSummary(envelope, part, data)
 		if part.FileName() != "" {
 			request.Kind = domain.KindCrash
 			request.AttachmentName = part.FileName()
@@ -112,4 +130,20 @@ func readParts(reader *multipart.Reader, request *app.UploadRequest) error {
 			request.Token = string(data)
 		}
 	}
+}
+
+// freeTextParts are the stock form fields whose value is text, so a diagnostic
+// may quote it; every other part contributes only its name and byte length.
+var freeTextParts = map[string]bool{"app_v": true, "v": true, "token": true}
+
+// writePartSummary describes one part without copying its bytes (A-132). The
+// service applies R8 redaction to the summary before persistence.
+func writePartSummary(envelope *bytes.Buffer, part *multipart.Part, data []byte) {
+	name := part.FormName()
+	fmt.Fprintf(envelope, "part %s", name)
+	if freeTextParts[name] && part.FileName() == "" {
+		value, _ := domain.Truncate(string(data), domain.MaxRawEnvelopeBytes)
+		fmt.Fprintf(envelope, "=%s", value)
+	}
+	fmt.Fprintf(envelope, " bytes=%d\n", len(data))
 }

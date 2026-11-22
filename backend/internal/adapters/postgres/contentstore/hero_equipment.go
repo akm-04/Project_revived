@@ -39,11 +39,7 @@ func (Store) HeroEquipmentRevisionTx(ctx context.Context, q tx.Queryer, revision
 	if q == nil || len(revision) != 64 {
 		return false, errors.New("content store: invalid Hero equipment revision")
 	}
-	var raw string
-	if err := q.QueryRow(ctx, contentqueries.ReadContentRevisionManifest, revision).Scan(&raw); err != nil {
-		return false, err
-	}
-	return manifestHasCapability([]byte(raw), revision, heroEquipmentCapability)
+	return storedCapability(ctx, q, revision, heroEquipmentCapability)
 }
 
 // HeroEquipmentPositionTx resolves the exact Normal-Hero source mapping. A

@@ -1,0 +1,60 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11B_ITEMS_ENERGY_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [],
+  "row_lock_methods": {
+   "daily_consumption_players": [
+    "dailyconsumestore.LockTx",
+    "dailyconsumestore.ReadTx"
+   ]
+  },
+  "row_locks": [
+   "daily_consumption_players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [],
+ "name": "dailyconsume",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/dailyconsumestore"
+ ],
+ "tables": {
+  "owned": [],
+  "read": [
+   "daily_consumption_players"
+  ],
+  "written": [
+   "daily_consumption_players"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [],
+  "unit": [
+   "buy_counters_test.go"
+  ]
+ }
+}

@@ -2,6 +2,7 @@ package arena
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -62,6 +63,7 @@ func PlayoffsInfo(view d.TournamentView) map[string]any {
 	// Zero is a display-only BYE; it is never enrolled, supported or paid.
 	players["0"] = map[string]any{"player_id": int64(0), "player_name": "-", "lev": int64(0), "avatar_id": int64(110001001), "avatar_frame_id": int64(0), "region": int64(0), "region_name": "", "guild_name": "", "conquer_lev": int64(0), "conquer_loop_id": int64(0), "fans": int64(0), "sign_up_times": int64(0), "win_times": int64(0), "dec": ""}
 	signed := false
+	declared := false
 	for _, entrant := range view.Period.Entrants {
 		row := tournamentFace(view.Faces[entrant.PlayerID])
 		fans := int64(0)
@@ -72,9 +74,19 @@ func PlayoffsInfo(view d.TournamentView) map[string]any {
 		}
 		row["fans"], row["sign_up_times"], row["win_times"], row["dec"] = fans, entrant.RegistrationSequence, entrant.GroupWins, entrant.Declaration
 		players[strconv.FormatInt(int64(entrant.PlayerID), 10)] = row
-		signed = signed || entrant.PlayerID == view.Viewer
+		if entrant.PlayerID == view.Viewer {
+			signed = true
+			declared = entrant.Declaration != ""
+		}
 	}
 	status := map[string]any{"2": []int64{}, "3": []int64{}, "4": []int64{}, "5": []int64{}, "6": []int64{}, "7": []int64{}}
+	if qualifiers := view.Period.Qualifiers(); len(qualifiers) > 0 {
+		rows := make([]int64, 0, len(qualifiers))
+		for _, player := range qualifiers {
+			rows = append(rows, int64(player))
+		}
+		status["3"] = rows
+	}
 	if view.Period.RosterLocked && !view.Period.Cancelled {
 		roster := []int64{}
 		for _, group := range view.Period.Groups {
@@ -98,7 +110,8 @@ func PlayoffsInfo(view d.TournamentView) map[string]any {
 			status["7"] = []int64{int64(entrant.PlayerID)}
 		}
 	}
-	return map[string]any{"battle_status": status, "players_info": players, "player_info": map[string]any{"is_signed": flag(signed)}, "playoff_info": PlayoffsPhase(view), "support_info": TournamentSupport(view)}
+	// The stock schedule window auto-opens the declaration form only while have_dec_flag is 0.
+	return map[string]any{"battle_status": status, "players_info": players, "player_info": map[string]any{"is_signed": flag(signed), "have_dec_flag": flag(declared)}, "playoff_info": PlayoffsPhase(view), "support_info": TournamentSupport(view)}
 }
 
 func PlayoffsSignList(view d.TournamentView) map[string]any {
@@ -123,6 +136,14 @@ func PlayoffsGroup(view d.TournamentView, group int) map[string]any {
 			key := strconv.FormatInt(int64(entrant.PlayerID), 10)
 			rows[key] = info[key]
 		}
+	}
+	// The stock group popup indexes all four cached seats, so a sparse group
+	// needs the same display-only zero card 1283 serves.
+	if group < 1 || group > d.TournamentGroupCount || !view.Period.RosterLocked || view.Period.Cancelled {
+		return rows
+	}
+	if slices.Contains(view.Period.Groups[group-1][:], identity.PlayerID(0)) {
+		rows["0"] = info["0"]
 	}
 	return rows
 }
@@ -192,23 +213,35 @@ func TournamentRecords(rooms []d.TournamentRoom, player identity.PlayerID, stage
 	return rows
 }
 
+// rowsOrEmpty keeps a map the client indexes an object, never a JSON null.
+func rowsOrEmpty(rows map[string]map[string]any) map[string]map[string]any {
+	if rows == nil {
+		return map[string]map[string]any{}
+	}
+	return rows
+}
+
 func TournamentRoom(view d.TournamentRoomView) map[string]any {
 	room := view.Room
-	pets := [2]any{}
-	for side := range pets {
+	body := map[string]any{"room_key": room.SelectionKey(), "stage": room.Selection.Turn, "stage_start_time": room.Selection.Deadline.Add(-d.SelectionTurnLifetime).Unix(), "server_time": view.At.Unix(), "is_open": flag(room.Status != d.RoomPreparing), "A_player_id": int64(room.Selection.Players[0]), "B_player_id": int64(room.Selection.Players[1]), "A_player_info": tournamentFace(room.Faces[0]), "B_player_info": tournamentFace(room.Faces[1]), "A_partners_info": rowsOrEmpty(view.Heroes[0]), "B_partners_info": rowsOrEmpty(view.Heroes[1]), "A_prepared": flag(room.Ready[0]), "B_prepared": flag(room.Ready[1]), "params": map[string]any{"team_id": room.Selection.Team, "stage": room.Stage, "record_id": room.Identifier.String(), "record_info": TournamentRecord(room)}}
+	// The stock window treats a present A_pet_info/B_pet_info as a pet and an
+	// absent key as "no pet"; JSON null decodes to truthy userdata and crashes.
+	for side, key := range [2]string{"A_pet_info", "B_pet_info"} {
 		identifier := room.Selection.Teams[side][room.Selection.Team-1].Pet
-		if identifier != 0 {
-			pets[side] = view.Pets[side][strconv.FormatInt(identifier, 10)]
+		if identifier == 0 {
+			continue
+		}
+		if pet, ok := view.Pets[side][strconv.FormatInt(identifier, 10)]; ok {
+			body[key] = pet
 		}
 	}
-	body := map[string]any{"room_key": room.SelectionKey(), "stage": room.Selection.Turn, "stage_start_time": room.Selection.Deadline.Add(-d.SelectionTurnLifetime).Unix(), "server_time": view.At.Unix(), "is_open": flag(room.Status != d.RoomPreparing), "A_player_id": int64(room.Selection.Players[0]), "B_player_id": int64(room.Selection.Players[1]), "A_player_info": tournamentFace(room.Faces[0]), "B_player_info": tournamentFace(room.Faces[1]), "A_partners_info": view.Heroes[0], "B_partners_info": view.Heroes[1], "A_pet_info": pets[0], "B_pet_info": pets[1], "A_prepared": flag(room.Ready[0]), "B_prepared": flag(room.Ready[1]), "params": map[string]any{"team_id": room.Selection.Team, "stage": room.Stage, "record_id": room.Identifier.String(), "record_info": TournamentRecord(room)}}
 	return body
 }
 
 func TournamentReport(view d.TournamentRoomView) map[string]any {
 	body := TournamentRoom(view)
 	body["record_info"] = TournamentRecord(view.Room)
-	body["A_pet_info"], body["B_pet_info"] = view.Pets[0], view.Pets[1]
+	body["A_pet_info"], body["B_pet_info"] = rowsOrEmpty(view.Pets[0]), rowsOrEmpty(view.Pets[1])
 	body["report"] = []map[string]any{}
 	if len(view.Report) > 0 {
 		body["report"] = []map[string]any{{"content": string(view.Report)}}

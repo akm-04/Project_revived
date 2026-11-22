@@ -16,6 +16,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	petproj "gxb.local/backend/v2/internal/projection/pet"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -55,7 +56,7 @@ func (d PetDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReques
 		return *fail
 	}
 	if d.Service == nil {
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "pet_unavailable"}}
+		return failureReply(defect(nil))
 	}
 	switch req.Envelope.MID {
 	case 780:
@@ -104,13 +105,14 @@ func (d PetDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReques
 			return petFail(err)
 		}
 		if d.Economy == nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "pet_projection_unavailable"}}
+			return failureReply(defect(nil))
 		}
 		crystal, err := d.Economy.CurrentScalar(ctx, actor.PlayerID, "crystal", req.Envelope.Operation)
 		if err != nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "pet_projection_failed"}}
+			return failureFromRows(nil, err)
 		}
-		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"economy_": map[string]any{"crystal": crystal}}}
+		changes.Balance(ctx, "crystal", crystal)
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
 	case 789:
 		if !onlyStockGameplayParams(req.Envelope.Params, "pet_id") {
 			return petBad("invalid_pet_set_show")
@@ -282,13 +284,17 @@ func (d PetDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReques
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error": "not_pet_mid"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 }
 
 func (d PetDispatcher) petActor(ctx context.Context, req httpedge.DispatchRequest) (identity.ActorContext, *httpedge.Response) {
-	if d.Authority == nil || req.Envelope.Claims.Token == "" {
-		r := httpedge.Response{HTTPStatus: http.StatusUnauthorized, Body: map[string]any{"error": "gameplay_auth_required"}}
+	if d.Authority == nil {
+		r := failureReply(defect(nil))
+		return identity.ActorContext{}, &r
+	}
+	if req.Envelope.Claims.Token == "" {
+		r := failureReply(sessionFailure())
 		return identity.ActorContext{}, &r
 	}
 	a, err := d.Authority.ResolveGameplayBearer(ctx, req.Envelope.Claims.Token, req.Envelope.ReceivedAt)
@@ -297,7 +303,7 @@ func (d PetDispatcher) petActor(ctx context.Context, req httpedge.DispatchReques
 		return identity.ActorContext{}, &r
 	}
 	if req.Envelope.Claims.Region != int64(a.LogicalServerID) {
-		r := httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "region_mismatch"}}
+		r := failureReply(refusal(unprovenRefusalCode))
 		return identity.ActorContext{}, &r
 	}
 	return a, nil
@@ -428,22 +434,38 @@ func petRestorationResponse(items []appi5.Award) map[string]any {
 }
 
 func petBad(code string) httpedge.Response {
-	return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": code}}
+	return failureReply(malformed(code))
+}
+
+// D5 splits the mapper table's FAULT rows: unsupported or inactive content is a
+// 35028 refusal, corrupt/time-discontinuity state is a permanent 500, and only
+// a provider dependency is a transient 503.
+var petFailureRows = []failureRow{
+	{match: apppet.ErrPetAcquisitionContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apppet.ErrPetProgressionContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apppet.ErrPetEquipmentContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apppet.ErrPetPromotionContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apppet.ErrPetAppearanceContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apppet.ErrPetAwakeningProviderUnavailable, class: failureUnavailable},
+	{match: apppet.ErrPetNotFound, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apppet.ErrPetStillIncubating, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apppet.ErrPetNotShown, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apppet.ErrPetStyleSwitchConflict, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apppet.ErrPetTimeDiscontinuity, class: failureDefect},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+	{match: apppet.ErrPetAppearanceUnavailable, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apppet.ErrPetExpMax, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apppet.ErrPetEvolutionUnavailable, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apppet.ErrPetSkillUnavailable, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apppet.ErrPetEquipmentUnavailable, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apppet.ErrPetPromotionUnavailable, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apppet.ErrPetPromotionPrerequisites, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apppet.ErrPetPromotionCorruptState, class: failureDefect},
+	{match: apppet.ErrPetPromotionQ1Unsupported, class: failureRefusal, code: unprovenRefusalCode},
 }
 
 func petFail(err error) httpedge.Response {
-	switch {
-	case errors.Is(err, apppet.ErrPetAcquisitionContentInactive), errors.Is(err, apppet.ErrPetProgressionContentInactive), errors.Is(err, apppet.ErrPetEquipmentContentInactive), errors.Is(err, apppet.ErrPetPromotionContentInactive), errors.Is(err, apppet.ErrPetAppearanceContentInactive), errors.Is(err, apppet.ErrPetAwakeningProviderUnavailable):
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "pet_content_inactive"}}
-	case errors.Is(err, apppet.ErrPetNotFound):
-		return httpedge.Response{HTTPStatus: http.StatusNotFound, Body: map[string]any{"error": "pet_not_found"}}
-	case errors.Is(err, apppet.ErrPetStillIncubating), errors.Is(err, apppet.ErrPetNotShown), errors.Is(err, apppet.ErrPetTimeDiscontinuity), errors.Is(err, apppet.ErrPetStyleSwitchConflict), errors.Is(err, economy.ErrInsufficientBalance):
-		return httpedge.Response{HTTPStatus: http.StatusConflict, Body: map[string]any{"error": "pet_operation_rejected"}}
-	case errors.Is(err, apppet.ErrPetAppearanceUnavailable), errors.Is(err, apppet.ErrPetExpMax), errors.Is(err, apppet.ErrPetEvolutionUnavailable), errors.Is(err, apppet.ErrPetSkillUnavailable), errors.Is(err, apppet.ErrPetEquipmentUnavailable), errors.Is(err, apppet.ErrPetPromotionUnavailable), errors.Is(err, apppet.ErrPetPromotionPrerequisites), errors.Is(err, apppet.ErrPetPromotionCorruptState), errors.Is(err, apppet.ErrPetPromotionQ1Unsupported):
-		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "pet_operation_rejected"}}
-	default:
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "pet_operation_failed"}}
-	}
+	return failureFromRows(petFailureRows, err)
 }
 
 var _ PetServicePort = apppet.Service{}

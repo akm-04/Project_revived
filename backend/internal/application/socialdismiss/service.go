@@ -91,18 +91,12 @@ func (s Service) Dismiss(ctx context.Context, a identity.ActorContext, ids []soc
 				if n.StateVersion == math.MaxInt64 {
 					return socialrelation.ErrCounterOverflow
 				}
-				if at.Before(n.NoticeTime) || at.Before(n.CreatedAt) || at.Before(n.UpdatedAt) {
-					return socialrelation.ErrStaleDecisionTime
-				}
 				pending = append(pending, n)
 			}
 		}
 		if len(pending) > 0 {
 			if root.StateVersion == math.MaxInt64 {
 				return socialrelation.ErrCounterOverflow
-			}
-			if at.Before(root.CreatedAt) || at.Before(root.UpdatedAt) {
-				return socialrelation.ErrStaleDecisionTime
 			}
 			if e := s.Roots.TouchRootTx(ctx, scope.Tx, root, at); e != nil {
 				return e

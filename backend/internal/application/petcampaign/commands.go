@@ -36,14 +36,10 @@ func (s Mode) Load(c context.Context, a identity.ActorContext, op operation.Cont
 	})
 }
 
-// Detail822 never grants the due preview it projects.
+// Detail822 is a read-only redpoint preview; FinishSweep is the only grant.
 func (s Mode) Detail(c context.Context, a identity.ActorContext, op operation.Context) (map[string]any, error) {
 	return s.run(c, a, "detail", struct{}{}, nil, 0, op, func(c context.Context, sc gen.TimedScope, v view, r *d.State) (map[string]any, error) {
-		out := r.Normal()
-		if r.Sweep != nil && sc.Operation.DecisionAt().Unix() >= r.Sweep.Due {
-			out["awards"] = r.Sweep.Awards
-		}
-		return out, nil
+		return r.Normal(), nil
 	})
 }
 func award(f d.Floor, first, vip bool) ([]grant.Line, []map[string]any) {
@@ -184,9 +180,9 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, q Fight, op oper
 		if q.Pet > 0 {
 			battle.PetsA = []cb.Participant{{Origin: cd.OwnedSelf, Kind: cd.PetActor, Player: a.PlayerID, Identity: q.Pet}}
 		}
-		trust := cd.ClientSummaryAttested
+		trust, mode := cd.ClientSummaryAttested, cd.ModePetCampaign
 		if q.Practice {
-			trust = cd.PracticeNoValue
+			trust, mode = cd.PracticeNoValue, cd.ModePetCampaignPractice
 		}
 		fp, e := receipt.FingerprintRequest(struct {
 			ID      string
@@ -195,7 +191,7 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, q Fight, op oper
 		if e != nil {
 			return nil, e
 		}
-		if _, e = s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Actor: a, Locator: locator(a, q.Practice), GenerationRef: id, StartFingerprint: fmt.Sprintf("%x", fp), ResultDeadline: at.Add(time.Hour), Battle: battle, TrustProfile: trust, Replay: cd.ReplaySpec{Response: cd.ReplayOK}}); e != nil {
+		if _, e = s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Mode: mode, Actor: a, Locator: locator(a, q.Practice), GenerationRef: id, StartFingerprint: fmt.Sprintf("%x", fp), ResultDeadline: at.Add(time.Hour), Battle: battle, TrustProfile: trust, Replay: cd.ReplaySpec{Response: cd.ReplayOK}}); e != nil {
 			return nil, e
 		}
 		if q.Practice {
@@ -226,7 +222,10 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, q Fight, op oper
 	})
 }
 func (s Mode) Result(c context.Context, a identity.ActorContext, q Result, op operation.Context) (map[string]any, error) {
-	return s.run(c, a, "result", q, nil, 0, op, func(c context.Context, sc gen.TimedScope, v view, r *d.State) (map[string]any, error) {
+	// A drained or rejected result still clears r.Fight in its committed state;
+	// the refusal is answered only after that commit as a dispatcher 409.
+	var refused bool
+	out, e := s.run(c, a, "result", q, nil, 0, op, func(c context.Context, sc gen.TimedScope, v view, r *d.State) (map[string]any, error) {
 		if q.Kind < 1 || q.Kind > 2 || q.Floor < 1 || q.Pet < 0 {
 			return nil, d.ErrInvalid
 		}
@@ -246,6 +245,7 @@ func (s Mode) Result(c context.Context, a identity.ActorContext, q Result, op op
 		}
 		if judged.Drained || judged.Attestation.Verdict == cd.VerdictRejected {
 			r.Fight = nil
+			refused = true
 			return map[string]any{"error_code": int64(1)}, nil
 		}
 		out := map[string]any{"awards": []map[string]any{}, "now_floor": r.Current, "max_floor": r.Max}
@@ -278,6 +278,25 @@ func (s Mode) Result(c context.Context, a identity.ActorContext, q Result, op op
 			r.LastResultFloor = q.Floor
 			r.LastResultPet = p.Pet
 		}
+		if e = s.BattleCounts.ObserveBattleTx(c, sc.Tx, a.PlayerID, p.Formation, sc.Operation.DecisionAt()); e != nil {
+			return nil, e
+		}
 		return out, nil
 	})
+	if e == nil && (refused || refusalBody(out)) {
+		e = d.ErrRefused
+	}
+	return out, e
+}
+
+// refusalBody recognises a committed refusal replayed from its receipt.
+func refusalBody(out map[string]any) bool {
+	switch code := out["error_code"].(type) {
+	case int64:
+		return code == 1
+	case float64:
+		return code == 1
+	default:
+		return false
+	}
 }

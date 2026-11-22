@@ -30,25 +30,34 @@ func heroes(v d.Display) []map[string]any {
 	out := []map[string]any{}
 	looksRobot := !v.Occupant.IsRobot() && v.Occupant.TableID() <= d.RobotTableLimit
 	for _, h := range v.Heroes {
-		if !looksRobot {
+		leader := v.Leader > 0 && h["partner_id"] == v.Leader
+		if !looksRobot && !leader {
 			out = append(out, h)
 			continue
 		}
-		row := make(map[string]any, len(h))
+		row := make(map[string]any, len(h)+1)
 		for k, x := range h {
 			row[k] = x
 		}
-		row["partner_id"] = h["table_id"]
+		if looksRobot {
+			row["partner_id"] = h["table_id"]
+		}
+		if leader {
+			row["is_leader"] = int64(1)
+		}
 		out = append(out, row)
 	}
 	return out
 }
 
 func Enemy(v d.Display) map[string]any {
-	row := map[string]any{"table_id": v.Occupant.TableID(), "player_name": v.Name, "lev": v.Level, "avatar_id": v.AvatarID, "avatar_frame_id": v.FrameID, "win": v.Wins, "rank": v.Rank, "force": v.Force,
+	row := map[string]any{"table_id": v.Occupant.TableID(), "player_name": v.Name, "lev": v.Level, "avatar_id": v.AvatarID, "avatar_frame_id": v.FrameID, "win": v.Wins, "rank": v.Rank, "force": v.Force, "is_robot": v.Occupant.IsRobot(),
 		"guild_name": v.GuildName, "ban_hero_id": int64(0), "conquer_lev": v.ConquerLevel, "conquer_loop_id": v.ConquerLoop, "heros": heroes(v), "book_shelf_lev": int64(0)}
 	if v.Pet != nil {
 		row["pet"] = v.Pet
+	}
+	if v.TitleInfo != nil {
+		row["title_info"] = v.TitleInfo
 	}
 	return row
 }
@@ -137,6 +146,23 @@ func Records(records []Record) map[string]any {
 	return map[string]any{"records": rows}
 }
 
+// RecordReplay is LOAD_ARENA_FIGHT_RECORDS with fighter_id and id: the client
+// reads the single record object from records and opens arena_share.
+func RecordReplay(record d.Record, self, opponent d.Display, raw []byte) map[string]any {
+	if record.ID == 0 {
+		return map[string]any{"records": map[string]any{}}
+	}
+	attacker, defender := self, opponent
+	if !record.Attack {
+		attacker, defender = opponent, self
+	}
+	return map[string]any{"records": map[string]any{
+		"report": report(raw), "is_attack": flag(record.Attack), "win": flag(record.Win),
+		"attack_name": attacker.Name, "attack_lev": attacker.Level, "attack_avatar": attacker.AvatarID, "attack_avatar_frame": attacker.FrameID,
+		"defend_name": defender.Name, "defend_lev": defender.Level, "defend_avatar": defender.AvatarID, "defend_avatar_frame": defender.FrameID,
+	}}
+}
+
 func RecordInfo(v d.Display, canAvenge bool, avengeType int64) map[string]any {
 	row := Enemy(v)
 	row["can_avenge"], row["avenge_type"], row["is_robot"] = flag(canAvenge), avengeType, v.Occupant.IsRobot()
@@ -157,5 +183,9 @@ func RankList(rows []d.Display, myRank int64, server identity.LogicalServerID) m
 		}
 		out = append(out, map[string]any{"player_id": id, "player_name": v.Name, "level": v.Level, "avatar_id": v.AvatarID, "avatar_frame_id": v.FrameID, "conquer_lev": v.ConquerLevel, "conquer_loop_id": v.ConquerLoop, "score": v.Rank, "rank": v.Rank})
 	}
-	return map[string]any{"rank_list": []map[string]any{{"rank_type": int64(1), "rank_info": map[string]any{"my_rank": myRank, "rank_info": out}}}}
+	mine := any(map[string]any{})
+	if myRank > 0 {
+		mine = myRank
+	}
+	return map[string]any{"rank_list": []map[string]any{{"rank_type": int64(1), "rank_info": map[string]any{"my_rank": mine, "rank_info": out}}}}
 }

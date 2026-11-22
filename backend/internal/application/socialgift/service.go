@@ -34,6 +34,21 @@ type Service struct {
 	Grants            GrantOwner
 	Admission         ActorAdmission
 	Fence             ActorFence
+	Bond              DailyBondOwner
+	ClassInfo         ClassInfoProjector
+}
+
+// DailyBondOwner is the Mentor seam that raises the pair's bond once per day
+// when they exchange the stock gift. It must be called inside this transaction.
+type DailyBondOwner interface {
+	AddDailyBondTx(context.Context, tx.Tx, identity.PlayerID, identity.PlayerID, time.Time) error
+}
+
+// ClassInfoProjector is the Mentor seam that projects the sender's class info
+// inside the gift transaction. ok is false when the pair holds no active class
+// relation, and the reply then omits master_info.
+type ClassInfoProjector interface {
+	GiftBaseInfoTx(context.Context, tx.Tx, identity.PlayerID, identity.PlayerID, time.Time) (map[string]any, bool, error)
 }
 
 func Profile() tx.Profile {
@@ -48,7 +63,7 @@ func (s Service) validate(actor identity.ActorContext) error {
 	}
 	return nil
 }
-func (s Service) read(c context.Context, op operation.Context, body func(context.Context, tx.Queryer) error) error {
+func (s Service) read(c context.Context, op operation.Context, body func(context.Context, tx.Tx) error) error {
 	_, e := s.Reads.Run(c, op, Profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error { return body(c, sc.Tx) })
 	return e
 }
@@ -73,7 +88,7 @@ func bind(op operation.Context, c Content) (operation.Context, error) {
 }
 func (s Service) admit(c context.Context, op operation.Context) (Content, operation.Context, error) {
 	var out Content
-	e := s.read(c, op, func(c context.Context, q tx.Queryer) error {
+	e := s.read(c, op, func(c context.Context, q tx.Tx) error {
 		rev, ok := op.Policies.Get("content")
 		if !ok {
 			var e error
@@ -129,29 +144,74 @@ func (s Service) root(c context.Context, t tx.Tx, pid identity.PlayerID) (social
 	return r, nil
 }
 func preflightRoot(r socialrelation.Root, at time.Time) error {
-	if r.StateVersion == math.MaxInt64 || at.Before(r.UpdatedAt) || at.Before(r.CreatedAt) {
+	if r.StateVersion == math.MaxInt64 {
 		return ErrClock
 	}
 	return nil
 }
-func (s Service) epoch(c context.Context, t tx.Tx, pid identity.PlayerID, day string, op operation.Context, at time.Time) (Epoch, bool, error) {
-	e, ok, last, have, err := s.Store.LockEpoch(c, t, pid, day)
-	if err != nil {
-		return e, ok, err
+
+// pairDay keeps a send under one day token: an old-calendar epoch of either
+// participant that still covers at makes the legacy token today's row.
+func (s Service) pairDay(c context.Context, q tx.Queryer, sender, recipient identity.PlayerID, at time.Time, day string) (string, error) {
+	legacy, e := LegacyDay(at)
+	if e != nil || legacy == day {
+		return day, e
 	}
-	if have && (last.Day > day || at.Before(last.UpdatedAt) || last.Version == math.MaxInt64) {
-		return e, ok, ErrClock
+	for _, pid := range []identity.PlayerID{sender, recipient} {
+		if _, ok, e := s.Store.ReadEpoch(c, q, pid, legacy); e != nil {
+			return day, e
+		} else if ok {
+			return legacy, nil
+		}
+	}
+	return day, nil
+}
+
+// dayFor is the read-only bound of epoch(): a legacy row that covers observedAt counts as today.
+func (s Service) dayFor(c context.Context, q tx.Queryer, pid identity.PlayerID, at time.Time) (string, error) {
+	day, e := Day(at)
+	if e != nil {
+		return "", e
+	}
+	return s.pairDay(c, q, pid, pid, at, day)
+}
+
+// epoch resolves the stored epoch for the current game day. During the R3
+// switch an old GMT+8-midnight row that still covers at is today's row.
+func (s Service) epoch(c context.Context, t tx.Tx, pid identity.PlayerID, day string, op operation.Context, at time.Time) (Epoch, bool, string, error) {
+	used := day
+	e, ok, last, have, err := s.Store.LockEpoch(c, t, pid, used)
+	if err != nil {
+		return e, false, used, err
+	}
+	if !ok {
+		legacy, legacyErr := LegacyDay(at)
+		if legacyErr != nil {
+			return e, false, used, legacyErr
+		}
+		if legacy != used {
+			l, lOK, lLast, _, lErr := s.Store.LockEpoch(c, t, pid, legacy)
+			if lErr != nil {
+				return l, false, used, lErr
+			}
+			if lOK {
+				e, ok, last, have, used = l, true, lLast, true, legacy
+			}
+		}
+	}
+	if have && (last.Day > used || last.Version == math.MaxInt64) {
+		return e, ok, used, ErrClock
 	}
 	if ok {
-		if e.Version == math.MaxInt64 || at.Before(e.UpdatedAt) {
-			return e, ok, ErrClock
+		if e.Version == math.MaxInt64 {
+			return e, ok, used, ErrClock
 		}
-		return e, true, nil
+		return e, true, used, nil
 	}
-	e, err = NewEpoch(pid, day, op, at)
-	return e, false, err
+	e, err = NewEpoch(pid, used, op, at)
+	return e, false, used, err
 }
-func (s Service) sendProof(c context.Context, q tx.Queryer, actor identity.ActorContext, recipient identity.PlayerID, fp string, op operation.Context) (Result, bool, error) {
+func (s Service) sendProof(c context.Context, q tx.Tx, actor identity.ActorContext, recipient identity.PlayerID, fp string, op operation.Context) (Result, bool, error) {
 	v, ok, e := s.Store.ReadSend(c, q, op.ID)
 	if e != nil || !ok {
 		return Result{}, ok, e
@@ -175,7 +235,18 @@ func (s Service) sendProof(c context.Context, q tx.Queryer, actor identity.Actor
 	if e != nil || !exists || socialinbox.MatchGift(n, v.Descriptor()) != nil || n.Active != v.ClaimOperation.IsZero() {
 		return Result{}, false, ErrConflict
 	}
-	return Result{NoticeIDs: []socialinbox.NoticeID{v.NoticeID}, TransferIDs: []string{v.ID.String()}, Revision: v.RewardRevision}, true, nil
+	answer := Result{NoticeIDs: []socialinbox.NoticeID{v.NoticeID}, TransferIDs: []string{v.ID.String()}, Revision: v.RewardRevision}
+	// S28: a retried send must rebuild the same class-pair master_info.
+	if s.ClassInfo != nil {
+		projected, linked, e := s.ClassInfo.GiftBaseInfoTx(c, q, actor.PlayerID, recipient, op.StartedAt)
+		if e != nil {
+			return Result{}, false, e
+		}
+		if linked {
+			answer.MasterInfo = projected
+		}
+	}
+	return answer, true, nil
 }
 func (s Service) claimProof(c context.Context, q tx.Queryer, actor identity.ActorContext, fp string, op operation.Context) (Result, bool, error) {
 	v, ok, e := s.Store.ReadClaim(c, q, op.ID)
@@ -292,7 +363,7 @@ func (s Service) Send(c context.Context, actor identity.ActorContext, recipient 
 	}
 	var answer Result
 	var known bool
-	e = s.read(c, op, func(c context.Context, q tx.Queryer) error {
+	e = s.read(c, op, func(c context.Context, q tx.Tx) error {
 		var e error
 		answer, known, e = s.sendProof(c, q, actor, recipient, fp, op)
 		return e
@@ -347,6 +418,10 @@ func (s Service) Send(c context.Context, actor identity.ActorContext, recipient 
 		if e != nil {
 			return e
 		}
+		day, e = s.pairDay(c, sc.Tx, actor.PlayerID, recipient, at, day)
+		if e != nil {
+			return e
+		}
 		epochOrder := []identity.PlayerID{actor.PlayerID, recipient}
 		sort.Slice(epochOrder, func(i, j int) bool {
 			a, _ := EpochKey(epochOrder[i])
@@ -356,9 +431,12 @@ func (s Service) Send(c context.Context, actor identity.ActorContext, recipient 
 		epochs := map[identity.PlayerID]Epoch{}
 		existingEpochs := map[identity.PlayerID]bool{}
 		for _, pid := range epochOrder {
-			v, exists, e := s.epoch(c, sc.Tx, pid, day, bound, at)
+			v, exists, used, e := s.epoch(c, sc.Tx, pid, day, bound, at)
 			if e != nil {
 				return e
+			}
+			if used != day {
+				return ErrClock
 			}
 			epochs[pid] = v
 			existingEpochs[pid] = exists
@@ -405,12 +483,27 @@ func (s Service) Send(c context.Context, actor identity.ActorContext, recipient 
 		if e := s.Store.InsertTransfer(c, sc.Tx, t); e != nil {
 			return e
 		}
+		if s.Bond != nil {
+			if e := s.Bond.AddDailyBondTx(c, sc.Tx, actor.PlayerID, recipient, at); e != nil {
+				return e
+			}
+		}
+		var masterInfo map[string]any
+		if s.ClassInfo != nil {
+			projected, linked, e := s.ClassInfo.GiftBaseInfoTx(c, sc.Tx, actor.PlayerID, recipient, at)
+			if e != nil {
+				return e
+			}
+			if linked {
+				masterInfo = projected
+			}
+		}
 		for _, pid := range []identity.PlayerID{actor.PlayerID, recipient} {
 			if e := s.Relations.TouchRootTx(c, sc.Tx, roots[pid], at); e != nil {
 				return e
 			}
 		}
-		answer = Result{NoticeIDs: []socialinbox.NoticeID{n.NoticeID}, TransferIDs: []string{t.ID.String()}, Revision: content.Revision}
+		answer = Result{NoticeIDs: []socialinbox.NoticeID{n.NoticeID}, TransferIDs: []string{t.ID.String()}, Revision: content.Revision, MasterInfo: masterInfo}
 		return nil
 	})
 	return resolved(answer, outcome, e)
@@ -440,7 +533,7 @@ func (s Service) Claim(c context.Context, actor identity.ActorContext, input []s
 	}
 	var answer Result
 	var known bool
-	e = s.read(c, op, func(c context.Context, q tx.Queryer) error {
+	e = s.read(c, op, func(c context.Context, q tx.Tx) error {
 		var e error
 		answer, known, e = s.claimProof(c, q, actor, fp, op)
 		if e != nil || known {
@@ -593,10 +686,12 @@ func (s Service) Claim(c context.Context, actor identity.ActorContext, input []s
 			if e := preflightRoot(root, at); e != nil {
 				return e
 			}
-			epoch, exists, e = s.epoch(c, sc.Tx, actor.PlayerID, day, bound, at)
+			var used string
+			epoch, exists, used, e = s.epoch(c, sc.Tx, actor.PlayerID, day, bound, at)
 			if e != nil {
 				return e
 			}
+			day = used
 			_, claimed, e := s.Store.Counts(c, sc.Tx, actor.PlayerID, day)
 			if e != nil {
 				return e
@@ -706,7 +801,7 @@ type resolution struct {
 func (r resolution) ResolveTimed(c context.Context, req gen.TimedResolutionRequest) (tx.Resolution, error) {
 	var result Result
 	var found bool
-	e := r.service.read(c, r.original, func(c context.Context, q tx.Queryer) error {
+	e := r.service.read(c, r.original, func(c context.Context, q tx.Tx) error {
 		var e error
 		if r.send {
 			result, found, e = r.service.sendProof(c, q, r.actor, r.recipient, r.fingerprint, r.original)
@@ -743,7 +838,7 @@ func resolved(answer Result, outcome tx.Result, e error) (Result, error) {
 // SnapshotTx is a pure observation: it neither creates an epoch nor refreshes a
 // counter. I7A7B must call it before the FriendDM destructive drain at rank380.
 func (s Service) SnapshotTx(c context.Context, q tx.Queryer, pid identity.PlayerID, observedAt time.Time) (sent, claimed int64, err error) {
-	day, e := Day(observedAt)
+	day, e := s.dayFor(c, q, pid, observedAt)
 	if e != nil {
 		return 0, 0, e
 	}
@@ -762,7 +857,7 @@ func (s Service) GiftSnapshotTx(c context.Context, q tx.Queryer, pid identity.Pl
 	if q == nil || s.Store == nil || !pid.Valid() {
 		return Snapshot{}, ErrInvalid
 	}
-	day, e := Day(observedAt)
+	day, e := s.dayFor(c, q, pid, observedAt)
 	if e != nil {
 		return Snapshot{}, e
 	}

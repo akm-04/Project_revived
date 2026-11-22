@@ -1,0 +1,81 @@
+{
+ "schema_version": 1,
+ "contract_id": "I9_DORM_SOCIAL_GLUE_RANKING_V1",
+ "node": "ROOT/I9/I9-10/I9-10C",
+ "status": "I5_FLOOR_PURCHASE_COUNTER_AND_1845_OUTER_COMMAND_IMPLEMENTED_TARGETED_PASS_PENDING_UPGRADE_REVIEW_STOCK_SOCIAL_RANKING",
+ "decisions": [
+  "D494"
+ ],
+ "policy_record": "research/I9_10C/PRIVATE_POLICY_AND_SURFACE_PROPOSAL.md",
+ "mids": [
+  2518,
+  2519,
+  2520,
+  2521,
+  2522,
+  2523,
+  2524,
+  2525,
+  2526,
+  1845
+ ],
+ "read_integration": [
+  1,
+  2512,
+  2514
+ ],
+ "ranking": {
+  "mid": 301,
+  "subtype": 34,
+  "score": "sum comfort across all currently owned rooms including lounge",
+  "wire_field": "comfort",
+  "scope": "logical server",
+  "limit": 100,
+  "ties": "Existing ranking CurrentObserved+StableID contract; no new tie clock or titles"
+ },
+ "superseded": [
+  2527
+ ],
+ "owners": {
+  "dormhouse": "Room name/privacy/praise/comments/reactions and daily glue purchase count; existing growth/layout/residency/equipment retained",
+  "i5": "Glue scalar amount and once-per-game-day daily floor anchor; crystal purchase debit and glue grant",
+  "ranking": "Existing canonical ordering/observation; Dorm supplies typed comfort facts",
+  "playerroot": "Bounded logical-server candidate IDs and governed actor roots",
+  "playerpresentation": "Canonical author display facts including client-required Conquer fields",
+  "content": "Versioned source glue/VIP/cost/room catalog; preserve existing revision decoding"
+ },
+ "invariants": [
+  "Never change prior room-growth/EXP/equipment or Book83 contracts without contradictory evidence",
+  "Daily05:00 glue topup only below source floor, preserve higherbalances, mark day even if no credit; no continuousregen inferred",
+  "Mutations settle I5 glue floor before credit/debit; readonly effective projection never writes; replay does not settle again",
+  "Purchase precondition currentglue<source limit; no postpurchase clamp; pay exactsource VIP/day/cost under atomic receipt",
+  "Player roots rank315 sortedactor/target, Dorm rank500 sortedset, I5 economy/scalar later; validate all component lockplans before code",
+  "No foreignownerSQL; typed ports only; no newauthor/presentation/value authority",
+  "Comment rows use from_player_info plus requiredConquer fields; host-only deletion; own-room posting blocked",
+  "Privacy enforced by server on visit/list/random; no hiddenroom fallback",
+  "1845 reply buy_glue_times plus currentglue economy; counts reload viaMID1 contribution; successcaptured under existing receipt model",
+  "Business refusals409, malformed400, unavailable503 under activecontracts"
+ ],
+ "open_technical_boundaries": [
+  "Complete I5 floor component c54f47a awaits independent review and historical upgrade/final integration qualification; purchase/counter/schema/social/runtime gates remain open",
+  "Dorm social schema/receipt admissionfamilies; two-player locks and reload composition",
+  "Contentv2 backward decode and unavailable-new-mutation behavior when capabilityabsent",
+  "Ranking metric identity/typed Dorm observation integration and bounded candidate port",
+  "Exact user-recollection source mapping pending narrowly bounded03"
+ ],
+ "deferred": [
+  {
+   "capability": "Furniture crafting MID83 routing and recipe/glue debit",
+   "owner": "I9-11B",
+   "state": "OPEN_REQUIRED_FUTURE_INTEGRATION;Bookcomposition83mustremainfunctional"
+  }
+ ],
+ "proof_required": [
+  "Dailyfloor below/equal/above100, dayboundary equality, readpurity and spend/grant/retry interleavings",
+  "1845 VIP/cost/limit/overflow/counter/reload/rollback/receipt recovery",
+  "Two-player praise/comment/reaction/delete/visibility native concurrency and committed reload",
+  "301/34 totals/server scope/ties and bounded randomprivacy",
+  "Stock Dorm scenario and affected prior room/Book contracts under existinggate hierarchy"
+ ],
+ "implementation_boundary": "research/I9_10C/GLUE_PURCHASE_IMPLEMENTATION_PLAN.md"
+}

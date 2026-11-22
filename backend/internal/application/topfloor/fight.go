@@ -55,8 +55,10 @@ func (r StartCommand) Validate() error {
 	return nil
 }
 
+// The stage is the opponent and the vengeance, not the chosen team: I8_PARENT_CONTRACT_V1
+// generation_supersede replays the frozen START when only the formation or pet changed.
 func fingerprint(pid identity.PlayerID, r StartCommand) string {
-	raw, _ := json.Marshal(map[string]any{"policy": d.ContractID, "player": int64(pid), "formation": r.Formation, "pet": r.PetID, "enemy": r.Enemy, "avenge": r.Avenge})
+	raw, _ := json.Marshal(map[string]any{"policy": d.ContractID, "player": int64(pid), "enemy": r.Enemy, "avenge": r.Avenge})
 	sum := sha256.Sum256(raw)
 	return hex.EncodeToString(sum[:])
 }
@@ -103,8 +105,9 @@ func (s Service) Start(c context.Context, a identity.ActorContext, r StartComman
 	if err != nil {
 		return FightView{}, err
 	}
-	repeat := found && latest.Fingerprint == fp && (latest.Status == d.StatusStarted || now.Sub(latest.StartedAt) < replayWindow)
-	if repeat {
+	openReplay := found && latest.Fingerprint == fp && latest.Status == d.StatusStarted
+	settledReplay := found && latest.Fingerprint == fp && slices.Equal(latest.Formation, r.Formation) && latest.PetID == r.PetID && now.Sub(latest.StartedAt) < replayWindow
+	if openReplay || settledReplay {
 		return s.finish(c, latest, op)
 	}
 	// Server-authoritative results always apply: an abandoned fight settles first.
@@ -169,7 +172,11 @@ func (s Service) admit(c context.Context, sc gen.TimedScope, a identity.ActorCon
 	if err := s.Fence.FenceActorTx(c, sc.Tx, a, at); err != nil {
 		return d.Fight{}, err
 	}
-	l, found, err := s.Store.ReadLadderTx(c, sc.Tx, server, true)
+	// Admission only reads the ladder root. Locking it made every START in the
+	// server queue on one row and abort with 40001 after any entry or settlement.
+	// The RepeatableRead snapshot still decides "settlement due" at the bound
+	// decision instant, and admission writes no ladder row.
+	l, found, err := s.Store.ReadLadderTx(c, sc.Tx, server, false)
 	if err != nil || !found {
 		return d.Fight{}, errors.Join(err, d.ErrRefused)
 	}
@@ -188,6 +195,13 @@ func (s Service) admit(c context.Context, sc gen.TimedScope, a identity.ActorCon
 	if err != nil || !found {
 		return d.Fight{}, errors.Join(err, d.ErrRefused)
 	}
+	snapshot, snapshotFound, err := s.Store.ReadOfferSnapshotTx(c, sc.Tx, a.PlayerID, d.OfferScopeNormal, true)
+	if err != nil {
+		return d.Fight{}, err
+	}
+	if err = s.requireAttackDefense(c, sc.Tx, a.PlayerID, p, at); err != nil {
+		return d.Fight{}, err
+	}
 	rank, _, err := s.Store.RankOfTx(c, sc.Tx, server, d.Occupant{Player: a.PlayerID})
 	if err != nil {
 		return d.Fight{}, err
@@ -197,10 +211,21 @@ func (s Service) admit(c context.Context, sc gen.TimedScope, a identity.ActorCon
 		return d.Fight{}, err
 	}
 	enemyRank, ok, err := s.Store.RankOfTx(c, sc.Tx, server, enemy)
-	if err != nil || !ok {
+	if err != nil {
 		return d.Fight{}, errors.Join(err, d.ErrConflict)
 	}
-	defenders, pets, err := s.defenders(c, sc.Tx, catalog, enemy)
+	if !ok {
+		if !r.Avenge {
+			return d.Fight{}, d.ErrOfferStale
+		}
+		return d.Fight{}, d.ErrConflict
+	}
+	if !r.Avenge {
+		if err = d.MatchOfferSnapshot(snapshot, snapshotFound, 0, rank, enemy, enemyRank); err != nil {
+			return d.Fight{}, err
+		}
+	}
+	defenders, pets, err := s.defenders(c, sc.Tx, catalog, enemy, enemyRank)
 	if err != nil {
 		return d.Fight{}, err
 	}
@@ -223,7 +248,7 @@ func (s Service) admit(c context.Context, sc gen.TimedScope, a identity.ActorCon
 	if r.PetID > 0 {
 		battle.PetsA = append(battle.PetsA, combat.Participant{Origin: cd.OwnedSelf, Kind: cd.PetActor, Player: a.PlayerID, Identity: r.PetID})
 	}
-	started, err := s.Combat.StartTx(c, sc.Tx, scope, combat.StartRequest{Actor: a, Locator: locator(server, a.PlayerID), GenerationRef: d.ContractID, StartFingerprint: fp, ResultDeadline: at.Add(resultWindow), Battle: battle})
+	started, err := s.Combat.StartTx(c, sc.Tx, scope, combat.StartRequest{Mode: cd.ModeTopFloor, Actor: a, Locator: locator(server, a.PlayerID), GenerationRef: d.ContractID, StartFingerprint: fp, ResultDeadline: at.Add(resultWindow), Battle: battle})
 	if err != nil {
 		return d.Fight{}, err
 	}
@@ -259,13 +284,18 @@ func (s Service) opponent(c context.Context, q tx.Queryer, catalog d.Catalog, p 
 }
 
 // defenders freezes a robot team as TEMPLATE actors or a player's saved defense as OWNED_FOREIGN.
-func (s Service) defenders(c context.Context, q tx.Queryer, catalog d.Catalog, o d.Occupant) ([]combat.Participant, []combat.Participant, error) {
+func (s Service) defenders(c context.Context, q tx.Queryer, catalog d.Catalog, o d.Occupant, rank int64) ([]combat.Participant, []combat.Participant, error) {
 	heroes, pets := []combat.Participant{}, []combat.Participant{}
 	if o.IsRobot() {
-		team, _ := catalog.Team(o.Robot)
-		for _, id := range team.Heroes {
-			params, _ := catalog.RobotHeroParams(id)
-			heroes = append(heroes, combat.Participant{Origin: cd.Template, Kind: cd.HeroActor, Identity: params["partner_id"].(int64), TemplateParams: params})
+		params, ok := catalog.RobotHeroesAt(o.Robot, rank)
+		if !ok {
+			return nil, nil, d.ErrRefused
+		}
+		for _, hero := range params {
+			heroes = append(heroes, combat.Participant{Origin: cd.Template, Kind: cd.HeroActor, Identity: hero["partner_id"].(int64), TemplateParams: hero})
+		}
+		if pet, ok := catalog.RobotPet(o.Robot, rank); ok {
+			pets = append(pets, combat.Participant{Origin: cd.Template, Kind: cd.PetActor, Identity: pet["pet_id"].(int64), TemplateParams: pet})
 		}
 		return heroes, pets, nil
 	}
@@ -437,6 +467,7 @@ func (s Service) settleTx(c context.Context, sc gen.TimedScope, id ids.UUID) err
 	if !f.Defender.IsRobot() {
 		sides = append(sides, fightSide{f.Defender.Player, false, !outcome.Win, "B", d.Occupant{Player: f.Challenger}})
 	}
+	challengerStreak := players[f.Challenger].WinStreak
 	for _, side := range sides {
 		p := players[side.player]
 		next := p
@@ -446,6 +477,8 @@ func (s Service) settleTx(c context.Context, sc gen.TimedScope, id ids.UUID) err
 		}
 		if side.attack {
 			next.BestRank = outcome.BestAfter
+			next.WinStreak = nextWinStreak(p.WinStreak, side.attack, side.won)
+			challengerStreak = next.WinStreak
 		}
 		next.StateVersion, next.UpdatedAt = p.StateVersion+1, at
 		if err = s.Store.SavePlayerTx(c, sc.Tx, next, p.StateVersion); err != nil {
@@ -462,6 +495,11 @@ func (s Service) settleTx(c context.Context, sc gen.TimedScope, id ids.UUID) err
 			return err
 		}
 	}
+	for _, message := range settlementMessages(catalog, f, outcome, challengerStreak) {
+		if err = s.Broadcast.EmitTx(c, sc.Tx, message); err != nil {
+			return err
+		}
+	}
 	fact := objective.Fact{PlayerID: f.Challenger, SourceDomain: "top-floor", SourceBusinessKey: f.AttemptID.String(), Kind: objective.PVPFightKind, Delta: 1}
 	if err = s.Facts.RecordTx(c, sc.Tx, sc.Operation.Operation(), fact); err != nil {
 		return err
@@ -469,7 +507,12 @@ func (s Service) settleTx(c context.Context, sc gen.TimedScope, id ids.UUID) err
 	done := f
 	stamp := at.UTC()
 	done.Status, done.Outcome, done.SettledAt, done.StateVersion = d.StatusSettled, &outcome, &stamp, f.StateVersion+1
-	return s.Store.FinishFightTx(c, sc.Tx, done, f.StateVersion)
+	if err = s.Store.FinishFightTx(c, sc.Tx, done, f.StateVersion); err != nil {
+		return err
+	}
+	// Only the challenger's formation is frozen on the fight; the defender has no
+	// stored own roster here, so no defender count is claimed (G2 H2).
+	return s.BattleCounts.ObserveBattleTx(c, sc.Tx, f.Challenger, f.Formation, at)
 }
 
 // fightSide is one Top Floor player's view of a settled fight; report side "A" is the challenger.
@@ -481,8 +524,18 @@ type fightSide struct {
 	opponent d.Occupant
 }
 
-// close ends a fight whose combat attempt can no longer produce a result; the
-// consumed ticket is not restored (private policy).
+// forfeited applies the challenger's state after a server-side close. A close
+// is a forfeit: a fight without a win and a reset attack streak, the loss
+// arena's settle(forfeit) records. The consumed ticket is not restored.
+func forfeited(p d.Player, at time.Time) d.Player {
+	p.Fights++
+	p.WinStreak = nextWinStreak(p.WinStreak, true, false)
+	p.StateVersion, p.UpdatedAt = p.StateVersion+1, at
+	return p
+}
+
+// close ends a fight whose combat attempt can no longer produce a result. A
+// close is a forfeit for the challenger, recorded in the same transaction.
 func (s Service) close(c context.Context, f d.Fight, parent operation.Context) error {
 	op, err := child(parent, "close:"+f.AttemptID.String())
 	if err != nil {
@@ -494,7 +547,21 @@ func (s Service) close(c context.Context, f d.Fight, parent operation.Context) e
 		if err != nil || !found || current.Status != d.StatusStarted {
 			return err
 		}
+		_, catalog, err := s.catalogTx(c, sc.Tx)
+		if err != nil {
+			return err
+		}
+		challenger, found, err := s.Store.ReadPlayerTx(c, sc.Tx, current.Challenger, true)
+		if err != nil || !found {
+			return errors.Join(err, d.ErrConflict)
+		}
 		if _, err = s.Combat.CloseTx(c, sc.Tx, combat.TerminalRequest{Locator: locator(f.Server, f.Challenger), GenerationRef: d.ContractID, TerminalKind: closedKind, SemanticReceiptID: semanticReceipt(f.AttemptID), At: at}); err != nil {
+			return err
+		}
+		if err = s.Store.SavePlayerTx(c, sc.Tx, forfeited(challenger, at), challenger.StateVersion); err != nil {
+			return err
+		}
+		if err = s.Store.InsertRecordTx(c, sc.Tx, d.Record{Owner: current.Challenger, AttemptID: current.AttemptID, Attack: true, Win: false, Opponent: current.Defender, At: at}, catalog.RecordsMax); err != nil {
 			return err
 		}
 		done := current

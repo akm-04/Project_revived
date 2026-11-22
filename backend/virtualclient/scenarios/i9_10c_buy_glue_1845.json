@@ -1,0 +1,44 @@
+{
+ "name": "i9_10c_buy_glue_1845",
+ "level": 100,
+ "vip": 1,
+ "grants": [
+  {
+   "Kind": "SCALAR_CURRENCY",
+   "ResourceKey": "crystal",
+   "Amount": 1000
+  }
+ ],
+ "steps": [
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) _G.glue0=p.glue _G.crystal0=p.crystal _G.times0=p.buyGlueTimes if tonumber(p.buyGlueTimes)~=0 then error('vc-glue-times-initial-'..tostring(p.buyGlueTimes)) end if tonumber(p.glue)~=100 then error('vc-glue-floor-'..tostring(p.glue)) end",
+  "window:furniture_factory",
+  "wait:3",
+  "lua:if not xyd.WindowManager.get():getWindow('furniture_factory') then error('vc-furniture-window') end",
+  "tap:btn_add",
+  "wait:2",
+  "lua:local w=xyd.WindowManager.get():getWindow('common_alert') if not w then error('vc-glue-alert-one') end if not w.rightBtn or not w.rightBtn.callback then error('vc-glue-confirm-missing') end w.rightBtn.callback({name='ended'})",
+  "wait:3",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) if tonumber(p.buyGlueTimes)~=1 then error('vc-glue-times-one-'..tostring(p.buyGlueTimes)) end if tonumber(p.glue)~=tonumber(glue0)+50 then error('vc-glue-economy-one-'..tostring(p.glue)) end if tonumber(p.crystal)~=tonumber(crystal0)-50 then error('vc-crystal-economy-one-'..tostring(p.crystal)) end",
+  "relogin",
+  "wait:2",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) if tonumber(p.buyGlueTimes)~=1 then error('vc-glue-times-reload-'..tostring(p.buyGlueTimes)) end if tonumber(p.glue)~=150 then error('vc-glue-reload-'..tostring(p.glue)) end _G.crystal1=p.crystal",
+  "window:furniture_factory",
+  "wait:3",
+  "tap:btn_add",
+  "wait:2",
+  "lua:local w=xyd.WindowManager.get():getWindow('common_alert') if not w then error('vc-glue-alert-two') end if not w.rightBtn or not w.rightBtn.callback then error('vc-glue-confirm-missing-two') end w.rightBtn.callback({name='ended'})",
+  "wait:3",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) if tonumber(p.buyGlueTimes)~=2 then error('vc-glue-times-two-'..tostring(p.buyGlueTimes)) end if tonumber(p.glue)~=200 then error('vc-glue-economy-two-'..tostring(p.glue)) end if tonumber(p.crystal)~=tonumber(crystal1)-50 then error('vc-crystal-economy-two-'..tostring(p.crystal)) end",
+  "lua:local manager=xyd.WindowManager.get() local originalOpen=manager.openWindow _G.glueGuardOriginalOpen=originalOpen _G.glueGuardObserved=false manager.openWindow=function(self,windowName,parameters,...) if windowName=='toast' and parameters and parameters.message==xyd.tables.translation:translation('BUY_GLUE_VIP_NOT_ENOUGH') then _G.glueGuardObserved=true end return originalOpen(self,windowName,parameters,...) end",
+  "tap:btn_add",
+  "wait:2",
+  "lua:local manager=xyd.WindowManager.get() manager.openWindow=glueGuardOriginalOpen _G.glueGuardOriginalOpen=nil if not glueGuardObserved then error('vc-glue-vip-guard-not-observed') end if manager:getWindow('common_alert') then error('vc-glue-cap-opened-confirmation') end local player=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) if tonumber(player.buyGlueTimes)~=2 or tonumber(player.glue)~=200 or tonumber(player.crystal)~=900 then error('vc-glue-guard-state-changed') end"
+ ],
+ "settle_seconds": 5,
+ "expect_ok": [
+  1845,
+  1
+ ],
+ "note": "Stock FurnitureFactoryWindow btn_add path: MID1845 is sent parameterless from the window's confirm alert callback (w.rightBtn.callback runs the stock onRegister handler). VIP1 is imported by the existing provisioner through the production privilege owner; MID1 buy_glue_times comes from the registered GlueBootstrap. First purchase, relogin reload, second purchase to the VIP1 cap, then the stock client-side cap guard leaves the counter unchanged. The window right button is a SpriteNodeButton with no scene node name, so the scenario invokes its registered stock callback instead of a coordinate tap. The final click uses a pass-through observer on WindowManager.openWindow to assert the exact stock BUY_GLUE_VIP_NOT_ENOUGH toast despite its 1.5-second lifetime, restores the original method, and refuses an unexpected confirmation window. This is test instrumentation, not a replacement for the stock guard."
+}

@@ -21,6 +21,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -157,11 +158,54 @@ func retry() tx.RetryPolicy {
 	return tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true}
 }
 
+// copyPosition returns the copy's index in catalog order, or -1.
+func copyPosition(copies []int64, copyID int64) int {
+	for index, id := range copies {
+		if id == copyID {
+			return index
+		}
+	}
+	return -1
+}
+
+// lockCopyForOpenRuleTx locks the requested copy and, before it, its catalog
+// predecessor, so copies are always locked in ascending copy-id order. It returns
+// the copy, its catalog position and whether that predecessor is won.
+func (m Mode) lockCopyForOpenRuleTx(c context.Context, t tx.Tx, guildID, chapterID, copyID int64) (d.Copy, int, bool, error) {
+	info, known := m.Content.ChapterInfo(chapterID)
+	if !known {
+		return d.Copy{}, 0, false, d.ErrRefused
+	}
+	position := copyPosition(info.Copies, copyID)
+	if position < 0 {
+		return d.Copy{}, 0, false, d.ErrRefused
+	}
+	predecessorWon := false
+	if position > 0 {
+		predecessor, found, err := m.ModeStore.LockCopyTx(c, t, guildID, chapterID, info.Copies[position-1])
+		if err != nil {
+			return d.Copy{}, 0, false, err
+		}
+		predecessorWon = found && predecessor.Win
+	}
+	copied, found, err := m.ModeStore.LockCopyTx(c, t, guildID, chapterID, copyID)
+	if err != nil {
+		return d.Copy{}, 0, false, err
+	}
+	if !found {
+		return d.Copy{}, 0, false, d.ErrRefused
+	}
+	return copied, position, predecessorWon, nil
+}
+
 // Claim is 614 (C6). A free or expired copy is claimed at stage 1; another
 // holder's live claim is read back without a write.
 func (m Mode) Claim(c context.Context, a identity.ActorContext, copyID int64, op operation.Context) (ClaimView, error) {
-	if !m.ready() || copyID <= 0 {
+	if !m.ready() {
 		return ClaimView{}, ErrUnavailable
+	}
+	if copyID <= 0 {
+		return ClaimView{}, d.ErrRefused
 	}
 	chapterID, known := m.Content.ChapterOfCopy(copyID)
 	if !known {
@@ -194,11 +238,11 @@ func (m Mode) Claim(c context.Context, a identity.ActorContext, copyID int64, op
 		if !open || chapter.Win {
 			return d.ErrRefused
 		}
-		copy, found, err := m.ModeStore.LockCopyTx(c, sc.Tx, guildID, chapterID, copyID)
+		copy, position, predecessorWon, err := m.lockCopyForOpenRuleTx(c, sc.Tx, guildID, chapterID, copyID)
 		if err != nil {
 			return err
 		}
-		if !found || copy.Win {
+		if !d.CopyOpen(open, chapter.Win, copy.Win, position, predecessorWon) {
 			return d.ErrRefused
 		}
 		if !holderLive(copy, m.Settings, at) {
@@ -229,8 +273,11 @@ func (m Mode) Claim(c context.Context, a identity.ActorContext, copyID int64, op
 
 // Start is 604 (C4-C7, C9).
 func (m Mode) Start(c context.Context, a identity.ActorContext, request Fight, op operation.Context) (Started, error) {
-	if !m.ready() || request.CopyID <= 0 || request.ChapterID <= 0 || request.CampaignType != 7 {
+	if !m.ready() {
 		return Started{}, ErrUnavailable
+	}
+	if request.CopyID <= 0 || request.ChapterID <= 0 || request.CampaignType != 7 {
+		return Started{}, d.ErrRefused
 	}
 	formation, err := parseFormation(request.Formation)
 	if err != nil {
@@ -277,11 +324,11 @@ func (m Mode) Start(c context.Context, a identity.ActorContext, request Fight, o
 		if !open || chapter.Win {
 			return d.ErrRefused
 		}
-		locked, found, err := m.ModeStore.LockCopyTx(c, sc.Tx, guildID, request.ChapterID, request.CopyID)
+		locked, position, predecessorWon, err := m.lockCopyForOpenRuleTx(c, sc.Tx, guildID, request.ChapterID, request.CopyID)
 		if err != nil {
 			return err
 		}
-		if !found || locked.Win {
+		if !d.CopyOpen(open, chapter.Win, locked.Win, position, predecessorWon) {
 			return d.ErrRefused
 		}
 		if holderLive(locked, m.Settings, at) && locked.HolderID != int64(a.PlayerID) {
@@ -296,7 +343,7 @@ func (m Mode) Start(c context.Context, a identity.ActorContext, request Fight, o
 		if err != nil {
 			return err
 		}
-		started, err := m.Combat.StartTx(c, sc.Tx, scope, combat.StartRequest{Actor: a, Locator: locator(a), GenerationRef: generationRef(request.ChapterID, request.CopyID),
+		started, err := m.Combat.StartTx(c, sc.Tx, scope, combat.StartRequest{Mode: cd.ModeGuildCampaign, Actor: a, Locator: locator(a), GenerationRef: generationRef(request.ChapterID, request.CopyID),
 			StartFingerprint: fingerprint(a, request, formation), ResultDeadline: at.Add(time.Duration(m.Settings.BattleSeconds) * time.Second),
 			Battle: battleRequest(a, info, formation, request), TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK},
 			Package: func(*cd.Stream) (any, error) { return map[string]any{}, nil }})
@@ -324,7 +371,7 @@ func (m Mode) Start(c context.Context, a identity.ActorContext, request Fight, o
 }
 
 func battleRequest(a identity.ActorContext, info CopyInfo, formation []int64, request Fight) combat.BattleRequest {
-	battle := combat.BattleRequest{CampaignType: 7, BattleID: info.FightID, Formation: formation}
+	battle := combat.BattleRequest{CampaignType: 7, RentalMode: 7, BattleID: info.FightID, Formation: formation}
 	for _, partner := range formation {
 		if partner > 0 {
 			battle.TeamA = append(battle.TeamA, combat.Participant{Origin: cd.OwnedSelf, Kind: cd.HeroActor, Player: a.PlayerID, Identity: partner})
@@ -353,8 +400,11 @@ func battleRequest(a identity.ActorContext, info CopyInfo, formation []int64, re
 // 606, copy 607, Combat 609, damage and server records, payout mail 610, grants
 // 700+, then the fact.
 func (m Mode) Settle(c context.Context, a identity.ActorContext, request Result, op operation.Context) (Settled, error) {
-	if !m.ready() || request.CopyID <= 0 || request.ChapterID <= 0 {
+	if !m.ready() {
 		return Settled{}, ErrUnavailable
+	}
+	if request.CopyID <= 0 || request.ChapterID <= 0 {
+		return Settled{}, d.ErrRefused
 	}
 	formation, err := parseFormation(request.Formation)
 	if err != nil {
@@ -369,6 +419,10 @@ func (m Mode) Settle(c context.Context, a identity.ActorContext, request Result,
 		return Settled{}, d.ErrRefused
 	}
 	guildID, err := m.guildOf(c, a)
+	if err != nil {
+		return Settled{}, err
+	}
+	fingerprint, err := resultFingerprint(request)
 	if err != nil {
 		return Settled{}, err
 	}
@@ -407,8 +461,13 @@ func (m Mode) Settle(c context.Context, a identity.ActorContext, request Result,
 		if !found {
 			return ErrLate
 		}
-		if isRetry(copy, a.PlayerID, request.CurrentIndex) {
-			out, err = replayBody(copy.SettledBody)
+		prefix := resultReplayPrefix(request, copy.Run)
+		latest, found, err := m.Receipts.FindLatestTx(c, sc.Tx, resultReplayLatest(a, prefix))
+		if err != nil {
+			return err
+		}
+		if found && copy.HolderID != int64(a.PlayerID) {
+			out, err = replayBody(latest.ResultPayload)
 			return err
 		}
 		if chapter.Win || !holderLive(copy, m.Settings, at) || copy.HolderID != int64(a.PlayerID) || copy.HolderStage != d.StageFight {
@@ -418,7 +477,7 @@ func (m Mode) Settle(c context.Context, a identity.ActorContext, request Result,
 			return d.ErrRefused
 		}
 		summary := cd.Summary{Star: clampStar(request.Star), Win: request.Star > 0, Damage: maxDamage(request.TotalDamage), Alive: int64(len(nonZero(formation))),
-			Formation: formation, Pet: request.PetID, Enemies: summaryEnemies(request.Enemies)}
+			Formation: formation, Pet: request.PetID, Enemies: summaryEnemies(info.Waves, request.Enemies)}
 		attested, err := m.Combat.AttestSummaryTx(c, sc.Tx, combat.SummaryRequest{Locator: locator(a), GenerationRef: generationRef(request.ChapterID, request.CopyID),
 			TerminalKind: combatKind, At: at, Policy: m.summaryPolicy(), Summary: summary})
 		if err != nil {
@@ -435,7 +494,10 @@ func (m Mode) Settle(c context.Context, a identity.ActorContext, request Result,
 			return err
 		}
 		out = result
-		return nil
+		if err = m.recordResultAnswer(c, sc.Tx, sc.Operation, a, prefix, fingerprint, result.Body); err != nil {
+			return err
+		}
+		return m.BattleCounts.ObserveBattleTx(c, sc.Tx, a.PlayerID, formation, at)
 	})
 	if err != nil {
 		return Settled{}, err
@@ -473,19 +535,67 @@ func nonZero(values []int64) []int64 {
 	return out
 }
 
-func summaryEnemies(enemies []ResultEnemy) []cd.EnemyStatus {
+// summaryEnemies maps each reported hero_id (the 604 partner_id) back to the
+// wave monster's table_id: the frozen battle names template enemies by table id,
+// so a summary carrying the partner id would be refused as ENEMY_UNKNOWN.
+func summaryEnemies(waves map[int64][]EnemyRow, enemies []ResultEnemy) []cd.EnemyStatus {
 	out := make([]cd.EnemyStatus, 0, len(enemies))
 	for _, enemy := range enemies {
-		out = append(out, cd.EnemyStatus{Identity: enemy.HeroID, HP: enemy.HP})
+		tableID := enemy.HeroID
+		for _, row := range waves[enemy.Index] {
+			if row.PartnerID == enemy.HeroID {
+				tableID = row.TableID
+				break
+			}
+		}
+		out = append(out, cd.EnemyStatus{Identity: tableID, HP: enemy.HP})
 	}
 	return out
 }
 
-// isRetry is C8's duplicate: the copy's last settled result is this member's at
-// this wave and nobody holds the copy since. A loss leaves the index unchanged,
-// so the settled index is compared rather than the current one.
-func isRetry(copy d.Copy, player identity.PlayerID, index int64) bool {
-	return copy.HolderID == 0 && copy.SettledBy == int64(player) && copy.SettledIndex == index
+// resultFingerprint identifies one settled RESULT request. A client retry
+// resends the same parameters (Backend.lua:493-524), so the fingerprint differs
+// only for a genuinely different result at the same wave.
+func resultFingerprint(request Result) ([32]byte, error) {
+	return receipt.FingerprintRequest(map[string]any{
+		"chapter_id": request.ChapterID, "copy_id": request.CopyID, "current_index": request.CurrentIndex,
+		"formation": request.Formation, "pet_id": request.PetID, "total_damage": request.TotalDamage,
+		"star": request.Star, "enemies": request.Enemies,
+	})
+}
+
+// resultReplayPrefix is C8's per-member answer family: one receipt per member,
+// run, copy and wave, with each settlement keeping its own key under it. Another
+// member's settlement of the same wave cannot displace it.
+func resultReplayPrefix(request Result, run int64) string {
+	return fmt.Sprintf("chapter=%d/copy=%d/run=%d/wave=%d/", request.ChapterID, request.CopyID, run, request.CurrentIndex)
+}
+
+func resultReplayLatest(a identity.ActorContext, prefix string) receipt.LatestIdentity {
+	return receipt.LatestIdentity{OwnerKind: "player", OwnerKey: strconv.FormatInt(int64(a.PlayerID), 10),
+		Domain: "guildcampaign", Operation: "result", SemanticKeyPrefix: prefix}
+}
+
+func resultAnswerIdentity(a identity.ActorContext, prefix string, op operation.Context) receipt.Identity {
+	return receipt.Identity{OwnerKind: "player", OwnerKey: strconv.FormatInt(int64(a.PlayerID), 10),
+		Domain: "guildcampaign", Operation: "result", SemanticKey: prefix + op.ID.String()}
+}
+
+// recordResultAnswer stores the complete 610 body atomically with the
+// settlement; a retry reads the member's latest answer back instead of paying
+// twice.
+func (m Mode) recordResultAnswer(c context.Context, t tx.Tx, op operation.Context, a identity.ActorContext, prefix string, fingerprint [32]byte, body map[string]any) error {
+	raw, err := json.Marshal(body)
+	if err != nil {
+		return err
+	}
+	record, err := receipt.New(op, resultAnswerIdentity(a, prefix, op), resultReceiptClass, resultReceiptSchema, raw, fingerprint)
+	if err != nil {
+		return err
+	}
+	record.PolicyVersion, record.ActorAccountUID, record.ContextID = policyVersion, string(a.AccountUID), a.ContextID.UUID()
+	_, err = m.Receipts.PutTx(c, t, record)
+	return err
 }
 
 func replayBody(stored []byte) (Settled, error) {
@@ -542,8 +652,6 @@ func (m Mode) applyResult(c context.Context, t tx.Tx, a identity.ActorContext, o
 	copy.HolderStage = d.StageFree
 	copy.LastFightTime = &at
 	copy.StartFightTime = nil
-	copy.SettledBy = int64(a.PlayerID)
-	copy.SettledIndex = index
 	if err := m.ModeStore.SaveCopyTx(c, t, copy); err != nil {
 		return Settled{}, err
 	}
@@ -566,7 +674,15 @@ func (m Mode) applyResult(c context.Context, t tx.Tx, a identity.ActorContext, o
 	if err != nil {
 		return Settled{}, err
 	}
-	if err := m.ModeStore.UpsertServerRecordTx(c, t, a.LogicalServerID, request.CopyID, int64(a.PlayerID), guildID, damage, []byte("[]"), at); err != nil {
+	partners, err := parseFormation(request.Formation)
+	if err != nil {
+		return Settled{}, err
+	}
+	partnersJSON, err := json.Marshal(partners)
+	if err != nil {
+		return Settled{}, err
+	}
+	if err := m.ModeStore.UpsertServerRecordTx(c, t, a.LogicalServerID, request.CopyID, int64(a.PlayerID), guildID, damage, partnersJSON, at); err != nil {
 		return Settled{}, err
 	}
 	if copy.Win {
@@ -579,8 +695,9 @@ func (m Mode) applyResult(c context.Context, t tx.Tx, a identity.ActorContext, o
 }
 
 // clampWaves applies the client's enemy HP to the current wave only. Each row
-// takes one reported enemy, a dead row stays dead, a known HP never rises, and
-// a hero id outside the wave is ignored.
+// takes one reported enemy: health marks a row with a recorded HP (the client
+// applies the HP only when health is 1), a dead row stays dead, a known HP
+// never rises, and a hero id outside the wave is ignored.
 func clampWaves(waves map[int64][]EnemyRow, index int64, enemies []ResultEnemy, cleared bool) map[int64][]EnemyRow {
 	current := waves[index]
 	taken := make([]bool, len(current))
@@ -593,7 +710,7 @@ func clampWaves(waves map[int64][]EnemyRow, index int64, enemies []ResultEnemy, 
 			continue
 		}
 		taken[position] = true
-		if current[position].Health != 0 {
+		if current[position].Health != 0 && current[position].HP == 0 {
 			continue
 		}
 		hp := max(enemy.HP, 0)
@@ -602,9 +719,7 @@ func clampWaves(waves map[int64][]EnemyRow, index int64, enemies []ResultEnemy, 
 		}
 		current[position].HP = hp
 		current[position].Reborn = enemy.IsReborn
-		if hp == 0 {
-			current[position].Health = 1
-		}
+		current[position].Health = 1
 	}
 	if cleared {
 		for position := range current {
@@ -616,9 +731,9 @@ func clampWaves(waves map[int64][]EnemyRow, index int64, enemies []ResultEnemy, 
 	return waves
 }
 
-func openRow(rows []EnemyRow, taken []bool, tableID int64) int {
+func openRow(rows []EnemyRow, taken []bool, partnerID int64) int {
 	for position, row := range rows {
-		if row.TableID == tableID && !taken[position] {
+		if row.PartnerID == partnerID && !taken[position] {
 			return position
 		}
 	}
@@ -713,13 +828,6 @@ func (m Mode) finishCopy(c context.Context, t tx.Tx, a identity.ActorContext, op
 	body := map[string]any{
 		"rank_award":  map[string]any{"crystal": recordCrystal, "guild_coin": recordBadge},
 		"normal_drop": []any{}, "guild_drop": []any{}, "coin_award": gold, "exps": []any{},
-	}
-	copy.SettledBody, err = json.Marshal(body)
-	if err != nil {
-		return Settled{}, err
-	}
-	if err := m.ModeStore.SaveCopyTx(c, t, copy); err != nil {
-		return Settled{}, err
 	}
 	return Settled{Body: body}, nil
 }

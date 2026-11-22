@@ -2,8 +2,7 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
-	"net/http"
+	"fmt"
 	"strconv"
 
 	app "gxb.local/backend/v2/internal/application/occult"
@@ -14,7 +13,6 @@ import (
 	d "gxb.local/backend/v2/internal/domain/occult"
 	room "gxb.local/backend/v2/internal/domain/sharedroom"
 	"gxb.local/backend/v2/internal/foundation/operation"
-	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
@@ -64,7 +62,7 @@ func (o OccultDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReq
 		return *fail
 	}
 	if o.Service == nil {
-		return failOccult(d.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	bad := badHero("occult_invalid_parameter")
 	params, op := req.Envelope.Params, req.Envelope.Operation
@@ -209,7 +207,9 @@ func (o OccultDispatcher) create(ctx context.Context, a identity.ActorContext, p
 	chapter, chapterOK := topFloorInteger(params, "chapter_id", true)
 	campaignType, typeOK := topFloorInteger(params, "campaign_type", true)
 	if !chapterOK || !typeOK || chapter <= 0 || campaignType < d.MultiCampaignType || campaignType > d.SingleCampaignType || !onlyStockGameplayParams(params, "chapter_id", "campaign_type") {
-		return badHero("occult_invalid_parameter")
+		response := badHero("occult_invalid_parameter")
+		response.Cause = fmt.Errorf("2366 chapter_id=%d campaign_type=%d rejected", chapter, campaignType)
+		return response
 	}
 	create := o.Service.CreateTeam
 	if campaignType == d.SingleCampaignType {
@@ -303,18 +303,37 @@ func occultMonsterStatus(raw any) (map[int64]int64, bool) {
 	return monsters, true
 }
 
-func failOccult(err error) httpedge.Response {
-	var conflict *receipt.ConflictError
-	if errors.Is(err, d.ErrInvalid) || errors.As(err, &conflict) {
-		return badHero("occult_invalid_parameter")
-	}
-	for _, refusal := range occultRefusals {
-		if errors.Is(err, refusal) {
-			return conflictRefusal(1)
-		}
-	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "occult_unavailable"}}
+var occultFailureRows = []failureRow{
+	{match: d.ErrInvalid, class: failureMalformed, detail: "occult_invalid_parameter"},
+	{match: d.ErrStageHeld, class: failureRefusal, code: occultTeammateHeldCode},
+	{match: d.ErrRoomUnavailable, class: failureRefusal, code: occultRoomMissingCode},
+	{match: d.ErrLevelBand, class: failureRefusal, code: occultLevelBandCode},
+	{match: d.ErrDuplicateGirl, class: failureRefusal, code: occultDuplicateGirlCode},
+	{match: d.ErrRefused, class: failureRefusal, code: occultRoomRefusedCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, code: occultNoScrollsCode},
+	{match: sr.ErrNotInRoom, class: failureRefusal, code: occultRoomRefusedCode},
+	{match: sr.ErrAlreadyInRoom, class: failureRefusal, code: occultRoomRefusedCode},
+	{match: sr.ErrNotFound, class: failureRefusal, code: occultRoomRefusedCode},
+	{match: room.ErrFull, class: failureRefusal, code: occultRoomRefusedCode},
+	{match: room.ErrKicked, class: failureRefusal, code: occultRoomRefusedCode},
+	{match: room.ErrJoinThrottled, class: failureRefusal, code: occultRoomRefusedCode},
+	{match: room.ErrExpired, class: failureRefusal, code: occultRoomRefusedCode},
+	{match: room.ErrClosed, class: failureRefusal, code: occultRoomRefusedCode},
+	{match: room.ErrNotOwner, class: failureRefusal, code: occultRoomRefusedCode},
+	{match: room.ErrNotSeated, class: failureRefusal, code: occultRoomRefusedCode},
 }
 
-var occultRefusals = []error{d.ErrRefused, economy.ErrInsufficientBalance, sr.ErrNotInRoom, sr.ErrAlreadyInRoom, sr.ErrNotFound,
-	room.ErrFull, room.ErrKicked, room.ErrExpired, room.ErrClosed, room.ErrNotOwner, room.ErrNotSeated}
+func failOccult(err error) httpedge.Response {
+	return failureFromRows(occultFailureRows, err)
+}
+
+// Stock room-system messages the client renders from error_code; code 1 has no
+// message row, so a bare refusal is silent on the phone.
+const (
+	occultRoomRefusedCode   = 35002
+	occultNoScrollsCode     = 35003
+	occultTeammateHeldCode  = 35001
+	occultRoomMissingCode   = 35004
+	occultLevelBandCode     = 35005
+	occultDuplicateGirlCode = 35009
+)

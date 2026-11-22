@@ -156,14 +156,23 @@ func TestDisplayChargedReplayInsufficientAndBackwardTime(t *testing.T) {
 	if _, e = s.Execute(ctx, b, app.Command{Kind: "rename", Name: "First"}, op()); e != nil {
 		t.Fatal(e)
 	}
+	updatedBefore := state(t, p, b).Basis.Profile.UpdatedAt
 	s.Time = fixedTime{at: time.Now().Add(-48 * time.Hour)}
-	if _, e = s.Execute(ctx, b, app.Command{Kind: "rename", Name: "Backward"}, op()); e == nil {
-		t.Fatal("backward profile clock accepted")
+	// K3: a decision bound before the stored profile write is clamped, not refused.
+	if _, e = s.Execute(ctx, b, app.Command{Kind: "rename", Name: "Backward"}, op()); e != nil {
+		t.Fatal("backward profile clock refused", e)
+	}
+	if state(t, p, b).Basis.Profile.DisplayName != "Backward" || state(t, p, b).Basis.Profile.UpdatedAt.Before(updatedBefore) {
+		t.Fatal("backward profile write clamp", state(t, p, b), updatedBefore)
 	}
 	s = service(p, p)
 	exec(t, p, `UPDATE player_currency_balances SET updated_at=clock_timestamp()+interval '1 day' WHERE player_id=$1`, int64(b.PlayerID))
-	if _, e = s.Execute(ctx, b, app.Command{Kind: "rename", Name: "FutureScalar"}, op()); e == nil {
-		t.Fatal("scalar clock regression")
+	// K3: a stored forward scalar timestamp no longer refuses the debit.
+	if _, e = s.Execute(ctx, b, app.Command{Kind: "rename", Name: "FutureScalar"}, op()); e != nil {
+		t.Fatal("scalar clock regression", e)
+	}
+	if state(t, p, b).Basis.Profile.DisplayName != "FutureScalar" {
+		t.Fatal("scalar clock write", state(t, p, b))
 	}
 }
 

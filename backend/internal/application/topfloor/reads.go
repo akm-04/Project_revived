@@ -12,6 +12,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/topfloor"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -84,6 +85,18 @@ func (s Service) face(c context.Context, catalog d.Catalog, server identity.Logi
 	if o.IsRobot() {
 		return s.display(c, s.Fresh, catalog, server, o, now)
 	}
+	return s.recordDisplay(c, catalog, o)
+}
+
+// recordDisplay is the record-row face, which needs no rank or roster.
+func (s Service) recordDisplay(c context.Context, catalog d.Catalog, o d.Occupant) (d.Display, error) {
+	if o.IsRobot() {
+		team, found := catalog.Team(o.Robot)
+		if !found {
+			return d.Display{}, d.ErrConflict
+		}
+		return d.Display{Occupant: o, Name: catalog.RobotName(o.Robot), Level: team.Level, AvatarID: catalog.RobotAvatarID, FrameID: catalog.RobotFrameID}, nil
+	}
 	profile, found, err := s.Directory.ProfileTx(c, s.Fresh, o.Player)
 	if err != nil || !found {
 		return d.Display{}, errors.Join(err, d.ErrUnavailable)
@@ -91,11 +104,41 @@ func (s Service) face(c context.Context, catalog d.Catalog, server identity.Logi
 	return d.Display{Occupant: o, Name: profile.Name, Level: profile.Level, AvatarID: profile.AvatarID, FrameID: profile.AvatarFrameID, ConquerLevel: profile.ConquerLevel, ConquerLoop: profile.ConquerLoopID}, nil
 }
 
-// reportRetention is the top floor replay window (D25a private policy, at the D9 Q6 ceiling).
-var reportRetention = cd.Retention{ID: "C5B_TOP_FLOOR_REPORT_RETENTION_V1", Version: 1, Window: cd.RetentionCeiling}
+// RecordReplay loads one retained record and its stored report for a chat-card
+// replay; an unknown or expired record answers empty, which the client shows as
+// ARENA_RECORD_OUT_OF_DATE.
+func (s Service) RecordReplay(c context.Context, recordID int64) (RecordReplay, error) {
+	catalog, now, err := s.readContext(c)
+	if err != nil || recordID <= 0 {
+		return RecordReplay{}, err
+	}
+	record, found, err := s.Store.RecordTx(c, s.Fresh, recordID)
+	if err != nil || !found {
+		return RecordReplay{}, err
+	}
+	self, err := s.recordDisplay(c, catalog, d.Occupant{Player: record.Owner})
+	if err != nil {
+		return RecordReplay{}, err
+	}
+	opponent, err := s.recordDisplay(c, catalog, record.Opponent)
+	if err != nil {
+		return RecordReplay{}, err
+	}
+	view := RecordReplay{Record: record, Self: self, Opponent: opponent}
+	retained, err := s.Store.RetainedTx(c, s.Fresh, record.AttemptID)
+	if err != nil || !retained {
+		return view, err
+	}
+	result, _, err := s.Combat.ReplayTx(c, s.Fresh, record.AttemptID, *cd.MustMode(cd.ModeTopFloor).Retention, now)
+	if err != nil {
+		return RecordReplay{}, err
+	}
+	view.Report = result.Report
+	return view, nil
+}
 
 // Report replays a fight while any retained record references it; nil is ARENA_RECORD_OUT_OF_DATE.
-func (s Service) Report(c context.Context, key string) ([]byte, error) {
+func (s Service) Report(c context.Context, key string, op operation.Context) ([]byte, error) {
 	if !s.ready() {
 		return nil, d.ErrUnavailable
 	}
@@ -103,17 +146,20 @@ func (s Service) Report(c context.Context, key string) ([]byte, error) {
 	if err != nil {
 		return nil, nil
 	}
-	retained, err := s.Store.RetainedTx(c, s.Fresh, id)
-	if err != nil || !retained {
-		return nil, err
-	}
-	now, err := s.Timed.Binder.Time.Now(c)
-	if err != nil {
-		return nil, err
-	}
-	result, _, err := s.Combat.ReplayTx(c, s.Fresh, id, reportRetention, now)
-	return result.Report, err
+	var report []byte
+	_, _, err = s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, readRetry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		retained, err := s.Store.RetainedTx(c, sc.Tx, id)
+		if err != nil || !retained {
+			return err
+		}
+		result, _, err := s.Combat.ReplayTx(c, sc.Tx, id, *cd.MustMode(cd.ModeTopFloor).Retention, sc.Operation.DecisionAt())
+		report = result.Report
+		return err
+	})
+	return report, err
 }
+
+func readRetry() tx.RetryPolicy { return tx.RetryPolicy{MaxAttempts: 1} }
 
 // RecordInfo is the opponent of one of the player's own records with its revenge state.
 func (s Service) RecordInfo(c context.Context, a identity.ActorContext, recordID int64) (RecordInfo, d.Record, error) {
@@ -140,26 +186,35 @@ func (s Service) RecordInfo(c context.Context, a identity.ActorContext, recordID
 
 // Formation resolves a wire player id (table_id + region*100000): a ranked player
 // holding that id first, otherwise the robot team with that table id.
-func (s Service) Formation(c context.Context, a identity.ActorContext, wire int64) (d.Display, error) {
-	catalog, now, err := s.readContext(c)
-	if err != nil {
-		return d.Display{}, err
+func (s Service) Formation(c context.Context, a identity.ActorContext, wire int64, op operation.Context) (d.Display, error) {
+	if !s.ready() {
+		return d.Display{}, d.ErrUnavailable
 	}
-	table := wire % d.RegionStride
-	if wire/d.RegionStride != int64(a.LogicalServerID) || table <= 0 {
-		return d.Display{}, d.ErrInvalid
-	}
-	o := d.Occupant{Player: identity.PlayerID(wire)}
-	if _, ranked, err := s.Store.RankOfTx(c, s.Fresh, a.LogicalServerID, o); err != nil || !ranked {
+	var out d.Display
+	_, _, err := s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.RepeatableRead}, retry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		at := sc.Operation.DecisionAt()
+		_, catalog, err := s.catalogTx(c, sc.Tx)
 		if err != nil {
-			return d.Display{}, err
+			return err
 		}
-		o = d.Occupant{Robot: table}
-		if !o.Valid() {
-			return d.Display{}, d.ErrRefused
+		table := wire % d.RegionStride
+		if wire/d.RegionStride != int64(a.LogicalServerID) || table <= 0 {
+			return d.ErrInvalid
 		}
-	}
-	return s.display(c, s.Fresh, catalog, a.LogicalServerID, o, now)
+		o := d.Occupant{Player: identity.PlayerID(wire)}
+		if _, ranked, err := s.Store.RankOfTx(c, sc.Tx, a.LogicalServerID, o); err != nil || !ranked {
+			if err != nil {
+				return err
+			}
+			o = d.Occupant{Robot: table}
+			if !o.Valid() {
+				return d.ErrRefused
+			}
+		}
+		out, err = s.display(c, sc.Tx, catalog, a.LogicalServerID, o, at)
+		return err
+	})
+	return out, err
 }
 
 func (s Service) RankList(c context.Context, a identity.ActorContext) (RankList, error) {

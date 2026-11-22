@@ -19,6 +19,7 @@ import (
 	dorm "gxb.local/backend/v2/internal/application/dormhouse"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	i5 "gxb.local/backend/v2/internal/application/i5"
+	book "gxb.local/backend/v2/internal/domain/bookskill"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -36,7 +37,10 @@ func bookService(p *pg.Pool, db tx.Beginner) app.Service {
 	values := i5store.Store{Queryer: p, StackUsage: dorm.FurnitureUsage{Owner: dormstore.Store{}, Content: cs}}
 	runner := tx.Runner{DB: db}
 	iv := i5.Service{Runner: runner, Store: values, Content: cs, Privileges: i5.BaselinePrivilegeProvider{}, Functions: i5.PetStarterFunctionAnnouncements{}, Directory: i4store.DirectoryLevelProjection{}, Backpack: values, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, RedeemSecret: []byte("i7c2d-native-fixture-only-secret-000")}
-	return app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner}, Reads: tx.Runner{DB: p}, Heroes: characterstore.LibraryHeroPort{Store: hs}, Owner: bookstore.Store{}, Content: cs, Players: i4store.PlayerRootLocker{}, Fence: values, Costs: i5.MaterialCostDebiter{Store: values, Content: cs}, Values: values, Grants: iv, Exchange: iv, Receipts: kernelstore.Store{}}
+	service := app.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: runner}, Reads: tx.Runner{DB: p}, Heroes: characterstore.LibraryHeroPort{Store: hs}, Owner: bookstore.Store{}, Content: cs, Players: i4store.PlayerRootLocker{}, Fence: values, Costs: i5.MaterialCostDebiter{Store: values, Content: cs}, Values: values, Grants: iv, Exchange: iv, Receipts: kernelstore.Store{}}
+	service.MakeInfo = eventCentreService(p, service)
+	service.RecycleInfo = eventCentreService(p, service)
+	return service
 }
 func bookFixture(t *testing.T, p *pg.Pool) (identity.ActorContext, string, app.Service) {
 	t.Helper()
@@ -80,6 +84,19 @@ func bookRoot(t *testing.T, p *pg.Pool, a identity.ActorContext) bookstore.Root 
 	}
 	return r
 }
+
+type unavailableReplayBookContent struct{}
+
+func (unavailableReplayBookContent) BookInputsActive(context.Context) (string, bool, error) {
+	return "", false, errors.New("replay must not consult active content")
+}
+func (unavailableReplayBookContent) BookInputsRevisionTx(context.Context, tx.Queryer, string) (bool, error) {
+	return false, errors.New("replay must not consult content revision")
+}
+func (unavailableReplayBookContent) BookCatalogTx(context.Context, tx.Queryer, string) (book.Catalog, error) {
+	return book.Catalog{}, errors.New("replay must not consult a catalog")
+}
+
 func TestI7C2DBookComposeResearchSpeedReplayInputs(t *testing.T) {
 	p := pool(t)
 	a, rev, s := bookFixture(t, p)
@@ -89,7 +106,9 @@ func TestI7C2DBookComposeResearchSpeedReplayInputs(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	replay, e := s.Command(ctx, a, c, o)
+	replayService := s
+	replayService.Content = unavailableReplayBookContent{}
+	replay, e := replayService.Command(ctx, a, c, o)
 	if e != nil || replay.OperationID != first.OperationID {
 		t.Fatal("receipt", e)
 	}
@@ -142,6 +161,37 @@ func TestI7C2DBookComposeResearchSpeedReplayInputs(t *testing.T) {
 		t.Fatal(inp, e)
 	}
 }
+
+// A research that finished by its own deadline needs no MID 1079 before the next Learn.
+func TestA130NaturallyCompletedResearchAllowsNextLearn(t *testing.T) {
+	p := pool(t)
+	a, _, s := bookFixture(t, p)
+	bookCmd(t, s, a, app.Command{Family: app.Compose, ItemID: 130001001, Amount: 1})
+	bookCmd(t, s, a, app.Command{Family: app.Learn, SkillID: 10010001})
+	research := bookRoot(t, p, a)
+	if research.Facts.Research == nil || research.Facts.Research.Subject != 10010001 {
+		t.Fatalf("fixture research: %#v", research.Facts.Research)
+	}
+	at := research.Facts.Research.StartedAt.Add(60 * time.Second)
+	s.Timed.Binder.Time = fixedBookReadTime{at: at}
+
+	bookCmd(t, s, a, app.Command{Family: app.Learn, SkillID: 10010004})
+
+	root := bookRoot(t, p, a)
+	if root.Facts.Skills[10010001] != 1 {
+		t.Fatalf("completed skill applied %d times", root.Facts.Skills[10010001])
+	}
+	if root.Facts.RecentSkill != 0 {
+		t.Fatalf("completed research still gates Learn: %d", root.Facts.RecentSkill)
+	}
+	if root.Facts.Research == nil || root.Facts.Research.Subject != 10010004 {
+		t.Fatalf("next research not admitted: %#v", root.Facts.Research)
+	}
+	if _, e := s.Command(ctx, a, app.Command{Family: app.Learn, SkillID: 10010001}, op()); !errors.Is(e, app.ErrRejected) {
+		t.Fatalf("another skill admitted while 10010004 runs: %v", e)
+	}
+}
+
 func TestI7C2DBookPrerequisitesBuildingLadderAndRefund(t *testing.T) {
 	p := pool(t)
 	a, _, s := bookFixture(t, p)

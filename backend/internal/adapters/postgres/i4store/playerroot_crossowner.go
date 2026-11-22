@@ -10,7 +10,8 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-const lockCanonicalPlayerRoot = `SELECT player_id,logical_server_id FROM players WHERE player_id=$1 FOR UPDATE`
+// NO KEY UPDATE: excludes other root lockers but not the FOR KEY SHARE of 00161 foreign-key checks (R8_PLAYER_ROOT_LOCK_AMENDMENT).
+const lockCanonicalPlayerRoot = `SELECT player_id,logical_server_id FROM players WHERE player_id=$1 FOR NO KEY UPDATE`
 
 // PlayerRootLocker is the I4-owned implementation of the shared-domain player
 // root lock seam. It returns only identity/server binding; gameplay state stays

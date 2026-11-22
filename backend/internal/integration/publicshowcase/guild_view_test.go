@@ -19,6 +19,7 @@ import (
 	"gxb.local/backend/v2/internal/application/guildcore"
 	app "gxb.local/backend/v2/internal/application/guildinvite"
 	"gxb.local/backend/v2/internal/application/i5"
+	"gxb.local/backend/v2/internal/application/publicprofile"
 	"gxb.local/backend/v2/internal/content/guildpolicy"
 	"gxb.local/backend/v2/internal/domain/guild"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -91,6 +92,15 @@ func Test6BGuildCurrentMembershipAndInviteSource(t *testing.T) {
 	v, e := read(b.PlayerID, saved.DecisionAt)
 	if e != nil || v.InviteTime != saved.DecisionAt.Unix() || v.GuildID != 0 {
 		t.Fatal("validsource", v, e)
+	}
+	// MID 1829 sub 1 serves the qualified invite instant at the top level.
+	profile, e := composer(t, p).Read(ctx, a, publicprofile.ReadRequest{MID: 1829, Target: b.PlayerID, Subtype: 1}, gop())
+	if e != nil || profile["guild_invite_time"] != saved.DecisionAt.Unix() {
+		t.Fatal("profile qualified invite", profile["guild_invite_time"], e)
+	}
+	profile, e = composer(t, p).Read(ctx, a, publicprofile.ReadRequest{MID: 1829, Target: a.PlayerID, Subtype: 1}, gop())
+	if e != nil || profile["guild_invite_time"] != int64(0) {
+		t.Fatal("profile qualified absence", profile["guild_invite_time"], e)
 	}
 	v, e = read(b.PlayerID, saved.ExpiresAt)
 	if e != nil || v.InviteTime != 0 {

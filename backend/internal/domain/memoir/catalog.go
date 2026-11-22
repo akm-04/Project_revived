@@ -11,9 +11,17 @@ const TeamLimit = 5
 const ResultWindowSeconds = 3600
 
 var (
-	ErrInvalid     = errors.New("memoir invalid request")
-	ErrRefused     = errors.New("memoir refused")
-	ErrUnavailable = errors.New("memoir unavailable")
+	ErrInvalid          = errors.New("memoir invalid request")
+	ErrRefused          = errors.New("memoir refused")
+	ErrUnavailable      = errors.New("memoir unavailable")
+	ErrReportExpired    = errors.New("memoir battle report expired")
+	ErrFightUnavailable = errors.New("memoir player fight unavailable")
+)
+
+// Stock message.lua rows the client turns into a toast for these refusals.
+const (
+	ReportExpiredCode    int64 = 35027
+	FightUnavailableCode int64 = 35028
 )
 
 type Count struct {

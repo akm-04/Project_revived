@@ -1,0 +1,27 @@
+{
+  "contract_id": "I9_SKILL_LEVEL_PRIVATE_POLICY_V1",
+  "version": 1,
+  "classification": "PRIVATE_POLICY",
+  "mids": {
+    "53": "SET_SKILL_LEVEL",
+    "39": "SET_ALL_SKILL_LEVEL"
+  },
+  "unknowns": {
+    "half_price_activity_authority": "The client applies a 50% discount while Activities:isHalfPriceOpen() is true. The authoritative backend activity mirror was not found.",
+    "bulk_partial_success": "The client callback distinguishes is_success but source evidence does not establish partial-write semantics. This service uses all-or-nothing writes."
+  },
+  "tunables": {
+    "skill_cost_discount_basis_points": {
+      "default": 10000,
+      "minimum": 1,
+      "maximum": 10000,
+      "active_half_price_value": 5000,
+      "description": "Keep 10000 until an authoritative activity mirror supplies the client's half-price state."
+    }
+  },
+  "refusal": {
+    "http_status": 409,
+    "stock_error_code": 1,
+    "is_success": 0
+  }
+}

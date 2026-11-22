@@ -14,6 +14,28 @@ import (
 
 const heroFumoCapability = "HERO_FUMO_CA4_3A"
 
+// QuickFumoRuleTx reads the daily_consume id 2 row from the I9-11B bundle. The
+// row's cost/value/num are the crystal price, the raw Fumo grant and the daily
+// limit (daily_consume.lua id 2: 20 / 150 / 1).
+func (Store) QuickFumoRuleTx(ctx context.Context, q tx.Queryer, revision string) (character.QuickFumoRule, error) {
+	if q == nil || len(revision) != 64 {
+		return character.QuickFumoRule{}, errors.New("content store: invalid quick Fumo revision")
+	}
+	catalog, err := (Store{}).DailyBuyInputsTx(ctx, q, revision)
+	if err != nil {
+		return character.QuickFumoRule{}, err
+	}
+	row, ok := catalog.DailyConsume[2]
+	if !ok {
+		return character.QuickFumoRule{}, errors.New("content store: daily_consume id 2 missing")
+	}
+	rule := character.QuickFumoRule{CrystalCost: row.Cost, FumoGrant: row.Value, DailyLimit: row.Num}
+	if err := rule.Validate(); err != nil {
+		return character.QuickFumoRule{}, err
+	}
+	return rule, nil
+}
+
 func (s Store) HeroFumoActive(ctx context.Context) (string, bool, error) {
 	if s.Queryer == nil {
 		return "", false, errors.New("content store: nil Hero Fumo queryer")
@@ -45,11 +67,7 @@ func (Store) HeroFumoRevisionTx(ctx context.Context, q tx.Queryer, revision stri
 	if q == nil || len(revision) != 64 {
 		return false, errors.New("content store: invalid Hero Fumo revision")
 	}
-	var raw string
-	if err := q.QueryRow(ctx, contentqueries.ReadContentRevisionManifest, revision).Scan(&raw); err != nil {
-		return false, err
-	}
-	return manifestHasCapability([]byte(raw), revision, heroFumoCapability)
+	return storedCapability(ctx, q, revision, heroFumoCapability)
 }
 
 func (s Store) HeroFumoTarget(ctx context.Context, revision string, itemID character.EquipmentTemplateID) (character.HeroFumoTarget, error) {

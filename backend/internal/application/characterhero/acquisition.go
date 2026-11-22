@@ -10,6 +10,7 @@ import (
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
+	lib "gxb.local/backend/v2/internal/domain/librarylocal"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/receipt"
@@ -224,7 +225,7 @@ func (s Service) SummonNormal(ctx context.Context, actor identity.ActorContext, 
 		if err != nil {
 			return err
 		}
-		if err := insertFreshHero(txctx, scope.Tx, s.AcquisitionStore, s.FreshFacets, h); err != nil {
+		if err := insertFreshHero(txctx, scope.Tx, s.AcquisitionStore, s.FreshFacets, h, lib.LogAcquiredSoulStone); err != nil {
 			return err
 		}
 		nextRoot, err := advanceRoot(root, 1, boundOp)
@@ -386,7 +387,7 @@ func (s Service) CreateVows(ctx context.Context, actor identity.ActorContext, ta
 		if err != nil {
 			return err
 		}
-		if err := insertFreshHero(txctx, scope.Tx, s.AcquisitionStore, s.FreshFacets, h); err != nil {
+		if err := insertFreshHero(txctx, scope.Tx, s.AcquisitionStore, s.FreshFacets, h, 0); err != nil {
 			return err
 		}
 		nextRoot, err := advanceRoot(root, 1, boundOp)

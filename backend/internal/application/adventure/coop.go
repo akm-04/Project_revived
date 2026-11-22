@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"strconv"
@@ -21,11 +22,16 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/illusion"
 	"gxb.local/backend/v2/internal/domain/sharedroom"
+	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-const coopCampaignType = 61
+const (
+	coopCampaignType = 61
+	// coopClosedKind names a co-op attempt the resolver can never finish.
+	coopClosedKind = "ADVENTURE_ILLUSION_TEAM_CLOSED"
+)
 
 // CreateCoop answers 2423: the master's 10006 room bound to the occurrence.
 func (s Mode) CreateCoop(c context.Context, a identity.ActorContext, op operation.Context) (map[string]any, error) {
@@ -56,6 +62,11 @@ func (s Mode) CreateCoop(c context.Context, a identity.ActorContext, op operatio
 		return nil, d.ErrRefused
 	}
 	state := d.RoomState{RoomType: d.RoomTypeIllusion, SpecialData: occurrence.SpecialData, MasterLevel: profile.Level, Phase: "SELECTING"}
+	forces, err := s.bestForces(c, []identity.PlayerID{a.PlayerID}, at)
+	if err != nil {
+		return nil, err
+	}
+	state.SetForce(int64(a.PlayerID), forces[a.PlayerID])
 	payload, err := state.Encode()
 	if err != nil {
 		return nil, err
@@ -119,8 +130,11 @@ func (s Mode) EnterCoop(c context.Context, a identity.ActorContext, roomID int64
 	if len(room.Members()) >= int(room.Capacity) && !seated(room, a.PlayerID) {
 		return nil, fmt.Errorf("%w: room full", d.ErrRefused)
 	}
-	joined, err := s.Rooms.Join(c, a, IllusionFamily(), roomID, op)
+	joined, err := s.Rooms.Join(c, a, sr.JoinRequest{Family: IllusionFamily(), RoomID: roomID}, op)
 	if err != nil {
+		return nil, err
+	}
+	if joined, err = s.recordForce(c, a, at, op); err != nil {
 		return nil, err
 	}
 	state, err = s.roomState(joined)
@@ -131,7 +145,9 @@ func (s Mode) EnterCoop(c context.Context, a identity.ActorContext, roomID int64
 	if err != nil {
 		return nil, err
 	}
-	return map[string]any{"room_info": info}, nil
+	// MID 2425 carries monster_statuses on both branches; a co-op room has no
+	// solved position, so every entry is the empty killer string.
+	return map[string]any{"room_info": info, "monster_statuses": monsterStatuses(state)}, nil
 }
 
 // InviteCoop answers 2427: the target is appended for the room wakeup.
@@ -422,16 +438,17 @@ func (s Mode) StartCoop(c context.Context, a identity.ActorContext, op operation
 		if err != nil {
 			return err
 		}
-		started, err = s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Actor: a, Locator: coopLocator(*room),
-			GenerationRef: coopGeneration(*room), StartFingerprint: coopFingerprint(*room, state),
-			ResultDeadline: at.Add(attemptLimit), Battle: battle, TrustProfile: cd.ServerReport, Members: room.Members()})
+		started, err = s.Combat.StartTx(c, sc.Tx, scope, coopStart(a, *room, battle, at))
 		return err
 	}}, op)
 	if err != nil {
 		return nil, err
 	}
 	if _, err = s.Combat.Resolve(c, op, started.Attempt.ID); err != nil {
-		return nil, err
+		if !errors.Is(err, cd.ErrResolverPermanent) {
+			return nil, err
+		}
+		return nil, errors.Join(err, s.closeUnresolvedCoop(c, a, op, started.Attempt.ID))
 	}
 	var report []byte
 	_, err = s.Rooms.Update(c, a, sr.UpdateRequest{Family: IllusionFamily(), Before: s.admissionBefore(a, op), Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
@@ -458,8 +475,24 @@ func (s Mode) StartCoop(c context.Context, a identity.ActorContext, op operation
 		if err != nil {
 			return err
 		}
+		// RESULT fans out over the roster START froze, not the room's present
+		// seats: a member who left keeps their settlement and mail, and a
+		// replacement seat neither gains value nor aborts the fan-out.
+		frozen, err := s.Combat.AttemptMembersTx(c, sc.Tx, started.Attempt.ID)
+		if err != nil {
+			return err
+		}
+		if len(frozen) == 0 {
+			return fmt.Errorf("%w: the attempt froze no members", d.ErrUnavailable)
+		}
 		_, lines := giftAwards(catalog, d.IllusionBaseGift)
-		for _, member := range room.Members() {
+		for _, member := range frozen {
+			if _, err = s.Combat.SettleMemberTx(c, sc.Tx, cb.MemberSettleRequest{Locator: coopLocator(*room), AttemptID: started.Attempt.ID,
+				Member: member, SemanticReceiptID: coopMemberReceipt(started.Attempt.ID, member), At: at}); err != nil {
+				return err
+			}
+		}
+		for _, member := range frozen {
 			key := strconv.FormatInt(int64(member), 10)
 			state.Reports[key] = append([]byte(nil), report...)
 			if _, _, err = s.Mail.DeliverTx(c, sc.Tx, i5.SettlementMailRequest{Recipient: member, SourceKind: "ADVENTURE_ILLUSION",
@@ -469,8 +502,8 @@ func (s Mode) StartCoop(c context.Context, a identity.ActorContext, op operation
 			}
 		}
 		state.AttemptID, state.ReportID, state.Phase, state.Damage = started.Attempt.ID.String(), started.Attempt.ID.String(), "DONE", damage
-		members := make([]int64, 0, len(room.Members()))
-		for _, member := range room.Members() {
+		members := make([]int64, 0, len(frozen))
+		for _, member := range frozen {
 			members = append(members, int64(member))
 		}
 		if err = s.Store.InsertReportTx(c, sc.Tx, state.ReportID, int64(room.LogicalServerID), room.ID, members, string(report), at); err != nil {
@@ -484,6 +517,16 @@ func (s Mode) StartCoop(c context.Context, a identity.ActorContext, op operation
 			return readErr
 		} else if found && occurrence.Active(at) {
 			if _, err = s.finish(c, sc.Tx, a, occurrence, at); err != nil {
+				return err
+			}
+		}
+		// Each frozen member's own heroes; the counter lock is last.
+		snapshot, err := s.Combat.SnapshotTx(c, sc.Tx, started.Attempt.ID)
+		if err != nil {
+			return err
+		}
+		for _, member := range frozen {
+			if err = s.BattleObserver.ObserveBattleTx(c, sc.Tx, member, frozenPartners(snapshot, member), at); err != nil {
 				return err
 			}
 		}
@@ -547,8 +590,28 @@ func (s Mode) coopBattle(c context.Context, sc gen.TimedScope, room sharedroom.R
 	return battle, true, nil
 }
 
+// frozenPartners is the owned hero roster the attempt froze for one player:
+// borrowed, template and foreign actors never count.
+func frozenPartners(snapshot cd.Snapshot, player identity.PlayerID) []int64 {
+	partners := make([]int64, 0, len(snapshot.Battle.TeamA))
+	for _, actor := range snapshot.Battle.TeamA {
+		if actor.Kind != cd.HeroActor || identity.PlayerID(actor.Player) != player {
+			continue
+		}
+		if actor.Origin != cd.OwnedSelf && actor.Origin != cd.OwnedMember {
+			continue
+		}
+		partners = append(partners, actor.Identity)
+	}
+	return partners
+}
+
 func (s Mode) coopRoomInfo(c context.Context, q tx.Queryer, room sharedroom.Room, state d.RoomState) (map[string]any, error) {
-	ids, infos, err := s.roomMembers(c, q, room)
+	forces := make(map[identity.PlayerID]int64, len(room.Members()))
+	for _, member := range room.Members() {
+		forces[member] = state.Force(int64(member))
+	}
+	ids, infos, err := s.roomMembers(c, q, room, forces)
 	if err != nil {
 		return nil, err
 	}
@@ -580,7 +643,7 @@ func (s Mode) heroRows(c context.Context, q tx.Queryer, player identity.PlayerID
 
 func (s Mode) petRows(c context.Context, q tx.Queryer, player identity.PlayerID, at time.Time) (map[string]map[string]any, error) {
 	detail := map[string]any{}
-	if err := s.Heroes.OverlayMID1(c, q, identity.ActorContext{PlayerID: player}, false, at, detail); err != nil {
+	if err := s.Pets.OverlayMID1(c, q, identity.ActorContext{PlayerID: player}, false, at, detail); err != nil {
 		return nil, err
 	}
 	body, _ := detail["780"].(map[string]any)
@@ -639,6 +702,17 @@ func (s Mode) pickBody(c context.Context, q tx.Queryer, player identity.PlayerID
 	return info, nil
 }
 
+// closeUnresolvedCoop ends a co-op attempt the resolver can never finish, so the
+// next start freezes a new attempt instead of replaying the dead one.
+func (s Mode) closeUnresolvedCoop(c context.Context, a identity.ActorContext, op operation.Context, attempt ids.UUID) error {
+	_, err := s.Rooms.Update(c, a, sr.UpdateRequest{Family: IllusionFamily(), Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
+		_, err := s.Combat.CloseTx(c, sc.Tx, cb.TerminalRequest{Locator: coopLocator(*room), GenerationRef: coopGeneration(*room),
+			TerminalKind: coopClosedKind, SemanticReceiptID: "adventure-illusion-team-closed:" + attempt.String(), At: sc.Operation.DecisionAt()})
+		return err
+	}}, op)
+	return err
+}
+
 func coopLocator(room sharedroom.Room) cd.Locator {
 	return cd.Locator{DomainKind: "ADVENTURE_ILLUSION", AuthorityScope: fmt.Sprintf("server:%d", room.LogicalServerID), DomainLocator: fmt.Sprintf("room:%d", room.ID)}
 }
@@ -647,11 +721,23 @@ func coopGeneration(room sharedroom.Room) string {
 	return fmt.Sprintf("ADVENTURE_ILLUSION_TEAM/%d", room.ID)
 }
 
-func coopFingerprint(room sharedroom.Room, state d.RoomState) string {
-	raw, _ := json.Marshal(struct {
-		Room  int64
-		Picks map[string]d.RoomPick
-	}{room.ID, state.Picks})
+// coopMemberReceipt is one member's settlement receipt under the shared
+// attempt's single terminal (D24); the member is part of the key so a replayed
+// RESULT replays each member instead of colliding.
+func coopMemberReceipt(attemptID ids.UUID, member identity.PlayerID) string {
+	return fmt.Sprintf("adventure-illusion-team:%s:%d", attemptID.String(), member)
+}
+
+// coopStart is the co-op START identity: the room is the stage; the picks are
+// the players' choice, so a same-room START replays the frozen attempt when
+// only they changed (I8_PARENT_CONTRACT_V1 generation_supersede).
+func coopStart(a identity.ActorContext, room sharedroom.Room, battle cb.BattleRequest, at time.Time) cb.StartRequest {
+	return cb.StartRequest{Mode: cd.ModeAdventureCoop, Actor: a, Locator: coopLocator(room), GenerationRef: coopGeneration(room),
+		StartFingerprint: coopFingerprint(room), ResultDeadline: at.Add(attemptLimit), Battle: battle, TrustProfile: cd.ServerReport, Members: room.Members()}
+}
+
+func coopFingerprint(room sharedroom.Room) string {
+	raw, _ := json.Marshal(struct{ Room int64 }{room.ID})
 	sum := sha256.Sum256(raw)
 	return hex.EncodeToString(sum[:])
 }

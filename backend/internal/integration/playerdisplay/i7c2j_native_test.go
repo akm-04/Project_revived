@@ -254,16 +254,18 @@ func TestI7C2JNativeWitnessStaleMissingAndCAS(t *testing.T) {
 		t.Fatal("forged witness")
 	}
 	o := opPinned(rev)
+	var future d.Observation
 	_, e := (tx.Runner{DB: p}).Run(ctx, o, app.Profile(), tx.Options{Isolation: tx.RepeatableRead}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
 		scope, e := characterasset.NewCoherentReadScope(sc, rev, time.Unix(1, 0))
 		if e != nil {
 			return e
 		}
-		_, e = s.FactsTx(c, scope, a.PlayerID)
+		future, e = s.FactsTx(c, scope, a.PlayerID)
 		return e
 	})
-	if !errors.Is(e, d.ErrStale) {
-		t.Fatal("futurestate", e)
+	// K7: an observation before the stored fact no longer refuses the read.
+	if e != nil || future.Facts.Player != a.PlayerID || future.Facts.Version < 1 {
+		t.Fatal("futurestate", future, e)
 	}
 	tr, e := p.Begin(ctx, tx.Options{Isolation: tx.Serializable})
 	if e != nil {

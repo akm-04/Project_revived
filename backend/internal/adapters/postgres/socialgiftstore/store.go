@@ -11,6 +11,7 @@ import (
 	dg "gxb.local/backend/v2/internal/domain/generation"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"time"
 )
@@ -182,13 +183,13 @@ func (Store) Counts(c context.Context, q tx.Queryer, p identity.PlayerID, day st
 	return a, b, e
 }
 func (Store) PutEpoch(c context.Context, t tx.Tx, e sg.Epoch, exists bool, at time.Time) error {
-	if e.Validate() != nil || at.Before(e.UpdatedAt) {
+	if e.Validate() != nil {
 		return sg.ErrClock
 	}
 	var tag tx.CommandTag
 	var err error
 	if exists {
-		tag, err = t.Exec(c, `UPDATE social_gift_epochs SET state_version=state_version+1,updated_at=$5 WHERE player_id=$1 AND policy_id=$2 AND day_token=$3 AND state_version=$4 AND generation_id=$6::uuid`, int64(e.Player), sg.DayPolicy, e.Day, e.Version, at, e.Generation.UUID().String())
+		tag, err = t.Exec(c, `UPDATE social_gift_epochs SET state_version=state_version+1,updated_at=GREATEST($5,updated_at,created_at) WHERE player_id=$1 AND policy_id=$2 AND day_token=$3 AND state_version=$4 AND generation_id=$6::uuid`, int64(e.Player), sg.DayPolicy, e.Day, e.Version, at, e.Generation.UUID().String())
 	} else {
 		tag, err = t.Exec(c, `INSERT INTO social_gift_epochs(player_id,policy_id,day_token,generation_id,state_version,created_at,updated_at) VALUES($1,$2,$3,$4::uuid,1,$5,$5)`, int64(e.Player), sg.DayPolicy, e.Day, e.Generation.UUID().String(), at)
 	}
@@ -233,12 +234,14 @@ type claimWire struct {
 	Generation  string            `json:"claim_generation_id"`
 	Revision    string            `json:"content_revision"`
 	Grant       string            `json:"grant_receipt_id"`
-	Result      sg.Result         `json:"semantic_result"`
+	Result      json.RawMessage   `json:"semantic_result"`
 }
 
 func (Store) ReadClaim(c context.Context, q tx.Queryer, id ids.UUID) (sg.ClaimOperation, bool, error) {
 	var raw []byte
-	e := q.QueryRow(c, `SELECT to_jsonb(o) FROM social_gift_claim_operations o WHERE operation_id=$1::uuid`, id.String()).Scan(&raw)
+	var payloadVersion int16
+	// The row JSON also carries payload_version; absent (a pre-00163 row) means version 0.
+	e := q.QueryRow(c, `SELECT to_jsonb(o)-'payload_version',COALESCE((to_jsonb(o)->>'payload_version')::smallint,0) FROM social_gift_claim_operations o WHERE operation_id=$1::uuid`, id.String()).Scan(&raw, &payloadVersion)
 	if errors.Is(e, kernelstore.ErrNoRows) {
 		return sg.ClaimOperation{}, false, nil
 	}
@@ -249,8 +252,12 @@ func (Store) ReadClaim(c context.Context, q tx.Queryer, id ids.UUID) (sg.ClaimOp
 	if e = json.Unmarshal(raw, &w); e != nil {
 		return sg.ClaimOperation{}, false, e
 	}
+	var result sg.Result
+	if e = payload.Decode("social_gift_claim_operations", payloadVersion, w.Result, &result); e != nil {
+		return sg.ClaimOperation{}, false, sg.ErrConflict
+	}
 	u, e := ids.ParseUUID(w.ID)
-	v := sg.ClaimOperation{ID: u, Recipient: w.Recipient, Fingerprint: w.Fingerprint, StartedAt: w.StartedAt.UTC(), DecisionAt: w.DecisionAt.UTC(), Day: w.Day, Revision: w.Revision, Result: w.Result}
+	v := sg.ClaimOperation{ID: u, Recipient: w.Recipient, Fingerprint: w.Fingerprint, StartedAt: w.StartedAt.UTC(), DecisionAt: w.DecisionAt.UTC(), Day: w.Day, Revision: w.Revision, Result: result}
 	if v.Result.OperationStartedAtExact != "" {
 		exact, err := time.Parse(time.RFC3339Nano, v.Result.OperationStartedAtExact)
 		if err != nil || exact.Location() != time.UTC || exact.Format(time.RFC3339Nano) != v.Result.OperationStartedAtExact || exact.UnixMicro() != v.StartedAt.UnixMicro() {
@@ -258,7 +265,7 @@ func (Store) ReadClaim(c context.Context, q tx.Queryer, id ids.UUID) (sg.ClaimOp
 		}
 		v.StartedAt = exact
 	}
-	if e != nil || u != id || w.Policy != sg.ClaimPolicy || !w.CreatedAt.Equal(w.DecisionAt) || w.Grant != w.Result.GrantReceiptID {
+	if e != nil || u != id || w.Policy != sg.ClaimPolicy || !w.CreatedAt.Equal(w.DecisionAt) || w.Grant != v.Result.GrantReceiptID {
 		return v, false, sg.ErrConflict
 	}
 	if w.Generation != "" {
@@ -289,7 +296,7 @@ func (Store) ClaimTransfers(c context.Context, q tx.Queryer, id ids.UUID) ([]sg.
 	return v, nil
 }
 func (Store) InsertClaim(c context.Context, t tx.Tx, v sg.ClaimOperation) error {
-	raw, e := json.Marshal(v.Result)
+	raw, version, e := payload.Encode(v.Result)
 	if e != nil {
 		return e
 	}
@@ -300,7 +307,7 @@ func (Store) InsertClaim(c context.Context, t tx.Tx, v sg.ClaimOperation) error 
 	if v.Result.GrantReceiptID != "" {
 		receipt = v.Result.GrantReceiptID
 	}
-	_, e = t.Exec(c, `INSERT INTO social_gift_claim_operations(operation_id,recipient_player_id,request_fingerprint,operation_started_at,decision_at,claim_day,claim_generation_id,content_revision,grant_receipt_id,semantic_result,created_at) VALUES($1::uuid,$2,$3,$4,$5,$6,$7::uuid,$8,$9,$10::jsonb,$5)`, v.ID.String(), int64(v.Recipient), v.Fingerprint, v.StartedAt, v.DecisionAt, v.Day, gen, v.Revision, receipt, string(raw))
+	_, e = t.Exec(c, `INSERT INTO social_gift_claim_operations(operation_id,recipient_player_id,request_fingerprint,operation_started_at,decision_at,claim_day,claim_generation_id,content_revision,grant_receipt_id,semantic_result,created_at,payload_version) VALUES($1::uuid,$2,$3,$4,$5,$6,$7::uuid,$8,$9,$10::jsonb,$5,$11)`, v.ID.String(), int64(v.Recipient), v.Fingerprint, v.StartedAt, v.DecisionAt, v.Day, gen, v.Revision, receipt, string(raw), version)
 	return e
 }
 

@@ -4,19 +4,32 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/domain/character"
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/march"
+	"gxb.local/backend/v2/internal/foundation/tx"
 	"math"
 	"sort"
 	"strconv"
+	"time"
 )
 
-func (s Mode) roster(c context.Context, sc gen.TimedScope, a identity.ActorContext) (map[string]any, error) {
+type rosterCacheKey struct{}
+
+type rosterCache struct{ rows map[string]any }
+
+// roster reads the stock roster once per operation; admission, the force list
+// and the status projection all ask for the same owned rows.
+func (s Mode) roster(c context.Context, q tx.Queryer, a identity.ActorContext, at time.Time) (map[string]any, error) {
+	cache, _ := c.Value(rosterCacheKey{}).(*rosterCache)
+	if cache != nil && cache.rows != nil {
+		return cache.rows, nil
+	}
 	detail := map[string]any{}
-	if err := s.Roster.OverlayMID1(c, sc.Tx, a, false, sc.Operation.DecisionAt(), detail); err != nil {
+	if err := s.Roster.OverlayMID1(c, q, a, false, at, detail); err != nil {
 		return nil, err
 	}
 	body, ok := detail["49"].(map[string]any)
@@ -27,13 +40,53 @@ func (s Mode) roster(c context.Context, sc gen.TimedScope, a identity.ActorConte
 	if !ok {
 		return nil, d.ErrUnavailable
 	}
+	if cache != nil {
+		cache.rows = rows
+	}
 	return rows, nil
+}
+
+// fillStatuses adds a read-time self_list entry for every owned girl: carried
+// run state for girls used in earlier stages and a fresh health-0 row for the
+// rest, so the stock selector never reuses a recycled card's bars. The fresh
+// entries are not saved into the run.
+func (s Mode) fillStatuses(c context.Context, q tx.Queryer, a identity.ActorContext, at time.Time, out map[string]any) error {
+	rows, err := s.roster(c, q, a, at)
+	if err != nil {
+		return err
+	}
+	envelope, ok := out["hero_status"].(map[string]any)
+	if !ok {
+		return d.ErrUnavailable
+	}
+	statuses, ok := envelope["self_list"].(map[string]any)
+	if !ok {
+		return d.ErrUnavailable
+	}
+	for key := range rows {
+		id, err := strconv.ParseInt(key, 10, 64)
+		if err != nil || id <= 0 {
+			return d.ErrUnavailable
+		}
+		if _, carried := statuses[key]; !carried {
+			statuses[key] = d.Status{Hero: id, Player: int64(a.PlayerID), Health: 0}
+		}
+	}
+	return nil
+}
+
+func (s Mode) projectionWithStatuses(c context.Context, q tx.Queryer, a identity.ActorContext, at time.Time, r d.Run) (map[string]any, error) {
+	out := r.Projection()
+	if err := s.fillStatuses(c, q, a, at, out); err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 func (s Mode) admitFormation(c context.Context, sc gen.TimedScope, a identity.ActorContext, r d.Run, formation []int64, advanced bool) error {
 	if len(formation) < 1 || len(formation) > 5 {
 		return d.ErrInvalid
 	}
-	rows, err := s.roster(c, sc, a)
+	rows, err := s.roster(c, sc.Tx, a, sc.Operation.DecisionAt())
 	if err != nil {
 		return err
 	}
@@ -69,24 +122,32 @@ func (s Mode) admitFormation(c context.Context, sc gen.TimedScope, a identity.Ac
 	return nil
 }
 func (s Mode) initialize(c context.Context, sc gen.TimedScope, a identity.ActorContext, v view, r *d.Run, reset bool) error {
-	candidates, err := s.Opponents.MarchCandidatesTx(c, sc.Tx, a, sc.Operation.DecisionAt(), int(v.catalog.Policy.CandidateLimit))
+	candidates, err := s.Opponents.MarchCandidatesTx(c, sc.Tx, a, sc.Operation.DecisionAt(), int(v.catalog.Policy.CandidateLimit), false)
 	if err != nil {
 		return err
 	}
+	owned := candidates[:0]
+	for _, candidate := range candidates {
+		if candidate.Player != int64(a.PlayerID) {
+			owned = append(owned, candidate)
+		}
+	}
+	candidates = owned
 	if len(candidates) == 0 {
 		return d.ErrUnavailable
 	}
-	rows, err := s.roster(c, sc, a)
+	rows, err := s.roster(c, sc.Tx, a, sc.Operation.DecisionAt())
 	if err != nil {
 		return err
 	}
+	frozen := frozenTeam{}
 	forces := []int64{}
 	for key := range rows {
 		id, err := strconv.ParseInt(key, 10, 64)
 		if err != nil || id <= 0 {
 			return d.ErrUnavailable
 		}
-		force, err := s.force(c, sc, a, character.HeroRef{PlayerID: a.PlayerID, PartnerID: id}, v.revision)
+		force, err := s.force(c, sc, a, character.HeroRef{PlayerID: a.PlayerID, PartnerID: id}, v.revision, frozen)
 		if err != nil {
 			return err
 		}
@@ -99,10 +160,11 @@ func (s Mode) initialize(c context.Context, sc gen.TimedScope, a identity.ActorC
 		}
 		e.Force = 0
 		for _, row := range e.Heroes {
-			force, err := s.force(c, sc, a, character.HeroRef{PlayerID: identity.PlayerID(e.Player), PartnerID: number(row["source_partner_id"])}, v.revision)
+			force, err := s.force(c, sc, a, character.HeroRef{PlayerID: identity.PlayerID(e.Player), PartnerID: number(row["source_partner_id"])}, v.revision, frozen)
 			if err != nil {
 				return err
 			}
+			row["force"] = force
 			e.Force += force
 		}
 	}
@@ -145,6 +207,9 @@ func (s Mode) initialize(c context.Context, sc gen.TimedScope, a identity.ActorC
 		}
 		for _, hero := range enemy.Heroes {
 			hero["mp"] = v.catalog.Factors("expedition_init_mana")[stage]
+		}
+		if err = s.scaleEnemy(c, sc, a, v, &enemy, target, frozen); err != nil {
+			return fmt.Errorf("scale stage %d: %w", stage+1, err)
 		}
 		enemies = append(enemies, enemy)
 	}

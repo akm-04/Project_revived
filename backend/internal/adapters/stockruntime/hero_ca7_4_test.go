@@ -49,7 +49,11 @@ func TestCA74MID68StockWireAlwaysProjectsAlignedLIVEAndCurrentCrystal(t *testing
 	}}
 	economy := &ca74HeroEconomy{amount: 12345}
 	d := HeroDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: &ca23HeroService{}, LIVE: live, Economy: economy}
-	r := d.Dispatch(context.Background(), heroReq(t, 68, map[string]any{"partner_id": json.Number("7"), "model_id": json.Number("40001074")}))
+	direct := d.Dispatch(context.Background(), heroReq(t, 68, map[string]any{"partner_id": json.Number("7"), "model_id": json.Number("40001074")}))
+	if _, written := direct.Body["economy_"]; written {
+		t.Fatalf("dispatcher assembled economy_: %#v", direct.Body)
+	}
+	r := Decorated{Next: d}.Dispatch(context.Background(), heroReq(t, 68, map[string]any{"partner_id": json.Number("7"), "model_id": json.Number("40001074")}))
 	if r.HTTPStatus != 200 || live.unlockPartner != 7 || live.unlockModel != 40001074 || economy.key != "crystal" {
 		t.Fatalf("response=%+v service=%d/%d economy=%q", r, live.unlockPartner, live.unlockModel, economy.key)
 	}
@@ -67,11 +71,11 @@ func TestCA74MID68StockWireAlwaysProjectsAlignedLIVEAndCurrentCrystal(t *testing
 	}
 }
 
-func TestCA74MID68ProjectionFailureAfterSemanticSuccessReturns503ForFreshConvergenceRetry(t *testing.T) {
+func TestCA74MID68ProjectionFailureAfterSemanticSuccessReturns500(t *testing.T) {
 	live := &ca74LIVEHTTPService{unlockResult: apphero.LIVEUnlockResult{PartnerID: 7, ModelID: 40001074, StateVersion: 2, LIVE: []apphero.LIVEResultState{{ModelID: 40001074, IsShow: true}}}}
 	d := HeroDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: &ca23HeroService{}, LIVE: live, Economy: &ca74HeroEconomy{err: errors.New("projection")}}
 	r := d.Dispatch(context.Background(), heroReq(t, 68, map[string]any{"partner_id": json.Number("7"), "model_id": json.Number("40001074")}))
-	if r.HTTPStatus != 503 || r.Body["error"] != "hero_projection_failed" {
+	if r.HTTPStatus != 500 || r.Body["error_code"] != unprovenRefusalCode {
 		t.Fatalf("response=%+v", r)
 	}
 }
@@ -102,7 +106,7 @@ func TestCA74MIDsRejectInventedGameplayFieldsAndMapSemanticFailure(t *testing.T)
 	live := &ca74LIVEHTTPService{unlockErr: apphero.ErrHeroAppearanceUnavailable}
 	d := HeroDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: &ca23HeroService{}, LIVE: live, Economy: &ca74HeroEconomy{amount: 1}}
 	r := d.Dispatch(context.Background(), heroReq(t, 68, map[string]any{"partner_id": json.Number("7"), "model_id": json.Number("40001074")}))
-	if r.HTTPStatus != 400 || r.Body["error"] != "hero_operation_rejected" {
+	if r.HTTPStatus != 409 || r.Body["error_code"] != unprovenRefusalCode {
 		t.Fatalf("semantic rejection=%+v", r)
 	}
 	extra := d.Dispatch(context.Background(), heroReq(t, 68, map[string]any{"partner_id": json.Number("7"), "model_id": json.Number("40001074"), "item_id": json.Number("50005171")}))

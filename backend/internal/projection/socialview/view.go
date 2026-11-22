@@ -23,7 +23,12 @@ type Common struct {
 }
 type Friend struct {
 	Common
-	IsSent bool `json:"is_sent"`
+	IsSent          bool   `json:"is_sent"`
+	RecallingFriend int64  `json:"recalling_friend"`
+	Region          *int64 `json:"region,omitempty"`
+	// 0 is "no attached notice": a friend row has no social_notices row of its own,
+	// and the client compares this field only on notice rows.
+	NoticeType int16 `json:"notice_type"`
 }
 type SearchPlayer struct {
 	Common
@@ -53,6 +58,8 @@ type PrivateMessage struct {
 }
 type Base struct {
 	ServerTime   int64            `json:"server_time"`
+	Count        int              `json:"count"`
+	List         []Friend         `json:"list"`
 	Blacklist    []Common         `json:"blacklist"`
 	Friends      []Friend         `json:"friend_list"`
 	Notices      []Notice         `json:"notice_list"`
@@ -78,17 +85,40 @@ func common(p Player) Common {
 	return v
 }
 func MapBase(r Result) Base {
-	v := Base{ServerTime: r.ObservedAt.Unix(), SendCount: r.SendCount, ReceiveCount: r.ReceiveCount, Blacklist: []Common{}, Friends: []Friend{}, Notices: []Notice{}, Requests: []Request{}, Offline: []PrivateMessage{}, Doing: []any{}, Done: []any{}, Got: []any{}, Awarded: []any{}}
+	v := Base{ServerTime: r.ObservedAt.Unix(), SendCount: r.SendCount, ReceiveCount: r.ReceiveCount, List: []Friend{}, Blacklist: []Common{}, Friends: []Friend{}, Notices: []Notice{}, Requests: []Request{}, Offline: []PrivateMessage{}, Doing: []any{}, Done: []any{}, Got: []any{}, Awarded: []any{}}
 	for _, p := range r.Blocks {
 		v.Blacklist = append(v.Blacklist, common(p))
 	}
 	for _, p := range r.Friends {
-		v.Friends = append(v.Friends, Friend{Common: common(p), IsSent: p.IsSent})
+		recalling := int64(0)
+		if r.Recalling[int64(p.Minimal.PlayerID)] {
+			recalling = 1
+		}
+		v.Friends = append(v.Friends, Friend{Common: common(p), IsSent: p.IsSent, RecallingFriend: recalling})
+	}
+	v.List = v.Friends
+	for _, row := range r.RecallDoing {
+		v.Doing = append(v.Doing, row)
+	}
+	for _, row := range r.RecallDone {
+		v.Done = append(v.Done, row)
+	}
+	for _, identifier := range r.RecallGot {
+		v.Got = append(v.Got, identifier)
+	}
+	for _, identifier := range r.RecallAwarded {
+		v.Awarded = append(v.Awarded, identifier)
 	}
 	for _, p := range r.Requests {
 		v.Requests = append(v.Requests, Request{Common: common(p.Player), Message: p.Message, At: p.At.Unix()})
 	}
 	for _, p := range r.Notices {
+		if p.Type == 10 && !r.ShowGuildInviteNotices {
+			// PRIVATE_POLICY: bug #76 - the stock guild_invite_item.csb binds
+			// agree_text/refuse_text as Sprites, so a type-10 row crashes Social >
+			// Notice; keep it stored but unlisted until the OTA client patch.
+			continue
+		}
 		row := Notice{ID: int64(p.ID), Type: p.Type, At: p.At.Unix(), Player: common(p.Player)}
 		switch p.Type {
 		case 6:

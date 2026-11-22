@@ -1,0 +1,50 @@
+{
+ "background": [],
+ "content": [
+  "content_dorm_input_catalogs",
+  "content_stat_input_catalogs",
+  "content_stat_rule_catalogs"
+ ],
+ "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [],
+  "row_lock_methods": {},
+  "row_locks": [],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [],
+ "name": "publicstats",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/contentstore"
+ ],
+ "tables": {
+  "owned": [],
+  "read": [
+   "content_dorm_input_catalogs",
+   "content_stat_input_catalogs",
+   "content_stat_rule_catalogs",
+   "gxb_content_revisions",
+   "player_pets"
+  ],
+  "written": []
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [],
+  "unit": [
+   "service_test.go"
+  ]
+ }
+}

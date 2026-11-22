@@ -3,6 +3,7 @@ package stockruntime
 import (
 	"context"
 	"errors"
+	"net/http"
 	"path/filepath"
 	"testing"
 	"time"
@@ -76,7 +77,7 @@ func TestDiscoveryBindsRoomToCanonicalActor(t *testing.T) {
 		t.Fatalf("%+v", r)
 	}
 	r = d.Dispatch(context.Background(), env(192, int64(2), now))
-	if r.HTTPStatus != 403 {
+	if r.HTTPStatus != http.StatusConflict || r.Body["error_code"] != unprovenRefusalCode {
 		t.Fatalf("forged room status=%d body=%v", r.HTTPStatus, r.Body)
 	}
 	e := protocolEvidence(tracker)
@@ -105,7 +106,7 @@ func TestLobbyFacadeRequiresCanonicalRegionAndRecordsExplicit(t *testing.T) {
 	}
 	bad := env(2784, nil, now)
 	bad.Envelope.Claims.Region = 2
-	if got := d.Dispatch(context.Background(), bad); got.HTTPStatus != 403 {
+	if got := d.Dispatch(context.Background(), bad); got.HTTPStatus != http.StatusConflict || got.Body["error_code"] != unprovenRefusalCode {
 		t.Fatalf("%+v", got)
 	}
 	e := protocolEvidence(tracker)
@@ -199,13 +200,13 @@ func TestBootstrapDispatcherMID1EmptyLogURLIsHonestDisabledDefault(t *testing.T)
 	}
 }
 
-func TestBootstrapDispatcherPreserves20018OnlyForCapacity(t *testing.T) {
+func TestBootstrapDispatcherReturns20018OnlyForCapacity(t *testing.T) {
 	now := time.Unix(501, 0).UTC()
 	r := env(1, nil, now)
 	r.Envelope.Operation = operation.Context{StartedAt: now}
 	r.Envelope.Params = map[string]any{"sid": "s", "login_token": "l", "region": int64(1)}
 	got := (BootstrapDispatcher{Bootstrap: fakeBootstrap{err: logicalserver.ErrServerFull}}).Dispatch(context.Background(), r)
-	if got.HTTPStatus != 200 || got.Body["error_code"] != int64(20018) {
+	if got.HTTPStatus != http.StatusConflict || got.Body["error_code"] != int64(20018) || got.Body["error_msg"] != "" {
 		t.Fatalf("%+v", got)
 	}
 }
@@ -238,7 +239,7 @@ func TestPreloginDispatcherStockShapes(t *testing.T) {
 
 func TestPreloginCenterRequiresPublicEngineURL(t *testing.T) {
 	got := (PreloginDispatcher{}).Dispatch(context.Background(), httpedge.DispatchRequest{Envelope: wire.RequestEnvelope{MID: 20480}})
-	if got.HTTPStatus != 503 {
+	if got.HTTPStatus != http.StatusInternalServerError || got.Body["error_code"] != unprovenRefusalCode {
 		t.Fatalf("got=%+v", got)
 	}
 }

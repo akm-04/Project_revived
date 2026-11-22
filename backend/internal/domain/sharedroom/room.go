@@ -20,17 +20,47 @@ const (
 	// MaxSeats matches the combat member limit; raise both together.
 	MaxSeats        = 8
 	MaxFamilyLength = 64
+	// ChatHistoryLimit bounds the chat ring a family keeps in its room payload
+	// for the realtime pusher; older lines are already delivered or lost.
+	ChatHistoryLimit = 24
 )
 
+// ChatMessage is one delivered room-chat line. Message is the canonical
+// CHAT_TO_FRIEND body, including selectType so the recipient's window accepts it.
+type ChatMessage struct {
+	Serial     int64   `json:"serial"`
+	Sender     int64   `json:"sender"`
+	Recipients []int64 `json:"recipients"`
+	Message    string  `json:"message"`
+	At         int64   `json:"at"`
+}
+
+// ChatRing is the family payload's bounded room-chat history: AddChat stamps
+// the next serial and drops the oldest line past the ring limit.
+type ChatRing struct {
+	ChatSerial int64         `json:"chat_serial,omitempty"`
+	Chats      []ChatMessage `json:"chats,omitempty"`
+}
+
+func (r *ChatRing) AddChat(message ChatMessage) {
+	r.ChatSerial++
+	message.Serial = r.ChatSerial
+	r.Chats = append(r.Chats, message)
+	if len(r.Chats) > ChatHistoryLimit {
+		r.Chats = r.Chats[len(r.Chats)-ChatHistoryLimit:]
+	}
+}
+
 var (
-	ErrInvalid   = errors.New("shared room: invalid room")
-	ErrClosed    = errors.New("shared room: room is closed")
-	ErrExpired   = errors.New("shared room: room lease expired")
-	ErrFull      = errors.New("shared room: room is full")
-	ErrKicked    = errors.New("shared room: player was kicked from this room")
-	ErrNotOwner  = errors.New("shared room: actor is not the owner")
-	ErrNotSeated = errors.New("shared room: player is not seated")
-	ErrNotFound  = errors.New("shared room: room not found")
+	ErrInvalid       = errors.New("shared room: invalid room")
+	ErrClosed        = errors.New("shared room: room is closed")
+	ErrExpired       = errors.New("shared room: room lease expired")
+	ErrFull          = errors.New("shared room: room is full")
+	ErrKicked        = errors.New("shared room: player was kicked from this room")
+	ErrNotOwner      = errors.New("shared room: actor is not the owner")
+	ErrNotSeated     = errors.New("shared room: player is not seated")
+	ErrNotFound      = errors.New("shared room: room not found")
+	ErrJoinThrottled = errors.New("shared room: joined this room too recently")
 )
 
 type Status string
@@ -44,13 +74,25 @@ type SeatStage string
 
 const (
 	SeatSeated SeatStage = "SEATED"
-	SeatLeft   SeatStage = "LEFT"
+	// SeatLeft is a player who left voluntarily; no removal frame is sent.
+	SeatLeft SeatStage = "LEFT"
+	// SeatKicked is a player removed by the owner; the removal frame is sent.
 	SeatKicked SeatStage = "KICKED"
+	// SeatClosed is a seat still occupied when the room ended (owner left, the
+	// last member left, or the lease expired); the removal frame is sent.
+	SeatClosed SeatStage = "CLOSED"
 )
 
 // KickCooldown is how long a kicked player stays out of that room. PRIVATE_POLICY:
 // the user recalls 2-3 minutes on the original server.
 const KickCooldown = 3 * time.Minute
+
+// JoinThrottle is how long a player waits before taking the same room's seat
+// again. The stock client blocks a second join of one room for 30 s
+// (Illusion.lua:114-138, AdventureEvent.lua:433-455, "Can't join this room in
+// 30s!"), and C3 requires the server to refuse it too. A seated player's
+// repeated join stays idempotent, so a lost-response replay still converges.
+const JoinThrottle = 30 * time.Second
 
 // Seat is one ordered slot of a room. A left or kicked player keeps their row.
 // On a kicked seat JoinedAt holds the kick time.
@@ -187,6 +229,10 @@ func (r *Room) Join(player identity.PlayerID, at time.Time) error {
 			if at.Before(r.Seats[index].JoinedAt.Add(KickCooldown)) {
 				return ErrKicked
 			}
+		case SeatLeft:
+			if at.Before(r.Seats[index].JoinedAt.Add(JoinThrottle)) {
+				return ErrJoinThrottled
+			}
 		}
 		if r.activeCount() >= int(r.Capacity) {
 			return ErrFull
@@ -220,7 +266,7 @@ func (r *Room) Leave(player identity.PlayerID, at time.Time) error {
 		return nil
 	}
 	if !at.Before(r.ExpiresAt) {
-		r.close(at)
+		r.close(at, player)
 		return nil
 	}
 	index := r.seatIndex(player)
@@ -228,12 +274,12 @@ func (r *Room) Leave(player identity.PlayerID, at time.Time) error {
 		return nil
 	}
 	if player == r.Owner {
-		r.close(at)
+		r.close(at, player)
 		return nil
 	}
 	r.Seats[index].Stage, r.Seats[index].Ready = SeatLeft, false
 	if r.activeCount() == 0 {
-		r.close(at)
+		r.close(at, player)
 		return nil
 	}
 	r.touch(at)
@@ -308,7 +354,7 @@ func (r *Room) Close(at time.Time) bool {
 	if r.Status != StatusOpen {
 		return false
 	}
-	r.close(at)
+	r.close(at, 0)
 	return true
 }
 
@@ -317,7 +363,7 @@ func (r *Room) Expire(at time.Time) bool {
 	if r.Status != StatusOpen || at.Before(r.ExpiresAt) {
 		return false
 	}
-	r.close(at)
+	r.close(at, 0)
 	return true
 }
 
@@ -331,11 +377,17 @@ func (r *Room) enter(at time.Time) error {
 	return nil
 }
 
-func (r *Room) close(at time.Time) {
+func (r *Room) close(at time.Time, voluntary identity.PlayerID) {
 	for index := range r.Seats {
-		if r.Seats[index].Stage == SeatSeated {
-			r.Seats[index].Stage, r.Seats[index].Ready = SeatLeft, false
+		if r.Seats[index].Stage != SeatSeated {
+			continue
 		}
+		r.Seats[index].Ready = false
+		if r.Seats[index].Player == voluntary {
+			r.Seats[index].Stage = SeatLeft
+			continue
+		}
+		r.Seats[index].Stage = SeatClosed
 	}
 	r.Status = StatusClosed
 	stamp := at.UTC()
@@ -398,7 +450,7 @@ func validFamily(family string) bool {
 
 func validStage(stage SeatStage) bool {
 	switch stage {
-	case SeatSeated, SeatLeft, SeatKicked:
+	case SeatSeated, SeatLeft, SeatKicked, SeatClosed:
 		return true
 	default:
 		return false

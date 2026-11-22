@@ -28,7 +28,7 @@ func (fixture *taskWireFixture) StartTask(_ context.Context, _ identity.ActorCon
 	fixture.command = command
 	return application.FightView{Report: []byte(`{"star":1}`), Win: true, Enemy: topFloorRobot}, nil
 }
-func (*taskWireFixture) TaskSchedule(context.Context) ([]domain.TaskModeRotation, error) {
+func (*taskWireFixture) TaskSchedule(context.Context, operation.Context) ([]domain.TaskModeRotation, error) {
 	return []domain.TaskModeRotation{{Mode: 3, StartsAt: time.Unix(100, 0), EndsAt: time.Unix(200, 0)}, {Mode: 4, StartsAt: time.Unix(200, 0), EndsAt: time.Unix(300, 0)}}, nil
 }
 func TestI97ATaskWireAndValidation(t *testing.T) {
@@ -47,9 +47,12 @@ func TestI97ATaskWireAndValidation(t *testing.T) {
 		t.Fatal(load)
 	}
 	number := func(value string) json.Number { return json.Number(value) }
-	call(284, map[string]any{"heroIDs": []any{number("3")}, "leader_id": number("3")})
-	if fixture.defense.Leader != 3 || len(fixture.defense.Heroes) != 1 {
+	saved := call(284, map[string]any{"heroIDs": []any{number("3")}, "pet_id": number("9"), "leader_id": number("3")})
+	if fixture.defense.Leader != 3 || fixture.defense.Pet != 9 || len(fixture.defense.Heroes) != 1 {
 		t.Fatal(fixture.defense)
+	}
+	if saved["pet_id"] != int64(9) {
+		t.Fatal("MID 284 must echo the saved pet id (Arena.lua:248 mPetId)", saved)
 	}
 	battle := call(286, map[string]any{"formation": "3|4", "enemy_id": number("7"), "leader_id": number("3"), "campaign_type": number("57")})
 	if fixture.command.Leader != 3 || len(fixture.command.Formation) != 2 || battle["award_crystal"] != int64(0) {
@@ -105,7 +108,36 @@ func TestI97ATaskRankingSubtype(t *testing.T) {
 
 func TestI97ATaskRefusalDoesNotInvokeStockSuccessCallback(t *testing.T) {
 	result := failTopFloorTask(domain.ErrRefused)
-	if result.HTTPStatus == 200 {
-		t.Fatal("stock client ignores error_code before success callback", result)
+	if result.HTTPStatus != 409 || result.Body["error_code"] != topFloorTaskNotOpen {
+		t.Fatalf("qualified-player refusal must be the stock not-open toast: %+v", result)
+	}
+}
+
+// invalidTaskWireFixture returns the row-level ErrInvalid the native defense
+// test proves, so the registered task MIDs answer it without a 200 body.
+type invalidTaskWireFixture struct{ taskWireFixture }
+
+func (invalidTaskWireFixture) LoadTask(context.Context, identity.ActorContext, operation.Context, bool) (application.TaskArenaView, error) {
+	return application.TaskArenaView{}, domain.ErrInvalid
+}
+
+func (invalidTaskWireFixture) TaskFormation(context.Context, identity.ActorContext, int64) (domain.Display, error) {
+	return domain.Display{}, domain.ErrInvalid
+}
+
+func TestI9_10TaskInvalidDefenseRefusesMIDs(t *testing.T) {
+	dispatcher := TopFloorTaskDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: &invalidTaskWireFixture{}}
+	cases := []struct {
+		mid    uint16
+		params map[string]any
+	}{
+		{282, map[string]any{}},
+		{295, map[string]any{"other_player_id": json.Number("7")}},
+	}
+	for _, testCase := range cases {
+		result := dispatcher.Dispatch(context.Background(), heroReq(t, testCase.mid, testCase.params))
+		if result.HTTPStatus != 400 || result.Body["error"] != "invalid_top_floor_task_parameter" {
+			t.Fatalf("MID %d invalid defense refusal %+v", testCase.mid, result)
+		}
 	}
 }

@@ -2,12 +2,14 @@ package adventure
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
 
 	cb "gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
+	"gxb.local/backend/v2/internal/application/i5"
 	sr "gxb.local/backend/v2/internal/application/sharedroom"
 	"gxb.local/backend/v2/internal/application/socialinbox"
 	d "gxb.local/backend/v2/internal/domain/adventure"
@@ -18,7 +20,25 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-const defenseCampaignType = 62
+const (
+	defenseCampaignType = 62
+
+	// defenseGiftTitle, defenseGiftBody and defenseGiftSender are the stock
+	// translation rows ADVENTURE_MONSTER_REWARD_* the defeaters' mail uses.
+	defenseGiftTitle  = "Guard Campus Rewards"
+	defenseGiftBody   = "Congrats on your success in guarding the campus against the invasion of the rogues. Thank you very much and present the following rewards to you."
+	defenseGiftSender = "Student union: Smartie"
+
+	// defenseBusyStarted is the busy type StartDefense writes (PrepareDefense
+	// writes type 1).
+	defenseBusyStarted = 2
+	// defenseExpiredKind and defenseExpiredReceiptPrefix close a started
+	// position whose RESULT deadline passed, so the lock cannot outlive it.
+	defenseExpiredKind          = "ADVENTURE_DEFENSE_EXPIRED"
+	defenseExpiredReceiptPrefix = "adventure-defense-expired:"
+
+	defenseMailSourceKind = "ADVENTURE_DEFENSE"
+)
 
 var defenseSummaryPolicy = cd.SummaryPolicy{ID: "I9_ADVENTURE_DEFENSE_SUMMARY_V1", Version: 1, MaxStar: d.DefenseMaxStar, WinFromStar: true, MaxDamage: d.DefenseDamageCap}
 
@@ -60,6 +80,10 @@ func (s Mode) DefenseInfo(c context.Context, a identity.ActorContext, op operati
 }
 
 func (s Mode) adventureCatalog(c context.Context, q tx.Queryer, op operation.Context) (d.Catalog, error) {
+	op, err := s.pin(c, op)
+	if err != nil {
+		return d.Catalog{}, err
+	}
 	revision, _ := op.Policies.Get("content")
 	return s.Content.AdventureCatalogTx(c, q, revision)
 }
@@ -103,16 +127,15 @@ func (s Mode) ensureDefenseRoom(c context.Context, a identity.ActorContext, cata
 // room_info is the member list, the position and kill arrays are siblings, and
 // challenge_times is the viewer's tries array indexed by position.
 func (s Mode) defenseDetail(c context.Context, q tx.Queryer, room sharedroom.Room, state d.RoomState, viewer identity.PlayerID) (map[string]any, error) {
-	ids, infos, err := s.roomMembers(c, q, room)
+	ids, infos, err := s.roomMembers(c, q, room, nil)
 	if err != nil {
 		return nil, err
 	}
 	positions := make([]any, d.DefenseMonsterCount)
-	monsters := make([]any, d.DefenseMonsterCount)
+	monsters := monsterStatuses(state)
 	for position := 1; position <= d.DefenseMonsterCount; position++ {
 		busy := state.Busy[position-1]
 		positions[position-1] = map[string]any{"player_id": busy.Player, "busy_type": busy.Type}
-		monsters[position-1] = state.Monsters[position-1].Killer
 	}
 	tries := state.TriesOf(int64(viewer))
 	challenges := make([]any, len(tries))
@@ -126,6 +149,16 @@ func (s Mode) defenseDetail(c context.Context, q tx.Queryer, room sharedroom.Roo
 		},
 		"pos_statuses": positions, "monster_statuses": monsters, "challenge_times": challenges,
 	}, nil
+}
+
+// monsterStatuses is the killer name per position; the same shared room state
+// backs both room types, and an unsolved position keeps the empty string.
+func monsterStatuses(state d.RoomState) []any {
+	monsters := make([]any, d.DefenseMonsterCount)
+	for position := 1; position <= d.DefenseMonsterCount; position++ {
+		monsters[position-1] = state.Monsters[position-1].Killer
+	}
+	return monsters
 }
 
 // EnterDefense answers 2425 with the server-side band and capacity.
@@ -154,7 +187,7 @@ func (s Mode) EnterDefense(c context.Context, a identity.ActorContext, roomID in
 	if len(room.Members()) >= int(room.Capacity) && !seated(room, a.PlayerID) {
 		return nil, fmt.Errorf("%w: room full", d.ErrRefused)
 	}
-	joined, err := s.Rooms.Join(c, a, DefenseFamily(), roomID, op)
+	joined, err := s.Rooms.Join(c, a, sr.JoinRequest{Family: DefenseFamily(), RoomID: roomID}, op)
 	if err != nil {
 		return nil, err
 	}
@@ -177,7 +210,13 @@ func (s Mode) PrepareDefense(c context.Context, a identity.ActorContext, positio
 				return fmt.Errorf("%w: monster already killed", d.ErrRefused)
 			}
 			if state.Busy[position-1].Type != 0 {
-				return fmt.Errorf("%w: position is busy", d.ErrRefused)
+				released, err := s.releaseExpiredDefenseHold(c, sc, *room, position, state)
+				if err != nil {
+					return err
+				}
+				if !released && state.Busy[position-1].Type != 0 {
+					return fmt.Errorf("%w: position is busy", d.ErrRefused)
+				}
 			}
 			progress := d.DefenseProgress{}
 			copy(progress.Tries[:], state.TriesOf(int64(a.PlayerID)))
@@ -198,12 +237,53 @@ func (s Mode) PrepareDefense(c context.Context, a identity.ActorContext, positio
 	return map[string]any{}, nil
 }
 
+// releaseExpiredDefenseHold retires a started position whose frozen combat
+// attempt can no longer settle (the RESULT deadline passed, or the attempt is
+// gone or already terminal). Without it a battle whose RESULT never arrives
+// holds the position forever; the next PrepareDefense of that position frees it.
+func (s Mode) releaseExpiredDefenseHold(c context.Context, sc gen.TimedScope, room sharedroom.Room, position int64, state *d.RoomState) (bool, error) {
+	if state.Busy[position-1].Type != defenseBusyStarted {
+		return false, nil
+	}
+	at := sc.Operation.DecisionAt()
+	current, found, err := s.Combat.CurrentAttemptTx(c, sc.Tx, defenseLocator(room, position))
+	if err != nil {
+		return false, err
+	}
+	if !defenseHoldExpired(found, current.Attempt, at) {
+		return false, nil
+	}
+	if found && current.Attempt.State == cd.Staged {
+		_, err = s.Combat.CloseTx(c, sc.Tx, cb.TerminalRequest{Locator: defenseLocator(room, position),
+			GenerationRef: current.Attempt.GenerationRef, TerminalKind: defenseExpiredKind,
+			SemanticReceiptID: defenseExpiredReceiptPrefix + current.Attempt.ID.String(), At: at})
+		if err != nil && !errors.Is(err, cb.ErrAttemptNotFound) && !errors.Is(err, cd.ErrStale) {
+			return false, err
+		}
+	}
+	holder := state.Busy[position-1].Player
+	state.Busy[position-1] = d.BusyState{}
+	delete(state.Attempts, strconv.Itoa(int(position)))
+	state.AddPush(8, holder, false, map[string]any{"room_id": room.ID, "monster_pos": position})
+	return true, nil
+}
+
+// defenseHoldExpired reports whether a started hold's attempt can no longer
+// settle: absent, already terminal, or at/after the deadline START froze.
+func defenseHoldExpired(found bool, attempt cd.Attempt, at time.Time) bool {
+	return !found || attempt.State != cd.Staged || !at.Before(attempt.ResultDeadline)
+}
+
 // StartDefense answers 2431: a client-summary attempt is frozen for one monster.
 func (s Mode) StartDefense(c context.Context, a identity.ActorContext, request FightRequest, position int64, op operation.Context) (map[string]any, error) {
 	if err := validateFormation(request.Formation); err != nil || position < 1 || position > d.DefenseMonsterCount {
 		return nil, d.ErrInvalid
 	}
-	_, err := s.Rooms.Update(c, a, sr.UpdateRequest{Family: DefenseFamily(), Before: s.admissionBefore(a, op), Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
+	op, err := s.pin(c, op)
+	if err != nil {
+		return nil, err
+	}
+	_, err = s.Rooms.Update(c, a, sr.UpdateRequest{Family: DefenseFamily(), Before: s.admissionBefore(a, op), Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
 		at := sc.Operation.DecisionAt()
 		state, err := s.roomState(*room)
 		if err != nil {
@@ -231,10 +311,10 @@ func (s Mode) StartDefense(c context.Context, a identity.ActorContext, request F
 		if err != nil {
 			return err
 		}
-		started, err := s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Actor: a, Locator: defenseLocator(*room, position),
-			GenerationRef: defenseGeneration(*room, position), StartFingerprint: startFingerprint(a, sc.Operation.Operation().ID.String(), request.Formation),
+		started, err := s.startAttempt(c, sc, scope, cb.StartRequest{Mode: cd.ModeAdventureDefense, Actor: a, Locator: defenseLocator(*room, position),
+			GenerationRef: defenseGeneration(*room, position), StartFingerprint: startFingerprint(a, request.Formation),
 			ResultDeadline: at.Add(attemptLimit), TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayOK},
-			Battle: cb.BattleRequest{CampaignType: defenseCampaignType, BattleID: campaign.BattleIDs[position-1], TeamA: ownedTeam(a.PlayerID, request.Formation), Formation: request.Formation, WavesB: waves}})
+			Battle: cb.BattleRequest{CampaignType: defenseCampaignType, RentalMode: d.DefenseRentalMode, BattleID: campaign.BattleIDs[position-1], TeamA: ownedTeam(a.PlayerID, request.Formation), Formation: request.Formation, WavesB: waves}})
 		if err != nil {
 			return err
 		}
@@ -261,6 +341,10 @@ func (s Mode) DefenseResult(c context.Context, a identity.ActorContext, request 
 	}
 	if err := validateFormation(request.Formation); err != nil {
 		return Response{}, d.ErrInvalid
+	}
+	op, err := s.pin(c, op)
+	if err != nil {
+		return Response{}, err
 	}
 	var response Response
 	room, err := s.Rooms.Update(c, a, sr.UpdateRequest{Family: DefenseFamily(), Before: s.admissionBefore(a, op), Apply: func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
@@ -300,11 +384,19 @@ func (s Mode) DefenseResult(c context.Context, a identity.ActorContext, request 
 				return d.ErrRefused
 			}
 			killer = profile.Name
-			state.Monsters[position-1] = d.MonsterState{Killer: killer, Solved: true}
+			state.Monsters[position-1] = d.MonsterState{Killer: killer, KillerPlayer: a.PlayerID, Solved: true}
+		}
+		if state.DefenseCompleted() {
+			if err = s.deliverDefenseGift(c, sc, *room, state, at); err != nil {
+				return err
+			}
 		}
 		state.AddPush(7, int64(a.PlayerID), true, map[string]any{"room_id": room.ID, "monster_pos": position,
 			"pos_status": map[string]any{"player_id": int64(0), "busy_type": int64(0)}, "monster_status": monsterKillers(state)})
-		return s.restoreRoom(sc, room, state)
+		if err = s.restoreRoom(sc, room, state); err != nil {
+			return err
+		}
+		return s.BattleObserver.ObserveBattleTx(c, sc.Tx, a.PlayerID, request.Formation, at)
 	}}, op)
 	if err != nil {
 		return Response{}, err
@@ -320,6 +412,33 @@ func (s Mode) DefenseResult(c context.Context, a identity.ActorContext, request 
 	body := map[string]any{"favor": map[string]any{}, "exps": []any{}, "tutorCoin": int64(0), "star_crystal": int64(0),
 		"awards": map[string]any{"awards": []any{}}, "room_info": detail["room_info"]}
 	return Response{Body: body, Duplicate: response.Duplicate}, nil
+}
+
+// deliverDefenseGift mails the room's band gift to each distinct defeater once,
+// in the transaction that solved the room's last position. The (recipient,
+// source kind, source key) mail key makes a repeated pass deliver nothing.
+func (s Mode) deliverDefenseGift(c context.Context, sc gen.TimedScope, room sharedroom.Room, state d.RoomState, at time.Time) error {
+	catalog, _, err := s.readCatalogs(c, sc.Tx, sc.Operation.Operation())
+	if err != nil {
+		return err
+	}
+	campaign, ok := catalog.CampaignByID(state.CampaignID)
+	if !ok {
+		return d.ErrUnavailable
+	}
+	_, lines := giftAwards(catalog, campaign.Gift)
+	if len(lines) == 0 {
+		return d.ErrUnavailable
+	}
+	sourceKey := strconv.FormatInt(room.ID, 10)
+	for _, recipient := range state.DefenseRecipients() {
+		if _, _, err = s.Mail.DeliverTx(c, sc.Tx, i5.SettlementMailRequest{Recipient: recipient, SourceKind: defenseMailSourceKind,
+			SourceKey: sourceKey, Title: defenseGiftTitle, Sender: defenseGiftSender, Body: defenseGiftBody,
+			PolicyVersion: d.PolicyID, Lines: lines, At: at}); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func monsterKillers(state d.RoomState) []any {
@@ -375,7 +494,7 @@ func (s Mode) KickDefense(c context.Context, a identity.ActorContext, target ide
 	if err := s.requireAdmission(c, a, op); err != nil {
 		return nil, err
 	}
-	if _, err := s.Rooms.Kick(c, a, DefenseFamily(), target, op); err != nil {
+	if _, err := s.Rooms.Kick(c, a, DefenseFamily(), target, op, s.clearDefenseBusy(int64(target))); err != nil {
 		return nil, err
 	}
 	return map[string]any{}, nil
@@ -385,10 +504,39 @@ func (s Mode) ExitDefense(c context.Context, a identity.ActorContext, op operati
 	if err := s.requireAdmission(c, a, op); err != nil {
 		return nil, err
 	}
-	if _, err := s.Rooms.Leave(c, a, DefenseFamily(), op); err != nil {
+	if _, err := s.Rooms.Leave(c, a, DefenseFamily(), op, s.clearDefenseBusy(int64(a.PlayerID))); err != nil {
 		return nil, err
 	}
 	return map[string]any{}, nil
+}
+
+// clearDefenseBusy retires every monster position the departing player holds
+// in the same room update that removes the seat, and appends the function 8
+// free push QuitDefense sends.
+func (s Mode) clearDefenseBusy(player int64) sr.RoomMutator {
+	return func(c context.Context, sc gen.TimedScope, room *sharedroom.Room) error {
+		state, err := s.roomState(*room)
+		if err != nil {
+			return err
+		}
+		if !freeDefenseBusy(&state, player, room.ID) {
+			return nil
+		}
+		return s.restoreRoom(sc, room, state)
+	}
+}
+
+func freeDefenseBusy(state *d.RoomState, player, roomID int64) bool {
+	freed := false
+	for index := range state.Busy {
+		if state.Busy[index].Player != player {
+			continue
+		}
+		state.Busy[index] = d.BusyState{}
+		state.AddPush(8, player, false, map[string]any{"room_id": roomID, "monster_pos": int64(index + 1)})
+		freed = true
+	}
+	return freed
 }
 
 func (s Mode) QuitDefense(c context.Context, a identity.ActorContext, position int64, op operation.Context) (map[string]any, error) {

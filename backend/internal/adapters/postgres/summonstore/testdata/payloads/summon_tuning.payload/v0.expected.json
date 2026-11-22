@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "small_super_chance_per_10000": 0,
+  "medium_super_chance_per_10000": 0,
+  "medium_featured_chance_per_10000": 0,
+  "medium_featured_pity_slots": 0,
+  "medium_extension_weight": 0,
+  "medium_featured_cohort": null,
+  "medium_extension_cohort": null,
+  "sx_cohort": null,
+  "partner_id": 50001002,
+  "pet_id": 0,
+  "juice_per_pull": null,
+  "main_ids": null,
+  "second_ids": null,
+  "sx_class_weights": null,
+  "sx_hotspot_share_per_10000": 0,
+  "sx_hotspot_pity": 0
+}

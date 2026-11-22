@@ -5,16 +5,23 @@ VALUES ($1,1,0,1,$2,$2)
 ON CONFLICT (player_id) DO NOTHING;
 
 -- name: ReadHeroRoot :one
-SELECT player_id,next_partner_id,sort_type,state_version,created_at,updated_at
+SELECT player_id,next_partner_id,sort_type,backpack_sort_type,state_version,created_at,updated_at
 FROM player_hero_roots WHERE player_id=$1;
 
 -- name: LockHeroRoot :one
-SELECT player_id,next_partner_id,sort_type,state_version,created_at,updated_at
+SELECT player_id,next_partner_id,sort_type,backpack_sort_type,state_version,created_at,updated_at
 FROM player_hero_roots WHERE player_id=$1 FOR UPDATE;
 
 -- name: SaveHeroSortType :execrows
 UPDATE player_hero_roots SET sort_type=$2,state_version=state_version+1,updated_at=$3
 WHERE player_id=$1 AND state_version=$4;
+
+-- name: SaveBackpackSortType :execrows
+UPDATE player_hero_roots SET backpack_sort_type=$2,state_version=state_version+1,updated_at=$3
+WHERE player_id=$1 AND state_version=$4;
+
+-- name: ReadBackpackSortType :one
+SELECT COALESCE((SELECT backpack_sort_type FROM player_hero_roots WHERE player_id=$1),0);
 
 -- name: SaveHeroRootAllocator :execrows
 UPDATE player_hero_roots
@@ -118,4 +125,8 @@ WHERE player_id=$1 AND partner_id=$2 AND state_version=$5;
 
 -- name: SaveHeroSkillChoice :execrows
 UPDATE player_heroes SET raw_skill_id_1=$3,raw_skill_id_2=$4,raw_skill_id_3=$5,raw_skill_id_4=$6,raw_skill_id_5=$7,raw_skill_id_6=$8,state_version=state_version+1,updated_at=$9
+WHERE player_id=$1 AND partner_id=$2 AND state_version=$10;
+
+-- name: SaveHeroSkillLevels :execrows
+UPDATE player_heroes SET raw_skill_1=$3,raw_skill_2=$4,raw_skill_3=$5,raw_skill_4=$6,raw_skill_5=$7,raw_skill_6=$8,state_version=state_version+1,updated_at=$9
 WHERE player_id=$1 AND partner_id=$2 AND state_version=$10;

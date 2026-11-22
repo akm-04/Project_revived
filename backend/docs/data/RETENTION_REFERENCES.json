@@ -1,0 +1,358 @@
+{
+ "authority": "R8 retention reference lists (generated from the PostgreSQL catalog)",
+ "schema_version": 1,
+ "attempt_ids": [
+  {
+   "table": "adventure_attempt_settlements",
+   "column": "attempt_id",
+   "type": "uuid",
+   "foreign_key": true
+  },
+  {
+   "table": "arena_matches",
+   "column": "attempt_id",
+   "type": "uuid",
+   "foreign_key": true
+  },
+  {
+   "table": "combat_attempts",
+   "column": "supersedes_attempt_id",
+   "type": "uuid",
+   "foreign_key": true
+  },
+  {
+   "table": "conquer_school_reports",
+   "column": "attempt_id",
+   "type": "text",
+   "foreign_key": false
+  },
+  {
+   "table": "illusion_attempt_settlements",
+   "column": "attempt_id",
+   "type": "uuid",
+   "foreign_key": true
+  },
+  {
+   "table": "league_matches",
+   "column": "attempt_id",
+   "type": "uuid",
+   "foreign_key": true
+  },
+  {
+   "table": "one_on_one_rounds",
+   "column": "attempt_id",
+   "type": "uuid",
+   "foreign_key": true
+  },
+  {
+   "table": "top_floor_fights",
+   "column": "attempt_id",
+   "type": "uuid",
+   "foreign_key": true
+  },
+  {
+   "table": "top_floor_records",
+   "column": "attempt_id",
+   "type": "uuid",
+   "foreign_key": true
+  },
+  {
+   "table": "top_floor_task_fights",
+   "column": "attempt_id",
+   "type": "uuid",
+   "foreign_key": true
+  },
+  {
+   "table": "top_floor_task_records",
+   "column": "attempt_id",
+   "type": "uuid",
+   "foreign_key": true
+  },
+  {
+   "table": "worldboss_attempt_settlements",
+   "column": "attempt_id",
+   "type": "uuid",
+   "foreign_key": true
+  }
+ ],
+ "receipt_ids": [
+  {
+   "table": "combat_attempts",
+   "column": "semantic_receipt_id",
+   "type": "text",
+   "foreign_key": false
+  },
+  {
+   "table": "combat_member_settlements",
+   "column": "semantic_receipt_id",
+   "type": "text",
+   "foreign_key": false
+  },
+  {
+   "table": "guild_broadcast_recipients",
+   "column": "target_receipt_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "guild_broadcast_sources",
+   "column": "source_receipt_id",
+   "type": "uuid",
+   "foreign_key": true
+  },
+  {
+   "table": "guild_invite_projection_deliveries",
+   "column": "target_receipt_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "guild_invite_projection_markers",
+   "column": "core_receipt_id",
+   "type": "uuid",
+   "foreign_key": true
+  },
+  {
+   "table": "guild_invite_projection_markers",
+   "column": "cursor_receipt_id",
+   "type": "uuid",
+   "foreign_key": true
+  },
+  {
+   "table": "guild_invite_projection_sources",
+   "column": "core_receipt_id",
+   "type": "uuid",
+   "foreign_key": true
+  },
+  {
+   "table": "gxb_operation_receipts",
+   "column": "receipt_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "redeem_redemptions",
+   "column": "grant_receipt_id",
+   "type": "uuid",
+   "foreign_key": true
+  },
+  {
+   "table": "social_gift_claim_operations",
+   "column": "grant_receipt_id",
+   "type": "text",
+   "foreign_key": false
+  },
+  {
+   "table": "social_gift_transfers",
+   "column": "grant_receipt_id",
+   "type": "text",
+   "foreign_key": false
+  },
+  {
+   "table": "social_guild_invite_invalidations",
+   "column": "receipt_id",
+   "type": "uuid",
+   "foreign_key": true
+  },
+  {
+   "table": "social_guild_invite_materializations",
+   "column": "receipt_id",
+   "type": "uuid",
+   "foreign_key": true
+  }
+ ],
+ "operation_ids": [
+  {
+   "table": "achievement_award_claims",
+   "column": "operation_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "friend_dm_projection_receipts",
+   "column": "operation_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "guild_audit_log",
+   "column": "operation_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "guild_invite_send_events",
+   "column": "operation_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "guild_membership_events",
+   "column": "operation_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "personal_dm_delivery",
+   "column": "operation_id",
+   "type": "uuid",
+   "foreign_key": true
+  },
+  {
+   "table": "personal_dm_intents",
+   "column": "operation_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "personal_dm_payloads",
+   "column": "operation_id",
+   "type": "uuid",
+   "foreign_key": true
+  },
+  {
+   "table": "player_book_admissions",
+   "column": "operation_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "player_course_admissions",
+   "column": "operation_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "player_display_admissions",
+   "column": "operation_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "player_dorm_admissions",
+   "column": "operation_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "player_element_admissions",
+   "column": "operation_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "player_gm_questions",
+   "column": "operation_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "player_hero_evolution_admissions",
+   "column": "operation_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "player_hero_practice_candidates",
+   "column": "generation_operation_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "player_inscription_admissions",
+   "column": "operation_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "player_library_admissions",
+   "column": "operation_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "player_login_observations",
+   "column": "source_operation_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "player_pet_practice_candidates",
+   "column": "generation_operation_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "player_profile_comment_operations",
+   "column": "operation_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "player_public_profile_media_current",
+   "column": "operation_id",
+   "type": "uuid",
+   "foreign_key": true
+  },
+  {
+   "table": "player_public_profile_media_history",
+   "column": "operation_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "player_spirit_admissions",
+   "column": "operation_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "ranking_girls_snapshots",
+   "column": "operation_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "social_gift_claim_operations",
+   "column": "operation_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "social_gift_transfers",
+   "column": "claim_operation_id",
+   "type": "uuid",
+   "foreign_key": true
+  },
+  {
+   "table": "social_gift_transfers",
+   "column": "send_operation_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "social_invite_bindings",
+   "column": "operation_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "social_invite_mission_claims",
+   "column": "operation_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "social_recall_awards",
+   "column": "operation_id",
+   "type": "uuid",
+   "foreign_key": false
+  },
+  {
+   "table": "social_recall_tasks",
+   "column": "operation_id",
+   "type": "uuid",
+   "foreign_key": false
+  }
+ ]
+}

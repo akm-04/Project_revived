@@ -38,8 +38,12 @@ func ApplicantList(as []app.Applicant) []any {
 func Self(s app.SelfGuild) map[string]any {
 	return map[string]any{"guild_info": Info(s.GuildInfo), "self_info": map[string]any{"job": int64(s.SelfRole), "join_time": s.JoinTime, "today_huoyue": s.TodayHuoyue, "huoyue_num": s.HuoyueNum}, "member_nums": s.MemberNum}
 }
+
+// EmptySelf is the guildless 612 projection. The full zero-valued Info keeps
+// the reply conforming while guild_id 0 still selects the client's own
+// "not in a guild" branch (SelfGuild.lua:104-135; I9-11 T34 S20).
 func EmptySelf() map[string]any {
-	return map[string]any{"guild_info": map[string]any{"guild_id": int64(0)}, "self_info": map[string]any{"job": int64(0), "join_time": int64(0), "today_huoyue": int64(0), "huoyue_num": int64(0)}, "member_nums": int64(0)}
+	return map[string]any{"guild_info": Info(app.GuildInfo{}), "self_info": map[string]any{"job": int64(0), "join_time": int64(0), "today_huoyue": int64(0), "huoyue_num": int64(0)}, "member_nums": int64(0)}
 }
 
 func Roster(info app.GuildInfo, members []app.Member) map[string]any {
@@ -58,11 +62,8 @@ func Other(s app.SelfGuild) map[string]any {
 
 func Detail2565(g app.GuildInfo) map[string]any {
 	info := Info(g)
-	// I6C does not own Guild rank position. Stock GuildDetailWindow requires a
-	// numeric field, so zero stays an explicit presentation sentinel until a
-	// later provider qualifies it.
 	info["three_huoyue"] = g.ThreeHuoyue
-	info["guild_rank"] = int64(0)
+	info["guild_rank"] = g.GuildRank
 	return map[string]any{"guild_info": info}
 }
 

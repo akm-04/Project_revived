@@ -18,7 +18,8 @@ func TestFrozenMID1DetailComplete(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(d) != 33 {
+	// MID 2501 is owned by the herorecommend MID1 contributor, not this baseline.
+	if len(d) != 32 {
 		t.Fatalf("detail=%d", len(d))
 	}
 	for _, mid := range EmbeddedMID1Records {
@@ -38,6 +39,35 @@ func fmtMID(mid uint16) string { // avoid protocol dependency in projection
 	}
 	return string(b)
 }
+func TestExplicitServerTimeSync(t *testing.T) {
+	v := view(t)
+	body, ok := Explicit(3, v)
+	if !ok {
+		t.Fatal("MID 3 must be an explicit lobby facade")
+	}
+	record, ok := body.(map[string]any)
+	if !ok {
+		t.Fatalf("MID 3 body = %#v", body)
+	}
+	if record["server_time"] != v.Now.Unix() {
+		t.Fatalf("server_time = %#v, want %d", record["server_time"], v.Now.Unix())
+	}
+	if len(record) != 1 {
+		t.Fatalf("MID 3 body = %#v, want only server_time", record)
+	}
+}
+
+func TestFrozenMessagePushesIsAnArray(t *testing.T) {
+	d, err := BuildMID1Detail(view(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	pushes, ok := d["17"].(map[string]any)["message_pushes"].([]any)
+	if !ok || pushes == nil || len(pushes) != 0 {
+		t.Fatalf("message_pushes = %#v, want a non-nil empty array", d["17"].(map[string]any)["message_pushes"])
+	}
+}
+
 func TestCriticalWaveSShapes(t *testing.T) {
 	v := view(t)
 	d, _ := BuildMID1Detail(v)

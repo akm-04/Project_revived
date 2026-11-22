@@ -31,7 +31,7 @@ func (dispatcher FriendFightDispatcher) Dispatch(requestContext context.Context,
 		return *failure
 	}
 	if dispatcher.Service == nil {
-		return failArena(d.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	params, operationContext := request.Envelope.Params, request.Envelope.Operation
 	bad := badHero("invalid_friend_fight_parameter")

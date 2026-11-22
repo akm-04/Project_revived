@@ -1,0 +1,32 @@
+{
+ "name": "i9_10f_mentor",
+ "level": 100,
+ "mentor_fixture": true,
+ "steps": [
+  "wait:5",
+  "lua:_G.vc10f=xyd.ModelManager.get():loadModel(xyd.ModelType.SOCIAL_SYSTEM) _G.vc10f:getClassInfo(function(code,reply) _G.vc10fInfoCode=code _G.vc10fInfo=reply end)",
+  "wait:3",
+  "lua:if vc10fInfoCode~=xyd.error.OK then error('vc10f-info-code-'..tostring(vc10fInfoCode)) end if type(vc10fInfo)~='table' or type(vc10fInfo.base_info)~='table' then error('vc10f-info-shape') end local base=vc10fInfo.base_info if type(base.relations)~='table' or type(base.accept_time)~='table' or type(base.daily_apply_times)~='table' then error('vc10f-base-shape') end if type(base.relations[1])~='table' or base.relations[1].player_id==nil then error('vc10f-seeded-teacher') end vc10f:getFindingList({relation_type=2}, function(code,reply) _G.vc10fFindCode=code _G.vc10fFind=reply end)",
+  "wait:3",
+  "lua:if vc10fFindCode~=xyd.error.OK then error('vc10f-find-code-'..tostring(vc10fFindCode)) end if type(vc10fFind)~='table' or type(vc10fFind.player_list)~='table' or #vc10fFind.player_list<1 then error('vc10f-find-empty') end local card=nil for _,row in ipairs(vc10fFind.player_list) do if type(row)=='table' and row.player_id~=nil and tonumber(row.lev)==20 then card=row break end end if card==nil then error('vc10f-find-card') end _G.vc10fTarget=tonumber(card.player_id) vc10f:ApplyRelation({to_player_id=vc10fTarget, relation_type=2, msg='vc10f apply'}, function(code,reply) _G.vc10fApplyCode=code _G.vc10fApply=reply end)",
+  "wait:3",
+  "lua:if vc10fApplyCode~=xyd.error.OK then error('vc10f-apply-code-'..tostring(vc10fApplyCode)) end if type(vc10fApply)~='table' or type(vc10fApply.base_info)~='table' then error('vc10f-apply-shape') end vc10f:getClassInfo(function(code,reply) _G.vc10fInfoCode=code _G.vc10fInfo=reply end)",
+  "wait:3",
+  "lua:if vc10fInfoCode~=xyd.error.OK then error('vc10f-refresh-code-'..tostring(vc10fInfoCode)) end local applicants={} for _,row in ipairs(vc10f.classApplyList or {}) do if tonumber(row.relation_type)==2 and row.player_info and row.player_info.player_id then table.insert(applicants, tonumber(row.player_info.player_id)) end end if #applicants<2 then error('vc10f-applications-'..#applicants) end _G.vc10fAccept=applicants[1] _G.vc10fDeny=applicants[2] vc10f:acceptTeachApply({from_player_id=vc10fAccept}, function(code,reply) _G.vc10fAcceptCode=code _G.vc10fAcceptReply=reply end)",
+  "wait:3",
+  "lua:if vc10fAcceptCode~=xyd.error.OK then error('vc10f-accept-code-'..tostring(vc10fAcceptCode)) end if type(vc10fAcceptReply)~='table' or type(vc10fAcceptReply.base_info)~='table' then error('vc10f-accept-shape') end local rel=vc10fAcceptReply.base_info.relations if type(rel)~='table' or type(rel[2])~='table' or tonumber(rel[2].player_id)~=vc10fAccept then error('vc10f-accept-relation') end vc10f:denyTeachApply({from_player_id=vc10fDeny}, function(code,reply) _G.vc10fDenyCode=code end)",
+  "wait:3",
+  "lua:if vc10fDenyCode~=xyd.error.OK then error('vc10f-deny-code-'..tostring(vc10fDenyCode)) end",
+  "fixture:mentor_terminate_ready",
+  "lua:vc10f:terminateRelation({relation_type=2}, function(code,reply) _G.vc10fTerminateCode=code _G.vc10fTerminate=reply end)",
+  "wait:3",
+  "lua:if vc10fTerminateCode~=xyd.error.OK then error('vc10f-terminate-code-'..tostring(vc10fTerminateCode)) end if type(vc10fTerminate)~='table' or type(vc10fTerminate.base_info)~='table' then error('vc10f-terminate-shape') end if vc10fTerminate.base_info.relations[2].player_id~=nil then error('vc10f-terminate-relation') end xyd.Backend.get():request(xyd.mid.STUDENT_OVER_FIGHT_RESULT, {is_win=1, formation='1|2|3'}, function(code,reply) _G.vc10fExamCode=code _G.vc10fExam=reply end)",
+  "wait:3",
+  "lua:if vc10fExamCode~=xyd.error.OK then error('vc10f-exam-code-'..tostring(vc10fExamCode)) end if type(vc10fExam)~='table' or type(vc10fExam.items)~='table' or #vc10fExam.items~=3 then error('vc10f-exam-items') end vc10f:getClassAward({mission_id=100025}, function(code,reply) _G.vc10fClaimCode=code _G.vc10fClaim=reply end)",
+  "wait:3",
+  "lua:if vc10fClaimCode~=xyd.error.OK then error('vc10f-claim-code-'..tostring(vc10fClaimCode)) end if type(vc10fClaim)~='table' or type(vc10fClaim.awards)~='table' or #vc10fClaim.awards<1 then error('vc10f-claim-awards') end"
+ ],
+ "settle_seconds": 10,
+ "expect_ok": [1856, 1857, 1858, 1859, 1860, 1861, 1862, 1863],
+ "note": "Stock SocialSystem model path for the Mentor MIDs on one driven player. The mentor_fixture births three level-20 students (find-list candidate plus two pending applications) and one active relation where the driven player is the student, because the virtual client drives one player. The driven player applies to the find-list candidate (1857), accepts one seeded application (1859), denies the other (1860), terminates the accepted relation after the fixture backdates it past the 24-hour limit (1861), passes the graduation exam through the same raw STUDENT_OVER_FIGHT_RESULT request BattleCreate sends (1863), and claims mission 100025 (1862), which ends the seeded student relation."
+}

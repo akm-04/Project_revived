@@ -11,11 +11,18 @@ import (
 	book "gxb.local/backend/v2/internal/domain/bookskill"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"io"
+	"sync"
 )
 
 // BookCatalogTx reads only the caller-pinned immutable revision. Registration
 // and controlled deployment/backfill must complete before activation.
+var bookCatalogs sync.Map
+
 func (s Store) BookCatalogTx(ctx context.Context, q tx.Queryer, revision string) (book.Catalog, error) {
+	return memoCatalog(&bookCatalogs, revision, func() (book.Catalog, error) { return s.bookCatalogTx(ctx, q, revision) })
+}
+
+func (s Store) bookCatalogTx(ctx context.Context, q tx.Queryer, revision string) (book.Catalog, error) {
 	var out book.Catalog
 	if q == nil || len(revision) != 64 {
 		return out, book.ErrUnqualified
@@ -119,11 +126,7 @@ func (s Store) BookInputsActive(ctx context.Context) (string, bool, error) {
 }
 
 func (Store) BookInputsRevisionTx(ctx context.Context, q tx.Queryer, revision string) (bool, error) {
-	var raw string
-	if e := q.QueryRow(ctx, `SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1`, revision).Scan(&raw); e != nil {
-		return false, e
-	}
-	return manifestHasCapability([]byte(raw), revision, "BOOK_INPUTS_I7C2D")
+	return storedCapability(ctx, q, revision, "BOOK_INPUTS_I7C2D")
 }
 
 func (s Store) BookInputsActiveTx(ctx context.Context, q tx.Queryer) (string, bool, error) {

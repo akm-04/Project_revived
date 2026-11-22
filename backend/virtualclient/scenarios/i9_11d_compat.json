@@ -1,0 +1,30 @@
+{
+ "name": "i9_11d_compat",
+ "level": 1,
+ "steps": [
+  "wait:5",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) if tonumber(p.firstMainTouch)~=0 then error('vc-compat-initial-touch-'..tostring(p.firstMainTouch)) end _G.compatPushError=nil p:getMessagePush():setState(1,1,function(c) if c~=xyd.error.OK then _G.compatPushError=c end end)",
+  "wait:3",
+  "lua:if _G.compatPushError~=nil then error('vc-compat-add-'..tostring(_G.compatPushError)) end local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) if tonumber(p:getMessagePush():getState()[1])~=1 then error('vc-compat-add-local') end xyd.selfPlayer:getServerTime()",
+  "wait:3",
+  "relogin",
+  "wait:3",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) if tonumber(p:getMessagePush():getState()[1])~=1 then error('vc-compat-relogin-push-'..tostring(p:getMessagePush():getState()[1])) end if tonumber(p.firstMainTouch)~=0 then error('vc-compat-relogin-touch-'..tostring(p.firstMainTouch)) end local w=xyd.WindowManager.get():getWindow('main_scene_touch') if not w or not w.blockLayer_ then error('vc-compat-touch-window') end if not w.blockLayer_._LuaListeners[cc.NODE_TOUCH_EVENT] then error('vc-compat-touch-handler') end _G.compatTouchOriginal=xyd.Backend.get().request _G.compatTouchCount=0 xyd.Backend.get().request=function(self,mid,params,callback,...) if mid==xyd.mid.FIRST_MAIN_TOUCH then _G.compatTouchCount=_G.compatTouchCount+1 end return _G.compatTouchOriginal(self,mid,params,callback,...) end _G.compatFire=function(name,points) local entry=w.blockLayer_._LuaListeners[cc.NODE_TOUCH_EVENT] if type(entry)=='function' then entry({name=name,points=points}) else for _,e in ipairs(entry) do e.listener_({name=name,points=points}) end end end w.isAnimation=false _G.compatFire('began',{{id=1,x=200,y=100},{id=2,x=100,y=100}}) _G.compatFire('added',{}) _G.compatFire('removed',{}) _G.compatFire('ended',{{id=1,x=400,y=200},{id=2,x=90,y=0}})",
+  "wait:2",
+  "lua:local w=xyd.WindowManager.get():getWindow('main_scene_touch') if not w then error('vc-compat-touch-window-hide') end w.isAnimation=false _G.compatFire('began',{{id=1,x=100,y=100},{id=2,x=500,y=100}}) _G.compatFire('added',{}) _G.compatFire('removed',{}) _G.compatFire('ended',{{id=1,x=400,y=200},{id=2,x=100,y=0}})",
+  "wait:3",
+  "lua:if _G.compatTouchCount~=1 then error('vc-compat-touch-count-'..tostring(_G.compatTouchCount)) end local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) if tonumber(p.firstMainTouch)~=1 then error('vc-compat-touch-local-'..tostring(p.firstMainTouch)) end",
+  "relogin",
+  "wait:3",
+  "lua:local p=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_PLAYER) if tonumber(p.firstMainTouch)~=1 then error('vc-compat-touch-relogin-'..tostring(p.firstMainTouch)) end if tonumber(p:getMessagePush():getState()[1])~=1 then error('vc-compat-push-relogin-'..tostring(p:getMessagePush():getState()[1])) end local w=xyd.WindowManager.get():getWindow('main_scene_touch') if not w or not w.blockLayer_ then error('vc-compat-touch-window-two') end if not w.blockLayer_._LuaListeners[cc.NODE_TOUCH_EVENT] then error('vc-compat-touch-handler-two') end _G.compatTouchOriginal=xyd.Backend.get().request _G.compatTouchCount=0 xyd.Backend.get().request=function(self,mid,params,callback,...) if mid==xyd.mid.FIRST_MAIN_TOUCH then _G.compatTouchCount=_G.compatTouchCount+1 end return _G.compatTouchOriginal(self,mid,params,callback,...) end local entry=w.blockLayer_._LuaListeners[cc.NODE_TOUCH_EVENT] local function fire(name,points) if type(entry)=='function' then entry({name=name,points=points}) else for _,e in ipairs(entry) do e.listener_({name=name,points=points}) end end end w.isAnimation=false fire('began',{{id=1,x=200,y=100},{id=2,x=100,y=100}}) fire('added',{}) fire('removed',{}) fire('ended',{{id=1,x=400,y=200},{id=2,x=90,y=0}})",
+  "wait:3",
+  "lua:xyd.Backend.get().request=_G.compatTouchOriginal _G.compatTouchOriginal=nil if _G.compatTouchCount~=0 then error('vc-compat-second-touch-'..tostring(_G.compatTouchCount)) end"
+ ],
+ "settle_seconds": 5,
+ "expect_ok": [
+  3,
+  1025,
+  1864
+ ],
+ "note": "I9-11D C13: the stock MessagePush model toggles push type 1 (MID 1025), a relogin proves MID 1 projects message_pushes, the stock MainSceneTouchWindow's own touch listener sends MID 1864 when first_main_touch is 0, and a second relogin shows first_main_touch 1 with no second 1864. MID 3 is the stock SelfPlayer:getServerTime path. The VC engine has no multi-touch input, so the scenario feeds the registered stock NODE_TOUCH_EVENT listener with the four all-at-once phases the stock listener expects (began, added, removed, ended) and wraps xyd.Backend.request only to count FIRST_MAIN_TOUCH sends; the first swipe is the stock hide direction and the second is the direction that requests the touch marker. No response handler is copied."
+}

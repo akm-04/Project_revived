@@ -27,5 +27,6 @@ type Store interface {
 	ReadRootTx(context.Context, tx.Queryer, identity.PlayerID) (Root, bool, error)
 	LockRootTx(context.Context, tx.Tx, identity.PlayerID) (Root, bool, error)
 	InsertRootTx(context.Context, tx.Tx, Root) error
+	InsertRootIfAbsentTx(context.Context, tx.Tx, Root) (bool, error)
 	UpdateRootTx(context.Context, tx.Tx, Root, Root) error
 }

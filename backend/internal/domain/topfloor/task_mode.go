@@ -66,6 +66,28 @@ func (catalog TaskModeCatalog) Rule(mode int64) (TaskModeRule, bool) {
 	return TaskModeRule{}, false
 }
 
+func (catalog TaskModeCatalog) WithOperatorBans(mode int64, bannedTables []int64) (TaskModeCatalog, error) {
+	updated := catalog
+	updated.Rules = slices.Clone(catalog.Rules)
+	for index, rule := range updated.Rules {
+		if rule.ID != mode {
+			continue
+		}
+		merged := slices.Clone(rule.BannedTables)
+		for _, table := range bannedTables {
+			if table <= 0 {
+				return TaskModeCatalog{}, ErrInvalid
+			}
+			if !slices.Contains(merged, table) {
+				merged = append(merged, table)
+			}
+		}
+		updated.Rules[index].BannedTables = merged
+		return updated, nil
+	}
+	return TaskModeCatalog{}, ErrUnavailable
+}
+
 func taskModeSourceDay(date string) (int64, error) {
 	parsed, err := time.Parse("20060102", date)
 	if err != nil {
@@ -170,7 +192,17 @@ func (catalog TaskModeCatalog) Rotation(at time.Time) (TaskModeRotation, error) 
 		return TaskModeRotation{}, ErrRefused
 	}
 	index := elapsed / taskModeDays
+	// PRIVATE_POLICY D512: Faction (mode 6) is out of the rotation until its buff
+	// and ban data is mapped, so a schedule entry resolves to the next non-6 entry.
 	entry := catalog.Schedule[index%int64(len(catalog.Schedule))]
+	follow := index
+	for range catalog.Schedule {
+		entry = catalog.Schedule[follow%int64(len(catalog.Schedule))]
+		if entry.Mode != TaskModeCamp {
+			break
+		}
+		follow++
+	}
 	startDay := firstDay + index*taskModeDays
 	return TaskModeRotation{Number: index + 1, Mode: entry.Mode, Submode: entry.Submode, StartsAt: modes.DayBegins(startDay), EndsAt: modes.DayBegins(startDay + taskModeDays)}, nil
 }
@@ -183,7 +215,7 @@ type TaskModeHero struct {
 
 func (rule TaskModeRule) ValidateFormation(heroes []TaskModeHero, pet, leader, submode int64) error {
 	selectedCamp, validCamp := taskModeSelectedCamp(submode)
-	if rule.ID < TaskModeSingle || rule.ID > TaskModeCamp || len(heroes) == 0 || len(heroes) > rule.HeroSlots || pet < 0 || leader < 0 || !validCamp || rule.ID != TaskModeCamp && submode != 0 {
+	if rule.ID < TaskModeSingle || rule.ID > TaskModeCamp || len(heroes) != rule.HeroSlots || pet < 0 || leader < 0 || !validCamp || rule.ID != TaskModeCamp && submode != 0 {
 		return ErrInvalid
 	}
 	if pet > 0 && !rule.PetAllowed {
@@ -252,11 +284,14 @@ func TaskEnemyTable(server, enemy int64) int64 {
 	return enemy
 }
 
-func (catalog TaskModeCatalog) Admit(rank, weeklyChallenges, serverLevel int64) error {
-	if rank < 1 || weeklyChallenges < 0 || serverLevel < 1 {
+// Admit is the D512 entry gate: normal rank <= EntryRank and server level >=
+// ServerLevel. PRIVATE_POLICY D512: the source weekly-challenge requirement
+// (EntryChallenges) is kept in the catalog but no longer enforced.
+func (catalog TaskModeCatalog) Admit(rank, serverLevel int64) error {
+	if rank < 1 || serverLevel < 1 {
 		return ErrInvalid
 	}
-	if rank > catalog.EntryRank || weeklyChallenges < catalog.EntryChallenges || serverLevel < catalog.ServerLevel {
+	if rank > catalog.EntryRank || serverLevel < catalog.ServerLevel {
 		return ErrRefused
 	}
 	return nil

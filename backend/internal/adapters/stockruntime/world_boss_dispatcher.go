@@ -2,10 +2,8 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math"
-	"net/http"
 	"strconv"
 
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
@@ -15,7 +13,6 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/worldboss"
 	"gxb.local/backend/v2/internal/foundation/operation"
-	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
@@ -43,7 +40,7 @@ func (o WorldBossDispatcher) Dispatch(ctx context.Context, req httpedge.Dispatch
 		return *fail
 	}
 	if o.Service == nil {
-		return failWorldBoss(d.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	params, op := req.Envelope.Params, req.Envelope.Operation
 	bad := badHero("world_boss_invalid_parameter")
@@ -163,16 +160,13 @@ func worldBossTerminal(response app.Response) httpedge.Response {
 	return okI5(response.Body)
 }
 
+var worldBossFailureRows = []failureRow{
+	{match: d.ErrInvalid, class: failureMalformed, detail: "world_boss_invalid_parameter"},
+	{match: cd.ErrLoanRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+}
+
 func failWorldBoss(err error) httpedge.Response {
-	var conflict *receipt.ConflictError
-	if errors.Is(err, d.ErrInvalid) || errors.As(err, &conflict) {
-		return badHero("world_boss_invalid_parameter")
-	}
-	if errors.Is(err, cd.ErrLoanRefused) {
-		return conflictRefusal(1)
-	}
-	if errors.Is(err, d.ErrRefused) || errors.Is(err, economy.ErrInsufficientBalance) {
-		return conflictRefusal(1)
-	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "world_boss_unavailable"}}
+	return failureFromRows(worldBossFailureRows, err)
 }

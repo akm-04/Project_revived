@@ -113,7 +113,7 @@ func (s *RunState) OpenTeamFight(campaignID int64, index int, startPlayer, at in
 			return false, nil
 		}
 		if s.Team.StartPlayer != startPlayer {
-			return false, ErrRefused
+			return false, ErrStageHeld
 		}
 		s.AbandonTeam()
 	}

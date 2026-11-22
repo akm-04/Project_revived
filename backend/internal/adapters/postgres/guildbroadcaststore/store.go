@@ -11,7 +11,7 @@ import (
 	gb "gxb.local/backend/v2/internal/domain/guildbroadcast"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
-	"gxb.local/backend/v2/internal/foundation/policy"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"time"
 )
@@ -38,13 +38,25 @@ func (Store) InsertSourceTx(c context.Context, t tx.Tx, s gb.Source, receiptID i
 	if e != nil {
 		return e
 	}
-	refs, e := policy.MarshalCanonicalJSON(s.Operation.Policies)
+	refs, version, e := payload.Encode(s.Operation.Policies)
 	if e != nil {
 		return e
 	}
-	tag, e := t.Exec(c, `INSERT INTO guild_broadcast_sources(source_id,guild_id,logical_server_id,leader_player_id,leader_name,name_snapshot_changed_at,operation_started_at,operation_started_at_exact,entropy_seed,policy_refs,decision_at,content_revision,guild_core_revision,policy_id,title,body,source_fingerprint,recipient_count,source_receipt_id) VALUES($1::uuid,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb,$11,$12,$13,$14,$15,$16,$17,$18,$19::uuid)`, s.Operation.ID.String(), int64(s.GuildID), int32(s.Server), int64(s.LeaderID), s.LeaderName, s.NameSnapshotChangedAt, s.Operation.StartedAt.UTC(), s.Operation.StartedAt.UTC().Format(time.RFC3339Nano), s.Operation.EntropySeed[:], string(refs), s.DecisionAt, s.ContentRevision, s.GuildCoreRevision, s.PolicyID, s.Request.Title, s.Request.Content, hex.EncodeToString(fp[:]), len(s.Recipients), receiptID.String())
+	tag, e := t.Exec(c, `INSERT INTO guild_broadcast_sources(source_id,guild_id,logical_server_id,leader_player_id,leader_name,name_snapshot_changed_at,operation_started_at,operation_started_at_exact,entropy_seed,policy_refs,decision_at,content_revision,guild_core_revision,policy_id,title,body,source_fingerprint,recipient_count,source_receipt_id,payload_version) VALUES($1::uuid,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb,$11,$12,$13,$14,$15,$16,$17,$18,$19::uuid,$20)`, s.Operation.ID.String(), int64(s.GuildID), int32(s.Server), int64(s.LeaderID), s.LeaderName, s.NameSnapshotChangedAt, s.Operation.StartedAt.UTC(), s.Operation.StartedAt.UTC().Format(time.RFC3339Nano), s.Operation.EntropySeed[:], string(refs), s.DecisionAt, s.ContentRevision, s.GuildCoreRevision, s.PolicyID, s.Request.Title, s.Request.Content, hex.EncodeToString(fp[:]), len(s.Recipients), receiptID.String(), version)
 	return one(tag, e)
 }
+
+// CountSourcesTx returns at most limit sources of one guild in one game-day
+// window, so the quota check never scans the guild's whole history.
+func (Store) CountSourcesTx(c context.Context, q tx.Queryer, guildID guild.ID, from, to time.Time, limit int) (int, error) {
+	if q == nil || guildID <= 0 || !from.Before(to) || limit < 1 {
+		return 0, gb.ErrSource
+	}
+	var count int
+	e := q.QueryRow(c, `SELECT count(*) FROM (SELECT 1 FROM guild_broadcast_sources WHERE guild_id=$1 AND decision_at>=$2 AND decision_at<$3 LIMIT $4) recent`, int64(guildID), from.UTC(), to.UTC(), limit).Scan(&count)
+	return count, e
+}
+
 func (Store) InsertBindingTx(c context.Context, t tx.Tx, b gb.Binding, m gb.Member) error {
 	if t == nil || b.Validate() != nil || b.State != gb.Pending || m.PlayerID != b.RecipientID || m.JoinEventID <= 0 || m.JoinedAt.IsZero() {
 		return gb.ErrSource
@@ -64,7 +76,8 @@ func (Store) ReadSourceTx(c context.Context, q tx.Queryer, id ids.UUID) (gb.Sour
 	var refs, fp, exact string
 	var projectedStart time.Time
 	var count int
-	e := q.QueryRow(c, `SELECT guild_id,logical_server_id,leader_player_id,leader_name,name_snapshot_changed_at,operation_started_at,operation_started_at_exact,entropy_seed,policy_refs::text,decision_at,content_revision,guild_core_revision,policy_id,title,body,source_fingerprint,recipient_count FROM guild_broadcast_sources WHERE source_id=$1::uuid`, id.String()).Scan(&gid, &sid, &pid, &s.LeaderName, &s.NameSnapshotChangedAt, &projectedStart, &exact, &seed, &refs, &s.DecisionAt, &s.ContentRevision, &s.GuildCoreRevision, &s.PolicyID, &s.Request.Title, &s.Request.Content, &fp, &count)
+	var version int16
+	e := q.QueryRow(c, `SELECT guild_id,logical_server_id,leader_player_id,leader_name,name_snapshot_changed_at,operation_started_at,operation_started_at_exact,entropy_seed,policy_refs::text,decision_at,content_revision,guild_core_revision,policy_id,title,body,source_fingerprint,recipient_count,payload_version FROM guild_broadcast_sources WHERE source_id=$1::uuid`, id.String()).Scan(&gid, &sid, &pid, &s.LeaderName, &s.NameSnapshotChangedAt, &projectedStart, &exact, &seed, &refs, &s.DecisionAt, &s.ContentRevision, &s.GuildCoreRevision, &s.PolicyID, &s.Request.Title, &s.Request.Content, &fp, &count, &version)
 	if errors.Is(e, kernelstore.ErrNoRows) {
 		return s, false, nil
 	}
@@ -82,8 +95,7 @@ func (Store) ReadSourceTx(c context.Context, q tx.Queryer, id ids.UUID) (gb.Sour
 	if e != nil || s.Operation.StartedAt.UnixMicro() != projectedStart.UnixMicro() {
 		return s, false, app.ErrConflict
 	}
-	s.Operation.Policies, e = policy.ParseCanonicalJSON([]byte(refs))
-	if e != nil {
+	if e = payload.Decode("guild_broadcast_sources", version, []byte(refs), &s.Operation.Policies); e != nil {
 		return s, false, e
 	}
 	s.DecisionAt = s.DecisionAt.UTC()

@@ -1,0 +1,166 @@
+{
+ "background": [
+  {
+   "enqueued_by": [
+    "gxb-api"
+   ],
+   "kind": "river",
+   "workers": []
+  }
+ ],
+ "content": [
+  "content_guild_invite_policies"
+ ],
+ "contracts": [
+  {
+   "count": 2,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I7A8B_GUILD_PROGRESS"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "guild_applications": [
+    "guildstore.PrepareRetirementChildrenTx"
+   ],
+   "guild_invite_projection_cursors": [
+    "guildinvitestore.LockCursorTx"
+   ],
+   "guild_invite_projection_deliveries": [
+    "guildinvitestore.ListDueInviteForUpdateTx",
+    "guildinvitestore.LockDeliveryTx"
+   ],
+   "guild_invite_projection_markers": [
+    "guildinvitestore.ListDueInviteForUpdateTx",
+    "guildinvitestore.LockMarkerTx"
+   ],
+   "guild_invites": [
+    "guildstore.PrepareRetirementChildrenTx"
+   ],
+   "players": [
+    "i4store.LockBoundRecipientTx"
+   ]
+  },
+  "row_locks": [
+   "guild_applications",
+   "guild_invite_projection_cursors",
+   "guild_invite_projection_deliveries",
+   "guild_invite_projection_markers",
+   "guild_invites",
+   "players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [],
+ "name": "guildinvite",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/guildinvitestore",
+  "internal/adapters/postgres/guildstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/kernelstore"
+ ],
+ "tables": {
+  "owned": [
+   "guild_invite_projection_cursors",
+   "guild_invite_projection_deliveries",
+   "guild_invite_projection_markers",
+   "guild_invite_projection_sources"
+  ],
+  "read": [
+   "content_guild_invite_policies",
+   "guild_applications",
+   "guild_invite_projection_cursors",
+   "guild_invite_projection_deliveries",
+   "guild_invite_projection_markers",
+   "guild_invite_projection_sources",
+   "guild_invite_send_events",
+   "guild_invites",
+   "guild_membership_events",
+   "guild_memberships",
+   "guilds",
+   "gxb_content_activation",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "logical_servers",
+   "players"
+  ],
+  "written": [
+   "guild_invite_projection_cursors",
+   "guild_invite_projection_deliveries",
+   "guild_invite_projection_markers",
+   "guild_invite_projection_sources",
+   "guild_invites",
+   "guild_membership_events",
+   "gxb_operation_receipts"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "guildinvite",
+   "playerdisplay",
+   "publicshowcase"
+  ],
+  "scenarios_naming": [],
+  "unit": []
+ }
+}

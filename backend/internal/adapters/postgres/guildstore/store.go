@@ -8,9 +8,11 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
+	app "gxb.local/backend/v2/internal/application/guildcampaign"
 	"gxb.local/backend/v2/internal/domain/guild"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -170,6 +172,62 @@ func (Store) ReadMembershipTx(ctx context.Context, q tx.Queryer, pid identity.Pl
 	}
 	return m, err == nil, err
 }
+
+// guildNamesByPlayersSQL resolves the current active guild name of an entire
+// requested player set in one owner read. A player with no current same-server
+// membership produces no row, and the caller renders "".
+const guildNamesByPlayersSQL = `
+WITH requested(player_id,logical_server_id) AS (
+  SELECT * FROM unnest($1::bigint[],$2::int[])
+)
+SELECT COALESCE(array_agg(gm.player_id), '{}'::bigint[]),
+       COALESCE(array_agg(g.name), '{}'::text[])
+FROM requested r
+JOIN guild_memberships gm ON gm.player_id=r.player_id
+JOIN guilds g ON g.guild_id=gm.guild_id AND g.logical_server_id=r.logical_server_id
+WHERE g.retired_at IS NULL`
+
+// GuildNamesTx is the typed guild identity read for rank and board rows that
+// carry a player's guild name.
+func (Store) GuildNamesTx(ctx context.Context, q tx.Queryer, server identity.LogicalServerID, players []identity.PlayerID) (map[identity.PlayerID]string, error) {
+	out := make(map[identity.PlayerID]string, len(players))
+	if q == nil || !server.Valid() {
+		return nil, errors.New("invalid guild name read")
+	}
+	playerIDs := make([]int64, 0, len(players))
+	servers := make([]int32, 0, len(players))
+	seen := make(map[identity.PlayerID]struct{}, len(players))
+	for _, playerID := range players {
+		if !playerID.Valid() {
+			continue
+		}
+		if _, repeated := seen[playerID]; repeated {
+			continue
+		}
+		seen[playerID] = struct{}{}
+		playerIDs = append(playerIDs, int64(playerID))
+		servers = append(servers, int32(server))
+	}
+	if len(playerIDs) == 0 {
+		return out, nil
+	}
+	var foundIDs []int64
+	var names []string
+	if err := q.QueryRow(ctx, guildNamesByPlayersSQL, playerIDs, servers).Scan(&foundIDs, &names); err != nil {
+		return nil, err
+	}
+	if len(foundIDs) != len(names) {
+		return nil, errors.New("inconsistent canonical guild names")
+	}
+	for index, playerID := range foundIDs {
+		if names[index] == "" {
+			return nil, errors.New("invalid canonical guild name")
+		}
+		out[identity.PlayerID(playerID)] = names[index]
+	}
+	return out, nil
+}
+
 func (Store) InsertMembershipTx(ctx context.Context, t tx.Tx, m guild.Membership) error {
 	if err := m.Validate(); err != nil {
 		return err
@@ -370,14 +428,57 @@ func (Store) AppendAuditTx(ctx context.Context, t tx.Tx, gid guild.ID, kind stri
 	if !op.IsZero() {
 		opv = op.String()
 	}
-	if details == "" {
-		details = "{}"
+	parsedDetails, err := parseAuditDetails(details)
+	if err != nil {
+		return fmt.Errorf("guild audit details: %w", err)
 	}
-	tag, err := t.Exec(ctx, `INSERT INTO guild_audit_log(guild_id,sequence,event_kind,actor_player_id,subject_player_id,occurred_at,policy_revision,operation_id,details) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb)`, int64(gid), seq, kind, actorv, subjectv, at.UTC(), policyRevision, opv, details)
+	detailsPayload, detailsVersion, err := payload.Encode(parsedDetails)
+	if err != nil {
+		return err
+	}
+	tag, err := t.Exec(ctx, `INSERT INTO guild_audit_log(guild_id,sequence,event_kind,actor_player_id,subject_player_id,occurred_at,policy_revision,operation_id,details,payload_version) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb,$10)`, int64(gid), seq, kind, actorv, subjectv, at.UTC(), policyRevision, opv, string(detailsPayload), detailsVersion)
 	if err != nil {
 		return err
 	}
 	return one(tag, "guild audit")
+}
+
+// ListMemberLogTx is the bounded newest-first membership slice for 609. The
+// guild store owns guild_audit_log; the campaign store owns its own log.
+func (Store) ListMemberLogTx(ctx context.Context, q tx.Queryer, guildID int64, cutoff time.Time, limit int) ([]app.MemberLogRow, error) {
+	var raw string
+	err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(jsonb_build_object(
+		'kind',event_kind,'actor',COALESCE(actor_player_id,0),'subject',COALESCE(subject_player_id,0),
+		'details',details,'payload_version',payload_version,'at',EXTRACT(EPOCH FROM occurred_at)::bigint) ORDER BY occurred_at DESC,sequence DESC),'[]'::jsonb)::text
+		FROM (SELECT event_kind,actor_player_id,subject_player_id,details,payload_version,occurred_at,sequence
+			FROM guild_audit_log WHERE guild_id=$1 AND occurred_at>=$2 ORDER BY occurred_at DESC,sequence DESC LIMIT $3) recent`, guildID, cutoff, limit).Scan(&raw)
+	if err != nil {
+		return nil, err
+	}
+	var rows []struct {
+		Kind           string          `json:"kind"`
+		Actor          int64           `json:"actor"`
+		Subject        int64           `json:"subject"`
+		Details        json.RawMessage `json:"details"`
+		PayloadVersion int16           `json:"payload_version"`
+		At             int64           `json:"at"`
+	}
+	if err := json.Unmarshal([]byte(raw), &rows); err != nil {
+		return nil, err
+	}
+	out := make([]app.MemberLogRow, 0, len(rows))
+	for _, row := range rows {
+		var details AuditDetails
+		if err := payload.Decode("guild_audit_log", row.PayloadVersion, row.Details, &details); err != nil {
+			return nil, err
+		}
+		role := int64(-1)
+		if details.Role != nil {
+			role = *details.Role
+		}
+		out = append(out, app.MemberLogRow{Kind: row.Kind, ActorID: row.Actor, SubjectID: row.Subject, Role: role, At: time.Unix(row.At, 0).UTC()})
+	}
+	return out, nil
 }
 
 // DeleteApplicationsForPlayerTx clears obsolete application state after a

@@ -65,25 +65,31 @@ type MailPrefix interface {
 	LockMailNamespaceCounterTx(context.Context, tx.Tx, identity.PlayerID, mail.Namespace) error
 }
 type Mode struct {
-	Spirit      Spirit
-	Progression Progression
-	Mail        MailPrefix
-	Energy      i5.TxTemporalDebiter
-	Timed       gen.TimedRunner
-	Fresh       tx.Queryer
-	Store       Store
-	Content     Content
-	Fence       Fence
-	Functions   Functions
-	Heroes      Heroes
-	HeroLocks   HeroLocks
-	Pets        Pets
-	Combat      Combat
-	Rules       cb.Rules
-	Values      Values
-	Facts       Facts
-	Receipts    receipt.Store
-	ReceiptRead receipt.Reader
+	Spirit       Spirit
+	Progression  Progression
+	Mail         MailPrefix
+	Energy       i5.TxTemporalDebiter
+	Timed        gen.TimedRunner
+	Fresh        tx.Queryer
+	Store        Store
+	Content      Content
+	Fence        Fence
+	Functions    Functions
+	Heroes       Heroes
+	HeroLocks    HeroLocks
+	Pets         Pets
+	Combat       Combat
+	Rules        cb.Rules
+	Values       Values
+	Facts        Facts
+	Receipts     receipt.Store
+	ReceiptRead  receipt.Reader
+	BattleCounts BattleCountObserver
+}
+
+// BattleCountObserver records the Girls Log count of one first settled battle.
+type BattleCountObserver interface {
+	ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error
 }
 type Fight struct {
 	Campaign      int64

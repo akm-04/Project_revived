@@ -1,0 +1,47 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [
+   {
+    "name": "playerroot.LockRank",
+    "rank": 315
+   }
+  ],
+  "row_lock_methods": {},
+  "row_locks": [],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [],
+ "name": "playerroot",
+ "pushes": [],
+ "stores": [],
+ "tables": {
+  "owned": [],
+  "read": [],
+  "written": []
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay",
+   "profilefeedback",
+   "socialactivation",
+   "socialprojection",
+   "socialrelation"
+  ],
+  "scenarios_naming": [],
+  "unit": [
+   "ports_test.go"
+  ]
+ }
+}

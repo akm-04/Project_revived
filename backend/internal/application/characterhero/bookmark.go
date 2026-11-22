@@ -196,15 +196,12 @@ func (s BookmarkService) SetBookmark(c context.Context, a identity.ActorContext,
 		if h.ValidatePersistent() != nil || h.Ref() != ref {
 			return ErrBookmarkRequest
 		}
-		if at.Before(h.UpdatedAt) {
-			return ErrBookmarkStaleTime
-		}
 		changed := h.IsLike != value
 		if changed {
 			old := h.StateVersion
 			h.IsLike = value
 			h.StateVersion++
-			h.UpdatedAt = at
+			h.UpdatedAt = gen.EffectiveObservation(at, h.UpdatedAt, h.CreatedAt)
 			if e = s.Store.SaveHeroBookmarkTx(c, sc.Tx, h, old); e != nil {
 				return e
 			}

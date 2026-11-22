@@ -237,8 +237,13 @@ func TestBookmarkAbortUnknownReplayAndRevocation(t *testing.T) {
 	}
 	stale := bookmarkService(p, p)
 	stale.Timed.Binder.Time = fixedTime{stamp.Add(-time.Second)}
-	if _, e := stale.SetBookmark(ctx, a, 1, 1, op()); !errors.Is(e, characterhero.ErrBookmarkStaleTime) {
-		t.Fatal("staledecision", e)
+	// K3: an earlier decision time is clamped to the stored write, not refused.
+	staleResult, e := stale.SetBookmark(ctx, a, 1, 1, op())
+	if e != nil || staleResult.StateVersion != 4 || staleResult.IsLike != 1 {
+		t.Fatal("staledecision", staleResult, e)
+	}
+	if heroState(t, p, a, 1).UpdatedAt.Before(stamp) {
+		t.Fatal("stale clamp moved UpdatedAt backwards", heroState(t, p, a, 1).UpdatedAt)
 	}
 	// Corrupt a known receipt and ensure replay is not a success or reapplication.
 	sqlExec(t, p, `UPDATE gxb_operation_receipts SET result_payload=jsonb_set(result_payload,'{is_like}','0') WHERE owner_key=$1 AND domain='character-hero' AND semantic_key=$2`, strings.TrimSpace(stringInt(int64(a.PlayerID))), o.ID.String())

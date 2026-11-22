@@ -22,10 +22,24 @@ type ProfileMediaDispatcher struct {
 
 func (d ProfileMediaDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequest) httpedge.Response {
 	fail := func(status int, msg string) httpedge.Response {
-		return httpedge.Response{HTTPStatus: status, Body: map[string]any{"error_code": 1, "error": msg}}
+		switch status {
+		case 400:
+			return failureReply(malformed(msg))
+		case 409:
+			return failureReply(refusal(unprovenRefusalCode))
+		case 503:
+			return failureReply(defect(nil))
+		case 401:
+			return failureReply(sessionFailure())
+		default:
+			return failureReply(refusal(unprovenRefusalCode))
+		}
 	}
-	if r.Envelope.MID != 1844 || d.Authority == nil || d.Service.Blobs == nil || r.Upload == nil || r.Upload.TempPath == "" {
+	if r.Envelope.MID != 1844 || r.Upload == nil || r.Upload.TempPath == "" {
 		return fail(400, "invalid_media_upload")
+	}
+	if d.Authority == nil || d.Service.Blobs == nil {
+		return failureReply(defect(nil))
 	}
 	token := r.Envelope.Claims.Token
 	if token == "" {
@@ -45,7 +59,7 @@ func (d ProfileMediaDispatcher) Dispatch(c context.Context, r httpedge.DispatchR
 	}
 	f, e := os.Open(r.Upload.TempPath)
 	if e != nil {
-		return fail(503, "upload_unavailable")
+		return failureReply(defect(e))
 	}
 	prepareCtx, cancel := context.WithTimeout(c, 30*time.Second)
 	p, e := d.Service.Blobs.Prepare(prepareCtx, f, asset.Reservation{Operation: r.Envelope.Operation.ID, Actor: ac.PlayerID, Server: ac.LogicalServerID})
@@ -55,12 +69,12 @@ func (d ProfileMediaDispatcher) Dispatch(c context.Context, r httpedge.DispatchR
 		if errors.Is(e, asset.ErrInvalid) {
 			return fail(400, "invalid_png")
 		}
-		return fail(503, "media_unavailable")
+		return failureFromRows(nil, e)
 	}
 	desc, e := p.Descriptor()
 	if e != nil {
 		_ = p.Close(asset.DefiniteAbort)
-		return fail(503, "media_unavailable")
+		return failureReply(defect(e))
 	}
 	out, e, cleanup := d.Service.Publish(c, ac, desc, p, r.Envelope.Operation)
 	if cleanup != nil {
@@ -73,14 +87,29 @@ func (d ProfileMediaDispatcher) Dispatch(c context.Context, r httpedge.DispatchR
 		if errors.Is(e, app.ErrInvalidState) || errors.Is(e, app.ErrConflict) {
 			return fail(409, "media_conflict")
 		}
-		return fail(503, "media_unavailable")
+		return failureFromRows(nil, e)
 	}
 	return httpedge.Response{HTTPStatus: 200, Body: out.Wire()}
 }
 
 // MediaGET exposes only committed immutable capabilities. The read completes
 // before OpenValidated; no filesystem read is performed under database locks.
-type ProfileMediaGET struct{ Service app.MediaService }
+type ProfileMediaGET struct {
+	Service app.MediaService
+	// Bound keeps this unauthenticated route to a share of the gameplay pool (C1-9).
+	Bound *httpedge.Admission
+}
+
+// mediaReadFailure separates a request whose context ended (the client is gone
+// or out of patience, so the pool wait was cancelled) from a media integrity
+// fault. Only the latter is a server error.
+func mediaReadFailure(w http.ResponseWriter, r *http.Request) {
+	if r.Context().Err() != nil {
+		busyReply(w, "media_unavailable")
+		return
+	}
+	http.Error(w, "media_integrity", http.StatusInternalServerError)
+}
 
 func (h ProfileMediaGET) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h.Service.Media == nil || h.Service.Blobs == nil || h.Service.Commands.Fresh == nil {
@@ -91,6 +120,13 @@ func (h ProfileMediaGET) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Allow", "GET, HEAD")
 		http.Error(w, "method_not_allowed", 405)
 		return
+	}
+	if h.Bound != nil && !h.Bound.TryAcquire() {
+		busyReply(w, "media_unavailable")
+		return
+	}
+	if h.Bound != nil {
+		defer h.Bound.Release()
 	}
 	parts := strings.Split(strings.TrimPrefix(r.URL.Path, "/profile-media/"), "/")
 	if !strings.HasPrefix(r.URL.Path, "/profile-media/") || len(parts) != 2 || r.URL.RawQuery != "" || !strings.HasSuffix(parts[1], ".png") {
@@ -104,7 +140,7 @@ func (h ProfileMediaGET) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	hist, ok, e := h.Service.Media.ReadMediaHistoryTx(r.Context(), h.Service.Commands.Fresh, op)
 	if e != nil {
-		http.Error(w, "media_integrity", 500)
+		mediaReadFailure(w, r)
 		return
 	}
 	if !ok || hist.Reference.Operation != op || parts[1] != hist.Reference.Asset.SHA256+".png" {
@@ -113,7 +149,7 @@ func (h ProfileMediaGET) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	f, e := h.Service.Blobs.OpenValidated(r.Context(), hist.Reference.Asset)
 	if e != nil {
-		http.Error(w, "media_integrity", 500)
+		mediaReadFailure(w, r)
 		return
 	}
 	defer f.Close()

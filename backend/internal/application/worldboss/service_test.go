@@ -1,11 +1,17 @@
 package worldboss
 
 import (
+	"context"
+	"errors"
 	"testing"
 	"time"
 
+	gen "gxb.local/backend/v2/internal/application/generation"
+	"gxb.local/backend/v2/internal/application/playerdirectory"
+	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/modes"
 	d "gxb.local/backend/v2/internal/domain/worldboss"
+	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
 func TestCourageUpdateDay(t *testing.T) {
@@ -43,6 +49,18 @@ func TestRewardLines(t *testing.T) {
 	}
 }
 
+func TestAttemptBoard(t *testing.T) {
+	board, err := attemptBoard("WORLD_BOSS/7/2/10013")
+	if err != nil || board != (d.Board{LogicalServerID: 7, Generation: 2, BossID: 10013}) {
+		t.Fatal(board, err)
+	}
+	for _, reference := range []string{"", "WORLD_BOSS/7/2", "WORLD_BOSS/0/2/10013", "WORLD_BOSS/7/0/10013", "WORLD_BOSS/7/2/10010", "WORLD_BOSS/7/2/10013/x", "OTHER/7/2/10013"} {
+		if _, err = attemptBoard(reference); err == nil || errors.Is(err, d.ErrUnavailable) {
+			t.Fatalf("%q accepted or classified transient: %v", reference, err)
+		}
+	}
+}
+
 func TestValidateFormation(t *testing.T) {
 	for _, bad := range [][]int64{nil, {}, {0}, {1, 1}, {1, 2, 3, 4, 5, 6}} {
 		if validateFormation(bad) == nil {
@@ -51,5 +69,48 @@ func TestValidateFormation(t *testing.T) {
 	}
 	if validateFormation([]int64{5, 4, 3}) != nil {
 		t.Fatal("valid formation refused")
+	}
+}
+
+type absentDirectory struct{}
+
+func (absentDirectory) ProfileTx(context.Context, tx.Queryer, identity.PlayerID) (playerdirectory.Profile, bool, error) {
+	return playerdirectory.Profile{}, false, nil
+}
+
+type rankStore struct {
+	Store
+	ranks []d.RankEntry
+}
+
+func (s rankStore) ReadRankTx(context.Context, tx.Queryer, d.Board, int64) ([]d.RankEntry, error) {
+	return s.ranks, nil
+}
+
+func (rankStore) ReadTotalTx(context.Context, tx.Queryer, d.Board, identity.PlayerID) (d.Total, bool, error) {
+	return d.Total{}, false, nil
+}
+
+func TestPreInfoKeepsAShapedRowWhenTheProfileIsMissing(t *testing.T) {
+	ranks := []d.RankEntry{{PlayerID: 11, TotalHurt: 500}, {PlayerID: 22, TotalHurt: 100}}
+	mode := Mode{Directory: absentDirectory{}}
+	pre, err := mode.preInfo(context.Background(), nil, ranks, 22)
+	if err != nil || pre == nil {
+		t.Fatalf("missing-profile pre_info: %v %#v", err, pre)
+	}
+	if pre["player_name"] != "" || pre["lev"] != int64(0) || pre["avatar_id"] != int64(0) || pre["hurt"] != int64(500) || pre["pre_rank"] != int64(1) {
+		t.Fatalf("shape %#v", pre)
+	}
+	if first, err := mode.preInfo(context.Background(), nil, ranks, 11); err != nil || first != nil {
+		t.Fatalf("first rank must not carry pre_info: %v %#v", err, first)
+	}
+}
+
+func TestTerminalBodyKeepsPreInfoForASecondRanker(t *testing.T) {
+	ranks := []d.RankEntry{{PlayerID: 11, TotalHurt: 500}, {PlayerID: 22, TotalHurt: 150}}
+	mode := Mode{Store: rankStore{ranks: ranks}, Directory: absentDirectory{}}
+	body, err := mode.terminalBody(context.Background(), gen.TimedScope{}, d.Board{LogicalServerID: 1, Generation: 1, BossID: d.FirstBossID}, 22, 50)
+	if err != nil || body["pre_info"] == nil || body["total_rank"] != int64(2) {
+		t.Fatalf("terminal body %v %#v", err, body)
 	}
 }

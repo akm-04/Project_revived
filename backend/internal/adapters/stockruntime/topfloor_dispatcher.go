@@ -2,8 +2,6 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
-	"net/http"
 	"strconv"
 	"strings"
 
@@ -17,21 +15,23 @@ import (
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 )
 
-// Top Floor stock MIDs (src_64 mid.lua); 274/275/277/276/279 and ARENA_MODE stay unregistered.
+// Top Floor stock MIDs (src_64 mid.lua); 274/275/277/279 and ARENA_MODE stay
+// unregistered here. 276 is registered through TournamentMIDs.
 var TopFloorMIDs = []uint16{272, 273, 278, 280, 281, 288, 289, 290, 291, 292, 293, 294}
 
 type TopFloorPort interface {
 	Load(context.Context, identity.ActorContext, operation.Context) (app.ArenaView, error)
 	Refresh(context.Context, identity.ActorContext, operation.Context) (app.ArenaView, error)
 	SaveDefense(context.Context, identity.ActorContext, []int64, int64, operation.Context) error
-	PreFight(context.Context, identity.ActorContext, int64) error
+	PreFight(context.Context, identity.ActorContext, int64, operation.Context) error
 	Start(context.Context, identity.ActorContext, app.StartCommand, operation.Context) (app.FightView, error)
 	BuyTicket(context.Context, identity.ActorContext, operation.Context) (d.Player, error)
 	ResetTimer(context.Context, identity.ActorContext, operation.Context) (d.Player, error)
 	Records(context.Context, identity.ActorContext) ([]app.RecordView, error)
-	Report(context.Context, string) ([]byte, error)
+	RecordReplay(context.Context, int64) (app.RecordReplay, error)
+	Report(context.Context, string, operation.Context) ([]byte, error)
 	RecordInfo(context.Context, identity.ActorContext, int64) (app.RecordInfo, d.Record, error)
-	Formation(context.Context, identity.ActorContext, int64) (d.Display, error)
+	Formation(context.Context, identity.ActorContext, int64, operation.Context) (d.Display, error)
 }
 
 type TopFloorDispatcher struct {
@@ -89,7 +89,7 @@ func (t TopFloorDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 		return *fail
 	}
 	if t.Service == nil {
-		return failTopFloor(d.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	p, op := req.Envelope.Params, req.Envelope.Operation
 	switch req.Envelope.MID {
@@ -148,6 +148,22 @@ func (t TopFloorDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 		}
 		return okI5(projection.ResetTimer(player))
 	case 289:
+		if _, replay := p["fighter_id"]; replay {
+			fighter, fighterOK := topFloorInteger(p, "fighter_id", true)
+			recordID, idOK := topFloorInteger(p, "id", true)
+			if !onlyStockGameplayParams(p, "fighter_id", "id") || !fighterOK || !idOK {
+				return badHero("invalid_top_floor_parameter")
+			}
+			value, err := t.Service.RecordReplay(ctx, recordID)
+			if err != nil {
+				return failTopFloor(err)
+			}
+			// An id owned by another player answers out of date, never their replay.
+			if int64(value.Record.Owner) != fighter {
+				value = app.RecordReplay{}
+			}
+			return okI5(projection.RecordReplay(value.Record, value.Self, value.Opponent, value.Report))
+		}
 		records, err := t.Service.Records(ctx, a)
 		if err != nil {
 			return failTopFloor(err)
@@ -162,7 +178,7 @@ func (t TopFloorDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 		if !onlyStockGameplayParams(p, "player_id", "report_key") || !ok {
 			return badHero("invalid_top_floor_parameter")
 		}
-		report, err := t.Service.Report(ctx, key)
+		report, err := t.Service.Report(ctx, key, op)
 		if err != nil {
 			return failTopFloor(err)
 		}
@@ -172,7 +188,7 @@ func (t TopFloorDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 		if !onlyStockGameplayParams(p, "other_player_id") || !ok {
 			return badHero("invalid_top_floor_parameter")
 		}
-		v, err := t.Service.Formation(ctx, a, id)
+		v, err := t.Service.Formation(ctx, a, id, op)
 		if err != nil {
 			return failTopFloor(err)
 		}
@@ -192,7 +208,7 @@ func (t TopFloorDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 		if !onlyStockGameplayParams(p, "enemy_id") || !ok {
 			return badHero("invalid_top_floor_parameter")
 		}
-		if err := t.Service.PreFight(ctx, a, enemy); err != nil {
+		if err := t.Service.PreFight(ctx, a, enemy, op); err != nil {
 			return failTopFloor(err)
 		}
 		return okI5(map[string]any{})
@@ -220,9 +236,18 @@ func (t TopFloorDispatcher) start(ctx context.Context, a identity.ActorContext, 
 	return okI5(projection.Fight(v.Formation, v.Report, v.Win, v.AwardCrystal, v.Enemy))
 }
 
+// Stock message id 35026 is the rank-changed toast; no stock row describes a
+// missing saved defense, so that refusal uses the D5 generic code.
+const topFloorRankChangedError = 35026
+
+var topFloorFailureRows = []failureRow{
+	{match: d.ErrOfferStale, class: failureRefusal, code: topFloorRankChangedError},
+	{match: d.ErrDefenseRequired, class: failureRefusal, code: unprovenRefusalCode},
+	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: d.ErrInvalid, class: failureMalformed, detail: "top_floor_request_refused"},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+}
+
 func failTopFloor(err error) httpedge.Response {
-	if errors.Is(err, d.ErrRefused) || errors.Is(err, d.ErrInvalid) || errors.Is(err, economy.ErrInsufficientBalance) {
-		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "top_floor_request_refused"}}
-	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "top_floor_unavailable_or_unresolved"}}
+	return failureFromRows(topFloorFailureRows, err)
 }

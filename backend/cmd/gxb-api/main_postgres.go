@@ -8,12 +8,14 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/arenastore"
 	"gxb.local/backend/v2/internal/adapters/postgres/commerceprivilegestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/dailyconsumestore"
+	"gxb.local/backend/v2/internal/adapters/postgres/dailyresetstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/leaguestore"
 	apparena "gxb.local/backend/v2/internal/application/arena"
 	appawakeningbattle "gxb.local/backend/v2/internal/application/awakeningbattle"
 	appleague "gxb.local/backend/v2/internal/application/championsleague"
 	"gxb.local/backend/v2/internal/application/commerceprivilege"
 	"gxb.local/backend/v2/internal/application/dailyconsume"
+	"gxb.local/backend/v2/internal/application/dailyreset"
 	apponeonone "gxb.local/backend/v2/internal/application/oneonone"
 	"gxb.local/backend/v2/internal/application/playerdisplay"
 	apptopfloor "gxb.local/backend/v2/internal/application/topfloor"
@@ -37,32 +39,45 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/campaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterbirth"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/compatstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/conquerstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/coursestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/dormstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/elementstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/eventcentrestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/frienddmstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/generaldmstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/gmquestionstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/godstrialstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildprojection"
 	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/herorecommendstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/inscriptionstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/libraryforumstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
 	"gxb.local/backend/v2/internal/adapters/postgres/marchstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/mentorstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/occultstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/oneononestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/petcampaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/publicationstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/restorestore"
+	"gxb.local/backend/v2/internal/adapters/postgres/retentionstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/sharedroomstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/socialexchangestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialgiftstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialinboxstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/socialinvitestore"
+	"gxb.local/backend/v2/internal/adapters/postgres/socialrecallstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/socialrelationstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/spiritstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/summonstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/undeliveredstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/worldbossstore"
 	"gxb.local/backend/v2/internal/adapters/publicpresentation"
 	"gxb.local/backend/v2/internal/adapters/socialpresentation"
@@ -78,25 +93,31 @@ import (
 	apppet "gxb.local/backend/v2/internal/application/characterpet"
 	apppractice "gxb.local/backend/v2/internal/application/characterpractice"
 	appsavedpreset "gxb.local/backend/v2/internal/application/charactersavedpreset"
+	appcompat "gxb.local/backend/v2/internal/application/compat"
 	appconquer "gxb.local/backend/v2/internal/application/conquerschool"
 	appcourse "gxb.local/backend/v2/internal/application/course"
 	appdir "gxb.local/backend/v2/internal/application/directorysync"
 	appdorm "gxb.local/backend/v2/internal/application/dormhouse"
 	appelement "gxb.local/backend/v2/internal/application/elementequipment"
+	appeventcentre "gxb.local/backend/v2/internal/application/eventcentre"
 	"gxb.local/backend/v2/internal/application/frienddm"
 	"gxb.local/backend/v2/internal/application/generaldm"
 	appgeneration "gxb.local/backend/v2/internal/application/generation"
+	"gxb.local/backend/v2/internal/application/gmquestion"
 	appgodstrial "gxb.local/backend/v2/internal/application/godstrial"
 	appguildcampaign "gxb.local/backend/v2/internal/application/guildcampaign"
 	"gxb.local/backend/v2/internal/application/guildcore"
 	appguildtea "gxb.local/backend/v2/internal/application/guildtea"
 	appevolution "gxb.local/backend/v2/internal/application/heroevolution"
+	appherorecommend "gxb.local/backend/v2/internal/application/herorecommend"
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	appidentity "gxb.local/backend/v2/internal/application/identitylifecycle"
 	appillusion "gxb.local/backend/v2/internal/application/illusion"
 	appinscription "gxb.local/backend/v2/internal/application/inscription"
+	applibraryforum "gxb.local/backend/v2/internal/application/libraryforum"
 	applibrary "gxb.local/backend/v2/internal/application/librarylocal"
 	appmarch "gxb.local/backend/v2/internal/application/march"
+	appmentor "gxb.local/backend/v2/internal/application/mentor"
 	"gxb.local/backend/v2/internal/application/missioninputs"
 	appoccult "gxb.local/backend/v2/internal/application/occult"
 	apppetcampaign "gxb.local/backend/v2/internal/application/petcampaign"
@@ -105,11 +126,15 @@ import (
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/application/roominvite"
 	appsharedroom "gxb.local/backend/v2/internal/application/sharedroom"
+	appshop "gxb.local/backend/v2/internal/application/shop"
 	"gxb.local/backend/v2/internal/application/socialdismiss"
+	"gxb.local/backend/v2/internal/application/socialexchange"
 	"gxb.local/backend/v2/internal/application/socialfriendbase"
 	"gxb.local/backend/v2/internal/application/socialgift"
 	"gxb.local/backend/v2/internal/application/socialinbox"
+	"gxb.local/backend/v2/internal/application/socialinvite"
 	"gxb.local/backend/v2/internal/application/socialprojection"
+	"gxb.local/backend/v2/internal/application/socialrecall"
 	"gxb.local/backend/v2/internal/application/socialrelation"
 	"gxb.local/backend/v2/internal/application/socialreload"
 	appspirit "gxb.local/backend/v2/internal/application/spirit"
@@ -132,6 +157,7 @@ import (
 	"gxb.local/backend/v2/internal/projection/lobby"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
 	"gxb.local/backend/v2/internal/protocol/limits"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 )
 
 func main() {
@@ -151,11 +177,16 @@ func main() {
 	if cfg.PublicEngineURL == "" {
 		log.Fatal("GXB_PUBLIC_ENGINE_URL is required for stock UpdateScene MID20480 discovery")
 	}
+	retentionPolicies, err := retentionstore.PoliciesFromEnvironment()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
+	poolConnections := envPositiveInt("GXB_API_DB_POOL_MAX_CONNS", 16)
 	pool, err := postgres.Open(ctx, string(cfg.PostgresDSN), postgres.PoolSettings{
-		MaxConns: 16, MinConns: 1, MaxConnLifetime: 30 * time.Minute,
+		MaxConns: int32(poolConnections), MinConns: 1, MaxConnLifetime: 30 * time.Minute,
 		MaxConnIdleTime: 5 * time.Minute, HealthCheckPeriod: 30 * time.Second,
 		ApplicationName: "gxb-v2-i6b-api",
 	})
@@ -165,6 +196,12 @@ func main() {
 	defer pool.Close()
 	if err := pool.Ping(ctx); err != nil {
 		log.Fatal(err)
+	}
+	if err := (restorestore.Store{}).CheckWritable(ctx, pool); err != nil {
+		log.Fatalf("refusing to start: %v", err)
+	}
+	if short, err := postgres.SerializableLockShortfall(ctx, pool); err != nil || len(short) > 0 {
+		log.Printf("WARNING: PostgreSQL SSI lock budget below C1 Tier 0, expect 40001 between unrelated players under load: %v %v", short, err)
 	}
 
 	var txMetrics observability.Metrics = observability.NopMetrics{}
@@ -184,7 +221,10 @@ func main() {
 			}
 		}()
 	}
-	runner := tx.Runner{DB: pool, Admission: tx.NewSemaphore(64), Hooks: observability.TxHooks{Metrics: txMetrics}}
+	// Admission equals the pool, so an admitted transaction never waits inside pgx where no deadline or order applies (C1-1).
+	transactionAdmission := tx.NewSemaphore(poolConnections)
+	runner := tx.Runner{DB: pool, Admission: transactionAdmission, Hooks: observability.TxHooks{Metrics: txMetrics}}
+	broadcastEmitter := postgres.BroadcastEmitter{Metrics: txMetrics}
 	// Deployment must apply migrations first. Gate all HTTP traffic on content readiness.
 	contentCtx, contentCancel := context.WithTimeout(ctx, 3*registry.DefaultWriteProfile().OperationTimeout)
 	active, contentErr := (registry.Service{Runner: runner, Repo: contentstore.Store{}, Fresh: pool, Providers: registry.DefaultProviderSet()}).ValidateActiveReadiness(contentCtx)
@@ -216,8 +256,12 @@ func main() {
 	i5db := i5store.Store{Queryer: pool, StackUsage: appdorm.FurnitureUsage{Owner: dormstore.Store{}, Content: contentstore.Store{Queryer: pool}}}
 	contentDB := contentstore.Store{Queryer: pool}
 	privileges := commerceprivilege.Provider{Store: commerceprivilegestore.Store{}, Content: contentDB}
-	i5svc := appi5.Service{Runner: runner, Store: i5db, Content: contentDB, Privileges: privileges, Functions: appi5.LevelFunctionAnnouncements{}, Directory: i4store.DirectoryLevelProjection{}, Backpack: i5db, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, RedeemSecret: redeemSecret}
+	i5svc := appi5.Service{Runner: runner, Store: i5db, Content: contentDB, Privileges: privileges, Functions: appi5.LevelFunctionAnnouncements{}, CampaignClears: campaignstore.TutorialMilestones{}, Directory: i4store.DirectoryLevelProjection{}, Backpack: i5db, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, RedeemSecret: redeemSecret}
+	if e := i5svc.ValidateStartup(); e != nil {
+		log.Fatalf("I5 startup: %v", e)
+	}
 	i5svc.CharacterFunctions = characterstore.FunctionPrerequisites{Store: characterstore.Store{Queryer: pool}, Content: contentDB}
+	i5svc.ServerLevels = i5db
 	i5svc.Awakening = &appi5.AwakeningRuntime{Store: i5db, Content: contentDB, Stacks: i5db, Costs: appi5.MaterialCostDebiter{Store: i5db, Content: contentDB}}
 	displayService := playerdisplay.Service{Runner: runner, Fresh: pool, Time: postgres.AuthoritativeTime{Queryer: pool}, Players: i4store.PlayerRootLocker{}, Fence: i5db, Store: i5db, Content: contentDB, Receipts: receipts, Privileges: privileges, CosmeticPrivileges: privileges, Inventory: i5db, Population: characterstore.DisplayReader{Store: characterstore.Store{Queryer: pool}, Content: contentDB}, Characters: characterstore.DisplayReader{Store: characterstore.Store{Queryer: pool}, Content: contentDB}, Values: appi5.DisplayValueOwner{Store: i5db, Content: contentDB, Grant: i5svc}, Directory: appdir.Reconciler{Source: i5db, Sink: i4store.DirectoryLevelProjection{}}, SkinItems: contentDB}
 
@@ -236,8 +280,8 @@ func main() {
 	heroEconomy := appi5.HeroProgressionDebiter{Store: i5db, Content: contentDB}
 	heroMaterialCosts := appi5.MaterialCostDebiter{Store: i5db, Content: contentDB}
 	heroEquipmentResources := appi5.HeroEquipmentResourceDebiter{Store: i5db, Content: contentDB}
-	heroEconomyProjection := appi5.ScalarProjector{Runner: runner, Store: i5db}
-	i5CrossOwner := appi5.CrossOwner{Store: i5db}
+	heroEconomyProjection := appi5.ScalarProjector{Runner: runner, Store: i5db, FloorPolicies: contentDB}
+	i5CrossOwner := appi5.CrossOwner{Store: i5db, FloorPolicies: contentDB}
 	practiceSvc := apppractice.Service{
 		Runner: runner, Store: heroDB, Content: contentDB, Privileges: privileges, ReconcileQueryer: pool,
 		Deps: apppractice.ServiceDeps{
@@ -252,14 +296,23 @@ func main() {
 	heroSvc := apphero.Service{CharacterFunctions: i5svc, AwakeningPositions: &apphero.AwakeningPositionResolver{Raw: characterstore.RawAwakeningStore{}, Content: contentDB, Queryer: pool}, Awakening: struct {
 		characterstore.Store
 		characterstore.RawAwakeningStore
-	}{Store: heroDB}, FreshFacets: characterbirth.FreshHeroFacets(), Runner: runner, Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}, Store: heroDB, Fencer: i5db, Content: contentDB, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, ProgressionStore: heroDB, Progression: contentDB, Economy: heroEconomy, Backpack: i5db, AcquisitionStore: heroDB, Acquisition: contentDB, MaterialCosts: heroMaterialCosts, PlayerLevel: i5CrossOwner, CollectionAdmission: apphero.CatalogCollectionAdmission{Content: contentDB}, Capacity: nil, Equipment: contentDB, EquipmentResources: heroEquipmentResources, Fumo: contentDB, Promotion: contentDB, PromotionResources: i5svc, StrictRestoration: i5svc, MaxHeroColorPolicy: maxHeroColorPolicy, RestorationModifier: characterasset.IdentityRestorationModifier{}, RosterProjection: contentDB, AppearanceStore: heroDB, Appearance: contentDB, AppearanceMutationStore: heroDB, AppearanceMutationContent: contentDB, LIVEMutationStore: heroDB}
+	}{Store: heroDB}, FreshFacets: characterbirth.FreshHeroFacets(), Journals: librarystore.Store{}, Runner: runner, Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}, Store: heroDB, Fencer: i5db, Content: contentDB, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, ProgressionStore: heroDB, Progression: contentDB, Economy: heroEconomy, Backpack: i5db, AcquisitionStore: heroDB, Acquisition: contentDB, MaterialCosts: heroMaterialCosts, Exchange: i5svc, PlayerLevel: i5CrossOwner, CollectionAdmission: apphero.CatalogCollectionAdmission{Content: contentDB}, Capacity: nil, Equipment: contentDB, EquipmentResources: heroEquipmentResources, Fumo: contentDB, DailyConsume: dailyconsume.Service{Store: dailyconsumestore.Store{}}, Promotion: contentDB, PromotionResources: i5svc, StrictRestoration: i5svc, MaxHeroColorPolicy: maxHeroColorPolicy, RestorationModifier: characterasset.IdentityRestorationModifier{}, RosterProjection: contentDB, AppearanceStore: heroDB, Appearance: contentDB, AppearanceMutationStore: heroDB, AppearanceMutationContent: contentDB, LIVEMutationStore: heroDB, Metrics: txMetrics}
 	petAcquisitionDebit := appi5.PetAcquisitionDebiter{Store: i5db, Content: contentDB}
 	petExpDebit := appi5.PetExpDebiter{Store: i5db, Content: contentDB}
 	petTimed := appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}
-	librarySvc := applibrary.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.LibraryHeroPort{Store: heroDB}, Library: librarystore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Receipts: receipts}
-	librarySvc.Achievements = appachievement.Service{Store: achievementstore.Store{}, Content: contentDB, Population: librarySvc}
-	dormSvc := appdorm.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.LibraryHeroPort{Store: heroDB}, Owner: dormstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Values: i5db, EXP: heroSvc, Exchange: i5svc, Receipts: receipts}
+	librarySvc := applibrary.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.LibraryHeroPort{Store: heroDB}, Library: librarystore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Receipts: receipts, Metrics: txMetrics, Broadcast: broadcastEmitter}
+	librarySvc.Achievements = appachievement.Service{Store: achievementstore.Store{Metrics: txMetrics}, Content: contentDB, Population: librarySvc}
+	librarySvc.Stacks = i5db
+	librarySvc.Skins = heroDB
+	forumSvc := applibraryforum.Service{Timed: heroSvc.Timed, Reads: runner, Store: libraryforumstore.Store{}, Players: i4store.PlayerRootLocker{}, Fence: i5db, Receipts: receipts, Directory: i4store.PlayerDirectoryReader{}, Characters: heroDB}
+	dormSvc := appdorm.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.LibraryHeroPort{Store: heroDB}, Awakening: apphero.RawAwakeningObservationReader{Heroes: characterstore.Store{}, Births: characterstore.RawAwakeningStore{}}, Owner: dormstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Values: i5db, EXP: heroSvc, Exchange: i5svc, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, GluePurchases: dormstore.Store{}, GlueValues: i5svc, GluePrivileges: privileges, Social: dormstore.Store{}, Directory: i4store.TransactionDiscoveryReader{}, Moderation: contentDB, Broadcast: broadcastEmitter}
 	bookSvc := appbook.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.LibraryHeroPort{Store: heroDB}, Owner: bookstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Values: i5db, Grants: i5svc, Exchange: i5svc, Receipts: receipts}
+	eventCentreSvc := appeventcentre.Service{Timed: heroSvc.Timed, Reads: runner, Owner: eventcentrestore.Store{}, Book: bookSvc, Content: contentDB, Pets: characterstore.Store{}, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Grants: i5svc, Receipts: receipts, BattleObserver: librarySvc}
+	if eventCentreSvc.BattleObserver == nil {
+		log.Fatal("I9-11G2 Event Centre board battle observer is not composed")
+	}
+	bookSvc.MakeInfo = eventCentreSvc
+	bookSvc.RecycleInfo = eventCentreSvc
 	courseSvc := appcourse.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.CourseHeroPort{Store: heroDB}, Owner: coursestore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Costs: heroMaterialCosts, Values: i5db, Grants: i5svc, Exchange: i5svc, Receipts: receipts, Privileges: privileges}
 	inscriptionSvc := appinscription.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.InscriptionHeroPort{Store: heroDB, Content: contentDB}, Owner: inscriptionstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Values: i5db, ValuePlans: i5svc, Eligibility: characterstore.InscriptionHeroPort{Store: heroDB, Content: contentDB}, Receipts: receipts}
 	elementSvc := appelement.Service{Timed: heroSvc.Timed, Reads: runner, Heroes: characterstore.ElementHeroPort{Store: heroDB}, Owner: elementstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Values: i5db, Costs: heroMaterialCosts, Grants: i5svc, Exchange: i5svc, Receipts: receipts}
@@ -274,13 +327,40 @@ func main() {
 	i5svc.Missions = &appi5.MissionMaterializer{Awakening: i5db, Activity: contentDB, Store: i5db, Catalog: contentDB, Observations: missioninputs.Reader{Spending: i5db, Heroes: heroDB, Progression: i5db, Campaigns: campaignstore.Store{}, Books: bookSvc, Privileges: privileges}}
 	i5svc.MissionTime = postgres.AuthoritativeTime{Queryer: pool}
 	i5svc.MissionFresh = pool
+	// ObjectiveFacts holds i5svc by value: compose it after Missions exists, and
+	// before heroSvc is copied into SignIn and the dispatchers.
+	heroSvc.Facts = appi5.ObjectiveFacts{Owner: i5svc, Open: i5db}
+	if heroSvc.Facts.Owner.Missions == nil {
+		log.Fatal("I9-12 Hero promotion mission facts are not composed")
+	}
 	i5svc.SignIn = &appi5.SignInRuntime{Store: i5db, Content: contentDB, Heroes: heroSvc, HeroWire: heroproj.StockHero}
-	librarySvc.Roster = characterstore.HeroBootstrapProjection{AwakeningPositions: heroSvc.AwakeningPositions, Awakening: heroSvc, Content: contentDB, Library: librarySvc, Dorm: dormSvc, Book: bookSvc, Course: courseSvc, Inscription: inscriptionSvc, Element: elementSvc, Spirit: spiritSvc, Evolution: evolutionSvc}
-	achievements := canonicalAchievements(pool, runner, contentDB, i5db, i5svc, librarySvc, achievementOwners{books: bookSvc, courses: courseSvc, inscriptions: inscriptionSvc, dorm: dormSvc, skins: displayService})
+	// C17/C18: the Library settling commands emit INTIMACY_IMPROVED through the
+	// same objective port as charge/summon, including the Adventure 10002 observer.
+	librarySvc.Grants = i5svc
+	librarySvc.Facts = appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}, Wake: adventureWakeup{}, Favor: librarystore.Store{}}}
+	eventCentreSvc.Facts = appi5.ObjectiveFacts{Owner: i5svc, Open: i5db}
+	rosterProjection := &characterstore.HeroBootstrapProjection{AwakeningPositions: heroSvc.AwakeningPositions, Awakening: heroSvc, Content: contentDB, Library: librarySvc, Dorm: dormSvc, Book: bookSvc, Course: courseSvc, Inscription: inscriptionSvc, Element: elementSvc, Spirit: spiritSvc, Evolution: evolutionSvc}
+	librarySvc.Roster = rosterProjection
+	achievements := canonicalAchievements(pool, runner, contentDB, i5db, i5svc, librarySvc, achievementOwners{books: bookSvc, courses: courseSvc, inscriptions: inscriptionSvc, dorm: dormSvc, skins: displayService}, txMetrics)
+	mentorTimed := appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}
+	socialRelationDB := socialrelationstore.Store{}
+	mentorSvc := appmentor.Service{
+		Timed:       mentorTimed,
+		Players:     i4store.PlayerRootLocker{},
+		Store:       mentorstore.Store{},
+		Directory:   i4store.TransactionDiscoveryReader{},
+		Cards:       socialpresentation.TransactionReader{Display: displayService},
+		Friendships: socialrelation.FriendshipEnsurer{Players: i4store.PlayerRootLocker{}, Store: socialRelationDB},
+		Backgrounds: librarystore.Store{},
+		Functions:   i5db,
+		Grants:      i5svc,
+		Content:     contentDB,
+		Receipts:    receipts,
+	}
 	petSvc := apppet.Service{Awakening: heroDB, Runner: runner, Timed: petTimed, Store: heroDB, Fencer: i5db, Content: contentDB, Progression: contentDB, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, Acquisition: petAcquisitionDebit, MaterialCosts: heroMaterialCosts, Scalar: i5CrossOwner, PetExp: petExpDebit, Equipment: contentDB, EquipmentResources: heroEquipmentResources, Promotion: contentDB, PromotionResources: i5svc, StrictRestoration: i5svc, RestorationModifier: characterasset.IdentityRestorationModifier{}, AppearanceStore: heroDB, Appearance: contentDB, AppearanceMutationStore: heroDB}
 	heroSvc.AwakeningEquipment, petSvc.AwakeningEquipment = &i5svc, &i5svc
 	i5svc.Awakening.Heroes, i5svc.Awakening.Pets = heroSvc, petSvc
-	petEconomyProjection := appi5.ScalarProjector{Runner: runner, Store: i5db}
+	petEconomyProjection := appi5.ScalarProjector{Runner: runner, Store: i5db, FloorPolicies: contentDB}
 	guildPolicyArtifact, err := guildpolicy.LoadBuiltin()
 	if err != nil {
 		log.Fatalf("I6C Guild policy: %v", err)
@@ -295,6 +375,7 @@ func main() {
 		Store: guildDB, Fencer: i5db, PlayerRoots: i4store.PlayerRootLocker{},
 		Level: i5CrossOwner, Scalar: i5CrossOwner, LevelAndScalar: i5CrossOwner,
 		Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, Policy: guildPolicy,
+		Notices: postgres.GuildApplyNoticeEmitter{},
 	}
 	guildView := guildviewread.Reader{Runner: runner}
 	teaPolicy, err := guildteapolicy.LoadBuiltin()
@@ -303,21 +384,64 @@ func main() {
 	}
 	guildTeaSvc := appguildtea.Service{Runner: runner, Store: guildDB, Directory: i4store.PlayerDirectoryReader{}, Content: contentDB,
 		Heroes: heroDB, Inventory: i5db, Values: i5svc, Costs: heroMaterialCosts, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db},
-		Fence: i5db, Players: i4store.PlayerRootLocker{}, Policy: appguildtea.Policy{RequestsPerDay: teaPolicy.Policy.RequestsPerDay, NormalNeed: teaPolicy.Policy.NormalNeed, SXNeed: teaPolicy.Policy.SXNeed, DonorFriendMedalPerScroll: teaPolicy.Policy.DonorFriendMedalPerScroll}}
+		Fence: i5db, Players: i4store.PlayerRootLocker{}, Policy: appguildtea.Policy{RequestsPerDay: teaPolicy.Policy.RequestsPerDay, NormalNeed: teaPolicy.Policy.NormalNeed, SXNeed: teaPolicy.Policy.SXNeed, DonorFriendMedalPerScroll: teaPolicy.Policy.DonorFriendMedalPerScroll}, PartnerMissions: librarySvc}
 	vending := appsummon.Mode{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}, Fresh: pool, Store: summonstore.Store{}, Content: contentDB, Fence: i5db,
-		Heroes: heroSvc, HeroWire: heroproj.StockHero, Grants: i5svc, Costs: heroMaterialCosts, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}, Wake: adventureWakeup{}}}, Privileges: privileges, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: pool}}
+		Heroes: heroSvc, HeroWire: heroproj.StockHero, Grants: i5svc, Costs: heroMaterialCosts, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}, Wake: adventureWakeup{}}}, Privileges: privileges, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: pool}, Broadcast: broadcastEmitter, Achievements: achievements}
+	charge := commerceprivilege.Charge{
+		Timed:       appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner},
+		Fresh:       pool,
+		Fence:       i5db,
+		Facts:       appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}, Wake: adventureWakeup{}}},
+		Store:       commerceprivilegestore.Store{},
+		Content:     contentDB,
+		Grants:      i5svc,
+		Effects:     appi5.PrivilegeTransitionOwner{Store: i5db, Content: contentDB},
+		Directory:   i4store.DirectoryLevelProjection{},
+		Receipts:    kernelstore.Store{},
+		ReceiptRead: kernelstore.Reader{Queryer: pool},
+	}
+	heroBootstrap := &characterstore.HeroBootstrapProjection{AwakeningPositions: heroSvc.AwakeningPositions, Awakening: heroSvc, Content: contentDB, Library: librarySvc, Dorm: dormSvc, Book: bookSvc, Course: courseSvc, Inscription: inscriptionSvc, Element: elementSvc, Spirit: spiritSvc, Evolution: evolutionSvc}
+	compatService := canonicalCompat(pool, runner, contentDB, i5db)
+	owners := topFloorOwners{library: librarySvc, dorm: dormSvc, book: bookSvc, course: courseSvc, inscription: inscriptionSvc, element: elementSvc, spirit: spiritSvc, evolution: evolutionSvc}
+	publicStats := canonicalPublicStats(pool, contentDB, owners)
+	heroRecommend := canonicalHeroRecommend(pool, runner, contentDB, owners, publicStats)
 	bootstrap := i4store.BootstrapService{
 		Runner: runner, Receipts: receipts, ReceiptReader: kernelstore.Reader{Queryer: pool},
 		DigestSecret: digestSecret, BearerSecret: bearerSecret, DerivationKeyID: keyID, BearerKeys: bearerKeys,
 		BootstrapProfileVersion: "i4-wave-s-v1",
 		PersistenceContributors: characterbirth.Contributors(contentstore.Store{Queryer: pool}, privileges, dormBundle.RevisionID()),
 		LoginTime:               postgres.AuthoritativeTime{Queryer: pool},
-		LoginReconcilers:        []appboot.CharacterLoginReconciler{appi5.AwakeningBootstrap{Owner: i5svc}, appi5.SignInBootstrap{Owner: i5svc}, appi5.MissionBootstrap{Owner: i5svc}, appi5.PetStarterLoginReconciler{Store: i5db, Content: contentDB}},
+		LoginReconcilers:        []appboot.CharacterLoginReconciler{i4store.PlayerLoginActivity{}, socialrecall.LoginReconciler{Owner: socialrecallstore.Store{}, Players: i4store.PlayerRootLocker{}}, appi5.MailExpiryLoginReconciler{Store: i5db}, appi5.SignInBootstrap{Owner: i5svc}, appi5.MissionBootstrap{Owner: i5svc}, appi5.AwakeningBootstrap{Owner: i5svc}, appi5.PetStarterLoginReconciler{Store: i5db, Content: contentDB}, achievementstore.NoticeLoginReconciler{}},
 		OperationBinder:         contentstore.Store{},
-		DetailContributors:      []appboot.MID1DetailContributor{appi5.AwakeningBootstrap{Owner: i5svc}, appi5.SignInBootstrap{Owner: i5svc}, appi5.MissionBootstrap{Owner: i5svc}, commerceprivilege.BootstrapProjection{Provider: privileges}, i5store.BootstrapProjection{Display: displayService, Content: contentstore.Store{Queryer: pool}, Privileges: privileges, MaxHeroColor: maxHeroColorPolicy, Spirit: spiritSvc}, activitystore.BootstrapProjection{Directory: activityDirectory}, guildprojection.BootstrapProjection{}, guildprojection.TeaProjection{}, characterstore.HeroBootstrapProjection{AwakeningPositions: heroSvc.AwakeningPositions, Awakening: heroSvc, Content: contentDB, Library: librarySvc, Dorm: dormSvc, Book: bookSvc, Course: courseSvc, Inscription: inscriptionSvc, Element: elementSvc, Spirit: spiritSvc, Evolution: evolutionSvc}, librarystore.BootstrapProjection{Service: librarySvc}, bookstore.BootstrapProjection{Service: bookSvc, Content: contentDB}, coursestore.BootstrapProjection{Service: courseSvc, Content: contentDB}, characterstore.PetBootstrapProjection{Content: contentDB}, characterstore.SavedPresetBootstrapProjection{}, conquerstore.BootstrapProjection{Content: contentDB}, campaignWorld, vending, appmarch.Mode{Store: marchstore.Store{}}, apppetcampaign.Mode{Store: petcampaignstore.Store{}}, appgodstrial.Mode{Store: godstrialstore.Store{}}, appworldboss.Mode{Store: worldbossstore.Store{}}, appadventure.Mode{Store: adventurestore.Store{}, Content: contentDB, Functions: i5db, Directory: i4store.PlayerDirectoryReader{}}},
+		DetailContributors:      []appboot.MID1DetailContributor{appdorm.GlueBootstrap{Owner: dormstore.Store{}}, appi5.AwakeningBootstrap{Owner: i5svc}, appi5.SignInBootstrap{Owner: i5svc}, appi5.MissionBootstrap{Owner: i5svc}, commerceprivilege.BootstrapProjection{Provider: privileges}, i5store.BootstrapProjection{Display: displayService, Content: contentstore.Store{Queryer: pool}, Privileges: privileges, MaxHeroColor: maxHeroColorPolicy, Spirit: spiritSvc, BackpackSort: heroDB}, activitystore.BootstrapProjection{Directory: activityDirectory}, guildprojection.BootstrapProjection{}, guildprojection.TeaProjection{}, mentorstore.BootstrapProjection{Service: mentorSvc}, heroBootstrap, librarystore.BootstrapProjection{Service: librarySvc}, bookstore.BootstrapProjection{Service: bookSvc, Content: contentDB}, coursestore.BootstrapProjection{Service: courseSvc, Content: contentDB}, characterstore.PetBootstrapProjection{Content: contentDB}, characterstore.SavedPresetBootstrapProjection{}, conquerstore.BootstrapProjection{Content: contentDB}, campaignWorld, vending, appmarch.Mode{Store: marchstore.Store{}, Roster: heroBootstrap}, apppetcampaign.Mode{Store: petcampaignstore.Store{}}, appgodstrial.Mode{Store: godstrialstore.Store{}}, appworldboss.Mode{Store: worldbossstore.Store{}}, appadventure.Mode{Store: adventurestore.Store{}, Content: contentDB, Functions: i5db, Directory: i4store.PlayerDirectoryReader{}}, appcompat.BootstrapProjection{Store: compatstore.Store{}}, achievementstore.BootstrapProjection{Store: achievementstore.Store{}, Content: contentDB, Active: contentDB}, herorecommendstore.BootstrapProjection{Service: heroRecommend}},
 		DirectoryReconciler:     appdir.Reconciler{Source: i5db, Sink: i4store.DirectoryLevelProjection{}},
 	}
 	authority := i4store.RealtimeAuthority{Queryer: pool, DigestSecret: digestSecret, BearerSecret: bearerSecret, DerivationKeyID: keyID, BearerKeys: bearerKeys}
+	itemsEnergy := stockruntime.NewItemsEnergyComposition(stockruntime.ItemsEnergyDependencies{
+		Timed:       heroSvc.Timed,
+		Fresh:       pool,
+		Content:     contentDB,
+		Values:      i5db,
+		Privileges:  privileges,
+		I5:          i5svc,
+		Heroes:      heroSvc,
+		Receipts:    receipts,
+		ReceiptRead: kernelstore.Reader{Queryer: pool},
+		Authority:   authority,
+	})
+	bootstrap.DetailContributors = append(bootstrap.DetailContributors, itemsEnergy.MID1)
+	heroAssets := stockruntime.NewHeroAssetsComposition(stockruntime.HeroAssetsDependencies{
+		Timed:       heroSvc.Timed,
+		Fresh:       pool,
+		Content:     contentDB,
+		Values:      i5db,
+		Privileges:  privileges,
+		I5:          i5svc,
+		Receipts:    receipts,
+		ReceiptRead: kernelstore.Reader{Queryer: pool},
+		Authority:   authority,
+	})
+	bootstrap.DetailContributors = append(bootstrap.DetailContributors, heroAssets.Bootstrap)
 	realtime := apprealtime.Service{
 		Authority: authority,
 		Guilds:    guildprojection.RealtimeMembership{Queryer: pool},
@@ -354,32 +478,56 @@ func main() {
 	for _, mid := range []uint16{2, 2864, 20480} {
 		mustRegister(mid, prelogin)
 	}
+	energyDispatcher := stockruntime.ItemsEnergyDispatcher{Authority: authority, Service: itemsEnergy.Service}
 	mux := http.NewServeMux()
-	clientLogs, journal := startClientLog(ctx, pool, authority, cfg.ClientLogURL, txMetrics, mux)
-	boot := stockruntime.BootstrapDispatcher{Bootstrap: bootstrap, Tracker: tracker, LogURLs: clientLogs}
+	clientLogs, journal := startClientLog(ctx, pool, authority, cfg.ClientLogURL, retentionPolicies.RetentionDays, txMetrics, mux, handlerConcurrency("GXB_CLIENT_LOG_MAX_CONCURRENT", 4, poolConnections))
+	dailyReset := dailyreset.Service{Markers: dailyresetstore.Store{Queryer: pool}, Counters: itemsEnergy.Counters}
+	boot := stockruntime.BootstrapDispatcher{Bootstrap: bootstrap, Tracker: tracker, LogURLs: clientLogs, DailyReset: dailyReset}
 	mustRegister(18, boot)
 	mustRegister(1, boot)
-	mustRegister(192, stockruntime.DiscoveryDispatcher{Realtime: realtime, Tracker: tracker})
-	// Login, bootstrap and discovery carry their own full state; every gameplay MID registered from here gets the F17 keys.
-	router.Wrap = func(d httpedge.Dispatcher) httpedge.Dispatcher { return stockruntime.Decorated{Next: d} }
-	owners := topFloorOwners{library: librarySvc, dorm: dormSvc, book: bookSvc, course: courseSvc, inscription: inscriptionSvc, element: elementSvc, spirit: spiritSvc, evolution: evolutionSvc}
-	publicStats := canonicalPublicStats(pool, contentDB, owners)
+	mustRegister(192, stockruntime.DiscoveryDispatcher{Realtime: realtime, Tracker: tracker, Reads: runner})
+	// Login, bootstrap and discovery carry their own full state; every gameplay MID registered from here gets the F17 keys
+	// and the R6 undelivered-reply guard: one decorator, resolved before the MID handler runs.
+	undeliveredMarks := undeliveredstore.Store{Pool: pool.Raw()}
+	replayWindow := envDurationWithin("GXB_UNDELIVERED_REPLAY_WINDOW", 10*time.Minute, time.Minute, 30*time.Minute)
+	router.Wrap = func(d httpedge.Dispatcher) httpedge.Dispatcher {
+		return stockruntime.UndeliveredReplay{Next: stockruntime.Decorated{Next: d, DailyReset: dailyReset, PendingFunctions: i5db}, Authority: authority, Marks: undeliveredMarks, Window: replayWindow, Metrics: txMetrics}
+	}
+	for _, mid := range stockruntime.ItemsEnergyMIDs {
+		mustRegister(mid, energyDispatcher)
+	}
+	heroRecommendD := stockruntime.HeroRecommendDispatcher{Authority: authority, Service: heroRecommend}
+	for _, mid := range []uint16{2496, 2497, 2498, 2499} {
+		mustRegister(mid, heroRecommendD)
+	}
+	go runReconcileWithInterval(ctx, pool, &appherorecommend.Reconciler{Service: heroRecommend}, envPositiveDuration("GXB_HERO_RECOMMEND_RECONCILE_INTERVAL", defaultReconcileInterval))
 	profileMetrics := canonicalProfileMetrics(contentDB, publicStats, displayService, achievements)
 	profileRecords := apppublicprofile.RosterRecords{Heroes: owners.roster(contentDB), Pets: characterstore.PetBootstrapProjection{Content: contentDB}, Awakening: publicStats.Awakening, Conquer: appconquer.Service{Owner: conquerstore.Store{}, Content: contentDB, Heroes: characterstore.Store{Queryer: pool}, Kinds: contentDB, Players: i4store.PlayerRootLocker{}}}
 	var profileHistory apppublicprofile.HistoryReader
 	// The title origin route copied above never reads metrics.
 	boardRanking.Metrics = profileMetrics
+	boardRanking.TopForce = profileMetrics
+	boardRanking.BloodAwaken = profileMetrics
+	boardRanking.Comfort = dormstore.Store{Queryer: pool}
+	boardRanking.Occult = occultstore.Store{}
+	boardRanking.Presence = presencestore.Store{}
+	boardRanking.Login = i4store.PlayerLoginActivity{}
+	startRankingJobs(ctx, pool, boardRanking)
 	rentalPolicy, err := guildrentalpolicy.LoadBuiltin()
 	if err != nil {
 		log.Fatalf("I9-9B Guild rental policy: %v", err)
 	}
 	rentalBinding := rentalPolicyBinding(rentalPolicy.Policy)
-	rentalSvc, rentalReads := canonicalGuildRental(pool, runner, contentDB, guildDB, i5db, i5svc, privileges, publicStats, heroMaterialCosts, rentalBinding)
+	rentalSvc, rentalReads := canonicalGuildRental(pool, runner, contentDB, guildDB, i5db, i5svc, privileges, publicStats, heroMaterialCosts, rentalBinding, librarySvc)
 	guildSvc.Rental = rentalSvc
 	fight, fightReady, err := canonicalCombat(pool, runner, contentDB, owners, rentalSvc)
 	if err != nil {
 		log.Fatalf("I7C-5B Combat composition: %v", err)
 	}
+	eventCentreSvc.Heroes = characterstore.Store{Queryer: pool}
+	eventCentreSvc.Levels = i5db
+	eventCentreSvc.Stats = publicStats
+	eventCentreSvc.Combat = fight
 	rentalRuntime := guildRentalRuntime{Service: rentalSvc, Reads: rentalReads}
 	campaignCatalog, err := guildcampaigncatalog.LoadBuiltin()
 	if err != nil {
@@ -389,51 +537,100 @@ func main() {
 	if err != nil {
 		log.Fatalf("I9-9C Guild Campaign policy: %v", err)
 	}
+	var teamShops appshop.TeamShops
 	if fightReady {
-		campaignMode, _ := canonicalGuildCampaign(pool, runner, contentDB, guildDB, i5db, i5svc, guildcampaigncontent.Catalog{Installed: campaignCatalog.Catalog}, campaignPolicy.Policy, fight)
+		campaignMode, _ := canonicalGuildCampaign(pool, runner, contentDB, guildDB, i5db, i5svc, guildcampaigncontent.Catalog{Installed: campaignCatalog.Catalog}, campaignPolicy.Policy, fight, librarySvc)
+		campaignMode.Metrics = txMetrics
+		requireGirlsLogObserver("Guild Campaign", campaignMode.BattleCounts)
 		guildSvc.Campaign = campaignMode
 		campaignD := stockruntime.GuildCampaignDispatcher{Authority: authority, Service: campaignMode}
 		for _, mid := range stockruntime.GuildCampaignMIDs {
+			if mid == 610 {
+				mustRegister(mid, observing(authority, achievements, "GuildCampaign", campaignD))
+				continue
+			}
 			mustRegister(mid, campaignD)
 		}
 		go runReconcile(ctx, pool, appguildcampaign.Reconciler{Mode: campaignMode})
+		teamShops = campaignMode
+	}
+	shopComposition := stockruntime.NewShopComposition(stockruntime.ShopDependencies{
+		Timed:        heroSvc.Timed,
+		Fresh:        pool,
+		Content:      contentDB,
+		Values:       i5db,
+		Privileges:   privileges,
+		I5:           i5svc,
+		Receipts:     receipts,
+		ReceiptRead:  kernelstore.Reader{Queryer: pool},
+		Authority:    authority,
+		TeamShops:    teamShops,
+		Achievements: achievements,
+		Facts:        appi5.ObjectiveFacts{Owner: i5svc, Open: i5db, Observer: appadventure.Observer{Store: adventurestore.Store{}, Wake: adventureWakeup{}}},
+	})
+	shopDispatcher := stockruntime.ShopDispatcher{Authority: authority, Service: shopComposition.Service}
+	for _, mid := range stockruntime.ShopMIDs {
+		mustRegister(mid, shopDispatcher)
 	}
 	ranking := stockruntime.RankingDispatcher{Authority: authority, Service: boardRanking, Trophy: achievements, Guilds: guildView}
+	var roomChat, occultRoomChat, adventureRoomChat stockruntime.RoomChatSender
 	if fightReady {
 		sharedRooms := appsharedroom.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner},
 			Fresh: pool, Store: sharedroomstore.Store{}, Fence: i5db, Players: i4store.PlayerRootLocker{}}
 		fight.Inputs.Rooms = stockruntime.NewAdmissionRouter()
-		worldBoss := canonicalWorldBoss(pool, runner, contentDB, i5db, i5svc, privileges, fight)
+		worldBoss := canonicalWorldBoss(pool, runner, contentDB, i5db, i5svc, privileges, fight, librarySvc)
 		roomInvites := roominvite.Service{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner},
 			Players: i4store.PlayerRootLocker{}, Roots: socialrelation.RootService{Store: socialrelationstore.Store{}}, Store: socialinboxstore.Store{},
-			Notices: postgres.RoomInviteNoticeListEmitter{Pool: pool, OnError: func(err error) { log.Printf("room invite notice list degraded: %v", err) }}}
-		illusion := canonicalIllusion(pool, runner, contentDB, i5db, i5svc, privileges, fight, guildDB, sharedRooms, roomInvites)
+			Notices: postgres.RoomInviteNoticeListEmitter{Pool: pool, OnError: func(err error) { log.Printf("room invite notice list degraded: %v", err) }},
+			Limiter: roominvite.NewSenderRateLimiter(envPositiveDuration("GXB_ROOM_INVITE_SENDER_INTERVAL", roominvite.DefaultSenderInterval), envPositiveInt("GXB_ROOM_INVITE_SENDER_BURST", roominvite.DefaultSenderBurst))}
+		illusion := canonicalIllusion(pool, runner, contentDB, i5db, i5svc, privileges, fight, guildDB, sharedRooms, roomInvites, achievements, retentionPolicies.RetentionDays, librarySvc)
+		if illusion.BattleObserver == nil {
+			log.Fatal("I9-11G2 Illusion battle observer is not composed")
+		}
 		ranking.Illusion = illusion
-		occultMode := canonicalOccult(pool, runner, contentDB, i5db, i5svc, fight, sharedRooms, roomInvites)
-		topFloor := canonicalTopFloor(pool, runner, contentDB, i5db, i5svc, privileges, fight, owners)
-		memoir := canonicalMemoir(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor)
+		roomChat = illusion
+		occultMode := canonicalOccult(pool, runner, contentDB, i5db, i5svc, fight, sharedRooms, roomInvites, retentionPolicies.RetentionDays, librarySvc)
+		occultRoomChat = occultMode
+		if occultMode.BattleObserver == nil {
+			log.Fatal("I9-11G2 Occult battle observer is not composed")
+		}
+		topFloor := canonicalTopFloor(pool, runner, contentDB, i5db, i5svc, privileges, fight, publicStats, owners, broadcastEmitter, displayService)
+		memoir := canonicalMemoir(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor, librarySvc)
 		for _, mid := range stockruntime.MemoirMIDs {
-			mustRegister(mid, stockruntime.MemoirDispatcher{Authority: authority, Service: memoir})
+			memoirD := stockruntime.MemoirDispatcher{Authority: authority, Service: memoir}
+			if mid == 2310 || mid == 2313 {
+				mustRegister(mid, observing(authority, achievements, "Memoir", memoirD))
+				continue
+			}
+			mustRegister(mid, memoirD)
 		}
 		dodgeball := canonicalDodgeball(pool, runner, contentDB, i5db, i5svc, fight, displayService)
 		for _, mid := range stockruntime.DodgeballMIDs {
 			mustRegister(mid, stockruntime.DodgeballDispatcher{Authority: authority, Service: dodgeball})
 		}
-		godsTrial := canonicalGodsTrial(pool, runner, contentDB, i5db, i5svc, heroSvc, petSvc, fight, spiritSvc)
+		godsTrial := canonicalGodsTrial(pool, runner, contentDB, i5db, i5svc, heroSvc, petSvc, fight, spiritSvc, librarySvc)
 		for _, mid := range stockruntime.GodsTrialMIDs {
 			mustRegister(mid, stockruntime.GodsTrialDispatcher{Authority: authority, Service: godsTrial})
 		}
-		petCampaign := canonicalPetCampaign(pool, runner, contentDB, i5db, i5svc, heroSvc, petSvc, fight)
+		petCampaign := canonicalPetCampaign(pool, runner, contentDB, i5db, i5svc, heroSvc, petSvc, fight, librarySvc)
 		ranking.PetCampaign = petCampaign
 		for _, mid := range stockruntime.PetCampaignMIDs {
-			mustRegister(mid, stockruntime.PetCampaignDispatcher{Authority: authority, Service: petCampaign})
+			petD := stockruntime.PetCampaignDispatcher{Authority: authority, Service: petCampaign}
+			if mid == 820 {
+				mustRegister(mid, observing(authority, achievements, "PetCampaign", petD))
+				continue
+			}
+			mustRegister(mid, petD)
 		}
-		workplace := canonicalWorkplace(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor, rentalReads)
+		workplace := canonicalWorkplace(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor, rentalReads, broadcastEmitter, librarySvc)
+		if workplace.BattleObserver == nil {
+			log.Fatal("I9-11G2 Workplace battle observer is not composed")
+		}
 		for _, mid := range stockruntime.WorkplaceMIDs {
 			mustRegister(mid, observing(authority, achievements, "Hero", stockruntime.WorkplaceDispatcher{Authority: authority, Service: workplace}))
 		}
 
-		march := canonicalMarch(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor)
+		march := canonicalMarch(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, topFloor, librarySvc, librarySvc)
 		for _, mid := range stockruntime.MarchMIDs {
 			mustRegister(mid, observing(authority, achievements, "Hero", stockruntime.MarchDispatcher{Authority: authority, Service: march}))
 		}
@@ -452,6 +649,10 @@ func main() {
 		}
 		go runReconcile(ctx, pool, apponeonone.Reconciler{Service: oneOnOne})
 		arena := canonicalArena(pool, runner, contentDB, i5db, i5svc, fight, owners)
+		// ARENA_HERO_PICKS_V1: both MID1 key49 and MID49 roster bodies read Arena's
+		// season pick count (ledger DL-b024e8a4).
+		rosterProjection.SeasonPicks = arena
+		heroBootstrap.SeasonPicks = arena
 		ranking.Arena = arena
 		for _, mid := range stockruntime.ArenaMIDs {
 			mustRegister(mid, stockruntime.ArenaDispatcher{Authority: authority, Service: arena})
@@ -473,17 +674,31 @@ func main() {
 			mustRegister(mid, stockruntime.LeagueDispatcher{Authority: authority, Service: league})
 		}
 		go runReconcile(ctx, pool, appleague.Reconciler{Service: league})
-		conquer := canonicalConquer(pool, runner, contentDB, i5db, i5svc, privileges, fight)
-		campaign := canonicalCampaign(pool, runner, contentDB, i5db, i5svc, heroSvc, fight)
+		conquer := canonicalConquer(pool, runner, contentDB, i5db, i5svc, privileges, fight, broadcastEmitter, librarySvc)
+		campaign := canonicalCampaign(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, librarySvc)
 		campaign.StarCaps = rentalStarCaps(rentalPolicy.Policy)
-		blood := appawakeningbattle.Mode{Timed: heroSvc.Timed, Fresh: pool, Content: contentDB, Fence: i5db, Heroes: heroSvc, Missions: i5svc, Combat: fight, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}}
+		blood := appawakeningbattle.Mode{Timed: heroSvc.Timed, Fresh: pool, Content: contentDB, Fence: i5db, Heroes: heroSvc, Missions: i5svc, Combat: fight, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, BattleCounts: librarySvc}
 		for _, mid := range []uint16{866, 867} {
 			mustRegister(mid, stockruntime.AwakeningBloodDispatcher{Authority: authority, Service: blood})
 		}
 		campaign.StoryHeroes, campaign.Pets, campaign.MaxColor = heroSvc, petSvc, maxHeroColorPolicy
 		campaign.StoryWire = heroproj.StockHero
+		sharedEnergy := energyDispatcher
+		sharedEnergy.Campaign = campaign
+		sharedEnergy.Fumo = heroSvc
+		for _, mid := range stockruntime.ItemsEnergySharedMIDs {
+			mustRegister(mid, sharedEnergy)
+		}
 		for _, mid := range stockruntime.CampaignMIDs {
-			mustRegister(mid, stockruntime.CampaignDispatcher{Authority: authority, Service: campaign})
+			if mid == 28 || mid == 29 {
+				continue
+			}
+			campaignD := stockruntime.CampaignDispatcher{Authority: authority, Service: campaign}
+			if mid == 114 {
+				mustRegister(mid, observing(authority, achievements, "Campaign", campaignD))
+				continue
+			}
+			mustRegister(mid, campaignD)
 		}
 		for _, mid := range stockruntime.ConquerMIDs {
 			mustRegister(mid, observing(authority, achievements, "Conquer", stockruntime.ConquerDispatcher{Authority: authority, Service: conquer}))
@@ -494,13 +709,22 @@ func main() {
 		for _, mid := range stockruntime.IllusionMIDs {
 			mustRegister(mid, stockruntime.IllusionDispatcher{Authority: authority, Service: illusion})
 		}
-		adventureMode := canonicalAdventure(pool, runner, contentDB, i5db, i5svc, fight, adventureOpponents{Arena: arena, TopFloor: topFloor}, sharedRooms, heroSvc, heroproj.StockHero, roomInvites)
+		adventureMode := canonicalAdventure(pool, runner, contentDB, i5db, i5svc, fight, adventureOpponents{Arena: arena, TopFloor: topFloor}, sharedRooms, heroSvc, heroproj.StockHero, roomInvites, retentionPolicies.RetentionDays, librarySvc)
+		adventureRoomChat = adventureMode
+		if adventureMode.BattleObserver == nil {
+			log.Fatal("I9-11G2 Adventure battle observer is not composed")
+		}
 		// 1362 is shared: Illusion answers its own reports, Adventure the co-op ones.
 		for _, mid := range stockruntime.IllusionRoomMIDs {
 			mustRegister(mid, stockruntime.IllusionRoomDispatcher{Authority: authority, Service: illusion, ReportFallback: adventureMode})
 		}
 		for _, mid := range stockruntime.OccultMIDs {
-			mustRegister(mid, stockruntime.OccultDispatcher{Authority: authority, Service: occultMode})
+			occultD := stockruntime.OccultDispatcher{Authority: authority, Service: occultMode}
+			if mid == 2371 || mid == 2372 || mid == 2374 || mid == 2377 {
+				mustRegister(mid, observing(authority, achievements, "Occult", occultD))
+				continue
+			}
+			mustRegister(mid, occultD)
 		}
 		for _, mid := range stockruntime.AdventureMIDs {
 			mustRegister(mid, stockruntime.AdventureDispatcher{Authority: authority, Service: adventureMode})
@@ -510,20 +734,46 @@ func main() {
 		go runReconcile(ctx, pool, appworldboss.Reconciler{Service: worldBoss})
 		go runReconcile(ctx, pool, appoccult.Reconciler{Service: occultMode})
 		go runReconcile(ctx, pool, appadventure.Reconciler{Service: adventureMode})
+		requireGirlsLogObserver("Campaign", campaign.BattleCounts)
+		requireGirlsLogObserver("Conquer School", conquer.BattleCounts)
+		requireGirlsLogObserver("Awakening Battle", blood.BattleCounts)
+		requireGirlsLogObserver("World Boss", worldBoss.BattleCounts)
+		requireGirlsLogObserver("Memoir", memoir.BattleCounts)
+		requireGirlsLogObserver("Gods Trial", godsTrial.BattleCounts)
+		requireGirlsLogObserver("Pet Campaign", petCampaign.BattleCounts)
+		requireGirlsLogObserver("March", march.BattleCounts)
 	} else {
 		log.Print("I7C-5B/5C/5D/5E/5F Top Floor, 1 on 1, Arena, Conquer School and Champions League routes not registered: GXB_COMBAT_ENTROPY_KEYS is unset")
 	}
 	mustRegister(301, ranking)
 	mustRegister(121, stockruntime.OperationLogDispatcher{Authority: authority})
+	mustRegister(30, stockruntime.FunctionClickDispatcher{Authority: authority})
 	lobbyD := stockruntime.LobbyDispatcher{Authority: authority, Tracker: tracker}
 	mustRegister(2754, lobbyD)
+	mustRegister(3, lobbyD)
+	compatD := stockruntime.CompatDispatcher{Authority: authority, Service: compatService}
+	for _, mid := range stockruntime.CompatMIDs {
+		mustRegister(mid, compatD)
+	}
+	arenaReportD := stockruntime.ArenaResultDispatcher{Authority: authority}
+	for _, mid := range stockruntime.ArenaFightResultMIDs {
+		mustRegister(mid, arenaReportD)
+	}
 	for _, mid := range stockruntime.SummonMIDs {
 		mustRegister(mid, stockruntime.SummonDispatcher{Authority: authority, Service: vending})
+	}
+	for _, mid := range stockruntime.ChargeMIDs {
+		mustRegister(mid, stockruntime.ChargeDispatcher{Authority: authority, Service: charge})
 	}
 	for _, mid := range stockruntime.AchievementMIDs {
 		mustRegister(mid, stockruntime.AchievementDispatcher{Authority: authority, Service: achievements})
 	}
 	socialTimed := appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}
+	questionService := gmquestion.Service{Timed: socialTimed, Fence: i5db, Players: i4store.PlayerRootLocker{}, Owner: gmquestionstore.Store{}, Directory: i4store.TransactionDiscoveryReader{}, Receipts: kernelstore.Store{}, ReceiptReader: kernelstore.Reader{Queryer: pool}}
+	questionDispatcher := stockruntime.GMQuestionDispatcher{Authority: authority, Service: questionService}
+	mustRegister(4, questionDispatcher)
+	mustRegister(5, questionDispatcher)
+
 	publicationDB := publicationstore.Store{}
 	if err := publicationDB.CheckSchema(ctx, pool); err != nil {
 		log.Fatal(err)
@@ -551,22 +801,41 @@ func main() {
 	for _, mid := range []uint16{7, 1537, 8193, 8194} {
 		mustRegister(mid, publicationDispatcher)
 	}
-	socialRelationDB := socialrelationstore.Store{}
+	exchangeService := socialexchange.Service{Timed: socialTimed, Fence: i5db, Players: i4store.PlayerRootLocker{}, Content: contentDB, Settings: socialexchangestore.Store{}, Materials: i5svc, Receipts: kernelstore.Store{}, ReceiptReader: kernelstore.Reader{Queryer: pool}}
+	mustRegister(191, stockruntime.SocialExchangeDispatcher{Authority: authority, Service: exchangeService})
+	recallTargets := socialrecallstore.TargetReader{Activity: i4store.PlayerLoginActivity{}, Progression: i5db, Roster: characterstore.RosterMetricReader{Store: heroDB, Content: contentDB}, Privilege: privileges, Relations: socialRelationDB}
+	recallService := socialrecall.StartService{Timed: socialTimed, Fence: i5db, Content: contentDB, Starter: socialrecall.Starter{Players: i4store.PlayerRootLocker{}, Owner: socialrecallstore.Store{}, Targets: recallTargets}, Projection: socialrecallstore.DoingProjection{Directory: i4store.TransactionDiscoveryReader{}}, Receipts: kernelstore.Store{}, ReceiptReader: kernelstore.Reader{Queryer: pool}}
+	mustRegister(193, stockruntime.SocialRecallStartDispatcher{Authority: authority, Service: recallService})
+	recallAwarder := socialrecall.Awarder{Players: i4store.PlayerRootLocker{}, Owner: socialrecallstore.Store{}, Content: contentDB, Current: recallTargets, Grants: i5svc}
+	recallClaim := socialrecall.ClaimService{Timed: socialTimed, Fence: i5db, Players: i4store.PlayerRootLocker{}, Content: contentDB, Awarder: recallAwarder, Receipts: kernelstore.Store{}, ReceiptReader: kernelstore.Reader{Queryer: pool}}
+	mustRegister(194, stockruntime.SocialRecallAwardDispatcher{Authority: authority, Service: recallClaim})
+	inviteStore := socialinvitestore.Store{}
+	inviteFacts := socialinvitestore.FactsReader{Directory: i4store.TransactionDiscoveryReader{}, Accounts: i4store.PlayerAccounts{}, Progression: i5db, Heroes: characterstore.HeroLevelReader{Store: heroDB}, Privilege: privileges, Servers: i4store.ServerNames{}}
+	inviteReader := socialinvitestore.Reader{Owner: inviteStore, Facts: inviteFacts}
+	inviteRead := socialinvite.ReadService{Timed: socialTimed, Content: contentDB, Reader: inviteReader}
+	inviteBind := socialinvite.BindService{Timed: socialTimed, Fence: i5db, Players: i4store.PlayerRootLocker{}, Owner: inviteStore, Facts: inviteFacts, Receipts: kernelstore.Store{}, ReceiptReader: kernelstore.Reader{Queryer: pool}}
+	inviteClaim := socialinvite.ClaimService{Timed: socialTimed, Fence: i5db, Players: i4store.PlayerRootLocker{}, Content: contentDB, Owner: inviteStore, Reader: inviteReader, Grants: i5svc, Settings: inviteStore, Receipts: kernelstore.Store{}, ReceiptReader: kernelstore.Reader{Queryer: pool}}
+	for _, mid := range []uint16{384, 385, 386} {
+		mustRegister(mid, stockruntime.SocialInviteDispatcher{Authority: authority, Read: inviteRead, Bind: inviteBind, Claim: inviteClaim})
+	}
 	socialInboxDB := socialinboxstore.Store{}
 	socialPresentation := socialpresentation.TransactionReader{Display: displayService}
 	socialCommands := socialrelation.Service{Timed: socialTimed, PlayerRoots: i4store.PlayerRootLocker{}, Store: socialRelationDB, Inbox: socialinbox.RelationService{Store: socialInboxDB}, Presentation: socialPresentation}
-	giftService := socialgift.Service{Timed: socialTimed, Reads: runner, Store: socialgiftstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Relations: socialRelationDB, Privacy: socialrelation.FriendDMPrivacyProvider{Store: socialRelationDB}, Inbox: socialinbox.GiftService{Store: socialInboxDB}, NoticeEvidence: socialInboxDB, Grants: i5svc, Admission: authority, Fence: i5db}
-	socialReads := socialprojection.Service{Gifts: giftService, NoticePages: socialInboxDB, Runner: runner, PlayerRoots: i4store.PlayerRootLocker{}, Relations: socialRelationDB, Inbox: socialInboxDB, Directory: publicpresentation.DiscoveryReader{}, Presentation: socialPresentation, Observer: socialPresentation}
+	giftService := socialgift.Service{Timed: socialTimed, Reads: runner, Store: socialgiftstore.Store{}, Content: contentDB, Players: i4store.PlayerRootLocker{}, Relations: socialRelationDB, Privacy: socialrelation.FriendDMPrivacyProvider{Store: socialRelationDB}, Inbox: socialinbox.GiftService{Store: socialInboxDB}, NoticeEvidence: socialInboxDB, Grants: i5svc, Admission: authority, Fence: i5db, Bond: mentorSvc, ClassInfo: mentorSvc}
+	socialReads := socialprojection.Service{Gifts: giftService, NoticePages: socialInboxDB, Runner: runner, PlayerRoots: i4store.PlayerRootLocker{}, Relations: socialRelationDB, Inbox: socialInboxDB, Directory: publicpresentation.DiscoveryReader{}, Presentation: socialPresentation, PresentationAt: socialPresentation, Observer: socialPresentation, Recall: socialrecallstore.RecallProjectionReader{Current: recallTargets}, Content: contentDB, ShowGuildInviteNotices: envBool("GXB_SOCIAL_SHOW_GUILD_INVITES")}
 	friendDM := frienddm.Service{Timed: socialTimed, Queryer: pool, Store: frienddmstore.Store{}, Players: i4store.PlayerRootLocker{}, Privacy: socialrelation.FriendDMPrivacyProvider{Store: socialRelationDB}, Observer: socialPresentation, Content: contentDB, Entitlement: appi5.EmoticonEntitlementReader{Store: i5db, Content: contentDB}, Owner: presencestore.Store{Queryer: pool}}
 	generalDM := generaldm.Service{Timed: socialTimed, Queryer: pool, Store: generaldmstore.Store{}, Bindings: generaldmbindings.Reader{}, Privacy: socialrelation.GeneralDMPrivacyProvider{Store: socialRelationDB}, Players: i4store.PlayerRootLocker{}, Presentation: socialPresentation, Observer: socialPresentation, Owner: presencestore.Store{Queryer: pool}}
 	mustRegister(513, stockruntime.GeneralDMDispatcher{Authority: authority, Service: generalDM, Slots: make(chan struct{}, 16), Emitter: postgres.GeneralDMWakeupEmitter{Pool: pool}})
 	friendBase := socialfriendbase.Service{FriendDM: friendDM, Projection: socialReads}
-	mustRegister(515, stockruntime.FriendDMDispatcher{Authority: authority, Service: friendDM, Emitter: postgres.FriendDMWakeupEmitter{Pool: pool, OnError: func(err error) { log.Printf("friend dm wakeup degraded: %v", err) }}})
+	mustRegister(515, stockruntime.FriendDMDispatcher{Authority: authority, Service: friendDM, RoomChat: roomChat,
+		OccultRoomChat: occultRoomChat, AdventureRoomChat: adventureRoomChat,
+		Emitter: postgres.FriendDMWakeupEmitter{Pool: pool, OnError: func(err error) { log.Printf("friend dm wakeup degraded: %v", err) }}})
 	socialDismissal := socialdismiss.Service{Timed: socialTimed, PlayerRoots: i4store.PlayerRootLocker{}, Roots: socialRelationDB, Inbox: socialInboxDB}
-	socialDispatcher := stockruntime.SocialDispatcher{Authority: authority, Relations: socialCommands, Projection: friendBase, Dismissal: socialDismissal, Scalar: appi5.ScalarProjector{Runner: runner, Store: i5db}, Tracker: tracker, Emitter: postgres.SocialWakeupEmitter{Pool: pool, OnError: func(err error) { log.Printf("social wakeup degraded: %v", err) }}}
+	socialDispatcher := stockruntime.SocialDispatcher{Authority: authority, Relations: socialCommands, Projection: friendBase, Dismissal: socialDismissal, Mentor: mentorSvc, Scalar: appi5.ScalarProjector{Runner: runner, Store: i5db, FloorPolicies: contentDB}, Tracker: tracker, Emitter: postgres.SocialWakeupEmitter{Pool: pool, OnError: func(err error) { log.Printf("social wakeup degraded: %v", err) }}}
 	giftReload := socialreload.Service{Runner: runner, Relations: socialRelationDB, Inbox: socialInboxDB, Observer: socialPresentation, Gifts: giftService}
-	if e := configureGuildInvite(ctx, pool, runner, &guildSvc, &giftService, &socialReads, &giftReload); e != nil {
-		log.Fatalf("Guild Invite bundle readiness: %v", e)
+	inviteProducer, inviteErr := prepareGuildInvite(ctx, pool, runner, &giftService, &socialReads, &giftReload)
+	if inviteErr != nil {
+		log.Fatalf("Guild Invite bundle readiness: %v", inviteErr)
 	}
 	socialReads.Gifts = giftService
 	giftReload.Gifts = giftService
@@ -575,6 +844,9 @@ func main() {
 	giftGroup, err := stockruntime.PrepareGiftStock(socialDispatcher, giftService, friendBase, giftReload)
 	if err != nil {
 		log.Fatalf("Gift consumer readiness: %v", err)
+	}
+	if inviteProducer != nil {
+		giftGroup = giftGroup.BindType10Producer(func() { guildSvc.InviteProjection = inviteProducer })
 	}
 	// Startup preserves the content-owner activation pointer. Only a compatible
 	// active catalog enables all Gift surfaces together; relation routes remain.
@@ -597,11 +869,19 @@ func main() {
 	if err := stockruntime.RegisterSocialRoutes(router, socialDispatcher); err != nil {
 		log.Fatalf("social route assembly: %v", err)
 	}
+	mentorDispatcher := stockruntime.MentorDispatcher{Authority: authority, Service: mentorSvc}
+	for _, mid := range []uint16{1856, 1857, 1858, 1859, 1860, 1861, 1862, 1863} {
+		if mid == 1862 {
+			mustRegister(mid, observing(authority, achievements, "Mentor", mentorDispatcher))
+			continue
+		}
+		mustRegister(mid, mentorDispatcher)
+	}
 	practiceD := stockruntime.PracticeDispatcher{Authority: authority, Service: practiceSvc, Tracker: tracker}
 	for _, mid := range []uint16{124, 125, 126, 127, 128, 129, 130, 131, 132, 133} {
 		mustRegister(mid, practiceD)
 	}
-	activityD := stockruntime.ActivityDispatcher{Authority: authority, Service: activityRuntime}
+	activityD := stockruntime.ActivityDispatcher{Authority: authority, Service: activityRuntime, Reads: runner, Levels: i4store.PlayerDirectoryReader{}}
 	for _, mid := range []uint16{229, 234} {
 		mustRegister(mid, activityD)
 	}
@@ -609,9 +889,14 @@ func main() {
 	mustRegister(1793, savedPresetD)
 	bookmarkSvc := apphero.BookmarkService{Timed: heroSvc.Timed, Reads: runner, Store: heroDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Receipts: receipts}
 	skillSvc := apphero.SkillChoiceService{Timed: heroSvc.Timed, Reads: runner, Store: heroDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Receipts: receipts, Inventory: i5db, Content: contentDB}
-	heroD := observing(authority, achievements, "Hero", stockruntime.HeroDispatcher{Roster: librarySvc, Skills: skillSvc, Bookmark: bookmarkSvc, Authority: authority, Service: heroSvc, Appearance: heroSvc, LIVE: heroSvc, Economy: heroEconomyProjection})
-	for _, mid := range []uint16{2144, 3116, 49, 51, 52, 54, 55, 57, 58, 59, 60, 61, 62, 63, 67, 68, 69, 89, 304, 305, 2979} {
+	skillLevelSvc := apphero.HeroSkillLevelService{Timed: heroSvc.Timed, Reads: runner, Store: heroDB, Books: bookSvc, Content: contentDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Receipts: receipts, Resources: i5svc, Points: i5db, Facts: appi5.ObjectiveFacts{Owner: i5svc, Open: i5db}, DiscountBasisPoints: 10000}
+	heroD := observing(authority, achievements, "Hero", stockruntime.HeroDispatcher{Roster: librarySvc, Skills: skillSvc, SkillLevels: skillLevelSvc, Bookmark: bookmarkSvc, Authority: authority, Service: heroSvc, Appearance: heroSvc, LIVE: heroSvc, Economy: heroEconomyProjection})
+	for _, mid := range []uint16{39, 53, 2144, 3116, 49, 51, 52, 54, 55, 57, 58, 59, 60, 61, 62, 63, 67, 68, 69, 88, 89, 304, 305, 2979} {
 		mustRegister(mid, heroD)
+	}
+	heroAssetsDispatcher := stockruntime.HeroAssetsDispatcher{Authority: authority, Service: heroAssets.Service}
+	for _, mid := range stockruntime.HeroAssetsMIDs {
+		mustRegister(mid, heroAssetsDispatcher)
 	}
 	evolutionD := stockruntime.EvolutionDispatcher{Authority: authority, Service: evolutionSvc}
 	for _, mid := range []uint16{2608, 2609} {
@@ -631,20 +916,34 @@ func main() {
 		mustRegister(mid, observing(authority, achievements, "Inscription", inscriptionD))
 	}
 	courseD := stockruntime.CourseDispatcher{Authority: authority, Service: courseSvc}
-	for _, mid := range []uint16{2128, 2129, 2130, 2131, 2132, 2133, 2134, 2135, 2136, 2137, 2138, 2139, 2140, 2142} {
+	for _, mid := range []uint16{2128, 2129, 2130, 2131, 2132, 2133, 2134, 2135, 2136, 2137, 2138, 2139, 2140, 2141, 2142, 2500} {
 		mustRegister(mid, observing(authority, achievements, "Course", courseD))
 	}
-	bookD := stockruntime.BookDispatcher{Authority: authority, Service: bookSvc}
-	for _, mid := range []uint16{83, 1056, 1057, 1058, 1059, 1060, 1061, 1077, 1078, 1079, 1080} {
+	bookD := stockruntime.BookDispatcher{Authority: authority, Service: stockruntime.NewCoalescedBookRead(bookSvc), Tracker: tracker}
+	for _, mid := range []uint16{1056, 1057, 1058, 1059, 1060, 1061, 1077, 1078, 1079, 1080} {
 		mustRegister(mid, observing(authority, achievements, "Book", bookD))
 	}
+	composeD := stockruntime.ComposeDispatcher{Authority: authority, Book: stockruntime.NewCoalescedBookRead(bookSvc), Furniture: dormSvc, Awakening: heroSvc, Equipment: heroSvc}
+	mustRegister(83, observing(authority, achievements, "Book", composeD))
+	eventCentreD := stockruntime.EventCentreDispatcher{Authority: authority, Service: eventCentreSvc}
+	for _, mid := range []uint16{1072, 1073, 1074, 1075, 1076, 1081, 1082, 1083, 1084, 1085, 1086, 1087, 1088, 1089, 1090, 1091} {
+		mustRegister(mid, eventCentreD)
+	}
 	dormD := stockruntime.DormDispatcher{Authority: authority, Service: dormSvc}
-	for _, mid := range []uint16{2512, 2513, 2514, 2515, 2516, 2517, 2693, 2694, 2695} {
+	for _, mid := range []uint16{1845, 2512, 2513, 2514, 2515, 2516, 2517, 2518, 2519, 2520, 2521, 2522, 2523, 2524, 2525, 2526, 2693, 2694, 2695} {
 		mustRegister(mid, observing(authority, achievements, "Dorm", dormD))
 	}
 	libraryD := stockruntime.LibraryDispatcher{Authority: authority, Service: librarySvc}
-	for _, mid := range []uint16{72, 836, 840, 852, 853, 854, 2784, 2785} {
+	for _, mid := range []uint16{72, 835, 836, 837, 838, 839, 840, 841, 842, 843, 844, 845, 846, 847, 851, 852, 853, 854, 855, 856, 857, 2784, 2785} {
+		if mid == 851 {
+			mustRegister(mid, observing(authority, achievements, "SchoolStory", libraryD))
+			continue
+		}
 		mustRegister(mid, libraryD)
+	}
+	forumD := stockruntime.LibraryForumDispatcher{Authority: authority, Service: forumSvc}
+	for _, mid := range []uint16{832, 833, 834} {
+		mustRegister(mid, forumD)
 	}
 	petD := observing(authority, achievements, "Pet", stockruntime.PetDispatcher{Authority: authority, Service: petSvc, Economy: petEconomyProjection})
 	for _, mid := range []uint16{134, 780, 781, 782, 783, 785, 786, 787, 789, 790, 791, 792, 1893, 1894, 1895} {
@@ -678,14 +977,14 @@ func main() {
 	if e := registerPlayerDisplay(ctx, pool, contentDB, router, stockruntime.PlayerDisplayDispatcher{Authority: authority, Service: displayService}); e != nil {
 		log.Fatalf("Player display startup: %v", e)
 	}
-	i5d := stockruntime.I5Dispatcher{Awakening: i5svc, SignIn: i5svc, Authority: authority, Service: i5svc, Missions: i5svc, SpiritBackpack: stockruntime.SpiritBackpackProjection{Service: spiritSvc}}
+	i5d := stockruntime.I5Dispatcher{Awakening: i5svc, SignIn: i5svc, Authority: authority, Service: i5svc, Missions: i5svc, BackpackSort: heroDB, SpiritBackpack: stockruntime.SpiritBackpackProjection{Service: spiritSvc, Sort: heroDB}}
 	for _, mid := range []uint16{163, 164, 165, 166, 167, 168, 171, 2561, 2737, 2738, 26, 81, 161, 230, 368, 369, 370, 2736, 2865, 2866} {
 		mustRegister(mid, i5d)
 	}
 	for _, mid := range []uint16{160, 169, 170, 352, 353} {
 		mustRegister(mid, i5d)
 	}
-	mediaHandler, err := registerProfileMedia(ctx, pool, runner, authority, receipts, contentDB, router, cfg.ProfileMediaRoot, cfg.ProfileMediaPublicOrigin)
+	mediaHandler, err := registerProfileMedia(ctx, pool, runner, authority, receipts, contentDB, router, cfg.ProfileMediaRoot, cfg.ProfileMediaPublicOrigin, handlerConcurrency("GXB_PROFILE_MEDIA_GET_MAX_CONCURRENT", 8, poolConnections))
 	if err != nil {
 		log.Fatalf("Profile media startup: %v", err)
 	}
@@ -695,13 +994,22 @@ func main() {
 			mustRegister(mid, stockruntime.InactiveModeDispatcher{Authority: authority})
 		}
 	}
-	admission, err := httpedge.NewAdmission(256)
+	admission, err := httpedge.NewAdmission(envPositiveInt("GXB_HTTP_EDGE_MAX_IN_FLIGHT", 1024))
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Bodies read at once; each is bounded by limits.Default, so this caps edge memory, not database work (A-047).
+	decoding, err := httpedge.NewAdmission(envPositiveInt("GXB_HTTP_EDGE_MAX_DECODING", 1024))
 	if err != nil {
 		log.Fatal(err)
 	}
 	h := httpedge.Handler{
-		Limits: limits.Default(), Admission: admission,
+		Limits: limits.Default(), Admission: admission, Decoding: decoding,
 		Operations: operation.Factory{Clock: clock.System{}}, Router: router, Journal: journal,
+		Undelivered: undeliveredMarks, Metrics: txMetrics,
+		Conformance: replyconformance.Checker{},
+		QueueBudget: time.Duration(envPositiveInt("GXB_HTTP_QUEUE_BUDGET_SECONDS", int(httpedge.DefaultQueueBudget/time.Second))) * time.Second,
+		QueueWait:   transactionAdmission,
 	}
 	mux.Handle("/", h)
 	if mediaHandler != nil {
@@ -717,5 +1025,13 @@ func main() {
 	log.Printf("gxb-api listening on %s; advertised realtime=%s:%d", cfg.HTTPAddr, host, port)
 	if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatal(err)
+	}
+}
+
+// requireGirlsLogObserver refuses to start a settlement mode whose Girls Log
+// battle-count port (I9_11_GIRLS_LOG_V1) was not composed.
+func requireGirlsLogObserver(name string, observer any) {
+	if observer == nil {
+		log.Fatalf("Girls Log battle-count observer is not wired for %s", name)
 	}
 }

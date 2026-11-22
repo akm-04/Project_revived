@@ -2,16 +2,15 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
+	"net/http"
+
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
 	app "gxb.local/backend/v2/internal/application/workplace"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/workplace"
 	"gxb.local/backend/v2/internal/foundation/operation"
-	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
-	"net/http"
 )
 
 var WorkplaceMIDs = []uint16{528, 530, 531, 532, 533}
@@ -34,7 +33,7 @@ func (m WorkplaceDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequ
 		return *fail
 	}
 	if m.Service == nil {
-		return workplaceFailure(d.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	p, op := r.Envelope.Params, r.Envelope.Operation
 	bad := badHero("workplace_invalid_parameter")
@@ -94,15 +93,15 @@ func (m WorkplaceDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequ
 	}
 	return okI5(body)
 }
+
+var workplaceFailureRows = []failureRow{
+	{match: d.ErrInvalid, class: failureMalformed, detail: "workplace_invalid_parameter"},
+	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+}
+
 func workplaceFailure(err error) httpedge.Response {
-	var conflict *receipt.ConflictError
-	if errors.Is(err, d.ErrInvalid) || errors.As(err, &conflict) {
-		return badHero("workplace_invalid_parameter")
-	}
-	if errors.Is(err, d.ErrRefused) || errors.Is(err, economy.ErrInsufficientBalance) {
-		return conflictRefusal(1)
-	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "workplace_unavailable"}}
+	return failureFromRows(workplaceFailureRows, err)
 }
 
 func workplacePartners(value any) ([]int64, error) {

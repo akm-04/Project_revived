@@ -1,0 +1,165 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [
+  {
+   "count": 2,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10A_EVENT_CENTRE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/general_dm.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [
+   {
+    "name": "generaldm.LockRank",
+    "rank": 381
+   }
+  ],
+  "row_lock_methods": {
+   "personal_dm_delivery": [
+    "generaldmstore.Find",
+    "generaldmstore.Lock"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ]
+  },
+  "row_locks": [
+   "personal_dm_delivery",
+   "players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/general_dm.go",
+    "line": 28
+   },
+   "mid": 513,
+   "name": "CHAT_TO_PLAYER"
+  }
+ ],
+ "name": "generaldm",
+ "pushes": [
+  {
+   "file": "internal/adapters/stockruntime/general_dm_events.go",
+   "kind": "direct",
+   "line": 12,
+   "mid": 514,
+   "roles": [
+    "Role",
+    "World"
+   ]
+  },
+  {
+   "file": "internal/adapters/stockruntime/general_dm_events.go",
+   "kind": "direct",
+   "line": 11,
+   "mid": 516,
+   "roles": [
+    "Role",
+    "World"
+   ]
+  },
+  {
+   "file": "internal/adapters/stockruntime/general_dm_events.go",
+   "kind": "direct",
+   "line": 10,
+   "mid": 36855,
+   "roles": [
+    "Role",
+    "World"
+   ]
+  }
+ ],
+ "stores": [
+  "internal/adapters/postgres/generaldmstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/presencestore"
+ ],
+ "tables": {
+  "owned": [],
+  "read": [
+   "personal_dm_delivery",
+   "personal_dm_intents",
+   "personal_dm_payloads",
+   "players",
+   "realtime_presence_owner_state"
+  ],
+  "written": [
+   "personal_dm_delivery",
+   "personal_dm_intents",
+   "personal_dm_payloads"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay",
+   "socialactivation"
+  ],
+  "scenarios_naming": [],
+  "unit": [
+   "legacy_payload_test.go",
+   "types_test.go"
+  ]
+ }
+}

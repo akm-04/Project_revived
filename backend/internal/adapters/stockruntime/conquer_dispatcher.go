@@ -3,10 +3,8 @@ package stockruntime
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"math"
-	"net/http"
 	"strconv"
 
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
@@ -42,7 +40,7 @@ func (o ConquerDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRe
 		return *fail
 	}
 	if o.Service == nil {
-		return failConquer(d.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	p, op := req.Envelope.Params, req.Envelope.Operation
 	bad := badHero("invalid_conquer_parameter")
@@ -139,9 +137,12 @@ func conquerDamage(raw any) (int64, bool) {
 	return int64(value), true
 }
 
+var conquerFailureRows = []failureRow{
+	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: d.ErrInvalid, class: failureMalformed, detail: "conquer_request_refused"},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+}
+
 func failConquer(err error) httpedge.Response {
-	if errors.Is(err, d.ErrRefused) || errors.Is(err, d.ErrInvalid) || errors.Is(err, economy.ErrInsufficientBalance) {
-		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "conquer_request_refused"}}
-	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "conquer_unavailable"}}
+	return failureFromRows(conquerFailureRows, err)
 }

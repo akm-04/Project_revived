@@ -15,7 +15,12 @@ func TestCA43AMID58StrictShapeAndProjection(t *testing.T) {
 	economy := &ca42HeroEconomy{amount: 9400}
 	d := HeroDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: svc, Economy: economy}
 	params := map[string]any{"partner_id": int64(41), "equip_index": int64(5), "materials": []any{int64(20001038), int64(20001047)}}
-	r := d.Dispatch(context.Background(), heroReq(t, 58, params))
+	direct := d.Dispatch(context.Background(), heroReq(t, 58, params))
+	if _, written := direct.Body["economy_"]; written {
+		t.Fatalf("dispatcher assembled economy_: %#v", direct.Body)
+	}
+	economy.calls = 0
+	r := Decorated{Next: d}.Dispatch(context.Background(), heroReq(t, 58, params))
 	if r.HTTPStatus != 200 || svc.fumoPartner != 41 || svc.fumoIndex != 5 || !reflect.DeepEqual(svc.fumoMaterials, []int64{20001038, 20001047}) {
 		t.Fatalf("response=%+v svc=%+v", r, svc)
 	}
@@ -50,7 +55,7 @@ func TestCA43AMID58RejectsMalformedAndSemanticFailureWithoutProjection(t *testin
 	}
 	svc.fumoErr = apphero.ErrHeroFumoUnavailable
 	r := d.Dispatch(context.Background(), heroReq(t, 58, map[string]any{"partner_id": int64(1), "equip_index": int64(5), "materials": []any{int64(1)}}))
-	if r.HTTPStatus != 400 || r.Body["error"] != "hero_operation_rejected" || economy.calls != 0 {
+	if r.HTTPStatus != 409 || r.Body["error_code"] != unprovenRefusalCode || economy.calls != 0 {
 		t.Fatalf("semantic=%+v economyCalls=%d", r, economy.calls)
 	}
 }
@@ -59,7 +64,7 @@ func TestCA43AMID58ProjectionFailureIsNonOK(t *testing.T) {
 	svc := &ca42HeroService{fumoResult: apphero.FumoResult{PartnerID: 1, Slot: 1, Fumo: 1}}
 	d := HeroDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: svc, Economy: &ca42HeroEconomy{err: errors.New("projection")}}
 	r := d.Dispatch(context.Background(), heroReq(t, 58, map[string]any{"partner_id": int64(1), "equip_index": int64(1), "materials": []any{int64(2)}}))
-	if r.HTTPStatus != 503 || r.Body["error"] != "hero_projection_failed" {
+	if r.HTTPStatus != 500 || r.Body["error_code"] != unprovenRefusalCode {
 		t.Fatalf("projection failure=%+v", r)
 	}
 }

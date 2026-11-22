@@ -294,6 +294,11 @@ nodeMethods.setTag = function(node, tag) stateOf(node).tag = tag end
 nodeMethods.getTag = function(node) return stateOf(node).tag or -1 end
 nodeMethods.setString = function(node, text) stateOf(node).text = tostring(text) end
 nodeMethods.getString = function(node) return stateOf(node).text or "" end
+-- shortcut: explicit text lines only; font wrapping requires a native rendering check.
+nodeMethods.getStringNumLines = function(node)
+	local _, breaks = string.gsub(stateOf(node).text or "", "\n", "")
+	return breaks + 1
+end
 -- ProgressTimer starts at 0 percent and LoadingBar at 100, as in cocos2d-x.
 nodeMethods.setPercentage = function(node, percent) stateOf(node).percentage = percent end
 nodeMethods.getPercentage = function(node) return stateOf(node).percentage or 0 end

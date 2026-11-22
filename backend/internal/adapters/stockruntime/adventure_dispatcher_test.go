@@ -2,6 +2,8 @@ package stockruntime
 
 import (
 	"context"
+	"encoding/json"
+	"net/http"
 	"testing"
 	"time"
 
@@ -12,6 +14,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 	"gxb.local/backend/v2/internal/protocol/wire"
 )
 
@@ -29,7 +32,17 @@ func (s *adventureStub) List(context.Context, identity.ActorContext, operation.C
 }
 func (s *adventureStub) Info(_ context.Context, _ identity.ActorContext, tableID int64, _ operation.Context) (map[string]any, error) {
 	s.tableID = tableID
-	return map[string]any{"detail": map[string]any{}}, s.err
+	return map[string]any{"detail": map[string]any{
+		"challenge_times":  []any{},
+		"monster_statuses": []any{},
+		"pos_statuses":     []any{},
+		"room_info": map[string]any{
+			"campaign_id": int64(0),
+			"members":     []any{},
+			"room_id":     int64(0),
+			"table_id":    d.EventDefense,
+		},
+	}}, s.err
 }
 func (s *adventureStub) BuyShop(_ context.Context, _ identity.ActorContext, tableID int64, _ operation.Context) (app.Response, error) {
 	s.tableID = tableID
@@ -121,6 +134,8 @@ func TestAdventureDispatcherRoutesAndDuplicates(t *testing.T) {
 	}
 	if response := dispatcher.Dispatch(context.Background(), adventureRequest(2417, map[string]any{"table_id": int64(10004)})); response.Body == nil || stub.tableID != 10004 {
 		t.Fatalf("2417 %+v", response)
+	} else {
+		replyconformance.Check(t, 2417, response.Body)
 	}
 	stub.duplicate = true
 	response := dispatcher.Dispatch(context.Background(), adventureRequest(2418, map[string]any{"table_id": int64(1001)}))
@@ -174,6 +189,28 @@ func TestAdventureDispatcherRoutesRoomMIDs(t *testing.T) {
 	}
 }
 
+// BUGS #126: the stock defense battle scene sends the raw harm sum as
+// total_damage (BattleCreate.lua:3175,3182), a Lua double that can carry a
+// fraction. The sibling result paths floor it client-side (BattleCreate.lua:18,
+// 3239); the decoder must accept the same wire value.
+func TestAdventureDispatcherDefenseResultAcceptsFractionalDamage(t *testing.T) {
+	stub := &adventureStub{}
+	dispatcher := AdventureDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: stub}
+	response := dispatcher.Dispatch(context.Background(), adventureRequest(2410, map[string]any{
+		"star":         json.Number("3"),
+		"total_damage": json.Number("12345.75"),
+		"monster_pos":  json.Number("2"),
+		"formation":    "11|12",
+		"table_id":     json.Number("10001"),
+	}))
+	if response.HTTPStatus != 200 {
+		t.Fatalf("fractional total_damage refused: %d %#v", response.HTTPStatus, response.Body)
+	}
+	if stub.result.Damage != 12345 || stub.result.Star != 3 {
+		t.Fatalf("parsed result %+v", stub.result)
+	}
+}
+
 func TestAdventureDispatcherMapsExpiredAndInvalid(t *testing.T) {
 	stub := &adventureStub{err: d.ErrExpired}
 	dispatcher := AdventureDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: stub}
@@ -192,20 +229,47 @@ func TestAdventureDispatcherMapsExpiredAndInvalid(t *testing.T) {
 	}
 	stub.err = sr.ErrAlreadyInRoom
 	response = dispatcher.Dispatch(context.Background(), adventureRequest(2417, map[string]any{"table_id": int64(10004)}))
-	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(1) {
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(adventureExpired) {
 		t.Fatalf("already in room %+v", response)
 	}
-	for _, serverError := range []error{economy.ErrUnknownResource, d.ErrUnavailable} {
-		stub.err = serverError
-		response = dispatcher.Dispatch(context.Background(), adventureRequest(2417, map[string]any{"table_id": int64(10004)}))
-		if response.HTTPStatus != 503 {
-			t.Fatalf("server failure %v -> %+v", serverError, response)
-		}
+	stub.err = economy.ErrUnknownResource
+	response = dispatcher.Dispatch(context.Background(), adventureRequest(2417, map[string]any{"table_id": int64(10004)}))
+	if response.HTTPStatus != http.StatusInternalServerError || response.Body["error_code"] != unprovenRefusalCode {
+		t.Fatalf("unknown resource %+v", response)
+	}
+	stub.err = d.ErrUnavailable
+	response = dispatcher.Dispatch(context.Background(), adventureRequest(2417, map[string]any{"table_id": int64(10004)}))
+	if response.HTTPStatus != http.StatusServiceUnavailable || response.Body["error_code"] != serverBusyCode {
+		t.Fatalf("unavailable %+v", response)
 	}
 	stub.err = nil
 	stub.duplicate = true
 	response = dispatcher.Dispatch(context.Background(), adventureRequest(2422, map[string]any{"star": int64(1), "total_damage": int64(50), "formation": "11"}))
 	if response.HTTPStatus != 200 || response.Body["error_code"] != int64(30005) {
 		t.Fatalf("2422 duplicate %+v", response)
+	}
+}
+
+func TestAdventureRentFieldsAreRefused(t *testing.T) {
+	stub := &adventureStub{}
+	dispatcher := AdventureDispatcher{Authority: httpAuthority{actor: actorForHTTP(t)}, Service: stub}
+	for _, test := range []struct {
+		name   string
+		mid    uint16
+		params map[string]any
+	}{
+		{"battle", 2419, map[string]any{"formation": "1", "rent_player_id": int64(7), "rent_formation": "31"}},
+		{"illusion-single", 2421, map[string]any{"formation": "1", "rent_player_id": int64(7), "rent_formation": "31"}},
+		{"defense", 2431, map[string]any{"formation": "1", "monster_pos": int64(1), "table_id": d.EventDefense, "rent_player_id": int64(7), "rent_formation": "31"}},
+	} {
+		response := dispatcher.Dispatch(context.Background(), adventureRequest(test.mid, test.params))
+		if response.HTTPStatus != 409 || response.Body["error_code"] != int64(adventureRentRefused) {
+			t.Fatalf("%s rent fields: %d %#v", test.name, response.HTTPStatus, response.Body)
+		}
+	}
+	// A zero-valued rent field is not a rental and still routes.
+	response := dispatcher.Dispatch(context.Background(), adventureRequest(2421, map[string]any{"formation": "1", "rent_player_id": int64(0), "rent_formation": "0"}))
+	if response.HTTPStatus != 200 {
+		t.Fatalf("zero rent fields: %d %#v", response.HTTPStatus, response.Body)
 	}
 }

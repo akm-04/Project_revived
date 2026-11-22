@@ -2,9 +2,12 @@ package guildcampaign
 
 import (
 	"context"
+	"encoding/json"
+	"sort"
 	"time"
 
 	"gxb.local/backend/v2/internal/application/i5"
+	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/guild"
 	d "gxb.local/backend/v2/internal/domain/guildcampaign"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -12,6 +15,10 @@ import (
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
+
+// serverRankPartnerLimit is the hero1..hero5 slot count of
+// highest_damage_item.csb, which AllServerDamageWindow.lua:217-235 fills.
+const serverRankPartnerLimit = 5
 
 // ChapterRow is one 601 chapter_list entry.
 type ChapterRow struct {
@@ -50,9 +57,23 @@ type RankRow struct {
 
 // ServerRankRow is one 608 rank row.
 type ServerRankRow struct {
-	Rank    int64
-	Damage  int64
-	Profile ProfileView
+	Rank      int64
+	Damage    int64
+	Profile   ProfileView
+	GuildID   int64
+	GuildName string
+	Partners  []Partner
+}
+
+// Partner is one stored formation slot of a 608 record, projected from the
+// Character owner so AllServerDamageWindow.lua:217-235 can draw its avatar.
+type Partner struct {
+	TableID         int64
+	Color           int64
+	Star            int64
+	Level           int64
+	CurrentSkinID   int64
+	TwiceAwakeStage int64
 }
 
 // Killer is 608's boss_killer row.
@@ -67,6 +88,7 @@ type Killer struct {
 type FastKiller struct {
 	GuildID   int64
 	GuildName string
+	GuildIcon int64
 	Seconds   int64
 	At        time.Time
 }
@@ -80,11 +102,12 @@ type ServerView struct {
 
 // LogRow is one 609 row.
 type LogRow struct {
-	Type      int64
-	Profile   ProfileView
-	PlayerJob int64
-	ChapterID int64
-	At        time.Time
+	Type       int64
+	Profile    ProfileView
+	MemberName string
+	PlayerJob  int64
+	ChapterID  int64
+	At         time.Time
 }
 
 // DetailView is 613.
@@ -102,6 +125,14 @@ type DetailView struct {
 	FightInfo    ProfileView
 }
 
+// BestDamageTx is 100004's owner fact: the player's best guild campaign hit.
+func (m Mode) BestDamageTx(c context.Context, q tx.Queryer, p identity.PlayerID) (int64, error) {
+	if m.Store == nil {
+		return 0, ErrUnavailable
+	}
+	return m.Store.BestDamageTx(c, q, p)
+}
+
 // CampaignLists is 601: every catalog chapter with this guild's state.
 func (m Mode) CampaignLists(c context.Context, a identity.ActorContext, op operation.Context) (Lists, error) {
 	return m.lists(c, a, op, false)
@@ -116,23 +147,23 @@ func (m Mode) lists(c context.Context, a identity.ActorContext, op operation.Con
 	if !m.ready() {
 		return Lists{}, ErrUnavailable
 	}
-	membership, joined, err := m.Service.Guilds.ReadMembership(c, a.PlayerID)
-	if err != nil {
-		return Lists{}, err
-	}
-	if !joined {
-		return Lists{}, nil
-	}
 	var out Lists
-	_, err = m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
+	_, err := m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
 		at := op.StartedAt.UTC()
+		membership, joined, err := m.Service.Guilds.ReadMembershipTx(c, sc.Tx, a.PlayerID)
+		if err != nil {
+			return err
+		}
+		if !joined {
+			return nil
+		}
 		guildID := int64(membership.GuildID)
 		for _, info := range sortedChapters(m.Tables) {
 			chapter, open, err := m.ModeStore.ReadChapterTx(c, sc.Tx, guildID, info.ChapterID)
 			if err != nil {
 				return err
 			}
-			row := ChapterRow{ChapterID: info.ChapterID, OpenCost: info.OpenCost, ChapterVersion: 1}
+			row := ChapterRow{ChapterID: info.ChapterID, OpenCost: info.OpenCost, ChapterVersion: m.Settings.ChapterVersion(info.ChapterID)}
 			if open {
 				row.IsOpen = true
 				row.IsWin = chapter.Win
@@ -155,8 +186,17 @@ func (m Mode) lists(c context.Context, a identity.ActorContext, op operation.Con
 			if err != nil {
 				return err
 			}
+			storedByID := make(map[int64]CopyRow, len(stored))
 			for _, copy := range stored {
-				out.Copies = append(out.Copies, CopyRowView{CopyID: copy.CopyID, IsOpen: !copy.Win, IsWin: copy.Win, Percent: copy.Percent})
+				storedByID[copy.CopyID] = copy
+			}
+			for position, copyID := range info.Copies {
+				copy, found := storedByID[copyID]
+				if !found {
+					continue
+				}
+				predecessorWon := position > 0 && storedByID[info.Copies[position-1]].Win
+				out.Copies = append(out.Copies, CopyRowView{CopyID: copy.CopyID, IsOpen: d.CopyOpen(open, chapter.Win, copy.Win, position, predecessorWon), IsWin: copy.Win, Percent: copy.Percent})
 			}
 		}
 		return nil
@@ -179,18 +219,21 @@ func sortedChapters(tables map[int64]ChapterInfo) []ChapterInfo {
 
 // DamageRank is 607.
 func (m Mode) DamageRank(c context.Context, a identity.ActorContext, chapterID int64, op operation.Context) ([]RankRow, error) {
-	if !m.ready() || chapterID <= 0 {
+	if !m.ready() {
 		return nil, ErrUnavailable
 	}
-	membership, joined, err := m.Service.Guilds.ReadMembership(c, a.PlayerID)
-	if err != nil {
-		return nil, err
-	}
-	if !joined {
-		return nil, nil
+	if chapterID <= 0 {
+		return nil, d.ErrRefused
 	}
 	var out []RankRow
-	_, err = m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
+	_, err := m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
+		membership, joined, err := m.Service.Guilds.ReadMembershipTx(c, sc.Tx, a.PlayerID)
+		if err != nil {
+			return err
+		}
+		if !joined {
+			return nil
+		}
 		guildID := int64(membership.GuildID)
 		chapter, open, err := m.ModeStore.ReadChapterTx(c, sc.Tx, guildID, chapterID)
 		if err != nil {
@@ -217,11 +260,29 @@ func (m Mode) DamageRank(c context.Context, a identity.ActorContext, chapterID i
 
 // AllServerRank is 608, scoped to the logical server.
 func (m Mode) AllServerRank(c context.Context, a identity.ActorContext, copyID int64, op operation.Context) (ServerView, error) {
-	if !m.ready() || copyID <= 0 {
+	if !m.ready() || m.Roster == nil || m.Awakenings == nil {
 		return ServerView{}, ErrUnavailable
 	}
+	if copyID <= 0 {
+		return ServerView{}, d.ErrRefused
+	}
 	var out ServerView
-	_, err := m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
+	_, err := m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
+		guilds := map[int64]guild.Guild{}
+		readGuild := func(id int64) (guild.Guild, bool, error) {
+			if id <= 0 {
+				return guild.Guild{}, false, nil
+			}
+			if known, cached := guilds[id]; cached {
+				return known, true, nil
+			}
+			row, found, err := m.Service.Guilds.ReadGuildTx(c, sc.Tx, guild.ID(id))
+			if err != nil || !found {
+				return guild.Guild{}, false, err
+			}
+			guilds[id] = row
+			return row, true, nil
+		}
 		rows, err := m.ModeStore.ListServerRecordsTx(c, sc.Tx, a.LogicalServerID, copyID, 100)
 		if err != nil {
 			return err
@@ -231,22 +292,102 @@ func (m Mode) AllServerRank(c context.Context, a identity.ActorContext, copyID i
 			if err != nil {
 				continue
 			}
-			out.Ranks = append(out.Ranks, ServerRankRow{Rank: int64(index + 1), Damage: row.Damage, Profile: profile})
+			rank := ServerRankRow{Rank: int64(index + 1), Damage: row.Damage, Profile: profile, GuildID: row.GuildID}
+			memberGuild, found, err := readGuild(row.GuildID)
+			if err != nil {
+				return err
+			}
+			if found {
+				rank.GuildName = memberGuild.Name
+			}
+			rank.Partners, err = m.partnersTx(c, sc.Tx, identity.PlayerID(row.PlayerID), row.Partners)
+			if err != nil {
+				return err
+			}
+			out.Ranks = append(out.Ranks, rank)
 		}
 		kill, found, err := m.ModeStore.ServerKillReadTx(c, sc.Tx, a.LogicalServerID, copyID)
 		if err != nil {
 			return err
 		}
-		if found {
-			profile, err := m.profileTx(c, sc.Tx, identity.PlayerID(kill.FirstPlayerID))
-			if err == nil {
-				out.Boss = &Killer{Profile: profile, GuildID: kill.FirstGuildID, At: kill.FirstAt}
-			}
-			out.Fast = &FastKiller{GuildID: kill.FastestGuild, Seconds: kill.FastestSecond, At: kill.FirstAt}
+		if !found {
+			return nil
 		}
+		profile, err := m.profileTx(c, sc.Tx, identity.PlayerID(kill.FirstPlayerID))
+		if err == nil {
+			boss := &Killer{Profile: profile, GuildID: kill.FirstGuildID, At: kill.FirstAt}
+			firstGuild, known, err := readGuild(kill.FirstGuildID)
+			if err != nil {
+				return err
+			}
+			if known {
+				boss.GuildName = firstGuild.Name
+			}
+			out.Boss = boss
+		}
+		fast := &FastKiller{GuildID: kill.FastestGuild, Seconds: kill.FastestSecond, At: kill.FirstAt}
+		fastGuild, known, err := readGuild(kill.FastestGuild)
+		if err != nil {
+			return err
+		}
+		if known {
+			fast.GuildName = fastGuild.Name
+			fast.GuildIcon = fastGuild.Icon
+		}
+		out.Fast = fast
 		return nil
 	})
 	return out, err
+}
+
+// partnersTx projects the stored formation ids through the Character owner;
+// a released hero has no display row and drops out.
+func (m Mode) partnersTx(c context.Context, q tx.Queryer, player identity.PlayerID, stored []byte) ([]Partner, error) {
+	if len(stored) == 0 {
+		return nil, nil
+	}
+	var ids []int64
+	if err := json.Unmarshal(stored, &ids); err != nil {
+		return nil, err
+	}
+	slots := make([]int64, 0, serverRankPartnerLimit)
+	for _, id := range ids {
+		if id <= 0 {
+			continue
+		}
+		slots = append(slots, id)
+		if len(slots) == serverRankPartnerLimit {
+			break
+		}
+	}
+	if len(slots) == 0 {
+		return nil, nil
+	}
+	heroes, err := m.Roster.ListHeroesTx(c, q, player)
+	if err != nil {
+		return nil, err
+	}
+	owned := make(map[int64]character.Hero, len(heroes))
+	for _, hero := range heroes {
+		owned[hero.PartnerID] = hero
+	}
+	awakenings, err := m.Awakenings.ListRawAwakeningsTx(c, q, player, slots)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]Partner, 0, len(slots))
+	for _, id := range slots {
+		hero, found := owned[id]
+		if !found {
+			continue
+		}
+		row := Partner{TableID: hero.TableID, Color: hero.Color, Star: hero.Star, Level: hero.Level, CurrentSkinID: hero.CurrentSkinID}
+		if raw, known := awakenings[id]; known {
+			row.TwiceAwakeStage = raw.RawStage
+		}
+		out = append(out, row)
+	}
+	return out, nil
 }
 
 // GuildLog is 609, newest first and bounded by policy retention days.
@@ -254,16 +395,17 @@ func (m Mode) GuildLog(c context.Context, a identity.ActorContext, op operation.
 	if !m.ready() {
 		return nil, ErrUnavailable
 	}
-	membership, joined, err := m.Service.Guilds.ReadMembership(c, a.PlayerID)
-	if err != nil {
-		return nil, err
-	}
-	if !joined {
-		return nil, nil
-	}
 	var out []LogRow
-	_, err = m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
+	_, err := m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
+		membership, joined, err := m.Service.Guilds.ReadMembershipTx(c, sc.Tx, a.PlayerID)
+		if err != nil {
+			return err
+		}
+		if !joined {
+			return nil
+		}
 		guildID := int64(membership.GuildID)
+		cutoff := op.StartedAt.AddDate(0, 0, -int(m.Settings.RetentionDays))
 		roles := map[identity.PlayerID]int64{}
 		memberships, err := m.Service.Guilds.ListMembershipsTx(c, sc.Tx, guild.ID(guildID))
 		if err != nil {
@@ -272,7 +414,7 @@ func (m Mode) GuildLog(c context.Context, a identity.ActorContext, op operation.
 		for _, member := range memberships {
 			roles[member.PlayerID] = int64(member.Role)
 		}
-		rows, err := m.ModeStore.ListGuildLogTx(c, sc.Tx, guildID, op.StartedAt.AddDate(0, 0, -int(m.Settings.RetentionDays)), 100)
+		rows, err := m.ModeStore.ListGuildLogTx(c, sc.Tx, guildID, cutoff, 100)
 		if err != nil {
 			return err
 		}
@@ -283,30 +425,94 @@ func (m Mode) GuildLog(c context.Context, a identity.ActorContext, op operation.
 			}
 			out = append(out, LogRow{Type: row.Type, Profile: profile, PlayerJob: roles[identity.PlayerID(row.PlayerID)], ChapterID: row.ChapterID, At: row.At})
 		}
+		members, err := m.Service.Guilds.ListMemberLogTx(c, sc.Tx, guildID, cutoff, 100)
+		if err != nil {
+			return err
+		}
+		for _, row := range members {
+			kind, known := memberLogType(row.Kind, row.Role)
+			if !known {
+				continue
+			}
+			actor, err := m.profileTx(c, sc.Tx, identity.PlayerID(row.ActorID))
+			if err != nil {
+				continue
+			}
+			subject := ""
+			if row.SubjectID != row.ActorID {
+				if profile, err := m.profileTx(c, sc.Tx, identity.PlayerID(row.SubjectID)); err == nil {
+					subject = profile.Name
+				}
+			}
+			out = append(out, LogRow{Type: kind, Profile: actor, MemberName: subject, PlayerJob: roles[identity.PlayerID(row.ActorID)], At: row.At})
+		}
+		sort.SliceStable(out, func(i, j int) bool { return out[i].At.After(out[j].At) })
+		if len(out) > 100 {
+			out = out[:100]
+		}
 		return nil
 	})
 	return out, err
 }
 
+// memberLogType maps the membership audit kinds onto the client's log types.
+// Kinds with no stock row (APPLY, CANCEL_APPLY, REFUSE_APPLY, INVITE, SETTINGS,
+// DISSOLVE, BROADCAST) are not shown; 10 and 14 stay unemitted until drink or
+// their source activates.
+func memberLogType(kind string, role int64) (int64, bool) {
+	switch kind {
+	case "CREATE":
+		return 1, true
+	case "DESCRIPTION":
+		return 2, true
+	case "KICK":
+		return 3, true
+	case "JOIN", "ACCEPT_INVITE":
+		return 4, true
+	case "ACCEPT_APPLY":
+		return 5, true
+	case "LEAVE":
+		return 6, true
+	case "ROLE":
+		switch role {
+		case 1:
+			return 11, true
+		case 2:
+			return 12, true
+		case 0:
+			return 13, true
+		}
+	}
+	return 0, false
+}
+
 // MapDetail is 613.
 func (m Mode) MapDetail(c context.Context, a identity.ActorContext, copyID int64, op operation.Context) (DetailView, error) {
-	if !m.ready() || copyID <= 0 {
+	if !m.ready() {
 		return DetailView{}, ErrUnavailable
+	}
+	if copyID <= 0 {
+		return DetailView{}, d.ErrRefused
 	}
 	chapterID, known := m.Content.ChapterOfCopy(copyID)
 	if !known {
 		return DetailView{}, d.ErrRefused
 	}
-	membership, joined, err := m.Service.Guilds.ReadMembership(c, a.PlayerID)
-	if err != nil {
-		return DetailView{}, err
+	info, known := m.Content.ChapterInfo(chapterID)
+	if !known {
+		return DetailView{}, d.ErrRefused
 	}
-	if !joined {
-		return DetailView{}, nil
-	}
+	position := copyPosition(info.Copies, copyID)
 	var out DetailView
-	_, err = m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
+	_, err := m.Runner.Run(c, op, i5.DefaultProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, sc tx.Scope) error {
 		at := op.StartedAt.UTC()
+		membership, joined, err := m.Service.Guilds.ReadMembershipTx(c, sc.Tx, a.PlayerID)
+		if err != nil {
+			return err
+		}
+		if !joined {
+			return nil
+		}
 		guildID := int64(membership.GuildID)
 		chapter, open, err := m.ModeStore.ReadChapterTx(c, sc.Tx, guildID, chapterID)
 		if err != nil {
@@ -320,8 +526,16 @@ func (m Mode) MapDetail(c context.Context, a identity.ActorContext, copyID int64
 		if err != nil {
 			return err
 		}
+		predecessorWon := false
+		if position > 0 {
+			predecessor, found, err := m.ModeStore.ReadCopyTx(c, sc.Tx, guildID, chapterID, info.Copies[position-1])
+			if err != nil {
+				return err
+			}
+			predecessorWon = found && predecessor.Win
+		}
 		view := DetailView{CopyID: copyID, ChapterID: chapterID, CurrentIndex: currentIndex(copy), Waves: waves,
-			IsOpen: open && !chapter.Win, IsWin: copy.Win, Stage: copy.HolderStage}
+			IsOpen: d.CopyOpen(open, chapter.Win, copy.Win, position, predecessorWon), IsWin: copy.Win, Stage: copy.HolderStage}
 		if copy.LastFightTime != nil {
 			view.LastFight = copy.LastFightTime.Unix()
 		}

@@ -4,20 +4,27 @@ package playerdisplay_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/memoirstore"
 	applicationcombat "gxb.local/backend/v2/internal/application/combat"
 	"gxb.local/backend/v2/internal/application/i5"
 	application "gxb.local/backend/v2/internal/application/memoir"
+	"gxb.local/backend/v2/internal/domain/campaign"
 	"gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/domain/march"
 	"gxb.local/backend/v2/internal/domain/memoir"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/payload"
+	"strconv"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -28,7 +35,7 @@ func memoirMode(t *testing.T, pool *postgres.Pool, clock *workplaceTime) applica
 	base := marchMode(t, pool)
 	fight := combatService(t, pool)
 	owner := base.Grants.(i5.Service)
-	mode := application.Mode{Timed: base.Timed, Fresh: pool, Store: memoirstore.Store{}, Content: contentstore.Store{Queryer: pool}, Fence: base.Fence, Functions: base.Functions, Heroes: base.Heroes, HeroLocks: base.HeroLocks, Roster: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Opponents: base.Opponents, Combat: fight, Grants: owner, Costs: base.Costs, Energy: owner, Exchange: owner, Receipts: base.Receipts, ReceiptRead: base.ReceiptRead}
+	mode := application.Mode{Timed: base.Timed, Fresh: pool, Store: memoirstore.Store{}, Content: contentstore.Store{Queryer: pool}, Fence: base.Fence, Functions: base.Functions, Heroes: base.Heroes, HeroLocks: base.HeroLocks, Roster: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Opponents: base.Opponents, Combat: fight, Grants: owner, Costs: base.Costs, Energy: owner, Exchange: owner, Receipts: base.Receipts, ReceiptRead: base.ReceiptRead, BattleCounts: battleCountObserver(pool)}
 	mode.Timed.Binder.Time = clock
 	return mode
 }
@@ -74,6 +81,9 @@ func TestI9_6CMemoirNativeLifecycle(t *testing.T) {
 		t.Fatal("gate", err)
 	}
 	compositeLevel(t, pool, actor, revision, 100)
+	if _, err := mode.SaveMap(ctx, actor, memoir.InitialPosition, nil, op()); !errors.Is(err, memoir.ErrRefused) || !strings.Contains(err.Error(), "inactive run") {
+		t.Fatal("save map cause", err)
+	}
 	bornHero(t, pool, actor, revision, 10001001, 1)
 	grantGenuine(t, pool, actor, revision, "memoir keys", []grant.Line{{Kind: grant.StackItem, ItemID: 50001400, Amount: 3}, {Kind: grant.StackItem, ItemID: 50001401, Amount: 8}})
 	if _, err := mode.Start(ctx, actor, 1, op()); !errors.Is(err, memoir.ErrInvalid) {
@@ -101,8 +111,11 @@ func TestI9_6CMemoirNativeLifecycle(t *testing.T) {
 	if _, err = mode.NextFloor(ctx, actor, memoir.FinalPosition, op()); !errors.Is(err, memoir.ErrRefused) {
 		t.Fatal("guardian bypass", err)
 	}
-	if _, err = mode.SaveMap(ctx, actor, memoir.FinalPosition, []int{memoir.FinalPosition}, op()); !errors.Is(err, memoir.ErrRefused) {
-		t.Fatal("teleport", err)
+	if _, err = mode.SaveMap(ctx, actor, memoir.FinalPosition, []int{memoir.FinalPosition}, op()); err != nil {
+		t.Fatal("stock walk stands on the final point", err)
+	}
+	if _, err = mode.NextFloor(ctx, actor, memoir.FinalPosition, op()); !errors.Is(err, memoir.ErrRefused) || !strings.Contains(err.Error(), "exit at 54 is closed") {
+		t.Fatal("standing on the exit must not advance without the guardian", err)
 	}
 	saveOperation := op()
 	saved, err := mode.SaveMap(ctx, actor, 10, []int{1, 2, 10, 11, 19}, saveOperation)
@@ -182,6 +195,9 @@ func TestI9_6CMemoirNativeLifecycle(t *testing.T) {
 		}
 		state = memoirRecord(t, pool, actor)
 		pending := *state.Pending
+		if _, err = mode.NextFloor(ctx, actor, memoir.FinalPosition, op()); !errors.Is(err, memoir.ErrRefused) || !strings.Contains(err.Error(), "battle is pending") {
+			t.Fatal("pending floor cause", err)
+		}
 		balance := energy()
 		if _, err = mode.StartFight(ctx, actor, memoir.GuardianPosition, op()); err != nil || energy() != balance {
 			t.Fatal("paid retry", err)
@@ -257,6 +273,10 @@ func TestI9_6CMemoirNativeLifecycle(t *testing.T) {
 				t.Fatal("next floor retry", err)
 			}
 		}
+	}
+	// Three first settlements count the fighting girl once each; replays and splits add nothing.
+	if got := battleCount(t, pool, actor.PlayerID, 1); got != 3 {
+		t.Fatalf("Girls Log monster count after three floors = %d, want 3", got)
 	}
 	finalOperation := op()
 	final, err := mode.FinalAward(ctx, actor, memoir.FinalPosition, catalog.FinalGifts[0], finalOperation)
@@ -424,6 +444,9 @@ func TestI9_6CMemoirNativePlayerServerResolution(t *testing.T) {
 	if _, formations := battle["library_mission_formations"].(map[string]any); !formations {
 		t.Fatal("stock SelectTeamNewWindow indexes battle_info.library_mission_formations", response)
 	}
+	if got := battleCount(t, pool, actor.PlayerID, 1); got != 1 {
+		t.Fatalf("Girls Log player-battle count = %d, want 1", got)
+	}
 	after := memoirRecord(t, pool, actor)
 	copied, err := combat.CanonicalJSON(after.Opponents)
 	if err != nil || string(before) != string(copied) {
@@ -441,6 +464,9 @@ func TestI9_6CMemoirNativePlayerServerResolution(t *testing.T) {
 	if string(left) != string(right) {
 		t.Fatal("server replay changed")
 	}
+	if got := battleCount(t, pool, actor.PlayerID, 1); got != 1 {
+		t.Fatalf("Girls Log player-battle count after replay = %d, want 1", got)
+	}
 	if _, err = mode.Abandon(ctx, actor, op()); err != nil {
 		t.Fatal(err)
 	}
@@ -448,6 +474,127 @@ func TestI9_6CMemoirNativePlayerServerResolution(t *testing.T) {
 	right, _ = combat.CanonicalJSON(repeated)
 	if err != nil || string(left) != string(right) {
 		t.Fatal("old operation lost after abandon", err)
+	}
+}
+
+// TestI9_6CMemoirNativeEnemyInfoCarriesStockPlayerTeam covers MID 2309 for a
+// PLAYER cell: MemoriesOfSchoolTeamInfoWindow.lua:328 reads team.player_name
+// and :127-130 reads team.pet from enemy_info.
+func TestI9_6CMemoirNativeEnemyInfoCarriesStockPlayerTeam(t *testing.T) {
+	pool := pool(t)
+	actor, revision := bornActor(t, pool), installed(t, pool)
+	clock := &workplaceTime{at: time.Now().UTC().Add(time.Hour)}
+	mode := memoirMode(t, pool, clock)
+	compositeLevel(t, pool, actor, revision, 100)
+	bornHero(t, pool, actor, revision, 10001001, 1)
+	catalog, err := mode.Content.MemoirCatalogTx(ctx, pool, revision)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = mode.Start(ctx, actor, catalog.Selected[0], op()); err != nil {
+		t.Fatal(err)
+	}
+	state := memoirRecord(t, pool, actor)
+	grid := 0
+	for index, kind := range state.Board.Cells {
+		if kind == memoir.Player {
+			grid = index + 1
+			break
+		}
+	}
+	if grid == 0 {
+		t.Fatal("no player encounter")
+	}
+	key := int(state.Board.Enemies[grid])
+	opponent := state.Opponents[key]
+	raw, err := json.Marshal(state)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var payload map[string]any
+	if err = json.Unmarshal(raw, &payload); err != nil {
+		t.Fatal(err)
+	}
+	opponents, present := payload["opponents"].(map[string]any)
+	if !present {
+		t.Fatal(payload["opponents"])
+	}
+	object, present := opponents[strconv.Itoa(key)].(map[string]any)
+	if !present {
+		t.Fatal(opponents)
+	}
+	object["pet"] = map[string]any{"pet_id": int64(1), "table_id": int64(10010001), "star": int64(1), "lev": int64(10)}
+	raw, err = json.Marshal(payload)
+	if err != nil {
+		t.Fatal(err)
+	}
+	exec(t, pool, `UPDATE memoir_players SET payload=$2::jsonb WHERE player_id=$1`, int64(actor.PlayerID), string(raw))
+	info, err := mode.EnemyInfo(ctx, actor, grid, op())
+	if err != nil {
+		t.Fatal(err)
+	}
+	enemy, present := info["enemy_info"].(map[string]any)
+	if !present {
+		t.Fatal(info)
+	}
+	if opponent.Name == "" || enemy["player_name"] != opponent.Name {
+		t.Fatalf("stock team window name: enemy_info.player_name=%v want %q", enemy["player_name"], opponent.Name)
+	}
+	pet, present := enemy["pet"].(map[string]any)
+	if !present || pet["table_id"] != float64(10010001) {
+		t.Fatalf("stock team window pet: enemy_info.pet=%v", enemy["pet"])
+	}
+}
+
+// permanentMemoirWorker makes the real combat owner record and return a
+// permanent resolver failure, as the launcher does for bad snapshots.
+type permanentMemoirWorker struct{}
+
+func (permanentMemoirWorker) Resolve(context.Context, []byte, string, [32]byte) (applicationcombat.WorkerOutput, error) {
+	return applicationcombat.WorkerOutput{}, fmt.Errorf("%w: injected", combat.ErrResolverPermanent)
+}
+
+func TestI9_6CMemoirNativePlayerResolutionFailureIsRefused(t *testing.T) {
+	pool := pool(t)
+	actor, revision := bornActor(t, pool), installed(t, pool)
+	clock := &workplaceTime{at: time.Now().UTC().Add(time.Hour)}
+	mode := memoirMode(t, pool, clock)
+	compositeLevel(t, pool, actor, revision, 100)
+	bornHero(t, pool, actor, revision, 10001001, 1)
+	catalog, err := mode.Content.MemoirCatalogTx(ctx, pool, revision)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = mode.Start(ctx, actor, catalog.Selected[0], op()); err != nil {
+		t.Fatal(err)
+	}
+	state := memoirRecord(t, pool, actor)
+	grid := 0
+	for index, kind := range state.Board.Cells {
+		if kind == memoir.Player {
+			grid = index + 1
+			break
+		}
+	}
+	if grid == 0 {
+		t.Fatal("no player encounter")
+	}
+	original := mode.Combat.(applicationcombat.Service)
+	broken := original
+	broken.Worker = permanentMemoirWorker{}
+	mode.Combat = broken
+	request := application.PlayerFight{Grid: grid, Formation: []int64{1}}
+	response, err := mode.PlayerFight(ctx, actor, request, op())
+	if !errors.Is(err, memoir.ErrFightUnavailable) || response != nil {
+		t.Fatal("permanent resolution must refuse, not answer a success body", err, response)
+	}
+	if memoirRecord(t, pool, actor).Pending != nil {
+		t.Fatal("refused attempt left a pending battle")
+	}
+	mode.Combat = original
+	response, err = mode.PlayerFight(ctx, actor, request, op())
+	if err != nil || response["battle_info"] == nil {
+		t.Fatal("the encounter must stay playable after the refusal", err, response)
 	}
 }
 
@@ -463,6 +610,77 @@ func (owner *interruptedMemoirCombat) Resolve(ctx context.Context, operationCont
 	}
 	return owner.Combat.Resolve(ctx, operationContext, attempt)
 }
+
+// TestClosureE4MemoirPlayerStartReplayIdentityNative: a player START whose only
+// change is the formation replays the frozen pending attempt
+// (I8_PARENT_CONTRACT_V1 generation_supersede).
+func TestClosureE4MemoirPlayerStartReplayIdentityNative(t *testing.T) {
+	pool := pool(t)
+	actor, revision := bornActor(t, pool), installed(t, pool)
+	clock := &workplaceTime{at: time.Now().UTC().Add(time.Hour)}
+	mode := memoirMode(t, pool, clock)
+	compositeLevel(t, pool, actor, revision, 100)
+	bornHero(t, pool, actor, revision, 10001001, 1)
+	bornHero(t, pool, actor, revision, 10001002, 2)
+	catalog, err := mode.Content.MemoirCatalogTx(ctx, pool, revision)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = mode.Start(ctx, actor, catalog.Selected[0], op()); err != nil {
+		t.Fatal(err)
+	}
+	state := memoirRecord(t, pool, actor)
+	grid := 0
+	for index, kind := range state.Board.Cells {
+		if kind == memoir.Player {
+			grid = index + 1
+			break
+		}
+	}
+	if grid == 0 {
+		t.Fatal("no player encounter")
+	}
+	mode.Combat = &interruptedMemoirCombat{Combat: mode.Combat, interrupt: true}
+	first := application.PlayerFight{Grid: grid, Formation: []int64{1}}
+	if _, err = mode.PlayerFight(ctx, actor, first, op()); !errors.Is(err, combat.ErrResolverRetryable) {
+		t.Fatalf("admission interruption err=%v", err)
+	}
+	pending := memoirRecord(t, pool, actor).Pending
+	if pending == nil || pending.Grid != grid {
+		t.Fatalf("pending %+v", pending)
+	}
+	energy := func() int64 {
+		return scalar(t, pool, `SELECT stored_amount FROM player_temporal_resources WHERE player_id=$1 AND resource_key='energy'`, int64(actor.PlayerID))
+	}
+	attempts := func() int64 {
+		return scalar(t, pool, `SELECT count(*) FROM combat_attempts WHERE actor_player_id=$1 AND domain_kind='MEMOIR'`, int64(actor.PlayerID))
+	}
+	if attempts() != 1 {
+		t.Fatalf("admission attempts=%d want 1", attempts())
+	}
+	before := energy()
+	second := application.PlayerFight{Grid: grid, Formation: []int64{2}}
+	response, err := mode.PlayerFight(ctx, actor, second, op())
+	if err != nil || response["battle_info"] == nil {
+		t.Fatalf("a changed formation must replay the frozen pending attempt: %v %v", err, response)
+	}
+	if energy() != before || attempts() != 1 {
+		t.Fatalf("the replay spent energy or started another attempt: energy %d->%d attempts %d", before, energy(), attempts())
+	}
+	battle := response["battle_info"].(map[string]any)
+	health := battle["health_status"].(map[string]any)
+	team, present := health["team_A"].(map[int64]combat.ActorStatus)
+	if !present || team[1].Identity != 1 {
+		t.Fatalf("the replay must carry the frozen formation 1: %v", health["team_A"])
+	}
+	if _, changed := team[2]; changed {
+		t.Fatalf("the replay used the changed formation: %v", team)
+	}
+	if active := memoirRecord(t, pool, actor); active.Pending != nil {
+		t.Fatal("the replay left the attempt pending")
+	}
+}
+
 func TestI9_6CMemoirNativePlayerRecoveryAfterAdmission(t *testing.T) {
 	pool := pool(t)
 	actor, revision := bornActor(t, pool), installed(t, pool)
@@ -528,5 +746,90 @@ func TestI9_6CMemoirNativePlayerRecoveryAfterAdmission(t *testing.T) {
 		if memoirRecord(t, pool, actor).Sequence <= state.Sequence {
 			t.Fatal("loss replay trapped a fresh request")
 		}
+	}
+}
+
+func memoirFinalState(revision string, girl int64) memoir.State {
+	cells := make([]int64, memoir.BoardCells)
+	for index := range cells {
+		cells[index] = memoir.Road
+	}
+	cells[memoir.FinalPosition-1] = memoir.Endpoint
+	return memoir.State{
+		Occurrence: "native-tuning",
+		Revision:   revision,
+		Girl:       girl,
+		Floor:      3,
+		Board: memoir.Board{
+			Cells:       cells,
+			Open:        map[int]int64{memoir.InitialPosition: 1},
+			Enemies:     map[int]int64{},
+			Position:    memoir.InitialPosition,
+			GuardianWon: true,
+		},
+		Heroes:    map[int64]combat.ActorStatus{},
+		Enemies:   map[int]memoir.EnemyCarry{},
+		Opponents: map[int]march.Enemy{},
+		Drops:     []campaign.Item{},
+		MaxFloor:  map[int64]int{},
+	}
+}
+
+func memoirAwarded(value any, table int64) bool {
+	rows, present := value.([]map[string]any)
+	if !present {
+		return false
+	}
+	for _, row := range rows {
+		if row["table_id"] == table {
+			return true
+		}
+	}
+	return false
+}
+
+// TestI9_11T34MemoirTuningNative proves the operator overlay row reaches the
+// final draw and that a rejected overlay still serves the source catalog.
+func TestI9_11T34MemoirTuningNative(t *testing.T) {
+	pool := pool(t)
+	actor, revision := bornActor(t, pool), installed(t, pool)
+	compositeLevel(t, pool, actor, revision, 100)
+	clock := &workplaceTime{at: time.Now().UTC().Add(time.Hour)}
+	mode := memoirMode(t, pool, clock)
+	catalog, err := mode.Content.MemoirCatalogTx(ctx, pool, revision)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Each award gets its own occurrence: the reward receipt is keyed by it, and the two draws differ.
+	restore := func(occurrence string) {
+		state := memoirFinalState(revision, catalog.Selected[0])
+		state.Occurrence = occurrence
+		raw, version, err := payload.Encode(state)
+		if err != nil {
+			t.Fatal(err)
+		}
+		exec(t, pool, `INSERT INTO memoir_players(player_id,payload,payload_version,updated_at)VALUES($1,$2::jsonb,$3,now()) ON CONFLICT(player_id) DO UPDATE SET payload=EXCLUDED.payload,payload_version=EXCLUDED.payload_version,updated_at=EXCLUDED.updated_at`, int64(actor.PlayerID), string(raw), int(version))
+	}
+	restore("native-tuning")
+	exec(t, pool, `INSERT INTO memoir_tuning(singleton,payload,payload_version,revision,updated_at)VALUES(true,$1::jsonb,1,1,now())`, `{"box_rates":{"597011":{"20001154":10000}}}`)
+	t.Cleanup(func() { exec(t, pool, `DELETE FROM memoir_tuning`) })
+	response, err := mode.FinalAward(ctx, actor, memoir.FinalPosition, catalog.FinalGifts[0], op())
+	if err != nil {
+		t.Fatal("tuned final award", err)
+	}
+	if !memoirAwarded(response["awards"], 20001154) {
+		t.Fatalf("tuned guaranteed row missing from %#v", response["awards"])
+	}
+	exec(t, pool, `UPDATE memoir_tuning SET payload='{"box_rates":{"1":{"1":10000}}}'::jsonb,revision=2,updated_at=now()`)
+	tuning, found, err := (memoirstore.Store{}).TuningTx(ctx, pool)
+	if err != nil || !found {
+		t.Fatal("overlay row", found, err)
+	}
+	if _, err = catalog.Tune(tuning); err == nil {
+		t.Fatal("malformed overlay accepted")
+	}
+	restore("native-tuning-source")
+	if _, err = mode.FinalAward(ctx, actor, memoir.FinalPosition, catalog.FinalGifts[0], op()); err != nil {
+		t.Fatal("rejected overlay stopped the mode", err)
 	}
 }

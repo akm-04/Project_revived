@@ -1,0 +1,339 @@
+{
+ "background": [],
+ "content": [
+  "content_player_display_catalogs",
+  "content_public_profile_policies"
+ ],
+ "contracts": [
+  {
+   "count": 2,
+   "file": "docs/architecture/CUMULATIVE_CONTENT_GENERATION_LOCK.json"
+  },
+  {
+   "count": 10,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 10,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_10A_EVENT_CENTRE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10D_RANKBOARDS_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_10F_MENTOR_V1.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_10H_H2_STRUCTURED_KINDS.md"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11B_ITEMS_ENERGY_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_GIRLS_LOG_V1.md"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_TRIAL_SWEEP_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_ADVENTURE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_BROADCAST_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_DORM_SOCIAL_GLUE_RANKING_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_GUILD_POLICY_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MARCH_IMPLEMENTATION.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MARCH_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_MISSIONS_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V3.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MODE_FRAMEWORK_V1.json"
+  },
+  {
+   "count": 9,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_PET_CAMPAIGN_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/player_display.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "player_directory_profiles": [
+    "i4store.LockOwnedDirectoryTx"
+   ],
+   "player_display_admissions": [
+    "i5store.PendingDisplayAdmissionTx",
+    "i5store.ReadDisplayAdmissionTx"
+   ],
+   "player_hero_roots": [
+    "characterstore.PrepareDisplayHeroesTx"
+   ],
+   "player_heroes": [
+    "characterstore.PrepareDisplayHeroesTx"
+   ],
+   "player_profiles": [
+    "i5store.ReadDisplayStateTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "player_directory_profiles",
+   "player_display_admissions",
+   "player_hero_roots",
+   "player_heroes",
+   "player_profiles",
+   "players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/player_display.go",
+    "line": 25
+   },
+   "mid": 23,
+   "name": "EDIT_PLAYER_NAME"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/player_display.go",
+    "line": 25
+   },
+   "mid": 98,
+   "name": "SET_AVATAR_ID"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/player_display.go",
+    "line": 25
+   },
+   "mid": 100,
+   "name": "EDIT_AVATAR_RRAME"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/player_display.go",
+    "line": 25
+   },
+   "mid": 119,
+   "name": "GENERATE_PLAYER_NAME"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/player_display.go",
+    "line": 25
+   },
+   "mid": 656,
+   "name": "BUY_AVATAR"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/player_display.go",
+    "line": 25
+   },
+   "mid": 2490,
+   "name": "GET_TITLE_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/player_display.go",
+    "line": 25
+   },
+   "mid": 2492,
+   "name": "CHANGE_TITLE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/player_display.go",
+    "line": 25
+   },
+   "mid": 2493,
+   "name": "GET_BUBBLE_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/player_display.go",
+    "line": 25
+   },
+   "mid": 2494,
+   "name": "CHANGE_BUBBLE"
+  }
+ ],
+ "name": "playerdisplay",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/characterstore",
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore"
+ ],
+ "tables": {
+  "owned": [],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "content_player_display_catalogs",
+   "content_public_profile_policies",
+   "gameplay_contexts",
+   "gxb_content_activation",
+   "gxb_content_appearance_skin_items",
+   "gxb_content_hero_templates",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "player_cosmetic_entitlements",
+   "player_directory_profiles",
+   "player_display_admissions",
+   "player_display_selections",
+   "player_economy_owners",
+   "player_function_unlocks",
+   "player_hero_roots",
+   "player_hero_skin_entitlements",
+   "player_heroes",
+   "player_item_stacks",
+   "player_profiles",
+   "player_progression",
+   "players"
+  ],
+  "written": [
+   "gxb_operation_receipts",
+   "player_cosmetic_entitlements",
+   "player_display_admissions",
+   "player_display_selections",
+   "player_profiles"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdata",
+   "playerdisplay",
+   "publicshowcase"
+  ],
+  "scenarios_naming": [
+   "i9_4_real_pk.json",
+   "topfloor_battle.json"
+  ],
+  "unit": [
+   "cosmetic_privilege_clock_test.go",
+   "family_origins_test.go",
+   "hero_predicate_test.go"
+  ]
+ }
+}

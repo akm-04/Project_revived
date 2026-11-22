@@ -57,17 +57,18 @@ func Test6BProfileReadWireActorAndExactIDs(t *testing.T) {
 		{1838, map[string]any{"to_player_id": json.Number("9007199254740992"), "index": 1}, 400},
 		{1840, map[string]any{}, 200},
 		{1840, map[string]any{"to_player_id": 100002}, 400},
-		{1832, map[string]any{"hero_ids": []any{json.Number("1"), 0, json.Number("-1"), 0, 0, 2}}, 200},
-		{1832, map[string]any{"hero_ids": []any{1, 0, -1, 0, 0}}, 400},
-		{1832, map[string]any{"hero_ids": []any{1, 0, -1, 0, 0, 2}, "player_id": 100002}, 400},
-		{1832, map[string]any{"hero_ids": []any{1.5, 0, -1, 0, 0, 2}}, 400},
+		{1832, map[string]any{"ids": []any{json.Number("1"), 0, json.Number("-1"), 0, 0, 2}}, 200},
+		{1832, map[string]any{"ids": []any{1, 0, -1, 0, 0}}, 400},
+		{1832, map[string]any{"ids": []any{1, 0, -1, 0, 0, 2}, "player_id": 100002}, 400},
+		{1832, map[string]any{"ids": []any{1.5, 0, -1, 0, 0, 2}}, 400},
+		{1832, map[string]any{"hero_ids": []any{1, 0, -1, 0, 0, 2}}, 400},
 	}
 	for _, tc := range cases {
 		got := d.Dispatch(context.Background(), activityReq(tc.mid, tc.p, time.Now()))
 		if got.HTTPStatus != tc.status {
 			t.Fatalf("%d %+v", tc.mid, got)
 		}
-		if tc.status != 200 && got.Body["error_code"] != int64(1) {
+		if tc.status != 200 && got.Body["error"] != "public_profile_request_failed" {
 			t.Fatal(got)
 		}
 	}
@@ -76,7 +77,7 @@ func Test6BProfileReadWireActorAndExactIDs(t *testing.T) {
 	}
 	r := activityReq(1840, map[string]any{}, time.Now())
 	r.Envelope.Claims.Region = 2
-	if d.Dispatch(context.Background(), r).HTTPStatus != 403 {
+	if d.Dispatch(context.Background(), r).HTTPStatus != 409 {
 		t.Fatal("forgedregion")
 	}
 }

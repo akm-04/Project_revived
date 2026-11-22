@@ -76,7 +76,7 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, q Fight, op oper
 		if e != nil {
 			return nil, e
 		}
-		battle := cb.BattleRequest{CampaignType: 79, BattleID: stage.Battle, Formation: append([]int64{}, q.Formation...), WavesB: waves}
+		battle := cb.BattleRequest{CampaignType: 79, RentalMode: 79, BattleID: stage.Battle, Formation: append([]int64{}, q.Formation...), WavesB: waves}
 		for _, h := range q.Formation {
 			battle.TeamA = append(battle.TeamA, cb.Participant{Origin: cd.OwnedSelf, Kind: cd.HeroActor, Player: a.PlayerID, Identity: h})
 		}
@@ -101,7 +101,7 @@ func (s Mode) Start(c context.Context, a identity.ActorContext, q Fight, op oper
 		if same {
 			deadline = time.Unix(r.Fight.Deadline, 0)
 		}
-		started, e := s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Actor: a, Locator: locator(a), GenerationRef: id, StartFingerprint: fmt.Sprintf("%x", fp), ResultDeadline: deadline, Battle: battle, TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayFightExist, ErrorCode: cd.FightExistCode}, Package: func(stream *cd.Stream) (any, error) { return v.catalog.Lines(v.catalog.Drop(box, stream)), nil }})
+		started, e := s.Combat.StartTx(c, sc.Tx, scope, cb.StartRequest{Mode: cd.ModeGodsTrial, Actor: a, Locator: locator(a), GenerationRef: id, StartFingerprint: fmt.Sprintf("%x", fp), ResultDeadline: deadline, Battle: battle, TrustProfile: cd.ClientSummaryAttested, Replay: cd.ReplaySpec{Response: cd.ReplayFightExist, ErrorCode: cd.FightExistCode}, Package: func(stream *cd.Stream) (any, error) { return v.catalog.Lines(v.catalog.Drop(box, stream)), nil }})
 		if e != nil {
 			return nil, e
 		}
@@ -195,6 +195,9 @@ func (s Mode) Result(c context.Context, a identity.ActorContext, q Result, op op
 			if e = s.record(c, sc, a, p.ID, 1); e != nil {
 				return nil, e
 			}
+		}
+		if e = s.BattleCounts.ObserveBattleTx(c, sc.Tx, a.PlayerID, p.Formation, sc.Operation.DecisionAt()); e != nil {
+			return nil, e
 		}
 		r.LastResult = out
 		r.LastFight = p

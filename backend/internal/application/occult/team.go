@@ -2,28 +2,24 @@ package occult
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"math"
-	"slices"
-	"strconv"
 	"time"
 
-	ca "gxb.local/backend/v2/internal/application/characterasset"
 	gen "gxb.local/backend/v2/internal/application/generation"
+	"gxb.local/backend/v2/internal/application/heroforce"
 	"gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/playerroot"
-	"gxb.local/backend/v2/internal/application/publicstats"
 	sr "gxb.local/backend/v2/internal/application/sharedroom"
 	"gxb.local/backend/v2/internal/application/socialinbox"
-	"gxb.local/backend/v2/internal/domain/character"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/occult"
 	"gxb.local/backend/v2/internal/domain/sharedroom"
+	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
-
-const inviteForceHeroes = 15
 
 // CreateTeam answers 2366 with campaign_type 1: an unstarted three-seat room.
 // No ticket is spent until the owner starts the challenge. A repeated create of
@@ -43,7 +39,12 @@ func (s Mode) CreateTeam(c context.Context, a identity.ActorContext, chapterID i
 	if err != nil {
 		return nil, err
 	}
-	payload, err := d.NewRun(chapterID, d.MultiCampaignType).Encode()
+	// shortcut: an unqualified Hero-stat read leaves force 0 rather than
+	// refusing the room, upgrade when a gate needs force.
+	forces, _ := s.bestForces(c, []identity.PlayerID{a.PlayerID}, loaded.at)
+	state := d.NewRun(chapterID, d.MultiCampaignType)
+	state.SetForce(int64(a.PlayerID), forces[a.PlayerID])
+	payload, err := state.Encode()
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +75,7 @@ func (s Mode) JoinRoom(c context.Context, a identity.ActorContext, roomID int64,
 		return nil, err
 	}
 	if !found || room.Family != RoomFamily || room.Slot != RoomSlot || room.Status != sharedroom.StatusOpen {
-		return nil, fmt.Errorf("%w: room unavailable", d.ErrRefused)
+		return nil, fmt.Errorf("%w: room unavailable", d.ErrRoomUnavailable)
 	}
 	state, err := d.LoadRunState(room.Payload)
 	if err != nil {
@@ -82,15 +83,36 @@ func (s Mode) JoinRoom(c context.Context, a identity.ActorContext, roomID int64,
 	}
 	at := loaded.at.Unix()
 	if state.CampaignType != d.MultiCampaignType || state.RoomExpired(at) || !state.MayJoin(int64(a.PlayerID), at) {
-		return nil, fmt.Errorf("%w: room cannot be joined", d.ErrRefused)
+		return nil, fmt.Errorf("%w: room cannot be joined", d.ErrRoomUnavailable)
 	}
 	if err = s.requireBand(c, s.Fresh, loaded.catalog, room.Owner, a.PlayerID); err != nil {
 		return nil, err
 	}
-	if _, err = s.Rooms.Join(c, a, RoomFamilyRef(), roomID, op); err != nil {
+	// shortcut: an unqualified Hero-stat read leaves force 0 rather than
+	// refusing the join, upgrade when a gate needs force.
+	forces, _ := s.bestForces(c, []identity.PlayerID{a.PlayerID}, loaded.at)
+	if _, err = s.Rooms.Join(c, a, sr.JoinRequest{Family: RoomFamilyRef(), RoomID: roomID}, op); err != nil {
+		return nil, joinRefusal(err)
+	}
+	// Freeze it for the prepare and invite windows, the same shape Adventure
+	// uses to keep Hero-stat reads out of room projections.
+	_, err = s.updateRoom(c, a, op, false, func(_ context.Context, _ gen.TimedScope, view *roomView) (map[string]any, error) {
+		view.state.SetForce(int64(a.PlayerID), forces[a.PlayerID])
+		return nil, nil
+	})
+	if err != nil {
 		return nil, err
 	}
 	return s.roomChange(c, a, op)
+}
+
+// joinRefusal reports a seat the room core refused as a missing, expired, closed
+// or full room, the stock join refusal the client renders.
+func joinRefusal(err error) error {
+	if errors.Is(err, sharedroom.ErrFull) || errors.Is(err, sharedroom.ErrExpired) || errors.Is(err, sharedroom.ErrClosed) || errors.Is(err, sr.ErrNotFound) {
+		return fmt.Errorf("%w: %w", d.ErrRoomUnavailable, err)
+	}
+	return err
 }
 
 // requireBand refuses a player outside the room's level band or below the gate.
@@ -104,7 +126,7 @@ func (s Mode) requireBand(c context.Context, q tx.Queryer, catalog d.Catalog, ow
 		return err
 	}
 	if !ownerFound || !candidateFound || candidateProfile.Level < catalog.OpenAcademyLevel || !d.WithinLevelBand(ownerProfile.Level, candidateProfile.Level, catalog.LevelBand) {
-		return fmt.Errorf("%w: level band", d.ErrRefused)
+		return fmt.Errorf("%w: level band", d.ErrLevelBand)
 	}
 	return nil
 }
@@ -148,36 +170,44 @@ func (s Mode) Invite(c context.Context, a identity.ActorContext, target identity
 // (CREATS_TIPS_13). A power change makes a new row, because force is part of the
 // notice source; the old row ages out with the retention window.
 func (s Mode) bestForce(c context.Context, sc gen.TimedScope, player identity.PlayerID, at time.Time) (int64, error) {
-	roster, err := s.rosterRows(c, sc.Tx, s.Heroes, player, at, "49", "heros")
-	if err != nil {
-		return 0, err
-	}
 	revision, err := s.Content.ActiveRevision(c, sc.Tx)
 	if err != nil {
 		return 0, err
 	}
-	scope, err := ca.NewCoherentReadScope(tx.Scope{Tx: sc.Tx, Operation: sc.Operation.Operation(), Attempt: sc.Attempt, Options: sc.Options}, revision, at)
+	return heroforce.Best15(c, sc, s.Heroes, s.Stats, player, revision, at)
+}
+
+// bestForces reads each player's best-15 AP in one read-only snapshot, copied
+// from Adventure's room service because create has no open transaction.
+func (s Mode) bestForces(c context.Context, players []identity.PlayerID, at time.Time) (map[identity.PlayerID]int64, error) {
+	forces := make(map[identity.PlayerID]int64, len(players))
+	if s.Stats == nil || len(players) == 0 {
+		return forces, nil
+	}
+	revision, err := s.Content.ActiveRevision(c, s.Fresh)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
-	forces := make([]int64, 0, len(roster))
-	for key := range roster {
-		id, err := strconv.ParseInt(key, 10, 64)
-		if err != nil {
-			return 0, err
+	id, err := ids.NewUUID()
+	if err != nil {
+		return nil, err
+	}
+	policies, err := policy.NewSet(policy.Ref{Name: "content", Version: revision})
+	if err != nil {
+		return nil, err
+	}
+	op := operation.Context{ID: id, StartedAt: at, Policies: policies}
+	_, _, err = s.Timed.Run(c, op, profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, retry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		for _, player := range players {
+			force, err := heroforce.Best15(c, sc, s.Heroes, s.Stats, player, revision, at)
+			if err != nil {
+				return err
+			}
+			forces[player] = force
 		}
-		result, err := s.Stats.HeroTx(c, scope, character.HeroRef{PlayerID: player, PartnerID: id}, publicstats.View{Kind: publicstats.Self, Viewer: player})
-		if err != nil {
-			return 0, err
-		}
-		forces = append(forces, int64(math.Round(result.Stats.Force)))
-	}
-	slices.Sort(forces)
-	total := int64(0)
-	for _, force := range forces[max(0, len(forces)-inviteForceHeroes):] {
-		total += force
-	}
-	return total, nil
+		return nil
+	})
+	return forces, err
 }
 
 // Kick answers 2370: the owner removes a member for the life of the room and the

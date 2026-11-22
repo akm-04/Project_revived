@@ -1,0 +1,55 @@
+{
+  "fight": {
+    "AttemptID": "e954b8c1-1d46-4079-8baa-836687c28e93",
+    "Server": 1,
+    "Challenger": 100001,
+    "Defender": {
+      "robot": 10325
+    },
+    "Avenge": false,
+    "Fingerprint": "0000000000000000000000000000000000000000000000000000000000000007",
+    "Formation": [
+      1,
+      2
+    ],
+    "PetID": 0,
+    "ChallengerRank": 1,
+    "DefenderRank": 1,
+    "StartedAt": "2026-11-16T02:17:56Z",
+    "Status": "STARTED",
+    "Outcome": null,
+    "SettledAt": null,
+    "StateVersion": 1
+  },
+  "period_number": 1,
+  "mode": 1,
+  "leader": 0,
+  "formation": [
+    {
+      "table_id": 1
+    },
+    {
+      "table_id": 2
+    }
+  ],
+  "enemy": {
+    "Occupant": {
+      "robot": 10325
+    },
+    "Rank": 1,
+    "Name": "",
+    "Level": 0,
+    "AvatarID": 0,
+    "FrameID": 0,
+    "ConquerLevel": 0,
+    "ConquerLoop": 0,
+    "GuildID": 0,
+    "GuildName": "",
+    "Wins": 0,
+    "Force": 0,
+    "Leader": 0,
+    "Heroes": null,
+    "Pet": null,
+    "TitleInfo": null
+  }
+}

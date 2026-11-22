@@ -1,0 +1,4 @@
+{
+ "rule": "Migration numbers the lead reserved for parallel I9-10 leaves that were never used, or that a merge renumbered away (GM 00123 to 00154). Deployed databases already record the versions around them, so they stay unused forever: a new migration takes the next number above the high-water mark, never one of these.",
+ "retired": [112, 113, 114, 115, 120, 121, 134, 139, 140, 142, 144, 145, 146, 147, 148, 149, 152, 153]
+}

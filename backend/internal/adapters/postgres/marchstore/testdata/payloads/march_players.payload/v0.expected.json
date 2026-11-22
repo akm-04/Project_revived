@@ -1,0 +1,83 @@
+{
+  "revision": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "occurrence": "occurrence-1",
+  "reset_day": 20600,
+  "reset_used": true,
+  "drink_day": 20600,
+  "drinks": 2,
+  "passed": 3,
+  "won": true,
+  "extra": true,
+  "has_fight": true,
+  "advanced": true,
+  "heroes": {
+    "2300002": {
+      "hero_id": 2300002,
+      "player_id": 2300001,
+      "health": 1,
+      "hp": 850.5,
+      "mp": 100,
+      "is_reborn": 0
+    }
+  },
+  "loan": {
+    "player_id": 2300003,
+    "unit_id": 2300004,
+    "health": 1,
+    "hp": 900,
+    "mp": 50
+  },
+  "enemies": [
+    {
+      "table_id": 5,
+      "avatar_frame": 1,
+      "conquer_lev": 10,
+      "conquer_loop_id": 1,
+      "team_id": 2399999,
+      "name": "rival",
+      "level": 30,
+      "avatar": 7,
+      "is_robot": 1,
+      "heroes": {
+        "2300005": {
+          "hp": 100
+        }
+      },
+      "force": 12345
+    }
+  ],
+  "rewards": {
+    "1": [
+      {
+        "item_num": 10,
+        "table_id": 1
+      }
+    ]
+  },
+  "recommend_day": 20600,
+  "recommend": [
+    2300002
+  ],
+  "pending": "operation-1",
+  "formation": [
+    2300002,
+    0,
+    0,
+    0
+  ],
+  "battle_ordinal": 2,
+  "last_result": {
+    "map_info": {
+      "stage_done": 1
+    }
+  },
+  "chest_replies": {
+    "1": [
+      {
+        "table_id": 1
+      }
+    ]
+  },
+  "lifetime_chests": 1,
+  "version": 4
+}

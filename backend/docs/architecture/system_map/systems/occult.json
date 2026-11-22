@@ -1,0 +1,385 @@
+{
+ "background": [
+  {
+   "binary": "gxb-api",
+   "entry": "appoccult.Reconciler",
+   "kind": "reconcile"
+  }
+ ],
+ "content": [],
+ "contracts": [
+  {
+   "count": 19,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 24,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 4,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 8,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 23,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 23,
+   "file": "docs/i9/I9_OCCULT_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [
+  "observing"
+ ],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/occult_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "occult"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "occult_players": [
+    "occultstore.LockPlayerTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "occult_players",
+   "players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 59
+   },
+   "mid": 2362,
+   "name": "GET_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 59
+   },
+   "mid": 2363,
+   "name": "START_CHALLENGE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 59
+   },
+   "mid": 2364,
+   "name": "GET_CAMPAIGN_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 59
+   },
+   "mid": 2365,
+   "name": "GET_MEMBER_STAT_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 59
+   },
+   "mid": 2366,
+   "name": "CREATE_ROOM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 59
+   },
+   "mid": 2367,
+   "name": "JOIN_ROOM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 59
+   },
+   "mid": 2368,
+   "name": "EXIT_ROOM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 59
+   },
+   "mid": 2369,
+   "name": "INVITE_FRIEND"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 59
+   },
+   "mid": 2370,
+   "name": "KICK_MEMBER"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 59
+   },
+   "mid": 2371,
+   "name": "PREPARE_SINGLE_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 59
+   },
+   "mid": 2372,
+   "name": "SINGLE_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 59
+   },
+   "mid": 2373,
+   "name": "QUIT_SINGLE_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 59
+   },
+   "mid": 2374,
+   "name": "TEAM_FIGHT_INVITE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 59
+   },
+   "mid": 2375,
+   "name": "ACCEPT_TEAM_INVITE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 59
+   },
+   "mid": 2376,
+   "name": "QUIT_TEAM_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 59
+   },
+   "mid": 2377,
+   "name": "TEAM_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 59
+   },
+   "mid": 2378,
+   "name": "PREPARE_TEAM_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 59
+   },
+   "mid": 2379,
+   "name": "START_SINGLE_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 59
+   },
+   "mid": 2380,
+   "name": "GET_CAMPAIGN_LOG_LIST"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 59
+   },
+   "mid": 2382,
+   "name": "GET_TEAM_FIGHT_REPORT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 59
+   },
+   "mid": 2383,
+   "name": "PICK_TEAM_FORMATION"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 59
+   },
+   "mid": 2384,
+   "name": "CHANGE_POS"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/occult_dispatcher.go",
+    "line": 59
+   },
+   "mid": 2385,
+   "name": "OCCULT_SWEEP"
+  }
+ ],
+ "name": "occult",
+ "pushes": [
+  {
+   "file": "internal/adapters/stockruntime/occult_room_notice.go",
+   "kind": "direct",
+   "line": 46,
+   "mid": 516,
+   "roles": [
+    "Role",
+    "World"
+   ]
+  },
+  {
+   "file": "internal/adapters/stockruntime/occult_room_notice.go",
+   "kind": "notice",
+   "line": 49,
+   "namespace": "rt.NoticeNamespaceGeneric",
+   "notice_type": 32,
+   "parent_mid": 36854,
+   "roles": [
+    "Role",
+    "World"
+   ]
+  }
+ ],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/guildrentalread",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore",
+  "internal/adapters/postgres/occultstore",
+  "internal/adapters/postgres/presencestore",
+  "internal/adapters/postgres/sharedroomstore"
+ ],
+ "tables": {
+  "owned": [
+   "occult_logs",
+   "occult_players",
+   "occult_reports",
+   "occult_runs"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "gxb_content_activation",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "occult_logs",
+   "occult_players",
+   "occult_reports",
+   "player_directory_profiles",
+   "player_function_eligibility",
+   "player_social_presence",
+   "players",
+   "realtime_presence_leases",
+   "shared_room_seats",
+   "shared_rooms"
+  ],
+  "written": [
+   "gxb_operation_receipts",
+   "occult_logs",
+   "occult_players",
+   "occult_reports",
+   "occult_runs"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [
+   "i9_8c_occult.json"
+  ],
+  "unit": [
+   "notice_test.go",
+   "service_test.go",
+   "start_choice_conformance_test.go"
+  ]
+ }
+}

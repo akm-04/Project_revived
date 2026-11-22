@@ -1,2 +1,10 @@
-{"name":"social","level":20,
- "steps":["window:social_system","wait:10"],"settle_seconds":15,"expect_ok":[176]}
+{"name":"social","level":85,
+ "steps":[
+  "window:social_system",
+  "wait:10",
+  "lua:local w=xyd.WindowManager.get():getWindow('social_system') if not w or tolua.isnull(w) then error('vc-social-window') end if w:nodeByName('red_point_teacher'):isVisible() then error('vc-social-class-red-dot') end local s=xyd.ModelManager.get():loadModel(xyd.ModelType.SOCIAL_SYSTEM) if s.noticelist then for _,n in ipairs(s.noticelist) do if n.notice_type==xyd.FriendNoticeType.GUILD_INVITE then error('vc-social-invite-listed-176') end end end s:loadFriendInfo({list_type=xyd.FriendInfoType.NOTICE}, function(code,reply) if code~=xyd.error.OK then error('vc-social-189-'..tostring(code)) end if type(reply)~='table' then error('vc-social-189-shape') end for _,n in ipairs(reply) do if n.notice_type==xyd.FriendNoticeType.GUILD_INVITE then error('vc-social-invite-listed-189') end end w:swapWindowState(3) end)",
+  "wait:5"
+ ],
+ "settle_seconds":15,
+ "expect_ok":[176,189],
+ "note":"Type-10 guild invites stay stored (native TestWorkingP4 proves the projection still holds the invite) but the server hides them from 176 and 189, and the invite alone leaves no red dot. The stock Notice tab opens with no type-10 row, so guild_invite_item.csb is never rendered; the server-side display is tunable via socialprojection.Service.ShowGuildInviteNotices after the OTA client patch."}

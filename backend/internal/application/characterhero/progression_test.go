@@ -129,6 +129,12 @@ func (c progContent) HeroSuperPrerequisitesTx(_ context.Context, _ tx.Queryer, _
 func (c progContent) HeroPieceMappings(context.Context, string) ([]character.HeroPieceMapping, error) {
 	return append([]character.HeroPieceMapping(nil), c.pieces...), nil
 }
+func (c progContent) HeroProgressionActiveTx(context.Context, tx.Queryer) (string, bool, error) {
+	return c.HeroProgressionActive(context.Background())
+}
+func (c progContent) HeroPieceMappingsTx(context.Context, tx.Queryer, string) ([]character.HeroPieceMapping, error) {
+	return c.HeroPieceMappings(context.Background(), "")
+}
 
 type progEconomy struct {
 	playerLevel                   int64
@@ -170,10 +176,16 @@ type emptyBackpack struct{}
 func (emptyBackpack) ListStacks(context.Context, identity.PlayerID) ([]economy.StackState, error) {
 	return nil, nil
 }
+func (emptyBackpack) ListStacksTx(context.Context, tx.Queryer, identity.PlayerID) ([]economy.StackState, error) {
+	return nil, nil
+}
 
 type progBackpack struct{ stacks []economy.StackState }
 
 func (b progBackpack) ListStacks(context.Context, identity.PlayerID) ([]economy.StackState, error) {
+	return append([]economy.StackState(nil), b.stacks...), nil
+}
+func (b progBackpack) ListStacksTx(context.Context, tx.Queryer, identity.PlayerID) ([]economy.StackState, error) {
 	return append([]economy.StackState(nil), b.stacks...), nil
 }
 
@@ -428,7 +440,7 @@ func TestHeroPiecesProjectsCanonicalI5Stacks(t *testing.T) {
 		{PlayerID: 7, ItemID: 40001002, Quantity: 0, StateVersion: 1, AcquiredAt: now, UpdatedAt: now},
 		{PlayerID: 7, ItemID: 12345, Quantity: 99, StateVersion: 1, AcquiredAt: now, UpdatedAt: now},
 	}}
-	got, err := s.HeroPieces(context.Background(), testActor(t))
+	got, err := s.HeroPieces(context.Background(), testActor(t), operation.Context{})
 	if err != nil {
 		t.Fatal(err)
 	}

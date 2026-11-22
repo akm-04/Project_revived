@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
 	"slices"
 	"time"
 
@@ -39,8 +40,10 @@ type StartCommand struct {
 	Enemy      identity.PlayerID
 }
 
+// The stage is the opponent, not the chosen team: I8_PARENT_CONTRACT_V1
+// generation_supersede replays the frozen START when only the formation changed.
 func fingerprint(pid identity.PlayerID, r StartCommand) string {
-	raw, _ := json.Marshal(map[string]any{"policy": d.ContractID, "player": int64(pid), "formations": r.Formations, "enemy": int64(r.Enemy)})
+	raw, _ := json.Marshal(map[string]any{"policy": d.ContractID, "player": int64(pid), "enemy": int64(r.Enemy)})
 	sum := sha256.Sum256(raw)
 	return hex.EncodeToString(sum[:])
 }
@@ -91,7 +94,9 @@ func (s Service) Start(c context.Context, a identity.ActorContext, r StartComman
 	if err != nil {
 		return d.MatchView{}, err
 	}
-	if found && latest.Fingerprint == fp && (latest.Status == d.StatusStarted || now.Sub(latest.StartedAt) < replayWindow) {
+	openReplay := found && latest.Fingerprint == fp && latest.Status == d.StatusStarted
+	settledReplay := found && latest.Fingerprint == fp && reflect.DeepEqual(latest.AttackTeams, r.Formations) && now.Sub(latest.StartedAt) < replayWindow
+	if openReplay || settledReplay {
 		return s.finish(c, a, latest, op, deadline)
 	}
 	// Server-authoritative results always apply: an abandoned match settles first.
@@ -181,6 +186,23 @@ func (s Service) admit(c context.Context, sc gen.TimedScope, a identity.ActorCon
 	if !slices.Contains(chosen, r.Enemy) || !sameGroup || locked {
 		return d.Match{}, d.ErrRefused
 	}
+	// Source message 30003 refuses a challenge against a low-point opponent;
+	// checked before admission so the refusal consumes no try.
+	if defender.Points < d.LowPointsChallengeFloor {
+		return d.Match{}, d.ErrOpponentLowPoints
+	}
+	// D488 parity: the issued list is not a reservation. If the challenger or the
+	// selected target moved to another rank since MATCH, answer with the stock
+	// rank-changed refusal instead of fighting a stale target.
+	if mode == d.ModeNormal {
+		standings, err := s.Store.StandingsTx(c, sc.Tx)
+		if err != nil {
+			return d.Match{}, err
+		}
+		if err = d.MatchOfferSnapshot(attacker.OfferSnapshot, catalog.Rank(standings), a.PlayerID, r.Enemy); err != nil {
+			return d.Match{}, err
+		}
+	}
 	rounds := catalog.Level(defender.Level).Teams
 	if !d.ValidTeams(r.Formations, rounds) {
 		return d.Match{}, d.ErrInvalid
@@ -212,7 +234,7 @@ func (s Service) admit(c context.Context, sc gen.TimedScope, a identity.ActorCon
 		battle := combat.BattleRequest{CampaignType: d.CampaignType, BattleID: d.BattleID, TeamA: participants(cd.OwnedSelf, a.PlayerID, r.Formations[i].Heroes, cd.HeroActor),
 			PetsA: participants(cd.OwnedSelf, a.PlayerID, pet(r.Formations[i]), cd.PetActor), WavesB: [][]combat.Participant{participants(cd.OwnedForeign, r.Enemy, defense[i].Heroes, cd.HeroActor)},
 			PetsB: participants(cd.OwnedForeign, r.Enemy, pet(defense[i]), cd.PetActor), Context: &cd.BattleContext{Transform: d.Transform}}
-		requests = append(requests, combat.StartRequest{Actor: a, Locator: roundLocator(id, i+1), GenerationRef: d.ContractID, StartFingerprint: fp, ResultDeadline: at.Add(resultWindow), Battle: battle})
+		requests = append(requests, combat.StartRequest{Mode: cd.ModeOneOnOne, Actor: a, Locator: roundLocator(id, i+1), GenerationRef: d.ContractID, StartFingerprint: fp, ResultDeadline: at.Add(resultWindow), Battle: battle})
 	}
 	started := []combat.Started{}
 	if len(requests) > 0 {
@@ -470,7 +492,26 @@ func (s Service) settleMatchTx(c context.Context, sc gen.TimedScope, id ids.UUID
 	done2 := m
 	stamp := at.UTC()
 	done2.Status, done2.Outcome, done2.SettledAt, done2.StateVersion = d.StatusSettled, &outcome, &stamp, m.StateVersion+1
-	return s.Store.FinishMatchTx(c, sc.Tx, done2, m.StateVersion)
+	if err = s.Store.FinishMatchTx(c, sc.Tx, done2, m.StateVersion); err != nil {
+		return err
+	}
+	if err = s.BattleCounts.ObserveBattleTx(c, sc.Tx, m.Attacker, foughtHeroes(m.AttackTeams, m.Rounds, wins), at); err != nil {
+		return err
+	}
+	return s.BattleCounts.ObserveBattleTx(c, sc.Tx, m.Defender, foughtHeroes(m.DefenseTeams, m.Rounds, wins), at)
+}
+
+// foughtHeroes is one side's own lineup in the rounds that reached a settled
+// result; a forfeited round was decided without a battle and does not count.
+func foughtHeroes(teams []d.Team, rounds []d.Round, wins []int64) []int64 {
+	heroes := []int64{}
+	for index := range wins {
+		if index >= len(teams) || rounds[index].Forfeit() {
+			continue
+		}
+		heroes = append(heroes, teams[index].Heroes...)
+	}
+	return heroes
 }
 
 // close ends a match whose rounds can no longer produce results; the consumed

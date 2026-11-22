@@ -22,6 +22,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"reflect"
 	"sync"
@@ -54,7 +55,7 @@ func (f *fixture) gift() sg.Service {
 	return sg.Service{Timed: gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: f.p}}, Runner: r}, Reads: r, Store: socialgiftstore.Store{}, Content: content, Players: i4store.PlayerRootLocker{}, Relations: socialrelationstore.Store{}, Privacy: sr.FriendDMPrivacyProvider{Store: socialrelationstore.Store{}}, Inbox: socialinbox.GiftService{Store: inbox}, NoticeEvidence: inbox, Grants: gr, Admission: f.authority(), Fence: db}
 }
 func (f *fixture) giftState() string {
-	return f.text(`SELECT jsonb_build_object('epochs',(SELECT coalesce(jsonb_agg(to_jsonb(e) ORDER BY player_id,day_token),'[]') FROM social_gift_epochs e),'transfers',(SELECT coalesce(jsonb_agg(to_jsonb(g) ORDER BY transfer_id),'[]') FROM social_gift_transfers g),'claims',(SELECT coalesce(jsonb_agg(to_jsonb(o) ORDER BY operation_id),'[]') FROM social_gift_claim_operations o),'scalar',(SELECT coalesce(jsonb_agg(to_jsonb(s) ORDER BY player_id,resource_key),'[]') FROM player_currency_balances s),'social',$1::jsonb)::text`, f.snapshot())
+	return f.text(`SELECT jsonb_build_object('epochs',(SELECT coalesce(jsonb_agg(to_jsonb(e) ORDER BY player_id,day_token),'[]') FROM social_gift_epochs e),'transfers',(SELECT coalesce(jsonb_agg(to_jsonb(g) ORDER BY transfer_id),'[]') FROM social_gift_transfers g),'claims',(SELECT coalesce(jsonb_agg(to_jsonb(o)-'payload_version' ORDER BY operation_id),'[]') FROM social_gift_claim_operations o),'scalar',(SELECT coalesce(jsonb_agg(to_jsonb(s) ORDER BY player_id,resource_key),'[]') FROM player_currency_balances s),'social',$1::jsonb)::text`, f.snapshot())
 }
 func Test7A_SendClaimCanonicalKnownReplay(t *testing.T) {
 	f, s, a, b := giftFixture(t)
@@ -91,6 +92,40 @@ func Test7A_SendClaimCanonicalKnownReplay(t *testing.T) {
 	}
 	t.Log("REAL_PG natural uniqueness, typed reciprocal notice, dedup order, one named scalar grant, complete known replay, no duplicate credit")
 }
+func Test7A_FactorySampledOperationRecoversCommittedGift(t *testing.T) {
+	for _, claim := range []bool{false, true} {
+		t.Run(map[bool]string{true: "claim", false: "send"}[claim], func(t *testing.T) {
+			f, s, a, b := giftFixture(t)
+			var ids []socialinbox.NoticeID
+			if claim {
+				r, e := s.Send(ctx, a, b.PlayerID, f.op())
+				if e != nil {
+					t.Fatal(e)
+				}
+				ids = r.NoticeIDs
+			}
+			op, e := (operation.Factory{Clock: clock.Fixed{T: time.Date(2026, 11, 18, 12, 0, 0, 123456789, time.UTC)}}).New(policy.Set{})
+			if e != nil {
+				t.Fatal(e)
+			}
+			first, e := s.Send(ctx, a, b.PlayerID, op)
+			if claim {
+				first, e = s.Claim(ctx, b, ids, op)
+			}
+			if e != nil {
+				t.Fatal(e)
+			}
+			again, e := s.Send(ctx, a, b.PlayerID, op)
+			if claim {
+				again, e = s.Claim(ctx, b, ids, op)
+			}
+			if e != nil || !reflect.DeepEqual(first, again) {
+				t.Fatal(again, e)
+			}
+		})
+	}
+}
+
 func Test7A_UnknownCommitNeverBlindReplay(t *testing.T) {
 	for _, send := range []bool{true, false} {
 		for _, commit := range []bool{true, false} {
@@ -148,10 +183,40 @@ func Test7A_PostIssueRelationChangeAndMidnight(t *testing.T) {
 	if e != nil || got.Amount != 5 {
 		t.Fatal(got, e)
 	}
-	if f.text(`SELECT sender_day FROM social_gift_transfers`) != "2026-10-08" || f.text(`SELECT claim_day FROM social_gift_transfers`) != "2026-10-09" {
-		t.Fatal("day boundary")
+	if f.text(`SELECT sender_day FROM social_gift_transfers`) != "2026-10-08" || f.text(`SELECT claim_day FROM social_gift_transfers`) != "2026-10-08" {
+		t.Fatal("game-day boundary")
 	}
-	t.Log("REAL_PG injected exact database-time port before/at GMT+8 midnight; old gifts survive relation/privacy changes")
+	t.Log("REAL_PG injected exact database-time port; 00:00 GMT+8 stays on the 05:00 game day; old gifts survive relation/privacy changes")
+}
+
+// A gift epoch written under the old GMT+8-midnight calendar at 00:00-05:00
+// still covers the instant, so it is today's row and gets no second reset.
+func Test7A_SwitchKeepsALegacyGiftRowThatCoversTheInstant(t *testing.T) {
+	f, s, a, b := giftFixture(t)
+	f.player(300001)
+	f.friend(100001, 300001)
+	at := time.Date(2026, 10, 8, 16, 30, 0, 0, time.UTC) // 00:30 GMT+8 on 10/9, game day 10/8
+	s.Timed.Binder.Time = fixedDMClock{at}
+	f.sql(`UPDATE player_social_roots SET created_at=$1,updated_at=$1`, at.Add(-time.Hour))
+	f.sql(`UPDATE social_friendships SET activated_at=$1,updated_at=$1`, at.Add(-time.Hour))
+	epoch, e := sg.NewEpoch(100001, "2026-10-09", f.op(), at.Add(-time.Minute))
+	if e != nil {
+		t.Fatal(e)
+	}
+	f.sql(`INSERT INTO social_gift_epochs(player_id,policy_id,day_token,generation_id,state_version,created_at,updated_at)VALUES($1,'SOCIAL_GIFT_DAY_V1','2026-10-09',$2::uuid,1,$3,$3)`, 100001, epoch.Generation.UUID().String(), at.Add(-time.Minute))
+	if _, e = s.Send(ctx, a, b.PlayerID, f.op()); e != nil {
+		t.Fatal(e)
+	}
+	if f.text(`SELECT sender_day FROM social_gift_transfers`) != "2026-10-09" {
+		t.Fatal("legacy covering row was not today's row")
+	}
+	s.Timed.Binder.Time = fixedDMClock{time.Date(2026, 10, 8, 21, 0, 0, 0, time.UTC)} // 05:00 GMT+8 on 10/9
+	if _, e = s.Send(ctx, a, 300001, f.op()); e != nil {
+		t.Fatal(e)
+	}
+	if f.number(`SELECT count(*) FROM social_gift_transfers WHERE sender_day='2026-10-09'`) != 2 {
+		t.Fatal("05:00 boundary reset the legacy row")
+	}
 }
 
 func Test7A_EligibilityActorAndNaturalFences(t *testing.T) {
@@ -216,15 +281,18 @@ func Test7A_ClockVersionNoticeBoundaryAndScalarFailures(t *testing.T) {
 				ns = r.NoticeIDs
 			}
 			claim := false
+			var futureAt time.Time
 			switch kind {
 			case "rootversion":
 				f.sql(`UPDATE player_social_roots SET state_version=9223372036854775807`)
 			case "rootfuture":
-				f.sql(`UPDATE player_social_roots SET updated_at=$1`, f.now().Add(time.Hour))
+				futureAt = f.now().Add(time.Hour)
+				f.sql(`UPDATE player_social_roots SET updated_at=$1`, futureAt)
 			case "epochversion":
 				f.sql(`UPDATE social_gift_epochs SET state_version=9223372036854775807`)
 			case "epochfuture":
-				f.sql(`UPDATE social_gift_epochs SET updated_at=$1`, f.now().Add(time.Hour))
+				futureAt = f.now().Add(time.Hour)
+				f.sql(`UPDATE social_gift_epochs SET updated_at=$1`, futureAt)
 			case "epochlaterday":
 				f.sql(`UPDATE social_gift_epochs SET day_token='2099-01-01'`)
 			case "noticesequence":
@@ -241,7 +309,8 @@ func Test7A_ClockVersionNoticeBoundaryAndScalarFailures(t *testing.T) {
 					version = 9223372036854775807
 				}
 				if kind == "scalarfuture" {
-					at = f.now().Add(time.Hour)
+					futureAt = f.now().Add(time.Hour)
+					at = futureAt
 				}
 				f.sql(`INSERT INTO player_currency_balances(player_id,resource_key,amount,state_version,updated_at)VALUES(200001,'friendship_coin',$1,$2,$3)`, amount, version, at)
 			}
@@ -258,6 +327,38 @@ func Test7A_ClockVersionNoticeBoundaryAndScalarFailures(t *testing.T) {
 				} else {
 					_, e = s.Send(ctx, a, b.PlayerID, f.op())
 				}
+			}
+			if !futureAt.IsZero() {
+				// K3': a forward stored timestamp is an observation, not a refusal;
+				// the command commits once and never rewrites the row backwards.
+				if e != nil {
+					t.Fatalf("forward stored timestamp refused: %v", e)
+				}
+				switch kind {
+				case "rootfuture":
+					if f.number(`SELECT count(*) FROM player_social_roots WHERE updated_at < $1`, futureAt) != 0 {
+						t.Fatal("stored root timestamp moved backwards")
+					}
+					if f.number(`SELECT count(*) FROM social_gift_transfers`) != 1 {
+						t.Fatal("forward root did not send exactly once")
+					}
+				case "epochfuture":
+					if f.number(`SELECT count(*) FROM social_gift_epochs WHERE player_id=100001 AND updated_at < $1`, futureAt) != 0 {
+						t.Fatal("stored epoch timestamp moved backwards")
+					}
+					if f.number(`SELECT count(*) FROM social_gift_transfers`) != 2 {
+						t.Fatal("forward epoch did not send exactly once")
+					}
+				case "scalarfuture":
+					if f.number(`SELECT count(*) FROM player_currency_balances WHERE player_id=200001 AND resource_key='friendship_coin' AND updated_at >= $1`, futureAt) != 1 {
+						t.Fatal("stored scalar timestamp moved backwards")
+					}
+					if f.number(`SELECT amount FROM player_currency_balances WHERE player_id=200001 AND resource_key='friendship_coin'`) != 5 {
+						t.Fatal("forward scalar did not credit exactly once")
+					}
+				}
+				t.Log("REAL_PG forward observation clamped; one effect, no rewrite backwards")
+				return
 			}
 			if e == nil || f.giftState() != before {
 				t.Fatal("clock/overflow/boundary failed atomicity", e)

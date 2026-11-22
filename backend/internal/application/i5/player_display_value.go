@@ -3,6 +3,7 @@ package i5
 import (
 	"context"
 	"errors"
+	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -70,12 +71,11 @@ func (s DisplayValueOwner) PrepareDisplayValueTx(c context.Context, t tx.Tx, a i
 	if !ok {
 		return nil, economy.ErrUnknownResource
 	}
-	if at.Before(b.UpdatedAt) {
-		return nil, player.ErrDisplay
-	}
+	storedUpdatedAt := b.UpdatedAt
 	if _, e = b.Debit(out.amount, at); e != nil {
 		return nil, e
 	}
+	b.UpdatedAt = gen.EffectiveObservation(at, storedUpdatedAt)
 	out.balance = b
 	if q.BuyID > 0 {
 		st, has, e := s.Store.LockStackTx(c, t, a.PlayerID, q.BuyID, at)
@@ -99,6 +99,9 @@ func (p *preparedDisplayValue) ApplyDisplayValueTx(c context.Context, t tx.Tx) (
 		if e != nil {
 			return nil, e
 		}
+		// Debit stamps the raw decision time; keep the forward stored fact that
+		// the prepared balance already clamped to (K3').
+		b.UpdatedAt = gen.EffectiveObservation(p.at, p.balance.UpdatedAt)
 		if e = p.owner.Store.SaveScalarTx(c, t, b, true); e != nil {
 			return nil, e
 		}
@@ -112,4 +115,20 @@ func (p *preparedDisplayValue) ApplyDisplayValueTx(c context.Context, t tx.Tx) (
 		out["items"] = StockRepresentableBulkAwards(g.Awards)
 	}
 	return out, nil
+}
+
+// CrystalBalanceTx reads the balance after any grant in the same transaction,
+// for a reply whose client overwrites its own balance (onRecharge_ total).
+func (s Service) CrystalBalanceTx(c context.Context, t tx.Tx, pid identity.PlayerID, at time.Time) (int64, error) {
+	if e := s.Store.LockEconomyOwnerTx(c, t, pid); e != nil {
+		return 0, e
+	}
+	b, ok, e := s.Store.LockScalarTx(c, t, pid, "crystal", at)
+	if e != nil {
+		return 0, e
+	}
+	if !ok {
+		return 0, economy.ErrUnknownResource
+	}
+	return b.Amount, nil
 }

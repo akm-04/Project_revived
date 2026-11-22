@@ -3,28 +3,33 @@ package march
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
+	"slices"
+	"strconv"
+
 	appcombat "gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	cd "gxb.local/backend/v2/internal/domain/combat"
-	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
+	lib "gxb.local/backend/v2/internal/domain/librarylocal"
 	d "gxb.local/backend/v2/internal/domain/march"
 	"gxb.local/backend/v2/internal/domain/objective"
 	"gxb.local/backend/v2/internal/foundation/operation"
-	"strconv"
 )
 
 func (s Mode) Result(c context.Context, a identity.ActorContext, q Result, op operation.Context) (map[string]any, error) {
-	return s.run(c, a, "result", q, q.Report.Formation, op, func(c context.Context, sc gen.TimedScope, v view, r *d.Run) (map[string]any, error) {
+	// A drained or rejected summary still closes its attempt: the refusal flag
+	// commits that close, then ErrRefused answers the dispatcher after commit.
+	var refused bool
+	out, err := s.run(c, a, "result", q, q.Report.Formation, op, func(c context.Context, sc gen.TimedScope, v view, r *d.Run) (map[string]any, error) {
 		if !q.Report.Finite() {
 			return nil, d.ErrInvalid
 		}
 		if r.Pending == "" {
 			if len(r.LastResult) == 0 {
+				refused = true
 				return map[string]any{"error_code": 1}, nil
 			}
 			out := map[string]any{}
@@ -32,6 +37,9 @@ func (s Mode) Result(c context.Context, a identity.ActorContext, q Result, op op
 				return nil, err
 			}
 			out["error_code"] = cd.FightExistCode
+			if err := s.fillStatuses(c, sc.Tx, a, sc.Operation.DecisionAt(), out); err != nil {
+				return nil, err
+			}
 			return out, nil
 		}
 		if len(q.Report.Formation) == 0 {
@@ -46,10 +54,12 @@ func (s Mode) Result(c context.Context, a identity.ActorContext, q Result, op op
 		}
 		if attested.Drained {
 			r.Pending = ""
+			refused = true
 			return map[string]any{"error_code": 1}, nil
 		}
 		if attested.Attestation.Verdict == cd.VerdictRejected {
 			r.Pending = ""
+			refused = true
 			return map[string]any{"error_code": 1}, nil
 		}
 		if err = r.ApplyReport(q.Report, q.CostDrink); err != nil {
@@ -74,10 +84,63 @@ func (s Mode) Result(c context.Context, a identity.ActorContext, q Result, op op
 		if q.Report.Win {
 			out["reward"] = r.Rewards[strconv.FormatInt(r.NextStage(), 10)]
 		}
+		// LastResult replays this reply from the saved run, so it keeps only
+		// carried state; the read-time fresh rows are added after the save.
 		r.LastResult, err = json.Marshal(out)
-		return out, err
+		if err != nil {
+			return nil, err
+		}
+		if err = s.fillStatuses(c, sc.Tx, a, sc.Operation.DecisionAt(), out); err != nil {
+			return nil, err
+		}
+		if err = s.BattleCounts.ObserveBattleTx(c, sc.Tx, a.PlayerID, q.Report.Formation, sc.Operation.DecisionAt()); err != nil {
+			return nil, err
+		}
+		// A-206 R7: each owned girl in a winning Champion formation advances
+		// mission 1004. Rented girls never appear in the frozen formation.
+		if q.Report.Win {
+			for _, partnerID := range championMissionPartners(q.Report.Formation) {
+				if err = s.PartnerMissions.ObservePartnerMissionTx(c, sc.Tx, a.PlayerID, partnerID, lib.ChampionMissionID, sc.Operation.DecisionAt()); err != nil {
+					return nil, err
+				}
+			}
+		}
+		return out, nil
 	})
+	if err == nil && (refused || refusalReply(out)) {
+		err = fmt.Errorf("%w: summary rejected or no open attempt", d.ErrRefused)
+	}
+	return out, err
 }
+
+// championMissionPartners lists the formation's owned girl ids in ascending
+// order, skipping empty slots.
+func championMissionPartners(formation []int64) []int64 {
+	partners := make([]int64, 0, len(formation))
+	for _, partnerID := range formation {
+		if partnerID > 0 {
+			partners = append(partners, partnerID)
+		}
+	}
+	slices.Sort(partners)
+	return partners
+}
+
+// refusalReply recognises a committed refusal replayed from its receipt; 30005
+// (FightExistCode) stays a 200 success reply.
+func refusalReply(out map[string]any) bool {
+	switch code := out["error_code"].(type) {
+	case int64:
+		return code == 1
+	case float64:
+		return code == 1
+	case json.Number:
+		return code.String() == "1"
+	default:
+		return false
+	}
+}
+
 func (s Mode) freezeReward(v view, r d.Run, sc gen.TimedScope, stage int64) []any {
 	rng := cd.NewStream(sc.Operation.Operation().Derive("march.stage-reward/v1", uint64(stage)))
 	rows := []any{}
@@ -91,10 +154,13 @@ func (s Mode) freezeReward(v view, r d.Run, sc gen.TimedScope, stage int64) []an
 }
 func (s Mode) Chest(c context.Context, a identity.ActorContext, stage int64, op operation.Context) (map[string]any, error) {
 	return s.run(c, a, "chest", stage, nil, op, func(c context.Context, sc gen.TimedScope, v view, r *d.Run) (map[string]any, error) {
+		key := strconv.FormatInt(stage, 10)
+		if granted, ok := r.ChestReplies[key]; ok && stage <= r.Passed {
+			return map[string]any{"map_info": r.Projection()["map_info"], "hero_status": map[string]any{}, "rewards": granted}, nil
+		}
 		if !r.Won || stage != r.NextStage() {
 			return nil, d.ErrRefused
 		}
-		key := strconv.FormatInt(stage, 10)
 		rows, ok := r.Rewards[key]
 		if !ok {
 			return nil, d.ErrUnavailable
@@ -110,6 +176,10 @@ func (s Mode) Chest(c context.Context, a identity.ActorContext, stage int64, op 
 		if err = r.AdvanceChest(stage); err != nil {
 			return nil, err
 		}
+		if r.ChestReplies == nil {
+			r.ChestReplies = map[string][]any{}
+		}
+		r.ChestReplies[key] = awards
 		// onUpdateMarch_ merges the actual item/hero rewards before the popup.
 		out := map[string]any{"map_info": r.Projection()["map_info"], "hero_status": map[string]any{}, "rewards": awards}
 		return out, nil
@@ -125,9 +195,6 @@ func (s Mode) Extra(c context.Context, a identity.ActorContext, op operation.Con
 			return nil, err
 		}
 		_, err = s.Costs.DebitMaterialCostTx(c, sc.Tx, a.PlayerID, i5.MaterialCost{Scalars: []i5.ScalarMaterialCost{{ResourceKey: "crystal", Amount: 50}}}, sc.Operation.Operation())
-		if errors.Is(err, economy.ErrInsufficientBalance) {
-			return nil, d.ErrRefused
-		}
 		if err != nil {
 			return nil, err
 		}

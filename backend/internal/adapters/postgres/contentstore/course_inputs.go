@@ -11,11 +11,18 @@ import (
 	course "gxb.local/backend/v2/internal/domain/course"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"io"
+	"sync"
 )
 
 // CourseCatalogTx reads only the caller-pinned immutable revision. Registration
 // and controlled deployment/backfill must complete before activation.
+var courseCatalogs sync.Map
+
 func (s Store) CourseCatalogTx(ctx context.Context, q tx.Queryer, revision string) (course.Catalog, error) {
+	return memoCatalog(&courseCatalogs, revision, func() (course.Catalog, error) { return s.courseCatalogTx(ctx, q, revision) })
+}
+
+func (s Store) courseCatalogTx(ctx context.Context, q tx.Queryer, revision string) (course.Catalog, error) {
 	var out course.Catalog
 	if q == nil || len(revision) != 64 {
 		return out, course.ErrUnqualified
@@ -76,6 +83,28 @@ func courseCatalogDomain(d builtin.CourseInputCatalog) (course.Catalog, error) {
 	}
 	return out, out.Validate()
 }
+
+// CourseGiftBoxRuleTx resolves the box-to-dropbox rule from the Library
+// content artifact, where the accepted compiler stores the D485 policy.
+func (s Store) CourseGiftBoxRuleTx(ctx context.Context, q tx.Queryer, revision string, itemID int64) (course.GiftBoxRule, bool, error) {
+	catalog, e := s.LibraryCatalogTx(ctx, q, revision)
+	if e != nil {
+		return course.GiftBoxRule{}, false, e
+	}
+	source, ok := catalog.CourseGiftBoxes[itemID]
+	if !ok {
+		return course.GiftBoxRule{}, false, nil
+	}
+	out := course.GiftBoxRule{ItemID: source.ItemID, DropboxID: source.DropboxID, Rolls: make([]course.GiftBoxDrop, 0, len(source.Rolls))}
+	for _, roll := range source.Rolls {
+		out.Rolls = append(out.Rolls, course.GiftBoxDrop{ID: roll.ID, ItemID: roll.ItemID, ItemNum: roll.ItemNum, Rate: roll.Rate})
+	}
+	if e = out.Validate(); e != nil {
+		return course.GiftBoxRule{}, false, e
+	}
+	return out, true, nil
+}
+
 func (Store) InsertCourseInputs(ctx context.Context, t tx.Tx, b registry.Bundle) (int64, error) {
 	tag, e := t.Exec(ctx, `INSERT INTO content_course_input_catalogs(revision_id,payload)VALUES($1,$2::jsonb)`, b.RevisionID(), string(b.CourseInputsJSON()))
 	if e != nil {
@@ -99,11 +128,7 @@ func (s Store) CourseInputsActive(ctx context.Context) (string, bool, error) {
 }
 
 func (Store) CourseInputsRevisionTx(ctx context.Context, q tx.Queryer, revision string) (bool, error) {
-	var raw string
-	if e := q.QueryRow(ctx, `SELECT manifest::text FROM gxb_content_revisions WHERE revision_id=$1`, revision).Scan(&raw); e != nil {
-		return false, e
-	}
-	return manifestHasCapability([]byte(raw), revision, "COURSE_INPUTS_I7C2E")
+	return storedCapability(ctx, q, revision, "COURSE_INPUTS_I7C2E")
 }
 
 func (s Store) CourseInputsActiveTx(ctx context.Context, q tx.Queryer) (string, bool, error) {

@@ -90,7 +90,10 @@ func (t *modelTx) Rollback(context.Context) error {
 	return nil
 }
 
-type repo struct{ m *model }
+type repo struct {
+	m               *model
+	socialInputRows int64
+}
 
 func (r repo) LockRegistry(context.Context, tx.Tx) error { return nil } // serialized by model Begin
 func (r repo) TryInsertRevision(_ context.Context, x tx.Tx, b Bundle) (bool, error) {
@@ -278,7 +281,7 @@ func setup(t *testing.T) (Service, *model, Bundle, operation.Context) {
 		t.Fatal(err)
 	}
 	m := &model{installed: map[string]Verification{}, manifests: map[string][]byte{}}
-	return Service{Runner: tx.Runner{DB: m}, Repo: repo{m}, Fresh: m, Providers: DefaultProviderSet()}, m, b, operation.Context{StartedAt: time.Unix(1770000000, 0).UTC()}
+	return Service{Runner: tx.Runner{DB: m}, Repo: repo{m: m}, Fresh: m, Providers: DefaultProviderSet()}, m, b, operation.Context{StartedAt: time.Unix(1770000000, 0).UTC()}
 }
 func install(t *testing.T, s Service, b Bundle, op operation.Context) {
 	t.Helper()
@@ -303,6 +306,23 @@ func TestExactInstallAndCorruptSameID(t *testing.T) {
 		t.Fatal("repaired in place")
 	}
 }
+func TestSocialInputInsertAndVerifyCountFailure(t *testing.T) {
+	ctx := context.Background()
+	s, m, b, op := setup(t)
+	s.Repo = repo{m: m, socialInputRows: 2}
+	if _, err := s.EnsureBuiltinInstalled(ctx, op, b); err == nil {
+		t.Fatal("Social input insert count drift accepted")
+	}
+	s, m, b, op = setup(t)
+	install(t, s, b, op)
+	v := m.installed[b.RevisionID()]
+	v.SocialInputCount = 0
+	m.installed[b.RevisionID()] = v
+	if _, err := s.EnsureBuiltinInstalled(ctx, op, b); err == nil {
+		t.Fatal("Social input verification count drift accepted")
+	}
+}
+
 func TestInstallRollback(t *testing.T) {
 	s, m, b, op := setup(t)
 	m.failChild = true
@@ -461,6 +481,33 @@ func TestManifestAndProviderFailClosed(t *testing.T) {
 		t.Fatal("implicit provider activation")
 	}
 }
+func TestActiveReadinessAcceptsLegacyRevisionWithoutSocialContent(t *testing.T) {
+	s, _, b, _ := setup(t)
+	var manifest map[string]any
+	if err := json.Unmarshal(b.ManifestJSON(), &manifest); err != nil {
+		t.Fatal(err)
+	}
+	capabilities := manifest["enabled_capabilities"].([]any)
+	filtered := make([]any, 0, len(capabilities))
+	for _, capability := range capabilities {
+		if capability != "SOCIAL_CONTENT_I9_10E" {
+			filtered = append(filtered, capability)
+		}
+	}
+	if len(filtered) != len(capabilities)-1 {
+		t.Fatal("fixture lacks SOCIAL_CONTENT_I9_10E")
+	}
+	manifest["enabled_capabilities"] = filtered
+	raw, err := json.Marshal(manifest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	summary := ActiveSummary{Activation: ActivationIdentity{RevisionID: b.RevisionID(), Version: 1}, SchemaVersion: 1, ManifestJSON: raw}
+	if err := s.validateActiveSummary(summary); err != nil {
+		t.Fatalf("capability-less legacy revision rejected: %v", err)
+	}
+}
+
 func TestRawBundleZeroFalseAndIsolation(t *testing.T) {
 	_, _, b, _ := setup(t)
 	var c struct {
@@ -482,7 +529,7 @@ func TestRawBundleZeroFalseAndIsolation(t *testing.T) {
 		t.Fatal(zero, noMail)
 	}
 	r, p, f, o, h, pet, petAcq, petProg, equipment, heroEquipment, superEquipment, heroFumoTargets, heroFumoMaterials, restorationEquipment, restorationFractions, restorationDenominations, petEquipment, petRestorationEquipment, practice, appearance := b.ExpectedCounts()
-	if r != 5570 || p != 100 || f != 99 || o != 476 || h != 568 || pet != 54 || petAcq != 27 || petProg != 54 || equipment != 1176 || heroEquipment != 53280 || superEquipment != 84 || heroFumoTargets != 359 || heroFumoMaterials != 516 || restorationEquipment != 195 || restorationFractions != 5 || restorationDenominations != 3 || petEquipment != 2592 || petRestorationEquipment != 73 || practice != 1889 || appearance != 542 {
+	if r != 5571 || p != 100 || f != 99 || o != 476 || h != 568 || pet != 54 || petAcq != 27 || petProg != 54 || equipment != 1176 || heroEquipment != 53280 || superEquipment != 84 || heroFumoTargets != 359 || heroFumoMaterials != 516 || restorationEquipment != 195 || restorationFractions != 5 || restorationDenominations != 3 || petEquipment != 2592 || petRestorationEquipment != 73 || practice != 1889 || appearance != 542 {
 		t.Fatal(r, p, f, o, h, pet, petAcq, petProg, equipment, heroEquipment, superEquipment, heroFumoTargets, heroFumoMaterials, restorationEquipment, restorationFractions, restorationDenominations, petEquipment, petRestorationEquipment, practice, appearance)
 	}
 	raw := b.ManifestJSON()
@@ -544,6 +591,25 @@ func (r repo) InsertEmoticons(_ context.Context, x tx.Tx, b Bundle) (int64, erro
 }
 
 func (r repo) InsertSocialGift(_ context.Context, x tx.Tx, b Bundle) (int64, error) { return 1, nil }
+
+func (r repo) InsertSocialInputs(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	if r.socialInputRows != 0 {
+		return r.socialInputRows, nil
+	}
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.SocialInputCount = 1
+	t.installed[b.RevisionID()] = v
+	return 1, nil
+}
+
+func (r repo) InsertCompatMessagePush(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.CompatMessagePushCount = 1
+	t.installed[b.RevisionID()] = v
+	return 1, nil
+}
 
 func (r repo) InsertDormInputs(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
 	t := x.(*modelTx)
@@ -644,6 +710,14 @@ func (r repo) InsertSummon(_ context.Context, x tx.Tx, b Bundle) (int64, error) 
 	return 1, nil
 }
 
+func (r repo) InsertCharge(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.ChargeCount = 1
+	t.installed[b.RevisionID()] = v
+	return 1, nil
+}
+
 func (r repo) InsertTopFloor(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
 	t := x.(*modelTx)
 	v := t.installed[b.RevisionID()]
@@ -729,6 +803,20 @@ func (r repo) InsertSpiritInputs(_ context.Context, x tx.Tx, b Bundle) (int64, e
 	t := x.(*modelTx)
 	v := t.installed[b.RevisionID()]
 	v.SpiritInputsCount = 1
+	t.installed[b.RevisionID()] = v
+	return 1, nil
+}
+func (r repo) InsertDailyBuyInputs(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.DailyBuyInputsCount = 1
+	t.installed[b.RevisionID()] = v
+	return 1, nil
+}
+func (r repo) InsertShop(_ context.Context, x tx.Tx, b Bundle) (int64, error) {
+	t := x.(*modelTx)
+	v := t.installed[b.RevisionID()]
+	v.ShopCount = 1
 	t.installed[b.RevisionID()] = v
 	return 1, nil
 }

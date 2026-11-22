@@ -202,11 +202,11 @@ func TestI7C3BNativeCatalogTamperRejectedRollback(t *testing.T) {
 	if _, e = tr.Exec(ctx, "UPDATE content_stat_input_catalogs SET payload=jsonb_set(payload,'{policy_id}','\"tampered\"') WHERE revision_id=$1", rev); e != nil {
 		t.Fatal(e)
 	}
-	if _, e = s.StatInputCatalogTx(ctx, tr, rev); e == nil {
+	if _, e = s.ReadStatInputCatalogTx(ctx, tr, rev); e == nil {
 		t.Fatal("payload hash unchecked")
 	}
 	tr.Rollback(ctx)
-	if _, e = s.StatInputCatalogTx(ctx, p, rev); e != nil {
+	if _, e = s.ReadStatInputCatalogTx(ctx, p, rev); e != nil {
 		t.Fatal("rollback lost content", e)
 	}
 }
@@ -285,11 +285,14 @@ func TestI7C3BNativeHeroConditionalOwnersMissingAwakeningAndStaleRoot(t *testing
 	ls := libraryService(p, p)
 	at := time.Now().UTC()
 	scope := lib.InputScope{Player: a.PlayerID, ContentRevision: rev, ObservedAt: at}
-	if _, e = ls.HeroLibraryInputsTx(ctx, tr, scope, 1); e == nil {
-		t.Fatal("future Library root accepted")
+	// K7: the stored forward timestamp no longer refuses either input read.
+	heroInputs, e := ls.HeroLibraryInputsTx(ctx, tr, scope, 1)
+	if e != nil || heroInputs.Hero.PartnerID != 1 || heroInputs.ContentRevision != rev {
+		t.Fatal("future Library root read", heroInputs, e)
 	}
-	if _, e = ls.PlayerCollectionInputsTx(ctx, tr, scope); e == nil {
-		t.Fatal("future collection root accepted")
+	collection, e := ls.PlayerCollectionInputsTx(ctx, tr, scope)
+	if e != nil || collection.Player != a.PlayerID || collection.ContentRevision != rev {
+		t.Fatal("future collection root read", collection, e)
 	}
 }
 
@@ -298,6 +301,14 @@ type forbiddenStats struct{ called *bool }
 func (f forbiddenStats) HeroTx(context.Context, ca.CoherentReadScope, character.HeroRef, app.View) (app.Result, error) {
 	*f.called = true
 	return app.Result{}, errors.New("stats before privacy")
+}
+func (f forbiddenStats) ScaledHeroTx(context.Context, ca.CoherentReadScope, character.HeroRef, app.View, int64, int64, int64) (app.Result, error) {
+	*f.called = true
+	return app.Result{}, errors.New("stats before privacy")
+}
+func (f forbiddenStats) FreezeHeroTx(context.Context, ca.CoherentReadScope, character.HeroRef, app.View) (*app.FrozenHero, error) {
+	*f.called = true
+	return nil, errors.New("stats before privacy")
 }
 func (f forbiddenStats) PetTx(context.Context, ca.CoherentReadScope, character.PetRef, app.View) (app.Result, error) {
 	*f.called = true

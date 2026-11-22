@@ -13,12 +13,12 @@ import (
 )
 
 func (Store) ReadFriendInvitationTx(requestContext context.Context, query tx.Queryer, identifier ids.UUID, lock bool) (d.FriendInvitation, bool, error) {
-	statement := `SELECT payload::text FROM arena_friend_invitations WHERE invitation_id=$1`
+	statement := `SELECT payload::text,payload_version FROM arena_friend_invitations WHERE invitation_id=$1`
 	if lock {
 		statement += ` FOR UPDATE`
 	}
 	var invitation d.FriendInvitation
-	found, err := readJSON(requestContext, query, statement, &invitation, identifier.String())
+	found, err := readPayload(requestContext, query, "arena_friend_invitations", statement, &invitation, identifier.String())
 	if err != nil || !found {
 		return invitation, found, err
 	}
@@ -27,7 +27,7 @@ func (Store) ReadFriendInvitationTx(requestContext context.Context, query tx.Que
 
 func (Store) LatestFriendInvitationTx(requestContext context.Context, query tx.Queryer, inviter, recipient identity.PlayerID) (d.FriendInvitation, bool, error) {
 	var invitation d.FriendInvitation
-	found, err := readJSON(requestContext, query, `SELECT payload::text FROM arena_friend_invitations WHERE inviter_player=$1 AND ($2::bigint=0 OR recipient_player=$2) ORDER BY sequence DESC LIMIT 1`, &invitation, int64(inviter), int64(recipient))
+	found, err := readPayload(requestContext, query, "arena_friend_invitations", `SELECT payload::text,payload_version FROM arena_friend_invitations WHERE inviter_player=$1 AND ($2::bigint=0 OR recipient_player=$2) ORDER BY sequence DESC LIMIT 1`, &invitation, int64(inviter), int64(recipient))
 	if err != nil || !found {
 		return invitation, found, err
 	}
@@ -35,8 +35,12 @@ func (Store) LatestFriendInvitationTx(requestContext context.Context, query tx.Q
 }
 
 func (Store) PendingFriendInvitationsForPlayersTx(requestContext context.Context, query tx.Queryer, first, second identity.PlayerID) ([]d.FriendInvitation, error) {
-	var invitations []d.FriendInvitation
-	_, err := readJSON(requestContext, query, `SELECT COALESCE(jsonb_agg(payload ORDER BY sequence),'[]'::jsonb)::text FROM arena_friend_invitations WHERE status='PENDING' AND (inviter_player IN($1,$2) OR recipient_player IN($1,$2))`, &invitations, int64(first), int64(second))
+	var rows []versionedPayload
+	_, err := readJSON(requestContext, query, `SELECT COALESCE(jsonb_agg(jsonb_build_object('payload',payload,'version',payload_version) ORDER BY sequence),'[]'::jsonb)::text FROM arena_friend_invitations WHERE status='PENDING' AND (inviter_player IN($1,$2) OR recipient_player IN($1,$2))`, &rows, int64(first), int64(second))
+	if err != nil {
+		return nil, err
+	}
+	invitations, err := decodePayloads[d.FriendInvitation]("arena_friend_invitations", rows)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +68,7 @@ func (Store) SaveFriendInvitationTx(requestContext context.Context, transaction 
 	if transaction == nil || invitation.Validate() != nil || invitation.StateVersion != previousVersion+1 {
 		return d.ErrConflict
 	}
-	payload, err := encode(invitation)
+	payload, version, err := encode(invitation)
 	if err != nil {
 		return err
 	}
@@ -73,9 +77,9 @@ func (Store) SaveFriendInvitationTx(requestContext context.Context, transaction 
 		room = invitation.Room.String()
 	}
 	if previousVersion == 0 {
-		err = one(transaction.Exec(requestContext, `INSERT INTO arena_friend_invitations(invitation_id,inviter_player,recipient_player,status,room_id,created_at,expires_at,sequence,state_version,payload) VALUES($1,$2,$3,$4,$5,$6,$7,$8,1,$9::jsonb)`, invitation.Identifier.String(), int64(invitation.Inviter.PlayerID), int64(invitation.Recipient), invitation.Status, room, invitation.CreatedAt, invitation.ExpiresAt, invitation.Sequence, payload))
+		err = one(transaction.Exec(requestContext, `INSERT INTO arena_friend_invitations(invitation_id,inviter_player,recipient_player,status,room_id,created_at,expires_at,sequence,state_version,payload,payload_version) VALUES($1,$2,$3,$4,$5,$6,$7,$8,1,$9::jsonb,$10)`, invitation.Identifier.String(), int64(invitation.Inviter.PlayerID), int64(invitation.Recipient), invitation.Status, room, invitation.CreatedAt, invitation.ExpiresAt, invitation.Sequence, payload, version))
 	} else {
-		err = one(transaction.Exec(requestContext, `UPDATE arena_friend_invitations SET status=$3,room_id=$4,state_version=$5,payload=$6::jsonb WHERE invitation_id=$1 AND state_version=$2 AND inviter_player=$7 AND recipient_player=$8 AND sequence=$9`, invitation.Identifier.String(), previousVersion, invitation.Status, room, invitation.StateVersion, payload, int64(invitation.Inviter.PlayerID), int64(invitation.Recipient), invitation.Sequence))
+		err = one(transaction.Exec(requestContext, `UPDATE arena_friend_invitations SET status=$3,room_id=$4,state_version=$5,payload=$6::jsonb,payload_version=$10 WHERE invitation_id=$1 AND state_version=$2 AND inviter_player=$7 AND recipient_player=$8 AND sequence=$9`, invitation.Identifier.String(), previousVersion, invitation.Status, room, invitation.StateVersion, payload, int64(invitation.Inviter.PlayerID), int64(invitation.Recipient), invitation.Sequence, version))
 	}
 	if err != nil {
 		return err

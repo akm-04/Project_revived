@@ -14,11 +14,13 @@ import (
 // shortcut: in memory, so a realtime restart skips the changes of one wakeup;
 // 2362 stays authoritative for the client.
 type roomObservation struct {
-	events    int64
-	pushes    int64
-	pushSeen  bool
-	positions map[identity.PlayerID]int64
-	online    map[identity.PlayerID]bool
+	signature     string
+	signatureSeen bool
+	events        int64
+	pushes        int64
+	pushSeen      bool
+	positions     map[identity.PlayerID]int64
+	online        map[identity.PlayerID]bool
 }
 
 type positionMove struct {
@@ -38,6 +40,25 @@ func (l *RoomNoticeLedger) observe(room int64) (*roomObservation, bool) {
 		l.observed[room] = seen
 	}
 	return seen, known
+}
+
+// roomShapeChanged reports whether the room's shape changed since the last
+// wakeup. The first sight records without pushing: the command reply that
+// created the room already carried its ROOM_CHANGE.
+func (l *RoomNoticeLedger) roomShapeChanged(room int64, signature string) bool {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	seen, _ := l.observe(room)
+	if !seen.signatureSeen {
+		seen.signatureSeen = true
+		seen.signature = signature
+		return false
+	}
+	if seen.signature == signature {
+		return false
+	}
+	seen.signature = signature
+	return true
 }
 
 func (l *RoomNoticeLedger) newEvents(room int64, events []d.EventRecord) []d.EventRecord {
@@ -84,6 +105,24 @@ func (l *RoomNoticeLedger) changedOnline(room int64, states map[identity.PlayerI
 	}
 	slices.SortFunc(changed, func(left, right onlineChange) int { return int(left.Player - right.Player) })
 	return changed
+}
+
+// terminalPushes returns the closing write's pushes even on the first sight of
+// the room: that wakeup is the only carrier of the final report. Sequences
+// already sent are skipped, so a repeated read does not repeat them.
+func (l *RoomNoticeLedger) terminalPushes(room int64, pushes []app.RoomPush) []app.RoomPush {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	seen, _ := l.observe(room)
+	seen.pushSeen = true
+	var fresh []app.RoomPush
+	for _, push := range pushes {
+		if push.Sequence > seen.pushes {
+			fresh = append(fresh, push)
+		}
+		seen.pushes = max(seen.pushes, push.Sequence)
+	}
+	return fresh
 }
 
 // newPushes returns the room pushes not yet sent; the first sight of a room only

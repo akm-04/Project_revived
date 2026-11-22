@@ -35,6 +35,7 @@ type IllusionRoomNotice struct {
 	DamageResults map[string]json.RawMessage
 	ParadiseID    int64
 	Master        playerdirectory.Profile
+	Chats         []d.ChatMessage
 }
 
 type IllusionRoomNoticeReader struct {
@@ -60,8 +61,8 @@ func (r IllusionRoomNoticeReader) ReadRoomNotice(c context.Context, reference st
 	if err != nil {
 		return out, false, d.ErrInvalid
 	}
-	out = IllusionRoomNotice{RoomID: room.ID, Status: illusionStage(room.Members()), TeamInfo: state.TeamInfo, ReportID: state.ReportID,
-		DamageResults: state.DamageResults, ParadiseID: state.ParadiseID, Ready: map[identity.PlayerID]bool{}}
+	out = IllusionRoomNotice{RoomID: room.ID, Status: state.Status(len(room.Members())), TeamInfo: state.TeamInfo, ReportID: state.ReportID,
+		DamageResults: state.DamageResults, ParadiseID: state.ParadiseID, Chats: state.Chats, Ready: map[identity.PlayerID]bool{}}
 	for _, seat := range room.Seats {
 		if seat.Stage == sharedroom.SeatSeated {
 			out.Ready[seat.Player] = seat.Ready
@@ -72,9 +73,10 @@ func (r IllusionRoomNoticeReader) ReadRoomNotice(c context.Context, reference st
 	} else {
 		out.Seated = room.Members()
 		for _, seat := range room.Seats {
-			if seat.Stage != sharedroom.SeatSeated {
-				out.Removed = append(out.Removed, seat.Player)
+			if seat.Stage == sharedroom.SeatSeated || seat.Stage == sharedroom.SeatLeft {
+				continue
 			}
+			out.Removed = append(out.Removed, seat.Player)
 		}
 	}
 	profile, found, err := r.Directory.ProfileTx(c, r.Queryer, room.Owner)
@@ -87,16 +89,13 @@ func (r IllusionRoomNoticeReader) ReadRoomNotice(c context.Context, reference st
 	return out, true, nil
 }
 
-func illusionStage(members []identity.PlayerID) int64 {
-	if len(members) >= int(d.TeamSeats) {
-		return 1
-	}
-	return 0
-}
-
+// seatPlayers is the removal set: everyone except players who left voluntarily.
 func seatPlayers(room sharedroom.Room) []identity.PlayerID {
 	out := make([]identity.PlayerID, 0, len(room.Seats))
 	for _, seat := range room.Seats {
+		if seat.Stage == sharedroom.SeatLeft {
+			continue
+		}
 		out = append(out, seat.Player)
 	}
 	return out
@@ -135,7 +134,10 @@ func ValidateIllusionRoomNotice(value any) error {
 
 func NewIllusionRoomNoticeRegistry() (rt.EventRegistry, error) {
 	return rt.NewEventRegistry(
-		[]rt.DirectRegistration{{MID: mids.MIDIllusionNotice, Roles: []rt.Role{rt.World}, Validate: ValidateIllusionRoomNotice}},
+		[]rt.DirectRegistration{
+			{MID: mids.MIDIllusionNotice, Roles: []rt.Role{rt.World}, Validate: ValidateIllusionRoomNotice},
+			{MID: mids.MIDChatFromFriend, Roles: []rt.Role{rt.World}, Validate: rt.ValidateFriendDM},
+		},
 		nil,
 	)
 }
@@ -155,14 +157,16 @@ type IllusionRoomNoticeHandler struct {
 	OnDeliveryError func(error)
 }
 
-// RoomNoticeLedger remembers each room's one-shot removal notices: the wakeup
-// carries only the room, and the room keeps departed seats.
+// RoomNoticeLedger remembers each room's one-shot removal notices and each
+// member's last delivered chat serial: the wakeup carries only the room.
 // shortcut: in memory, so a realtime restart repeats them once for a live room;
 // persist delivery if that repeat ever reaches a player seated elsewhere.
 type RoomNoticeLedger struct {
 	mu       sync.Mutex
 	rooms    map[int64]map[roomOneShot]bool
 	observed map[int64]*roomObservation
+	// chats is the last chat serial delivered to each room member.
+	chats map[int64]map[identity.PlayerID]int64
 }
 
 type roomOneShot struct {
@@ -171,7 +175,26 @@ type roomOneShot struct {
 }
 
 func NewRoomNoticeLedger() *RoomNoticeLedger {
-	return &RoomNoticeLedger{rooms: map[int64]map[roomOneShot]bool{}, observed: map[int64]*roomObservation{}}
+	return &RoomNoticeLedger{rooms: map[int64]map[roomOneShot]bool{}, observed: map[int64]*roomObservation{},
+		chats: map[int64]map[identity.PlayerID]int64{}}
+}
+
+// chatUndelivered reports whether the recipient has not yet seen this serial.
+func (l *RoomNoticeLedger) chatUndelivered(room int64, player identity.PlayerID, serial int64) bool {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.chats[room][player] < serial
+}
+
+func (l *RoomNoticeLedger) markChat(room int64, player identity.PlayerID, serial int64) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	if l.chats[room] == nil {
+		l.chats[room] = map[identity.PlayerID]int64{}
+	}
+	if l.chats[room][player] < serial {
+		l.chats[room][player] = serial
+	}
 }
 
 func (l *RoomNoticeLedger) undelivered(room int64, mid uint16, players []identity.PlayerID) []identity.PlayerID {
@@ -209,6 +232,7 @@ func (l *RoomNoticeLedger) forget(room int64) {
 	defer l.mu.Unlock()
 	delete(l.rooms, room)
 	delete(l.observed, room)
+	delete(l.chats, room)
 }
 
 func (h IllusionRoomNoticeHandler) ReloadAndDeliver(c context.Context, reference string) error {
@@ -243,14 +267,19 @@ func (h IllusionRoomNoticeHandler) ReloadAndDeliver(c context.Context, reference
 			message := cloneMessage(base)
 			message["room_id"] = view.RoomID
 			message["status"] = view.Status
+			// Illusion.lua:412 plays the report only when is_report is 1, so a
+			// seat with no stored damage_result (one seated after the report)
+			// is told 0 and gets no report_id.
 			if view.ReportID != "" {
-				message["is_report"] = int64(1)
-				message["report_id"] = view.ReportID
-				if raw, ok := view.DamageResults[strconv.FormatInt(int64(player), 10)]; ok {
+				message["is_report"] = int64(0)
+				raw, hasResult := view.DamageResults[strconv.FormatInt(int64(player), 10)]
+				if hasResult {
 					value, err := decodeRawNumber(raw)
 					if err != nil {
 						return err
 					}
+					message["is_report"] = int64(1)
+					message["report_id"] = view.ReportID
 					message["damage_result"] = value
 				}
 			}
@@ -263,10 +292,40 @@ func (h IllusionRoomNoticeHandler) ReloadAndDeliver(c context.Context, reference
 			}
 		}
 	}
+	if len(view.Chats) > 0 {
+		seated := make(map[identity.PlayerID]bool, len(view.Seated))
+		for _, player := range view.Seated {
+			seated[player] = true
+		}
+		for _, chat := range view.Chats {
+			if chat.Serial <= 0 {
+				continue
+			}
+			frame := illusionChatFrame(chat)
+			for _, raw := range chat.Recipients {
+				player := identity.PlayerID(raw)
+				if !seated[player] || !h.Delivered.chatUndelivered(view.RoomID, player, chat.Serial) {
+					continue
+				}
+				if err := h.deliver(c, player, mids.MIDChatFromFriend, frame); err != nil {
+					return err
+				}
+				h.Delivered.markChat(view.RoomID, player, chat.Serial)
+			}
+		}
+	}
 	if len(view.Seated) == 0 {
 		h.Delivered.forget(view.RoomID)
 	}
 	return nil
+}
+
+func illusionChatFrame(chat d.ChatMessage) *amf3.Object {
+	return &amf3.Object{Properties: []amf3.Property{
+		{Name: "friend_id", Value: chat.Sender},
+		{Name: "message", Value: chat.Message},
+		{Name: "time", Value: chat.At},
+	}}
 }
 
 func (h IllusionRoomNoticeHandler) deliver(c context.Context, player identity.PlayerID, mid uint16, frame *amf3.Object) error {
@@ -284,10 +343,19 @@ type RoomDelivery struct {
 }
 
 func (delivery RoomDelivery) Deliver(c context.Context, player identity.PlayerID, mid uint16, frame *amf3.Object) error {
+	_, err := delivery.DeliverOnce(c, player, mid, frame)
+	return err
+}
+
+// DeliverOnce publishes to every current live world socket of one player and
+// reports whether at least one accepted the frame. A player with no live handle
+// is not an error: the caller may keep the fact undelivered for a later wakeup.
+func (delivery RoomDelivery) DeliverOnce(c context.Context, player identity.PlayerID, mid uint16, frame *amf3.Object) (bool, error) {
 	handles := delivery.Registry.ByPlayerRole(player, domainrt.World)
 	if len(handles) > delivery.MaxHandles {
-		return errors.New("room notice connection bound exceeded")
+		return false, errors.New("room notice connection bound exceeded")
 	}
+	delivered := false
 	for _, handle := range handles {
 		metadata, valid := handle.Metadata()
 		if !valid || !delivery.Registry.IsCurrent(handle) || metadata.PlayerID != player || metadata.PhysicalRole != domainrt.World || metadata.RoomID != int64(metadata.LogicalServerID) {
@@ -295,22 +363,26 @@ func (delivery RoomDelivery) Deliver(c context.Context, player identity.PlayerID
 		}
 		at, err := delivery.Time.Now(c)
 		if err != nil {
-			return err
+			return delivered, err
 		}
 		actor := identity.ActorContext{AccountID: metadata.AccountID, AccountUID: metadata.AccountUID, SessionID: metadata.SessionID, ContextID: metadata.ContextID, LogicalServerID: metadata.LogicalServerID, PlayerID: metadata.PlayerID, ContextGeneration: metadata.ContextGeneration, SessionLivenessVersion: metadata.SessionLivenessVersion, ContextLivenessVersion: metadata.ContextLivenessVersion}
 		if delivery.Authority.ValidateActor(c, actor, at) != nil {
 			continue
 		}
-		if mid == mids.MIDIllusionNotice || mid == mids.MIDForceReload {
+		if mid == mids.MIDIllusionNotice || mid == mids.MIDForceReload || mid == mids.MIDChatFromFriend {
 			err = delivery.Publisher.PublishDirect(c, handle, mid, frame)
 		} else {
 			err = delivery.Publisher.PublishNotice(c, handle, mid, rt.NoticeNamespaceGeneric, frame)
 		}
-		if err != nil && delivery.OnDeliveryError != nil {
-			delivery.OnDeliveryError(err)
+		if err != nil {
+			if delivery.OnDeliveryError != nil {
+				delivery.OnDeliveryError(err)
+			}
+			continue
 		}
+		delivered = true
 	}
-	return nil
+	return delivered, nil
 }
 
 type illusionMessageSlot struct{ idName, infoName, prefix string }

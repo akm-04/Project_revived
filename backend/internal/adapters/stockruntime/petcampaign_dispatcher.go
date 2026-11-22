@@ -2,16 +2,13 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
 	app "gxb.local/backend/v2/internal/application/petcampaign"
 	rt "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/petcampaign"
 	"gxb.local/backend/v2/internal/foundation/operation"
-	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
-	"net/http"
 )
 
 var PetCampaignMIDs = []uint16{816, 817, 818, 819, 820, 821, 822, 823, 824, 825, 826, 827}
@@ -41,7 +38,7 @@ func (m PetCampaignDispatcher) Dispatch(c context.Context, r httpedge.DispatchRe
 	}
 	bad := badHero("pet_campaign_invalid_parameter")
 	if m.Service == nil {
-		return httpedge.Response{HTTPStatus: 503, Body: map[string]any{"error_code": int64(1)}}
+		return failureReply(defect(nil))
 	}
 	p, op := r.Envelope.Params, r.Envelope.Operation
 	var out map[string]any
@@ -132,17 +129,24 @@ func (m PetCampaignDispatcher) Dispatch(c context.Context, r httpedge.DispatchRe
 		}
 		out, e = m.Service.SaveElite(c, a, n, state, op)
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error_code": int64(1)}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 	if e != nil {
-		var conflict *receipt.ConflictError
-		status := http.StatusServiceUnavailable
-		if errors.Is(e, d.ErrInvalid) || errors.As(e, &conflict) {
-			status = 400
-		} else if errors.Is(e, d.ErrRefused) || errors.Is(e, economy.ErrInsufficientBalance) {
-			return conflictRefusal(1)
-		}
-		return httpedge.Response{HTTPStatus: status, Body: map[string]any{"error_code": int64(1), "error": "pet_campaign_failed"}}
+		return petCampaignFailure(e)
 	}
 	return okI5(out)
+}
+
+// No rows exist in the mapper table; D5 supplies the classes. A receipt
+// conflict is a stale-state 40002. The owner's ErrUnavailable names a permanent
+// content gap, so its row refuses with 409 + 35028 (R4 amendment item 5).
+var petCampaignFailureRows = []failureRow{
+	{match: d.ErrInvalid, class: failureMalformed, detail: "pet_campaign_invalid_parameter"},
+	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+	{match: d.ErrUnavailable, class: failureRefusal, code: unprovenRefusalCode},
+}
+
+func petCampaignFailure(e error) httpedge.Response {
+	return failureFromRows(petCampaignFailureRows, e)
 }

@@ -1,10 +1,21 @@
 package arena
 
 import (
+	"slices"
 	"time"
 
 	"gxb.local/backend/v2/internal/domain/identity"
 )
+
+// OfferLimit is the number of most recently issued match lists whose opponents
+// stay fightable after a refresh. PRIVATE_POLICY D507 (tunable, default 3).
+const OfferLimit = 3
+
+// Offer is one opponent from an issued match list (REARENA_MATCH_ENEMY).
+type Offer struct {
+	Opponent identity.PlayerID `json:"opponent"`
+	Practice bool              `json:"practice"`
+}
 
 // Lineup is a saved defense: girls by table id (own or summoned this season)
 // and an optional own pet id.
@@ -20,7 +31,9 @@ type Award struct {
 	AddStar int64 `json:"add_star"`
 	Awake   bool  `json:"is_awake"`
 	Summon  bool  `json:"is_summon"`
-	Picks   int64 `json:"region_arena_times"`
+	// Picks is the wire field only: ARENA_HERO_PICKS_V1 sends 0 here and the
+	// roster row carries the season count.
+	Picks int64 `json:"region_arena_times"`
 }
 
 type MissionSlot struct {
@@ -48,6 +61,7 @@ type Player struct {
 	Defense       Lineup
 	Opponent      identity.PlayerID
 	Practice      bool
+	RecentOffers  []Offer
 	MatchCounter  int64
 	Missions      []MissionSlot
 	MissionTime   time.Time
@@ -61,7 +75,7 @@ type Player struct {
 
 func NewPlayer(c Catalog, pid identity.PlayerID, server identity.LogicalServerID, at time.Time) Player {
 	p := Player{PlayerID: pid, Server: server, Season: c.SeasonAt(at).Number, StarAt: at, DailyDay: Day(at), Defense: Lineup{Heroes: []int64{}},
-		Missions: []MissionSlot{}, Awards: []Award{}, MissionTime: at, StateVersion: 1, CreatedAt: at, UpdatedAt: at}
+		RecentOffers: []Offer{}, Missions: []MissionSlot{}, Awards: []Award{}, MissionTime: at, StateVersion: 1, CreatedAt: at, UpdatedAt: at}
 	return c.Refill(p, at, true)
 }
 
@@ -72,12 +86,26 @@ func (c Catalog) Rolled(p Player, at time.Time) Player {
 	if season := c.SeasonAt(at).Number; season > p.Season {
 		p.Season, p.Star, p.Point, p.StarAt = season, 0, 0, at
 		p.TotalFight, p.WinTimes, p.KeepWin, p.DefenseWins, p.DefenseLosses = 0, 0, 0, 0, 0
-		p.Opponent, p.Practice, p.ExchangeTimes, p.Awards = 0, false, [3]int64{}, []Award{}
+		p.Opponent, p.Practice, p.RecentOffers, p.ExchangeTimes, p.Awards = 0, false, []Offer{}, [3]int64{}, []Award{}
 	}
 	if day := Day(at); day != p.DailyDay {
 		p.DailyDay, p.DailyFights = day, 0
 	}
 	return c.Refill(p, at, false)
+}
+
+// Offered reports whether an issued match list still offers this opponent (D507).
+func (p Player) Offered(enemy identity.PlayerID, practice bool) bool {
+	return slices.Contains(p.RecentOffers, Offer{Opponent: enemy, Practice: practice})
+}
+
+// IssueOffer records one issued list opponent and keeps only the last OfferLimit.
+func (p Player) IssueOffer(offer Offer) Player {
+	p.RecentOffers = append(slices.Clone(p.RecentOffers), offer)
+	if len(p.RecentOffers) > OfferLimit {
+		p.RecentOffers = p.RecentOffers[len(p.RecentOffers)-OfferLimit:]
+	}
+	return p
 }
 
 // Fought reports participation in the season (settlement eligibility, C5D policy).

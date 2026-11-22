@@ -82,9 +82,9 @@ func composer(t *testing.T, p *pg.Pool) app.ReadService {
 	if e != nil {
 		t.Fatal(e)
 	}
-	fb := feedback.Service{Roots: feedback.RootService{Store: profilefeedbackstore.Store{}}, Content: content, Recipients: i4store.PlayerRootLocker{}, Authors: i5store.Store{}}
+	fb := feedback.Service{Roots: feedback.RootService{Store: profilefeedbackstore.Store{}}, Content: content, Recipients: i4store.PlayerRootLocker{}, Authors: i5store.Store{}, Directory: i4store.PlayerDirectoryReader{}}
 	display := playerdisplay.Service{Store: i5store.Store{}, Content: content, Characters: characterstore.DisplayReader{Store: characterstore.Store{}, Content: content}}
-	return app.ReadService{Runner: r, Fresh: p, Time: pg.AuthoritativeTime{Queryer: p}, Content: content, Basic: b.Basic, Display: display, Guilds: guildcore.PublicViewReader{Store: guildstore.Store{}, Invites: inv.Source}, Feedback: fb.Roots, Comments: feedback.CommentService{Base: fb, Store: profilefeedbackstore.Store{}}, Media: publicprofilestore.Store{}, Metrics: app.CanonicalCreationMetricProvider{Players: i5store.Store{}}, Slots: b.Slots, Characters: b.Characters, Records: app.UnavailableShowcaseRecords{}}
+	return app.ReadService{Runner: r, Fresh: p, Time: pg.AuthoritativeTime{Queryer: p}, Content: content, Basic: b.Basic, Display: display, Guilds: guildcore.PublicViewReader{Store: guildstore.Store{}, Invites: inv.Source}, Feedback: fb.Roots, Comments: feedback.CommentService{Base: fb, Store: profilefeedbackstore.Store{}}, Media: publicprofilestore.Store{}, Metrics: app.CanonicalCreationMetricProvider{Players: i5store.Store{}}, Slots: b.Slots, Characters: b.Characters, Records: app.UnavailableShowcaseRecords{}, Directory: i4store.PlayerDirectoryReader{}}
 }
 func profileActor(t *testing.T, p *pg.Pool) identity.ActorContext {
 	a := actor(t, p)
@@ -189,8 +189,10 @@ func Test6BCoherentCompositionPrivacyMetricsAndCurrentDetail(t *testing.T) {
 			t.Fatal("SYSTEM would clear basiccache", k)
 		}
 	}
-	if choices, e := s.Read(ctx, a, app.ReadRequest{MID: 1840}, op()); e != nil || len(choices["all_show_types"].(map[string]int64)) != 1 {
-		t.Fatal("1840 omits owners it cannot read instead of zeroing them", choices, e)
+	// C4F_SHOW_TYPES_FULL11_V1: only an explicit UNKNOWN basis may be omitted;
+	// an owner that cannot serve a field fails the read instead of shortening it.
+	if _, e := s.Read(ctx, a, app.ReadRequest{MID: 1840}, op()); !errors.Is(e, app.ErrContent) {
+		t.Fatal("1840 masked an owner failure", e)
 	}
 	// Future persisted choice cannot become a guessed zero.
 	assign(t, p, b, app.Command{Kind: app.ShowCommand, Show: []int64{1011}}, op())
@@ -217,8 +219,13 @@ func Test6BCoherentCompositionPrivacyMetricsAndCurrentDetail(t *testing.T) {
 		t.Fatal("SPACE genuineempty", out, e)
 	}
 	assign(t, p, b, app.Command{Kind: app.HideCommand, Hide: []int16{2, 4}}, op())
-	if _, e = read(a, b.PlayerID, 4); e == nil {
-		t.Fatal("hiddenSPACE")
+	hiddenSpace, e := read(a, b.PlayerID, 4)
+	if e != nil || hiddenSpace["comment_num"] != int64(0) || len(hiddenSpace["best_comments"].([]any)) != 0 {
+		t.Fatal("hiddenSPACEempty", hiddenSpace, e)
+	}
+	hiddenStatistics, e := read(a, b.PlayerID, 2)
+	if e != nil || len(hiddenStatistics["arena_performance"].(map[string]any)) != 0 || len(hiddenStatistics["region_arena_performance"].(map[string]any)) != 0 || len(hiddenStatistics["super_arena_performance"].(map[string]any)) != 0 {
+		t.Fatal("hiddenSTATISTICSempty", hiddenStatistics, e)
 	}
 	if _, e = read(b, b.PlayerID, 4); e != nil {
 		t.Fatal("ownhiddenSPACE", e)
@@ -255,10 +262,45 @@ func Test6BCoherentCompositionPrivacyMetricsAndCurrentDetail(t *testing.T) {
 		if _, e = s.Read(ctx, a, app.ReadRequest{MID: 1838, Target: b.PlayerID, Index: 1}, op()); e == nil {
 			t.Fatal("blockdetail")
 		}
+		if _, e = read(a, b.PlayerID, 2); !errors.Is(e, app.ErrShowcasePrivate) {
+			t.Fatal("blockedstatistics", e)
+		}
 		sqlExec(t, p, `UPDATE social_blocks SET active=false,removed_at=clock_timestamp(),updated_at=clock_timestamp() WHERE blocker_player_id=$1 AND blocked_player_id=$2`, int64(pair[0]), int64(pair[1]))
 	}
 	// Invalid isolation is rejected rather than inferred from bare Queryer.
 	if _, e = s.ReadTx(ctx, tx.Scope{Tx: nil}, a, app.ReadRequest{MID: 1829, Target: b.PlayerID}, rev, at); e == nil {
 		t.Fatal("unwitnessed")
+	}
+}
+
+type ownerFailureMetrics struct{ err error }
+
+func (m ownerFailureMetrics) ReadMetricsTx(context.Context, tx.Queryer, app.MetricRequest) ([]app.MetricObservation, error) {
+	return nil, m.err
+}
+
+func Test1840PropagatesOwnerMetricFailure(t *testing.T) {
+	p := pool(t)
+	installed(t, p)
+	a := profileActor(t, p)
+	s := composer(t, p)
+	s.Metrics = ownerFailureMetrics{err: app.ErrContent}
+	if _, e := s.Read(ctx, a, app.ReadRequest{MID: 1840}, op()); !errors.Is(e, app.ErrContent) {
+		t.Fatalf("1840 masked owner failure: %v", e)
+	}
+}
+
+func Test1829PlayerInfoCarriesDirectoryConquerFacts(t *testing.T) {
+	p := pool(t)
+	installed(t, p)
+	a, b := profileActor(t, p), profileActor(t, p)
+	sqlExec(t, p, `UPDATE player_directory_profiles SET conquer_lev=21,conquer_loop_id=23 WHERE player_id=$1`, int64(b.PlayerID))
+	out, e := composer(t, p).Read(ctx, a, app.ReadRequest{MID: 1829, Target: b.PlayerID, Subtype: 1}, op())
+	if e != nil {
+		t.Fatal(e)
+	}
+	info, ok := out["player_info"].(map[string]any)
+	if !ok || info["conquer_lev"] != int64(21) || info["conquer_loop_id"] != int64(23) {
+		t.Fatalf("player_info conquer facts %#v", out["player_info"])
 	}
 }

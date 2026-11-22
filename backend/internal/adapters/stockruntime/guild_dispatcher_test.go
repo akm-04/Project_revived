@@ -11,6 +11,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/guild"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 )
 
 type fakeGuildCore struct {
@@ -60,7 +61,8 @@ func (f *fakeGuildCore) AcceptInvite(context.Context, identity.ActorContext, gui
 }
 
 type fakeGuildView struct {
-	self guildview.SelfGuild
+	self      guildview.SelfGuild
+	guildless bool
 }
 
 func (f fakeGuildView) Self(context.Context, identity.ActorContext) (guildview.SelfGuild, bool, error) {
@@ -73,6 +75,9 @@ func (f fakeGuildView) Other(context.Context, identity.ActorContext, guild.ID) (
 	return f.self, f.self.GuildInfo.GuildID != 0, nil
 }
 func (f fakeGuildView) Members(context.Context, identity.ActorContext) (guildview.GuildInfo, []guildview.Member, error) {
+	if f.guildless {
+		return guildview.GuildInfo{}, nil, guildview.ErrForbidden
+	}
 	return f.self.GuildInfo, []guildview.Member{{PlayerID: 100001, Role: 1, LastTime: 0, SevenVitality: 0, CopyChallengeTime: 0}}, nil
 }
 func (f fakeGuildView) Guilds(context.Context, identity.ActorContext, int) ([]guildview.GuildInfo, error) {
@@ -110,6 +115,49 @@ func TestGuildDispatcherMID612AndDirectArrayShapes(t *testing.T) {
 	}
 }
 
+func TestI9_11T34GuildlessRosterAndMissingGuildDetail(t *testing.T) {
+	// DormWindow.lua:96-109, GardenWindow.lua:279-293 and
+	// FifthAnniPartyGiftWindow.lua:252-266 open the guild visit with no guild
+	// precondition and expect OK plus a zero roster (SelfGuild.lua:32-63 then
+	// takes its own "not in a guild" branch).
+	actor := actorForHTTP(t)
+	d := GuildDispatcher{Authority: httpAuthority{actor}, Core: &fakeGuildCore{}, View: fakeGuildView{guildless: true}}
+	now := time.Unix(100, 0).UTC()
+
+	guildless := d.Dispatch(context.Background(), env(579, nil, now))
+	if guildless.HTTPStatus != 200 || guildless.Body["guild_id"] != int64(0) {
+		t.Fatalf("579 guildless=%+v", guildless)
+	}
+	if members, ok := guildless.Body["members"].([]any); !ok || len(members) != 0 {
+		t.Fatalf("579 guildless members=%+v", guildless.Body["members"])
+	}
+	replyconformance.Check(t, 579, guildless.Body)
+
+	detail := env(2565, nil, now)
+	detail.Envelope.Params["player_id"] = int64(100001)
+	missing := d.Dispatch(context.Background(), detail)
+	if missing.HTTPStatus != 409 || missing.Body["error_code"] != int64(30015) {
+		t.Fatalf("2565 missing guild=%+v", missing)
+	}
+}
+
+func TestGuildDispatcher2565AnswersActivityBoardRank(t *testing.T) {
+	actor := actorForHTTP(t)
+	view := fakeGuildView{self: guildview.SelfGuild{GuildInfo: guildview.GuildInfo{GuildID: 1000001, Name: "g", GuildRank: 4}}}
+	d := GuildDispatcher{Authority: httpAuthority{actor}, Core: &fakeGuildCore{}, View: view}
+	rq := env(2565, nil, time.Unix(100, 0).UTC())
+	rq.Envelope.Params["player_id"] = int64(100002)
+	r := d.Dispatch(context.Background(), rq)
+	if r.HTTPStatus != 200 {
+		t.Fatalf("2565=%+v", r)
+	}
+	info, ok := r.Body["guild_info"].(map[string]any)
+	if !ok || info["guild_rank"] != int64(4) {
+		t.Fatalf("2565 guild_info=%+v", r.Body)
+	}
+	replyconformance.Check(t, 2565, r.Body)
+}
+
 func TestGuildDispatcherRecoveredCooldownProtocolShapes(t *testing.T) {
 	actor := actorForHTTP(t)
 	core := &fakeGuildCore{applyErr: &guildcore.CantJoinError{Kind: guildcore.JoinCooldownOtherGuild, RemainingSeconds: 77}}
@@ -118,7 +166,7 @@ func TestGuildDispatcherRecoveredCooldownProtocolShapes(t *testing.T) {
 	rq := env(580, nil, now)
 	rq.Envelope.Params["guild_id"] = int64(1000001)
 	r := d.Dispatch(context.Background(), rq)
-	if r.HTTPStatus != 200 || r.Body["error_code"] != int64(30010) || r.Body["time"] != int64(77) {
+	if r.HTTPStatus != 409 || r.Body["error_code"] != int64(30010) || r.Body["time"] != int64(77) {
 		t.Fatalf("other-guild cooldown=%+v", r)
 	}
 	if core.seenGID != guild.ID(1000001) {
@@ -127,7 +175,7 @@ func TestGuildDispatcherRecoveredCooldownProtocolShapes(t *testing.T) {
 
 	core.applyErr = &guildcore.CantJoinError{Kind: guildcore.JoinCooldownSameGuild, RemainingSeconds: 88}
 	r = d.Dispatch(context.Background(), rq)
-	if r.HTTPStatus != 200 || r.Body["error_code"] != int64(30011) {
+	if r.HTTPStatus != 409 || r.Body["error_code"] != int64(30011) {
 		t.Fatalf("same-guild cooldown=%+v", r)
 	}
 	if _, exists := r.Body["time"]; exists {
@@ -154,17 +202,24 @@ func TestGuildMutationResultMapsOnlySourceRecoveredGuildCodes(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			r := guildMutationResult(tc.err)
-			if r.HTTPStatus != 200 || r.Body["error_code"] != tc.code {
+			if r.HTTPStatus != 409 || r.Body["error_code"] != tc.code {
 				t.Fatalf("response=%+v", r)
 			}
 		})
 	}
 
-	for _, err := range []error{guildcore.ErrApplicantLimit, guildcore.ErrLevelTooLow, guildcore.ErrInviteLimit, errors.New("unknown")} {
+	for _, err := range []error{guildcore.ErrApplicantLimit, guildcore.ErrLevelTooLow, guildcore.ErrInviteLimit} {
 		r := guildMutationResult(err)
-		if _, exists := r.Body["error_code"]; exists {
-			t.Fatalf("invented numeric code for %v: %+v", err, r)
+		if r.HTTPStatus != 409 || r.Body["error_code"] != int64(35028) {
+			t.Fatalf("unproven refusal %v: %+v", err, r)
 		}
+	}
+	unknown := guildMutationResult(errors.New("unknown"))
+	if unknown.HTTPStatus != 500 || unknown.Body["error_code"] != int64(35028) {
+		t.Fatalf("unknown failure: %+v", unknown)
+	}
+	if _, leaks := unknown.Body["error"]; leaks {
+		t.Fatalf("unknown failure leaked backend detail: %+v", unknown)
 	}
 }
 
@@ -173,14 +228,21 @@ func TestGuildDispatcherRejectsForgedRegionBeforeViewOrCore(t *testing.T) {
 	rq := env(576, nil, time.Unix(1, 0).UTC())
 	rq.Envelope.Claims.Region = 2
 	r := d.Dispatch(context.Background(), rq)
-	if r.HTTPStatus != 403 {
+	if r.HTTPStatus != 409 {
 		t.Fatalf("%+v", r)
 	}
 }
 
 func TestFailGuildKeepsUnknownErrorsOpaque(t *testing.T) {
 	r := failGuild(errors.New("sensitive backend detail"))
-	if r.HTTPStatus != 503 || r.Body["error"] != "guild_operation_failed" {
+	if r.HTTPStatus != 500 || r.Body["error_code"] != int64(35028) || r.Body["error"] != nil {
+		t.Fatalf("%+v", r)
+	}
+}
+
+func TestFailGuildRefusesGuildlessViewRead(t *testing.T) {
+	r := failGuild(guildview.ErrForbidden)
+	if r.HTTPStatus != 409 || r.Body["error_code"] != int64(35028) {
 		t.Fatalf("%+v", r)
 	}
 }
@@ -196,5 +258,22 @@ func TestGuildDispatcher616AlwaysAnswersEmptySuccess(t *testing.T) {
 	guildless := GuildDispatcher{Authority: httpAuthority{actor}}
 	if got := guildless.Dispatch(context.Background(), env(616, nil, now)); got.HTTPStatus != 200 || len(got.Body) != 0 {
 		t.Fatalf("616 guildless=%+v", got)
+	}
+}
+
+type kickedGuildCore struct{ *fakeGuildCore }
+
+func (kickedGuildCore) Leave(context.Context, identity.ActorContext, operation.Context) (guildcore.AckResult, error) {
+	return guildcore.AckResult{}, guildcore.ErrNotGuildMember
+}
+
+// A player kicked between requests is no longer a member; the stock client must
+// get a 409 refusal instead of a 200 body its guild mutation callback indexes.
+func TestGuildDispatcherKickedMemberGuildActionIsRefusal(t *testing.T) {
+	now := time.Unix(200, 0).UTC()
+	d := GuildDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Core: kickedGuildCore{&fakeGuildCore{}}, View: fakeGuildView{}}
+	got := d.Dispatch(context.Background(), env(584, nil, now))
+	if got.HTTPStatus != 409 || got.Body["error_code"] != int64(35028) || got.Body["error_msg"] != "" {
+		t.Fatalf("kicked member action=%+v", got)
 	}
 }

@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"gxb.local/backend/v2/internal/adapters/blobstore"
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
+	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/application/i5"
@@ -53,7 +54,7 @@ func TestDisplayMID1OwnerReloadProjection(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer tr.Rollback(ctx)
-	projection := i5store.BootstrapProjection{Display: s, Content: contentstore.Store{}, Privileges: i5.BaselinePrivilegeProvider{}, MaxHeroColor: i5.PreservationMaxHeroColorProvider{}}
+	projection := i5store.BootstrapProjection{Display: s, Content: contentstore.Store{}, Privileges: i5.BaselinePrivilegeProvider{}, MaxHeroColor: i5.PreservationMaxHeroColorProvider{}, BackpackSort: characterstore.Store{Queryer: p}}
 	detail := map[string]any{"17": map[string]any{}}
 	if e = projection.OverlayMID1(ctx, tr, a, false, time.Now().UTC(), detail); e != nil {
 		t.Fatal(e)

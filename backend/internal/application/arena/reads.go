@@ -7,81 +7,154 @@ import (
 
 	gen "gxb.local/backend/v2/internal/application/generation"
 	d "gxb.local/backend/v2/internal/domain/arena"
+	"gxb.local/backend/v2/internal/domain/character"
 	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
 // rankRows is the number of 301 rank_types 6 rows (C5D policy, as 5C).
 const rankRows = 50
 
-func (s Service) current(c context.Context, pid identity.PlayerID) (d.Catalog, d.Player, time.Time, error) {
+func (s Service) current(c context.Context, q tx.Queryer, pid identity.PlayerID, now time.Time) (string, d.Catalog, d.Player, error) {
 	if !s.ready() {
-		return d.Catalog{}, d.Player{}, time.Time{}, d.ErrUnavailable
+		return "", d.Catalog{}, d.Player{}, d.ErrUnavailable
 	}
-	now, err := s.Timed.Binder.Time.Now(c)
+	revision, catalog, err := s.catalogTx(c, q)
 	if err != nil {
-		return d.Catalog{}, d.Player{}, now, err
+		return "", d.Catalog{}, d.Player{}, err
 	}
-	_, catalog, err := s.catalogTx(c, s.Fresh)
-	if err != nil {
-		return d.Catalog{}, d.Player{}, now, err
-	}
-	p, found, err := s.Store.ReadPlayerTx(c, s.Fresh, pid, false)
+	p, found, err := s.Store.ReadPlayerTx(c, q, pid, false)
 	if err != nil || !found {
-		return d.Catalog{}, d.Player{}, now, errors.Join(err, d.ErrRefused)
+		return revision, d.Catalog{}, d.Player{}, errors.Join(err, d.ErrRefused)
 	}
-	return catalog, catalog.Rolled(p, now), now, nil
+	return revision, catalog, catalog.Rolled(p, now), nil
 }
 
-// Partners answers GET_REARENA_PARTNERS: season statistics and girl usage.
-func (s Service) Partners(c context.Context, a identity.ActorContext) (d.PartnersView, error) {
-	_, p, _, err := s.current(c, a.PlayerID)
+// Partners answers GET_REARENA_PARTNERS: the requested player's season
+// statistics and girl usage, read without mutation.
+func (s Service) Partners(c context.Context, a identity.ActorContext, subject identity.PlayerID, op operation.Context) (d.PartnersView, error) {
+	var out d.PartnersView
+	_, _, err := s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, readRetry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		p, usage, err := s.partnersSubject(c, sc.Tx, subject, sc.Operation.DecisionAt())
+		if err != nil {
+			return err
+		}
+		out = d.PartnersView{Player: p, Usage: usage}
+		return nil
+	})
+	return out, err
+}
+
+// partnersSubject is the Arena-owned subject read of one player's statistics.
+// An unknown subject is ErrRefused, which the dispatcher answers 409.
+func (s Service) partnersSubject(c context.Context, q tx.Queryer, subject identity.PlayerID, at time.Time) (d.Player, []d.Usage, error) {
+	revision, _, p, err := s.current(c, q, subject, at)
 	if err != nil {
-		return d.PartnersView{}, err
+		return d.Player{}, nil, err
 	}
-	usage, err := s.Store.UsageTx(c, s.Fresh, a.PlayerID, p.Season)
-	return d.PartnersView{Player: p, Usage: usage}, err
+	usage, err := s.Store.UsageTx(c, q, subject, p.Season)
+	if err != nil {
+		return d.Player{}, nil, err
+	}
+	if err = s.fillPartnerStars(c, q, revision, subject, usage); err != nil {
+		return d.Player{}, nil, err
+	}
+	return p, usage, nil
+}
+
+// fillPartnerStars adds each usage girl's current star from the subject's owned
+// heroes; a girl the subject no longer owns keeps no star.
+func (s Service) fillPartnerStars(c context.Context, q tx.Queryer, revision string, subject identity.PlayerID, usage []d.Usage) error {
+	if len(usage) == 0 {
+		return nil
+	}
+	templates, err := s.Content.ArenaTemplatesTx(c, q, revision)
+	if err != nil {
+		return err
+	}
+	owned, err := s.OwnedHeroes.ListHeroesTx(c, q, subject)
+	if err != nil {
+		return err
+	}
+	attachPartnerStars(usage, owned, templates)
+	return nil
+}
+
+// attachPartnerStars resolves each usage girl to the subject's strongest owned
+// copy, as lineupRows picks it, and records that copy's current star.
+func attachPartnerStars(usage []d.Usage, owned []character.Hero, templates d.Templates) {
+	strongest := make(map[int64]character.Hero, len(owned))
+	for _, hero := range owned {
+		base := templates.Base(hero.TableID)
+		if current, found := strongest[base]; !found || heroRanksAbove(hero, current) {
+			strongest[base] = hero
+		}
+	}
+	for index := range usage {
+		hero, found := strongest[templates.Base(usage[index].TableID)]
+		if !found {
+			continue
+		}
+		star := hero.Star
+		usage[index].Star = &star
+	}
+}
+
+// heroRanksAbove orders owned copies of one girl: most stars, then the highest
+// level, then the lowest partner id (C5D policy, as strongest does).
+func heroRanksAbove(candidate, current character.Hero) bool {
+	if candidate.Star != current.Star {
+		return candidate.Star > current.Star
+	}
+	if candidate.Level != current.Level {
+		return candidate.Level > current.Level
+	}
+	return candidate.PartnerID < current.PartnerID
 }
 
 // Records lists the retained ranked fights, newest first.
-func (s Service) Records(c context.Context, a identity.ActorContext) ([]d.RecordView, error) {
-	if !s.ready() {
-		return nil, d.ErrUnavailable
-	}
-	records, err := s.Store.RecordsTx(c, s.Fresh, a.PlayerID)
-	if err != nil {
-		return nil, err
-	}
-	out := []d.RecordView{}
-	for _, r := range records {
-		m, found, err := s.Store.ReadMatchTx(c, s.Fresh, r.MatchID, false)
-		if err != nil || !found {
-			return nil, errors.Join(err, d.ErrConflict)
-		}
-		opponent := m.Defender
-		if !r.Attack {
-			opponent = m.Attacker
-		}
-		face, err := s.face(c, s.Fresh, opponent)
+func (s Service) Records(c context.Context, a identity.ActorContext, op operation.Context) ([]d.RecordView, error) {
+	var out []d.RecordView
+	_, _, err := s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, readRetry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		records, err := s.Store.RecordsTx(c, sc.Tx, a.PlayerID)
 		if err != nil {
-			return nil, err
+			return err
 		}
-		view := d.RecordView{Record: r, Opponent: face}
-		if !m.AttemptID.IsZero() {
-			view.ReportKey = m.AttemptID.String()
+		out = []d.RecordView{}
+		for _, r := range records {
+			m, found, err := s.Store.ReadMatchTx(c, sc.Tx, r.MatchID, false)
+			if err != nil || !found {
+				return errors.Join(err, d.ErrConflict)
+			}
+			opponent := m.Defender
+			if !r.Attack {
+				opponent = m.Attacker
+			}
+			face, err := s.face(c, sc.Tx, opponent)
+			if err != nil {
+				return err
+			}
+			view := d.RecordView{Record: r, Opponent: face}
+			if !m.AttemptID.IsZero() {
+				view.ReportKey = m.AttemptID.String()
+			}
+			out = append(out, view)
 		}
-		out = append(out, view)
-	}
-	return out, nil
+		return nil
+	})
+	return out, err
 }
 
-// reportRetention is the arena replay window (D25a private policy, at the D9 Q6 ceiling).
-var reportRetention = cd.Retention{ID: "C5D_ARENA_REPORT_RETENTION_V1", Version: 1, Window: cd.RetentionCeiling}
+// readRetry keeps a read-only snapshot from retrying a definite abort.
+func readRetry() tx.RetryPolicy {
+	return tx.RetryPolicy{MaxAttempts: 1}
+}
 
 // Report replays a retained record's battle report; an expired key is absent.
-func (s Service) Report(c context.Context, key string) ([]byte, bool, error) {
+func (s Service) Report(c context.Context, key string, op operation.Context) ([]byte, bool, error) {
 	if !s.ready() {
 		return nil, false, d.ErrUnavailable
 	}
@@ -89,16 +162,18 @@ func (s Service) Report(c context.Context, key string) ([]byte, bool, error) {
 	if err != nil {
 		return nil, false, d.ErrInvalid
 	}
-	retained, err := s.Store.RetainedAttemptTx(c, s.Fresh, id)
-	if err != nil || !retained {
-		return nil, false, err
-	}
-	now, err := s.Timed.Binder.Time.Now(c)
-	if err != nil {
-		return nil, false, err
-	}
-	result, served, err := s.Combat.ReplayTx(c, s.Fresh, id, reportRetention, now)
-	return result.Report, served, err
+	var report []byte
+	served := false
+	_, _, err = s.Timed.Run(c, op, Profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, readRetry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		retained, err := s.Store.RetainedAttemptTx(c, sc.Tx, id)
+		if err != nil || !retained {
+			return err
+		}
+		result, found, err := s.Combat.ReplayTx(c, sc.Tx, id, *cd.MustMode(cd.ModeArena).Retention, sc.Operation.DecisionAt())
+		report, served = result.Report, found
+		return err
+	})
+	return report, served, err
 }
 
 // RankList is 301 rank_types 6: the season's top rows and the viewer's place.

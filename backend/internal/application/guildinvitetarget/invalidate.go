@@ -202,9 +202,6 @@ func (s Service) Invalidate(c context.Context, marker, source ids.UUID) (gi.Inva
 			}
 			current, hasRoot := plan.Existing()
 			if hasRoot {
-				if at.Before(current.UpdatedAt) {
-					return gi.ErrEvidence
-				}
 				out.RootVersion = current.StateVersion
 			}
 			key, _ := v.Tuple.SourceKey()

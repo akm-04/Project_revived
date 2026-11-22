@@ -47,7 +47,7 @@ func TestWorkplaceOwnedIdentityBoundary(t *testing.T) {
 	if p.calls != 1 {
 		t.Fatal("bad identities reached owner", p.calls)
 	}
-	if workplaceFailure(&receipt.ConflictError{}).HTTPStatus != http.StatusBadRequest {
-		t.Fatal("receipt conflict must be F4 malformed request")
+	if workplaceFailure(&receipt.ConflictError{}).HTTPStatus != http.StatusConflict {
+		t.Fatal("receipt conflict must be D5's stale-state refusal")
 	}
 }

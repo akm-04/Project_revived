@@ -1,0 +1,130 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [
+  {
+   "count": 1,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/saved_preset_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [
+   {
+    "name": "character.HeroInstanceLockRank",
+    "rank": 410
+   },
+   {
+    "name": "character.PetInstanceLockRank",
+    "rank": 430
+   }
+  ],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/saved_preset_dispatcher.go",
+    "line": 26
+   },
+   "mid": 1793,
+   "name": "SAVE_TEAM"
+  }
+ ],
+ "name": "charactersavedpreset",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore"
+ ],
+ "tables": {
+  "owned": [
+   "player_saved_preset_heroes",
+   "player_saved_preset_lanes",
+   "player_saved_preset_roots"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "gxb_operation_receipts",
+   "player_heroes",
+   "player_pets",
+   "player_saved_preset_heroes",
+   "player_saved_preset_lanes",
+   "player_saved_preset_roots"
+  ],
+  "written": [
+   "gxb_operation_receipts",
+   "player_saved_preset_heroes",
+   "player_saved_preset_lanes",
+   "player_saved_preset_roots"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "publicshowcase"
+  ],
+  "scenarios_naming": [],
+  "unit": [
+   "ca7_6_preservation_test.go",
+   "command_codec_test.go",
+   "contracts_test.go",
+   "legacy_import_test.go",
+   "reference_guard_concurrency_test.go",
+   "reference_guard_test.go",
+   "reference_state_test.go",
+   "service_test.go"
+  ]
+ }
+}

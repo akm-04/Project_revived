@@ -59,7 +59,7 @@ var (
 
 func combatLauncher(t *testing.T) *combatworker.Launcher {
 	t.Helper()
-	launcher := combatworker.New(combatLimits(t), 3, 5*time.Second)
+	launcher := combatworker.New(combatLimits(t), 3, 5*time.Second, 0)
 	t.Cleanup(launcher.Close)
 	return launcher
 }
@@ -276,8 +276,8 @@ func TestI7C5ACombatOwnedStartResolveTerminalNative(t *testing.T) {
 	a, rev, ref := combatOwner(t, pool, server)
 	b, _, foreignRef := combatOwner(t, pool, server)
 	s := combatService(t, pool)
-	locator := d.Locator{DomainKind: "i7c5a-fixture-mode", AuthorityScope: fmt.Sprintf("server/%d", server), DomainLocator: fmt.Sprintf("player/%d/target/%d", a.PlayerID, b.PlayerID)}
-	request := combat.StartRequest{Actor: a, Locator: locator, GenerationRef: "fixture-generation-1", StartFingerprint: fingerprint(locator.DomainLocator + "/v1"), Battle: combat.BattleRequest{CampaignType: 1, BattleID: 0,
+	locator := d.Locator{DomainKind: "EVENT_CENTRE_BOARD", AuthorityScope: fmt.Sprintf("server/%d", server), DomainLocator: fmt.Sprintf("player/%d/target/%d", a.PlayerID, b.PlayerID)}
+	request := combat.StartRequest{Mode: d.ModeEventCentreBoard, Actor: a, Locator: locator, GenerationRef: "fixture-generation-1", StartFingerprint: fingerprint(locator.DomainLocator + "/v1"), Battle: combat.BattleRequest{CampaignType: 1, BattleID: 0,
 		TeamA:  []combat.Participant{{Origin: d.OwnedSelf, Kind: d.HeroActor, Player: a.PlayerID, Identity: ref.PartnerID}},
 		WavesB: [][]combat.Participant{{{Origin: d.OwnedForeign, Kind: d.HeroActor, Player: b.PlayerID, Identity: foreignRef.PartnerID}, {Origin: d.Template, Kind: d.HeroActor, Identity: 10001002, TemplateParams: templateParams(10001002)}}}}}
 	started, err := fixtureStart(t, s, rev, request, pool)
@@ -426,8 +426,8 @@ func TestI7C5ACombatFailClosedNative(t *testing.T) {
 	a, rev, ref := combatOwner(t, pool, server)
 	base := combatService(t, pool)
 	request := func(name string, wave []combat.Participant) combat.StartRequest {
-		locator := d.Locator{DomainKind: "i7c5a-fixture-mode", AuthorityScope: "refusals", DomainLocator: fmt.Sprintf("%d/%s", a.PlayerID, name)}
-		return combat.StartRequest{Actor: a, Locator: locator, GenerationRef: "g", StartFingerprint: fingerprint(name), Battle: combat.BattleRequest{CampaignType: 1,
+		locator := d.Locator{DomainKind: "EVENT_CENTRE_BOARD", AuthorityScope: "refusals", DomainLocator: fmt.Sprintf("%d/%s", a.PlayerID, name)}
+		return combat.StartRequest{Mode: d.ModeEventCentreBoard, Actor: a, Locator: locator, GenerationRef: "g", StartFingerprint: fingerprint(name), Battle: combat.BattleRequest{CampaignType: 1,
 			TeamA: []combat.Participant{{Origin: d.OwnedSelf, Kind: d.HeroActor, Player: a.PlayerID, Identity: ref.PartnerID}}, WavesB: [][]combat.Participant{wave}}}
 	}
 	template := []combat.Participant{{Origin: d.Template, Kind: d.HeroActor, Identity: 10001002, TemplateParams: templateParams(10001002)}}
@@ -468,8 +468,8 @@ func TestI7C5ACombatConcurrentStartNative(t *testing.T) {
 	server := rankingServer(t, pool)
 	a, rev, ref := combatOwner(t, pool, server)
 	s := combatService(t, pool)
-	locator := d.Locator{DomainKind: "i7c5a-fixture-mode", AuthorityScope: "concurrent", DomainLocator: fmt.Sprint(a.PlayerID)}
-	request := combat.StartRequest{Actor: a, Locator: locator, GenerationRef: "g", StartFingerprint: fingerprint("concurrent"), Battle: combat.BattleRequest{CampaignType: 1,
+	locator := d.Locator{DomainKind: "EVENT_CENTRE_BOARD", AuthorityScope: "concurrent", DomainLocator: fmt.Sprint(a.PlayerID)}
+	request := combat.StartRequest{Mode: d.ModeEventCentreBoard, Actor: a, Locator: locator, GenerationRef: "g", StartFingerprint: fingerprint("concurrent"), Battle: combat.BattleRequest{CampaignType: 1,
 		TeamA: []combat.Participant{{Origin: d.OwnedSelf, Kind: d.HeroActor, Player: a.PlayerID, Identity: ref.PartnerID}}, WavesB: [][]combat.Participant{{{Origin: d.Template, Kind: d.HeroActor, Identity: 10001002, TemplateParams: templateParams(10001002)}}}}}
 	var wg sync.WaitGroup
 	ids := make([]string, 6)
@@ -514,8 +514,8 @@ func TestI7C5ACombatCompletionAndUnknownCommitNative(t *testing.T) {
 	a, rev, ref := combatOwner(t, pool, server)
 	base := combatService(t, pool)
 	start := func(name string, db tx.Beginner) combat.Started {
-		locator := d.Locator{DomainKind: "i7c5a-fixture-mode", AuthorityScope: "completion", DomainLocator: fmt.Sprintf("%d/%s", a.PlayerID, name)}
-		started, err := fixtureStart(t, base, rev, combat.StartRequest{Actor: a, Locator: locator, GenerationRef: "g", StartFingerprint: fingerprint(name), Battle: combat.BattleRequest{CampaignType: 1,
+		locator := d.Locator{DomainKind: "EVENT_CENTRE_BOARD", AuthorityScope: "completion", DomainLocator: fmt.Sprintf("%d/%s", a.PlayerID, name)}
+		started, err := fixtureStart(t, base, rev, combat.StartRequest{Mode: d.ModeEventCentreBoard, Actor: a, Locator: locator, GenerationRef: "g", StartFingerprint: fingerprint(name), Battle: combat.BattleRequest{CampaignType: 1,
 			TeamA: []combat.Participant{{Origin: d.OwnedSelf, Kind: d.HeroActor, Player: a.PlayerID, Identity: ref.PartnerID}}, WavesB: [][]combat.Participant{{{Origin: d.Template, Kind: d.HeroActor, Identity: 10001002, TemplateParams: templateParams(10001002)}}}}}, db)
 		if err != nil {
 			t.Fatal(name, err)
@@ -554,8 +554,8 @@ func TestI7C5ACombatCompletionAndUnknownCommitNative(t *testing.T) {
 		t.Fatal("unknown START commit not reconciled")
 	}
 	// Ambiguous COMMIT that actually rolled back stays unknown, never a blind retry success.
-	locator := d.Locator{DomainKind: "i7c5a-fixture-mode", AuthorityScope: "completion", DomainLocator: fmt.Sprintf("%d/unknown-absent", a.PlayerID)}
-	_, err := fixtureStart(t, base, rev, combat.StartRequest{Actor: a, Locator: locator, GenerationRef: "g", StartFingerprint: fingerprint("unknown-absent"), Battle: combat.BattleRequest{CampaignType: 1,
+	locator := d.Locator{DomainKind: "EVENT_CENTRE_BOARD", AuthorityScope: "completion", DomainLocator: fmt.Sprintf("%d/unknown-absent", a.PlayerID)}
+	_, err := fixtureStart(t, base, rev, combat.StartRequest{Mode: d.ModeEventCentreBoard, Actor: a, Locator: locator, GenerationRef: "g", StartFingerprint: fingerprint("unknown-absent"), Battle: combat.BattleRequest{CampaignType: 1,
 		TeamA: []combat.Participant{{Origin: d.OwnedSelf, Kind: d.HeroActor, Player: a.PlayerID, Identity: ref.PartnerID}}, WavesB: [][]combat.Participant{{{Origin: d.Template, Kind: d.HeroActor, Identity: 10001002, TemplateParams: templateParams(10001002)}}}}}, metricCommitDB{Beginner: pool, commit: false})
 	var unknown *tx.UnknownCommitError
 	if !errors.As(err, &unknown) {
@@ -676,8 +676,8 @@ func TestI7C5ACombatNondefaultDifferentialNative(t *testing.T) {
 	stats := rawBirthStats(pool)
 	stats.Awakening = fixture
 	s.Inputs.Stats, s.Inputs.Awakening = stats, fixture
-	locator := d.Locator{DomainKind: "i7c5a-fixture-mode", AuthorityScope: "nondefault", DomainLocator: fmt.Sprint(a.PlayerID)}
-	started, err := fixtureStart(t, s, rev, combat.StartRequest{Actor: a, Locator: locator, GenerationRef: "g", StartFingerprint: fingerprint("nondefault"), Battle: combat.BattleRequest{CampaignType: 1,
+	locator := d.Locator{DomainKind: "EVENT_CENTRE_BOARD", AuthorityScope: "nondefault", DomainLocator: fmt.Sprint(a.PlayerID)}
+	started, err := fixtureStart(t, s, rev, combat.StartRequest{Mode: d.ModeEventCentreBoard, Actor: a, Locator: locator, GenerationRef: "g", StartFingerprint: fingerprint("nondefault"), Battle: combat.BattleRequest{CampaignType: 1,
 		TeamA:  []combat.Participant{{Origin: d.OwnedSelf, Kind: d.HeroActor, Player: a.PlayerID, Identity: ref.PartnerID}, {Origin: d.OwnedSelf, Kind: d.HeroActor, Player: a.PlayerID, Identity: super.PartnerID}},
 		PetsA:  []combat.Participant{{Origin: d.OwnedSelf, Kind: d.PetActor, Player: a.PlayerID, Identity: pet.PetID}},
 		WavesB: [][]combat.Participant{{{Origin: d.Template, Kind: d.HeroActor, Identity: 10001002, TemplateParams: templateParams(10001002)}}}}}, pool)
@@ -741,8 +741,8 @@ func TestI7C5ACombatStartTakesOnlyCombatLocksNative(t *testing.T) {
 	pool := pool(t)
 	a, rev, ref := combatOwner(t, pool, rankingServer(t, pool))
 	s := combatService(t, pool)
-	locator := d.Locator{DomainKind: "i7c5a-fixture-mode", AuthorityScope: "locks", DomainLocator: fmt.Sprint(a.PlayerID)}
-	request := combat.StartRequest{Actor: a, Locator: locator, GenerationRef: "g", StartFingerprint: fingerprint("locks"), Battle: combat.BattleRequest{CampaignType: 1,
+	locator := d.Locator{DomainKind: "EVENT_CENTRE_BOARD", AuthorityScope: "locks", DomainLocator: fmt.Sprint(a.PlayerID)}
+	request := combat.StartRequest{Mode: d.ModeEventCentreBoard, Actor: a, Locator: locator, GenerationRef: "g", StartFingerprint: fingerprint("locks"), Battle: combat.BattleRequest{CampaignType: 1,
 		TeamA: []combat.Participant{{Origin: d.OwnedSelf, Kind: d.HeroActor, Player: a.PlayerID, Identity: ref.PartnerID}}, WavesB: [][]combat.Participant{{{Origin: d.Template, Kind: d.HeroActor, Identity: 10001002, TemplateParams: templateParams(10001002)}}}}}
 	var tables []string
 	rows, err := pool.Raw().Query(ctx, `SELECT table_name FROM information_schema.columns WHERE table_schema='public' AND column_name='player_id' AND table_name NOT LIKE 'combat_%' ORDER BY table_name`)
@@ -817,9 +817,9 @@ func TestI7C5ACombatCloseUnresolvedNative(t *testing.T) {
 	a, rev, ref := combatOwner(t, pool, rankingServer(t, pool))
 	s := combatService(t, pool)
 	s.Worker = permanentWorker{}
-	locator := d.Locator{DomainKind: "i7c5a-fixture-mode", AuthorityScope: "close", DomainLocator: fmt.Sprint(a.PlayerID)}
+	locator := d.Locator{DomainKind: "EVENT_CENTRE_BOARD", AuthorityScope: "close", DomainLocator: fmt.Sprint(a.PlayerID)}
 	request := func(name string) combat.StartRequest {
-		return combat.StartRequest{Actor: a, Locator: locator, GenerationRef: "g", StartFingerprint: fingerprint(name), Battle: combat.BattleRequest{CampaignType: 1,
+		return combat.StartRequest{Mode: d.ModeEventCentreBoard, Actor: a, Locator: locator, GenerationRef: "g", StartFingerprint: fingerprint(name), Battle: combat.BattleRequest{CampaignType: 1,
 			TeamA: []combat.Participant{{Origin: d.OwnedSelf, Kind: d.HeroActor, Player: a.PlayerID, Identity: ref.PartnerID}}, WavesB: [][]combat.Participant{{{Origin: d.Template, Kind: d.HeroActor, Identity: 10001002, TemplateParams: templateParams(10001002)}}}}}
 	}
 	first, err := fixtureStart(t, s, rev, request("close-1"), pool)

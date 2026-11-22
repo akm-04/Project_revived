@@ -3,6 +3,7 @@ package stockruntime
 import (
 	"context"
 	"encoding/json"
+
 	dm "gxb.local/backend/v2/internal/application/frienddm"
 	"gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/domain/friendmessage"
@@ -17,31 +18,59 @@ type FriendDMSender interface {
 type FriendDMEmitter interface {
 	EmitFriendDM(context.Context, dm.Occurrence)
 }
+
+// RoomChatSender routes a room-scoped selectType to its room owner; a stock
+// team-chat line is authorized by shared room membership, not friendship.
+type RoomChatSender interface {
+	SendRoomChat(context.Context, identity.ActorContext, identity.PlayerID, friendmessage.Message, operation.Context) error
+}
+
 type FriendDMDispatcher struct {
 	Authority realtimeauth.GameplayAuthorityPort
 	Service   FriendDMSender
 	Emitter   FriendDMEmitter
+	// RoomChat routes ILLUSION, OccultRoomChat OCCULT and AdventureRoomChat
+	// ADVENTURE_ILLUSION/ADVENTURE_DEFENSE to their room owners.
+	RoomChat          RoomChatSender
+	OccultRoomChat    RoomChatSender
+	AdventureRoomChat RoomChatSender
+}
+
+// roomChat routes one room-scoped selectType to its owner. A permanent refusal
+// (no room, not a member, roomID mismatch) is 409 through refusalOrTransient.
+func (d FriendDMDispatcher) roomChat(c context.Context, a identity.ActorContext, recipient int64, message friendmessage.Message, r httpedge.DispatchRequest, sender RoomChatSender) httpedge.Response {
+	if sender == nil {
+		return failureReply(defect(nil))
+	}
+	if e := sender.SendRoomChat(c, a, identity.PlayerID(recipient), message, r.Envelope.Operation); e != nil {
+		return refusalOrTransient(e)
+	}
+	// The stock 515 callback reads server_time for the sender's own line.
+	return httpedge.Response{HTTPStatus: 200, Body: map[string]any{"server_time": r.Envelope.ReceivedAt.Unix()}}
 }
 
 func (d FriendDMDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequest) httpedge.Response {
 	bad := func() httpedge.Response {
-		return httpedge.Response{HTTPStatus: 400, Body: map[string]any{"error": "invalid_private_message"}}
+		return failureReply(malformed("invalid_private_message"))
 	}
-	unavailable := func() httpedge.Response {
-		return httpedge.Response{HTTPStatus: 409, Body: map[string]any{"error": "private_message_unavailable"}}
+	unsupported := func() httpedge.Response {
+		return failureReply(refusal(unprovenRefusalCode))
 	}
-	if d.Authority == nil || r.Envelope.Claims.Token == "" {
-		return httpedge.Response{HTTPStatus: 401, Body: map[string]any{"error": "gameplay_auth_required"}}
+	if d.Authority == nil {
+		return failureReply(defect(nil))
+	}
+	if r.Envelope.Claims.Token == "" {
+		return failureReply(sessionFailure())
 	}
 	a, e := d.Authority.ResolveGameplayBearer(c, r.Envelope.Claims.Token, r.Envelope.ReceivedAt)
 	if e != nil {
 		return authFailure(e)
 	}
 	if r.Envelope.Claims.Region != int64(a.LogicalServerID) {
-		return httpedge.Response{HTTPStatus: 403, Body: map[string]any{"error": "region_mismatch"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 	if r.Envelope.MID != 515 {
-		return bad()
+		return unsupported()
 	}
 	fields, e := socialFields(r.Envelope.Params, "player_id", "msg")
 	if e != nil || len(fields) != 2 {
@@ -67,15 +96,24 @@ func (d FriendDMDispatcher) Dispatch(c context.Context, r httpedge.DispatchReque
 	if e != nil {
 		return bad()
 	}
-	if d.Service == nil {
-		return unavailable()
+	switch msg.SelectType {
+	case friendmessage.SelectIllusion:
+		return d.roomChat(c, a, pid, msg, r, d.RoomChat)
+	case friendmessage.SelectOccult:
+		return d.roomChat(c, a, pid, msg, r, d.OccultRoomChat)
+	case friendmessage.SelectAdventureIllusion, friendmessage.SelectAdventureDefense:
+		return d.roomChat(c, a, pid, msg, r, d.AdventureRoomChat)
+	case friendmessage.SelectSocialSystem:
+	default:
+		return bad()
+	}
+	if d.Service == nil || d.Emitter == nil {
+		return failureReply(defect(nil))
 	}
 	o, e := d.Service.Accept(c, a, identity.PlayerID(pid), msg, r.Envelope.Operation)
 	if e != nil {
-		return unavailable()
+		return refusalOrTransient(e)
 	}
-	if d.Emitter != nil {
-		d.Emitter.EmitFriendDM(c, o)
-	}
-	return httpedge.Response{HTTPStatus: 200, Body: map[string]any{}}
+	d.Emitter.EmitFriendDM(c, o)
+	return httpedge.Response{HTTPStatus: 200, Body: map[string]any{"server_time": o.AcceptedAt.Unix()}}
 }

@@ -358,3 +358,14 @@ func TestScopeCarriesExactRunnerOptionsAcrossRetry(t *testing.T) {
 		t.Fatalf("calls=%d", calls)
 	}
 }
+
+func TestExhaustedRetryBudgetIsDefiniteAbort(t *testing.T) {
+	d := &fakeDB{txs: []*fakeTx{{}, {}}}
+	res, err := (Runner{DB: d}).Run(context.Background(), opctx(), profile(), Options{Isolation: Serializable},
+		RetryPolicy{MaxAttempts: 2, RetryDefiniteAbort: true}, nil, func(context.Context, Scope) error {
+			return stateErr("40001")
+		})
+	if res.Outcome != DefiniteAbort || !IsDefiniteAbortError(err) || SQLState(err) != "40001" {
+		t.Fatalf("res=%+v err=%v state=%q", res, err, SQLState(err))
+	}
+}

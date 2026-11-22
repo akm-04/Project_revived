@@ -6,11 +6,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/worldboss"
+	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -135,42 +137,40 @@ func (Store) ReadRankTx(ctx context.Context, q tx.Queryer, board d.Board, limit 
 	return out, nil
 }
 
-// InsertAttemptTx replaces the player's abandoned open attempt: Combat already
-// superseded it, so it can no longer receive a result.
-func (Store) InsertAttemptTx(ctx context.Context, t tx.Tx, attempt d.Attempt) error {
-	if err := attempt.Validate(); err != nil {
-		return err
+// InsertSettlementTx records the damage the RESULT credited to one terminal
+// Combat attempt; the transaction is Combat's attest transaction.
+func (Store) InsertSettlementTx(ctx context.Context, t tx.Tx, attemptID ids.UUID, playerID identity.PlayerID, damage int64, settledAt time.Time) error {
+	if t == nil || attemptID.IsZero() || playerID <= 0 || damage < 0 || damage > d.DamageCap || settledAt.IsZero() {
+		return d.ErrInvalid
 	}
-	if _, err := t.Exec(ctx, `DELETE FROM worldboss_attempts WHERE player_id=$1 AND NOT resolved`, attempt.PlayerID); err != nil {
-		return err
-	}
-	_, err := t.Exec(ctx, `INSERT INTO worldboss_attempts(attempt_id,player_id,logical_server_id,generation,campaign_id,formation,frozen_at,resolved,damage)VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)`, attempt.ID, attempt.PlayerID, attempt.LogicalServerID, attempt.Generation, attempt.CampaignID, attempt.Formation, attempt.FrozenAt, attempt.Resolved, attempt.Damage)
+	_, err := t.Exec(ctx, `INSERT INTO worldboss_attempt_settlements(attempt_id,player_id,damage,settled_at)VALUES($1,$2,$3,$4)`, attemptID.String(), int64(playerID), damage, settledAt.UTC())
 	return err
 }
 
-// FindAttemptTx prefers the open attempt, then the newest resolved one that a
-// repeated result would be a duplicate of.
-func (Store) FindAttemptTx(ctx context.Context, q tx.Queryer, playerID identity.PlayerID, serverID, campaignID int64) (d.Attempt, bool, error) {
-	var attempt d.Attempt
-	err := q.QueryRow(ctx, `SELECT attempt_id,player_id,logical_server_id,generation,campaign_id,formation,frozen_at,resolved,damage FROM worldboss_attempts WHERE player_id=$1 AND logical_server_id=$2 AND campaign_id=$3 ORDER BY resolved,attempt_sequence DESC LIMIT 1`, int64(playerID), serverID, campaignID).Scan(&attempt.ID, &attempt.PlayerID, &attempt.LogicalServerID, &attempt.Generation, &attempt.CampaignID, &attempt.Formation, &attempt.FrozenAt, &attempt.Resolved, &attempt.Damage)
-	if errors.Is(err, kernelstore.ErrNoRows) {
-		return d.Attempt{}, false, nil
+// ReadSettlementTx answers a duplicate RESULT from the settlement row, not
+// from the occurrence that may have advanced since the attempt.
+func (Store) ReadSettlementTx(ctx context.Context, q tx.Queryer, attemptID ids.UUID) (int64, bool, error) {
+	if q == nil || attemptID.IsZero() {
+		return 0, false, d.ErrInvalid
 	}
-	return attempt, err == nil, err
+	var damage int64
+	err := q.QueryRow(ctx, `SELECT damage FROM worldboss_attempt_settlements WHERE attempt_id=$1`, attemptID.String()).Scan(&damage)
+	if errors.Is(err, kernelstore.ErrNoRows) {
+		return 0, false, nil
+	}
+	if err != nil {
+		return 0, false, err
+	}
+	if damage < 0 || damage > d.DamageCap {
+		return 0, true, fmt.Errorf("worldboss: settlement damage %d out of range", damage)
+	}
+	return damage, true, nil
 }
 
 func (Store) CountChallengersTx(ctx context.Context, q tx.Queryer, serverID, day int64) (int64, error) {
 	var count int64
 	err := q.QueryRow(ctx, `SELECT count(*) FROM worldboss_players WHERE logical_server_id=$1 AND challenged_day=$2`, serverID, day).Scan(&count)
 	return count, err
-}
-
-func (Store) SaveAttemptTx(ctx context.Context, t tx.Tx, attempt d.Attempt) error {
-	tag, err := t.Exec(ctx, `UPDATE worldboss_attempts SET resolved=$2,damage=$3 WHERE attempt_id=$1`, attempt.ID, attempt.Resolved, attempt.Damage)
-	if err == nil && tag.RowsAffected() != 1 {
-		return d.ErrUnavailable
-	}
-	return err
 }
 
 func readOccurrence(row tx.Row) (d.Occurrence, bool, error) {

@@ -12,7 +12,7 @@ import (
 type MissionBootstrap struct{ Owner Service }
 
 func (MissionBootstrap) Name() string     { return "i5.missions" }
-func (MissionBootstrap) Claims() []string { return []string{"160"} }
+func (MissionBootstrap) Claims() []string { return []string{"160", "2560"} }
 func (m MissionBootstrap) ReconcileCharacterLogin(ctx context.Context, t tx.Tx, actor identity.ActorContext, op operation.Context, at time.Time) error {
 	bound, err := m.Owner.bindActiveContentTx(ctx, t, op)
 	if err != nil {
@@ -57,6 +57,9 @@ func (m MissionBootstrap) OverlayMID1(ctx context.Context, q tx.Queryer, actor i
 		}
 		view.AwakeningReady = awakeningReady(a)
 	}
-	detail["160"] = MissionProjection(view, at, 0)
+	projection := MissionProjection(view, at, 0)
+	detail["160"] = projection
+	// The stock Redmark model hydrates only from MID1's 2560 entry, as function-keyed rows.
+	detail["2560"] = projection["redmarks_"]
 	return nil
 }

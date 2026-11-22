@@ -15,12 +15,15 @@ import (
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	"gxb.local/backend/v2/internal/application/playerpresentation"
 	ar "gxb.local/backend/v2/internal/application/realtimeauth"
+	"gxb.local/backend/v2/internal/domain/identity"
 	dr "gxb.local/backend/v2/internal/domain/realtimeauth"
+	"gxb.local/backend/v2/internal/foundation/observability"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	"gxb.local/backend/v2/internal/protocol/amf3"
 	"gxb.local/backend/v2/internal/protocol/limits"
 	"gxb.local/backend/v2/internal/protocol/mids"
 	rt "gxb.local/backend/v2/internal/protocol/realtime"
+	"gxb.local/backend/v2/internal/testsupport/latency"
 	"math"
 	"net"
 	"os"
@@ -355,13 +358,13 @@ func TestChatA14ReadOnlyRepeatableReadSingleCommitAndNoEffects(t *testing.T) {
 	f := fresh(t)
 	f.chatPlayers(100001, 100002)
 	w := &readWitness{f: f}
-	reader := channelReadFunc(func(c context.Context, t tx.Tx, a ar.Admission, b bool) (playerpresentation.Minimal, error) {
+	reader := channelReadFunc{read: func(c context.Context, t tx.Tx, a ar.Admission, b bool) (playerpresentation.Minimal, error) {
 		var ro, iso string
 		if e := t.QueryRow(c, `SELECT current_setting('transaction_read_only'),current_setting('transaction_isolation')`).Scan(&ro, &iso); e != nil || ro != "on" || iso != "repeatable read" {
 			return playerpresentation.Minimal{}, fmt.Errorf("wrongtransaction %s %s %v", ro, iso, e)
 		}
 		return (channelchatread.Reader{}).ReadTx(c, t, a, b)
-	})
+	}}
 	h := chatHarness(t, f, channelHarnessOptions{db: w, reader: reader})
 	a, _, _ := h.login(100001, dr.World, 1)
 	b, _, _ := h.login(100002, dr.World, 1)
@@ -370,10 +373,11 @@ func TestChatA14ReadOnlyRepeatableReadSingleCommitAndNoEffects(t *testing.T) {
 	readChat(t, a, "readonly")
 	readChat(t, b, "readonly")
 	h.report()
-	if w.begins.Load() != 3 || w.commits.Load() != 3 || w.active.Load() != 0 || f.snapshot() != before {
+	// One sender preparation and one batch authorization for the whole room.
+	if w.begins.Load() != 2 || w.commits.Load() != 2 || w.active.Load() != 0 || f.snapshot() != before {
 		t.Fatal("transaction/effect violation", w.begins.Load(), w.commits.Load(), w.active.Load())
 	}
-	if f.number(`SELECT count(*) FROM pg_locks WHERE mode LIKE '%ExclusiveLock' AND relation IN('players'::regclass,'guild_memberships'::regclass,'social_friendships'::regclass) AND granted`) != 0 {
+	if f.number(`SELECT count(*) FROM pg_locks WHERE mode LIKE '%ExclusiveLock' AND relation IN('players'::regclass,'guild_memberships'::regclass,'social_friendships'::regclass) AND database=(SELECT oid FROM pg_database WHERE datname=current_database()) AND granted`) != 0 {
 		t.Fatal("gameplay lock stranded")
 	}
 }
@@ -381,7 +385,7 @@ func TestChatA15FreshDBTimeAndUnknownReadCompletion(t *testing.T) {
 	f := fresh(t)
 	f.chatPlayers(100001)
 	var first time.Time
-	reader := channelReadFunc(func(c context.Context, t tx.Tx, a ar.Admission, b bool) (playerpresentation.Minimal, error) {
+	reader := channelReadFunc{read: func(c context.Context, t tx.Tx, a ar.Admission, b bool) (playerpresentation.Minimal, error) {
 		var at time.Time
 		if e := t.QueryRow(c, `SELECT clock_timestamp()`).Scan(&at); e != nil {
 			return playerpresentation.Minimal{}, e
@@ -392,7 +396,7 @@ func TestChatA15FreshDBTimeAndUnknownReadCompletion(t *testing.T) {
 			return playerpresentation.Minimal{}, errors.New("stale DB observation")
 		}
 		return (channelchatread.Reader{}).ReadTx(c, t, a, b)
-	})
+	}}
 	h := chatHarness(t, f, channelHarnessOptions{reader: reader})
 	c, _, _ := h.login(100001, dr.World, 1)
 	sendChat(t, c, "freshclock", 0)
@@ -481,38 +485,37 @@ func TestChatA18GlobalMessageWorkerOverflowAndShutdown(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer p.Close()
-	prepGate, recipientGate := make(chan struct{}), make(chan struct{})
+	prepGate, writeGate := make(chan struct{}), make(chan struct{})
+	// A failed wait must still release blocked socket writers, or the harness stop hangs until the package timeout.
+	releaseWrites := sync.OnceFunc(func() { close(writeGate) })
+	defer releaseWrites()
+	// Occupancy waits are liveness bounds only; the worker bound itself is checked by peak and the 150ms probe.
+	const occupancyWait = 10 * time.Second
 	prepared := make(chan struct{}, 16)
-	entered := make(chan struct{}, 8)
+	entered := make(chan struct{}, 16)
 	var active, peak atomic.Int64
-	reader := channelReadFunc(func(c context.Context, tr tx.Tx, a ar.Admission, b bool) (playerpresentation.Minimal, error) {
-		if b {
-			prepared <- struct{}{}
-			select {
-			case <-prepGate:
-			case <-c.Done():
-				return playerpresentation.Minimal{}, c.Err()
-			}
-		} else {
-			n := active.Add(1)
-			defer active.Add(-1)
-			for old := peak.Load(); n > old; old = peak.Load() {
-				if peak.CompareAndSwap(old, n) {
-					break
-				}
-			}
-			select {
-			case entered <- struct{}{}:
-			default:
-			}
-			select {
-			case <-recipientGate:
-			case <-c.Done():
-				return playerpresentation.Minimal{}, c.Err()
-			}
+	reader := channelReadFunc{read: func(c context.Context, tr tx.Tx, a ar.Admission, b bool) (playerpresentation.Minimal, error) {
+		prepared <- struct{}{}
+		select {
+		case <-prepGate:
+		case <-c.Done():
+			return playerpresentation.Minimal{}, c.Err()
 		}
 		return (channelchatread.Reader{}).ReadTx(c, tr, a, b)
-	})
+	}}
+	drain := func(cs []net.Conn, frames int) *sync.WaitGroup {
+		var done sync.WaitGroup
+		done.Add(len(cs))
+		for _, conn := range cs {
+			go func(c net.Conn) {
+				defer done.Done()
+				for i := 0; i < frames; i++ {
+					frameRead(t, c, mids.MIDChatMessage)
+				}
+			}(conn)
+		}
+		return &done
+	}
 	h := chatHarness(t, f, channelHarnessOptions{db: p, reader: reader})
 	conns := make([]net.Conn, 17)
 	for i := range conns {
@@ -524,7 +527,7 @@ func TestChatA18GlobalMessageWorkerOverflowAndShutdown(t *testing.T) {
 	for i := 0; i < 16; i++ {
 		select {
 		case <-prepared:
-		case <-time.After(time.Second):
+		case <-time.After(occupancyWait):
 			t.Fatal("16 sender slots not occupied")
 		}
 	}
@@ -534,35 +537,51 @@ func TestChatA18GlobalMessageWorkerOverflowAndShutdown(t *testing.T) {
 		t.Fatal(r)
 	}
 	noChat(t, conns[16])
-	var drain sync.WaitGroup
-	drain.Add(17)
-	for _, conn := range conns {
-		go func(c net.Conn) {
-			defer drain.Done()
-			for i := 0; i < 16; i++ {
-				frameRead(t, c, mids.MIDChatMessage)
-			}
-		}(conn)
-	}
+	read := drain(conns, 16)
 	close(prepGate)
-	for i := 0; i < 8; i++ {
-		select {
-		case <-entered:
-		case <-time.After(time.Second):
-			t.Fatal("8 recipient slots not occupied")
-		}
-	}
-	if peak.Load() != 8 {
-		t.Fatal("global worker bound", peak.Load())
-	}
-	close(recipientGate)
 	for i := 0; i < 16; i++ {
 		r := h.report()
 		if r.Outcomes[stockruntime.ChatTransportWriteRecorded] != 17 {
 			t.Fatal(r)
 		}
 	}
-	drain.Wait()
+	read.Wait()
+	// Global socket-write bound. Each connection has one writer, so a job queued behind a gated write holds its global
+	// slot without reaching the socket; with several messages in flight two slots can wait on one socket and the
+	// probe stalls until the publication budget. One message gives every recipient exactly one job, and a global
+	// bound below the local one is then the only thing that can stop the fifth write.
+	bounded := stockruntime.DefaultChannelChatPolicy(2048)
+	bounded.GlobalWorkers = 4
+	g := chatHarness(t, f, channelHarnessOptions{db: p, policy: &bounded, decorate: func(c net.Conn) net.Conn {
+		return &gatedChatWrite{Conn: c, gate: writeGate, entered: entered, active: &active, peak: &peak}
+	}})
+	targets := make([]net.Conn, 17)
+	for i := range targets {
+		targets[i], _, _ = g.login(100001, dr.World, 1)
+	}
+	sendChat(t, targets[0], "bounded", 0)
+	for i := 0; i < bounded.GlobalWorkers; i++ {
+		select {
+		case <-entered:
+		case <-time.After(occupancyWait):
+			t.Fatal("global socket write slots not occupied")
+		}
+	}
+	select {
+	case <-entered:
+		t.Fatal("global worker bound exceeded for socket writes")
+	case <-time.After(150 * time.Millisecond):
+	}
+	if peak.Load() != int64(bounded.GlobalWorkers) {
+		t.Fatal("global worker bound", peak.Load())
+	}
+	delivered := drain(targets, 1)
+	releaseWrites()
+	if r := g.report(); r.Outcomes[stockruntime.ChatTransportWriteRecorded] != 17 {
+		t.Fatal(r)
+	}
+	delivered.Wait()
+	g.stop()
 	// Bound snapshot before enqueuing: both actual admitted sockets exceed a smaller test limit.
 	h.stop()
 	pol := stockruntime.DefaultChannelChatPolicy(1)
@@ -577,27 +596,27 @@ func TestChatA18GlobalMessageWorkerOverflowAndShutdown(t *testing.T) {
 	noChat(t, b)
 	overflow.stop()
 	blocked := make(chan struct{}, 1)
-	cancelReader := channelReadFunc(func(c context.Context, tr tx.Tx, a ar.Admission, b bool) (playerpresentation.Minimal, error) {
-		if !b {
+	cancelReader := channelReadFunc{
+		read: func(c context.Context, tr tx.Tx, a ar.Admission, b bool) (playerpresentation.Minimal, error) {
+			return (channelchatread.Reader{}).ReadTx(c, tr, a, b)
+		},
+		authorize: func(c context.Context, _ tx.Tx, _ []ar.Admission) ([]bool, error) {
 			blocked <- struct{}{}
 			<-c.Done()
-			return playerpresentation.Minimal{}, c.Err()
-		}
-		return (channelchatread.Reader{}).ReadTx(c, tr, a, b)
-	})
+			return nil, c.Err()
+		},
+	}
 	shutdown := chatHarness(t, f, channelHarnessOptions{reader: cancelReader})
 	c, _, _ := shutdown.login(100001, dr.World, 1)
 	sendChat(t, c, "shutdown", 0)
 	select {
 	case <-blocked:
-	case <-time.After(time.Second):
+	case <-time.After(eventWaitTimeout):
 		t.Fatal("recipient did not start")
 	}
 	at := time.Now()
 	shutdown.stop()
-	if time.Since(at) > 3*time.Second {
-		t.Fatal("shutdown unbounded")
-	}
+	latency.Enforce(t, latency.Incidental, time.Since(at), 3*time.Second)
 }
 func TestChatA19PartialNoRetryACKOrConsumptionClaim(t *testing.T) {
 	f := fresh(t)
@@ -632,7 +651,7 @@ func TestChatA20TimeoutAdmittedFrameMayWriteLaterNativeTCP(t *testing.T) {
 	sendChat(t, c, "lateframe", 0)
 	select {
 	case <-entered:
-	case <-time.After(time.Second):
+	case <-time.After(eventWaitTimeout):
 		t.Fatal("no queue admission")
 	}
 	r := h.report()
@@ -748,7 +767,7 @@ func TestChatA24ActualProductionDispatcherAndHTTPRejection(t *testing.T) {
 		t.Fatal("chat renewed Presence")
 	}
 	writeChatFrame(t, c, rt.Frame{MID: mids.MIDSocketHeartbeat, Params: chatParams()})
-	deadline := time.Now().Add(time.Second)
+	deadline := time.Now().Add(eventWaitTimeout)
 	for f.text(`SELECT lease_expires_at::text FROM realtime_presence_leases WHERE player_id=100001 LIMIT 1`) == leaseBefore {
 		if time.Now().After(deadline) {
 			t.Fatal("heartbeat did not renew Presence")
@@ -820,7 +839,7 @@ func TestChatA29CrashReconnectAndRetirementNativeLifecycle(t *testing.T) {
 	readChat(t, sender, "retirequeued")
 	select {
 	case <-started:
-	case <-time.After(time.Second):
+	case <-time.After(eventWaitTimeout):
 		t.Fatal("write not queued")
 	}
 	replacement, _, _ := h.loginToken(100002, token, dr.World, 1)
@@ -833,6 +852,68 @@ func TestChatA29CrashReconnectAndRetirementNativeLifecycle(t *testing.T) {
 	sendChat(t, sender, "stilllive", 0)
 	readChat(t, sender, "stilllive")
 	h.report()
+}
+
+type chatTransactionMetrics struct {
+	mu      sync.Mutex
+	commits int
+}
+
+func (m *chatTransactionMetrics) Counter(string, observability.Labels, uint64) {}
+
+func (m *chatTransactionMetrics) Observe(name string, labels observability.Labels, _ time.Duration) {
+	if name != "gxb_tx_phase_duration" {
+		return
+	}
+	values := map[string]string{}
+	for _, pair := range labels.Pairs() {
+		values[pair.Key] = pair.Value
+	}
+	if values["profile"] != "channel-chat-read-v1" || values["phase"] != "commit" || values["outcome"] != "definite_commit" {
+		return
+	}
+	m.mu.Lock()
+	m.commits++
+	m.mu.Unlock()
+}
+
+func (m *chatTransactionMetrics) count() int {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return m.commits
+}
+
+func TestChatA30OneAuthorizationTransactionForFiftyRecipients(t *testing.T) {
+	f := fresh(t)
+	players := make([]identity.PlayerID, 0, 52)
+	for pid := identity.PlayerID(100001); pid <= 100052; pid++ {
+		players = append(players, pid)
+	}
+	f.chatPlayers(players...)
+	metrics := &chatTransactionMetrics{}
+	h := chatHarness(t, f, channelHarnessOptions{hooks: observability.TxHooks{Metrics: metrics}})
+	sender, _, _ := h.login(100001, dr.World, 1)
+	healthy := make([]net.Conn, 0, 50)
+	for _, pid := range players[1:51] {
+		c, _, _ := h.login(pid, dr.World, 1)
+		healthy = append(healthy, c)
+	}
+	stale, staleAdmission, _ := h.login(100052, dr.World, 1)
+	f.sql(`UPDATE gameplay_contexts SET liveness_version=liveness_version+1 WHERE context_id=$1::uuid`, staleAdmission.Domain.Actor.ContextID.UUID().String())
+	before := metrics.count()
+	sendChat(t, sender, "fiftyrecipients", 0)
+	for _, c := range append([]net.Conn{sender}, healthy...) {
+		readChat(t, c, "fiftyrecipients")
+	}
+	report := h.report()
+	if report.Outcomes[stockruntime.ChatTransportWriteRecorded] != 51 || report.Outcomes[stockruntime.ChatIneligible] != 1 {
+		t.Fatal(report)
+	}
+	noChat(t, stale)
+	// One sender preparation plus one authorization read for the whole room.
+	if got := metrics.count() - before; got != 2 {
+		t.Fatalf("authorization transactions = %d, want 2", got)
+	}
 }
 
 func TestChatA17bFullNativeWriterQueueIsolated(t *testing.T) {

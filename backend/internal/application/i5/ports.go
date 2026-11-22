@@ -33,12 +33,13 @@ func (d TemporalDescriptor) FixedPolicy(cap int64) economy.TemporalPolicy {
 }
 
 type ResourcePolicy struct {
-	Kind          grant.LineKind
-	WireTableID   int64
-	Stack         *economy.StackDefinition
-	Temporal      *economy.TemporalPolicy // legacy exact-version rows only
-	Descriptor    *TemporalDescriptor     // immutable R5 temporal rows
-	PolicyVersion string
+	DailyFloorMinimum *int64
+	Kind              grant.LineKind
+	WireTableID       int64
+	Stack             *economy.StackDefinition
+	Temporal          *economy.TemporalPolicy // legacy exact-version rows only
+	Descriptor        *TemporalDescriptor     // immutable R5 temporal rows
+	PolicyVersion     string
 }
 
 type FunctionGate struct {
@@ -53,6 +54,13 @@ type FunctionGate struct {
 type FunctionGatePolicy struct {
 	Revision string
 	Gates    []FunctionGate
+}
+
+// CampaignFirstClearReader is Campaign's typed observation of the durable
+// tutorial milestone. A content gate names the node; I5 never reads Campaign
+// tables directly.
+type CampaignFirstClearReader interface {
+	CampaignFirstClearCommittedTx(context.Context, tx.Queryer, identity.PlayerID, int64) (bool, error)
 }
 
 type PetStarterPolicy struct {
@@ -76,7 +84,9 @@ type PrivilegeSnapshot struct {
 	ProviderRevision       string
 	VIPLevel               int64
 	MonthlyPrivilegeActive bool
-	SkillPointNaturalCap   int64
+	// MonthCardActive is the ordinary month card; mission gate 4 reads it.
+	MonthCardActive      bool
+	SkillPointNaturalCap int64
 }
 
 type PrivilegeSnapshotProvider interface {
@@ -94,6 +104,7 @@ type FunctionAnnouncementProvider interface {
 // It exposes canonical ordinary stacks only; Spirit-equipment ownership remains deferred.
 type BackpackReader interface {
 	ListStacks(context.Context, identity.PlayerID) ([]economy.StackState, error)
+	ListStacksTx(context.Context, tx.Queryer, identity.PlayerID) ([]economy.StackState, error)
 }
 
 type DirectoryLevelProjection struct {
@@ -188,6 +199,7 @@ type Store interface {
 	LockFunctionStateTx(context.Context, tx.Tx, identity.PlayerID) (int64, error)
 	InsertFunctionEligibilityTx(context.Context, tx.Tx, player.FunctionEligibility) (bool, error)
 	InsertFunctionUnlockTx(context.Context, tx.Tx, player.FunctionUnlock) (bool, error)
+	AcknowledgeFunctionAnnouncementTx(context.Context, tx.Tx, identity.PlayerID, int64, time.Time) error
 	AdvanceFunctionStateTx(context.Context, tx.Tx, identity.PlayerID, int64, time.Time) error
 
 	AllocateMailWireIDTx(context.Context, tx.Tx, identity.PlayerID, mail.Namespace) (int64, error)

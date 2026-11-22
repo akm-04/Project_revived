@@ -1,0 +1,40 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [],
+  "row_lock_methods": {},
+  "row_locks": [],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [],
+ "name": "realtimewakeup",
+ "pushes": [],
+ "stores": [],
+ "tables": {
+  "owned": [],
+  "read": [],
+  "written": []
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay",
+   "socialactivation"
+  ],
+  "scenarios_naming": [],
+  "unit": [
+   "duplicate_test.go",
+   "registry_test.go"
+  ]
+ }
+}

@@ -28,6 +28,11 @@ EXPECTED_MISC = {
     'creats_timeout1': '60',
     'creats_timeout2': '150',
     'creats_sweep_reward_rate': '0.6',
+    'creats_dispatch_hero_limit_single': '90',
+    'creats_survival_param_single': '2.5',
+    'creats_dispatch_param_single': '3.5',
+    'creats_schedule_param_single': '10',
+    'creats_time_param_single': '1.1',
 }
 
 
@@ -118,8 +123,11 @@ def build_occult(blobs, parse):
             start_point=int(row['is_start_point']) != 0,
             unlock_ids=_pipe_ints(row['unlock_id']),
             fight_ids=fight_ids,
+            special_reward=int(row['special_reward']),
             stage_total_hp=[stage_total_hp(fight_id) for fight_id in fight_ids],
             event_id=int(row['event_id']),
+            event_condition=int(row['event_condition']),
+            extra_integral=int(row['extra_integral']),
             dialogue=row['creat_dialogue'],
             x=row['x'],
             y=row['y'],
@@ -131,6 +139,14 @@ def build_occult(blobs, parse):
         raise ValueError('occult campaign census drift')
     if len({campaign['id'] for campaign in campaigns}) != len(campaigns) or any(campaign['chapter_id'] not in CHAPTER_IDS for campaign in campaigns):
         raise ValueError('occult campaign shape drift')
+    special = {}
+    for campaign in campaigns:
+        if campaign['special_reward'] != 0:
+            key = (campaign['chapter_id'], campaign['campaign_type'])
+            special[key] = special.get(key, 0) + 1
+    expected = {(chapter_id, campaign_type) for chapter_id in CHAPTER_IDS for campaign_type in (MULTI_CAMPAIGN_TYPE, SINGLE_CAMPAIGN_TYPE)}
+    if set(special) != expected or any(count != 1 for count in special.values()):
+        raise ValueError('occult final challenge census drift')
     campaign_ids = {campaign['id'] for campaign in campaigns}
     dangling = {(campaign['id'], next_id) for campaign in campaigns for next_id in campaign['unlock_ids'] if next_id not in campaign_ids}
     if dangling != KNOWN_DANGLING_UNLOCKS:
@@ -159,12 +175,17 @@ def build_occult(blobs, parse):
         fight_seconds=int(misc['creats_timeout2']),
         reentry_seconds=int(misc['creats_remove_time_limit']),
         dispatch_hero_limit=int(misc['creats_dispatch_hero_limit']),
+        dispatch_hero_limit_single=int(misc['creats_dispatch_hero_limit_single']),
         event_percent=int(Decimal(misc['creats_event_param']) * 100),
         event_dispatch=int(misc['creats_event_dispatch']),
         survival_parameter=misc['creats_survival_param'],
         dispatch_parameter=misc['creats_dispatch_param'],
         schedule_parameter=misc['creats_schedule_param'],
         time_parameter=misc['creats_time_param'],
+        survival_parameter_single=misc['creats_survival_param_single'],
+        dispatch_parameter_single=misc['creats_dispatch_param_single'],
+        schedule_parameter_single=misc['creats_schedule_param_single'],
+        time_parameter_single=misc['creats_time_param_single'],
         sweep_percent=int(sweep_percent),
         chapters=chapters,
         campaigns=campaigns,

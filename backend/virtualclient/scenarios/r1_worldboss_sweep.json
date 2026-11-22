@@ -1,0 +1,19 @@
+{
+  "name": "r1_worldboss_sweep",
+  "level": 100,
+  "worldboss_sweep_fixture": true,
+  "note": "R1 case E (sweep reply shape). The fixture seeds a ranked boss board where the player directly ahead of the driven player has no directory profile. The stock world_boss_sweep CSB is absent from the supplied assets (only res/windows/worldBoss/boss_rank exists), so the stock window cannot be instantiated; like i9_8a_world_boss this scenario loads WORLD_BOSS (624) and sweeps (628) through the stock model, then performs the exact read WorldBossSweepWindow.lua:35-43 makes against the model (perpose.player_name/lev/hurt when total_rank > 1). The model callback carries only the code, so the fields are read from the stock model. The window open is kept to show the intended consumer.",
+  "steps": [
+    "wait:3",
+    "lua:_G.vcE=xyd.ModelManager.get():loadModel(xyd.ModelType.WORLD_BOSS) _G.vcELoad=nil vcE:loadWorldBoss(function(code) _G.vcELoad=code end,true)",
+    "wait:3",
+    "lua:if vcELoad~=xyd.error.OK then error('vc-e-load-'..tostring(vcELoad)) end _G.vcECode=nil vcE:doSweep({campaign_id=vcE.boss_id},function(code) _G.vcECode=code end)",
+    "wait:3",
+    "lua:if vcECode~=xyd.error.OK then error('vc-e-sweep-'..tostring(vcECode)) end if vcE.total_rank > 1 and not vcE.perpose then error('vc-e-perpose-nil rank='..tostring(vcE.total_rank)) end if vcE.perpose and (vcE.perpose.player_name==nil or vcE.perpose.hurt==nil or vcE.perpose.lev==nil) then error('vc-e-pre-info-shape') end xyd.WindowManager.get():openWindow('world_boss_sweep')"
+  ],
+  "settle_seconds": 5,
+  "expect_ok": [
+    624,
+    628
+  ]
+}

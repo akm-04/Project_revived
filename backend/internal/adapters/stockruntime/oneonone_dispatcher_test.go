@@ -3,6 +3,8 @@ package stockruntime
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"net/http"
 	"reflect"
 	"testing"
 	"time"
@@ -14,10 +16,11 @@ import (
 )
 
 type oneOnOneFake struct {
-	teams  []d.Team
-	start  app.StartCommand
-	closed bool
-	calls  int
+	teams     []d.Team
+	start     app.StartCommand
+	closed    bool
+	lowPoints bool
+	calls     int
 }
 
 var oneOnOneRanked = d.Ranked{Standing: d.Standing{Player: 200007, Server: 2, Position: d.Position{Level: d.LevelSenior, Slot: 512, Points: 4700}}, Global: 512, InGroup: 12, ServerRank: 3}
@@ -36,7 +39,10 @@ func (f *oneOnOneFake) ChangeTeams(_ context.Context, _ identity.ActorContext, t
 	return nil
 }
 func (f *oneOnOneFake) Match(context.Context, identity.ActorContext, operation.Context) ([]d.Entry, error) {
-	return []d.Entry{{Face: d.Face{Player: 200007, Name: "rival", Level: 60}, Ranked: oneOnOneRanked}}, nil
+	return []d.Entry{
+		{Face: d.Face{Player: 200007, Name: "rival", Level: 60}, Ranked: oneOnOneRanked},
+		{Face: d.Face{Player: 400012, Name: "far rival", Level: 61}, Ranked: oneOnOneRanked},
+	}, nil
 }
 func (f *oneOnOneFake) EnemyTeam(context.Context, identity.PlayerID) ([]d.TeamView, error) {
 	return []d.TeamView{{Heroes: []map[string]any{{"table_id": int64(11001)}}}, {}}, nil
@@ -47,18 +53,21 @@ func (f *oneOnOneFake) Start(_ context.Context, _ identity.ActorContext, r app.S
 	if f.closed {
 		return d.MatchView{}, d.ErrClosedHours
 	}
+	if f.lowPoints {
+		return d.MatchView{}, d.ErrOpponentLowPoints
+	}
 	return d.MatchView{Arena: f.arena(), ReportKeys: []string{"a", "", "c"}, Wins: []int64{1, 1}, Win: true}, nil
 }
-func (f *oneOnOneFake) Report(context.Context, string) ([]byte, error) {
+func (f *oneOnOneFake) Report(context.Context, string, operation.Context) ([]byte, error) {
 	return []byte(`{"star":1}`), nil
 }
-func (f *oneOnOneFake) DefenseReportKeys(context.Context, identity.ActorContext) ([]string, error) {
+func (f *oneOnOneFake) DefenseReportKeys(context.Context, identity.ActorContext, operation.Context) ([]string, error) {
 	return []string{"k1"}, nil
 }
 func (f *oneOnOneFake) BuyTimes(context.Context, identity.ActorContext, operation.Context) (d.Player, error) {
 	return d.Player{TriesLeft: 10, Purchases: 2}, nil
 }
-func (f *oneOnOneFake) Records(context.Context, identity.ActorContext) ([]d.RecordView, error) {
+func (f *oneOnOneFake) Records(context.Context, identity.ActorContext, operation.Context) ([]d.RecordView, error) {
 	return []d.RecordView{{Record: d.Record{ID: 5, Win: true, Mode: d.ModePromotion, At: time.Unix(1700000000, 0)}, Attacker: d.Face{Player: 100001}, Defender: d.Face{Player: 200007}}}, nil
 }
 func (f *oneOnOneFake) ResetTime(context.Context, identity.ActorContext, operation.Context) (d.Player, error) {
@@ -98,9 +107,14 @@ func TestI7C5COneOnOneWireShapes(t *testing.T) {
 	if !reflect.DeepEqual(f.teams, []d.Team{{Heroes: []int64{3, 4}, Pet: 9}, {Heroes: []int64{5}}, {Heroes: []int64{6}}}) {
 		t.Fatal("PEAK_CHANGE_TEAMS", f.teams)
 	}
-	match := call(2482, map[string]any{})["match_infos"].([]map[string]any)[0]
-	if match["player_info"].(map[string]any)["player_id"] != int64(200007) || match["rank_info"].(map[string]any)["rank"] != int64(512) {
-		t.Fatal("MATCH_ENEMIES", match)
+	matches := call(2482, map[string]any{})["match_infos"].([]map[string]any)
+	// The requester is on server 1; ChangeEnemyWindow renders "S"..player_info.region, so each
+	// rival must carry its own band, never the requester's.
+	for index, rival := range []struct{ player, region int64 }{{200007, 2}, {400012, 4}} {
+		info := matches[index]["player_info"].(map[string]any)
+		if info["player_id"] != rival.player || info["region"] != rival.region || matches[index]["rank_info"].(map[string]any)["rank"] != int64(512) {
+			t.Fatalf("MATCH_ENEMIES rival %d player_info=%v", index, info)
+		}
 	}
 	defense := call(2483, map[string]any{"enemy_id": n("200007")})["defense"].([]map[string]any)
 	if len(defense) != 2 || len(defense[1]["formation_info"].([]map[string]any)) != 0 {
@@ -111,8 +125,8 @@ func TestI7C5COneOnOneWireShapes(t *testing.T) {
 		t.Fatal("PEAK_START_FIGHT", started)
 	}
 	f.closed = true
-	if call(2484, map[string]any{"formations": []any{"3"}, "enemy_id": n("200007")})["error_code"] != int64(30002) {
-		t.Fatal("closed hours answer in-band 30002")
+	if r := dispatcher.Dispatch(context.Background(), heroReq(t, 2484, map[string]any{"formations": []any{"3"}, "enemy_id": n("200007")})); r.HTTPStatus != http.StatusConflict || r.Body["error_code"] != int64(oneOnOneClosedHoursError) {
+		t.Fatalf("closed hours response=%+v", r)
 	}
 	if call(2485, map[string]any{"report_key": "a"})["report"] != `{"star":1}` {
 		t.Fatal("PEAK_RECORDS report")
@@ -121,13 +135,17 @@ func TestI7C5COneOnOneWireShapes(t *testing.T) {
 		t.Fatal("PEAK_RECORDS list is a bare array", r)
 	}
 	record := call(2487, map[string]any{})["battle_records"].([]map[string]any)[0]
-	if record["record_id"] != int64(5) || record["is_win"] != int64(1) || record["mode"] != int64(2) || record["attack_player_info"].(map[string]any)["player_id"] != int64(100001) {
+	if record["record_id"] != int64(5) || record["is_win"] != int64(1) || record["mode"] != int64(2) || record["attack_player_info"].(map[string]any)["player_id"] != int64(100001) ||
+		record["attack_player_info"].(map[string]any)["region"] != int64(1) || record["defense_player_info"].(map[string]any)["region"] != int64(2) {
 		t.Fatal("PEAK_RECORDS_LIST", record)
 	}
 	if call(2486, map[string]any{})["left_times"] != int64(10) || call(2488, map[string]any{})["left_times"] != int64(7) {
 		t.Fatal("buy / reset")
 	}
-	if len(call(2489, map[string]any{"record_id": n("404"), "player_id": n("100001")})) != 0 || call(2489, map[string]any{"record_id": n("5")})["wins"] == nil {
+	if r := dispatcher.Dispatch(context.Background(), heroReq(t, 2489, map[string]any{"record_id": n("404"), "player_id": n("100001")})); r.HTTPStatus != http.StatusConflict || r.Body["error_code"] != unprovenRefusalCode {
+		t.Fatalf("expired record response=%+v", r)
+	}
+	if call(2489, map[string]any{"record_id": n("5")})["wins"] == nil {
 		t.Fatal("PEAK_RECORDS_DETAIL")
 	}
 	before := f.calls
@@ -141,5 +159,36 @@ func TestI7C5COneOnOneWireShapes(t *testing.T) {
 	}
 	if f.calls != before {
 		t.Fatal("invalid request reached the owner")
+	}
+}
+
+func TestOneOnOneStaleOfferIsRankChangedConflict(t *testing.T) {
+	response := failOneOnOne(fmt.Errorf("moved: %w", d.ErrOfferStale))
+	if response.HTTPStatus != 409 || response.Body["error_code"] != int64(oneOnOneRankChangedError) {
+		t.Fatalf("stale offer response=%+v", response)
+	}
+}
+
+func TestOneOnOneLowPointsIsRefusal(t *testing.T) {
+	dispatcher := OneOnOneDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: &oneOnOneFake{lowPoints: true}}
+	response := dispatcher.Dispatch(context.Background(), heroReq(t, 2484, map[string]any{"formations": []any{"3"}, "enemy_id": json.Number("200007")}))
+	if response.HTTPStatus != http.StatusConflict || response.Body["error_code"] != int64(oneOnOneLowPointsError) {
+		t.Fatalf("low points response=%+v", response)
+	}
+}
+
+func TestOneOnOneClosedHoursIsRefusal(t *testing.T) {
+	dispatcher := OneOnOneDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: &oneOnOneFake{closed: true}}
+	response := dispatcher.Dispatch(context.Background(), heroReq(t, 2484, map[string]any{"formations": []any{"3"}, "enemy_id": json.Number("200007")}))
+	if response.HTTPStatus != http.StatusConflict || response.Body["error_code"] != int64(oneOnOneClosedHoursError) {
+		t.Fatalf("closed hours response=%+v", response)
+	}
+}
+
+func TestOneOnOneExpiredRecordIsRefusal(t *testing.T) {
+	dispatcher := OneOnOneDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: &oneOnOneFake{}}
+	response := dispatcher.Dispatch(context.Background(), heroReq(t, 2489, map[string]any{"record_id": json.Number("404")}))
+	if response.HTTPStatus != http.StatusConflict || response.Body["error_code"] != unprovenRefusalCode {
+		t.Fatalf("expired record response=%+v", response)
 	}
 }

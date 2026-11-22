@@ -1,0 +1,319 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [
+  {
+   "count": 15,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 9,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 15,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10A_EVENT_CENTRE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10F_MENTOR_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_10H_H2_STRUCTURED_KINDS.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_GIRLS_LOG_V1.md"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_4B_PREIMPLEMENTATION.md"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_4D_RESEARCH_PLAN.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_CAMPAIGN_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MODE_FOUNDATION_V3.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MODE_FRAMEWORK_V1.json"
+  },
+  {
+   "count": 15,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [
+  "observing"
+ ],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/pet_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "CA3_PET_ACQUISITION"
+   },
+   {
+    "lock_timeout_ms": 2000,
+    "name": "CA7_5_PET_HOME_STYLE"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 53
+   },
+   "mid": 134,
+   "name": "PET_USE_EXP_ITEMS"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 53
+   },
+   "mid": 780,
+   "name": "PETS_GET"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 53
+   },
+   "mid": 781,
+   "name": "PET_SUMMON"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 53
+   },
+   "mid": 782,
+   "name": "PET_CLEAN_CD"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 53
+   },
+   "mid": 783,
+   "name": "PET_EQUIP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 53
+   },
+   "mid": 785,
+   "name": "PET_ADVANCE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 53
+   },
+   "mid": 786,
+   "name": "PET_EVOLVE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 53
+   },
+   "mid": 787,
+   "name": "PET_FEED"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 53
+   },
+   "mid": 789,
+   "name": "PET_SET_SHOW"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 53
+   },
+   "mid": 790,
+   "name": "PET_ONE_KEY_UP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 53
+   },
+   "mid": 791,
+   "name": "PET_UPGRADE_ALL_SKILL"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 53
+   },
+   "mid": 792,
+   "name": "PET_ONE_KEY_EQUIP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 53
+   },
+   "mid": 1893,
+   "name": "GET_PET_STYLE_FORM_ITEM"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 53
+   },
+   "mid": 1894,
+   "name": "USE_PET_STYLE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/pet_dispatcher.go",
+    "line": 53
+   },
+   "mid": 1895,
+   "name": "CANCEL_PET_STYLE"
+  }
+ ],
+ "name": "characterpet",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore"
+ ],
+ "tables": {
+  "owned": [
+   "player_pet_roots",
+   "player_pet_style_entitlements",
+   "player_pets"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "gxb_content_activation",
+   "gxb_content_appearance_pet_styles",
+   "gxb_content_equipment_primitives",
+   "gxb_content_equipment_recipe_edges",
+   "gxb_content_hero_exp",
+   "gxb_content_hero_promotion_restoration_denominations",
+   "gxb_content_hero_promotion_restoration_fractions",
+   "gxb_content_pet_acquisition",
+   "gxb_content_pet_acquisition_policy",
+   "gxb_content_pet_equipment",
+   "gxb_content_pet_evolution",
+   "gxb_content_pet_exp",
+   "gxb_content_pet_exp_items",
+   "gxb_content_pet_practice_thresholds",
+   "gxb_content_pet_progression",
+   "gxb_content_pet_progression_policy",
+   "gxb_content_pet_promotion_restoration_equipment",
+   "gxb_content_pet_skill_books",
+   "gxb_content_pet_skill_slot_policy",
+   "gxb_content_pet_skill_slots",
+   "gxb_content_pet_templates",
+   "gxb_content_player_progression",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "player_pet_roots",
+   "player_pet_style_entitlements",
+   "player_pets"
+  ],
+  "written": [
+   "gxb_operation_receipts",
+   "player_pet_roots",
+   "player_pet_style_entitlements",
+   "player_pets"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "missions",
+   "playerdisplay",
+   "publicshowcase"
+  ],
+  "scenarios_naming": [
+   "i9_3d_trials.json"
+  ],
+  "unit": [
+   "appearance_contribution_test.go",
+   "appearance_style_recovery_test.go",
+   "appearance_style_service_test.go",
+   "base_observation_test.go",
+   "ca3_2_test.go",
+   "ca7_6_preservation_test.go",
+   "ca8_observation_adapters_test.go",
+   "equipment_planner_oracle_test.go",
+   "equipment_recovery_test.go",
+   "equipment_service_test.go",
+   "equipment_state_test.go",
+   "practice_contribution_test.go",
+   "progression_test.go",
+   "promotion_onekey_test.go",
+   "promotion_recovery_test.go",
+   "promotion_service_test.go",
+   "service_test.go"
+  ]
+ }
+}

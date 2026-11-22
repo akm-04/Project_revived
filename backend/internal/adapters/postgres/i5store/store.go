@@ -21,6 +21,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/redeem"
 	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -53,15 +54,23 @@ WHERE gc.context_id=$1::uuid AND gc.session_id=$2::uuid AND gc.account_id=$3::uu
   AND gc.liveness_version=$7 AND s.liveness_version=$8
   AND gc.ended_at IS NULL AND s.revoked_at IS NULL AND a.status='ACTIVE' AND a.disabled_at IS NULL
   AND (s.absolute_expires_at IS NULL OR $9::timestamptz < s.absolute_expires_at)
-  AND (s.idle_timeout_seconds IS NULL OR $9::timestamptz < s.last_activity_at + make_interval(secs => s.idle_timeout_seconds))
-FOR SHARE OF gc,s,a`
+  AND (s.idle_timeout_seconds IS NULL OR $9::timestamptz < s.last_activity_at + make_interval(secs => s.idle_timeout_seconds))`
+
+// The write fence pins the session against revocation until commit. A read-only
+// transaction cannot take FOR SHARE (PostgreSQL rejects row locks in READ ONLY),
+// and its fixed snapshot needs no lock.
+const fenceActorWriteLock = ` FOR SHARE OF gc,s,a`
 
 func (Store) FenceActorTx(ctx context.Context, t tx.Tx, a identity.ActorContext, now time.Time) error {
 	if t == nil || a.ContextID.UUID().IsZero() || now.IsZero() {
 		return errors.New("invalid actor fence")
 	}
+	statement := fenceActorSQL
+	if !readOnlyTransaction(t) {
+		statement += fenceActorWriteLock
+	}
 	var one int
-	err := t.QueryRow(ctx, fenceActorSQL, a.ContextID.UUID().String(), a.SessionID.UUID().String(), a.AccountID.UUID().String(), int32(a.LogicalServerID), int64(a.PlayerID), a.ContextGeneration, a.ContextLivenessVersion, a.SessionLivenessVersion, now.UTC()).Scan(&one)
+	err := t.QueryRow(ctx, statement, a.ContextID.UUID().String(), a.SessionID.UUID().String(), a.AccountID.UUID().String(), int32(a.LogicalServerID), int64(a.PlayerID), a.ContextGeneration, a.ContextLivenessVersion, a.SessionLivenessVersion, now.UTC()).Scan(&one)
 	if err != nil {
 		if noRows(err) {
 			return errors.New("actor liveness fence rejected")
@@ -69,6 +78,11 @@ func (Store) FenceActorTx(ctx context.Context, t tx.Tx, a identity.ActorContext,
 		return err
 	}
 	return nil
+}
+
+func readOnlyTransaction(t tx.Tx) bool {
+	probe, ok := t.(interface{ ReadOnly() bool })
+	return ok && probe.ReadOnly()
 }
 
 func (Store) LockStoryTx(ctx context.Context, t tx.Tx, pid identity.PlayerID) (player.StoryCursor, error) {
@@ -135,6 +149,22 @@ func (Store) ListStacksTx(ctx context.Context, q tx.Queryer, pid identity.Player
 		out = append(out, st)
 	}
 	return out, nil
+}
+
+func (Store) ReadStackTx(ctx context.Context, q tx.Queryer, pid identity.PlayerID, itemID int64) (economy.StackState, bool, error) {
+	if q == nil || !pid.Valid() || itemID <= 0 {
+		return economy.StackState{}, false, errors.New("invalid stack read")
+	}
+	var s economy.StackState
+	err := q.QueryRow(ctx, `SELECT player_id,item_id,quantity,state_version,acquired_at,updated_at FROM player_item_stacks WHERE player_id=$1 AND item_id=$2`, int64(pid), itemID).Scan((*int64)(&s.PlayerID), &s.ItemID, &s.Quantity, &s.StateVersion, &s.AcquiredAt, &s.UpdatedAt)
+	if noRows(err) {
+		return economy.StackState{}, false, nil
+	}
+	if err != nil {
+		return economy.StackState{}, false, err
+	}
+	s.AcquiredAt, s.UpdatedAt = s.AcquiredAt.UTC(), s.UpdatedAt.UTC()
+	return s, true, s.Validate()
 }
 
 func (Store) ReadScalarTx(ctx context.Context, q tx.Queryer, pid identity.PlayerID, key string) (economy.ScalarBalance, bool, error) {
@@ -436,7 +466,11 @@ func (Store) InsertFunctionUnlockTx(ctx context.Context, t tx.Tx, u player.Funct
 	if err := u.Validate(); err != nil {
 		return false, err
 	}
-	tag, err := t.Exec(ctx, `INSERT INTO player_function_unlocks(player_id,function_id,opened_at,source_fact_key,state_version) VALUES($1,$2,$3,$4,1) ON CONFLICT(player_id,function_id) DO NOTHING`, int64(u.PlayerID), u.FunctionID, u.OpenedAt.UTC(), u.SourceFactKey)
+	var acknowledgedAt any = u.OpenedAt.UTC()
+	if _, pending := player.FunctionAnnouncementAcknowledgement(u.FunctionID); pending {
+		acknowledgedAt = nil
+	}
+	tag, err := t.Exec(ctx, `INSERT INTO player_function_unlocks(player_id,function_id,opened_at,source_fact_key,state_version,acknowledged_at) VALUES($1,$2,$3,$4,1,$5) ON CONFLICT(player_id,function_id) DO NOTHING`, int64(u.PlayerID), u.FunctionID, u.OpenedAt.UTC(), u.SourceFactKey, acknowledgedAt)
 	if err != nil {
 		return false, err
 	}
@@ -448,6 +482,38 @@ func (Store) InsertFunctionUnlockTx(ctx context.Context, t tx.Tx, u player.Funct
 		changes.FunctionOpened(ctx, u.FunctionID)
 	}
 	return n == 1, nil
+}
+
+// AcknowledgeFunctionAnnouncementTx clears the pending announcement of a
+// function the client has now seen; an already acknowledged row is untouched.
+func (Store) AcknowledgeFunctionAnnouncementTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, functionID int64, now time.Time) error {
+	if t == nil || !pid.Valid() || functionID <= 0 || now.IsZero() {
+		return errors.New("invalid function acknowledgement")
+	}
+	_, err := t.Exec(ctx, `UPDATE player_function_unlocks SET acknowledged_at=$3 WHERE player_id=$1 AND function_id=$2 AND acknowledged_at IS NULL`, int64(pid), functionID, now.UTC())
+	return err
+}
+
+// PendingFunctionAnnouncementIDs lists the announcements the client can still
+// acknowledge and has not acknowledged, in ascending function order. Rows of
+// functions without an acknowledgement cursor, or already passed by the saved
+// story cursor, are not replayed.
+func (s Store) PendingFunctionAnnouncementIDs(ctx context.Context, pid identity.PlayerID) ([]int64, error) {
+	if s.Queryer == nil || !pid.Valid() {
+		return nil, errors.New("invalid function announcement query")
+	}
+	var raw string
+	var savedGuideID int64
+	if err := s.Queryer.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(function_id ORDER BY function_id),'[]'::jsonb)::text,
+		COALESCE((SELECT guide_id FROM player_story_cursors WHERE player_id=$1),0)
+		FROM player_function_unlocks WHERE player_id=$1 AND acknowledged_at IS NULL`, int64(pid)).Scan(&raw, &savedGuideID); err != nil {
+		return nil, err
+	}
+	var ids []int64
+	if err := json.Unmarshal([]byte(raw), &ids); err != nil {
+		return nil, err
+	}
+	return player.ReplayableFunctionAnnouncements(ids, savedGuideID), nil
 }
 
 func (Store) AdvanceFunctionStateTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, expected int64, now time.Time) error {
@@ -466,6 +532,35 @@ func (Store) AllocateMailWireIDTx(ctx context.Context, t tx.Tx, pid identity.Pla
 	err := t.QueryRow(ctx, `INSERT INTO mail_namespace_counters(recipient_player_id,namespace,next_wire_id,state_version) VALUES($1,$2,2,1) ON CONFLICT(recipient_player_id,namespace) DO UPDATE SET next_wire_id=mail_namespace_counters.next_wire_id+1,state_version=mail_namespace_counters.state_version+1 RETURNING next_wire_id-1`, int64(pid), ns.String()).Scan(&id)
 	return id, err
 }
+
+// MailTuningTx reads the operator overlay; found=false keeps the built-in durations.
+func (Store) MailTuningTx(c context.Context, q tx.Queryer) (mail.Tuning, bool, error) {
+	var raw string
+	var version int16
+	err := q.QueryRow(c, `SELECT payload::text,payload_version FROM mail_tuning`).Scan(&raw, &version)
+	if errors.Is(err, kernelstore.ErrNoRows) {
+		return mail.Tuning{}, false, nil
+	}
+	if err != nil {
+		return mail.Tuning{}, false, err
+	}
+	var tuning mail.Tuning
+	err = payload.Decode("mail_tuning", version, []byte(raw), &tuning)
+	return tuning, true, err
+}
+
+// StampOverflowMailExpiryTx bounds one login's backlog so a large mailbox cannot
+// hold the MID1 transaction; later logins stamp the remainder.
+func (Store) StampOverflowMailExpiryTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, expires time.Time) (int64, error) {
+	tag, err := t.Exec(ctx, `UPDATE mail_records SET expires_at=$2,state_version=state_version+1
+		WHERE mail_uuid IN (SELECT mail_uuid FROM mail_records
+			WHERE recipient_player_id=$1 AND source_kind='GRANT_OVERFLOW' AND claimed_at IS NULL AND expires_at IS NULL
+			ORDER BY created_at LIMIT 100)`, int64(pid), expires.UTC())
+	if err != nil {
+		return 0, err
+	}
+	return tag.RowsAffected(), nil
+}
 func (Store) InsertMailTx(ctx context.Context, t tx.Tx, r mail.Record) error {
 	if err := r.Validate(); err != nil {
 		return err
@@ -482,7 +577,7 @@ func (Store) InsertMailTx(ctx context.Context, t tx.Tx, r mail.Record) error {
 		return err
 	}
 	for _, a := range r.Attachments {
-		meta, err := json.Marshal(a.Line.Metadata)
+		meta, version, err := payload.Encode(a.Line.Metadata)
 		if err != nil {
 			return err
 		}
@@ -494,7 +589,7 @@ func (Store) InsertMailTx(ctx context.Context, t tx.Tx, r mail.Record) error {
 		if a.Line.ItemID > 0 {
 			item = a.Line.ItemID
 		}
-		tag, err = t.Exec(ctx, `INSERT INTO mail_attachments(mail_uuid,ordinal,grant_line_kind,resource_key,item_id,amount,metadata) VALUES($1::uuid,$2,$3,$4,$5,$6,$7::jsonb)`, r.MailUUID.String(), a.Ordinal, string(a.Line.Kind), key, item, a.Line.Amount, string(meta))
+		tag, err = t.Exec(ctx, `INSERT INTO mail_attachments(mail_uuid,ordinal,grant_line_kind,resource_key,item_id,amount,metadata,payload_version) VALUES($1::uuid,$2,$3,$4,$5,$6,$7::jsonb,$8)`, r.MailUUID.String(), a.Ordinal, string(a.Line.Kind), key, item, a.Line.Amount, string(meta), version)
 		if err != nil {
 			return err
 		}
@@ -507,7 +602,7 @@ func (Store) InsertMailTx(ctx context.Context, t tx.Tx, r mail.Record) error {
 
 const mailListJSON = `
 WITH active AS (
- SELECT * FROM mail_records WHERE recipient_player_id=$1 AND (expires_at IS NULL OR expires_at>$2)
+ SELECT * FROM mail_records WHERE recipient_player_id=$1 AND shown AND (expires_at IS NULL OR expires_at>$2)
 ), page AS (
  SELECT * FROM active ORDER BY created_at DESC,namespace,wire_id DESC LIMIT $3
 )
@@ -516,7 +611,7 @@ SELECT COALESCE((SELECT jsonb_agg(jsonb_build_object(
  'source_kind',p.source_kind,'source_key',p.source_key,'category',p.category,'title',p.title,'sender',p.sender,'body',p.body,
  'created_at',p.created_at,'expires_at',p.expires_at,'read_at',p.read_at,'shown',p.shown,'claimed_at',p.claimed_at,
  'platform',p.platform_eligibility,'policy',p.compatibility_policy_version,'state_version',p.state_version,
- 'attachments',COALESCE((SELECT jsonb_agg(jsonb_build_object('ordinal',a.ordinal,'kind',a.grant_line_kind,'resource_key',a.resource_key,'item_id',a.item_id,'amount',a.amount,'metadata',a.metadata) ORDER BY a.ordinal) FROM mail_attachments a WHERE a.mail_uuid=p.mail_uuid),'[]'::jsonb)
+ 'attachments',COALESCE((SELECT jsonb_agg(jsonb_build_object('ordinal',a.ordinal,'kind',a.grant_line_kind,'resource_key',a.resource_key,'item_id',a.item_id,'amount',a.amount,'metadata',a.metadata,'payload_version',a.payload_version) ORDER BY a.ordinal) FROM mail_attachments a WHERE a.mail_uuid=p.mail_uuid),'[]'::jsonb)
  ) ORDER BY p.created_at DESC,p.namespace,p.wire_id DESC)::text FROM page p),'[]'),
  (SELECT count(*) FROM active), (SELECT count(*) FROM active WHERE read_at IS NULL)`
 
@@ -550,7 +645,7 @@ func (Store) LockMailTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, add
 		return mail.Record{}, err
 	}
 	var ar string
-	if err := t.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(jsonb_build_object('ordinal',ordinal,'kind',grant_line_kind,'resource_key',resource_key,'item_id',item_id,'amount',amount,'metadata',metadata) ORDER BY ordinal),'[]'::jsonb)::text FROM mail_attachments WHERE mail_uuid=$1::uuid`, uuid).Scan(&ar); err != nil {
+	if err := t.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(jsonb_build_object('ordinal',ordinal,'kind',grant_line_kind,'resource_key',resource_key,'item_id',item_id,'amount',amount,'metadata',metadata,'payload_version',payload_version) ORDER BY ordinal),'[]'::jsonb)::text FROM mail_attachments WHERE mail_uuid=$1::uuid`, uuid).Scan(&ar); err != nil {
 		return mail.Record{}, err
 	}
 	u, err := ids.ParseUUID(uuid)
@@ -689,14 +784,15 @@ func (Store) SaveObjectiveTx(ctx context.Context, t tx.Tx, i objective.Instance,
 func (Store) LockRedeemByDigestTx(ctx context.Context, t tx.Tx, digest [32]byte) (appi5.RedeemCode, appi5.RedeemCampaign, grant.Plan, error) {
 	var codeID, campaignID, codeKind, codeStatus, campStatus, subject, policy, rewardID, rewardJSON, audienceJSON string
 	var useCount, stateVersion, perSubject int64
+	var audienceVersion, rewardVersion int16
 	var global, total *int64
 	var starts, ends *time.Time
-	q := `SELECT rc.code_id::text,rc.campaign_id::text,rc.code_kind,rc.global_use_limit,rc.use_count,rc.status,rc.state_version,c.status,c.redemption_subject,c.starts_at,c.ends_at,c.audience_policy::text,c.reward_bundle_revision_id::text,c.total_cap,c.per_subject_cap,c.policy_version,b.grant_plan::text FROM redeem_codes rc JOIN redeem_campaigns c ON c.campaign_id=rc.campaign_id JOIN redeem_reward_bundle_revisions b ON b.reward_bundle_revision_id=c.reward_bundle_revision_id WHERE rc.lookup_digest=$1 FOR UPDATE OF rc,c`
-	err := t.QueryRow(ctx, q, digest[:]).Scan(&codeID, &campaignID, &codeKind, &global, &useCount, &codeStatus, &stateVersion, &campStatus, &subject, &starts, &ends, &audienceJSON, &rewardID, &total, &perSubject, &policy, &rewardJSON)
+	q := `SELECT rc.code_id::text,rc.campaign_id::text,rc.code_kind,rc.global_use_limit,rc.use_count,rc.status,rc.state_version,c.status,c.redemption_subject,c.starts_at,c.ends_at,c.audience_policy::text,c.payload_version,c.reward_bundle_revision_id::text,c.total_cap,c.per_subject_cap,c.policy_version,b.grant_plan::text,b.payload_version FROM redeem_codes rc JOIN redeem_campaigns c ON c.campaign_id=rc.campaign_id JOIN redeem_reward_bundle_revisions b ON b.reward_bundle_revision_id=c.reward_bundle_revision_id WHERE rc.lookup_digest=$1 FOR UPDATE OF rc,c`
+	err := t.QueryRow(ctx, q, digest[:]).Scan(&codeID, &campaignID, &codeKind, &global, &useCount, &codeStatus, &stateVersion, &campStatus, &subject, &starts, &ends, &audienceJSON, &audienceVersion, &rewardID, &total, &perSubject, &policy, &rewardJSON, &rewardVersion)
 	if err != nil {
 		return appi5.RedeemCode{}, appi5.RedeemCampaign{}, grant.Plan{}, err
 	}
-	ap, err := decodeAudience([]byte(audienceJSON))
+	ap, err := decodeAudience(audienceVersion, []byte(audienceJSON))
 	if err != nil {
 		return appi5.RedeemCode{}, appi5.RedeemCampaign{}, grant.Plan{}, err
 	}
@@ -708,7 +804,7 @@ func (Store) LockRedeemByDigestTx(ctx context.Context, t tx.Tx, digest [32]byte)
 	if err != nil {
 		return appi5.RedeemCode{}, appi5.RedeemCampaign{}, grant.Plan{}, err
 	}
-	plan, err := decodeGrantPlan([]byte(rewardJSON))
+	plan, err := decodeGrantPlanVersioned(rewardVersion, []byte(rewardJSON))
 	if err != nil {
 		return appi5.RedeemCode{}, appi5.RedeemCampaign{}, grant.Plan{}, err
 	}
@@ -763,12 +859,13 @@ func (Store) InsertRedemptionTx(ctx context.Context, t tx.Tx, r appi5.Redemption
 // JSON decode helpers intentionally sit in the adapter: JSON is a PostgreSQL
 // storage representation here, not a domain contract.
 type attachJSON struct {
-	Ordinal     int               `json:"ordinal"`
-	Kind        string            `json:"kind"`
-	ResourceKey *string           `json:"resource_key"`
-	ItemID      *int64            `json:"item_id"`
-	Amount      int64             `json:"amount"`
-	Metadata    map[string]string `json:"metadata"`
+	Ordinal        int             `json:"ordinal"`
+	Kind           string          `json:"kind"`
+	ResourceKey    *string         `json:"resource_key"`
+	ItemID         *int64          `json:"item_id"`
+	Amount         int64           `json:"amount"`
+	Metadata       json.RawMessage `json:"metadata"`
+	PayloadVersion int16           `json:"payload_version"`
 }
 
 func decodeAttachments(raw []byte) ([]mail.Attachment, error) {
@@ -778,7 +875,11 @@ func decodeAttachments(raw []byte) ([]mail.Attachment, error) {
 	}
 	out := make([]mail.Attachment, 0, len(rows))
 	for _, x := range rows {
-		l := grant.Line{Kind: grant.LineKind(x.Kind), Amount: x.Amount, Metadata: x.Metadata}
+		var metadata map[string]string
+		if err := payload.Decode("mail_attachments", x.PayloadVersion, x.Metadata, &metadata); err != nil {
+			return nil, err
+		}
+		l := grant.Line{Kind: grant.LineKind(x.Kind), Amount: x.Amount, Metadata: metadata}
 		if x.ResourceKey != nil {
 			l.ResourceKey = *x.ResourceKey
 		}
@@ -968,6 +1069,18 @@ func decodeGrantPlan(raw []byte) (grant.Plan, error) {
 	if err := json.Unmarshal(raw, &p); err != nil {
 		return grant.Plan{}, err
 	}
+	return validateGrantPlan(p)
+}
+
+func decodeGrantPlanVersioned(version int16, raw []byte) (grant.Plan, error) {
+	var p grant.Plan
+	if err := payload.Decode("redeem_reward_bundle_revisions", version, raw, &p); err != nil {
+		return grant.Plan{}, err
+	}
+	return validateGrantPlan(p)
+}
+
+func validateGrantPlan(p grant.Plan) (grant.Plan, error) {
 	if p.Source.PolicyVersion == "" {
 		return grant.Plan{}, errors.New("grant plan policy version missing")
 	}
@@ -988,10 +1101,10 @@ type audienceJSON struct {
 	LogicalServers []int32 `json:"logical_servers"`
 }
 
-func decodeAudience(raw []byte) (redeem.AudiencePolicy, error) {
+func decodeAudience(version int16, raw []byte) (redeem.AudiencePolicy, error) {
 	var x audienceJSON
 	if len(raw) > 0 {
-		if err := json.Unmarshal(raw, &x); err != nil {
+		if err := payload.Decode("redeem_campaigns", version, raw, &x); err != nil {
 			return redeem.AudiencePolicy{}, err
 		}
 	}

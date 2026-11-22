@@ -13,7 +13,9 @@ import (
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	apprealtime "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/domain/character"
+	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	heroproj "gxb.local/backend/v2/internal/projection/hero"
 	"gxb.local/backend/v2/internal/protocol/httpedge"
@@ -22,6 +24,7 @@ import (
 type HeroServicePort interface {
 	RosterView(context.Context, identity.ActorContext, time.Time) (character.HeroRoot, []apphero.HeroRosterView, error)
 	SaveSortType(context.Context, identity.ActorContext, int64, operation.Context) error
+	SaveBackpackSortType(context.Context, identity.ActorContext, int64, operation.Context) error
 	UseExpItem(context.Context, identity.ActorContext, int64, int64, int64, operation.Context) (apphero.ExpResult, error)
 	UseExpItems(context.Context, identity.ActorContext, int64, []appi5.HeroExpItemDebit, operation.Context) (apphero.ExpResult, error)
 	EquipItem(context.Context, identity.ActorContext, int64, int64, operation.Context) (apphero.EquipItemResult, error)
@@ -31,7 +34,7 @@ type HeroServicePort interface {
 	PowerUpHero(context.Context, identity.ActorContext, int64, operation.Context) (apphero.HeroPromotionResult, error)
 	OneClickJinjie(context.Context, identity.ActorContext, int64, operation.Context) (apphero.HeroPromotionResult, error)
 	Evolve(context.Context, identity.ActorContext, int64, operation.Context) error
-	HeroPieces(context.Context, identity.ActorContext) (map[int64]int64, error)
+	HeroPieces(context.Context, identity.ActorContext, operation.Context) (map[int64]int64, error)
 	SummonNormal(context.Context, identity.ActorContext, int64, int64, int64, operation.Context) (character.Hero, error)
 	CreateVows(context.Context, identity.ActorContext, int64, operation.Context) (character.Hero, error)
 }
@@ -58,18 +61,25 @@ type HeroBookmarkServicePort interface {
 type HeroSkillChoicePort interface {
 	ChangeSkill(context.Context, identity.ActorContext, int64, int64, int64, operation.Context) (apphero.SkillChoiceResult, error)
 }
+
+type HeroSkillLevelPort interface {
+	SetSkillLevel(context.Context, identity.ActorContext, int64, int64, operation.Context) (apphero.HeroSkillLevelResult, error)
+	SetAllSkillLevels(context.Context, identity.ActorContext, int64, []apphero.HeroSkillLevelChange, operation.Context) (apphero.HeroSkillLevelResult, error)
+	SkillLevelView(context.Context, identity.ActorContext, int64, operation.Context) (apphero.HeroSkillLevelView, error)
+}
 type HeroRosterBodyPort interface {
 	Read(context.Context, identity.ActorContext, operation.Context, uint16, int64) (map[string]any, error)
 }
 type HeroDispatcher struct {
-	Roster     HeroRosterBodyPort
-	Skills     HeroSkillChoicePort
-	Bookmark   HeroBookmarkServicePort
-	Authority  apprealtime.GameplayAuthorityPort
-	Service    HeroServicePort
-	Appearance HeroAppearanceServicePort
-	LIVE       HeroLIVEAppearanceServicePort
-	Economy    HeroEconomyProjectionPort
+	Roster      HeroRosterBodyPort
+	Skills      HeroSkillChoicePort
+	SkillLevels HeroSkillLevelPort
+	Bookmark    HeroBookmarkServicePort
+	Authority   apprealtime.GameplayAuthorityPort
+	Service     HeroServicePort
+	Appearance  HeroAppearanceServicePort
+	LIVE        HeroLIVEAppearanceServicePort
+	Economy     HeroEconomyProjectionPort
 }
 
 func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest) httpedge.Response {
@@ -78,12 +88,68 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		return *fail
 	}
 	if d.Service == nil {
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_unavailable"}}
+		return failureReply(defect(nil))
 	}
 	switch req.Envelope.MID {
+	case 53:
+		if d.SkillLevels == nil {
+			return failureReply(defect(nil))
+		}
+		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "skill_index") {
+			return badHero("invalid_hero_skill_level")
+		}
+		partner, partnerErr := requiredInt64(req.Envelope.Params, "partner_id")
+		slot, slotErr := requiredInt64(req.Envelope.Params, "skill_index")
+		if partnerErr != nil || slotErr != nil || partner <= 0 || slot < 1 || slot > 6 {
+			return badHero("invalid_hero_skill_level")
+		}
+		result, err := d.SkillLevels.SetSkillLevel(ctx, actor, partner, slot, req.Envelope.Operation)
+		if err != nil {
+			var refused apphero.HeroSkillLevelRefusalError
+			if errors.As(err, &refused) {
+				return failureReply(refusalWithBody(heroSkillLevelRefusalCode(refused.Reason), map[string]any{"skill_point": refused.SkillPoint, "skill_time": refused.SkillTime}))
+			}
+			return failHeroSkillLevel(err)
+		}
+		body := map[string]any{"skill_point": result.SkillPoint, "skill_time": result.SkillTime}
+		if !result.Success {
+			return failureReply(refusalWithBody(heroSkillLevelRefusalCode(result.RefusalReason), body))
+		}
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
+	case 39:
+		if d.SkillLevels == nil {
+			return failureReply(defect(nil))
+		}
+		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "skill_colors", "skill_counts") {
+			return badHero("invalid_hero_skill_levels")
+		}
+		partner, partnerErr := requiredInt64(req.Envelope.Params, "partner_id")
+		colors, colorsErr := requiredPipeIntegers(req.Envelope.Params, "skill_colors")
+		counts, countsErr := requiredPipeIntegers(req.Envelope.Params, "skill_counts")
+		if partnerErr != nil || colorsErr != nil || countsErr != nil || partner <= 0 || len(colors) != len(counts) || len(colors) == 0 || len(colors) > 6 {
+			return badHero("invalid_hero_skill_levels")
+		}
+		changes := make([]apphero.HeroSkillLevelChange, len(colors))
+		for index := range colors {
+			changes[index] = apphero.HeroSkillLevelChange{Slot: colors[index], Count: counts[index]}
+		}
+		result, err := d.SkillLevels.SetAllSkillLevels(ctx, actor, partner, changes, req.Envelope.Operation)
+		if err != nil {
+			var refused apphero.HeroSkillLevelRefusalError
+			if errors.As(err, &refused) {
+				body := map[string]any{"skills": apphero.HeroSkillLevelsString(refused.SkillLevels), "is_success": int64(0), "skill_point": refused.SkillPoint, "skill_time": refused.SkillTime}
+				return failureReply(refusalWithBody(heroSkillLevelRefusalCode(refused.Reason), body))
+			}
+			return d.skillLevelRefusalBody(ctx, actor, partner, req.Envelope.Operation, failHeroSkillLevel(err))
+		}
+		body := map[string]any{"skills": result.SkillString(), "is_success": result.SuccessValue(), "skill_point": result.SkillPoint, "skill_time": result.SkillTime}
+		if !result.Success {
+			return failureReply(refusalWithBody(heroSkillLevelRefusalCode(result.RefusalReason), body))
+		}
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
 	case 2144:
 		if d.Skills == nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_skills_unavailable"}}
+			return failureReply(defect(nil))
 		}
 		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "skill_index", "skill_item") {
 			return badHero("invalid_hero_skill_choice")
@@ -102,7 +168,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 
 	case 3116: // HERO_COLLOCATION is desired assignment, never a server toggle.
 		if d.Bookmark == nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_bookmark_unavailable"}}
+			return failureReply(defect(nil))
 		}
 		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "is_like") {
 			return badHero("invalid_hero_bookmark")
@@ -123,7 +189,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 
 	case 60: // SKIN_ON — CA7-3 acquire-or-select
 		if d.Appearance == nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_appearance_unavailable"}}
+			return failureReply(defect(nil))
 		}
 		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "item_id") {
 			return badHero("invalid_hero_skin_on")
@@ -136,7 +202,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		got, err := d.Appearance.SkinOn(ctx, actor, partnerID, itemID, req.Envelope.Operation)
 		if err != nil {
 			if errors.Is(err, apphero.ErrHeroSkinExperienceAlreadyOwned) {
-				return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error_code": int64(35035)}}
+				return failureReply(refusal(35035))
 			}
 			return failHero(err)
 		}
@@ -155,7 +221,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
 	case 68: // UNLOCK_DYNAMIC_CARD — CA7-4 paid type-2 LIVE convergence
 		if d.LIVE == nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_live_unavailable"}}
+			return failureReply(defect(nil))
 		}
 		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "model_id") {
 			return badHero("invalid_hero_live_unlock")
@@ -170,24 +236,24 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 			return failHero(err)
 		}
 		if d.Economy == nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_projection_unavailable"}}
+			return failureReply(defect(nil))
 		}
 		crystal, err := d.Economy.CurrentScalar(ctx, actor.PlayerID, "crystal", req.Envelope.Operation)
 		if err != nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "hero_projection_failed"}}
+			return failureFromRows(nil, err)
 		}
 		models, states, err := liveStockStrings(got.LIVE)
 		if err != nil {
 			return failHero(err)
 		}
+		changes.Balance(ctx, "crystal", crystal)
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{
 			"unlocked_dynamic_card": models,
 			"dynamic_card_state":    states,
-			"economy_":              map[string]any{"crystal": crystal},
 		}}
 	case 69: // SHOW_DYNAMIC_CARD — CA7-4 explicit desired show-state assignment
 		if d.LIVE == nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_live_unavailable"}}
+			return failureReply(defect(nil))
 		}
 		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "model_id", "is_show") {
 			return badHero("invalid_hero_live_show")
@@ -204,7 +270,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
 	case 61: // SKIN_CANCEL — CA7-3 ordinary selector -> base
 		if d.Appearance == nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_appearance_unavailable"}}
+			return failureReply(defect(nil))
 		}
 		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id") {
 			return badHero("invalid_hero_skin_cancel")
@@ -219,7 +285,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
 	case 2979: // USE_ILLUSION_SKIN_ITEM — CA7-3 independent presentation selector
 		if d.Appearance == nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_appearance_unavailable"}}
+			return failureReply(defect(nil))
 		}
 		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "item_id") {
 			return badHero("invalid_hero_illusion")
@@ -238,7 +304,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		if raw, ok := req.Envelope.Params["player_id"]; ok && raw != nil {
 			pid, err := requiredInt64(req.Envelope.Params, "player_id")
 			if err != nil || pid != int64(actor.PlayerID) {
-				return httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "private_hero_roster"}}
+				return failureReply(refusal(unprovenRefusalCode))
 			}
 		}
 		if d.Roster != nil {
@@ -285,7 +351,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		if err != nil {
 			return failHero(err)
 		}
-		return httpedge.Response{HTTPStatus: http.StatusOK, Body: heroPromotionResponse(got)}
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: heroPromotionResponse(ctx, got)}
 	case 57: // ONE_CLICK_JINJIE / one-click promotion-or-collect (CA4-3B)
 		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id") {
 			return badHero("invalid_hero_one_click_jinjie")
@@ -298,7 +364,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		if err != nil {
 			return failHero(err)
 		}
-		return httpedge.Response{HTTPStatus: http.StatusOK, Body: heroPromotionResponse(got)}
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: heroPromotionResponse(ctx, got)}
 	case 52: // EVOLVE_HERO
 		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id") {
 			return badHero("invalid_hero_evolve")
@@ -345,17 +411,18 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 			return failHero(err)
 		}
 		if d.Economy == nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_projection_unavailable"}}
+			return failureReply(defect(nil))
 		}
 		mana, err := d.Economy.CurrentScalar(ctx, actor.PlayerID, "mana", req.Envelope.Operation)
 		if err != nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "hero_projection_failed"}}
+			return failureFromRows(nil, err)
 		}
 		equips := make([]any, character.HeroEquipmentSlotCount)
 		for i, v := range got.Equipment {
 			equips[i] = v
 		}
-		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"equips": equips, "economy_": map[string]any{"mana": mana}}}
+		changes.Balance(ctx, "mana", mana)
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"equips": equips}}
 	case 58: // FUMO_EQUIP / Hero Fumo (CA4-3A)
 		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "equip_index", "materials") {
 			return badHero("invalid_hero_fumo")
@@ -371,17 +438,18 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 			return failHero(err)
 		}
 		if d.Economy == nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_projection_unavailable"}}
+			return failureReply(defect(nil))
 		}
 		mana, err := d.Economy.CurrentScalar(ctx, actor.PlayerID, "mana", req.Envelope.Operation)
 		if err != nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "hero_projection_failed"}}
+			return failureFromRows(nil, err)
 		}
 		levels := make([]any, character.HeroEquipmentSlotCount)
 		for i, v := range got.Levels {
 			levels[i] = v
 		}
-		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"fumo": got.Fumo, "fumo_lev": levels, "economy_": map[string]any{"mana": mana}}}
+		changes.Balance(ctx, "mana", mana)
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{"fumo": got.Fumo, "fumo_lev": levels}}
 	case 55: // USE_EXP_ITEM
 		if !onlyStockGameplayParams(req.Envelope.Params, "item_id", "partner_id", "item_num", "total_num") {
 			return badHero("invalid_hero_exp_item")
@@ -425,7 +493,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 			return badHero("invalid_hero_summon")
 		}
 		if d.Economy == nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Body: map[string]any{"error": "hero_projection_unavailable"}}
+			return failureReply(defect(nil))
 		}
 		h, err := d.Service.SummonNormal(ctx, actor, tableID, stoneID, stoneNum, req.Envelope.Operation)
 		if err != nil {
@@ -437,9 +505,9 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		}
 		mana, err := d.Economy.CurrentScalar(ctx, actor.PlayerID, "mana", req.Envelope.Operation)
 		if err != nil {
-			return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "hero_projection_failed"}}
+			return failureFromRows(nil, err)
 		}
-		body["economy_"] = map[string]any{"mana": mana}
+		changes.Balance(ctx, "mana", mana)
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
 	case 304: // UPGRADE_SUPER_EQUIP (CA4-5)
 		if !onlyStockGameplayParams(req.Envelope.Params, "partner_id", "equip_index", "enhance_times") {
@@ -476,7 +544,7 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 		if !onlyStockGameplayParams(req.Envelope.Params) {
 			return badHero("invalid_hero_pieces")
 		}
-		pieces, err := d.Service.HeroPieces(ctx, actor)
+		pieces, err := d.Service.HeroPieces(ctx, actor, req.Envelope.Operation)
 		if err != nil {
 			return failHero(err)
 		}
@@ -485,22 +553,38 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 			body[strconv.FormatInt(origin, 10)] = qty
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
+	case 88: // BACKPACK_SORT_TYPE
+		sortType, err := requiredInt64(req.Envelope.Params, "sort_type")
+		if err != nil {
+			return badHero("invalid_backpack_sort_type")
+		}
+		if sortType < 0 || sortType > character.MaxBackpackSortType {
+			return failureReply(refusal(unprovenRefusalCode))
+		}
+		if err := d.Service.SaveBackpackSortType(ctx, actor, sortType, req.Envelope.Operation); err != nil {
+			return failHero(err)
+		}
+		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
 	case 89:
 		sortType, err := requiredInt64(req.Envelope.Params, "sort_type")
 		if err != nil || sortType < 0 || sortType > character.MaxSortType {
-			return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "invalid_hero_sort_type"}}
+			return badHero("invalid_hero_sort_type")
 		}
 		if err := d.Service.SaveSortType(ctx, actor, sortType, req.Envelope.Operation); err != nil {
 			return failHero(err)
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{}}
 	default:
-		return httpedge.Response{HTTPStatus: http.StatusNotImplemented, Body: map[string]any{"error": "not_hero_mid"}}
+		return failureReply(refusal(unprovenRefusalCode))
 	}
 }
 func (d HeroDispatcher) actor(ctx context.Context, req httpedge.DispatchRequest) (identity.ActorContext, *httpedge.Response) {
-	if d.Authority == nil || req.Envelope.Claims.Token == "" {
-		r := httpedge.Response{HTTPStatus: http.StatusUnauthorized, Body: map[string]any{"error": "gameplay_auth_required"}}
+	if d.Authority == nil {
+		r := failureReply(defect(nil))
+		return identity.ActorContext{}, &r
+	}
+	if req.Envelope.Claims.Token == "" {
+		r := failureReply(sessionFailure())
 		return identity.ActorContext{}, &r
 	}
 	a, err := d.Authority.ResolveGameplayBearer(ctx, req.Envelope.Claims.Token, req.Envelope.ReceivedAt)
@@ -509,7 +593,7 @@ func (d HeroDispatcher) actor(ctx context.Context, req httpedge.DispatchRequest)
 		return identity.ActorContext{}, &r
 	}
 	if req.Envelope.Claims.Region != int64(a.LogicalServerID) {
-		r := httpedge.Response{HTTPStatus: http.StatusForbidden, Body: map[string]any{"error": "region_mismatch"}}
+		r := failureReply(refusal(unprovenRefusalCode))
 		return identity.ActorContext{}, &r
 	}
 	return a, nil
@@ -569,7 +653,7 @@ func decodeHeroExpItems(raw any) ([]appi5.HeroExpItemDebit, error) {
 	return out, nil
 }
 
-func heroPromotionResponse(got apphero.HeroPromotionResult) map[string]any {
+func heroPromotionResponse(ctx context.Context, got apphero.HeroPromotionResult) map[string]any {
 	body := map[string]any{}
 	if len(got.RestoreItems) > 0 {
 		rows := make([]any, 0, len(got.RestoreItems))
@@ -579,7 +663,10 @@ func heroPromotionResponse(got apphero.HeroPromotionResult) map[string]any {
 		body["restore_items"] = rows
 	}
 	if got.ManaAfter != nil {
-		body["economy_"] = map[string]any{"mana": *got.ManaAfter}
+		changes.Balance(ctx, "mana", *got.ManaAfter)
+	}
+	for key, value := range changes.RecordedMissions(ctx) {
+		body[key] = value
 	}
 	return body
 }
@@ -619,16 +706,110 @@ func liveStockStrings(in []apphero.LIVEResultState) (string, string, error) {
 	return strings.Join(models, "|"), strings.Join(states, "|"), nil
 }
 
+func requiredPipeIntegers(params map[string]any, key string) ([]int64, error) {
+	value, ok := params[key].(string)
+	if !ok {
+		// xyd.luaStringMerge returns a one-element list as the bare number, not a string.
+		single, err := requiredInt64(params, key)
+		if err != nil {
+			return nil, err
+		}
+		return []int64{single}, nil
+	}
+	if value == "" {
+		return nil, errors.New("missing stock integer list")
+	}
+	parts := strings.Split(value, "|")
+	values := make([]int64, len(parts))
+	for index, part := range parts {
+		parsed, err := strconv.ParseInt(part, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		values[index] = parsed
+	}
+	return values, nil
+}
+
+var heroFailureRows = []failureRow{
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+	{match: apphero.ErrHeroAppearanceUnavailable, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroExpMax, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroEvolutionUnavailable, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroPrerequisites, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroNotFound, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroCapacityExceeded, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroDuplicateOrigin, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroAcquisitionInvalid, class: failureMalformed, detail: "hero_operation_rejected"},
+	{match: apphero.ErrHeroVowsLevel, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroEquipmentUnavailable, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroFumoUnavailable, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroPromotionUnavailable, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroPromotionPrerequisites, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroPromotionCorruptState, class: failureDefect},
+	{match: apphero.ErrHeroContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrAppearanceContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroProgressionContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroEquipmentContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroFumoContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroPromotionContentInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroCapacityUnavailable, class: failureDefect},
+}
+
+var heroSkillLevelFailureRows = []failureRow{
+	{match: apphero.ErrHeroSkillLevelRequest, class: failureMalformed, detail: "invalid_hero_skill_level"},
+	{match: apphero.ErrHeroSkillLevelInactive, class: failureRefusal, code: unprovenRefusalCode},
+	{match: apphero.ErrHeroSkillLevelStaleTime, class: failureRefusal, code: staleConflictCode},
+}
+
+func failHeroSkillLevel(err error) httpedge.Response {
+	if classified := classifyFailure(heroSkillLevelFailureRows, err); classified != nil {
+		return failureReply(classified)
+	}
+	return failHero(err)
+}
+
+// heroSkillLevelRefusalCode applies D5 C11 to an unsuccessful skill-level
+// result: the coin wallet has its own code, every other permanent cause is
+// unproven.
+func heroSkillLevelRefusalCode(reason apphero.HeroSkillLevelRefusal) int64 {
+	if reason == apphero.HeroSkillLevelRefusalInsufficientMana {
+		return insufficientCoinCode
+	}
+	return unprovenRefusalCode
+}
+
+// skillLevelRefusalBody fills the MID 39 fields the stock callback reads
+// unconditionally (C2/A-126). A 400 malformed reply stays bodyless; every other
+// non-200 reply is enriched from the player's committed state. When one owner
+// read fails only the parts that could be read are written, and when nothing can
+// be read the error class is kept as it arrived.
+func (d HeroDispatcher) skillLevelRefusalBody(ctx context.Context, actor identity.ActorContext, partner int64, op operation.Context, refusal httpedge.Response) httpedge.Response {
+	if refusal.HTTPStatus == http.StatusBadRequest || refusal.Body == nil || d.SkillLevels == nil {
+		return refusal
+	}
+	if _, written := refusal.Body["skills"]; written {
+		return refusal
+	}
+	view, err := d.SkillLevels.SkillLevelView(ctx, actor, partner, op)
+	if err != nil {
+		return refusal
+	}
+	if view.SkillLevelsKnown {
+		refusal.Body["skills"] = apphero.HeroSkillLevelResult{SkillLevels: view.SkillLevels}.SkillString()
+	}
+	refusal.Body["is_success"] = int64(0)
+	if view.SkillPointKnown {
+		refusal.Body["skill_point"] = view.SkillPoint
+		refusal.Body["skill_time"] = view.SkillTime
+	}
+	return refusal
+}
+
 func badHero(code string) httpedge.Response {
-	return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": code}}
+	return failureReply(malformed(code))
 }
 
 func failHero(err error) httpedge.Response {
-	if errors.Is(err, apphero.ErrHeroContentInactive) || errors.Is(err, apphero.ErrAppearanceContentInactive) || errors.Is(err, apphero.ErrHeroProgressionContentInactive) || errors.Is(err, apphero.ErrHeroEquipmentContentInactive) || errors.Is(err, apphero.ErrHeroFumoContentInactive) || errors.Is(err, apphero.ErrHeroPromotionContentInactive) || errors.Is(err, apphero.ErrHeroCapacityUnavailable) {
-		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "hero_content_inactive"}}
-	}
-	if errors.Is(err, apphero.ErrHeroAppearanceUnavailable) || errors.Is(err, apphero.ErrHeroExpMax) || errors.Is(err, apphero.ErrHeroEvolutionUnavailable) || errors.Is(err, apphero.ErrHeroPrerequisites) || errors.Is(err, apphero.ErrHeroNotFound) || errors.Is(err, apphero.ErrHeroCapacityExceeded) || errors.Is(err, apphero.ErrHeroDuplicateOrigin) || errors.Is(err, apphero.ErrHeroAcquisitionInvalid) || errors.Is(err, apphero.ErrHeroVowsLevel) || errors.Is(err, apphero.ErrHeroEquipmentUnavailable) || errors.Is(err, apphero.ErrHeroFumoUnavailable) || errors.Is(err, apphero.ErrHeroPromotionUnavailable) || errors.Is(err, apphero.ErrHeroPromotionPrerequisites) || errors.Is(err, apphero.ErrHeroPromotionCorruptState) {
-		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "hero_operation_rejected"}}
-	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "hero_operation_failed"}}
+	return failureFromRows(heroFailureRows, err)
 }

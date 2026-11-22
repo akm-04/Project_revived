@@ -1,9 +1,7 @@
 package conquerstore
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	appboot "gxb.local/backend/v2/internal/application/bootstrap"
@@ -11,36 +9,28 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/logicalserver"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
-	"io"
 	"time"
 )
 
 type Store struct{}
 
-const cols = `player_id,state_version,content_revision,payload::text,created_at,updated_at`
+const cols = `player_id,state_version,content_revision,payload::text,payload_version,created_at,updated_at`
 
 func scan(r tx.Row) (d.Facts, error) {
 	var f d.Facts
 	var pid int64
 	var raw string
-	if e := r.Scan(&pid, &f.Version, &f.ContentRevision, &raw, &f.CreatedAt, &f.UpdatedAt); e != nil {
+	var version int16
+	if e := r.Scan(&pid, &f.Version, &f.ContentRevision, &raw, &version, &f.CreatedAt, &f.UpdatedAt); e != nil {
 		if errors.Is(e, kernelstore.ErrNoRows) {
 			e = d.ErrUnavailable
 		}
 		return f, e
 	}
 	f.Player = identity.PlayerID(pid)
-	dec := json.NewDecoder(bytes.NewBufferString(raw))
-	dec.DisallowUnknownFields()
-	if e := dec.Decode(&f.Payload); e != nil {
-		return f, e
-	}
-	var x any
-	if dec.Decode(&x) != io.EOF {
-		return f, d.ErrUnqualified
-	}
-	return f, nil
+	return f, payload.Decode("player_conquer_facts", version, []byte(raw), &f.Payload)
 }
 func (Store) ReadFactsTx(c context.Context, q tx.Queryer, p identity.PlayerID) (d.Facts, error) {
 	if q == nil || !p.Valid() {
@@ -57,11 +47,11 @@ func (Store) SaveFactsTx(c context.Context, t tx.Tx, f d.Facts, old int64, cat d
 	if t == nil || old < 1 || f.Version != old+1 || f.Validate(cat) != nil {
 		return d.ErrUnqualified
 	}
-	raw, e := json.Marshal(f.Payload)
+	raw, version, e := payload.Encode(f.Payload)
 	if e != nil {
 		return e
 	}
-	tag, e := t.Exec(c, `UPDATE player_conquer_facts SET state_version=$2,content_revision=$3,payload=$4::jsonb,updated_at=$5 WHERE player_id=$1 AND state_version=$6 AND updated_at<=$5`, int64(f.Player), f.Version, f.ContentRevision, string(raw), f.UpdatedAt, old)
+	tag, e := t.Exec(c, `UPDATE player_conquer_facts SET state_version=$2,content_revision=$3,payload=$4::jsonb,payload_version=$5,updated_at=$6 WHERE player_id=$1 AND state_version=$7 AND updated_at<=$6`, int64(f.Player), f.Version, f.ContentRevision, string(raw), version, f.UpdatedAt, old)
 	if e != nil {
 		return e
 	}
@@ -75,11 +65,11 @@ func insert(c context.Context, t tx.Tx, p identity.PlayerID, rev string, op oper
 	if t == nil || !p.Valid() || len(rev) != 64 || !ok || pin != rev || op.ID.IsZero() || at.IsZero() || ref == "" {
 		return d.ErrUnqualified
 	}
-	payload := d.Payload{Kind: kind, Policy: d.Policy, OriginOperation: op.ID, OriginRef: ref}
+	factsPayload := d.Payload{Kind: kind, Policy: d.Policy, OriginOperation: op.ID, OriginRef: ref}
 	if kind == d.Initial {
-		payload.Progress = &d.Progress{Level: 0, Loop: 1}
+		factsPayload.Progress = &d.Progress{Level: 0, Loop: 1}
 	}
-	raw, e := json.Marshal(payload)
+	raw, version, e := payload.Encode(factsPayload)
 	if e != nil {
 		return e
 	}
@@ -87,7 +77,7 @@ func insert(c context.Context, t tx.Tx, p identity.PlayerID, rev string, op oper
 	if missingOnly {
 		suffix = " ON CONFLICT(player_id)DO NOTHING"
 	}
-	_, e = t.Exec(c, `INSERT INTO player_conquer_facts(player_id,state_version,content_revision,payload,created_at,updated_at)VALUES($1,1,$2,$3::jsonb,$4,$4)`+suffix, int64(p), rev, string(raw), at)
+	_, e = t.Exec(c, `INSERT INTO player_conquer_facts(player_id,state_version,content_revision,payload,payload_version,created_at,updated_at)VALUES($1,1,$2,$3::jsonb,$4,$5,$5)`+suffix, int64(p), rev, string(raw), version, at)
 	return e
 }
 func (Store) InsertLegacyUnknownTx(c context.Context, t tx.Tx, p identity.PlayerID, rev string, op operation.Context, at time.Time) error {

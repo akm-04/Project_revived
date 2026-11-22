@@ -39,8 +39,8 @@ WHERE player_id=$1 AND state_version=$13;
 INSERT INTO player_hero_practice_candidates(
   player_id,session_id,partner_id,actor_state_version,proposed_str,proposed_int,proposed_agi,
   generation_operation_id,generation_context_id,generation_kind,generation_content_revision,
-  generation_policy_refs,created_at,updated_at
-) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12::jsonb,$13,$14)
+  generation_policy_refs,payload_version,created_at,updated_at
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12::jsonb,$13,$14,$15)
 ON CONFLICT (player_id,session_id,partner_id) DO UPDATE
 SET actor_state_version=EXCLUDED.actor_state_version,
     proposed_str=EXCLUDED.proposed_str,proposed_int=EXCLUDED.proposed_int,proposed_agi=EXCLUDED.proposed_agi,
@@ -49,6 +49,7 @@ SET actor_state_version=EXCLUDED.actor_state_version,
     generation_kind=EXCLUDED.generation_kind,
     generation_content_revision=EXCLUDED.generation_content_revision,
     generation_policy_refs=EXCLUDED.generation_policy_refs,
+    payload_version=EXCLUDED.payload_version,
     created_at=EXCLUDED.created_at,
     updated_at=EXCLUDED.updated_at;
 
@@ -56,8 +57,8 @@ SET actor_state_version=EXCLUDED.actor_state_version,
 INSERT INTO player_pet_practice_candidates(
   player_id,session_id,pet_id,actor_state_version,proposed_str,proposed_int,proposed_agi,
   generation_operation_id,generation_context_id,generation_kind,generation_content_revision,
-  generation_policy_refs,created_at,updated_at
-) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12::jsonb,$13,$14)
+  generation_policy_refs,payload_version,created_at,updated_at
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12::jsonb,$13,$14,$15)
 ON CONFLICT (player_id,session_id,pet_id) DO UPDATE
 SET actor_state_version=EXCLUDED.actor_state_version,
     proposed_str=EXCLUDED.proposed_str,proposed_int=EXCLUDED.proposed_int,proposed_agi=EXCLUDED.proposed_agi,
@@ -66,20 +67,21 @@ SET actor_state_version=EXCLUDED.actor_state_version,
     generation_kind=EXCLUDED.generation_kind,
     generation_content_revision=EXCLUDED.generation_content_revision,
     generation_policy_refs=EXCLUDED.generation_policy_refs,
+    payload_version=EXCLUDED.payload_version,
     created_at=EXCLUDED.created_at,
     updated_at=EXCLUDED.updated_at;
 
 -- name: ReadHeroPracticeCandidate :one
 SELECT player_id,session_id::text,partner_id,actor_state_version,proposed_str,proposed_int,proposed_agi,
        generation_operation_id::text,generation_context_id::text,generation_kind,generation_content_revision,
-       generation_policy_refs::text,created_at,updated_at
+       generation_policy_refs::text,payload_version,created_at,updated_at
 FROM player_hero_practice_candidates
 WHERE player_id=$1 AND session_id=$2 AND partner_id=$3;
 
 -- name: LockHeroPracticeCandidate :one
 SELECT player_id,session_id::text,partner_id,actor_state_version,proposed_str,proposed_int,proposed_agi,
        generation_operation_id::text,generation_context_id::text,generation_kind,generation_content_revision,
-       generation_policy_refs::text,created_at,updated_at
+       generation_policy_refs::text,payload_version,created_at,updated_at
 FROM player_hero_practice_candidates
 WHERE player_id=$1 AND session_id=$2 AND partner_id=$3 FOR UPDATE;
 
@@ -90,14 +92,14 @@ WHERE player_id=$1 AND session_id=$2 AND partner_id=$3;
 -- name: ReadPetPracticeCandidate :one
 SELECT player_id,session_id::text,pet_id,actor_state_version,proposed_str,proposed_int,proposed_agi,
        generation_operation_id::text,generation_context_id::text,generation_kind,generation_content_revision,
-       generation_policy_refs::text,created_at,updated_at
+       generation_policy_refs::text,payload_version,created_at,updated_at
 FROM player_pet_practice_candidates
 WHERE player_id=$1 AND session_id=$2 AND pet_id=$3;
 
 -- name: LockPetPracticeCandidate :one
 SELECT player_id,session_id::text,pet_id,actor_state_version,proposed_str,proposed_int,proposed_agi,
        generation_operation_id::text,generation_context_id::text,generation_kind,generation_content_revision,
-       generation_policy_refs::text,created_at,updated_at
+       generation_policy_refs::text,payload_version,created_at,updated_at
 FROM player_pet_practice_candidates
 WHERE player_id=$1 AND session_id=$2 AND pet_id=$3 FOR UPDATE;
 

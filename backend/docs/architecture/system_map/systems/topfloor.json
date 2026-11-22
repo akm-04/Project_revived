@@ -1,0 +1,464 @@
+{
+ "background": [
+  {
+   "binary": "gxb-api",
+   "entry": "apptopfloor.Reconciler",
+   "kind": "reconcile"
+  }
+ ],
+ "content": [],
+ "contracts": [
+  {
+   "count": 24,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 21,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 23,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
+   "count": 7,
+   "file": "docs/i9/I9_10A_EVENT_CENTRE_V1.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_10F_MENTOR_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_10H_H2_STRUCTURED_KINDS.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11B_ITEMS_ENERGY_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_11_CLOCK_ROLLBACK_V1.md"
+  },
+  {
+   "count": 7,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GUILD_ACTIVITY_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MISSIONS_V1.json"
+  },
+  {
+   "count": 23,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_SOCIAL_RECALL_INVITE_EXCHANGE_V1.json"
+  },
+  {
+   "count": 3,
+   "file": "docs/i9/I9_TOP_FLOOR_TASK_MODE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/R8_PRIVATE_CACHE_RETENTION_DAYS_V1.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/RULING_I9-12_SEAL_CARRY_SYNC.md"
+  },
+  {
+   "count": 6,
+   "file": "docs/i9/TOPFLOOR_PLAYTEST_REPAIR_POLICY_V1.json"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/topfloor_dispatcher.go",
+  "internal/adapters/stockruntime/topfloor_task_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {
+   "PVP_FIGHT": {
+    "adventure": "EventBattle",
+    "missions": [
+     106
+    ],
+    "stages": [
+     "I9-4B"
+    ]
+   }
+  },
+  "emits": [
+   "PVP_FIGHT"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "top-floor"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "top_floor_fights": [
+    "topfloorstore.ReadFightTx"
+   ],
+   "top_floor_ladders": [
+    "topfloorstore.ReadLadderTx"
+   ],
+   "top_floor_offer_snapshots": [
+    "topfloorstore.ReadOfferSnapshotTx"
+   ],
+   "top_floor_players": [
+    "topfloorstore.ReadPlayerTx"
+   ],
+   "top_floor_task_fights": [
+    "topfloorstore.ReadTaskFightTx"
+   ],
+   "top_floor_task_periods": [
+    "topfloorstore.ReadTaskPeriodTx"
+   ],
+   "top_floor_task_players": [
+    "topfloorstore.ReadTaskPlayerTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "top_floor_fights",
+   "top_floor_ladders",
+   "top_floor_offer_snapshots",
+   "top_floor_players",
+   "top_floor_task_fights",
+   "top_floor_task_periods",
+   "top_floor_task_players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
+    "line": 86
+   },
+   "mid": 272,
+   "name": "LOAD_ARENA"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
+    "line": 86
+   },
+   "mid": 273,
+   "name": "LOAD_ARENA_PLAYER_LIST"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
+    "line": 86
+   },
+   "mid": 278,
+   "name": "SAVE_ARENA_DEFENSE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
+    "line": 86
+   },
+   "mid": 280,
+   "name": "START_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
+    "line": 86
+   },
+   "mid": 281,
+   "name": "ARENA_BUY_TICKET"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
+    "line": 51
+   },
+   "mid": 282,
+   "name": "ARENA_MODE_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
+    "line": 51
+   },
+   "mid": 283,
+   "name": "ARENA_MODE_ENEMY_LIST"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
+    "line": 51
+   },
+   "mid": 284,
+   "name": "ARENA_MODE_DEFENCE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
+    "line": 51
+   },
+   "mid": 285,
+   "name": "ARENA_MODE_FIGHT_PRE"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
+    "line": 51
+   },
+   "mid": 286,
+   "name": "ARENA_MODE_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
+    "line": 51
+   },
+   "mid": 287,
+   "name": "ARENA_MODE_BUY_TICKET"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
+    "line": 86
+   },
+   "mid": 288,
+   "name": "ARENA_RESET_TIMER"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
+    "line": 86
+   },
+   "mid": 289,
+   "name": "LOAD_ARENA_FIGHT_RECORDS"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
+    "line": 86
+   },
+   "mid": 290,
+   "name": "LOAD_ARENA_FIGHT_REPORT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
+    "line": 86
+   },
+   "mid": 291,
+   "name": "query_arena_formation"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
+    "line": 86
+   },
+   "mid": 292,
+   "name": "SEAL_HERO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
+    "line": 86
+   },
+   "mid": 293,
+   "name": "ARENA_GET_RCORD_PLAYER_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/topfloor_dispatcher.go",
+    "line": 86
+   },
+   "mid": 294,
+   "name": "ARENA_PRE_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
+    "line": 51
+   },
+   "mid": 295,
+   "name": "ARENA_MODE_QUERY_FORMATION"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
+    "line": 51
+   },
+   "mid": 296,
+   "name": "ARENA_MODE_RESET_TIME"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
+    "line": 51
+   },
+   "mid": 298,
+   "name": "ARENA_MODE_RECORD_DETAIL"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
+    "line": 51
+   },
+   "mid": 299,
+   "name": "ARENA_MODE_RECORD_PLAYER_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/topfloor_task_dispatcher.go",
+    "line": 51
+   },
+   "mid": 300,
+   "name": "ARENA_MODE_SCHEDULE"
+  }
+ ],
+ "name": "topfloor",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/guildstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore",
+  "internal/adapters/postgres/topfloorstore"
+ ],
+ "tables": {
+  "owned": [
+   "top_floor_day_ranks",
+   "top_floor_day_settlements",
+   "top_floor_fights",
+   "top_floor_ladders",
+   "top_floor_offer_snapshots",
+   "top_floor_partner_usage",
+   "top_floor_players",
+   "top_floor_ranks",
+   "top_floor_records",
+   "top_floor_task_bans",
+   "top_floor_task_days",
+   "top_floor_task_fights",
+   "top_floor_task_periods",
+   "top_floor_task_players",
+   "top_floor_task_preferences",
+   "top_floor_task_ranks",
+   "top_floor_task_records"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "guild_memberships",
+   "guilds",
+   "gxb_content_activation",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "player_directory_profiles",
+   "player_function_eligibility",
+   "player_heroes",
+   "top_floor_fights",
+   "top_floor_ladders",
+   "top_floor_offer_snapshots",
+   "top_floor_partner_usage",
+   "top_floor_players",
+   "top_floor_ranks",
+   "top_floor_records",
+   "top_floor_task_bans",
+   "top_floor_task_fights",
+   "top_floor_task_periods",
+   "top_floor_task_players",
+   "top_floor_task_preferences",
+   "top_floor_task_ranks",
+   "top_floor_task_records"
+  ],
+  "written": [
+   "gxb_operation_receipts",
+   "top_floor_day_ranks",
+   "top_floor_day_settlements",
+   "top_floor_fights",
+   "top_floor_ladders",
+   "top_floor_offer_snapshots",
+   "top_floor_partner_usage",
+   "top_floor_players",
+   "top_floor_ranks",
+   "top_floor_records",
+   "top_floor_task_days",
+   "top_floor_task_fights",
+   "top_floor_task_periods",
+   "top_floor_task_players",
+   "top_floor_task_preferences",
+   "top_floor_task_ranks",
+   "top_floor_task_records"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [
+   "i9_10_topfloor_defense_required.json",
+   "i9_10_topfloor_team_info_popup.json",
+   "i9_4_real_pk.json",
+   "i9_7a_top_floor_task.json",
+   "i9_7a_top_floor_task_battle.json",
+   "topfloor.json",
+   "topfloor_battle.json"
+  ],
+  "unit": [
+   "broadcast_native_test.go",
+   "broadcast_test.go",
+   "fight_test.go",
+   "task_battle_test.go"
+  ]
+ }
+}

@@ -37,6 +37,18 @@ func TestPlayerCarryRequiresActualServerEndState(t *testing.T) {
 		})
 	}
 }
+func TestMemoirPlayerPendingStageIgnoresFormation(t *testing.T) {
+	pending := &domain.Pending{Kind: domain.Player, Grid: 3, Formation: []int64{1}, Pet: 2}
+	if !samePendingStage(pending, PlayerFight{Grid: 3, Formation: []int64{1, 2}, Pet: 3}) {
+		t.Fatal("a changed formation is the same stage: I8_PARENT_CONTRACT_V1 generation_supersede")
+	}
+	if samePendingStage(pending, PlayerFight{Grid: 4, Formation: []int64{1}}) {
+		t.Fatal("a different grid must be a different stage")
+	}
+	if samePendingStage(&domain.Pending{Kind: domain.Monster, Grid: 3}, PlayerFight{Grid: 3, Formation: []int64{1}}) {
+		t.Fatal("a non-player pending is not a player START stage")
+	}
+}
 func TestMemoirPlayerSelectionBoundary(t *testing.T) {
 	for _, request := range []PlayerFight{{Grid: 0, Formation: []int64{1}}, {Grid: 1, Formation: []int64{1, 1}}, {Grid: 1, Formation: []int64{0}}, {Grid: 1, Formation: []int64{1}, Pet: -1}, {Grid: 1, Formation: []int64{1, 2, 3, 4, 5, 6}}} {
 		if request.valid() {
@@ -81,9 +93,16 @@ func (content memoirRevisionContent) ActiveRevision(context.Context, tx.Queryer)
 func (content memoirRevisionContent) MemoirCatalogTx(context.Context, tx.Queryer, string) (domain.Catalog, error) {
 	return content.catalog, nil
 }
+
+type memoirRevisionStore struct{ Store }
+
+func (memoirRevisionStore) TuningTx(context.Context, tx.Queryer) (domain.Tuning, bool, error) {
+	return domain.Tuning{}, false, nil
+}
+
 func TestMemoirNewStartsRefuseChangedRunCatalog(t *testing.T) {
 	pinned := domain.Catalog{SourceArchive: "source", BigKey: 50001400}
-	mode := Mode{Content: memoirRevisionContent{catalog: pinned}}
+	mode := Mode{Content: memoirRevisionContent{catalog: pinned}, Store: memoirRevisionStore{}}
 	revision, err := mode.startRevision(context.Background(), scope{revision: "old", catalog: pinned})
 	if err != nil || revision != "new" {
 		t.Fatal("compatible stat revision", revision, err)

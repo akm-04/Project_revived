@@ -4,19 +4,23 @@ package playerdisplay_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 	"testing"
 	"time"
 
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/adventurestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/sharedroomstore"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	appadventure "gxb.local/backend/v2/internal/application/adventure"
+	ca "gxb.local/backend/v2/internal/application/characterasset"
 	cb "gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
@@ -29,6 +33,7 @@ import (
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 	heroproj "gxb.local/backend/v2/internal/projection/hero"
+	"gxb.local/backend/v2/internal/protocol/replyconformance"
 )
 
 type adventureWake struct{}
@@ -44,7 +49,7 @@ type adventureOpponents struct {
 	robotFound bool
 }
 
-func (o adventureOpponents) ArenaOpponentTx(context.Context, tx.Queryer, identity.PlayerID, int64, uint64) (appadventure.Opponent, bool, error) {
+func (o adventureOpponents) ArenaOpponentTx(context.Context, tx.Queryer, identity.PlayerID, int64, uint64, time.Time) (appadventure.Opponent, bool, error) {
 	return o.arena, o.arenaFound, nil
 }
 
@@ -54,7 +59,13 @@ func (o adventureOpponents) RobotOpponentTx(context.Context, tx.Queryer, uint64)
 
 func adventureTestMode(t *testing.T, p *pg.Pool, clock gen.TimeAuthority, opponents appadventure.Opponents) appadventure.Mode {
 	t.Helper()
-	fight := combatService(t, p)
+	return adventureTestModeWithFight(t, p, clock, opponents, combatService(t, p))
+}
+
+// adventureTestModeWithFight builds the production Adventure mode around a
+// caller-supplied combat service, so a native can wrap its worker.
+func adventureTestModeWithFight(t *testing.T, p *pg.Pool, clock gen.TimeAuthority, opponents appadventure.Opponents, fight cb.Service) appadventure.Mode {
+	t.Helper()
 	values := i5store.Store{Queryer: p}
 	content := contentstore.Store{Queryer: p}
 	timed := gen.TimedRunner{Binder: gen.Binder{Time: clock}, Runner: tx.Runner{DB: p}}
@@ -63,10 +74,10 @@ func adventureTestMode(t *testing.T, p *pg.Pool, clock gen.TimeAuthority, oppone
 	fight.Inputs.Rooms = stockruntime.NewAdmissionRouter()
 	owner := occultI5(p)
 	mode := appadventure.Mode{Timed: timed, Fresh: p, Store: adventurestore.Store{}, Content: content,
-		Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: fight.Inputs.Heroes, Combat: fight,
+		Functions: values, Directory: i4store.PlayerDirectoryReader{}, Guilds: guildstore.Store{}, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Stats: fight.Inputs.Stats, Combat: fight,
 		Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Grants: owner, Opponents: opponents, Wake: adventureWake{},
 		Rooms: rooms, RoomStore: sharedroomstore.Store{}, Mail: i5.SettlementMail{Store: values},
-		Partners: ownerSummoner(p), HeroWire: heroproj.StockHero}
+		Partners: ownerSummoner(p), HeroWire: heroproj.StockHero, BattleObserver: libraryService(p, p)}
 	mode.Invites = roomInviteMaterializer(t, p)
 	return mode
 }
@@ -205,7 +216,7 @@ func TestI9_8DAdventureTriggerReadsAndExpiryNative(t *testing.T) {
 		t.Fatal("first info did not create the defense room")
 	}
 
-	// 10002 and 10003 have no producer and never fire.
+	// 10002 has no producer yet; SHOP_PURCHASE (10003) is produced by the shop.
 	for _, kind := range []string{"FAVOR", "STORE_SPEND"} {
 		if _, ok := d.EventForFactKind(kind); ok {
 			t.Fatal("kind has an event", kind)
@@ -237,7 +248,7 @@ func TestI9_8DAdventureShopPvpRobotNative(t *testing.T) {
 	a, picks := adventureOwner(t, p, server, 11, 10001001)
 	defender, _, defenderHero := combatOwner(t, p, server)
 	clock := &leagueClock{at: time.Now().UTC().Add(2 * time.Minute)}
-	mode := adventureTestMode(t, p, clock, adventureOpponents{arena: appadventure.Opponent{PlayerID: defender.PlayerID, Heroes: []int64{defenderHero.PartnerID}}, arenaFound: true})
+	mode := adventureTestMode(t, p, clock, adventureOpponents{arena: appadventure.Opponent{PlayerID: defender.PlayerID, Heroes: []cb.Participant{{Origin: cd.OwnedForeign, Kind: cd.HeroActor, Player: defender.PlayerID, Identity: defenderHero.PartnerID}}}, arenaFound: true})
 	opContext := opPinned(installed(t, p))
 	opContext.StartedAt = clock.at
 
@@ -312,10 +323,23 @@ func TestI9_8DAdventureShopPvpRobotNative(t *testing.T) {
 	if _, ok := response.Body["awards"].([]any); !ok {
 		t.Fatalf("2419 awards shape %#v", response.Body["awards"])
 	}
+	if count := girlsLogCount(t, p, a.PlayerID, picks[0]); count != 1 {
+		t.Fatalf("PVP counted %d for the fighting hero, want 1", count)
+	}
+	if rows := girlsLogRows(t, p, defender.PlayerID); len(rows) != 0 {
+		t.Fatalf("the opponent's heroes were counted for the opponent: %v", rows)
+	}
+	// The finished occurrence refuses a second result and counts nothing more.
+	if _, err = mode.Fight(ctx, a, appadventure.FightRequest{Formation: []int64{picks[0]}}, opContext); !errors.Is(err, d.ErrExpired) {
+		t.Fatalf("PVP result replay %v", err)
+	}
+	if count := girlsLogCount(t, p, a.PlayerID, picks[0]); count != 1 {
+		t.Fatalf("a refused PVP result counted %d, want 1", count)
+	}
 
 	// Robot fallback: no Arena opponent, a template team resolves.
 	clock.Set(clock.at.Add(time.Minute))
-	robotMode := adventureTestMode(t, p, clock, adventureOpponents{robot: appadventure.Opponent{TemplateHeroes: []cb.Participant{{Origin: cd.Template, Kind: cd.HeroActor, Identity: 10001001, TemplateParams: templateParams(10001001)}}}, robotFound: true})
+	robotMode := adventureTestMode(t, p, clock, adventureOpponents{robot: appadventure.Opponent{Heroes: []cb.Participant{{Origin: cd.Template, Kind: cd.HeroActor, Identity: 10001001, TemplateParams: templateParams(10001001)}}}, robotFound: true})
 	putAdventureOccurrence(t, p, a.PlayerID, d.EventBattle, 0, clock.at, clock.at.Add(2*time.Hour), "pvp-robot")
 	response, err = robotMode.Fight(ctx, a, appadventure.FightRequest{Formation: []int64{picks[0]}}, opContext)
 	if err != nil {
@@ -323,6 +347,12 @@ func TestI9_8DAdventureShopPvpRobotNative(t *testing.T) {
 	}
 	if report, _ = response.Body["battle_report"].(string); report == "" {
 		t.Fatal("robot report missing")
+	}
+	if count := girlsLogCount(t, p, a.PlayerID, picks[0]); count != 2 {
+		t.Fatalf("robot PVP counted %d, want one more for the player's own hero", count)
+	}
+	if rows := girlsLogRows(t, p, a.PlayerID); len(rows) != 1 {
+		t.Fatalf("robot PVP counted a non-owned actor: %v", rows)
 	}
 }
 
@@ -347,6 +377,7 @@ func TestI9_8DAdventureRoomsNative(t *testing.T) {
 		t.Fatal(err)
 	}
 	roomID := adventureRoomID(t, info)
+	replyconformance.Check(t, 2417, info)
 	defenseDetail := info["detail"].(map[string]any)
 	positions, ok := defenseDetail["pos_statuses"].([]any)
 	if !ok || len(positions) != d.DefenseMonsterCount {
@@ -361,8 +392,13 @@ func TestI9_8DAdventureRoomsNative(t *testing.T) {
 		t.Fatalf("2417 challenge_times sibling %#v", defenseDetail)
 	}
 	putAdventureOccurrence(t, p, b.PlayerID, d.EventDefense, 0, now, now.Add(time.Hour), "defense-room-b")
-	if _, err = mode.EnterDefense(ctx, b, roomID, opContext); err != nil {
+	joinedDefense, err := mode.EnterDefense(ctx, b, roomID, opContext)
+	if err != nil {
 		t.Fatal("defense join", err)
+	}
+	replyconformance.Check(t, 2425, joinedDefense)
+	if statuses, ok := joinedDefense["monster_statuses"].([]any); !ok || len(statuses) != d.DefenseMonsterCount || statuses[0] != "" {
+		t.Fatalf("2425 defense monster_statuses %#v", joinedDefense)
 	}
 	for try := 0; try < d.DefenseTriesPerPosition; try++ {
 		if _, err = mode.PrepareDefense(ctx, a, 1, opContext); err != nil {
@@ -374,6 +410,9 @@ func TestI9_8DAdventureRoomsNative(t *testing.T) {
 		if _, err = mode.DefenseResult(ctx, a, appadventure.ResultRequest{Star: 0, Damage: 100, Formation: []int64{aPicks[0]}}, 1, opContext); err != nil {
 			t.Fatal("defense result", err)
 		}
+	}
+	if count := girlsLogCount(t, p, a.PlayerID, aPicks[0]); count != int64(d.DefenseTriesPerPosition) {
+		t.Fatalf("defense counted %d, want one per settled try (%d)", count, d.DefenseTriesPerPosition)
 	}
 	if _, err = mode.PrepareDefense(ctx, a, 1, opContext); !errors.Is(err, d.ErrRefused) {
 		t.Fatalf("fourth try %v", err)
@@ -400,6 +439,12 @@ func TestI9_8DAdventureRoomsNative(t *testing.T) {
 	if _, ok := awards["awards"].([]any); !ok {
 		t.Fatalf("2410 awards.awards must be an array: %#v", defenseResult.Body)
 	}
+	if count := girlsLogCount(t, p, b.PlayerID, bPicks[0]); count != 1 {
+		t.Fatalf("the winning member counted %d, want 1", count)
+	}
+	if count := girlsLogCount(t, p, a.PlayerID, aPicks[0]); count != int64(d.DefenseTriesPerPosition) {
+		t.Fatalf("a refused result changed the first member's count to %d", count)
+	}
 	var raw string
 	if err = p.QueryRow(ctx, `SELECT payload::text FROM shared_rooms WHERE room_id=$1`, roomID).Scan(&raw); err != nil {
 		t.Fatal(err)
@@ -422,6 +467,7 @@ func TestI9_8DAdventureRoomsNative(t *testing.T) {
 	if err != nil {
 		t.Fatal("create coop", err)
 	}
+	replyconformance.Check(t, 2423, created)
 	coopID := adventureRoomIDFrom(created)
 	if _, ok := created["room_info"].(map[string]any); !ok {
 		t.Fatalf("2423 reply lacks the room_info wrapper: %#v", created)
@@ -437,8 +483,13 @@ func TestI9_8DAdventureRoomsNative(t *testing.T) {
 	}
 	for _, member := range []identity.ActorContext{b, c} {
 		putAdventureOccurrence(t, p, member.PlayerID, d.EventIllusion, d.IllusionHiddenBoss, now, now.Add(2*time.Hour), fmt.Sprintf("coop-%d", member.PlayerID))
-		if _, err = mode.EnterCoop(ctx, member, coopID, opContext); err != nil {
-			t.Fatal("coop join", err)
+		joined, joinErr := mode.EnterCoop(ctx, member, coopID, opContext)
+		if joinErr != nil {
+			t.Fatal("coop join", joinErr)
+		}
+		replyconformance.Check(t, 2425, joined)
+		if statuses, ok := joined["monster_statuses"].([]any); !ok || len(statuses) != d.DefenseMonsterCount || statuses[0] != "" {
+			t.Fatalf("2425 co-op monster_statuses %#v", joined)
 		}
 	}
 	if _, err = mode.EnterTeamFight(ctx, a, opContext); err != nil {
@@ -460,12 +511,27 @@ func TestI9_8DAdventureRoomsNative(t *testing.T) {
 			t.Fatal("prepare coop", err)
 		}
 	}
+	coopMembers := []struct {
+		actor identity.ActorContext
+		picks []int64
+	}{{a, aPicks}, {b, bPicks}, {c, cPicks}}
+	coopBefore := map[identity.PlayerID]map[int64]int64{}
+	for _, member := range coopMembers {
+		coopBefore[member.actor.PlayerID] = girlsLogRows(t, p, member.actor.PlayerID)
+	}
 	report, err := mode.StartCoop(ctx, a, opContext)
 	if err != nil {
 		t.Fatal("start coop", err)
 	}
 	if text, _ := report["battle_report"].(string); text == "" {
 		t.Fatal("coop report missing")
+	}
+	for _, member := range coopMembers {
+		for _, pick := range member.picks {
+			if count := girlsLogCount(t, p, member.actor.PlayerID, pick); count != coopBefore[member.actor.PlayerID][pick]+1 {
+				t.Fatalf("coop member %d pick %d counted %d, want one more than %d", member.actor.PlayerID, pick, count, coopBefore[member.actor.PlayerID][pick])
+			}
+		}
 	}
 	if err = p.QueryRow(ctx, `SELECT payload::text FROM shared_rooms WHERE room_id=$1`, coopID).Scan(&raw); err != nil {
 		t.Fatal(err)
@@ -476,6 +542,11 @@ func TestI9_8DAdventureRoomsNative(t *testing.T) {
 	}
 	if mails := scalar(t, p, `SELECT count(*) FROM mail_records WHERE source_kind='ADVENTURE_ILLUSION' AND source_key=$1`, state.ReportID); mails != 3 {
 		t.Fatalf("coop mail %d", mails)
+	}
+	for _, member := range []identity.ActorContext{a, b, c} {
+		if settlements := scalar(t, p, `SELECT count(*) FROM combat_member_settlements WHERE attempt_id=$1 AND member_player_id=$2`, state.ReportID, int64(member.PlayerID)); settlements != 1 {
+			t.Fatalf("Adventure co-op member %d settlements=%d, want 1 (I8-MULTI-PARTICIPANT)", member.PlayerID, settlements)
+		}
 	}
 	notice, found, err := mode.ReadRoomNotice(ctx, fmt.Sprint(coopID))
 	if err != nil || !found {
@@ -533,6 +604,13 @@ func TestI9_8DAdventureRoomsNative(t *testing.T) {
 	} else if text, _ := replay["battle_report"].(string); text == "" {
 		t.Fatal("coop replay report missing")
 	}
+	for _, member := range coopMembers {
+		for _, pick := range member.picks {
+			if count := girlsLogCount(t, p, member.actor.PlayerID, pick); count != coopBefore[member.actor.PlayerID][pick]+1 {
+				t.Fatalf("a replay changed coop member %d pick %d to %d", member.actor.PlayerID, pick, count)
+			}
+		}
+	}
 	if mails := scalar(t, p, `SELECT count(*) FROM mail_records WHERE source_kind='ADVENTURE_ILLUSION' AND source_key=$1`, state.ReportID); mails != 3 {
 		t.Fatal("coop replay mailed again")
 	}
@@ -579,4 +657,271 @@ func adventureRoomIDFrom(body map[string]any) int64 {
 	}
 	roomID, _ := body["room_id"].(int64)
 	return roomID
+}
+
+func TestI9_8DAdventureAdmissionSeatOrderNative(t *testing.T) {
+	p := pool(t)
+	rev := installed(t, p)
+	server := rankingServer(t, p)
+	owner, _ := playerRoot(t, p, server)
+	member, _ := playerRoot(t, p, server)
+	clock := &leagueClock{at: time.Now().UTC()}
+	timed := gen.TimedRunner{Binder: gen.Binder{Time: clock}, Runner: tx.Runner{DB: p}}
+	rooms := appsharedroom.Service{Timed: timed, Fresh: p, Store: sharedroomstore.Store{}, Fence: i5store.Store{Queryer: p}, Players: i4store.PlayerRootLocker{}}
+	created, err := rooms.Open(ctx, owner, appsharedroom.OpenRequest{Family: appadventure.IllusionFamily(),
+		Capacity: int64(d.IllusionCoopSeats), Lease: time.Hour, Payload: json.RawMessage(`{}`)}, opPinned(rev))
+	if err != nil {
+		t.Fatal("open room", err)
+	}
+	if _, err = rooms.Join(ctx, member, appsharedroom.JoinRequest{Family: appadventure.IllusionFamily(), RoomID: created.ID}, opPinned(rev)); err != nil {
+		t.Fatal("join room", err)
+	}
+	for _, seated := range []identity.ActorContext{owner, member} {
+		if _, err = rooms.SetReady(ctx, seated, appadventure.IllusionFamily(), true, opPinned(rev)); err != nil {
+			t.Fatal("ready", err)
+		}
+	}
+	router := stockruntime.NewAdmissionRouter()
+	locator := cd.Locator{DomainKind: "ADVENTURE_ILLUSION", AuthorityScope: fmt.Sprintf("server:%d", server), DomainLocator: fmt.Sprintf("room:%d", created.ID)}
+	admit := func(convener identity.PlayerID, roster []identity.PlayerID) error {
+		tr, beginErr := p.Begin(ctx, tx.Options{Isolation: tx.RepeatableRead})
+		if beginErr != nil {
+			t.Fatal(beginErr)
+		}
+		defer tr.Rollback(ctx)
+		scope, scopeErr := ca.NewCoherentReadScope(tx.Scope{Tx: tr, Operation: opPinned(rev), Attempt: 1, Options: tx.Options{Isolation: tx.RepeatableRead}}, rev, clock.at)
+		if scopeErr != nil {
+			t.Fatal(scopeErr)
+		}
+		return router.AdmitTx(ctx, tr, scope, cb.Admission{Convener: convener, Members: roster, Locator: locator})
+	}
+	if err = admit(member.PlayerID, []identity.PlayerID{member.PlayerID, owner.PlayerID}); !errors.Is(err, cd.ErrRoomRefused) {
+		t.Fatalf("a non-owner convener was admitted: %v", err)
+	}
+	if err = admit(owner.PlayerID, []identity.PlayerID{owner.PlayerID, member.PlayerID}); err != nil {
+		t.Fatalf("the owner was refused in seat order: %v", err)
+	}
+}
+
+// A-187: exit and kick clear every busy position of the departing player in the
+// same room update, append the function 8 free push, and the position becomes
+// prepareable by another member.
+func TestI9_11T34AdventureDefenseBusyReleaseNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	a, _ := adventureOwner(t, p, server, 11, 10001001)
+	b, _ := adventureOwner(t, p, server, 11, 10001002)
+	c, cPicks := adventureOwner(t, p, server, 11, 10001003)
+	fighter, fighterPicks := adventureOwner(t, p, server, 11, 10001004)
+	clock := &leagueClock{at: time.Now().UTC().Add(2 * time.Minute)}
+	mode := adventureTestMode(t, p, clock, adventureOpponents{})
+	opContext := opPinned(installed(t, p))
+	opContext.StartedAt = clock.at
+	now := clock.at
+
+	putAdventureOccurrence(t, p, a.PlayerID, d.EventDefense, 0, now, now.Add(time.Hour), "busy-release-owner")
+	info, err := mode.Info(ctx, a, d.EventDefense, opContext)
+	if err != nil {
+		t.Fatal(err)
+	}
+	roomID := adventureRoomID(t, info)
+	for _, member := range []identity.ActorContext{b, c} {
+		if _, err = mode.EnterDefense(ctx, member, roomID, opContext); err != nil {
+			t.Fatal("defense join", member.PlayerID, err)
+		}
+	}
+
+	// Kick frees the kicked member's busy position.
+	if _, err = mode.PrepareDefense(ctx, b, 2, opContext); err != nil {
+		t.Fatal("prepare before kick", err)
+	}
+	positions := defensePositions(t, mode, a, opContext)
+	if positions[1]["busy_type"] != int64(1) || positions[1]["player_id"] != int64(b.PlayerID) {
+		t.Fatalf("position 2 not busy by b: %#v", positions[1])
+	}
+	if _, err = mode.KickDefense(ctx, a, b.PlayerID, opContext); err != nil {
+		t.Fatal("kick busy member", err)
+	}
+	positions = defensePositions(t, mode, a, opContext)
+	if positions[1]["busy_type"] != int64(0) {
+		t.Fatalf("kicked position still busy: %#v", positions[1])
+	}
+	if _, err = mode.PrepareDefense(ctx, a, 2, opContext); err != nil {
+		t.Fatal("another member cannot prepare a freed position", err)
+	}
+	if _, err = mode.QuitDefense(ctx, a, 2, opContext); err != nil {
+		t.Fatal("quit freed position", err)
+	}
+
+	// A kick during a battle (busy type 2) leaves the attempt unresolved but
+	// reachable: the kicked player's result is refused as not-in-room, and the
+	// next member's START retires the old attempt and freezes a fresh one.
+	if _, err = mode.EnterDefense(ctx, fighter, roomID, opContext); err != nil {
+		t.Fatal("fighting member join", err)
+	}
+	if _, err = mode.PrepareDefense(ctx, fighter, 2, opContext); err != nil {
+		t.Fatal("prepare started battle", err)
+	}
+	if _, err = mode.StartDefense(ctx, fighter, appadventure.FightRequest{Formation: []int64{fighterPicks[0]}}, 2, opContext); err != nil {
+		t.Fatal("start battle before kick", err)
+	}
+	positions = defensePositions(t, mode, a, opContext)
+	if positions[1]["busy_type"] != int64(2) || positions[1]["player_id"] != int64(fighter.PlayerID) {
+		t.Fatalf("position 2 not in battle by fighter: %#v", positions[1])
+	}
+	if _, err = mode.KickDefense(ctx, a, fighter.PlayerID, opContext); err != nil {
+		t.Fatal("kick fighting member", err)
+	}
+	if _, err = mode.DefenseResult(ctx, fighter, appadventure.ResultRequest{Star: 3, Damage: 100, Formation: []int64{fighterPicks[0]}}, 2, opContext); !errors.Is(err, appsharedroom.ErrNotInRoom) {
+		t.Fatalf("kicked result %v, want not-in-room", err)
+	}
+	locator := fmt.Sprintf("room:%d/pos:2", roomID)
+	if open := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ADVENTURE_DEFENSE' AND domain_locator=$1 AND state<>'TERMINAL'`, locator); open != 1 {
+		t.Fatalf("kicked attempt open %d, want the started battle retained", open)
+	}
+	if _, err = mode.PrepareDefense(ctx, c, 2, opContext); err != nil {
+		t.Fatal("prepare after kicked battle", err)
+	}
+	if _, err = mode.StartDefense(ctx, c, appadventure.FightRequest{Formation: []int64{cPicks[0]}}, 2, opContext); err != nil {
+		t.Fatalf("next member start after kick: %v", err)
+	}
+	if closed := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ADVENTURE_DEFENSE' AND domain_locator=$1 AND terminal_kind='ADVENTURE_START_CLOSED'`, locator); closed != 1 {
+		t.Fatalf("start-closed attempts %d, want the kicked battle retired", closed)
+	}
+	if staged := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ADVENTURE_DEFENSE' AND domain_locator=$1 AND state='STAGED'`, locator); staged != 1 {
+		t.Fatalf("staged attempts %d, want the next member's START to proceed", staged)
+	}
+	if _, err = mode.QuitDefense(ctx, c, 2, opContext); err != nil {
+		t.Fatal("quit next member's battle", err)
+	}
+
+	// Exit frees the leaving member's busy position.
+	if _, err = mode.PrepareDefense(ctx, c, 3, opContext); err != nil {
+		t.Fatal("prepare before exit", err)
+	}
+	if _, err = mode.ExitDefense(ctx, c, opContext); err != nil {
+		t.Fatal("member exit", err)
+	}
+	positions = defensePositions(t, mode, a, opContext)
+	if positions[2]["busy_type"] != int64(0) {
+		t.Fatalf("departed member's position still busy: %#v", positions[2])
+	}
+	if _, err = mode.PrepareDefense(ctx, a, 3, opContext); err != nil {
+		t.Fatal("another member cannot prepare the exited position", err)
+	}
+
+	var raw string
+	if err = p.QueryRow(ctx, `SELECT payload::text FROM shared_rooms WHERE room_id=$1`, roomID).Scan(&raw); err != nil {
+		t.Fatal(err)
+	}
+	state, err := d.LoadRoomState([]byte(raw))
+	if err != nil {
+		t.Fatal(err)
+	}
+	freed := map[int64]bool{}
+	for _, push := range state.Pushes {
+		if push.Function != 8 {
+			continue
+		}
+		if position, ok := push.Body["monster_pos"].(float64); ok {
+			freed[int64(position)] = true
+		}
+	}
+	if !freed[2] || !freed[3] {
+		t.Fatalf("free pushes %+v", state.Pushes)
+	}
+
+	if _, err = mode.ExitDefense(ctx, a, opContext); err != nil {
+		t.Fatal("owner exit", err)
+	}
+}
+
+func defensePositions(t *testing.T, mode appadventure.Mode, actor identity.ActorContext, opContext operation.Context) []map[string]any {
+	t.Helper()
+	info, err := mode.Info(ctx, actor, d.EventDefense, opContext)
+	if err != nil {
+		t.Fatal(err)
+	}
+	detail, ok := info["detail"].(map[string]any)
+	if !ok {
+		t.Fatalf("2417 detail %#v", info)
+	}
+	rows, ok := detail["pos_statuses"].([]any)
+	if !ok || len(rows) != d.DefenseMonsterCount {
+		t.Fatalf("2417 pos_statuses %#v", detail["pos_statuses"])
+	}
+	out := make([]map[string]any, 0, len(rows))
+	for _, row := range rows {
+		position, _ := row.(map[string]any)
+		out = append(out, position)
+	}
+	return out
+}
+
+// R2: the result that solves a room's last position mails the room's band gift
+// once to each distinct defeater; a partial room and a replayed result mail
+// nothing.
+func TestI9_12AdventureDefenseGiftNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	a, aPicks := adventureOwner(t, p, server, 11, 10001001)
+	b, bPicks := adventureOwner(t, p, server, 11, 10001002)
+	clock := &leagueClock{at: time.Now().UTC().Add(2 * time.Minute)}
+	mode := adventureTestMode(t, p, clock, adventureOpponents{})
+	opContext := opPinned(installed(t, p))
+	opContext.StartedAt = clock.at
+	now := clock.at
+
+	putAdventureOccurrence(t, p, a.PlayerID, d.EventDefense, 0, now, now.Add(time.Hour), "gift-room-owner")
+	info, err := mode.Info(ctx, a, d.EventDefense, opContext)
+	if err != nil {
+		t.Fatal(err)
+	}
+	roomID := adventureRoomID(t, info)
+	if _, err = mode.EnterDefense(ctx, b, roomID, opContext); err != nil {
+		t.Fatal("defense join", err)
+	}
+	sourceKey := strconv.FormatInt(roomID, 10)
+	solve := func(player identity.ActorContext, hero, position int64) {
+		t.Helper()
+		if _, err := mode.PrepareDefense(ctx, player, position, opContext); err != nil {
+			t.Fatalf("prepare %d: %v", position, err)
+		}
+		if _, err := mode.StartDefense(ctx, player, appadventure.FightRequest{Formation: []int64{hero}}, position, opContext); err != nil {
+			t.Fatalf("start %d: %v", position, err)
+		}
+		if _, err := mode.DefenseResult(ctx, player, appadventure.ResultRequest{Star: 3, Damage: 100, Formation: []int64{hero}}, position, opContext); err != nil {
+			t.Fatalf("result %d: %v", position, err)
+		}
+	}
+
+	solve(a, aPicks[0], 1)
+	solve(b, bPicks[0], 2)
+	if mails := scalar(t, p, `SELECT count(*) FROM mail_records WHERE source_kind='ADVENTURE_DEFENSE' AND source_key=$1`, sourceKey); mails != 0 {
+		t.Fatalf("partial room mailed %d, want 0", mails)
+	}
+
+	solve(a, aPicks[0], 3)
+	if mails := scalar(t, p, `SELECT count(*) FROM mail_records WHERE source_kind='ADVENTURE_DEFENSE' AND source_key=$1`, sourceKey); mails != 2 {
+		t.Fatalf("completed room mailed %d, want one per distinct defeater", mails)
+	}
+	for _, player := range []identity.ActorContext{a, b} {
+		if got := scalar(t, p, `SELECT count(*) FROM mail_records WHERE source_kind='ADVENTURE_DEFENSE' AND source_key=$1 AND recipient_player_id=$2`, sourceKey, int64(player.PlayerID)); got != 1 {
+			t.Fatalf("recipient %d mailed %d, want 1", player.PlayerID, got)
+		}
+	}
+	if got := scalar(t, p, `SELECT count(*) FROM mail_attachments a JOIN mail_records m USING(mail_uuid) WHERE m.source_kind='ADVENTURE_DEFENSE' AND m.source_key=$1`, sourceKey); got != 8 {
+		t.Fatalf("band gift attachments %d, want 4 per winner", got)
+	}
+	if got := scalar(t, p, `SELECT count(*) FROM mail_attachments a JOIN mail_records m USING(mail_uuid) WHERE m.source_kind='ADVENTURE_DEFENSE' AND m.source_key=$1 AND a.item_id=50001014 AND a.amount=5`, sourceKey); got != 2 {
+		t.Fatalf("band gift item 50001014 counted %d, want one per winner", got)
+	}
+
+	replay, err := mode.DefenseResult(ctx, a, appadventure.ResultRequest{Star: 3, Damage: 100, Formation: []int64{aPicks[0]}}, 3, opContext)
+	if err != nil || !replay.Duplicate {
+		t.Fatalf("late result duplicate=%v err=%v", replay.Duplicate, err)
+	}
+	if mails := scalar(t, p, `SELECT count(*) FROM mail_records WHERE source_kind='ADVENTURE_DEFENSE' AND source_key=$1`, sourceKey); mails != 2 {
+		t.Fatalf("late result mailed %d, want no new mail", mails)
+	}
 }

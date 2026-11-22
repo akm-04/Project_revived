@@ -5,8 +5,12 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"gxb.local/backend/v2/internal/adapters/guildbroadcastworker"
 	"gxb.local/backend/v2/internal/adapters/postgres"
+	"gxb.local/backend/v2/internal/adapters/postgres/restorestore"
+	"gxb.local/backend/v2/internal/adapters/postgres/retentionstore"
+	"gxb.local/backend/v2/internal/adapters/river/retentionworker"
 	"log"
 	"os"
 	"os/signal"
@@ -26,21 +30,37 @@ func run() error {
 	if dsn == "" {
 		return errors.New("Guild broadcast worker requires GXB_POSTGRES_DSN")
 	}
+	retentionPolicies, e := retentionstore.PoliciesFromEnvironment()
+	if e != nil {
+		return e
+	}
 	p, e := postgres.Open(c, dsn, postgres.PoolSettings{MaxConns: 16, MinConns: 1, MaxConnLifetime: 30 * time.Minute, MaxConnIdleTime: 5 * time.Minute, HealthCheckPeriod: 30 * time.Second, ApplicationName: "gxb-guild-broadcast-worker"})
 	if e != nil {
 		return e
 	}
 	defer p.Close()
+	if e = (restorestore.Store{}).CheckWritable(c, p); e != nil {
+		return fmt.Errorf("refusing to start: %w", e)
+	}
 	ready, cancel := context.WithTimeout(c, 30*time.Second)
 	v, e := guildbroadcastworker.New(ready, p)
 	cancel()
 	if e != nil {
 		return e
 	}
+	retention, e := retentionworker.New(p, retentionPolicies)
+	if e != nil {
+		return e
+	}
 	log.Print("Guild broadcast worker configuration validated: finite Mail/reconcile routes; acquiring separate session owner before execution")
-	e = v.Run(c)
-	if errors.Is(e, context.Canceled) {
+	errs := make(chan error, 2)
+	go func() { errs <- v.Run(c) }()
+	go func() { errs <- retention.Run(c) }()
+	first := <-errs
+	stop()
+	<-errs
+	if errors.Is(first, context.Canceled) {
 		return nil
 	}
-	return e
+	return first
 }

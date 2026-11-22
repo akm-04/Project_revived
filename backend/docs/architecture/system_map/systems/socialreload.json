@@ -1,0 +1,49 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 500,
+    "name": "I7A4D_RELOAD"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {},
+  "row_locks": [],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [],
+ "name": "socialreload",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/socialinboxstore",
+  "internal/adapters/postgres/socialrelationstore"
+ ],
+ "tables": {
+  "owned": [],
+  "read": [
+   "player_social_roots",
+   "social_friend_requests",
+   "social_notices"
+  ],
+  "written": []
+ },
+ "tests": {
+  "integration": [
+   "guildinvite",
+   "socialactivation"
+  ],
+  "scenarios_naming": [],
+  "unit": []
+ }
+}

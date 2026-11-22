@@ -1,0 +1,55 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [],
+  "row_lock_methods": {},
+  "row_locks": [],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [],
+ "name": "generation",
+ "pushes": [],
+ "stores": [],
+ "tables": {
+  "owned": [],
+  "read": [],
+  "written": []
+ },
+ "tests": {
+  "integration": [
+   "guildbroadcast",
+   "guildinvite",
+   "missions",
+   "playerdisplay",
+   "profilefeedback",
+   "profilemedia",
+   "publication",
+   "publicprofilecommands",
+   "publicprofilefoundation",
+   "publicshowcase",
+   "socialactivation",
+   "socialprojection",
+   "socialrelation",
+   "undeliveredreplay"
+  ],
+  "scenarios_naming": [],
+  "unit": [
+   "dispatch_test.go",
+   "kernel_contract_test.go",
+   "reconcile_test.go",
+   "time_test.go",
+   "transaction_test.go"
+  ]
+ }
+}

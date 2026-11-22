@@ -1,2 +1,15 @@
 {"name":"guild","level":32,
- "steps":["wait:5","tap:guild","wait:10"],"settle_seconds":20,"expect_ok":[612]}
+ "note":"Real guildless lobby path: 612 reports guild_id 0, the Join window's production model calls run 598 then 576, the captured 576 rows carry the fields TeamJoinWindow.lua reads, and 580 applies to the first listed guild.",
+ "steps":[
+  "wait:5",
+  "lua:local backend=xyd.Backend.get() local original=backend.request backend.request=function(self,mid,params,cb,showError,skip,showLoading) return original(self,mid,params,function(code,reply) if mid==xyd.mid.GET_SELF_GUILD then __vc_612={code=code,reply=reply} elseif mid==xyd.mid.PLAYER_LOAD_APPLY_LIST_TEAM then __vc_598={code=code,reply=reply} elseif mid==xyd.mid.LOAD_ALL_TEAMS then __vc_576={code=code,reply=reply} elseif mid==xyd.mid.APPLY_TEAM then __vc_580={code=code,reply=reply} end if cb then cb(code,reply) end end,showError,skip,showLoading) end",
+  "fixture:guild_join_seed",
+  "tap:guild",
+  "wait:6",
+  "lua:if not __vc_612 or __vc_612.code~=xyd.error.OK or tonumber(__vc_612.reply.guild_info.guild_id)~=0 then error('vc-guild-612-guildless') end",
+  "lua:if not __vc_598 or __vc_598.code~=xyd.error.OK or type(__vc_598.reply)~='table' then error('vc-guild-598') end if not __vc_576 or __vc_576.code~=xyd.error.OK or type(__vc_576.reply.guild_infos)~='table' or #__vc_576.reply.guild_infos<1 then error('vc-guild-576') end local row=__vc_576.reply.guild_infos[1] if tonumber(row.guild_id)<=0 or row.name==nil or tonumber(row.icon)<=0 or tonumber(row.min_allow_level)<=0 or tonumber(row.member_num)<=0 or tonumber(row.apply_type)~=0 then error('vc-guild-576-row') end __vc_guild=tonumber(row.guild_id)",
+  "lua:local g=xyd.ModelManager.get():loadModel(xyd.ModelType.SELF_GUILD) g:applyTeam({guild_id=__vc_guild},function(code) if code~=xyd.error.OK then error('vc-guild-580-'..tostring(code)) end end)",
+  "wait:4",
+  "lua:if not __vc_580 or __vc_580.code~=xyd.error.OK then error('vc-guild-580-capture') end"
+ ],
+ "settle_seconds":20,"expect_ok":[612,598,576,580]}

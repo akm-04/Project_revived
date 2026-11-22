@@ -16,11 +16,14 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/marchstore"
+	"gxb.local/backend/v2/internal/adapters/stockruntime"
+	combat "gxb.local/backend/v2/internal/application/combat"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
 	app "gxb.local/backend/v2/internal/application/march"
 	"gxb.local/backend/v2/internal/application/missioninputs"
 	cd "gxb.local/backend/v2/internal/domain/combat"
+	"gxb.local/backend/v2/internal/domain/economy"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	d "gxb.local/backend/v2/internal/domain/march"
@@ -34,13 +37,17 @@ import (
 )
 
 func marchMode(t *testing.T, p *pg.Pool) app.Mode {
+	mode, _ := marchModeWithCombat(t, p)
+	return mode
+}
+func marchModeWithCombat(t *testing.T, p *pg.Pool) (app.Mode, combat.Service) {
 	values, content := i5store.Store{Queryer: p}, contentstore.Store{Queryer: p}
 	fight := combatService(t, p)
 	owner := compositeI5(p)
 	owner.MissionFresh = p
 	owner.MissionTime = pg.AuthoritativeTime{Queryer: p}
 	owner.Missions = &i5.MissionMaterializer{Store: values, Catalog: content, Activity: content, Observations: missioninputs.Reader{Spending: values, Heroes: characterstore.Store{Queryer: p}, Progression: values, Campaigns: campaignstore.Store{}, Privileges: privilegeProvider(p), Books: bookService(p, p)}}
-	return app.Mode{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}}, Fresh: p, Store: marchstore.Store{}, Content: content, Fence: values, Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: ownerSummoner(p), HeroLocks: characterstore.MarchHeroPort{Store: characterstore.Store{Queryer: p}}, Roster: fight.Inputs.Heroes, HeroWire: heroproj.StockHero, Opponents: topFloorService(t, p), Combat: fight, Stats: fight.Inputs.Stats, Facts: i5.ObjectiveFacts{Owner: owner, Open: values}, Grants: owner, Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+	return app.Mode{Timed: gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}}, Fresh: p, Store: marchstore.Store{}, Content: content, Fence: values, Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: ownerSummoner(p), HeroLocks: characterstore.MarchHeroPort{Store: characterstore.Store{Queryer: p}}, Roster: fight.Inputs.Heroes, HeroWire: heroproj.StockHero, Opponents: topFloorService(t, p), Combat: fight, Stats: fight.Inputs.Stats, Facts: i5.ObjectiveFacts{Owner: owner, Open: values}, Grants: owner, Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}, BattleCounts: battleCountObserver(p), PartnerMissions: libraryService(p, p)}, fight
 }
 func marchRecord(t *testing.T, p *pg.Pool, a identity.ActorContext) d.Run {
 	t.Helper()
@@ -116,6 +123,9 @@ func TestI9_5AMarchNativeRunCarryChestAndReset(t *testing.T) {
 	if _, err = s.Result(ctx, a, q, op()); err != nil {
 		t.Fatal("loss", err)
 	}
+	if got := battleCount(t, p, a.PlayerID, 1); got != 1 {
+		t.Fatalf("Girls Log count after a settled loss = %d, want 1", got)
+	}
 	r = marchRecord(t, p, a)
 	if r.Heroes["1"].HP != 1 || r.Heroes["1"].MP != 345 || r.Won {
 		t.Fatal("HP/SP not carried", r)
@@ -131,6 +141,9 @@ func TestI9_5AMarchNativeRunCarryChestAndReset(t *testing.T) {
 	if _, err = s.Result(ctx, a, q, op()); err != nil {
 		t.Fatal("win", err)
 	}
+	if got := battleCount(t, p, a.PlayerID, 1); got != 2 {
+		t.Fatalf("Girls Log count after a settled win = %d, want 2", got)
+	}
 	if _, err = s.Chest(ctx, a, 2, op()); !errors.Is(err, d.ErrRefused) {
 		t.Fatal("future chest", err)
 	}
@@ -145,8 +158,14 @@ func TestI9_5AMarchNativeRunCarryChestAndReset(t *testing.T) {
 	if err != nil || string(originalJSON) != string(replayJSON) {
 		t.Fatal("chest retry", err, string(originalJSON), string(replayJSON))
 	}
-	if _, err = s.Chest(ctx, a, 1, op()); !errors.Is(err, d.ErrRefused) {
-		t.Fatal("duplicate chest", err)
+	// A verdict-free retry (the client resends after a timeout with a new
+	// operation) replays the granted body instead of hiding the reward.
+	replayed, err := s.Chest(ctx, a, 1, op())
+	if err != nil || marchJSON(replayed["rewards"]) != marchJSON(awards["rewards"]) {
+		t.Fatal("chest retry replay", err)
+	}
+	if marchRecord(t, p, a).Passed != 1 || marchRecord(t, p, a).LifetimeChests != 1 {
+		t.Fatal("chest retry advanced twice")
 	}
 	if _, err = s.Extra(ctx, a, op()); !errors.Is(err, d.ErrRefused) {
 		t.Fatal("early Mystic chest", err)
@@ -248,8 +267,11 @@ func TestI9_5AMarchNativeAllStagesExtraAndConcurrentValue(t *testing.T) {
 				t.Fatal("March producer did not advance daily mission")
 			}
 			good, bad := marchPair(t, func() (map[string]any, error) { return s.Chest(ctx, a, stage, op()) })
-			if good != 1 || bad != 1 {
-				t.Fatal("chest double spend", good, bad)
+			if good != 2 || bad != 0 {
+				t.Fatal("chest concurrent retry", good, bad)
+			}
+			if r := marchRecord(t, p, a); r.Passed != stage || r.LifetimeChests != stage {
+				t.Fatal("chest double spend", r)
 			}
 		} else {
 			if _, err = s.Chest(ctx, a, stage, op()); err != nil {
@@ -278,8 +300,14 @@ func TestI9_5AMarchNativeAllStagesExtraAndConcurrentValue(t *testing.T) {
 			if e = tr.Commit(ctx); e != nil {
 				t.Fatal(e)
 			}
-			if _, e = s.Extra(ctx, a, op()); !errors.Is(e, d.ErrRefused) || marchRecord(t, p, a).Extra {
+			if _, e = s.Extra(ctx, a, op()); !errors.Is(e, economy.ErrInsufficientBalance) || marchRecord(t, p, a).Extra {
 				t.Fatal("insufficient Mystic purchase consumed chest", e)
+			}
+			dispatcher := stockruntime.MarchDispatcher{Authority: playtestAuthority{a}, Service: s}
+			refused := dispatcher.Dispatch(ctx, playtestRequest(a, 341, map[string]any{}))
+			replayed := dispatcher.Dispatch(ctx, playtestRequest(a, 341, map[string]any{}))
+			if refused.HTTPStatus != 409 || refused.Body["error_code"] != int64(20005) || replayed.HTTPStatus != 409 || replayed.Body["error_code"] != int64(20005) || marchRecord(t, p, a).Extra {
+				t.Fatalf("MID341 short crystal reply = %+v replay = %+v", refused, replayed)
 			}
 			grantGenuine(t, p, a, rev, "march-mystic-fixture", []grant.Line{{Kind: grant.ScalarCurrency, ResourceKey: "crystal", Amount: before}})
 			good, bad := marchPair(t, func() (map[string]any, error) { return s.Extra(ctx, a, op()) })
@@ -297,8 +325,8 @@ func TestI9_5AMarchNativeAllStagesExtraAndConcurrentValue(t *testing.T) {
 	if _, err := s.Start(ctx, a, app.Fight{Formation: team}, op()); !errors.Is(err, d.ErrRefused) {
 		t.Fatal("battle after final stage", err)
 	}
-	if _, err := s.Chest(ctx, a, 15, op()); !errors.Is(err, d.ErrRefused) {
-		t.Fatal("duplicate final chest", err)
+	if replay, err := s.Chest(ctx, a, 15, op()); err != nil || replay["rewards"] == nil {
+		t.Fatal("duplicate final chest replay", err)
 	}
 	// Extra exact retry on another genuine run, without fixture-authoring eligibility.
 	if _, err := s.Reset(ctx, a, op()); err != nil {
@@ -346,9 +374,9 @@ func TestI9_5AMarchNativeReportsDeathRollbackAndDailyManualReset(t *testing.T) {
 	// One omitted enemy must consume the rejected attempt without accepting state or a mission fact.
 	q := marchReport(marchRecord(t, p, a), int64(a.PlayerID), team, true)
 	q.Report.Enemies = q.Report.Enemies[:len(q.Report.Enemies)-1]
-	body, err := s.Result(ctx, a, q, op())
-	if err != nil || fmt.Sprint(body["error_code"]) != "1" || len(marchRecord(t, p, a).Heroes) != 0 {
-		t.Fatal("incomplete report", body, err)
+	_, err := s.Result(ctx, a, q, op())
+	if !errors.Is(err, d.ErrRefused) || len(marchRecord(t, p, a).Heroes) != 0 || marchRecord(t, p, a).Pending != "" {
+		t.Fatal("incomplete report", err, marchRecord(t, p, a))
 	}
 	if _, err = s.Start(ctx, a, app.Fight{Formation: team}, op()); err != nil {
 		t.Fatal(err)
@@ -464,6 +492,71 @@ func TestI9_5AMarchNativeVanguardSacrificeAndCanonicalForce(t *testing.T) {
 	}
 	if _, err = s.Advance(ctx, a, q, op()); !errors.Is(err, d.ErrRefused) {
 		t.Fatal("Vanguard after manual battle", err)
+	}
+}
+
+func TestI9_10MarchNativeStatusCoversEveryOwnedGirl(t *testing.T) {
+	p := pool(t)
+	rev := installed(t, p)
+	a := bornActor(t, p)
+	s := marchMode(t, p)
+	bornHero(t, p, a, rev, 10001001, 1)
+	bornHero(t, p, a, rev, 10001002, 2)
+	bornHero(t, p, a, rev, 10001003, 3)
+	compositeLevel(t, p, a, rev, 30)
+	team := []int64{1, 2, 0, 0, 0}
+	if _, err := s.Start(ctx, a, app.Fight{Formation: team}, op()); err != nil {
+		t.Fatal("start", err)
+	}
+	report := marchReport(marchRecord(t, p, a), int64(a.PlayerID), team, true)
+	report.Report.Allies[0].HP, report.Report.Allies[0].MP = 41, 123
+	report.Report.Allies[1].HP, report.Report.Allies[1].MP = 77, 456
+	body, err := s.Result(ctx, a, report, op())
+	if err != nil {
+		t.Fatal("result", err)
+	}
+	self := body["hero_status"].(map[string]any)["self_list"].(map[string]any)
+	if len(self) != 3 {
+		t.Fatal("self_list does not cover every owned girl", self)
+	}
+	used := self["1"].(d.Status)
+	if used.Health != 1 || used.HP != 41 || used.MP != 123 {
+		t.Fatal("carried status missing", used)
+	}
+	fresh := self["3"].(d.Status)
+	if fresh.Health != 0 || fresh.HP != 0 || fresh.MP != 0 {
+		t.Fatal("unused girl not fresh", fresh)
+	}
+	if _, saved := marchRecord(t, p, a).Heroes["3"]; saved {
+		t.Fatal("fresh entry was persisted into the run")
+	}
+	loaded, err := s.Load(ctx, a, op())
+	if err != nil {
+		t.Fatal("load", err)
+	}
+	if len(loaded["hero_status"].(map[string]any)["self_list"].(map[string]any)) != 3 {
+		t.Fatal("load projection incomplete", loaded)
+	}
+	detail := map[string]any{}
+	if err = s.OverlayMID1(ctx, p, a, false, time.Now(), detail); err != nil {
+		t.Fatal("MID1 overlay", err)
+	}
+	mid := detail["336"].(map[string]any)["hero_status"].(map[string]any)
+	if len(mid["self_list"].(map[string]any)) != 3 {
+		t.Fatal("MID1 336 projection incomplete", mid)
+	}
+	if len(mid["rent_list"].(map[string]any)) != 0 {
+		t.Fatal("absent loan must leave rent_list empty for the client's fresh default", mid)
+	}
+	raw, err := json.Marshal(self["3"])
+	if err != nil {
+		t.Fatal(err)
+	}
+	wire := map[string]any{}
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	decoder.UseNumber()
+	if err = decoder.Decode(&wire); err != nil || fmt.Sprint(wire["hero_id"]) != "3" || fmt.Sprint(wire["health"]) != "0" {
+		t.Fatal("fresh status wire shape", string(raw), err)
 	}
 }
 

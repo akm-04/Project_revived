@@ -3,12 +3,13 @@ package stockruntime
 import (
 	"context"
 	"encoding/json"
-	"errors"
+	"fmt"
 	"reflect"
 	"testing"
 
 	app "gxb.local/backend/v2/internal/application/heroevolution"
 	"gxb.local/backend/v2/internal/domain/economy"
+	ins "gxb.local/backend/v2/internal/domain/heroevolution"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 )
@@ -69,10 +70,15 @@ func TestI7C2IExactWireFieldsAndFailureEnvelope(t *testing.T) {
 	}
 	s.err = economy.ErrInsufficientBalance
 	r = d.Dispatch(context.Background(), heroReq(t, 2608, p))
-	if r.HTTPStatus != 400 || r.Body["evo_info"] != nil {
+	if r.HTTPStatus != 409 || r.Body["error_code"] != unprovenRefusalCode || r.Body["evo_info"] != nil {
 		t.Fatal("failed debit produced success callback", r)
 	}
-	s.err = errors.New("database unavailable")
+	s.err = fmt.Errorf("%w: %w", app.ErrRejected, ins.ErrInvalid)
+	r = d.Dispatch(context.Background(), heroReq(t, 2608, p))
+	if r.HTTPStatus != 400 || r.Body["error"] == nil {
+		t.Fatal("a recorded malformed rejection lost its class", r)
+	}
+	s.err = context.DeadlineExceeded
 	r = d.Dispatch(context.Background(), heroReq(t, 2608, p))
 	if r.HTTPStatus != 503 || r.Body["evo_info"] != nil {
 		t.Fatal("infrastructure failure disguised", r)

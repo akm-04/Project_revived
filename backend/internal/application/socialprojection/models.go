@@ -7,7 +7,9 @@ import (
 	dm "gxb.local/backend/v2/internal/application/frienddm"
 	"gxb.local/backend/v2/internal/application/playerpresentation"
 	"gxb.local/backend/v2/internal/application/socialinbox"
+	"gxb.local/backend/v2/internal/application/socialrecall"
 	"gxb.local/backend/v2/internal/application/socialrelation"
+	"gxb.local/backend/v2/internal/domain/identity"
 	"time"
 	"unicode/utf8"
 )
@@ -78,10 +80,13 @@ type Result struct {
 	Friends, Blocks, Players []Player
 	Requests                 []Requested
 	Notices                  []Notified
+	ShowGuildInviteNotices   bool
+	Recall                   socialrecall.RecallBase
+	RecallNames              map[identity.PlayerID]string
 	Scan                     ScanStats
 	SendCount, ReceiveCount  int
 }
 
 func emptyResult() Result {
-	return Result{Friends: []Player{}, Blocks: []Player{}, Players: []Player{}, Requests: []Requested{}, Notices: []Notified{}}
+	return Result{Friends: []Player{}, Blocks: []Player{}, Players: []Player{}, Requests: []Requested{}, Notices: []Notified{}, Recall: socialrecall.RecallBase{Doing: []socialrecall.RecallDoing{}, Done: []socialrecall.RecallDone{}, Got: []identity.PlayerID{}, Awarded: []int64{}, Recalling: []identity.PlayerID{}}, RecallNames: map[identity.PlayerID]string{}}
 }

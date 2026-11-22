@@ -1,0 +1,167 @@
+{
+ "background": [],
+ "content": [
+  "content_emoticon_catalogs"
+ ],
+ "contracts": [
+  {
+   "count": 2,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/friend_dm.go"
+ ],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [
+   {
+    "name": "frienddm.LockRank",
+    "rank": 380
+   }
+  ],
+  "row_lock_methods": {
+   "friend_dm_roots": [
+    "frienddmstore.Snapshot"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ],
+   "realtime_presence_owner_state": [
+    "presencestore.AssertOwnerFenceTx"
+   ]
+  },
+  "row_locks": [
+   "friend_dm_roots",
+   "players",
+   "realtime_presence_owner_state"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/friend_dm.go",
+    "line": 52
+   },
+   "mid": 515,
+   "name": "CHAT_TO_FRIEND"
+  }
+ ],
+ "name": "frienddm",
+ "pushes": [
+  {
+   "file": "internal/adapters/stockruntime/friend_dm_delivery.go",
+   "kind": "direct",
+   "line": 19,
+   "mid": 516,
+   "roles": [
+    "Role",
+    "World"
+   ]
+  },
+  {
+   "file": "internal/adapters/stockruntime/friend_dm_delivery.go",
+   "kind": "direct",
+   "line": 19,
+   "mid": 36855,
+   "roles": [
+    "Role",
+    "World"
+   ]
+  }
+ ],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/frienddmstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/presencestore"
+ ],
+ "tables": {
+  "owned": [
+   "friend_dm_delivery",
+   "friend_dm_occurrences",
+   "friend_dm_projection_receipts",
+   "friend_dm_roots"
+  ],
+  "read": [
+   "content_emoticon_catalogs",
+   "friend_dm_delivery",
+   "friend_dm_occurrences",
+   "friend_dm_roots",
+   "gxb_content_activation",
+   "gxb_content_revisions",
+   "players",
+   "realtime_presence_owner_state"
+  ],
+  "written": [
+   "friend_dm_delivery",
+   "friend_dm_occurrences",
+   "friend_dm_projection_receipts",
+   "friend_dm_roots"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "socialactivation",
+   "socialprojection"
+  ],
+  "scenarios_naming": [],
+  "unit": []
+ }
+}

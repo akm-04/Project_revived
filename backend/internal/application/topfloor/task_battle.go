@@ -28,11 +28,15 @@ type TaskStartCommand struct {
 func taskLocator(server identity.LogicalServerID, player identity.PlayerID) cd.Locator {
 	return cd.Locator{DomainKind: "TOP_FLOOR_TASK", AuthorityScope: fmt.Sprintf("server:%d", server), DomainLocator: fmt.Sprintf("challenger:%d", player)}
 }
+
+// The stage is the opponent and the vengeance, not the chosen team: I8_PARENT_CONTRACT_V1
+// generation_supersede replays the frozen START when only a formation, pet or leader changed.
 func taskFingerprint(player identity.PlayerID, command TaskStartCommand) string {
 	raw, _ := json.Marshal(struct {
-		Player  identity.PlayerID
-		Command TaskStartCommand
-	}{player, command})
+		Player identity.PlayerID
+		Enemy  int64
+		Avenge bool
+	}{player, command.Enemy, command.Avenge})
 	digest := sha256.Sum256(raw)
 	return hex.EncodeToString(digest[:])
 }
@@ -59,7 +63,10 @@ func (service Service) StartTask(requestContext context.Context, actor identity.
 	if err != nil {
 		return FightView{}, err
 	}
-	if found && latest.Fight.Fingerprint == fingerprint && (latest.Fight.Status == domain.StatusStarted || now.Sub(latest.Fight.StartedAt) < replayWindow) {
+	openReplay := found && latest.Fight.Fingerprint == fingerprint && latest.Fight.Status == domain.StatusStarted
+	settledReplay := found && latest.Fight.Fingerprint == fingerprint && latest.Fight.PetID == command.PetID && latest.Leader == command.Leader &&
+		slices.Equal(latest.Fight.Formation, command.Formation) && now.Sub(latest.Fight.StartedAt) < replayWindow
+	if openReplay || settledReplay {
 		return service.finishTask(requestContext, latest, op)
 	}
 	if found && latest.Fight.Status == domain.StatusStarted {
@@ -88,6 +95,10 @@ func (service Service) StartTask(requestContext context.Context, actor identity.
 			return err
 		}
 		at := scope.Operation.DecisionAt()
+		snapshot, snapshotFound, err := service.Store.ReadOfferSnapshotTx(requestContext, scope.Tx, actor.PlayerID, domain.OfferScopeSpecial, true)
+		if err != nil {
+			return err
+		}
 		formation, _, err := service.taskTeam(requestContext, scope.Tx, catalog, period, actor.PlayerID, domain.TaskModeDefense{Heroes: command.Formation, Pet: command.PetID, Leader: command.Leader}, at)
 		if err != nil {
 			return err
@@ -110,15 +121,23 @@ func (service Service) StartTask(requestContext context.Context, actor identity.
 			return domain.ErrRefused
 		}
 		display, err := service.taskDisplay(requestContext, scope.Tx, catalog, period, opponent, at)
-		if err != nil {
+		if err = taskOfferError(err, command.Avenge); err != nil {
 			return err
 		}
 		rank, _, err := service.Store.TaskRankOfTx(requestContext, scope.Tx, actor.LogicalServerID, period.Rotation.Number, domain.Occupant{Player: actor.PlayerID})
 		if err != nil {
 			return err
 		}
+		if !command.Avenge {
+			if err = domain.MatchOfferSnapshot(snapshot, snapshotFound, period.Rotation.Number, rank, display.Occupant, display.Rank); err != nil {
+				return err
+			}
+		}
 		if command.Avenge && catalog.AvengeType(rank, display.Rank) != 0 {
 			return domain.ErrRefused
+		}
+		if err = service.requireTaskDefense(requestContext, scope.Tx, catalog, period, actor.PlayerID, player, at); err != nil {
+			return err
 		}
 		next := player
 		next.Player = catalog.Rolled(player.Player, at)
@@ -197,11 +216,11 @@ func (service Service) StartTask(requestContext context.Context, actor identity.
 		if err != nil {
 			return err
 		}
-		started, err := service.Combat.StartTx(requestContext, scope.Tx, coherent, combat.StartRequest{Actor: actor, Locator: taskLocator(actor.LogicalServerID, actor.PlayerID), GenerationRef: domain.TaskModeContractID, StartFingerprint: fingerprint, ResultDeadline: at.Add(resultWindow), Battle: battle})
+		started, err := service.Combat.StartTx(requestContext, scope.Tx, coherent, combat.StartRequest{Mode: cd.ModeTopFloorTask, Actor: actor, Locator: taskLocator(actor.LogicalServerID, actor.PlayerID), GenerationRef: domain.TaskModeContractID, StartFingerprint: fingerprint, ResultDeadline: at.Add(resultWindow), Battle: battle})
 		if err != nil {
 			return err
 		}
-		fight = domain.TaskModeFight{Fight: domain.Fight{AttemptID: started.Attempt.ID, Server: actor.LogicalServerID, Challenger: actor.PlayerID, Defender: opponent, Avenge: command.Avenge, Fingerprint: fingerprint, Formation: slices.Clone(command.Formation), PetID: command.PetID, ChallengerRank: rank, DefenderRank: display.Rank, StartedAt: at, Status: domain.StatusStarted, StateVersion: 1}, PeriodNumber: period.Rotation.Number, Mode: period.Rotation.Mode, Formation: formation, Enemy: display}
+		fight = domain.TaskModeFight{Fight: domain.Fight{AttemptID: started.Attempt.ID, Server: actor.LogicalServerID, Challenger: actor.PlayerID, Defender: opponent, Avenge: command.Avenge, Fingerprint: fingerprint, Formation: slices.Clone(command.Formation), PetID: command.PetID, ChallengerRank: rank, DefenderRank: display.Rank, StartedAt: at, Status: domain.StatusStarted, StateVersion: 1}, PeriodNumber: period.Rotation.Number, Mode: period.Rotation.Mode, Leader: command.Leader, Formation: formation, Enemy: display}
 		return service.Store.InsertTaskFightTx(requestContext, scope.Tx, fight)
 	})
 	if err != nil {
@@ -385,7 +404,12 @@ func (service Service) settleTask(requestContext context.Context, fight domain.T
 		current.Fight.Outcome = &outcome
 		current.Fight.SettledAt = &at
 		current.Fight.StateVersion++
-		return service.Store.FinishTaskFightTx(requestContext, scope.Tx, current, previous)
+		if err = service.Store.FinishTaskFightTx(requestContext, scope.Tx, current, previous); err != nil {
+			return err
+		}
+		// Only the challenger's formation is frozen on the fight; the defender has
+		// no stored own roster here, so no defender count is claimed (G2 H2).
+		return service.BattleCounts.ObserveBattleTx(requestContext, scope.Tx, current.Fight.Challenger, current.Fight.Formation, at)
 	})
 	return err
 }

@@ -19,21 +19,21 @@
  },
  "counts": {
   "by_disposition": {
-   "DELIVERED": 185,
-   "ACTIVE": 415,
-   "LATER": 503,
-   "INACTIVE_SUPERSEDED": 59,
+   "DELIVERED": 196,
+   "ACTIVE": 371,
+   "INACTIVE_SUPERSEDED": 102,
+   "LATER": 502,
    "INACTIVE_D79": 21
   },
   "active_by_stage": {
-   "I9-11": 72,
+   "I9-11": 34,
+   "I9-10": 111,
    "I9-3": 17,
    "I9-4": 7,
    "I9-4D": 12,
-   "I9-10": 112,
    "I9-7": 42,
    "I9-5": 24,
-   "I9-8": 71,
+   "I9-8": 66,
    "I9-9": 28,
    "I9-6": 30
   }
@@ -54,7 +54,7 @@
    "family": "STOCK_COMPAT_MISC",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -62,8 +62,8 @@
    "name": "LOAD_GM_QUESTIONS",
    "family": "STOCK_COMPAT_MISC",
    "disposition": "ACTIVE",
-   "target": "I9-11",
-   "v2": "unimplemented",
+   "target": "I9-10",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -71,18 +71,19 @@
    "name": "ASK_GM_QUESTION",
    "family": "STOCK_COMPAT_MISC",
    "disposition": "ACTIVE",
-   "target": "I9-11",
-   "v2": "unimplemented",
+   "target": "I9-10",
+   "v2": "implemented",
    "v1": null
   },
   {
    "mid": 6,
    "name": "LOAD_REGIONS",
    "family": "STOCK_COMPAT_MISC",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 V2 11F C2: no sender; region directory is MID 18"
   },
   {
    "mid": 7,
@@ -97,10 +98,11 @@
    "mid": 17,
    "name": "LOAD_PLAYER_INFO",
    "family": "STOCK_COMPAT_MISC",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v1": "STATE_BACKED",
+   "note": "I9-11 V2 11D C5: no live sender; shared 409+35028 refusal"
   },
   {
    "mid": 18,
@@ -115,19 +117,21 @@
    "mid": 20,
    "name": "LOAD_SCROLLS",
    "family": "INVENTORY_ITEM_USE",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v1": "STATE_BACKED",
+   "note": "I9-11 reality check: unreachable; loadScrolls has no caller and the client has no scroll table; shared 409+35028 refusal"
   },
   {
    "mid": 21,
    "name": "LOAD_ESSENCES",
    "family": "INVENTORY_ITEM_USE",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v1": "STATE_BACKED",
+   "note": "I9-11 reality check: only the dead legacy HeroWindow calls loadEssences (no live opener); shared 409+35028 refusal"
   },
   {
    "mid": 23,
@@ -153,7 +157,7 @@
    "family": "INVENTORY_ITEM_USE",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -182,7 +186,7 @@
    "family": "STOCK_COMPAT_MISC",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -200,7 +204,7 @@
    "family": "SHOP",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED",
    "note": "D85/D87: core currency shops move into I9-11; mode coins earned in I9 need a sink and daily mission 109 buys from them"
   },
@@ -210,7 +214,7 @@
    "family": "SHOP",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB",
    "note": "D85/D87: core currency shops move into I9-11; mode coins earned in I9 need a sink and daily mission 109 buys from them"
   },
@@ -220,7 +224,7 @@
    "family": "SHOP",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB",
    "note": "D85/D87: core currency shops move into I9-11; mode coins earned in I9 need a sink and daily mission 109 buys from them"
   },
@@ -228,11 +232,11 @@
    "mid": 35,
    "name": "SHOP_MAGIC_UNLOCK",
    "family": "SHOP",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
    "v1": "STATE_BACKED",
-   "note": "D85/D87: core currency shops move into I9-11; mode coins earned in I9 need a sink and daily mission 109 buys from them"
+   "note": "I9-11 V2 11C C2: no live sender; shared 409+35028 refusal"
   },
   {
    "mid": 36,
@@ -249,7 +253,7 @@
    "family": "SHOP",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED",
    "note": "D85/D87: core currency shops move into I9-11; mode coins earned in I9 need a sink and daily mission 109 buys from them"
   },
@@ -259,7 +263,7 @@
    "family": "SHOP",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB",
    "note": "D85/D87: core currency shops move into I9-11; mode coins earned in I9 need a sink and daily mission 109 buys from them"
   },
@@ -269,17 +273,18 @@
    "family": "HERO_ASSET_RESIDUAL",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
    "mid": 48,
    "name": "LOAD_HERO",
    "family": "HERO_ASSET_RESIDUAL",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v1": "STATE_BACKED",
+   "note": "RULING_I9-11_UNSERVED_MIDS addendum (lead 2026-11-19): no request sender in the current client (src_64 defines the id only); shared 409+35028 refusal"
   },
   {
    "mid": 49,
@@ -323,7 +328,7 @@
    "family": "HERO_ASSET_RESIDUAL",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -375,8 +380,8 @@
    "mid": 59,
    "name": "STONE_SUMMON_HERO",
    "family": "SUMMON_GACHA",
-   "disposition": "LATER",
-   "target": "I10",
+   "disposition": "DELIVERED",
+   "target": null,
    "v2": "implemented",
    "v1": "STATE_BACKED"
   },
@@ -420,28 +425,31 @@
    "mid": 64,
    "name": "EXPAND_HERO_SLOTS",
    "family": "HERO_ASSET_RESIDUAL",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 V2 11A A1: unreachable; no hero_slots_expand window and no heroSlot table, so no sender exists; shared 409+35028 refusal"
   },
   {
    "mid": 65,
    "name": "LOAD_COLLECTED_HEROS",
    "family": "HERO_ASSET_RESIDUAL",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v1": "STATE_BACKED",
+   "note": "I9-11 reality check: loadCollectedHeros has no caller; shared 409+35028 refusal"
   },
   {
    "mid": 66,
    "name": "DISMISS_HERO",
    "family": "HERO_ASSET_RESIDUAL",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 V2 11A A1: unreachable; no code opens hero_setting, so no sender exists; shared 409+35028 refusal"
   },
   {
    "mid": 67,
@@ -501,10 +509,11 @@
    "mid": 80,
    "name": "LOAD_RUNE",
    "family": "RUNE",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v1": "STATE_BACKED",
+   "note": "I9-11 V2 11D C6 D1: no live sender; shared 409+35028 refusal"
   },
   {
    "mid": 81,
@@ -521,7 +530,7 @@
    "family": "INVENTORY_ITEM_USE",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -537,19 +546,21 @@
    "mid": 84,
    "name": "EQUIP_RUNE",
    "family": "RUNE",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 V2 11D C6 D1: no live sender; shared 409+35028 refusal"
   },
   {
    "mid": 85,
    "name": "UNEQUIP_RUNE",
    "family": "RUNE",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 V2 11D C6 D1: no live sender; shared 409+35028 refusal"
   },
   {
    "mid": 86,
@@ -557,7 +568,7 @@
    "family": "INVENTORY_ITEM_USE",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -566,7 +577,7 @@
    "family": "INVENTORY_ITEM_USE",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -575,7 +586,7 @@
    "family": "INVENTORY_ITEM_USE",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -593,17 +604,18 @@
    "family": "INVENTORY_ITEM_USE",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
    "mid": 91,
    "name": "OPEN_ACT_ITEM",
    "family": "INVENTORY_ITEM_USE",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 reality check: OpenActItemWindow is not in window.lua, so the request is never sent; shared 409+35028 refusal"
   },
   {
    "mid": 96,
@@ -611,7 +623,7 @@
    "family": "GOLDEN_HAND",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -620,7 +632,7 @@
    "family": "INVENTORY_ITEM_USE",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -638,7 +650,7 @@
    "family": "HERO_ASSET_RESIDUAL",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -726,10 +738,11 @@
    "mid": 120,
    "name": "GET_COMMENT_AWARD",
    "family": "STOCK_COMPAT_MISC",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": "LITERAL_STUB"
+   "v1": "LITERAL_STUB",
+   "note": "I9-11 V2 11F C3: iOS app-store review window, client defaults closed"
   },
   {
    "mid": 121,
@@ -862,82 +875,91 @@
    "mid": 144,
    "name": "LOAD_BUILDING",
    "family": "LEGACY_BUILDINGS",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "RULING_I9-11_UNSERVED_MIDS addendum (lead 2026-11-19): no request sender in the current client (src_64 defines the id only and maps the reply event in Backend.lua); shared 409+35028 refusal"
   },
   {
    "mid": 145,
    "name": "OPEN_BUILDING",
    "family": "LEGACY_BUILDINGS",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "RULING_I9-11_UNSERVED_MIDS addendum (lead 2026-11-19): no request sender in the current client (src_64 defines the id only and maps the reply event in Backend.lua); shared 409+35028 refusal"
   },
   {
    "mid": 146,
    "name": "BUILDING_UPGRADE",
    "family": "LEGACY_BUILDINGS",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "RULING_I9-11_UNSERVED_MIDS addendum (lead 2026-11-19): no request sender in the current client (src_64 defines the id only and maps the reply event in Backend.lua); shared 409+35028 refusal"
   },
   {
    "mid": 147,
    "name": "BUILDING_OUTPUT",
    "family": "LEGACY_BUILDINGS",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "RULING_I9-11_UNSERVED_MIDS addendum (lead 2026-11-19): no request sender in the current client (src_64 defines the id only and maps the reply event in Backend.lua); shared 409+35028 refusal"
   },
   {
    "mid": 148,
    "name": "BUILIDNG_PARTNER",
    "family": "LEGACY_BUILDINGS",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "RULING_I9-11_UNSERVED_MIDS addendum (lead 2026-11-19): no request sender in the current client (src_64 defines the id only and maps the reply event in Backend.lua); shared 409+35028 refusal"
   },
   {
    "mid": 149,
    "name": "LOAD_WISH_INFO",
    "family": "LEGACY_BUILDINGS",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "RULING_I9-11_UNSERVED_MIDS addendum (lead 2026-11-19): no request sender in the current client (src_64 defines the id only and maps the reply event in Backend.lua); shared 409+35028 refusal"
   },
   {
    "mid": 150,
    "name": "WISH",
    "family": "LEGACY_BUILDINGS",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "RULING_I9-11_UNSERVED_MIDS addendum (lead 2026-11-19): no request sender in the current client (src_64 defines the id only and maps the reply event in Backend.lua); shared 409+35028 refusal"
   },
   {
    "mid": 151,
    "name": "LOAD_ALL_BUILDING_INFO",
    "family": "LEGACY_BUILDINGS",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "RULING_I9-11_UNSERVED_MIDS addendum (lead 2026-11-19): no request sender in the current client (src_64 defines the id only and maps the reply event in Backend.lua); shared 409+35028 refusal"
   },
   {
    "mid": 152,
    "name": "LOAD_YANWUCHANG_HERO_EXP",
    "family": "LEGACY_BUILDINGS",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "RULING_I9-11_UNSERVED_MIDS addendum (lead 2026-11-19): no request sender in the current client (src_64 defines the id only and maps the reply event in Backend.lua); shared 409+35028 refusal"
   },
   {
    "mid": 160,
@@ -1189,7 +1211,7 @@
    "family": "SOCIAL_RECALL_EXCHANGE",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -1207,7 +1229,7 @@
    "family": "SOCIAL_RECALL_EXCHANGE",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -1216,80 +1238,88 @@
    "family": "SOCIAL_RECALL_EXCHANGE",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
    "mid": 208,
    "name": "LOAD_BATTLE_FORMATION",
    "family": "BATTLE_LEGACY_ENVELOPE",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v1": "STATE_BACKED",
+   "note": "I9-11 V2 11D C6 D2: no live sender; shared 409+35028 refusal"
   },
   {
    "mid": 209,
    "name": "SET_FORMATION",
    "family": "BATTLE_LEGACY_ENVELOPE",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v1": "STATE_BACKED",
+   "note": "I9-11 V2 11D C6 D2: no live sender; shared 409+35028 refusal"
   },
   {
    "mid": 210,
    "name": "ENTER_BATTLE",
    "family": "BATTLE_LEGACY_ENVELOPE",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": "LITERAL_STUB"
+   "v1": "LITERAL_STUB",
+   "note": "I9-11 V2 11D C6: no live sender; shared 409+35028 refusal"
   },
   {
    "mid": 211,
    "name": "LOAD_FRIEND_REP_HEROS",
    "family": "BATTLE_LEGACY_ENVELOPE",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": "LITERAL_STUB"
+   "v1": "LITERAL_STUB",
+   "note": "I9-11 V2 11D C6 D2: no live sender; shared 409+35028 refusal"
   },
   {
    "mid": 212,
    "name": "END_BATTLE",
    "family": "BATTLE_LEGACY_ENVELOPE",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": "LITERAL_STUB"
+   "v1": "LITERAL_STUB",
+   "note": "I9-11 V2 11D C6: no live sender; shared 409+35028 refusal"
   },
   {
    "mid": 213,
    "name": "BATTLE_REVIVE",
    "family": "BATTLE_LEGACY_ENVELOPE",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": "LITERAL_STUB"
+   "v1": "LITERAL_STUB",
+   "note": "I9-11 V2 11D C6: no live sender; shared 409+35028 refusal"
   },
   {
    "mid": 224,
    "name": "LOAD_GIFTBOX",
    "family": "INVENTORY_ITEM_USE",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 V2 11B B8: no live sender; shared 409+35028 refusal"
   },
   {
    "mid": 225,
    "name": "RECEIVE_GIFT_BOX_ITEM",
    "family": "INVENTORY_ITEM_USE",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 V2 11B B8: no live sender; shared 409+35028 refusal"
   },
   {
    "mid": 228,
@@ -1304,8 +1334,8 @@
    "mid": 229,
    "name": "ACTIVITIES",
    "family": "ACTIVITY_LONG_TAIL",
-   "disposition": "LATER",
-   "target": "I10/I10.5",
+   "disposition": "DELIVERED",
+   "target": null,
    "v2": "implemented",
    "v1": "STATE_BACKED"
   },
@@ -1349,8 +1379,8 @@
    "mid": 234,
    "name": "LOAD_SINGLE_ACTIVITY",
    "family": "SINGLE_DAY",
-   "disposition": "LATER",
-   "target": "I10/I10.5",
+   "disposition": "DELIVERED",
+   "target": null,
    "v2": "implemented",
    "v1": "STATE_BACKED"
   },
@@ -1414,7 +1444,7 @@
    "family": "INVENTORY_ITEM_USE",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -1452,6 +1482,16 @@
    "target": "I10/I10.5",
    "v2": "unimplemented",
    "v1": null
+  },
+  {
+   "mid": 246,
+   "name": "SAKURA_FIGHT_RESULT",
+   "family": "SAKURA",
+   "disposition": "INACTIVE_SUPERSEDED",
+   "target": "I9-11",
+   "v2": "unimplemented",
+   "v1": null,
+   "note": "11D C6: shadowed by 1826 in mid.lua"
   },
   {
    "mid": 247,
@@ -1591,6 +1631,16 @@
    "target": "I9-7",
    "v2": "implemented",
    "v1": "LITERAL_STUB"
+  },
+  {
+   "mid": 279,
+   "name": "ARENA_FIGHT_RESULT",
+   "family": "BATTLE_LEGACY_ENVELOPE",
+   "disposition": "ACTIVE",
+   "target": "I9-11",
+   "v2": "implemented",
+   "v1": null,
+   "note": "11D C7: F4e duplicate terminal 200/30005"
   },
   {
    "mid": 280,
@@ -1909,9 +1959,9 @@
    "mid": 354,
    "name": "QUERY_CHARGE_DATA",
    "family": "CHARGE_VIP_GIFTPUSH",
-   "disposition": "LATER",
-   "target": "I10",
-   "v2": "unimplemented",
+   "disposition": "ACTIVE",
+   "target": "I9-10",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -1947,7 +1997,7 @@
    "family": "SOCIAL_RECALL_EXCHANGE",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "DISPATCHER_METHOD"
   },
   {
@@ -1956,26 +2006,27 @@
    "family": "SOCIAL_RECALL_EXCHANGE",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
    "mid": 386,
    "name": "SEND_INVITE_CODE",
    "family": "UNCLASSIFIED_LONG_TAIL",
-   "disposition": "LATER",
-   "target": "I10/I10.5",
-   "v2": "unimplemented",
+   "disposition": "ACTIVE",
+   "target": "I9-10",
+   "v2": "implemented",
    "v1": null
   },
   {
    "mid": 435,
    "name": "LOAD_GET_REQUEST_PLAYERS",
    "family": "SOCIAL_RECALL_EXCHANGE",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-10",
    "v2": "unimplemented",
-   "v1": "LITERAL_STUB"
+   "v1": "LITERAL_STUB",
+   "note": "I9-11 reality check: the current client's guard sends MID 182 as ACCEPT_ALL_FRIEND_REQUEST (old LOAD_SEND_REQUEST_PLAYERS), so 435 is never reached; 176 already carries request_list; shared 409+35028 refusal"
   },
   {
    "mid": 513,
@@ -1999,10 +2050,11 @@
    "mid": 517,
    "name": "ILLUSION_INVITE",
    "family": "ILLUSION_FANTASY",
-   "disposition": "ACTIVE",
-   "target": "I9-8",
+   "disposition": "INACTIVE_SUPERSEDED",
+   "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 T33 A-146: superseded under I9_ILLUSION_V1 C8/C10; no client sender"
   },
   {
    "mid": 518,
@@ -2653,7 +2705,7 @@
    "family": "BATTLE_LEGACY_ENVELOPE",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -2783,8 +2835,8 @@
    "name": "GET_VIP_AWARD",
    "family": "CHARGE_VIP_GIFTPUSH",
    "disposition": "ACTIVE",
-   "target": "I9-11",
-   "v2": "unimplemented",
+   "target": "I9-10",
+   "v2": "implemented",
    "v1": "STATE_BACKED",
    "note": "D80 obligation I9-GET-VIP-AWARD; the rest of CHARGE_VIP_GIFTPUSH is I10A recharge"
   },
@@ -2801,8 +2853,8 @@
    "mid": 768,
    "name": "GET_REARENA_INFO",
    "family": "BEACH",
-   "disposition": "LATER",
-   "target": "I10/I10.5",
+   "disposition": "DELIVERED",
+   "target": null,
    "v2": "implemented",
    "v1": null
   },
@@ -2850,6 +2902,16 @@
    "target": null,
    "v2": "implemented",
    "v1": null
+  },
+  {
+   "mid": 774,
+   "name": "REARENA_END_FIGHT",
+   "family": "V2_DELIVERED_OTHER",
+   "disposition": "DELIVERED",
+   "target": null,
+   "v2": "implemented",
+   "v1": null,
+   "note": "11D C9: zlib sibling served by arena_dispatcher"
   },
   {
    "mid": 775,
@@ -2909,8 +2971,8 @@
    "mid": 781,
    "name": "PET_SUMMON",
    "family": "SUMMON_GACHA",
-   "disposition": "LATER",
-   "target": "I10",
+   "disposition": "DELIVERED",
+   "target": null,
    "v2": "implemented",
    "v1": "STATE_BACKED"
   },
@@ -3242,7 +3304,7 @@
    "family": "LIBRARY",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3251,7 +3313,7 @@
    "family": "LIBRARY",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3260,7 +3322,7 @@
    "family": "LIBRARY",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3269,7 +3331,7 @@
    "family": "LIBRARY",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -3287,7 +3349,7 @@
    "family": "LIBRARY",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3296,7 +3358,7 @@
    "family": "LIBRARY",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3305,7 +3367,7 @@
    "family": "LIBRARY",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3323,7 +3385,7 @@
    "family": "LIBRARY",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3332,7 +3394,7 @@
    "family": "LIBRARY",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3341,7 +3403,7 @@
    "family": "LIBRARY",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3350,7 +3412,7 @@
    "family": "LIBRARY",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3359,7 +3421,7 @@
    "family": "LIBRARY",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3368,7 +3430,7 @@
    "family": "LIBRARY",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3377,7 +3439,7 @@
    "family": "LIBRARY",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3404,7 +3466,7 @@
    "family": "LIBRARY",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3440,7 +3502,7 @@
    "family": "LIBRARY",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3449,7 +3511,7 @@
    "family": "LIBRARY",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3458,7 +3520,7 @@
    "family": "LIBRARY",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -3523,7 +3585,7 @@
    "family": "STOCK_COMPAT_MISC",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -3532,7 +3594,7 @@
    "family": "STOCK_COMPAT_MISC",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -3629,10 +3691,11 @@
    "mid": 1051,
    "name": "HERO_SELL_AWARD",
    "family": "HERO_ASSET_RESIDUAL",
-   "disposition": "ACTIVE",
-   "target": "I9-11",
+   "disposition": "LATER",
+   "target": "I10",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 V2: hero sell award moves to I10"
   },
   {
    "mid": 1056,
@@ -3694,7 +3757,7 @@
    "family": "EVENT_CENTRE_BUILDINGS",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3703,7 +3766,7 @@
    "family": "EVENT_CENTRE_BUILDINGS",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3712,7 +3775,7 @@
    "family": "EVENT_CENTRE_BUILDINGS",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3721,7 +3784,7 @@
    "family": "EVENT_CENTRE_BUILDINGS",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3730,7 +3793,7 @@
    "family": "EVENT_CENTRE_BUILDINGS",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3775,7 +3838,7 @@
    "family": "EVENT_CENTRE_BUILDINGS",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3784,7 +3847,7 @@
    "family": "EVENT_CENTRE_BUILDINGS",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3793,7 +3856,7 @@
    "family": "EVENT_CENTRE_BUILDINGS",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3802,7 +3865,7 @@
    "family": "EVENT_CENTRE_BUILDINGS",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3811,7 +3874,7 @@
    "family": "EVENT_CENTRE_BUILDINGS",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3820,7 +3883,7 @@
    "family": "EVENT_CENTRE_BUILDINGS",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3829,7 +3892,7 @@
    "family": "EVENT_CENTRE_BUILDINGS",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3838,7 +3901,7 @@
    "family": "EVENT_CENTRE_BUILDINGS",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3847,7 +3910,7 @@
    "family": "EVENT_CENTRE_BUILDINGS",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3856,7 +3919,7 @@
    "family": "EVENT_CENTRE_BUILDINGS",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -3865,7 +3928,7 @@
    "family": "EVENT_CENTRE_BUILDINGS",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -4335,10 +4398,11 @@
    "mid": 1304,
    "name": "GET_OFFLINE_INFO",
    "family": "STOCK_COMPAT_MISC",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v1": "STATE_BACKED",
+   "note": "I9-11 V2 11F C4: no standalone caller; served as the MID 1 detail by achievement"
   },
   {
    "mid": 1312,
@@ -4469,10 +4533,11 @@
    "mid": 1348,
    "name": "ILLUSION_RANK_LIST",
    "family": "ILLUSION_FANTASY",
-   "disposition": "ACTIVE",
-   "target": "I9-8",
+   "disposition": "INACTIVE_SUPERSEDED",
+   "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 T33 A-146: superseded under I9_ILLUSION_V1 C8/C10; no client sender"
   },
   {
    "mid": 1349,
@@ -4538,10 +4603,11 @@
    "mid": 1355,
    "name": "ILLUSION_CLEAR_ROOM",
    "family": "ILLUSION_FANTASY",
-   "disposition": "ACTIVE",
-   "target": "I9-8",
+   "disposition": "INACTIVE_SUPERSEDED",
+   "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 T33 A-146: superseded under I9_ILLUSION_V1 C8/C10; no client sender"
   },
   {
    "mid": 1356,
@@ -4577,10 +4643,11 @@
    "mid": 1359,
    "name": "ILLUSION_GET_ROOM_LIST",
    "family": "ILLUSION_FANTASY",
-   "disposition": "ACTIVE",
-   "target": "I9-8",
+   "disposition": "INACTIVE_SUPERSEDED",
+   "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 T33 A-146: superseded under I9_ILLUSION_V1 C8/C10; no client sender"
   },
   {
    "mid": 1360,
@@ -4596,10 +4663,11 @@
    "mid": 1361,
    "name": "ILLUSION_INVITE_BROADCAST",
    "family": "ILLUSION_FANTASY",
-   "disposition": "ACTIVE",
-   "target": "I9-8",
+   "disposition": "INACTIVE_SUPERSEDED",
+   "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 T33 A-146: superseded under I9_ILLUSION_V1 C8/C10; no client sender"
   },
   {
    "mid": 1362,
@@ -4924,6 +4992,16 @@
    "decision": "D354"
   },
   {
+   "mid": 1412,
+   "name": "REGION_FIGHT_RESULT",
+   "family": "ARENA_REGION_RESIDUAL",
+   "disposition": "INACTIVE_SUPERSEDED",
+   "target": "I9-11",
+   "v2": "unimplemented",
+   "v1": null,
+   "note": "11D C6: no sender, region arena superseded D354"
+  },
+  {
    "mid": 1413,
    "name": "REGION_BUY_TICKET",
    "family": "ARENA_REGION_RESIDUAL",
@@ -5141,8 +5219,8 @@
    "mid": 1537,
    "name": "GET_BOARD_INFO",
    "family": "ACTIVITY_LONG_TAIL",
-   "disposition": "LATER",
-   "target": "I10/I10.5",
+   "disposition": "DELIVERED",
+   "target": null,
    "v2": "implemented",
    "v1": "STATE_BACKED"
   },
@@ -5199,6 +5277,16 @@
    "target": null,
    "v2": "implemented",
    "v1": null
+  },
+  {
+   "mid": 1570,
+   "name": "CONQUER_SCHOOL_FIGHT_RESULT",
+   "family": "V2_DELIVERED_OTHER",
+   "disposition": "DELIVERED",
+   "target": null,
+   "v2": "implemented",
+   "v1": null,
+   "note": "11D C9: zlib sibling served by conquer_dispatcher"
   },
   {
    "mid": 1571,
@@ -5435,12 +5523,22 @@
    "v1": null
   },
   {
+   "mid": 1844,
+   "name": "UPLOAD_SPACE_AVATAR",
+   "family": "V2_DELIVERED_OTHER",
+   "disposition": "DELIVERED",
+   "target": null,
+   "v2": "implemented",
+   "v1": null,
+   "note": "11D C9: upload served by profile_media"
+  },
+  {
    "mid": 1845,
    "name": "BUY_GLUE",
    "family": "DORM",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -5449,7 +5547,7 @@
    "family": "MENTOR_STUDENT",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -5458,7 +5556,7 @@
    "family": "MENTOR_STUDENT",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -5467,7 +5565,7 @@
    "family": "MENTOR_STUDENT",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -5476,7 +5574,7 @@
    "family": "MENTOR_STUDENT",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -5485,7 +5583,7 @@
    "family": "MENTOR_STUDENT",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -5494,7 +5592,7 @@
    "family": "MENTOR_STUDENT",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -5503,7 +5601,7 @@
    "family": "MENTOR_STUDENT",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -5512,7 +5610,7 @@
    "family": "MENTOR_STUDENT",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -5521,7 +5619,7 @@
    "family": "STOCK_COMPAT_MISC",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "STATE_BACKED"
   },
   {
@@ -5696,28 +5794,31 @@
    "mid": 2065,
    "name": "SELECT_DATE_HERO",
    "family": "LIBRARY",
-   "disposition": "ACTIVE",
-   "target": "I9-10",
+   "disposition": "LATER",
+   "target": "I10/I10.5",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 reality check: activity 1107 is never listed (only table 1026 has a provider); needs a date-activity owner with per-player state"
   },
   {
    "mid": 2066,
    "name": "CHANGE_DATE_HERO",
    "family": "LIBRARY",
-   "disposition": "ACTIVE",
-   "target": "I9-10",
+   "disposition": "LATER",
+   "target": "I10/I10.5",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 reality check: activity 1107 is never listed; needs a date-activity owner"
   },
   {
    "mid": 2067,
    "name": "SELECT_DATE_HERO_2",
    "family": "LIBRARY",
-   "disposition": "ACTIVE",
-   "target": "I9-10",
+   "disposition": "LATER",
+   "target": "I10/I10.5",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 reality check: activity 1126 is never listed; needs a date-activity owner"
   },
   {
    "mid": 2068,
@@ -5959,7 +6060,7 @@
    "family": "COURSE_RESIDUAL",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -6173,19 +6274,21 @@
    "mid": 2197,
    "name": "ZHUGE_SELECT_DIALOG",
    "family": "LIBRARY",
-   "disposition": "ACTIVE",
-   "target": "I9-10",
+   "disposition": "LATER",
+   "target": "I10/I10.5",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 reality check: activity 1109 (Zhuge) is never open; needs a Zhuge activity owner"
   },
   {
    "mid": 2198,
    "name": "ZHUGE_END_DIALOG",
    "family": "LIBRARY",
-   "disposition": "ACTIVE",
-   "target": "I9-10",
+   "disposition": "LATER",
+   "target": "I10/I10.5",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 reality check: activity 1109 (Zhuge) is never open; needs a Zhuge activity owner"
   },
   {
    "mid": 2199,
@@ -7394,6 +7497,16 @@
    "v1": null
   },
   {
+   "mid": 2484,
+   "name": "PEAK_START_FIGHT",
+   "family": "V2_DELIVERED_OTHER",
+   "disposition": "DELIVERED",
+   "target": null,
+   "v2": "implemented",
+   "v1": null,
+   "note": "11D C9: zlib sibling served by oneonone_dispatcher"
+  },
+  {
    "mid": 2485,
    "name": "PEAK_RECORDS",
    "family": "V2_DELIVERED_OTHER",
@@ -7480,7 +7593,7 @@
    "family": "HERO_ASSET_RESIDUAL",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -7489,7 +7602,7 @@
    "family": "HERO_ASSET_RESIDUAL",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -7498,7 +7611,7 @@
    "family": "HERO_ASSET_RESIDUAL",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -7507,7 +7620,7 @@
    "family": "HERO_ASSET_RESIDUAL",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -7516,7 +7629,7 @@
    "family": "COURSE_RESIDUAL",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB"
   },
   {
@@ -7526,7 +7639,8 @@
    "disposition": "ACTIVE",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": "STATE_BACKED"
+   "v1": "STATE_BACKED",
+   "note": "MID 1 detail only (SelfPlayer.lua:4199); real per-hero recommend scores owed: ShopDetailWindow.lua:59 and BattlePassShopDetailWindow.lua:35 concatenate a nil score (crash) when ID_RECOMMEND is open"
   },
   {
    "mid": 2512,
@@ -7556,6 +7670,16 @@
    "v1": null
   },
   {
+   "mid": 2515,
+   "name": "SAVE_FURNITURES",
+   "family": "DORM",
+   "disposition": "ACTIVE",
+   "target": "I9-10",
+   "v2": "implemented",
+   "v1": null,
+   "note": "11D C9: zlib sibling served by dorm_dispatcher"
+  },
+  {
    "mid": 2516,
    "name": "HOUSE_EQUIP",
    "family": "DORM",
@@ -7579,7 +7703,7 @@
    "family": "DORM",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -7588,7 +7712,7 @@
    "family": "DORM",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -7597,7 +7721,7 @@
    "family": "DORM",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -7606,7 +7730,7 @@
    "family": "DORM",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -7615,7 +7739,7 @@
    "family": "DORM",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -7624,7 +7748,7 @@
    "family": "DORM",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -7633,7 +7757,7 @@
    "family": "DORM",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -7642,7 +7766,7 @@
    "family": "DORM",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
@@ -7651,17 +7775,18 @@
    "family": "DORM",
    "disposition": "ACTIVE",
    "target": "I9-10",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": null
   },
   {
    "mid": 2527,
    "name": "GET_COMFORT_RANK_LIST",
    "family": "DORM",
-   "disposition": "ACTIVE",
-   "target": "I9-10",
+   "disposition": "INACTIVE_SUPERSEDED",
+   "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 T33 A-145: superseded by D494; no client sender"
   },
   {
    "mid": 2529,
@@ -7883,10 +8008,11 @@
    "mid": 2560,
    "name": "RED_POINT",
    "family": "STOCK_COMPAT_MISC",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": "DISPATCHER_METHOD"
+   "v1": "DISPATCHER_METHOD",
+   "note": "I9-11 V2 11F C5: no standalone sender; served as the MID 1 detail by I5 missions"
   },
   {
    "mid": 2561,
@@ -7955,10 +8081,11 @@
    "mid": 2568,
    "name": "SEND_BARRAGE_MESSAGE",
    "family": "STOCK_COMPAT_MISC",
-   "disposition": "ACTIVE",
+   "disposition": "INACTIVE_SUPERSEDED",
    "target": "I9-11",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 V2 11F C6: current client never sends barrage"
   },
   {
    "mid": 2569,
@@ -8405,10 +8532,11 @@
    "mid": 2657,
    "name": "CV_LINK_ANSWER",
    "family": "STOCK_COMPAT_MISC",
-   "disposition": "ACTIVE",
-   "target": "I9-11",
+   "disposition": "LATER",
+   "target": "I10",
    "v2": "unimplemented",
-   "v1": null
+   "v1": null,
+   "note": "I9-11 V2 11F C7: needs dated activity 1170 provider"
   },
   {
    "mid": 2672,
@@ -10009,7 +10137,7 @@
    "family": "SHOP",
    "disposition": "ACTIVE",
    "target": "I9-11",
-   "v2": "unimplemented",
+   "v2": "implemented",
    "v1": "LITERAL_STUB",
    "note": "D85/D87: core currency shops move into I9-11; mode coins earned in I9 need a sink and daily mission 109 buys from them"
   },
@@ -10863,6 +10991,15 @@
    "mid": 8194,
    "name": "READ_PIC_NOTICE",
    "family": "V2_DELIVERED_OTHER",
+   "disposition": "DELIVERED",
+   "target": null,
+   "v2": "implemented",
+   "v1": null
+  },
+  {
+   "mid": 32000,
+   "name": "PRESERVATION_RECHARGE_TAP",
+   "family": "CHARGE_VIP_GIFTPUSH",
    "disposition": "DELIVERED",
    "target": null,
    "v2": "implemented",

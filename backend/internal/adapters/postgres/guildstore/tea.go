@@ -161,15 +161,15 @@ func (Store) ClaimGiftsTx(ctx context.Context, t tx.Tx, receiver identity.Player
 // unbounded backlog; the next command continues.
 const purgeBatchLimit = 100
 
-// DeleteExpiredWishesTx removes up to one batch of a guild's expired wishes; a
-// later command runs it, never a read path (C15).
-func (Store) DeleteExpiredWishesTx(ctx context.Context, t tx.Tx, guildID guild.ID, day int64) error {
-	if t == nil || guildID <= 0 || day <= 0 {
+// DeleteExpiredWishesTx removes up to one batch of expired wishes by expiry
+// alone, whatever the owner's current membership (N7); a later command runs it,
+// never a read path (C15).
+func (Store) DeleteExpiredWishesTx(ctx context.Context, t tx.Tx, day int64) error {
+	if t == nil || day <= 0 {
 		return errors.New("invalid guild tea wish purge")
 	}
 	_, err := t.Exec(ctx, `DELETE FROM guild_tea_wishes WHERE ctid IN (
-		SELECT w.ctid FROM guild_tea_wishes w JOIN guild_memberships m ON m.player_id=w.player_id
-		WHERE m.guild_id=$1 AND w.game_day<$2 LIMIT $3)`, int64(guildID), day, purgeBatchLimit)
+		SELECT ctid FROM guild_tea_wishes WHERE game_day<$1 LIMIT $2)`, day, purgeBatchLimit)
 	return err
 }
 

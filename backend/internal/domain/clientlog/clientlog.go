@@ -197,6 +197,17 @@ func UploadClass(rows []Row, attributed, quarantined bool) RetentionClass {
 	return class
 }
 
+// ClassifyUploadRows applies the upload-level ANOMALY class to every parsed
+// row of an unattributed or quarantined upload (R7).
+func ClassifyUploadRows(rows []Row, attributed, quarantined bool) {
+	if attributed && !quarantined {
+		return
+	}
+	for index := range rows {
+		rows[index].Class = Anomaly
+	}
+}
+
 func integerField(value any) *int64 {
 	number, isNumber := value.(json.Number)
 	if !isNumber {

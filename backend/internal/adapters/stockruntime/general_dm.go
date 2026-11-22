@@ -27,9 +27,21 @@ type GeneralDMDispatcher struct {
 
 func (d GeneralDMDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequest) httpedge.Response {
 	fail := func(code int, name string) httpedge.Response {
-		return httpedge.Response{HTTPStatus: code, Body: map[string]any{"error": name}}
+		switch code {
+		case 400:
+			return failureReply(malformed(name))
+		case 409:
+			return failureReply(refusal(unprovenRefusalCode))
+		case 401:
+			return failureReply(sessionFailure())
+		default:
+			return failureReply(refusal(unprovenRefusalCode))
+		}
 	}
-	if d.Authority == nil || r.Envelope.Claims.Token == "" {
+	if d.Authority == nil {
+		return failureReply(defect(nil))
+	}
+	if r.Envelope.Claims.Token == "" {
 		return fail(401, "gameplay_auth_required")
 	}
 	a, e := d.Authority.ResolveGameplayBearer(c, r.Envelope.Claims.Token, r.Envelope.ReceivedAt)
@@ -39,8 +51,11 @@ func (d GeneralDMDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequ
 	if r.Envelope.Claims.Region != int64(a.LogicalServerID) {
 		return fail(403, "region_mismatch")
 	}
-	if r.Envelope.MID != 513 || d.Service == nil || d.Slots == nil || cap(d.Slots) != 16 {
+	if r.Envelope.MID != 513 {
 		return fail(409, "general_message_unavailable")
+	}
+	if d.Service == nil || d.Slots == nil || cap(d.Slots) != 16 || d.Emitter == nil {
+		return failureReply(defect(nil))
 	}
 	params, e := socialFields(r.Envelope.Params, "message", "to_player_id", "channel")
 	if e != nil {
@@ -87,20 +102,23 @@ func (d GeneralDMDispatcher) Dispatch(c context.Context, r httpedge.DispatchRequ
 	case d.Slots <- struct{}{}:
 		defer func() { <-d.Slots }()
 	default:
-		return fail(503, "general_message_capacity")
+		return failureReply(unavailable(httpedge.ErrSaturated))
 	}
 	bounded, cancel := context.WithTimeout(c, 12*time.Second)
 	defer cancel()
 	i, e := d.Service.Accept(bounded, int64(a.PlayerID), recipient, message, r.Envelope.Operation)
 	if e != nil {
-		return fail(409, "general_message_unavailable")
+		return refusalOrTransient(e)
 	}
-	if d.Emitter != nil && !i.Status.Terminal() {
+	if !i.Status.Terminal() {
 		d.Emitter.EmitGeneralDM(bounded, i)
 	}
 	result, e := d.Service.Wait(bounded, i)
-	if e != nil || bounded.Err() != nil || result.ID != i.ID || result.Digest != i.Digest || result.Status != dm.WrittenBeforeDeadline || result.CompletionUpper == nil || !result.CompletionUpper.Before(i.ExpiresAt) {
-		return fail(409, "general_message_unavailable")
+	if e != nil {
+		return refusalOrTransient(e)
+	}
+	if bounded.Err() != nil || result.ID != i.ID || result.Digest != i.Digest || result.Status != dm.WrittenBeforeDeadline || result.CompletionUpper == nil || !result.CompletionUpper.Before(i.ExpiresAt) {
+		return failureReply(defect(nil))
 	}
 	return httpedge.Response{HTTPStatus: 200, Body: map[string]any{}}
 }

@@ -1,0 +1,231 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [
+  {
+   "count": 12,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 5,
+   "file": "docs/architecture/popup_catalog/REVIEWED.json"
+  },
+  {
+   "count": 12,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/architecture/reply_consumers/WAIVERS.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_10A_EVENT_CENTRE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10H_H2_STRUCTURED_KINDS.md"
+  },
+  {
+   "count": 4,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 12,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  }
+ ],
+ "decorated_by": [
+  "observing"
+ ],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/petcampaign_dispatcher.go"
+ ],
+ "facts": {
+  "consumers": {
+   "SKY_CITY_BATTLE": {
+    "missions": [
+     120
+    ]
+   }
+  },
+  "emits": [
+   "SKY_CITY_BATTLE"
+  ],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "pet-campaign"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "petcampaign_players": [
+    "petcampaignstore.LockTx"
+   ]
+  },
+  "row_locks": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "petcampaign_players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [
+  "OverlayMID1"
+ ],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
+    "line": 34
+   },
+   "mid": 816,
+   "name": "PET_CAMPAIGN_LOAD_INFO"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
+    "line": 34
+   },
+   "mid": 817,
+   "name": "PET_CAMPAIGN_SWEEP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
+    "line": 34
+   },
+   "mid": 818,
+   "name": "PET_CAMPAIGN_RECORD_SWEEP_TIME"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
+    "line": 34
+   },
+   "mid": 819,
+   "name": "PET_CAMPAIGN_FIGHT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
+    "line": 34
+   },
+   "mid": 820,
+   "name": "PET_CAMPAIGN_BATTLE_RESULT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
+    "line": 34
+   },
+   "mid": 821,
+   "name": "PET_CAMPAIGN_RESTART"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
+    "line": 34
+   },
+   "mid": 822,
+   "name": "PET_CAMPAIGN_RED_POINT"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
+    "line": 34
+   },
+   "mid": 823,
+   "name": "PET_CAMPAIGN_AWAKE_SWEEP"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
+    "line": 34
+   },
+   "mid": 824,
+   "name": "PET_CAMPAIGN_SWEEP_SUPER"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
+    "line": 34
+   },
+   "mid": 825,
+   "name": "PET_CAMPAIGN_BUY_SUPER"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
+    "line": 34
+   },
+   "mid": 826,
+   "name": "PET_CAMPAIGN_SAVE_SUPER"
+  },
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/petcampaign_dispatcher.go",
+    "line": 34
+   },
+   "mid": 827,
+   "name": "PET_CAMPAIGN_PRACTICE"
+  }
+ ],
+ "name": "petcampaign",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/guildrentalread",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store",
+  "internal/adapters/postgres/kernelstore",
+  "internal/adapters/postgres/petcampaignstore"
+ ],
+ "tables": {
+  "owned": [
+   "petcampaign_players"
+  ],
+  "read": [
+   "account_sessions",
+   "accounts",
+   "gameplay_contexts",
+   "gxb_content_activation",
+   "gxb_content_revisions",
+   "gxb_operation_receipts",
+   "petcampaign_players",
+   "player_directory_profiles",
+   "player_function_eligibility"
+  ],
+  "written": [
+   "gxb_operation_receipts",
+   "petcampaign_players"
+  ]
+ },
+ "tests": {
+  "integration": [
+   "playerdisplay"
+  ],
+  "scenarios_naming": [
+   "i9_5c_pet_awakening.json",
+   "i9_5c_petcampaign.json"
+  ],
+  "unit": [
+   "rank_test.go",
+   "start_choice_conformance_test.go"
+  ]
+ }
+}

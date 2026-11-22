@@ -36,9 +36,10 @@ func (q *heroBootstrapQueryer) QueryRow(_ context.Context, query string, _ ...an
 			*(dest[0].(*int64)) = int64(q.root.PlayerID)
 			*(dest[1].(*int64)) = q.root.NextPartnerID
 			*(dest[2].(*int64)) = q.root.SortType
-			*(dest[3].(*int64)) = q.root.StateVersion
-			*(dest[4].(*time.Time)) = q.root.CreatedAt
-			*(dest[5].(*time.Time)) = q.root.UpdatedAt
+			*(dest[3].(*int64)) = q.root.BackpackSortType
+			*(dest[4].(*int64)) = q.root.StateVersion
+			*(dest[5].(*time.Time)) = q.root.CreatedAt
+			*(dest[6].(*time.Time)) = q.root.UpdatedAt
 			return nil
 		}}
 	case characterqueries.ListPlayerHeroes:
@@ -162,6 +163,17 @@ func (c heroBootstrapContent) HeroKindTx(context.Context, tx.Queryer, string, in
 	}
 	return c.kind, nil
 }
+
+func (c heroBootstrapContent) HeroExpPolicyTx(context.Context, tx.Queryer, string, int64) ([]character.HeroExpThreshold, error) {
+	if c.err != nil {
+		return nil, c.err
+	}
+	rows := make([]character.HeroExpThreshold, 0, character.MaxHeroLevel)
+	for level := int64(1); level <= character.MaxHeroLevel; level++ {
+		rows = append(rows, character.HeroExpThreshold{Level: level, TotalExp: level * 100})
+	}
+	return rows, nil
+}
 func (heroBootstrapContent) HeroEquipmentPositionTx(context.Context, tx.Queryer, string, int64, int64, int64) (character.HeroEquipmentPosition, error) {
 	return character.HeroEquipmentPosition{}, errors.New("unexpected equipment lookup")
 }
@@ -199,6 +211,21 @@ func TestHeroBootstrapProjectionActiveOverlaysCanonicalMID49(t *testing.T) {
 	}
 	if wire["partner_type"] != int64(2) {
 		t.Fatalf("partner_type=%v", wire["partner_type"])
+	}
+}
+
+func TestHeroBootstrapProjectionProjectsCumulativeEXPFloor(t *testing.T) {
+	root, h := heroBootstrapFixture()
+	h.Level, h.Exp = 3, 0
+	q := &heroBootstrapQueryer{root: root, heroes: []character.Hero{h}}
+	content := heroBootstrapContent{revision: h.CreationContentRevision, core: true, equipment: true, fumo: true, appearance: true, kind: character.NormalHero}
+	detail := map[string]any{"49": map[string]any{"sort_type": int64(0), "heros": map[string]any{}}}
+	if err := (HeroBootstrapProjection{Content: content}).OverlayMID1(context.Background(), q, identity.ActorContext{PlayerID: 7}, false, time.Unix(200, 0).UTC(), detail); err != nil {
+		t.Fatal(err)
+	}
+	wire := detail["49"].(map[string]any)["heros"].(map[string]any)["1"].(map[string]any)
+	if wire["exp"] != int64(200) {
+		t.Fatalf("exp=%v want source floor 200", wire["exp"])
 	}
 }
 

@@ -2,7 +2,6 @@ package stockruntime
 
 import (
 	"context"
-	"errors"
 	"net/http"
 
 	app "gxb.local/backend/v2/internal/application/oneonone"
@@ -24,10 +23,10 @@ type OneOnOnePort interface {
 	Match(context.Context, identity.ActorContext, operation.Context) ([]d.Entry, error)
 	EnemyTeam(context.Context, identity.PlayerID) ([]d.TeamView, error)
 	Start(context.Context, identity.ActorContext, app.StartCommand, operation.Context) (d.MatchView, error)
-	Report(context.Context, string) ([]byte, error)
-	DefenseReportKeys(context.Context, identity.ActorContext) ([]string, error)
+	Report(context.Context, string, operation.Context) ([]byte, error)
+	DefenseReportKeys(context.Context, identity.ActorContext, operation.Context) ([]string, error)
 	BuyTimes(context.Context, identity.ActorContext, operation.Context) (d.Player, error)
-	Records(context.Context, identity.ActorContext) ([]d.RecordView, error)
+	Records(context.Context, identity.ActorContext, operation.Context) ([]d.RecordView, error)
 	ResetTime(context.Context, identity.ActorContext, operation.Context) (d.Player, error)
 	RecordDetail(context.Context, int64) (d.RecordDetail, error)
 }
@@ -59,7 +58,7 @@ func (o OneOnOneDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 		return *fail
 	}
 	if o.Service == nil {
-		return failOneOnOne(d.ErrUnavailable)
+		return failureReply(defect(nil))
 	}
 	p, op := req.Envelope.Params, req.Envelope.Operation
 	switch req.Envelope.MID {
@@ -107,10 +106,6 @@ func (o OneOnOneDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 			return badHero("invalid_one_on_one_parameter")
 		}
 		v, err := o.Service.Start(ctx, a, app.StartCommand{Formations: teams, Enemy: identity.PlayerID(enemy)}, op)
-		if errors.Is(err, d.ErrClosedHours) {
-			// Source message 30002 "1 on 1 opens from 8:00 to 22:00 everyday", answered in-band.
-			return okI5(map[string]any{"error_code": int64(30002)})
-		}
 		if err != nil {
 			return failOneOnOne(err)
 		}
@@ -121,13 +116,13 @@ func (o OneOnOneDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 			return badHero("invalid_one_on_one_parameter")
 		}
 		if !keyed {
-			keys, err := o.Service.DefenseReportKeys(ctx, a)
+			keys, err := o.Service.DefenseReportKeys(ctx, a, op)
 			if err != nil {
 				return failOneOnOne(err)
 			}
 			return httpedge.Response{HTTPStatus: http.StatusOK, JSON: projection.ReportKeys(keys)}
 		}
-		report, err := o.Service.Report(ctx, key)
+		report, err := o.Service.Report(ctx, key, op)
 		if err != nil {
 			return failOneOnOne(err)
 		}
@@ -149,7 +144,7 @@ func (o OneOnOneDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 		if !onlyStockGameplayParams(p) {
 			return badHero("invalid_one_on_one_parameter")
 		}
-		records, err := o.Service.Records(ctx, a)
+		records, err := o.Service.Records(ctx, a, op)
 		if err != nil {
 			return failOneOnOne(err)
 		}
@@ -161,10 +156,6 @@ func (o OneOnOneDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 			return badHero("invalid_one_on_one_parameter")
 		}
 		v, err := o.Service.RecordDetail(ctx, id)
-		if errors.Is(err, d.ErrRefused) {
-			// A shared record that is no longer retained answers empty (MessageManager toast).
-			return okI5(map[string]any{})
-		}
 		if err != nil {
 			return failOneOnOne(err)
 		}
@@ -173,9 +164,27 @@ func (o OneOnOneDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 	return badHero("unsupported_one_on_one_mid")
 }
 
+// oneOnOneRankChangedError is stock message 35026 ("The ranking has changed,
+// please refresh and challenge again"), shown by the shared Backend error toast.
+const oneOnOneRankChangedError = 35026
+
+// Stock message codes for the closed-hours and low-point refusals, shown by the
+// shared Backend error toast like 35026.
+const (
+	oneOnOneClosedHoursError = 30002
+	oneOnOneLowPointsError   = 30003
+)
+
+var oneOnOneFailureRows = []failureRow{
+	{match: d.ErrOfferStale, class: failureRefusal, code: oneOnOneRankChangedError},
+	{match: d.ErrClosedHours, class: failureRefusal, code: oneOnOneClosedHoursError},
+	{match: d.ErrOpponentLowPoints, class: failureRefusal, code: oneOnOneLowPointsError},
+	{match: d.ErrRefused, class: failureRefusal, code: unprovenRefusalCode},
+	{match: d.ErrInvalid, class: failureMalformed, detail: "one_on_one_request_refused"},
+	{match: app.ErrUnresolved, class: failureUnavailable},
+	{match: economy.ErrInsufficientBalance, class: failureRefusal, balance: true},
+}
+
 func failOneOnOne(err error) httpedge.Response {
-	if errors.Is(err, d.ErrRefused) || errors.Is(err, d.ErrInvalid) || errors.Is(err, economy.ErrInsufficientBalance) {
-		return httpedge.Response{HTTPStatus: http.StatusBadRequest, Body: map[string]any{"error": "one_on_one_request_refused"}}
-	}
-	return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: err, Body: map[string]any{"error": "one_on_one_unavailable_or_unresolved"}}
+	return failureFromRows(oneOnOneFailureRows, err)
 }

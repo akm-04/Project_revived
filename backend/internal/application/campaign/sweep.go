@@ -35,11 +35,23 @@ type Reset struct {
 
 func (s Mode) Sweep(c context.Context, a identity.ActorContext, q Sweep, op operation.Context) (map[string]any, error) {
 	return s.purchase(c, a, "sweep", q, op, func(c context.Context, sc gen.TimedScope, v view, r d.Record, level int64, privilege i5.PrivilegeSnapshot) (map[string]any, error) {
-		n, err := v.catalog.Admit(r.Progress, q.Type, q.CampaignID, level, v.day, v.superOpen)
+		group, trial := v.catalog.Group(q.Type)
+		if !trial && q.Type != d.Normal && q.Type != d.Super {
+			return nil, d.ErrInvalid
+		}
+		n, err := s.admit(c, sc.Tx, a.PlayerID, v, r, q.Type, q.CampaignID, level)
 		if err != nil {
 			return nil, err
 		}
-		next, err := v.catalog.Sweep(r.Progress, n, q.Count, q.Kind, v.day, privilege.VIPLevel, privilege.MonthlyPrivilegeActive)
+		var buys int64
+		if trial {
+			bought, e := s.trialBuys(c, sc.Tx, a.PlayerID, v.day)
+			if e != nil {
+				return nil, e
+			}
+			buys = bought[group.ConsumeID]
+		}
+		next, err := v.catalog.Sweep(r.Progress, n, q.Count, q.Kind, v.day, buys, privilege.VIPLevel, privilege.MonthlyPrivilegeActive)
 		if err != nil {
 			return nil, err
 		}
@@ -73,7 +85,13 @@ func (s Mode) Sweep(c context.Context, a identity.ActorContext, q Sweep, op oper
 			return nil, err
 		}
 		items, economys := make([][]d.Item, 0, q.Count), make([]any, 0, q.Count)
-		lines := []grant.Line{{Kind: grant.PlayerExp, Amount: exp}, {Kind: grant.ScalarCurrency, ResourceKey: "mana", Amount: n.ManaGain * q.Count}}
+		lines := []grant.Line{}
+		if exp > 0 {
+			lines = append(lines, grant.Line{Kind: grant.PlayerExp, Amount: exp})
+		}
+		if mana := n.ManaGain * q.Count; mana > 0 {
+			lines = append(lines, grant.Line{Kind: grant.ScalarCurrency, ResourceKey: "mana", Amount: mana})
+		}
 		for i := int64(0); i < q.Count; i++ {
 			row := []d.Item{}
 			for _, award := range n.SweepReward {
@@ -97,10 +115,13 @@ func (s Mode) Sweep(c context.Context, a identity.ActorContext, q Sweep, op oper
 			}
 		}
 		plan := grant.Plan{PlayerID: a.PlayerID, Source: grant.SourceIdentity{Domain: "campaign", Operation: "sweep", BusinessKey: "campaign:sweep:" + current.ID.String(), Occurrence: current.ID.String(), PolicyVersion: d.PolicyID}, Lines: lines}
-		if _, err = s.Grants.SettleGrantTx(c, sc.Tx, a, plan, current, i5.GrantTxOptions{}); err != nil {
+		if _, err = s.Grants.SettleGrantTx(c, sc.Tx, a, plan, current, i5.GrantTxOptions{AllowOverflowMail: true}); err != nil {
 			return nil, err
 		}
-		kind := NormalWinKind
+		kind := "CAMPAIGN_TRIAL_WIN"
+		if n.Type == d.Normal {
+			kind = NormalWinKind
+		}
 		if n.Type == d.Super {
 			kind = SuperWinKind
 		}
@@ -112,11 +133,34 @@ func (s Mode) Sweep(c context.Context, a identity.ActorContext, q Sweep, op oper
 			return nil, err
 		}
 		for i := int64(0); i < q.Count; i++ {
-			if err = s.Facts.RecordTx(c, sc.Tx, current, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "campaign", SourceBusinessKey: fmt.Sprintf("%s/%d", current.ID, i), Kind: kind, Delta: 1}); err != nil {
+			key := fmt.Sprintf("%s/%d", current.ID, i)
+			if err = s.Facts.RecordTx(c, sc.Tx, current, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "campaign", SourceBusinessKey: key, Kind: kind, Delta: 1}); err != nil {
+				return nil, err
+			}
+			if !trial {
+				continue
+			}
+			if d.VoyageMission(group.ID) {
+				if err = s.Facts.RecordTx(c, sc.Tx, current, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "campaign", SourceBusinessKey: key, Kind: objective.VoyageFinishedKind, Delta: 1}); err != nil {
+					return nil, err
+				}
+			}
+			if group.NextID == 0 {
+				continue
+			}
+			if err = s.Facts.RecordTx(c, sc.Tx, current, objective.Fact{PlayerID: a.PlayerID, SourceDomain: "campaign", SourceBusinessKey: key, Kind: "INFINITY_BOSS_DEFEATED", Delta: 1}); err != nil {
 				return nil, err
 			}
 		}
-		return map[string]any{"items": items, "economys": economys, "additional": []any{}, "campaign": v.catalog.Row(next, n.ID, v.day)}, nil
+		out := map[string]any{"items": items, "economys": economys, "additional": []any{}, "campaign": v.catalog.Row(next, n.ID, v.day)}
+		if trial {
+			key := "trial"
+			if group.NextID != 0 {
+				key = "challenge"
+			}
+			out[key] = v.catalog.TrialRow(next, group, v.day, buys, v.groupOpen(group))
+		}
+		return out, nil
 	})
 }
 
@@ -142,8 +186,10 @@ func (s Mode) Reset(c context.Context, a identity.ActorContext, q Reset, op oper
 	})
 }
 
+// purchaseError keeps the typed D5 balance cause so the dispatcher answers the
+// named code; an unknown resource stays a rule refusal.
 func purchaseError(err error) error {
-	if errors.Is(err, economy.ErrInsufficientBalance) || errors.Is(err, economy.ErrUnknownResource) {
+	if errors.Is(err, economy.ErrUnknownResource) {
 		return fmt.Errorf("%w: cost unavailable", d.ErrRefused)
 	}
 	return err
@@ -221,10 +267,8 @@ func (s Mode) purchase(c context.Context, a identity.ActorContext, name string, 
 		for key, value := range changes.RecordedMissions(c) {
 			out[key] = value
 		}
-		out["economy_"] = balances
-		if len(functions) > 0 {
-			out["new_funcs_"] = functions
-		}
+		changes.WriteEconomy(out, balances)
+		changes.WriteFunctions(out, functions)
 		raw, err := json.Marshal(out)
 		if err != nil {
 			return err

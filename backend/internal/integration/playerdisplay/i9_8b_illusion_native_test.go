@@ -4,6 +4,7 @@ package playerdisplay_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -26,6 +27,7 @@ import (
 	d "gxb.local/backend/v2/internal/domain/illusion"
 	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/domain/statrules"
+	"gxb.local/backend/v2/internal/foundation/changes"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -42,6 +44,14 @@ type illusionStatInputs struct{}
 
 func (illusionStatInputs) HeroTx(context.Context, ca.CoherentReadScope, character.HeroRef, publicstats.View) (publicstats.Result, error) {
 	return publicstats.Result{Stats: statrules.Result{Force: 1000}}, nil
+}
+
+func (illusionStatInputs) ScaledHeroTx(context.Context, ca.CoherentReadScope, character.HeroRef, publicstats.View, int64, int64, int64) (publicstats.Result, error) {
+	return publicstats.Result{Stats: statrules.Result{Force: 1000}}, nil
+}
+
+func (illusionStatInputs) FreezeHeroTx(context.Context, ca.CoherentReadScope, character.HeroRef, publicstats.View) (*publicstats.FrozenHero, error) {
+	return nil, errors.New("illusionStatInputs does not freeze")
 }
 
 type illusionGuildSource struct {
@@ -65,7 +75,9 @@ func illusionService(t *testing.T, p *pg.Pool, clock gen.TimeAuthority, privileg
 		Functions: values, Directory: i4store.PlayerDirectoryReader{}, Heroes: fight.Inputs.Heroes, Pets: fight.Inputs.Pets, Stats: illusionStatInputs{},
 		Rooms: rooms, RoomStore: sharedroomstore.Store{}, Combat: fight, Privileges: privileges,
 		Costs: i5.MaterialCostDebiter{Store: values, Content: content}, Facts: i5.ObjectiveFacts{Owner: compositeI5(p), Open: values},
-		Guilds: guilds, GuildActivity: guildstore.Store{Queryer: p}, Mail: i5.SettlementMail{Store: values}, Receipts: kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
+		Guilds: guilds, GuildActivity: guildstore.Store{Queryer: p}, Mail: i5.SettlementMail{Store: values}, Achievements: catalogAchievements(p, fixedCounts{}),
+		BattleObserver: libraryService(p, p),
+		Receipts:       kernelstore.Store{}, ReceiptRead: kernelstore.Reader{Queryer: p}}
 	mode.Invites = roomInviteMaterializer(t, p)
 	return mode
 }
@@ -139,12 +151,16 @@ func TestI9_8BIllusionInfoBuyNative(t *testing.T) {
 	}
 	exec(t, p, `INSERT INTO player_currency_balances(player_id,resource_key,amount,state_version,updated_at)VALUES($1,'crystal',1000,1,clock_timestamp())
 		ON CONFLICT(player_id,resource_key)DO UPDATE SET amount=1000,state_version=player_currency_balances.state_version+1`, int64(a.PlayerID))
-	bought, err := s.Buy(ctx, a, op())
+	tracked, _ := changes.Track(ctx)
+	bought, err := s.Buy(tracked, a, op())
 	if err != nil || bought["challenge_times"] != int64(d.FreeChances+d.ChancesPerBuy) || bought["buy_times"] != int64(1) {
 		t.Fatalf("buy %#v %v", bought, err)
 	}
 	if scalar(t, p, `SELECT amount FROM player_currency_balances WHERE player_id=$1 AND resource_key='crystal'`, int64(a.PlayerID)) != 950 {
 		t.Fatal("buy did not debit refresh_cost entry 1")
+	}
+	if balances, ok := bought["economy_"].(map[string]int64); !ok || balances["crystal"] != 950 {
+		t.Fatalf("buy reply reports the debited crystal balance %#v", bought["economy_"])
 	}
 	if _, err = s.Buy(ctx, a, op()); err == nil {
 		t.Fatal("buy past the VIP cap succeeded")
@@ -165,8 +181,8 @@ func TestI9_8BIllusionStartSettleDuplicateNative(t *testing.T) {
 	if _, err := s.Start(ctx, a, il.StartRequest{Formation: formation}, op()); err != nil {
 		t.Fatal(err)
 	}
-	if n := scalar(t, p, `SELECT count(*) FROM illusion_attempts WHERE player_id=$1 AND NOT resolved`, int64(a.PlayerID)); n != 1 {
-		t.Fatal("attempt row", n)
+	if n := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ILLUSION' AND actor_player_id=$1 AND state<>'TERMINAL'`, int64(a.PlayerID)); n != 1 {
+		t.Fatal("open combat attempt", n)
 	}
 	if n := scalar(t, p, `SELECT chances FROM illusion_players WHERE player_id=$1`, int64(a.PlayerID)); n != d.FreeChances-1 {
 		t.Fatal("chance not consumed", n)
@@ -182,6 +198,15 @@ func TestI9_8BIllusionStartSettleDuplicateNative(t *testing.T) {
 	if n := scalar(t, p, `SELECT best_hit FROM illusion_players WHERE player_id=$1`, int64(a.PlayerID)); n != 500 {
 		t.Fatal("duplicate settlement changed the best hit", n)
 	}
+	if n := scalar(t, p, `SELECT count(*) FROM illusion_attempt_settlements WHERE player_id=$1 AND damage=500`, int64(a.PlayerID)); n != 1 {
+		t.Fatal("settlement rows", n)
+	}
+	if n := girlsLogCount(t, p, a.PlayerID, partner); n != 1 {
+		t.Fatalf("illusion solo with its duplicate counted %d, want 1", n)
+	}
+	if n := scalar(t, p, `SELECT count(*) FROM illusion_attempts_retired_r5d WHERE player_id=$1`, int64(a.PlayerID)); n != 0 {
+		t.Fatal("mode-local attempt row", n)
+	}
 }
 
 func TestI9_8BIllusionAbandonedStartNative(t *testing.T) {
@@ -196,7 +221,7 @@ func TestI9_8BIllusionAbandonedStartNative(t *testing.T) {
 			t.Fatal("start after an abandoned attempt", err)
 		}
 	}
-	if n := scalar(t, p, `SELECT count(*) FROM illusion_attempts WHERE player_id=$1 AND NOT resolved`, int64(a.PlayerID)); n != 1 {
+	if n := scalar(t, p, `SELECT count(*) FROM combat_attempts WHERE domain_kind='ILLUSION' AND actor_player_id=$1 AND state<>'TERMINAL'`, int64(a.PlayerID)); n != 1 {
 		t.Fatal("abandoned attempt kept open", n)
 	}
 	if n := scalar(t, p, `SELECT chances FROM illusion_players WHERE player_id=$1`, int64(a.PlayerID)); n != d.FreeChances-2 {
@@ -291,7 +316,9 @@ func TestI9_8BIllusionSettlementOnceTwoServersNative(t *testing.T) {
 	}
 	clock.Set(modes.DayBegins(modes.Day(clock.at)).Add(17 * time.Hour))
 	timed := mustTimed(t, op(), clock.at)
-	if out, err := (il.Reconciler{Service: s}).Reconcile(ctx, timed, 100); err != nil || out.Settled != 2 {
+	// The reconciler scans every server, so an earlier test's closed occurrence
+	// in a shared database adds to the count; once-only is the mail count below.
+	if out, err := (il.Reconciler{Service: s}).Reconcile(ctx, timed, 100); err != nil || out.Settled < 2 {
 		t.Fatalf("reconcile %+v %v", out, err)
 	}
 	for _, entry := range []struct {
@@ -350,21 +377,24 @@ func TestI9_8BIllusionBoardFrozenUntilNextOpeningNative(t *testing.T) {
 		}
 		return body["rank_list"].([]map[string]any)[0]["rank_info"].(map[string]any)["my_rank"].(map[string]any)
 	}
-	if board()["hurt"] != int64(1000) {
-		t.Fatal("open board", board())
+	// A-177: the killed run's cost time rides in the fractional hurt; the
+	// integer text stays the canonical damage.
+	clearedHurt := func(stage string) {
+		t.Helper()
+		hurt, ok := board()["hurt"].(float64)
+		if !ok || int64(hurt) != 1000 || hurt-float64(int64(hurt)) == 0 {
+			t.Fatalf("%s board hurt %#v", stage, board()["hurt"])
+		}
 	}
+	clearedHurt("open")
 	settleDay := modes.Day(clock.at)
 	clock.Set(modes.DayBegins(settleDay).Add(17 * time.Hour))
 	if _, err := (il.Reconciler{Service: s}).Reconcile(ctx, mustTimed(t, op(), clock.at), 100); err != nil {
 		t.Fatal(err)
 	}
-	if board()["hurt"] != int64(1000) {
-		t.Fatal("the settled board was cleared at settlement", board())
-	}
+	clearedHurt("settled")
 	clock.Set(modes.DayBegins(settleDay + 1).Add(time.Hour))
-	if board()["hurt"] != int64(1000) {
-		t.Fatal("the settled board was cleared on the rest day", board())
-	}
+	clearedHurt("rest day")
 	clock.Set(modes.DayBegins(settleDay + d.CycleDays).Add(3 * time.Hour))
 	if len(board()) != 0 {
 		t.Fatal("the next opening did not clear the board", board())
@@ -510,5 +540,54 @@ func TestI9_8BIllusionReportRetentionNative(t *testing.T) {
 	}
 	if n := scalar(t, p, `SELECT count(*) FROM illusion_reports WHERE report_id='fresh-illusion-report'`); n != 1 {
 		t.Fatal("retained illusion report purged", n)
+	}
+}
+
+// TestI9_8BIllusionRankKillsFirstNative pins the D428 board order on the store
+// paths: kills rank above every loss, kills by shorter time then higher hurt,
+// losses by higher hurt. RankOfTx must count the same order ReadRankTx serves.
+func TestI9_8BIllusionRankKillsFirstNative(t *testing.T) {
+	p := pool(t)
+	server := rankingServer(t, p)
+	lossLeader := rankingActor(t, p, server, false)
+	slowKill := rankingActor(t, p, server, false)
+	lowerHurtKill := rankingActor(t, p, server, false)
+	higherHurtKill := rankingActor(t, p, server, false)
+	openDay := int64(1)
+	fixtures := []struct {
+		player   identity.ActorContext
+		hurt     int64
+		costTime int64
+		killed   bool
+	}{
+		{lossLeader, 900, 3, false},
+		{slowKill, 500, 7, true},
+		{lowerHurtKill, 700, 5, true},
+		{higherHurtKill, 800, 5, true},
+	}
+	for _, fixture := range fixtures {
+		exec(t, p, `INSERT INTO illusion_occurrence_results(logical_server_id,open_day,campaign_id,player_id,hurt,cost_time,updated_at,killed)VALUES($1,$2,100001,$3,$4,$5,clock_timestamp(),$6)`,
+			int64(server), openDay, int64(fixture.player.PlayerID), fixture.hurt, fixture.costTime, fixture.killed)
+	}
+	store := illusionstore.Store{}
+	ranks, err := store.ReadRankTx(ctx, p, int64(server), openDay, 100)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []identity.ActorContext{higherHurtKill, lowerHurtKill, slowKill, lossLeader}
+	if len(ranks) != len(want) {
+		t.Fatalf("rank count = %d, want %d: %+v", len(ranks), len(want), ranks)
+	}
+	for index, player := range want {
+		if ranks[index].PlayerID != int64(player.PlayerID) {
+			t.Fatalf("rank %d = %+v, want player %d (order %+v)", index+1, ranks[index], player.PlayerID, ranks)
+		}
+		rank, err := store.RankOfTx(ctx, p, int64(server), openDay, player.PlayerID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if rank != int64(index+1) {
+			t.Fatalf("RankOfTx(player %d) = %d, want %d", player.PlayerID, rank, index+1)
+		}
 	}
 }

@@ -1,0 +1,66 @@
+{
+  "name": "i9_10_topfloor_team_info_popup",
+  "note": "Runs the stock NewRankWindow.clickCell callback for MID 291 (ARENA_RANK) and MID 295 (ARENA_MODE_RANK_INFO) and asserts the opened arena_team_info window recomputes client power from valid Hero identities. The normal rank is declared by fixture:top_floor_task_rank (inside the D512 entry limit), so no normal STARTs are needed. The mode defense is chosen from xyd.tables.arenaMode heroNum/banList/isLead and Hero:getFromType camps, so Camp and Ban rotations are honored. D512's special ladder is humans-only, so a fresh period has no robot mode target: MID 295 is exercised for the player's own mode row, and the unrecruited-robot 295 refusal is asserted natively (i7c5b). No pet is provisioned by the virtual client, so the optional-pet popup path is NOT_RUN here and is covered natively. The rank-list layout is not exercised: clickCell is invoked with the stock ranking row shape and the stock callback body opens arena_team_info.",
+  "level": 60,
+  "heroes": [
+    10001001,
+    10001002,
+    10001003,
+    10001004,
+    10001005
+  ],
+  "vip": 10,
+  "grants": [
+    {
+      "Kind": "SCALAR_CURRENCY",
+      "ResourceKey": "crystal",
+      "Amount": 100000
+    }
+  ],
+  "settle_seconds": 10,
+  "steps": [
+    "wait:60",
+    "window:sub_arena",
+    "tap:arena_node",
+    "wait:30",
+    "lua:local m=xyd.WindowManager.get() if m:getWindow('edit_player_name') then m:closeWindow('edit_player_name') end local w=m:getWindow('arena') assert(w and w.isShowArenaMode,'vc-popup-viewer-missing') local a=w.arena_ assert(a.mRank==0 and #(a.mEnemies or {})==0,'vc-popup-viewer-state')",
+    "fixture:top_floor_task_rank",
+    "lua:local a=xyd.ModelManager.get():loadModel(xyd.ModelType.ARENA) local hs={} for _,h in pairs(xyd.selfPlayer:getHeros()) do table.insert(hs,h) if #hs>=5 then break end end a:saveArenaDefenderData({defenseHeroes=hs}) __vcNormalDefense=#hs",
+    "wait:3",
+    "lua:assert(__vcNormalDefense>0,'vc-popup-normal-defense')",
+    "lua:xyd.WindowManager.get():closeWindow('arena')",
+    "wait:3",
+    "tap:arena_node",
+    "wait:10",
+    "tap:change_mode_btn",
+    "wait:3",
+    "lua:local w=xyd.WindowManager.get():getWindow('arena') local a=w.arena_ assert(w.isShowArenaMode and a.modeType and a.modeType>0,'vc-task-not-admitted') local mode=a.modeType local slots=xyd.tables.arenaMode:heroNum(mode) local banned=xyd.tables.arenaMode:banList(mode) local bannedSet={} for _,id in ipairs(banned) do bannedSet[id]=true end local pool={} for _,h in pairs(xyd.selfPlayer:getHeros()) do local t=h:getFirstTableID() if not bannedSet[t] then table.insert(pool,h) end end assert(#pool>0,'vc-popup-mode-no-eligible-hero') local camp=0 if mode==xyd.ArenaModeType.CAMP then camp=a.subMode and a.subMode>0 and (a.subMode==10 and xyd.HeroFromType.QUN or a.subMode) or pool[1]:getFromType() end local chosen={} for _,h in ipairs(pool) do if #chosen<slots and (camp==0 or h:getFromType()==camp) then table.insert(chosen,h) end end assert(#chosen>0 and #chosen<=slots,'vc-popup-mode-roster-'..#chosen) local leader=xyd.tables.arenaMode:isLead(mode)==1 and chosen[1]:getHeroID() or 0 a:saveModeDefenderData({defenseHeroes=chosen,pet_id=0,leader_id=leader},function() __vcModeDefense=true end) __vcMode=camp",
+    "wait:5",
+    "lua:assert(__vcModeDefense,'vc-popup-mode-defense')",
+    "lua:function __vcPopup(tag) local w=xyd.WindowManager.get():getWindow('arena_team_info') assert(w and w.team,'vc-'..tag..'-no-window') assert(w.team.heroes and #w.team.heroes>0,'vc-'..tag..'-no-heroes') assert(type(w.team.force)=='number' and w.team.force>0,'vc-'..tag..'-power') assert(type(w.team.rank)=='number' and w.team.rank>0,'vc-'..tag..'-rank') for _,h in ipairs(w.team.heroes) do assert(h.getTableID and h:getTableID()>0,'vc-'..tag..'-hero-table') assert(h:getZhandouli()>0,'vc-'..tag..'-hero-power') end print('vc-popup-force',tag,w.team.force,#w.team.heroes) return w.team.force end __vcClick=import('app.windows.NewRankWindow').clickCell",
+    "lua:local a=xyd.ModelManager.get():loadModel(xyd.ModelType.ARENA) __vcClick({curSubType=xyd.SubRankType.ARENA_RANK},{player_id=xyd.selfPlayer.playerID},a:getRank())",
+    "wait:3",
+    "lua:__vcNormalPlayerPower=__vcPopup('291-player') xyd.WindowManager.get():closeWindow('arena_team_info')",
+    "wait:2",
+    "lua:local rl=xyd.ModelManager.get():loadModel(xyd.ModelType.RANK_LIST) rl:delRankInfoByType(xyd.SubRankType.ARENA_RANK) rl:loadRankList({xyd.SubRankType.ARENA_RANK},true,function(code,reply) assert(code==xyd.error.OK,'vc-popup-rank-list') local info=reply.rank_list[1].rank_info assert(info and info.rank_info and #info.rank_info>0,'vc-popup-rank-empty') __vcRankRow=info.rank_info[1] end)",
+    "wait:5",
+    "lua:assert(__vcRankRow,'vc-popup-rank-missing') xyd.Backend.get():request(xyd.mid.query_arena_formation,{other_player_id=__vcRankRow.player_id},function(code,reply) assert(code==xyd.error.OK,'vc-popup-291-query') assert(reply.is_robot==true,'vc-popup-291-not-robot') assert(reply.heros and #reply.heros>0,'vc-popup-291-query-heroes') __vcClick({curSubType=xyd.SubRankType.ARENA_RANK},{player_id=__vcRankRow.player_id},__vcRankRow.rank or 0) end)",
+    "wait:3",
+    "lua:__vcNormalRobotPower=__vcPopup('291-robot') xyd.WindowManager.get():closeWindow('arena_team_info')",
+    "wait:2",
+    "lua:__vcClick({curSubType=xyd.SubRankType.ARENA_MODE_RANK_INFO},{player_id=xyd.selfPlayer.playerID},0)",
+    "wait:3",
+    "lua:__vcModePlayerPower=__vcPopup('295-player') xyd.WindowManager.get():closeWindow('arena_team_info')",
+    "lua:assert(__vcNormalPlayerPower>0 and __vcNormalRobotPower>0 and __vcModePlayerPower>0,'vc-popup-power-zero') print('vc-popup-powers',__vcNormalPlayerPower,__vcNormalRobotPower,__vcModePlayerPower) xyd.WindowManager.get():closeWindow('arena_team_info')"
+  ],
+  "expect_ok": [
+    59,
+    272,
+    278,
+    282,
+    284,
+    291,
+    295,
+    301
+  ]
+}

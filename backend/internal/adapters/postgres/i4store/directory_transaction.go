@@ -34,5 +34,11 @@ func (TransactionDiscoveryReader) ProfilesAfterTx(c context.Context, t tx.Tx, p 
 	}
 	return (PlayerDirectoryReader{Queryer: t}).ProfilesAfter(c, p, l)
 }
+func (TransactionDiscoveryReader) ProfilesByRecentActivityTx(c context.Context, t tx.Tx, s identity.LogicalServerID, exclude identity.PlayerID, l int) ([]playerdirectory.Profile, error) {
+	if t == nil {
+		return nil, errors.New("nil directory transaction")
+	}
+	return (PlayerDirectoryReader{Queryer: t}).ProfilesByRecentActivity(c, s, exclude, l)
+}
 
 var _ playerdirectory.TxDiscoveryReader = TransactionDiscoveryReader{}

@@ -6,6 +6,7 @@ import (
 	"errors"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	"gxb.local/backend/v2/internal/application/i5"
+	cd "gxb.local/backend/v2/internal/domain/combat"
 	"gxb.local/backend/v2/internal/domain/identity"
 	domain "gxb.local/backend/v2/internal/domain/topfloor"
 	"gxb.local/backend/v2/internal/foundation/ids"
@@ -143,7 +144,7 @@ func (service Service) TaskPreFight(requestContext context.Context, actor identi
 	if err != nil || !found {
 		return errors.Join(err, domain.ErrRefused)
 	}
-	eligibility, err := service.TaskModeEligibilityTx(requestContext, service.Fresh, *catalog.TaskModes, actor, at)
+	eligibility, err := service.TaskModeEligibilityTx(requestContext, service.Fresh, *catalog.TaskModes, period, actor, at)
 	if err != nil {
 		return err
 	}
@@ -161,8 +162,19 @@ func (service Service) TaskPreFight(requestContext context.Context, actor identi
 	if !found {
 		return domain.ErrRefused
 	}
-	_, err = service.taskDisplay(requestContext, service.Fresh, catalog, period, occupant, at)
-	return err
+	display, err := service.taskDisplay(requestContext, service.Fresh, catalog, period, occupant, at)
+	if err = taskOfferError(err, false); err != nil {
+		return err
+	}
+	rank, _, err := service.Store.TaskRankOfTx(requestContext, service.Fresh, actor.LogicalServerID, period.Rotation.Number, domain.Occupant{Player: actor.PlayerID})
+	if err != nil {
+		return err
+	}
+	snapshot, snapshotFound, err := service.Store.ReadOfferSnapshotTx(requestContext, service.Fresh, actor.PlayerID, domain.OfferScopeSpecial, false)
+	if err != nil {
+		return err
+	}
+	return domain.MatchOfferSnapshot(snapshot, snapshotFound, period.Rotation.Number, rank, display.Occupant, display.Rank)
 }
 func (service Service) TaskRankList(requestContext context.Context, actor identity.ActorContext) (RankList, error) {
 	_, at, err := service.readContext(requestContext)
@@ -236,30 +248,32 @@ func (service Service) TaskRecordInfo(requestContext context.Context, actor iden
 		}
 		info.Opponent = display
 		info.AvengeType = catalog.AvengeType(rank, display.Rank)
-		info.CanAvenge = !record.Record.Attack && !record.Record.Win && !record.Record.Opponent.IsRobot() && info.AvengeType == 0
+		// The stock record popup routes its Revenge button through Normal 291/294/280,
+		// so a Special record must not advertise it; Special 286 revenge stays server-side (A-164).
 	}
 	return info, nil
 }
-func (service Service) TaskReport(requestContext context.Context, actor identity.ActorContext, key string) ([]byte, error) {
+func (service Service) TaskReport(requestContext context.Context, actor identity.ActorContext, key string, op operation.Context) ([]byte, error) {
 	id, err := ids.ParseUUID(key)
 	if err != nil {
 		return nil, domain.ErrInvalid
 	}
-	records, err := service.Store.TaskRecordsTx(requestContext, service.Fresh, actor.PlayerID)
-	if err != nil {
-		return nil, err
-	}
-	retained := false
-	for _, record := range records {
-		retained = retained || record.Record.AttemptID == id
-	}
-	if !retained {
-		return nil, domain.ErrRefused
-	}
-	now, err := service.Timed.Binder.Time.Now(requestContext)
-	if err != nil {
-		return nil, err
-	}
-	result, _, err := service.Combat.ReplayTx(requestContext, service.Fresh, id, reportRetention, now)
-	return result.Report, err
+	var report []byte
+	_, _, err = service.Timed.Run(requestContext, op, Profile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, readRetry(), nil, func(c context.Context, sc gen.TimedScope) error {
+		records, err := service.Store.TaskRecordsTx(c, sc.Tx, actor.PlayerID)
+		if err != nil {
+			return err
+		}
+		retained := false
+		for _, record := range records {
+			retained = retained || record.Record.AttemptID == id
+		}
+		if !retained {
+			return domain.ErrRefused
+		}
+		result, _, err := service.Combat.ReplayTx(c, sc.Tx, id, *cd.MustMode(cd.ModeTopFloorTask).Retention, sc.Operation.DecisionAt())
+		report = result.Report
+		return err
+	})
+	return report, err
 }

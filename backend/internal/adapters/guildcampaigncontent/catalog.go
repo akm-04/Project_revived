@@ -33,6 +33,7 @@ func Settings(policy guildcampaignpolicy.Policy, settings guildcampaigncatalog.S
 		RecordRewardBadge:     settings.FirstRewardCoin,
 		LastStrikeCoin:        policy.LastStrikeCoin,
 		MaxFightDamage:        policy.MaxFightDamage,
+		ChapterVersions:       policy.ChapterVersions,
 	}
 }
 
@@ -97,7 +98,7 @@ func (c Catalog) CopyInfo(chapterID, copyID int64) (guildcampaign.CopyInfo, bool
 		}
 		rows := make([]guildcampaign.EnemyRow, 0, len(enemies))
 		for _, enemy := range enemies {
-			rows = append(rows, guildcampaign.EnemyRow{TableID: enemy.TableID, Lev: enemy.Lev, Star: enemy.Star, Color: enemy.Color, Health: enemy.Health})
+			rows = append(rows, guildcampaign.EnemyRow{PartnerID: enemy.PartnerID, TableID: enemy.TableID, Lev: enemy.Lev, Star: enemy.Star, Color: enemy.Color, Health: enemy.Health})
 		}
 		info.Waves[number] = rows
 	}

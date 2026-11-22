@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"strconv"
 	"testing"
 	"time"
@@ -22,6 +23,8 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
+	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
+	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	"gxb.local/backend/v2/internal/application/commerceprivilege"
 	gen "gxb.local/backend/v2/internal/application/generation"
 	app "gxb.local/backend/v2/internal/application/guildcampaign"
@@ -37,6 +40,8 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
+	"gxb.local/backend/v2/internal/protocol/httpedge"
+	"gxb.local/backend/v2/internal/protocol/wire"
 )
 
 type campaignFixture struct {
@@ -96,7 +101,9 @@ func newCampaignFixture(t *testing.T) campaignFixture {
 		ModeStore: store, Content: catalog, Tables: f.tables, Settings: f.settings,
 		Combat: combatService, Grants: genuineGrants(p), Facts: appi5.ObjectiveFacts{Owner: missionOwner, Open: i5store.Store{Queryer: p}},
 		Directory: i4store.PlayerDirectoryReader{}, Mail: mail,
+		Roster: characterstore.Store{Queryer: p}, Awakenings: characterstore.RawAwakeningStore{},
 		Timed: gen.TimedRunner{Binder: gen.Binder{Time: postgres.AuthoritativeTime{Queryer: p}}, Runner: tx.Runner{DB: p}}, Fresh: p,
+		Receipts: kernelstore.Store{}, BattleCounts: battleCountObserver(p),
 	}
 	f.leaderHero = bornHero(t, p, f.leader, f.rev, genuineHeroTable, 1).PartnerID
 	f.secondHero = bornHero(t, p, f.second, f.rev, 10001002, 1).PartnerID
@@ -167,7 +174,7 @@ func (f campaignFixture) waveEnemies(t *testing.T, started app.Started, star int
 	t.Helper()
 	enemies := []app.ResultEnemy{}
 	for _, enemy := range started.Waves[started.CurrentIndex] {
-		enemies = append(enemies, app.ResultEnemy{HeroID: enemy.TableID, HP: hp, Index: started.CurrentIndex})
+		enemies = append(enemies, app.ResultEnemy{HeroID: enemy.PartnerID, HP: hp, Index: started.CurrentIndex})
 	}
 	_ = star
 	return app.Result{ChapterID: 7, CopyID: started.CopyID, CurrentIndex: started.CurrentIndex,
@@ -246,6 +253,9 @@ func TestI9_9CFightClaimCarryAttemptsLateAndDuplicate(t *testing.T) {
 	if clears := f.memberClears(t, f.third, chapterID); clears != 0 {
 		t.Fatalf("loss consumed a clear: %d", clears)
 	}
+	if got := battleCount(t, f.pool, f.third.PlayerID, heroThird); got != 1 {
+		t.Fatalf("Girls Log count for third member = %d, want 1", got)
+	}
 	detail, err := f.mode.MapDetail(ctx, f.third, copyID, f.op())
 	if err != nil {
 		t.Fatal("detail", err)
@@ -278,6 +288,23 @@ func TestI9_9CFightClaimCarryAttemptsLateAndDuplicate(t *testing.T) {
 	}
 	heroSecond := f.secondHero
 	second := f.start(t, f.second, chapterID, copyID, heroSecond)
+	// The same retry still replays as 30005 while another member holds the
+	// copy: the stored body exists and the replay writes and pays nothing.
+	thirdGoldBefore := f.balance(t, f.third, "mana")
+	heldRetry, err := f.mode.Settle(ctx, f.third, loss, f.op())
+	if err != nil || !heldRetry.Duplicate || heldRetry.Body["error_code"] != int64(30005) {
+		t.Fatalf("retry while held %+v err=%v", heldRetry, err)
+	}
+	if detail, err = f.mode.MapDetail(ctx, f.third, copyID, f.op()); err != nil || detail.CurrentIndex != 1 || detail.Waves[1][0].HP != 77 {
+		t.Fatalf("retry while held wrote the copy: %+v err=%v", detail, err)
+	}
+	if goldAfter := f.balance(t, f.third, "mana"); goldAfter != thirdGoldBefore {
+		t.Fatalf("retry while held paid again: %d -> %d", thirdGoldBefore, goldAfter)
+	}
+	// Receipt and held replays never count.
+	if got := battleCount(t, f.pool, f.third.PlayerID, heroThird); got != 1 {
+		t.Fatalf("Girls Log count for third member after replays = %d, want 1", got)
+	}
 	win := f.waveEnemies(t, second, 3, 5000, 0)
 	win.Formation = strconv.FormatInt(heroSecond, 10)
 	settled, err := f.mode.Settle(ctx, f.second, win, f.op())
@@ -287,9 +314,15 @@ func TestI9_9CFightClaimCarryAttemptsLateAndDuplicate(t *testing.T) {
 	if clears := f.memberClears(t, f.second, chapterID); clears != 1 {
 		t.Fatalf("clear not consumed: %d", clears)
 	}
+	if got := battleCount(t, f.pool, f.second.PlayerID, heroSecond); got != 1 {
+		t.Fatalf("Girls Log count for second member = %d, want 1", got)
+	}
 	win.Formation = strconv.FormatInt(heroSecond, 10)
 	if duplicate, err := f.mode.Settle(ctx, f.second, win, f.op()); err != nil || !duplicate.Duplicate || duplicate.Body["error_code"] != int64(30005) {
 		t.Fatalf("duplicate replay %+v err=%v", duplicate, err)
+	}
+	if got := battleCount(t, f.pool, f.second.PlayerID, heroSecond); got != 1 {
+		t.Fatalf("Girls Log count for second member after replay = %d, want 1", got)
 	}
 	// A late result after the holder window writes nothing.
 	if _, err := f.mode.Claim(ctx, f.second, copyID, f.op()); err != nil {
@@ -303,6 +336,196 @@ func TestI9_9CFightClaimCarryAttemptsLateAndDuplicate(t *testing.T) {
 	}
 	if after := f.copyIndex(t, copyID); after != before {
 		t.Fatalf("late result advanced the copy %d -> %d", before, after)
+	}
+}
+
+// TestI9_9CCopiesOpenInCatalogOrder guards BUGS #134: 603 and 613 report is_open
+// 0 for a copy whose catalog predecessor is not won, and 604/614 refuse it.
+func TestI9_9CCopiesOpenInCatalogOrder(t *testing.T) {
+	f := newCampaignFixture(t)
+	f.seedActivity(t, 40)
+	if _, err := f.mode.Open(ctx, f.leader, 7, f.op()); err != nil {
+		t.Fatal("open", err)
+	}
+	info := f.chapter(t)
+	first, second := info.Copies[0], info.Copies[1]
+
+	mapBefore, err := f.mode.GuildMap(ctx, f.second, f.op())
+	if err != nil {
+		t.Fatal("guild map", err)
+	}
+	if row := campaignCopyRow(t, mapBefore, first); !row.IsOpen {
+		t.Fatal("first copy is locked")
+	}
+	if row := campaignCopyRow(t, mapBefore, second); row.IsOpen {
+		t.Fatal("second copy is open before the first is won")
+	}
+	detail, err := f.mode.MapDetail(ctx, f.second, second, f.op())
+	if err != nil || detail.IsOpen {
+		t.Fatalf("613 second copy is_open=%v err=%v", detail.IsOpen, err)
+	}
+	if _, err := f.mode.Claim(ctx, f.second, second, f.op()); !errors.Is(err, d.ErrRefused) {
+		t.Fatalf("claim of a locked copy: %v", err)
+	}
+	if _, err := f.mode.Start(ctx, f.second, app.Fight{ChapterID: 7, CopyID: second, CampaignType: 7, Formation: "1"}, f.op()); !errors.Is(err, d.ErrRefused) {
+		t.Fatalf("start of a locked copy: %v", err)
+	}
+
+	f.fight(t, f.leader, 7, first, f.leaderHero, 4000, 3, 0, f.at)
+	f.fight(t, f.second, 7, first, f.secondHero, 4000, 3, 0, f.at)
+	f.fight(t, f.third, 7, first, f.thirdHero, 4000, 3, 0, f.at)
+
+	mapAfter, err := f.mode.GuildMap(ctx, f.second, f.op())
+	if err != nil {
+		t.Fatal("guild map after first win", err)
+	}
+	if row := campaignCopyRow(t, mapAfter, first); !row.IsWin {
+		t.Fatal("first copy not won")
+	}
+	if row := campaignCopyRow(t, mapAfter, second); !row.IsOpen {
+		t.Fatal("second copy still locked after the first is won")
+	}
+	detail, err = f.mode.MapDetail(ctx, f.second, second, f.op())
+	if err != nil || !detail.IsOpen {
+		t.Fatalf("613 second copy after first win is_open=%v err=%v", detail.IsOpen, err)
+	}
+	if _, err := f.mode.Claim(ctx, f.second, second, f.op()); err != nil {
+		t.Fatalf("claim of the opened second copy: %v", err)
+	}
+}
+
+func campaignCopyRow(t *testing.T, lists app.Lists, copyID int64) app.CopyRowView {
+	t.Helper()
+	for _, row := range lists.Copies {
+		if row.CopyID == copyID {
+			return row
+		}
+	}
+	t.Fatalf("copy %d missing from 603 copy_list", copyID)
+	return app.CopyRowView{}
+}
+
+// TestI9_9CEnemyHPRecordedForClientCarry guards DL-33b38484: a row that took
+// damage carries health 1 so the client applies the stored hp (BattleCreate.lua
+// 1106) and a later loss lowers the known HP.
+// TestI9_9CMemberReplaySurvivesAnotherMembersSameWaveSettlement guards A-134:
+// C8 replays a member's own last settled result at that wave even after another
+// member settled the same wave over the copy's single replay slot.
+func TestI9_9CMemberReplaySurvivesAnotherMembersSameWaveSettlement(t *testing.T) {
+	f := newCampaignFixture(t)
+	f.seedActivity(t, 40)
+	if _, err := f.mode.Open(ctx, f.leader, 7, f.op()); err != nil {
+		t.Fatal("open", err)
+	}
+	chapterID, copyID := f.copyID(t)
+	if _, err := f.mode.Claim(ctx, f.third, copyID, f.op()); err != nil {
+		t.Fatal("claim third", err)
+	}
+	thirdStart := f.start(t, f.third, chapterID, copyID, f.thirdHero)
+	thirdLoss := f.waveEnemies(t, thirdStart, 0, 1234, 77)
+	firstSettled, err := f.mode.Settle(ctx, f.third, thirdLoss, f.op())
+	if err != nil || firstSettled.Duplicate {
+		t.Fatalf("third loss %+v err=%v", firstSettled, err)
+	}
+	if _, err := f.mode.Claim(ctx, f.second, copyID, f.op()); err != nil {
+		t.Fatal("claim second", err)
+	}
+	secondStart := f.start(t, f.second, chapterID, copyID, f.secondHero)
+	secondLoss := f.waveEnemies(t, secondStart, 0, 4321, 33)
+	if _, err := f.mode.Settle(ctx, f.second, secondLoss, f.op()); err != nil {
+		t.Fatal("second loss", err)
+	}
+	before, err := f.mode.MapDetail(ctx, f.third, copyID, f.op())
+	if err != nil {
+		t.Fatal("detail before", err)
+	}
+	goldBefore := f.balance(t, f.third, "mana")
+	clearsBefore := f.memberClears(t, f.third, chapterID)
+	replayed, err := f.mode.Settle(ctx, f.third, thirdLoss, f.op())
+	if err != nil || !replayed.Duplicate || replayed.Body["error_code"] != int64(30005) {
+		t.Fatalf("third retry after another member settled %+v err=%v", replayed, err)
+	}
+	replayedAward := replayed.Body["rank_award"].(map[string]any)
+	storedAward := firstSettled.Body["rank_award"].(map[string]any)
+	if replayed.Body["coin_award"] != float64(firstSettled.Body["coin_award"].(int64)) ||
+		replayedAward["crystal"] != float64(storedAward["crystal"].(int64)) || replayedAward["guild_coin"] != float64(storedAward["guild_coin"].(int64)) {
+		t.Fatalf("replayed body %+v vs %+v", replayed.Body, firstSettled.Body)
+	}
+	if goldAfter := f.balance(t, f.third, "mana"); goldAfter != goldBefore {
+		t.Fatalf("replay paid again: %d -> %d", goldBefore, goldAfter)
+	}
+	if clearsAfter := f.memberClears(t, f.third, chapterID); clearsAfter != clearsBefore {
+		t.Fatalf("replay changed member clears: %d -> %d", clearsBefore, clearsAfter)
+	}
+	after, err := f.mode.MapDetail(ctx, f.third, copyID, f.op())
+	if err != nil {
+		t.Fatal("detail after", err)
+	}
+	if after.CurrentIndex != before.CurrentIndex || fmt.Sprint(after.Waves) != fmt.Sprint(before.Waves) {
+		t.Fatalf("replay wrote the copy: %+v -> %+v", before, after)
+	}
+	// A later settlement by the same member at the same wave is the latest
+	// answer: the retry now replays that body and still pays nothing.
+	if _, err := f.mode.Claim(ctx, f.third, copyID, f.op()); err != nil {
+		t.Fatal("reclaim third", err)
+	}
+	thirdAgain := f.start(t, f.third, chapterID, copyID, f.thirdHero)
+	latestSettled, err := f.mode.Settle(ctx, f.third, f.waveEnemies(t, thirdAgain, 0, 7777, 11), f.op())
+	if err != nil || latestSettled.Duplicate {
+		t.Fatalf("third later loss %+v err=%v", latestSettled, err)
+	}
+	goldLatest := f.balance(t, f.third, "mana")
+	latestReplay, err := f.mode.Settle(ctx, f.third, thirdLoss, f.op())
+	if err != nil || !latestReplay.Duplicate || latestReplay.Body["error_code"] != int64(30005) {
+		t.Fatalf("retry after a later settlement %+v err=%v", latestReplay, err)
+	}
+	if latestReplay.Body["coin_award"] != float64(latestSettled.Body["coin_award"].(int64)) {
+		t.Fatalf("retry replayed a stale body %v vs %v", latestReplay.Body["coin_award"], latestSettled.Body["coin_award"])
+	}
+	if goldAfter := f.balance(t, f.third, "mana"); goldAfter != goldLatest {
+		t.Fatalf("latest replay paid again: %d -> %d", goldLatest, goldAfter)
+	}
+}
+
+func TestI9_9CEnemyHPRecordedForClientCarry(t *testing.T) {
+	f := newCampaignFixture(t)
+	f.seedActivity(t, 40)
+	if _, err := f.mode.Open(ctx, f.leader, 7, f.op()); err != nil {
+		t.Fatal("open", err)
+	}
+	chapterID, copyID := f.copyID(t)
+	if _, err := f.mode.Claim(ctx, f.second, copyID, f.op()); err != nil {
+		t.Fatal("claim second", err)
+	}
+	started := f.startAt(t, f.second, chapterID, copyID, f.secondHero, f.at)
+	if _, err := f.mode.Settle(ctx, f.second, f.waveEnemies(t, started, 0, 1000, 77), f.op()); err != nil {
+		t.Fatal("first loss", err)
+	}
+	detail, err := f.mode.MapDetail(ctx, f.third, copyID, f.op())
+	if err != nil {
+		t.Fatal("detail", err)
+	}
+	for _, row := range detail.Waves[detail.CurrentIndex] {
+		if row.Health != 1 || row.HP != 77 {
+			t.Fatalf("recorded row health=%d hp=%d, want health=1 hp=77", row.Health, row.HP)
+		}
+	}
+	if _, err := f.mode.Claim(ctx, f.third, copyID, f.op()); err != nil {
+		t.Fatal("claim third", err)
+	}
+	second := f.startAt(t, f.third, chapterID, copyID, f.thirdHero, f.at.Add(time.Minute))
+	if row := second.Waves[second.CurrentIndex][0]; row.Health != 1 || row.HP != 77 {
+		t.Fatalf("start rows health=%d hp=%d, want health=1 hp=77", row.Health, row.HP)
+	}
+	if _, err := f.mode.Settle(ctx, f.third, f.waveEnemies(t, second, 0, 500, 33), f.opAt(f.at.Add(time.Minute))); err != nil {
+		t.Fatal("second loss", err)
+	}
+	lowered, err := f.mode.MapDetail(ctx, f.third, copyID, f.opAt(f.at.Add(time.Minute)))
+	if err != nil {
+		t.Fatal("detail after second loss", err)
+	}
+	if row := lowered.Waves[lowered.CurrentIndex][0]; row.Health != 1 || row.HP != 33 {
+		t.Fatalf("known HP did not fall: health=%d hp=%d", row.Health, row.HP)
 	}
 }
 
@@ -559,7 +782,7 @@ func (f campaignFixture) startAt(t *testing.T, a identity.ActorContext, chapterI
 func resultFor(chapterID int64, started app.Started, damage, star, hp int64) app.Result {
 	enemies := make([]app.ResultEnemy, 0, len(started.Waves[started.CurrentIndex]))
 	for _, enemy := range started.Waves[started.CurrentIndex] {
-		enemies = append(enemies, app.ResultEnemy{HeroID: enemy.TableID, HP: hp, Index: started.CurrentIndex})
+		enemies = append(enemies, app.ResultEnemy{HeroID: enemy.PartnerID, HP: hp, Index: started.CurrentIndex})
 	}
 	return app.Result{ChapterID: chapterID, CopyID: started.CopyID, CurrentIndex: started.CurrentIndex,
 		Formation: "1", TotalDamage: damage, Star: star, Enemies: enemies}
@@ -645,11 +868,22 @@ func TestI9_9CReplayLastStrikeAndChapterClear(t *testing.T) {
 	}
 	chapterID, plainCopy := f.copyID(t)
 	copyID := f.bossCopy(t, chapterID)
-	for _, id := range []int64{plainCopy, copyID} {
+	// BUGS #134: copies open in catalog order, so every copy before the boss is
+	// seeded won; plainCopy stays unwon to keep the chapter open for the last strike.
+	for _, id := range f.chapter(t).Copies {
+		if id == plainCopy || id == copyID {
+			f.mutateCopy(t, chapterID, id, func(copy *d.Copy, waves map[int64][]app.EnemyRow) {
+				copy.CurrentIndex = 3
+				copy.Percent = 2.0 / 3
+				killWaves(waves, 1, 2)
+			})
+			continue
+		}
 		f.mutateCopy(t, chapterID, id, func(copy *d.Copy, waves map[int64][]app.EnemyRow) {
+			copy.Win = true
 			copy.CurrentIndex = 3
-			copy.Percent = 2.0 / 3
-			killWaves(waves, 1, 2)
+			copy.Percent = 1
+			killWaves(waves, 1, 2, 3)
 		})
 	}
 	if logs := f.logCount(t, int64(d.LogFinalHit)); logs != 0 {
@@ -664,8 +898,10 @@ func TestI9_9CReplayLastStrikeAndChapterClear(t *testing.T) {
 	if got := f.balance(t, f.leader, "team_dungeon_coin") - beforeCoin; got != f.settings.LastStrikeCoin {
 		t.Fatalf("last strike coin %d, want %d", got, f.settings.LastStrikeCoin)
 	}
-	if logs := f.logCount(t, int64(d.LogFinalHit)); logs != 0 {
-		t.Fatalf("log 7 on a copy clear that did not win the chapter: %d", logs)
+	// BUGS #134: the boss is the last catalog copy, so it can only be fought once
+	// every earlier copy is won; its clear is therefore the chapter clear.
+	if logs := f.logCount(t, int64(d.LogFinalHit)); logs != 1 {
+		t.Fatalf("chapter clear log 7 = %d", logs)
 	}
 	retry, err := f.mode.Settle(ctx, f.leader, resultFor(chapterID, app.Started{CopyID: copyID, CurrentIndex: 3}, 4000, 3, 0), f.opAt(f.at.Add(time.Minute)))
 	if err != nil || !retry.Duplicate || retry.Body["error_code"] != int64(30005) {
@@ -762,7 +998,7 @@ func TestI9_9CAwardQueue(t *testing.T) {
 			t.Fatalf("third apply %d: %v", attempt+2, err)
 		}
 	}
-	if _, err := f.mode.ApplyReward(ctx, f.third, chapterID, info.Items[0], f.op()); !errors.Is(err, app.ErrUnavailable) {
+	if _, err := f.mode.ApplyReward(ctx, f.third, chapterID, info.Items[0], f.op()); !errors.Is(err, d.ErrRefused) {
 		t.Fatalf("fifth application in a day: %v", err)
 	}
 
@@ -812,6 +1048,204 @@ func TestI9_9CAwardQueue(t *testing.T) {
 	}
 }
 
+// TestI9_9CRewardApplicationRequiresRegistration covers BUGS #98: only a
+// member registered for the chapter at open or reset may apply for its reward.
+// A late joiner, a leaver and a leaver who rejoined are all refused.
+func TestI9_9CRewardApplicationRequiresRegistration(t *testing.T) {
+	f := newCampaignFixture(t)
+	f.seedActivity(t, 40)
+	if _, err := f.mode.Open(ctx, f.leader, 7, f.op()); err != nil {
+		t.Fatal("open", err)
+	}
+	chapterID, _ := f.copyID(t)
+	info := f.chapter(t)
+	slot := f.nextSlot(f.at)
+	tr := f.openTx(t)
+	if err := f.store().SaveChapterProgressTx(ctx, tr, int64(f.guild), chapterID, 1, 1, true, &f.at); err != nil {
+		t.Fatal("chapter win", err)
+	}
+	seed := app.AwardSeed{AwardID: info.Items[0], Remaining: 3, ExpiresAt: f.at.Add(time.Duration(f.settings.RewardTimeLimitSecond) * time.Second), NextSlot: slot}
+	if err := f.store().InsertAwardsTx(ctx, tr, int64(f.guild), chapterID, 1, []app.AwardSeed{seed}); err != nil {
+		t.Fatal("award seed", err)
+	}
+	if err := tr.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+	// The reconciler scans due awards across every guild, so this fixture consumes
+	// its row on exit to keep later tests' due scans exact.
+	t.Cleanup(func() {
+		exec(t, f.pool, `UPDATE guild_campaign_awards SET remaining=0 WHERE guild_id=$1 AND chapter_id=$2 AND run=1`, int64(f.guild), chapterID)
+	})
+	if _, err := f.mode.ApplyReward(ctx, f.second, chapterID, info.Items[0], f.op()); err != nil {
+		t.Fatalf("registered member applied: %v", err)
+	}
+
+	lateJoiner, _ := genuinePlayer(t, f.pool, f.server)
+	tr = f.openTx(t)
+	member := guild.Membership{PlayerID: lateJoiner.PlayerID, GuildID: f.guild, Role: guild.Member, JoinedAt: f.at, MembershipVersion: 1, StateVersion: 1, UpdatedAt: f.at}
+	if err := (guildstore.Store{Queryer: f.pool}).InsertMembershipTx(ctx, tr, member); err != nil {
+		tr.Rollback(ctx)
+		t.Fatal("late join", err)
+	}
+	if err := tr.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.mode.ApplyReward(ctx, lateJoiner, chapterID, info.Items[0], f.op()); !errors.Is(err, d.ErrRefused) {
+		t.Fatalf("late joiner applied: %v", err)
+	}
+
+	if _, err := f.core(t).Leave(ctx, f.third, op()); err != nil {
+		t.Fatal("leave", err)
+	}
+	if _, err := f.mode.ApplyReward(ctx, f.third, chapterID, info.Items[0], f.op()); !errors.Is(err, d.ErrRefused) {
+		t.Fatalf("leaver applied: %v", err)
+	}
+
+	tr = f.openTx(t)
+	rejoin := guild.Membership{PlayerID: f.third.PlayerID, GuildID: f.guild, Role: guild.Member, JoinedAt: f.at, MembershipVersion: 1, StateVersion: 1, UpdatedAt: f.at}
+	if err := (guildstore.Store{Queryer: f.pool}).InsertMembershipTx(ctx, tr, rejoin); err != nil {
+		tr.Rollback(ctx)
+		t.Fatal("rejoin", err)
+	}
+	if err := tr.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.mode.ApplyReward(ctx, f.third, chapterID, info.Items[0], f.op()); !errors.Is(err, d.ErrRefused) {
+		t.Fatalf("rejoined member applied before the next reset: %v", err)
+	}
+
+	for _, refused := range []identity.ActorContext{lateJoiner, f.third} {
+		if rows := scalar(t, f.pool, `SELECT count(*) FROM guild_campaign_applications WHERE guild_id=$1 AND chapter_id=$2 AND player_id=$3`,
+			int64(f.guild), chapterID, int64(refused.PlayerID)); rows != 0 {
+			t.Fatalf("refused player %d left %d application rows", refused.PlayerID, rows)
+		}
+	}
+}
+
+// TestI9_9CLeaverIsNotAnAwardCandidate covers the BUGS #98 residual: an
+// application recorded while registered must not let a leaver take a later
+// award slot or remain an applicant in the 605 list.
+func TestI9_9CLeaverIsNotAnAwardCandidate(t *testing.T) {
+	t.Run("award goes to the next registered applicant", func(t *testing.T) {
+		f := newCampaignFixture(t)
+		f.seedActivity(t, 40)
+		if _, err := f.mode.Open(ctx, f.leader, 7, f.op()); err != nil {
+			t.Fatal("open", err)
+		}
+		chapterID, _ := f.copyID(t)
+		info := f.chapter(t)
+		slot := f.nextSlot(f.at)
+		tr := f.openTx(t)
+		if err := f.store().SaveChapterProgressTx(ctx, tr, int64(f.guild), chapterID, 1, 1, true, &f.at); err != nil {
+			t.Fatal("chapter win", err)
+		}
+		seed := app.AwardSeed{AwardID: info.Items[0], Remaining: 1, ExpiresAt: f.at.Add(time.Duration(f.settings.RewardTimeLimitSecond) * time.Second), NextSlot: slot}
+		if err := f.store().InsertAwardsTx(ctx, tr, int64(f.guild), chapterID, 1, []app.AwardSeed{seed}); err != nil {
+			t.Fatal("award seed", err)
+		}
+		if err := tr.Commit(ctx); err != nil {
+			t.Fatal(err)
+		}
+		t.Cleanup(func() {
+			exec(t, f.pool, `UPDATE guild_campaign_awards SET remaining=0 WHERE guild_id=$1 AND chapter_id=$2 AND run=1`, int64(f.guild), chapterID)
+		})
+		for _, applicant := range []identity.ActorContext{f.second, f.third} {
+			if _, err := f.mode.ApplyReward(ctx, applicant, chapterID, info.Items[0], f.op()); err != nil {
+				t.Fatalf("apply %d: %v", applicant.PlayerID, err)
+			}
+		}
+		if _, err := f.core(t).Leave(ctx, f.second, op()); err != nil {
+			t.Fatal("leave", err)
+		}
+		body, err := f.mode.AwardRead(ctx, f.third, chapterID, f.op())
+		if err != nil {
+			t.Fatal("award list", err)
+		}
+		if listed := awardMemberIDs(body, info.Items[0]); len(listed) != 1 || listed[0] != f.third.PlayerID {
+			t.Fatalf("605 members after leave %v, want only %d", listed, f.third.PlayerID)
+		}
+
+		decision := slot.Add(time.Second)
+		mode := f.mode
+		mode.Timed = gen.TimedRunner{Binder: gen.Binder{Time: fixedTime{at: decision}}, Runner: tx.Runner{DB: f.pool}}
+		out, err := (app.Reconciler{Mode: mode}).Reconcile(ctx, mustTimed(t, f.opAt(decision), decision), 100)
+		if err != nil || out.Settled != 1 {
+			t.Fatalf("reconcile %+v err=%v", out, err)
+		}
+		if got := f.awardMails(t, f.second); got != 0 {
+			t.Fatalf("leaver award mails %d", got)
+		}
+		if got := f.awardMails(t, f.third); got != 1 {
+			t.Fatalf("next applicant award mails %d", got)
+		}
+		distributed, err := f.mode.DistributeRecord(ctx, f.third, f.op())
+		if err != nil || len(distributed) != 1 {
+			t.Fatalf("615 rows %+v err=%v", distributed, err)
+		}
+	})
+
+	t.Run("only applicant leaving leaves the slot undistributed", func(t *testing.T) {
+		f := newCampaignFixture(t)
+		f.seedActivity(t, 40)
+		if _, err := f.mode.Open(ctx, f.leader, 7, f.op()); err != nil {
+			t.Fatal("open", err)
+		}
+		chapterID, _ := f.copyID(t)
+		info := f.chapter(t)
+		slot := f.nextSlot(f.at)
+		tr := f.openTx(t)
+		if err := f.store().SaveChapterProgressTx(ctx, tr, int64(f.guild), chapterID, 1, 1, true, &f.at); err != nil {
+			t.Fatal("chapter win", err)
+		}
+		seed := app.AwardSeed{AwardID: info.Items[0], Remaining: 1, ExpiresAt: f.at.Add(time.Duration(f.settings.RewardTimeLimitSecond) * time.Second), NextSlot: slot}
+		if err := f.store().InsertAwardsTx(ctx, tr, int64(f.guild), chapterID, 1, []app.AwardSeed{seed}); err != nil {
+			t.Fatal("award seed", err)
+		}
+		if err := tr.Commit(ctx); err != nil {
+			t.Fatal(err)
+		}
+		t.Cleanup(func() {
+			exec(t, f.pool, `UPDATE guild_campaign_awards SET remaining=0 WHERE guild_id=$1 AND chapter_id=$2 AND run=1`, int64(f.guild), chapterID)
+		})
+		if _, err := f.mode.ApplyReward(ctx, f.second, chapterID, info.Items[0], f.op()); err != nil {
+			t.Fatal("apply", err)
+		}
+		if _, err := f.core(t).Leave(ctx, f.second, op()); err != nil {
+			t.Fatal("leave", err)
+		}
+		decision := slot.Add(time.Second)
+		mode := f.mode
+		mode.Timed = gen.TimedRunner{Binder: gen.Binder{Time: fixedTime{at: decision}}, Runner: tx.Runner{DB: f.pool}}
+		out, err := (app.Reconciler{Mode: mode}).Reconcile(ctx, mustTimed(t, f.opAt(decision), decision), 100)
+		if err != nil || out.Settled != 0 || out.Noops < 1 {
+			t.Fatalf("reconcile %+v err=%v", out, err)
+		}
+		if got := f.awardMails(t, f.second); got != 0 {
+			t.Fatalf("leaver award mails %d", got)
+		}
+		if rows := scalar(t, f.pool, `SELECT count(*) FROM guild_campaign_distributions WHERE guild_id=$1`, int64(f.guild)); rows != 0 {
+			t.Fatalf("leaver distribution rows %d", rows)
+		}
+		rows, err := f.store().ListAwardsTx(ctx, f.pool, int64(f.guild), chapterID, 1)
+		if err != nil || len(rows) != 1 || rows[0].Remaining != 1 || !rows[0].NextSlot.After(decision) {
+			t.Fatalf("award after no-op %+v err=%v", rows, err)
+		}
+	})
+}
+
+func awardMemberIDs(body app.AwardBody, awardID int64) []identity.PlayerID {
+	var players []identity.PlayerID
+	for _, award := range body.Awards {
+		if award.AwardID != awardID {
+			continue
+		}
+		for _, member := range award.Members {
+			players = append(players, member.Profile.PlayerID)
+		}
+	}
+	return players
+}
+
 func TestI9_9CRankTieBossDoubleAndRecordReward(t *testing.T) {
 	f := newCampaignFixture(t)
 	f.seedActivity(t, 40)
@@ -821,13 +1255,20 @@ func TestI9_9CRankTieBossDoubleAndRecordReward(t *testing.T) {
 	chapterID, _ := f.copyID(t)
 	info := f.chapter(t)
 	bossCopy := f.bossCopy(t, chapterID)
-	plain := make([]int64, 0, len(info.Copies))
+	tieCopy, recordCopy := info.Copies[0], info.Copies[2]
+	// BUGS #134: copies open in catalog order. Seed the copies between them won so
+	// the boss, first and third copies are all open at once.
 	for _, id := range info.Copies {
-		if id != bossCopy {
-			plain = append(plain, id)
+		if id == bossCopy || id == tieCopy || id == recordCopy {
+			continue
 		}
+		f.mutateCopy(t, chapterID, id, func(copy *d.Copy, waves map[int64][]app.EnemyRow) {
+			copy.Win = true
+			copy.CurrentIndex = 3
+			copy.Percent = 1
+			killWaves(waves, 1, 2, 3)
+		})
 	}
-	tieCopy, recordCopy := plain[0], plain[1]
 	bossSettled := f.fight(t, f.second, chapterID, bossCopy, f.secondHero, 1000, 0, 50, f.at)
 	if got := f.damage(t, f.second.PlayerID, chapterID); got != 2000 {
 		t.Fatalf("boss wave rank damage %d, want 2000", got)
@@ -876,9 +1317,9 @@ func TestI9_9CAttemptCapRestWindowAndLateJoin(t *testing.T) {
 	chapterID, _ := f.copyID(t)
 	info := f.chapter(t)
 	for index := 0; index < 2; index++ {
-		f.fight(t, f.second, chapterID, info.Copies[index], f.secondHero, 5000, 3, 0, f.at.Add(time.Duration(index)*time.Minute))
+		f.fight(t, f.second, chapterID, info.Copies[0], f.secondHero, 5000, 3, 0, f.at.Add(time.Duration(index)*time.Minute))
 	}
-	if _, err := f.mode.Start(ctx, f.second, app.Fight{ChapterID: chapterID, CopyID: info.Copies[2], CampaignType: 7,
+	if _, err := f.mode.Start(ctx, f.second, app.Fight{ChapterID: chapterID, CopyID: info.Copies[0], CampaignType: 7,
 		Formation: strconv.FormatInt(f.secondHero, 10)}, f.op()); !errors.Is(err, d.ErrRefused) {
 		t.Fatalf("third start with no attempts left: %v", err)
 	}
@@ -1070,6 +1511,98 @@ func TestI9_9CBorrowedGirlThroughARealOffer(t *testing.T) {
 	}
 }
 
+func TestI9_9CServerRankCarriesGuildNameIconAndPartners(t *testing.T) {
+	f := newCampaignFixture(t)
+	f.seedActivity(t, 40)
+	if _, err := f.mode.Open(ctx, f.leader, 7, f.op()); err != nil {
+		t.Fatal("open", err)
+	}
+	chapterID, copyID := f.prepareChapterClear(t)
+	f.fight(t, f.leader, chapterID, copyID, f.leaderHero, 4000, 3, 0, f.at)
+
+	request := httpedge.DispatchRequest{Envelope: wire.RequestEnvelope{
+		Operation: f.op(), MID: 608,
+		Params:     map[string]any{"copy_id": copyID, "token": "bearer", "region": int64(f.server)},
+		Claims:     wire.CredentialClaims{Token: "bearer", Region: int64(f.server)},
+		ReceivedAt: f.at,
+	}}
+	response := stockruntime.GuildCampaignDispatcher{Authority: fixedSocialAuthority{actor: f.leader}, Service: f.mode}.Dispatch(ctx, request)
+	if response.HTTPStatus != http.StatusOK {
+		t.Fatalf("608 %d %+v", response.HTTPStatus, response.Body)
+	}
+
+	var guildName string
+	var guildIcon int64
+	if err := f.pool.QueryRow(ctx, `SELECT name,icon FROM guilds WHERE guild_id=$1`, int64(f.guild)).Scan(&guildName, &guildIcon); err != nil {
+		t.Fatal(err)
+	}
+	fast, ok := response.Body["fast_boss_killer"].(map[string]any)
+	if !ok || fast["name"] != guildName || fast["guild_id"] != int64(f.guild) || fast["icon"] != guildIcon {
+		t.Fatalf("fast_boss_killer %+v", response.Body["fast_boss_killer"])
+	}
+	boss, ok := response.Body["boss_killer"].(map[string]any)
+	if !ok || boss["guild_name"] != guildName || boss["player_name"] != "" || boss["lev"] != int64(1) {
+		t.Fatalf("boss_killer %+v", response.Body["boss_killer"])
+	}
+	rows, ok := response.Body["rank_list"].([]any)
+	if !ok || len(rows) != 1 {
+		t.Fatalf("rank_list %+v", response.Body["rank_list"])
+	}
+	row := rows[0].(map[string]any)
+	if row["guild_name"] != guildName || row["damage"] != int64(4000) {
+		t.Fatalf("rank row %+v", row)
+	}
+	partners, ok := row["partners"].([]any)
+	if !ok || len(partners) != 1 {
+		t.Fatalf("rank partners %+v", row["partners"])
+	}
+	partner := partners[0].(map[string]any)
+	if partner["table_id"] != int64(genuineHeroTable) || partner["star"] != int64(5) || partner["lev"] != int64(1) ||
+		partner["color"] != int64(1) || partner["current_skin_id"] != int64(0) || partner["twice_awake_stage"] != int64(0) {
+		t.Fatalf("rank partner %+v", partner)
+	}
+}
+
+// TestI9_9CDetailShapesFightInfoForAnAbsentHolderProfile
+func TestI9_9CDetailShapesFightInfoForAnAbsentHolderProfile(t *testing.T) {
+	f := newCampaignFixture(t)
+	f.seedActivity(t, 40)
+	if _, err := f.mode.Open(ctx, f.leader, 7, f.op()); err != nil {
+		t.Fatal("open", err)
+	}
+	chapterID, copyID := f.copyID(t)
+	// The holder must be a player (R8 holder_id FK); only the directory profile is absent.
+	holder, _ := genuinePlayer(t, f.pool, f.server)
+	if _, err := f.pool.Raw().Exec(ctx, `DELETE FROM player_directory_profiles WHERE player_id=$1`, int64(holder.PlayerID)); err != nil {
+		t.Fatal(err)
+	}
+	absentHolder := int64(holder.PlayerID)
+	f.mutateCopy(t, chapterID, copyID, func(copy *d.Copy, _ map[int64][]app.EnemyRow) {
+		copy.HolderID = absentHolder
+		copy.HolderStage = d.StagePrepare
+		copy.LastFightTime = &f.at
+		copy.StartFightTime = nil
+	})
+	request := httpedge.DispatchRequest{Envelope: wire.RequestEnvelope{
+		Operation: f.op(), MID: 613,
+		Params:     map[string]any{"copy_id": copyID, "token": "bearer", "region": int64(f.server)},
+		Claims:     wire.CredentialClaims{Token: "bearer", Region: int64(f.server)},
+		ReceivedAt: f.at,
+	}}
+	response := stockruntime.GuildCampaignDispatcher{Authority: fixedSocialAuthority{actor: f.leader}, Service: f.mode}.Dispatch(ctx, request)
+	if response.HTTPStatus != http.StatusOK || response.Body["current_fight_player"] != absentHolder {
+		t.Fatalf("613 %d %+v", response.HTTPStatus, response.Body)
+	}
+	info, ok := response.Body["fight_info"].(map[string]any)
+	if !ok {
+		t.Fatalf("the live holder without a profile lost fight_info: %+v", response.Body)
+	}
+	if info["player_name"] != "" || info["lev"] != int64(0) || info["avatar_id"] != int64(0) || info["conquer_lev"] != int64(0) {
+		t.Fatalf("fight_info %+v", info)
+	}
+}
+
+// TestI9_9CChallengeFactsAndMemberRow
 func TestI9_9CChallengeFactsAndMemberRow(t *testing.T) {
 	f := newCampaignFixture(t)
 	f.seedActivity(t, 40)

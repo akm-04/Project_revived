@@ -1,0 +1,135 @@
+{
+ "background": [],
+ "content": [
+  "content_player_display_catalogs",
+  "content_public_profile_policies"
+ ],
+ "contracts": [
+  {
+   "count": 1,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_GACHA_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_HERO_RECOMMEND_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "I7A4C_SOCIAL_PROJECTION"
+   }
+  ],
+  "ranks": [],
+  "row_lock_methods": {
+   "player_social_roots": [
+    "socialrelationstore.LockRootTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
+   ]
+  },
+  "row_locks": [
+   "player_social_roots",
+   "players"
+  ],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [],
+ "name": "socialprojection",
+ "pushes": [],
+ "stores": [
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/socialinboxstore",
+  "internal/adapters/postgres/socialrecallstore",
+  "internal/adapters/postgres/socialrelationstore"
+ ],
+ "tables": {
+  "owned": [],
+  "read": [
+   "content_player_display_catalogs",
+   "content_public_profile_policies",
+   "gxb_content_activation",
+   "gxb_content_revisions",
+   "player_directory_profiles",
+   "player_hero_roots",
+   "player_heroes",
+   "player_pet_roots",
+   "player_pets",
+   "player_progression",
+   "player_social_roots",
+   "players",
+   "social_blocks",
+   "social_friend_requests",
+   "social_friendships",
+   "social_notices",
+   "social_recall_awards",
+   "social_recall_tasks"
+  ],
+  "written": []
+ },
+ "tests": {
+  "integration": [
+   "guildinvite",
+   "playerdisplay",
+   "socialactivation",
+   "socialprojection"
+  ],
+  "scenarios_naming": [],
+  "unit": []
+ }
+}

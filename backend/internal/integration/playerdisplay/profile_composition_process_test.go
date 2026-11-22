@@ -56,7 +56,7 @@ func Test6BActualAPICompositionMediaPrivacyAndWireRecovery(t *testing.T) {
 	}
 	p := pool(t)
 	installed(t, p)
-	a, b := actor(t, p), actor(t, p)
+	a, b := bornActor(t, p), bornActor(t, p)
 	token := displayToken(t, p, a)
 	other := displayToken(t, p, b)
 	original := op()
@@ -150,11 +150,11 @@ func Test6BActualAPICompositionMediaPrivacyAndWireRecovery(t *testing.T) {
 			t.Fatal("emptydetail fabricated", v)
 		}
 	}
-	code, v = post(token, 1832, map[string]any{"hero_ids": []int{0, 0, 0, 0, 0, 0}})
+	code, v = post(token, 1832, map[string]any{"ids": []int{0, 0, 0, 0, 0, 0}})
 	if code != 200 || len(v["show_case"].([]any)) != 6 {
 		t.Fatal("emptywire", code, v)
 	}
-	if code, v = post(token, 1832, map[string]any{"hero_ids": []int{0, 0, 0, 0, 0, 0}, "to_player_id": int64(b.PlayerID)}); code == 200 {
+	if code, v = post(token, 1832, map[string]any{"ids": []int{0, 0, 0, 0, 0, 0}, "to_player_id": int64(b.PlayerID)}); code == 200 {
 		t.Fatal("forgedactor", v)
 	}
 	// Actual immutable media capability; new composition controls discovery only.
