@@ -1797,6 +1797,7 @@
     "StaleRevision"
    ]
   },
+  "otabuild": {},
   "otarelease": {},
   "petcampaign": {
    "achievement": [
@@ -5285,6 +5286,7 @@
    ]
   },
   "operator": {},
+  "otabuild": {},
   "otarelease": {
    "operator": [
     "Refuse",
@@ -6626,6 +6628,7 @@
    "cmd/gxb-api/top_floor_postgres.go"
   ],
   "operator": [],
+  "otabuild": [],
   "otarelease": [
    "cmd/gxb-api/main_postgres.go"
   ],
