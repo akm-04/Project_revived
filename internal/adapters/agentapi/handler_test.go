@@ -11,11 +11,13 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/adapters/operatorclient"
+	"gxb.local/backend/v2/internal/application/operator"
 	"gxb.local/backend/v2/internal/application/operatoragent"
 )
 
 type backendRecorder struct {
 	authorization string
+	bodyBytes     int64
 }
 
 func newForwardingHandler(t *testing.T) (Handler, *backendRecorder, string) {
@@ -32,6 +34,7 @@ func newForwardingHandler(t *testing.T) (Handler, *backendRecorder, string) {
 	recorder := &backendRecorder{}
 	backend := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		recorder.authorization = request.Header.Get("Authorization")
+		recorder.bodyBytes = request.ContentLength
 		writer.Header().Set("Content-Type", "application/json")
 		if strings.HasPrefix(request.URL.Path, "/operator/v1/commands/") {
 			writer.WriteHeader(http.StatusConflict)
@@ -119,6 +122,21 @@ func TestCommandRouteBodyCap(t *testing.T) {
 	otherRoute := serveAgent(handler, http.MethodPost, "/agent/v1/ota/build", session, paddedBuildRequest(maxBodyBytes+1))
 	if otherRoute.Code != http.StatusRequestEntityTooLarge || refusalCodeOf(t, otherRoute) != operatoragent.CodeBodyTooLarge {
 		t.Fatalf("other route cap: %d %s", otherRoute.Code, otherRoute.Body)
+	}
+}
+
+func TestCommandRouteCapFitsBackendCap(t *testing.T) {
+	handler, backend, session := newForwardingHandler(t)
+	atCap := serveAgent(handler, http.MethodPost, "/agent/v1/commands/ota.register_build", session, paddedCommandRequest(maxCommandBodyBytes))
+	if atCap.Code != http.StatusConflict {
+		t.Fatalf("body at the agent cap: %d %s", atCap.Code, atCap.Body)
+	}
+	if backend.bodyBytes >= operator.MaxCommandBodyBytes {
+		t.Fatalf("forwarded %d bytes, backend cap %d", backend.bodyBytes, operator.MaxCommandBodyBytes)
+	}
+	over := serveAgent(handler, http.MethodPost, "/agent/v1/commands/ota.register_build", session, paddedCommandRequest(maxCommandBodyBytes+1))
+	if over.Code != http.StatusRequestEntityTooLarge || refusalCodeOf(t, over) != operatoragent.CodeBodyTooLarge {
+		t.Fatalf("one byte over the agent cap: %d %s", over.Code, over.Body)
 	}
 }
 

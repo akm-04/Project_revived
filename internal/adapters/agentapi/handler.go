@@ -1,7 +1,8 @@
 // Package agentapi is the gxb-operator agent's local HTTP surface
 // (I11A_1_PLAN "Agent decisions"): loopback callers, bearer session on every
-// route but setup/login, 1 MiB bodies (32 MiB on the command route for
-// ota.register_build), backend refusals passed through unchanged.
+// route but setup/login, 1 MiB bodies (the backend command cap minus envelope
+// headroom on the command route for ota.register_build), backend refusals passed
+// through unchanged.
 package agentapi
 
 import (
@@ -36,11 +37,14 @@ const (
 	operationPrefix   = "/agent/v1/ops/"
 	logTailPath       = "/agent/v1/log/tail"
 
-	maxBodyBytes        = 1 << 20
-	maxCommandBodyBytes = 32 << 20
-	defaultTail         = 50
-	maxTailLines        = 1000
-	tailByteLimit       = 256 << 10
+	maxBodyBytes = 1 << 20
+	// The agent re-marshals a command into a larger envelope, so it accepts
+	// this much less than the backend cap and every accepted body still fits.
+	commandEnvelopeHeadroomBytes = 64 << 10
+	maxCommandBodyBytes          = operator.MaxCommandBodyBytes - commandEnvelopeHeadroomBytes
+	defaultTail                  = 50
+	maxTailLines                 = 1000
+	tailByteLimit                = 256 << 10
 )
 
 // Handler serves the agent API. All fields are composed by cmd/gxb-operator.
