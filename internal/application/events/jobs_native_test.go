@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -21,7 +22,10 @@ import (
 	appi5 "gxb.local/backend/v2/internal/application/i5"
 	"gxb.local/backend/v2/internal/application/operator"
 	eventscontent "gxb.local/backend/v2/internal/content/events"
+	"gxb.local/backend/v2/internal/domain/character"
+	"gxb.local/backend/v2/internal/domain/economy"
 	domainevents "gxb.local/backend/v2/internal/domain/events"
+	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/mail"
 	otadomain "gxb.local/backend/v2/internal/domain/otarelease"
@@ -774,3 +778,80 @@ func TestSettlementSkipsPlayerWithoutDirectoryRow(t *testing.T) {
 }
 
 func int64Ptr(value int64) *int64 { return &value }
+
+type e4SettlementContent struct{ revision string }
+
+func (content e4SettlementContent) ActiveRevision(context.Context, tx.Queryer) (string, error) {
+	return content.revision, nil
+}
+
+type e4HeroContent struct{ originTableID int64 }
+
+func (content e4HeroContent) HeroNormalSummonTx(context.Context, tx.Queryer, string, int64) (character.HeroNormalSummonPolicy, error) {
+	return character.HeroNormalSummonPolicy{Template: character.HeroAcquisitionTemplate{OriginTableID: content.originTableID}}, nil
+}
+
+type e4OwnedHeroOwner struct{}
+
+func (e4OwnedHeroOwner) LockStoryRosterTx(context.Context, tx.Tx, identity.PlayerID) error {
+	return nil
+}
+
+func (e4OwnedHeroOwner) OwnsOriginTx(context.Context, tx.Tx, identity.PlayerID, int64) (bool, error) {
+	return true, nil
+}
+
+func (e4OwnedHeroOwner) AwardStoryPartnerTx(context.Context, tx.Tx, identity.PlayerID, int64, string, operation.Context) (character.Hero, *character.CollectionAdmissionProof, error) {
+	return character.Hero{}, nil, errors.New("an owned hero must convert to its stone")
+}
+
+type e4HeroStoneFragments struct{}
+
+func (e4HeroStoneFragments) HeroFragmentsTx(context.Context, tx.Queryer, string, int64) ([2]int64, error) {
+	return [2]int64{50001004, 30}, nil
+}
+
+type e4RefusingGrants struct{}
+
+func (e4RefusingGrants) SettleGrantTx(context.Context, tx.Tx, identity.ActorContext, grant.Plan, operation.Context, appi5.GrantTxOptions) (appi5.GrantResult, error) {
+	return appi5.GrantResult{}, economy.ErrUnknownResource
+}
+
+// TestSettlementRecordsAPermanentGrantRefusalAndStillSettles covers E4d: a
+// settled item row that no longer exists in the catalogue is a permanent owner
+// refusal, so the tier is recorded refused and the occurrence still archives.
+func TestSettlementRecordsAPermanentGrantRefusalAndStillSettles(t *testing.T) {
+	pool := e4Pool(t)
+	bus := e4Bus(t, pool)
+	e4ResetServer(t, pool, e4Server)
+	e4SeedPlayer(t, pool, e4Server, 400050, 10, "e4-settle-refused")
+	e4Deploy(t, bus, `{"activity_id":2091,"revision":1,"archetype":"TIERED_CLAIM","client_requirements":{},"default_days":-1,"tiers":[`+
+		`{"id":1,"requirement":{"kind":"player_level","value":10},"choices":[{"lines":[`+
+		`{"kind":"hero","item_id":10001034,"amount":1},{"kind":"item","item_id":50001003,"amount":1}]}]}]}`)
+	now := time.Now().UTC()
+	occurrence := e4Schedule(t, bus, e4Server, 2091, now.Add(-72*time.Hour), "1d")
+	jobs := e4SettlementJobs(t, pool, now, 10)
+	jobs.Content = e4SettlementContent{revision: strings.Repeat("a", 64)}
+	jobs.ClaimGrant = appevents.ChoiceGrant{
+		HeroContent: e4HeroContent{originTableID: 10001034},
+		Heroes:      e4OwnedHeroOwner{},
+		Fragments:   e4HeroStoneFragments{},
+		Grants:      e4RefusingGrants{},
+		HeroWire:    func(character.Hero) (map[string]any, error) { return map[string]any{}, nil },
+	}
+	ctx := context.Background()
+	if err := jobs.SettleDue(ctx); err != nil {
+		t.Fatalf("a permanent refusal must not wedge settlement: %v", err)
+	}
+	if settled := e4SettledAt(t, pool, occurrence.ID); settled == nil {
+		t.Fatal("the occurrence must settle after recording the refused tier")
+	}
+	var receipt string
+	if err := pool.Raw().QueryRow(ctx, `SELECT grant_receipt FROM player_event_claims WHERE player_id=$1 AND occurrence_id=$2 AND tier=1`,
+		int64(400050), occurrence.ID).Scan(&receipt); err != nil {
+		t.Fatalf("read the refused claim: %v", err)
+	}
+	if receipt != "refused" {
+		t.Fatalf("grant_receipt = %q, want refused", receipt)
+	}
+}

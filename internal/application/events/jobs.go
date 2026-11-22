@@ -463,7 +463,7 @@ func (jobs Jobs) deliverHeroTier(ctx context.Context, transaction tx.Tx, occurre
 	}
 	actor := identity.ActorContext{LogicalServerID: identity.LogicalServerID(occurrence.LogicalServerID), PlayerID: player.PlayerID}
 	if _, err := jobs.ClaimGrant.Grant(ctx, transaction, actor, op, &occurrence, tier, 1, revision); err != nil {
-		if errors.Is(err, ErrClaimRejected) {
+		if errors.Is(err, ErrClaimRejected) || appi5.IsPermanentGrantRefusal(err) {
 			return tierRefused(occurrence.ID, player.PlayerID, tier.ID, err)
 		}
 		return err
