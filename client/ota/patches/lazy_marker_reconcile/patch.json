@@ -1,0 +1,8 @@
+{
+  "target": "lazyFileManager.lua",
+  "stock_sha256": "4257bdfbb400417414aff2f138f199c35675c96c56ccdfdfe09a6b0a681e3686",
+  "kind": "replace_exact",
+  "anchor": "\t\targ_1_0.changeCount = 0\n\tend,",
+  "insert": "overlay.lua",
+  "origin": "OA-7: the first-boot seeding pass (UpdateScene_64.lua:283-333) marks every absent lazy row before a loud asset release lands, and the marker map is loaded and flushed back later (lazyFileManager.lua:4-11,23-27). The pass clears each __lazy__ marker whose file now exists with its md5 (fleet_ota7/01-ota-client-research.md)"
+}

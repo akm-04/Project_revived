@@ -32,6 +32,17 @@ go run client/ota/patches/backend_http_poll/tests/cjson_runner.go \
   client/ota/patches/backend_http_poll/tests/test_backend_http_poll.lua
 ```
 
+`lazy_marker_reconcile` patches `lazyFileManager.lua` (root): `init` clears each `__lazy__` marker whose
+file exists with the marker's md5, at most once per applied asset version (`__version__`). It never deletes a file,
+never adds a marker and leaves mismatched or missing files as lazy fetches. Test:
+
+```sh
+GXB_STOCK_LAZY_MANAGER=<stock source>/lazyFileManager.lua \
+GXB_LAZY_RECONCILE_PATCH=client/ota/patches/lazy_marker_reconcile \
+go run client/ota/patches/backend_http_poll/tests/cjson_runner.go \
+  client/ota/patches/lazy_marker_reconcile/tests/test_lazy_marker_reconcile.lua
+```
+
 The league room test reuses that runner with both `league_room_stop_*` patch directories:
 
 ```sh
