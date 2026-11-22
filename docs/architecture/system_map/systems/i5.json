@@ -190,6 +190,10 @@
    {
     "lock_timeout_ms": 2000,
     "name": "I5_PLAYER_WRITE"
+   },
+   {
+    "lock_timeout_ms": 500,
+    "name": "operator-redeem-read-v1"
    }
   ],
   "ranks": [
@@ -626,8 +630,10 @@
    "player_story_cursors",
    "player_temporal_resources",
    "players",
+   "redeem_campaigns",
    "redeem_codes",
-   "redeem_redemptions"
+   "redeem_redemptions",
+   "redeem_reward_bundle_revisions"
   ]
  },
  "tests": {

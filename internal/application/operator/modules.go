@@ -56,13 +56,6 @@ func OperatorModule() Module {
 func PlannedModules() []Module {
 	later := "later leaf"
 	return []Module{
-		{ID: "mail", Title: "Mail", LogChannel: "mail", Planned: "O3", Commands: []CommandSpec{
-			{Name: "mail.send", Class: ClassLive, Help: "Send GM mail to players, a server or everyone."},
-		}},
-		{ID: "redeem", Title: "Redeem codes", LogChannel: "redeem", Planned: "O3", Commands: []CommandSpec{
-			{Name: "redeem.create", Class: ClassLive, Help: "Create a gift code."},
-			{Name: "redeem.disable", Class: ClassLive, Help: "Disable a gift code."},
-		}},
 		{ID: "gm", Title: "GM questions", LogChannel: "gm", Planned: later, Commands: []CommandSpec{
 			{Name: "gm.list", Class: ClassLive, Help: "Player questions inbox."},
 			{Name: "gm.answer", Class: ClassLive, Help: "Answer one stored question."},

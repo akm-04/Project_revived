@@ -48,3 +48,38 @@ func TestAttachmentProjectionUsesSourceVisibleAttachShape(t *testing.T) {
 		t.Fatalf("attach=%#v", a)
 	}
 }
+
+func TestReadBasedExpiryIsSetFromReadAt(t *testing.T) {
+	seconds := int64(60)
+	r := Record{ExpireAfterReadSeconds: &seconds}
+	readAt := time.Unix(1000, 0).UTC()
+	got := r.ReadExpiry(readAt)
+	if got == nil || !got.Equal(readAt.Add(time.Minute)) {
+		t.Fatalf("expiry=%v", got)
+	}
+	zero := int64(0)
+	opened := Record{ExpireAfterReadSeconds: &zero}
+	if got := opened.ReadExpiry(readAt); got == nil || !got.Equal(readAt) {
+		t.Fatalf("on_read expiry=%v", got)
+	}
+	if got := (Record{}).ReadExpiry(readAt); got != nil {
+		t.Fatalf("absolute/no expiry returned %v", got)
+	}
+}
+
+func TestRecordRefusesTwoExpiriesAndNegativeReadDelay(t *testing.T) {
+	u, _ := ids.NewUUID()
+	created := time.Unix(1, 0)
+	later := created.Add(time.Hour)
+	negative := int64(-1)
+	zero := int64(0)
+	for name, r := range map[string]Record{
+		"both":     {ExpiresAt: &later, ExpireAfterReadSeconds: &zero},
+		"negative": {ExpireAfterReadSeconds: &negative},
+	} {
+		base := Record{MailUUID: u, Recipient: identity.PlayerID(1), Address: Address{Normal, 1}, SourceKind: "ADMIN", SourceKey: "k", CreatedAt: created, Shown: true, Platform: AnyPlatform, CompatibilityPolicyVersion: "p1", StateVersion: 1, ExpiresAt: r.ExpiresAt, ExpireAfterReadSeconds: r.ExpireAfterReadSeconds}
+		if err := base.Validate(); err == nil {
+			t.Fatalf("%s was accepted", name)
+		}
+	}
+}

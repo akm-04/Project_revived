@@ -1442,7 +1442,7 @@
    "mids": 0,
    "name": "operatorgrant",
    "path": "internal/application/operatorgrant",
-   "purpose": "is the operator grant module (I11A_OPERATOR_COMMANDS_V1 M2/M8, ruling 5): catalogue-checked grant.items with the shared bulk target core, the progress read, and the resumable per-recipient settlement job",
+   "purpose": "is the operator entitlement module (I11A_OPERATOR_COMMANDS_V1 M1/M2/M4/M8/M11, ruling 5): catalogue-checked grant.items and mail.send, the redeem campaign commands, the shared bulk target core, and the resumable per-recipient settlement job",
    "tables": 0
   },
   {

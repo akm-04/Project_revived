@@ -1521,6 +1521,10 @@
    "operatorgrant": [
     "*AdminGrant",
     "*AdminGrantTx",
+    "*AdminSendMail",
+    "*AdminSendMailTx",
+    "*OperatorCreateRedeemTx",
+    "*OperatorDisableRedeemTx",
     "IsPermanentGrantRefusal"
    ],
    "petcampaign": [
@@ -1842,6 +1846,7 @@
     "*ListPendingBulkTx",
     "*ReadBulkTx",
     "*SaveBulkProgressTx",
+    "Bounded",
     "NewField",
     "Refuse"
    ],
@@ -5464,6 +5469,10 @@
    "i5": [
     "*AdminGrant",
     "*AdminGrantTx",
+    "*AdminSendMail",
+    "*AdminSendMailTx",
+    "*OperatorCreateRedeemTx",
+    "*OperatorDisableRedeemTx",
     "IsPermanentGrantRefusal"
    ],
    "operator": [
@@ -5471,6 +5480,7 @@
     "*ListPendingBulkTx",
     "*ReadBulkTx",
     "*SaveBulkProgressTx",
+    "Bounded",
     "NewField",
     "Refuse"
    ],

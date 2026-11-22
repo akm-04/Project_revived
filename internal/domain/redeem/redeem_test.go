@@ -41,3 +41,24 @@ func TestStockLevel10GateAndServerAudience(t *testing.T) {
 		t.Fatal("level 9 unexpectedly eligible")
 	}
 }
+
+func TestGeneratedCodeAlphabetIsAPowerOfTwo(t *testing.T) {
+	if len(GeneratedCodeAlphabet) != 32 {
+		t.Fatalf("alphabet length = %d", len(GeneratedCodeAlphabet))
+	}
+}
+
+func TestGenerateCodeUsesTheUnambiguousAlphabet(t *testing.T) {
+	code, err := GenerateCode(bytes.NewReader([]byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}))
+	if err != nil || len(code) != GeneratedCodeLength {
+		t.Fatalf("code=%q err=%v", code, err)
+	}
+	for _, c := range code {
+		if !bytes.ContainsRune([]byte(GeneratedCodeAlphabet), c) {
+			t.Fatalf("code %q has %q outside the alphabet", code, c)
+		}
+	}
+	if _, err := GenerateCode(bytes.NewReader([]byte{1, 2})); err == nil {
+		t.Fatal("a short random source was accepted")
+	}
+}

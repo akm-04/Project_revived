@@ -145,6 +145,41 @@ type RedeemCampaign struct {
 	PerSubjectCap          int64
 }
 
+// RedeemInsert is one operator-issued redeem code together with its campaign
+// and immutable reward bundle; the owner writes all three in one transaction.
+type RedeemInsert struct {
+	CampaignID    string
+	CodeID        string
+	BundleID      string
+	Name          string
+	Code          string
+	Plan          grant.Plan
+	Digest        [32]byte
+	SubjectType   string
+	StartsAt      *time.Time
+	EndsAt        *time.Time
+	TotalCap      *int64
+	PerSubjectCap int64
+	PolicyVersion string
+	CreatedBy     string
+	CreatedAt     time.Time
+}
+
+// RedeemSummary is one redeem.list row.
+type RedeemSummary struct {
+	CodeID        string       `json:"code_id"`
+	CampaignID    string       `json:"campaign_id"`
+	Code          string       `json:"code"`
+	Lines         []grant.Line `json:"lines"`
+	StartsAt      *time.Time   `json:"starts_at"`
+	EndsAt        *time.Time   `json:"ends_at"`
+	TotalCap      *int64       `json:"total_cap"`
+	PerSubjectCap int64        `json:"per_subject_cap"`
+	UsedCount     int64        `json:"used_count"`
+	State         string       `json:"state"`
+	CreatedAt     time.Time    `json:"created_at"`
+}
+
 type Redemption struct {
 	RedemptionID           string
 	CodeID                 string
@@ -215,6 +250,9 @@ type Store interface {
 	SaveObjectiveTx(context.Context, tx.Tx, objective.Instance, int64) error
 
 	LockRedeemByDigestTx(context.Context, tx.Tx, [32]byte) (RedeemCode, RedeemCampaign, grant.Plan, error)
+	InsertOperatorRedeemTx(context.Context, tx.Tx, RedeemInsert) error
+	DisableRedeemCodeTx(context.Context, tx.Tx, [32]byte) (bool, error)
+	ListRedeemSummariesTx(context.Context, tx.Queryer, string, int) ([]RedeemSummary, error)
 	FindRedemptionTx(context.Context, tx.Tx, string, string, string, int64) (Redemption, bool, error)
 	CountCampaignRedemptionsTx(context.Context, tx.Tx, string) (int64, error)
 	AdvanceRedeemCodeTx(context.Context, tx.Tx, RedeemCode) error

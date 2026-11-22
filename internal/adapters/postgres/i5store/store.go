@@ -2,6 +2,7 @@ package i5store
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -23,6 +24,8 @@ import (
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/payload"
 	"gxb.local/backend/v2/internal/foundation/tx"
+
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 type Store struct {
@@ -569,7 +572,11 @@ func (Store) InsertMailTx(ctx context.Context, t tx.Tx, r mail.Record) error {
 	if r.ExpiresAt != nil {
 		expires = r.ExpiresAt.UTC()
 	}
-	tag, err := t.Exec(ctx, `INSERT INTO mail_records(mail_uuid,recipient_player_id,namespace,wire_id,source_kind,source_key,category,title,sender,body,created_at,expires_at,read_at,shown,claimed_at,platform_eligibility,compatibility_policy_version,state_version) VALUES($1::uuid,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,NULL,$13,NULL,$14,$15,$16)`, r.MailUUID.String(), int64(r.Recipient), r.Address.Namespace.String(), r.Address.WireID, r.SourceKind, r.SourceKey, r.Category, r.Title, r.Sender, r.Body, r.CreatedAt.UTC(), expires, r.Shown, r.Platform.String(), r.CompatibilityPolicyVersion, r.StateVersion)
+	var afterRead any
+	if r.ExpireAfterReadSeconds != nil {
+		afterRead = *r.ExpireAfterReadSeconds
+	}
+	tag, err := t.Exec(ctx, `INSERT INTO mail_records(mail_uuid,recipient_player_id,namespace,wire_id,source_kind,source_key,category,title,sender,body,created_at,expires_at,expire_after_read_seconds,read_at,shown,claimed_at,platform_eligibility,compatibility_policy_version,state_version) VALUES($1::uuid,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,NULL,$14,NULL,$15,$16,$17)`, r.MailUUID.String(), int64(r.Recipient), r.Address.Namespace.String(), r.Address.WireID, r.SourceKind, r.SourceKey, r.Category, r.Title, r.Sender, r.Body, r.CreatedAt.UTC(), expires, afterRead, r.Shown, r.Platform.String(), r.CompatibilityPolicyVersion, r.StateVersion)
 	if err != nil {
 		return err
 	}
@@ -636,8 +643,9 @@ func (Store) LockMailTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, add
 	var rec, wire, category, version int64
 	var created time.Time
 	var expires, read, claimed *time.Time
+	var afterRead *int64
 	var shown bool
-	err := t.QueryRow(ctx, `SELECT mail_uuid::text,recipient_player_id,namespace,wire_id,source_kind,source_key,category,title,sender,body,created_at,expires_at,read_at,shown,claimed_at,platform_eligibility,compatibility_policy_version,state_version FROM mail_records WHERE recipient_player_id=$1 AND namespace=$2 AND wire_id=$3 FOR UPDATE`, int64(pid), addr.Namespace.String(), addr.WireID).Scan(&uuid, &rec, &ns, &wire, &sourceKind, &sourceKey, &category, &title, &sender, &body, &created, &expires, &read, &shown, &claimed, &platform, &policy, &version)
+	err := t.QueryRow(ctx, `SELECT mail_uuid::text,recipient_player_id,namespace,wire_id,source_kind,source_key,category,title,sender,body,created_at,expires_at,expire_after_read_seconds,read_at,shown,claimed_at,platform_eligibility,compatibility_policy_version,state_version FROM mail_records WHERE recipient_player_id=$1 AND namespace=$2 AND wire_id=$3 FOR UPDATE`, int64(pid), addr.Namespace.String(), addr.WireID).Scan(&uuid, &rec, &ns, &wire, &sourceKind, &sourceKey, &category, &title, &sender, &body, &created, &expires, &afterRead, &read, &shown, &claimed, &platform, &policy, &version)
 	if err != nil {
 		if noRows(err) {
 			return mail.Record{}, appi5.ErrMailNotFound
@@ -664,10 +672,10 @@ func (Store) LockMailTx(ctx context.Context, t tx.Tx, pid identity.PlayerID, add
 	if err != nil {
 		return mail.Record{}, err
 	}
-	return mail.Record{MailUUID: u, Recipient: identity.PlayerID(rec), Address: mail.Address{Namespace: n, WireID: wire}, SourceKind: sourceKind, SourceKey: sourceKey, Category: category, Title: title, Sender: sender, Body: body, CreatedAt: created.UTC(), ExpiresAt: utcPtr(expires), ReadAt: utcPtr(read), Shown: shown, ClaimedAt: utcPtr(claimed), Platform: p, CompatibilityPolicyVersion: policy, StateVersion: version, Attachments: atts}, nil
+	return mail.Record{MailUUID: u, Recipient: identity.PlayerID(rec), Address: mail.Address{Namespace: n, WireID: wire}, SourceKind: sourceKind, SourceKey: sourceKey, Category: category, Title: title, Sender: sender, Body: body, CreatedAt: created.UTC(), ExpiresAt: utcPtr(expires), ExpireAfterReadSeconds: afterRead, ReadAt: utcPtr(read), Shown: shown, ClaimedAt: utcPtr(claimed), Platform: p, CompatibilityPolicyVersion: policy, StateVersion: version, Attachments: atts}, nil
 }
 func (Store) SaveMailStateTx(ctx context.Context, t tx.Tx, r mail.Record, old int64) error {
-	tag, err := t.Exec(ctx, `UPDATE mail_records SET read_at=$2,shown=$3,claimed_at=$4,state_version=$5 WHERE mail_uuid=$1::uuid AND state_version=$6`, r.MailUUID.String(), r.ReadAt, r.Shown, r.ClaimedAt, r.StateVersion, old)
+	tag, err := t.Exec(ctx, `UPDATE mail_records SET expires_at=$2,read_at=$3,shown=$4,claimed_at=$5,state_version=$6 WHERE mail_uuid=$1::uuid AND state_version=$7`, r.MailUUID.String(), r.ExpiresAt, r.ReadAt, r.Shown, r.ClaimedAt, r.StateVersion, old)
 	if err != nil {
 		return err
 	}
@@ -848,6 +856,118 @@ func (Store) AdvanceRedeemCodeTx(ctx context.Context, t tx.Tx, c appi5.RedeemCod
 	}
 	return rowsOne(tag, "redeem code")
 }
+
+// InsertOperatorRedeemTx writes the immutable reward bundle, its campaign and
+// the single code the operator distributes, all in the caller's transaction.
+func (Store) InsertOperatorRedeemTx(ctx context.Context, t tx.Tx, insert appi5.RedeemInsert) error {
+	planRaw, planVersion, err := payload.Encode(insert.Plan)
+	if err != nil {
+		return err
+	}
+	contentHash := sha256.Sum256(planRaw)
+	tag, err := t.Exec(ctx, `INSERT INTO redeem_reward_bundle_revisions(reward_bundle_revision_id,grant_plan,content_hash,created_by,created_at,payload_version) VALUES($1::uuid,$2::jsonb,$3,$4,$5,$6)`, insert.BundleID, string(planRaw), contentHash[:], insert.CreatedBy, insert.CreatedAt.UTC(), planVersion)
+	if err != nil {
+		return err
+	}
+	if err := rowsOne(tag, "redeem bundle"); err != nil {
+		return err
+	}
+	tag, err = t.Exec(ctx, `INSERT INTO redeem_campaigns(campaign_id,name,status,redemption_subject,starts_at,ends_at,audience_policy,reward_bundle_revision_id,total_cap,per_subject_cap,policy_version,created_by,created_at,activated_at,payload_version) VALUES($1::uuid,$2,'ACTIVE',$3,$4,$5,'{}'::jsonb,$6::uuid,$7,$8,$9,$10,$11,$11,$12)`, insert.CampaignID, insert.Name, insert.SubjectType, insert.StartsAt, insert.EndsAt, insert.BundleID, insert.TotalCap, insert.PerSubjectCap, insert.PolicyVersion, insert.CreatedBy, insert.CreatedAt.UTC(), payload.Current)
+	if err != nil {
+		return err
+	}
+	if err := rowsOne(tag, "redeem campaign"); err != nil {
+		return err
+	}
+	tag, err = t.Exec(ctx, `INSERT INTO redeem_codes(code_id,campaign_id,lookup_digest,code_kind,use_count,status,created_at,state_version,code_display) VALUES($1::uuid,$2::uuid,$3,'PUBLIC_CAMPAIGN_CODE',0,'ACTIVE',$4,1,$5)`, insert.CodeID, insert.CampaignID, insert.Digest[:], insert.CreatedAt.UTC(), insert.Code)
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" && pgErr.ConstraintName == "redeem_codes_lookup_digest_key" {
+			return appi5.ErrRedeemCodeTaken
+		}
+		return err
+	}
+	return rowsOne(tag, "redeem code")
+}
+
+// DisableRedeemCodeTx disables one code and reports whether it existed. An
+// already disabled code is an idempotent success.
+func (Store) DisableRedeemCodeTx(ctx context.Context, t tx.Tx, digest [32]byte) (bool, error) {
+	tag, err := t.Exec(ctx, `UPDATE redeem_codes SET status='DISABLED',state_version=state_version+1 WHERE lookup_digest=$1 AND status<>'DISABLED'`, digest[:])
+	if err != nil {
+		return false, err
+	}
+	if tag.RowsAffected() > 0 {
+		return true, nil
+	}
+	var one int
+	err = t.QueryRow(ctx, `SELECT 1 FROM redeem_codes WHERE lookup_digest=$1`, digest[:]).Scan(&one)
+	if noRows(err) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+// listRedeemSummaries is newest first; after is the last code_id of the page.
+const listRedeemSummaries = `
+WITH page AS (
+ SELECT rc.code_id::text AS code_id, rc.campaign_id::text AS campaign_id, COALESCE(rc.code_display,'') AS code,
+        rc.use_count, rc.status, c.starts_at, c.ends_at, c.total_cap, c.per_subject_cap, c.created_at,
+        b.grant_plan::text AS plan_raw, b.payload_version AS plan_version
+ FROM redeem_codes rc
+ JOIN redeem_campaigns c ON c.campaign_id=rc.campaign_id
+ JOIN redeem_reward_bundle_revisions b ON b.reward_bundle_revision_id=c.reward_bundle_revision_id
+ WHERE $1::uuid IS NULL OR (c.created_at,rc.code_id) < (
+   SELECT c2.created_at,rc2.code_id FROM redeem_codes rc2 JOIN redeem_campaigns c2 ON c2.campaign_id=rc2.campaign_id WHERE rc2.code_id=$1::uuid)
+ ORDER BY c.created_at DESC,rc.code_id DESC
+ LIMIT $2
+)
+SELECT COALESCE(jsonb_agg(jsonb_build_object(
+ 'code_id',p.code_id,'campaign_id',p.campaign_id,'code',p.code,'use_count',p.use_count,'state',p.status,
+ 'starts_at',p.starts_at,'ends_at',p.ends_at,'total_cap',p.total_cap,'per_subject_cap',p.per_subject_cap,
+ 'created_at',p.created_at,'plan_raw',p.plan_raw,'plan_version',p.plan_version) ORDER BY p.created_at DESC,p.code_id DESC),'[]'::jsonb)::text
+FROM page p`
+
+func (Store) ListRedeemSummariesTx(ctx context.Context, q tx.Queryer, after string, limit int) ([]appi5.RedeemSummary, error) {
+	var cursor any
+	if after != "" {
+		cursor = after
+	}
+	var raw string
+	if err := q.QueryRow(ctx, listRedeemSummaries, cursor, limit).Scan(&raw); err != nil {
+		return nil, err
+	}
+	var rows []struct {
+		CodeID        string     `json:"code_id"`
+		CampaignID    string     `json:"campaign_id"`
+		Code          string     `json:"code"`
+		UseCount      int64      `json:"use_count"`
+		State         string     `json:"state"`
+		StartsAt      *time.Time `json:"starts_at"`
+		EndsAt        *time.Time `json:"ends_at"`
+		TotalCap      *int64     `json:"total_cap"`
+		PerSubjectCap int64      `json:"per_subject_cap"`
+		CreatedAt     time.Time  `json:"created_at"`
+		PlanRaw       string     `json:"plan_raw"`
+		PlanVersion   int16      `json:"plan_version"`
+	}
+	if err := json.Unmarshal([]byte(raw), &rows); err != nil {
+		return nil, err
+	}
+	out := make([]appi5.RedeemSummary, 0, len(rows))
+	for _, row := range rows {
+		plan, err := decodeGrantPlanVersioned(row.PlanVersion, []byte(row.PlanRaw))
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, appi5.RedeemSummary{CodeID: row.CodeID, CampaignID: row.CampaignID, Code: row.Code, Lines: plan.Lines, StartsAt: utcPtr(row.StartsAt), EndsAt: utcPtr(row.EndsAt), TotalCap: row.TotalCap, PerSubjectCap: row.PerSubjectCap, UsedCount: row.UseCount, State: row.State, CreatedAt: row.CreatedAt.UTC()})
+	}
+	return out, nil
+}
+
 func (Store) InsertRedemptionTx(ctx context.Context, t tx.Tx, r appi5.Redemption) error {
 	tag, err := t.Exec(ctx, `INSERT INTO redeem_redemptions(redemption_id,code_id,subject_type,subject_id,redemption_slot,player_id,account_id,logical_server_id,reward_bundle_revision_id,grant_receipt_id,redeemed_at,request_platform_hint,policy_version) VALUES($1::uuid,$2::uuid,$3,$4,$5,$6,$7::uuid,$8,$9::uuid,$10::uuid,$11,$12,$13)`, r.RedemptionID, r.CodeID, r.SubjectType, r.SubjectID, r.Slot, int64(r.PlayerID), r.AccountID.UUID().String(), int32(r.LogicalServerID), r.RewardBundleRevisionID, r.GrantReceiptID, r.RedeemedAt.UTC(), r.Platform, r.PolicyVersion)
 	if err != nil {

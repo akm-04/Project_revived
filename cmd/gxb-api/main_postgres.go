@@ -559,6 +559,8 @@ func main() {
 	}
 	logoutCommands := appidentity.LogoutCommands{Store: identitystore.Store{}}
 	grantCommands := operatorgrant.Commands{Catalogue: operatorCatalogue, Store: operatorstore.Store{}, Directory: i4store.PlayerDirectoryReader{}, Grants: i5svc, LineCap: grantLineCap}
+	mailCommands := operatorgrant.MailCommands{Catalogue: operatorCatalogue, Store: operatorstore.Store{}, Directory: i4store.PlayerDirectoryReader{}, Mail: i5svc, LineCap: grantLineCap}
+	redeemCommands := operatorgrant.RedeemCommands{Catalogue: operatorCatalogue, Redeem: i5svc, LineCap: grantLineCap}
 	eventHooks, err := appevents.NewHookRegistry(domainevents.HookCampaignDropMultiplier)
 	if err != nil {
 		log.Fatalf("events hook registry: %v", err)
@@ -576,14 +578,16 @@ func main() {
 		map[string]operator.ReadHandler{"player.find": operatorapi.PlayerFind(playerReads), "player.summary": operatorapi.PlayerSummary(playerReads)})
 	operatorModule := bindModule(operator.OperatorModule(), nil,
 		map[string]operator.ReadHandler{"operator.audit.list": operatorapi.AuditList(operatorAudit), operatorgrant.BulkShowRead: operatorapi.BulkShow(bulkReads)})
-	modules := []operator.Module{otaModule, logoutCommands.Module(), grantCommands.Module(), eventsModule, catalogModule, playerModule, operatorModule}
+	redeemModule := bindModule(redeemCommands.Module(), nil,
+		map[string]operator.ReadHandler{"redeem.list": operatorapi.RedeemList(appi5.OperatorRedeemRead{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: i5db})})
+	modules := []operator.Module{otaModule, logoutCommands.Module(), grantCommands.Module(), mailCommands.Module(), redeemModule, eventsModule, catalogModule, playerModule, operatorModule}
 	modules = append(modules, operator.PlannedModules()...)
 	registry, err := operator.NewRegistry(modules...)
 	if err != nil {
 		log.Fatalf("operator modules: %v", err)
 	}
 	startOperator(ctx, runner, registry.Handlers(), registry.Reads(), registry.Modules(), operatorVersionReply, otaAfterCommit{Root: cfg.OTARoot, ReconcileSettings: otaSettingsSync.Reconcile, Serving: otaServing})
-	startOperatorBulkJob(ctx, pool, operatorgrant.Applier{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: operatorstore.Store{}, Grants: i5svc, Catalogue: operatorCatalogue, LineCap: grantLineCap})
+	startOperatorBulkJob(ctx, pool, operatorgrant.Applier{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: operatorstore.Store{}, Grants: i5svc, Mail: i5svc, Catalogue: operatorCatalogue, LineCap: grantLineCap})
 	clientLogs, journal := startClientLog(ctx, pool, authority, cfg.ClientLogURL, retentionPolicies.RetentionDays, txMetrics, mux, handlerConcurrency("GXB_CLIENT_LOG_MAX_CONCURRENT", 4, poolConnections))
 	dailyReset := dailyreset.Service{Markers: dailyresetstore.Store{Queryer: pool}, Counters: itemsEnergy.Counters}
 	boot := stockruntime.BootstrapDispatcher{Bootstrap: bootstrap, Tracker: tracker, LogURLs: clientLogs, DailyReset: dailyReset}

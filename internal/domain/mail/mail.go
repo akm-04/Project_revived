@@ -96,6 +96,7 @@ type Record struct {
 	Title, Sender, Body        string
 	CreatedAt                  time.Time
 	ExpiresAt                  *time.Time
+	ExpireAfterReadSeconds     *int64
 	ReadAt                     *time.Time
 	Shown                      bool
 	ClaimedAt                  *time.Time
@@ -121,6 +122,12 @@ func (r Record) Validate() error {
 	if r.ExpiresAt != nil && !r.ExpiresAt.After(r.CreatedAt) {
 		return errors.New("mail expiry must follow creation")
 	}
+	if r.ExpireAfterReadSeconds != nil && *r.ExpireAfterReadSeconds < 0 {
+		return errors.New("mail read-based expiry cannot be negative")
+	}
+	if r.ExpiresAt != nil && r.ExpireAfterReadSeconds != nil {
+		return errors.New("mail cannot carry an absolute and a read-based expiry together")
+	}
 	seen := map[int]struct{}{}
 	for _, a := range r.Attachments {
 		if err := a.Validate(); err != nil {
@@ -138,6 +145,16 @@ func (r Record) Claimable(now time.Time) bool {
 		return false
 	}
 	return r.ExpiresAt == nil || now.Before(*r.ExpiresAt)
+}
+
+// ReadExpiry is the expiry a read at readAt imposes, or nil when the mail uses
+// an absolute expiry or none. A zero delay expires when opened.
+func (r Record) ReadExpiry(readAt time.Time) *time.Time {
+	if r.ExpireAfterReadSeconds == nil {
+		return nil
+	}
+	at := readAt.Add(time.Duration(*r.ExpireAfterReadSeconds) * time.Second)
+	return &at
 }
 func (r Record) New() bool { return r.ReadAt == nil }
 
