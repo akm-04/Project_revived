@@ -1,7 +1,7 @@
 // Package agentapi is the gxb-operator agent's local HTTP surface
 // (I11A_1_PLAN "Agent decisions"): loopback callers, bearer session on every
-// route but setup/login, 1 MiB bodies, backend refusals passed through
-// unchanged.
+// route but setup/login, 1 MiB bodies (32 MiB on the command route for
+// ota.register_build), backend refusals passed through unchanged.
 package agentapi
 
 import (
@@ -36,10 +36,11 @@ const (
 	operationPrefix   = "/agent/v1/ops/"
 	logTailPath       = "/agent/v1/log/tail"
 
-	maxBodyBytes  = 1 << 20
-	defaultTail   = 50
-	maxTailLines  = 1000
-	tailByteLimit = 256 << 10
+	maxBodyBytes        = 1 << 20
+	maxCommandBodyBytes = 32 << 20
+	defaultTail         = 50
+	maxTailLines        = 1000
+	tailByteLimit       = 256 << 10
 )
 
 // Handler serves the agent API. All fields are composed by cmd/gxb-operator.
@@ -193,7 +194,7 @@ func (handler Handler) serveSetup(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 	var body passwordRequest
-	if err := decodeBody(writer, request, &body); err != nil {
+	if err := decodeBody(writer, request, maxBodyBytes, &body); err != nil {
 		handler.writeBodyError(writer, err)
 		return
 	}
@@ -207,7 +208,7 @@ func (handler Handler) serveSetup(writer http.ResponseWriter, request *http.Requ
 
 func (handler Handler) serveLogin(writer http.ResponseWriter, request *http.Request) {
 	var body passwordRequest
-	if err := decodeBody(writer, request, &body); err != nil {
+	if err := decodeBody(writer, request, maxBodyBytes, &body); err != nil {
 		handler.writeBodyError(writer, err)
 		return
 	}
@@ -260,7 +261,7 @@ func (handler Handler) serveBackendStop(writer http.ResponseWriter) {
 
 func (handler Handler) serveCommand(writer http.ResponseWriter, request *http.Request, name string) {
 	var body commandRequest
-	if err := decodeBody(writer, request, &body); err != nil {
+	if err := decodeBody(writer, request, maxCommandBodyBytes, &body); err != nil {
 		handler.writeBodyError(writer, err)
 		return
 	}
@@ -303,7 +304,7 @@ func (handler Handler) serveRead(writer http.ResponseWriter, request *http.Reque
 
 func (handler Handler) serveMaintenance(writer http.ResponseWriter, request *http.Request, publish bool) {
 	var body maintenanceRequest
-	if err := decodeBody(writer, request, &body); err != nil {
+	if err := decodeBody(writer, request, maxBodyBytes, &body); err != nil {
 		handler.writeBodyError(writer, err)
 		return
 	}
@@ -331,7 +332,7 @@ func (handler Handler) serveMaintenance(writer http.ResponseWriter, request *htt
 // 202 with its id; the CLI polls op status (I11A_1_PLAN "L4c decisions").
 func (handler Handler) serveBuild(writer http.ResponseWriter, request *http.Request) {
 	var body buildRequest
-	if err := decodeBody(writer, request, &body); err != nil {
+	if err := decodeBody(writer, request, maxBodyBytes, &body); err != nil {
 		handler.writeBodyError(writer, err)
 		return
 	}
@@ -438,10 +439,14 @@ func tailLines(path string, count int) ([]string, error) {
 	return all, nil
 }
 
-func decodeBody(writer http.ResponseWriter, request *http.Request, target any) error {
-	decoder := json.NewDecoder(http.MaxBytesReader(writer, request.Body, maxBodyBytes))
+func decodeBody(writer http.ResponseWriter, request *http.Request, limit int64, target any) error {
+	decoder := json.NewDecoder(http.MaxBytesReader(writer, request.Body, limit))
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(target); err != nil {
+		var tooLarge *http.MaxBytesError
+		if errors.As(err, &tooLarge) {
+			return err
+		}
 		return errors.New("the body is not the expected JSON object")
 	}
 	return endOfBody(decoder)
@@ -465,6 +470,10 @@ func decodeOptionalBody(writer http.ResponseWriter, request *http.Request, targe
 func endOfBody(decoder *json.Decoder) error {
 	err := operatoragent.EnsureEndOfFile(decoder)
 	if err == nil || errors.Is(err, operatoragent.ErrTrailingData) {
+		return err
+	}
+	var tooLarge *http.MaxBytesError
+	if errors.As(err, &tooLarge) {
 		return err
 	}
 	return errors.New("the body is not the expected JSON object")
@@ -503,6 +512,11 @@ func outcomeWord(status int) string {
 }
 
 func (handler Handler) writeBodyError(writer http.ResponseWriter, err error) {
+	var tooLarge *http.MaxBytesError
+	if errors.As(err, &tooLarge) {
+		writeRefusal(writer, http.StatusRequestEntityTooLarge, operatoragent.CodeBodyTooLarge, "the body is too large")
+		return
+	}
 	status := http.StatusConflict
 	if errors.Is(err, operatoragent.ErrTrailingData) {
 		status = http.StatusBadRequest

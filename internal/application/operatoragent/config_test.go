@@ -53,6 +53,40 @@ func TestLoadConfigAcceptsLoopback(t *testing.T) {
 	}
 }
 
+func TestLoadConfigBackendTimeoutsDefaultAndBounds(t *testing.T) {
+	base := `{"listen":"127.0.0.1:8090","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`
+	config, err := LoadConfig(writeAgentConfig(t, base))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if config.Backend.ReadyTimeout() != 60*time.Second || config.Backend.StopGrace() != 15*time.Second {
+		t.Fatalf("defaults = %s/%s", config.Backend.ReadyTimeout(), config.Backend.StopGrace())
+	}
+
+	for _, values := range []string{
+		`"ready_timeout_seconds":4`,
+		`"ready_timeout_seconds":601`,
+		`"stop_grace_seconds":0`,
+		`"stop_grace_seconds":301`,
+	} {
+		contents := `{"listen":"127.0.0.1:8090","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091",` + values + `}}`
+		if _, err := LoadConfig(writeAgentConfig(t, contents)); err == nil {
+			t.Fatalf("%s was accepted", values)
+		}
+	}
+
+	contents := `{"listen":"127.0.0.1:8090","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091","ready_timeout_seconds":5,"stop_grace_seconds":1}}`
+	config, err = LoadConfig(writeAgentConfig(t, contents))
+	if err != nil || config.Backend.ReadyTimeout() != 5*time.Second || config.Backend.StopGrace() != time.Second {
+		t.Fatalf("lower bounds: %+v err=%v", config.Backend, err)
+	}
+	contents = `{"listen":"127.0.0.1:8090","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091","ready_timeout_seconds":600,"stop_grace_seconds":300}}`
+	config, err = LoadConfig(writeAgentConfig(t, contents))
+	if err != nil || config.Backend.ReadyTimeout() != 600*time.Second || config.Backend.StopGrace() != 300*time.Second {
+		t.Fatalf("upper bounds: %+v err=%v", config.Backend, err)
+	}
+}
+
 func TestLoadConfigErrorCarriesNoValue(t *testing.T) {
 	root := writeAgentConfig(t, `{"listen":5,"ota_root":"postgres://alice:hunter2@db/x","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`)
 	_, err := LoadConfig(root)

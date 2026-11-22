@@ -83,6 +83,31 @@ func TestHandlerOutcomes(t *testing.T) {
 	}
 }
 
+func paddedCommandBody(size int) string {
+	head := `{"envelope":{"principal":"root","role":"root","scope":"global","reason":"test","semantic_key":"k1"},"payload":{"pad":"`
+	tail := `"}}`
+	return head + strings.Repeat("a", size-len(head)-len(tail)) + tail
+}
+
+func TestHandlerRefusesAnOversizedBodyDistinguishably(t *testing.T) {
+	bus := &fakeBus{outcome: operator.Outcome{State: operator.StateApplied, Result: json.RawMessage(`{}`)}}
+	recorder := serve(t, bus, "127.0.0.1:1", "secret", "/operator/v1/commands/ota.register_build", paddedCommandBody(maxRequestBody+1))
+	if recorder.Code != http.StatusRequestEntityTooLarge || errorCode(t, recorder) != codeBodyTooLarge {
+		t.Fatalf("oversized body: %d %s", recorder.Code, recorder.Body)
+	}
+	if bus.calls != 0 {
+		t.Fatalf("an oversized body reached the bus %d times", bus.calls)
+	}
+}
+
+func TestHandlerAcceptsABodyJustUnderTheCap(t *testing.T) {
+	bus := &fakeBus{outcome: operator.Outcome{State: operator.StateApplied, Result: json.RawMessage(`{}`)}}
+	recorder := serve(t, bus, "127.0.0.1:1", "secret", "/operator/v1/commands/ota.register_build", paddedCommandBody(maxRequestBody-1024))
+	if recorder.Code != http.StatusOK || bus.calls != 1 {
+		t.Fatalf("under-cap body: %d %s calls=%d", recorder.Code, recorder.Body, bus.calls)
+	}
+}
+
 func TestHandlerAcceptsAFullReleaseManifest(t *testing.T) {
 	rows := strings.Repeat(`{"path":"res/web/images/vip_recharge/90002309.png","md5":"0123456789abcdef0123456789abcdef","size":123456},`, 30000)
 	body := `{"envelope":{"principal":"root","role":"root","scope":"global","reason":"test","semantic_key":"k1"},"payload":{"manifest":[` + strings.TrimSuffix(rows, ",") + `]}}`

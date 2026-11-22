@@ -22,6 +22,7 @@ import (
 type fakeBuildOperator struct {
 	mutex          sync.Mutex
 	registers      int
+	volumeCounts   []int
 	semanticKeys   []string
 	failNext       int
 	builtVersions  []string
@@ -72,11 +73,15 @@ func (fake *fakeBuildOperator) ServeHTTP(writer http.ResponseWriter, request *ht
 			Envelope struct {
 				SemanticKey string `json:"semantic_key"`
 			} `json:"envelope"`
+			Payload struct {
+				PackageFiles []json.RawMessage `json:"package_files"`
+			} `json:"payload"`
 		}
 		_ = json.Unmarshal(body, &submitted)
 		fake.mutex.Lock()
 		fake.registers++
 		fake.semanticKeys = append(fake.semanticKeys, submitted.Envelope.SemanticKey)
+		fake.volumeCounts = append(fake.volumeCounts, len(submitted.Payload.PackageFiles))
 		fail := fake.failNext > 0
 		if fail {
 			fake.failNext--
@@ -166,6 +171,41 @@ func TestBuildOperationRegistersOnce(t *testing.T) {
 	}
 	if len(result.Release) == 0 || !strings.Contains(string(result.Release), "1.631.2") {
 		t.Fatalf("registered release = %s", result.Release)
+	}
+}
+
+func TestBuildOperationUsesTheSettingsVolumeCap(t *testing.T) {
+	build, fake, operations, root := newBuildOperation(t)
+	if err := os.MkdirAll(build.Config.OTARoot, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(build.Config.OTARoot, "settings.json"), []byte(`{"lazy_fetch":"auto","res_path":"","volume_mb":1}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	large := make([]byte, 1_200_000)
+	state := uint32(2463534242)
+	for index := range large {
+		state ^= state << 13
+		state ^= state >> 17
+		state ^= state << 5
+		large[index] = byte(state)
+	}
+	if err := os.WriteFile(filepath.Join(root, "client", "src", "Large.lua"), large, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	started, err := build.Start(context.Background(), operatoragent.BuildRequest{Lane: "code", Version: "1.631.2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	operation := waitOperation(t, operations, started.ID)
+	if operation.State != operatoragent.OperationDone {
+		t.Fatalf("operation = %+v", operation)
+	}
+	fake.mutex.Lock()
+	defer fake.mutex.Unlock()
+	if len(fake.volumeCounts) != 1 || fake.volumeCounts[0] < 2 {
+		t.Fatalf("the 1 MB settings cap did not split the package: %v", fake.volumeCounts)
 	}
 }
 

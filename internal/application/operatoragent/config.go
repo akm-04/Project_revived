@@ -9,6 +9,7 @@ import (
 	"net"
 	"os"
 	"strings"
+	"time"
 )
 
 const (
@@ -21,6 +22,13 @@ const (
 	BackendLogFileName  = "backend.log"
 	DefaultAgentListen  = "127.0.0.1:8090"
 	DefaultOperatorAddr = "127.0.0.1:8091"
+
+	DefaultReadyTimeoutSeconds = 60
+	DefaultStopGraceSeconds    = 15
+	minReadyTimeoutSeconds     = 5
+	maxReadyTimeoutSeconds     = 600
+	minStopGraceSeconds        = 1
+	maxStopGraceSeconds        = 300
 )
 
 // BackendConfig names the backend binary the agent controls.
@@ -28,6 +36,26 @@ type BackendConfig struct {
 	Binary       string `json:"binary"`
 	EnvFile      string `json:"env_file"`
 	OperatorAddr string `json:"operator_addr"`
+	// ReadyTimeoutSeconds and StopGraceSeconds are optional; nil means the
+	// default. A pointer separates a missing field from an explicit 0.
+	ReadyTimeoutSeconds *int `json:"ready_timeout_seconds,omitempty"`
+	StopGraceSeconds    *int `json:"stop_grace_seconds,omitempty"`
+}
+
+// ReadyTimeout is how long the agent waits for the backend to answer.
+func (config BackendConfig) ReadyTimeout() time.Duration {
+	if config.ReadyTimeoutSeconds == nil {
+		return DefaultReadyTimeoutSeconds * time.Second
+	}
+	return time.Duration(*config.ReadyTimeoutSeconds) * time.Second
+}
+
+// StopGrace is how long the agent waits before killing the backend.
+func (config BackendConfig) StopGrace() time.Duration {
+	if config.StopGraceSeconds == nil {
+		return DefaultStopGraceSeconds * time.Second
+	}
+	return time.Duration(*config.StopGraceSeconds) * time.Second
 }
 
 // Config is agent.json: the agent root folder's configuration. Unknown fields
@@ -94,6 +122,12 @@ func (config Config) Validate() error {
 	}
 	if !isLoopbackAddress(config.Backend.OperatorAddr) {
 		return errors.New(AgentConfigFileName + ": backend.operator_addr must be a loopback address")
+	}
+	if value := config.Backend.ReadyTimeoutSeconds; value != nil && (*value < minReadyTimeoutSeconds || *value > maxReadyTimeoutSeconds) {
+		return fmt.Errorf("%s: backend.ready_timeout_seconds %d is outside %d..%d", AgentConfigFileName, *value, minReadyTimeoutSeconds, maxReadyTimeoutSeconds)
+	}
+	if value := config.Backend.StopGraceSeconds; value != nil && (*value < minStopGraceSeconds || *value > maxStopGraceSeconds) {
+		return fmt.Errorf("%s: backend.stop_grace_seconds %d is outside %d..%d", AgentConfigFileName, *value, minStopGraceSeconds, maxStopGraceSeconds)
 	}
 	return nil
 }

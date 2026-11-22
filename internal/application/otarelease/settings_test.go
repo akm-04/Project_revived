@@ -27,7 +27,9 @@ func TestSettingsFileMissingIsDefaultsAndSaveReloads(t *testing.T) {
 		t.Fatalf("loaded=%+v err=%v", loaded, err)
 	}
 	res := t.TempDir()
-	next := domain.Settings{LazyFetch: domain.LazyFetchOn, ResPath: res}
+	next := domain.DefaultSettings()
+	next.LazyFetch = domain.LazyFetchOn
+	next.ResPath = res
 	if err := file.Save(next); err != nil {
 		t.Fatal(err)
 	}
@@ -87,7 +89,9 @@ func TestSettingsSetHandlerWritesOnlyTheRow(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	first := domain.Settings{LazyFetch: domain.LazyFetchOn, ResPath: res}
+	first := domain.DefaultSettings()
+	first.LazyFetch = domain.LazyFetchOn
+	first.ResPath = res
 	if change, ok := result.(SettingsChange); !ok || change != (SettingsChange{Old: domain.DefaultSettings(), New: first, Revision: 1}) {
 		t.Fatalf("result=%#v", result)
 	}
@@ -115,8 +119,10 @@ func TestSettingsSyncInstallsOnlyNewerRevisions(t *testing.T) {
 	root := t.TempDir()
 	live := NewSettingsValue(domain.DefaultSettings())
 	sync := &SettingsSync{File: SettingsFile{Root: root}, Live: live}
-	on := domain.Settings{LazyFetch: domain.LazyFetchOn}
-	off := domain.Settings{LazyFetch: domain.LazyFetchOff}
+	on := domain.DefaultSettings()
+	on.LazyFetch = domain.LazyFetchOn
+	off := domain.DefaultSettings()
+	off.LazyFetch = domain.LazyFetchOff
 
 	if err := sync.install(&SettingsRecord{Settings: on, Revision: 0}); err != nil || live.Get() != domain.DefaultSettings() {
 		t.Fatalf("the seed row was installed: live=%+v err=%v", live.Get(), err)
@@ -139,7 +145,9 @@ func TestSettingsSyncRetriesAFailedCopy(t *testing.T) {
 	missing := filepath.Join(root, "missing")
 	live := NewSettingsValue(domain.DefaultSettings())
 	sync := &SettingsSync{File: SettingsFile{Root: missing}, Live: live}
-	record := &SettingsRecord{Settings: domain.Settings{LazyFetch: domain.LazyFetchOff}, Revision: 1}
+	offSettings := domain.DefaultSettings()
+	offSettings.LazyFetch = domain.LazyFetchOff
+	record := &SettingsRecord{Settings: offSettings, Revision: 1}
 
 	if err := sync.install(record); err == nil {
 		t.Fatal("a failed write must be reported")
@@ -167,7 +175,8 @@ func TestSettingsStartReplacesAnInvalidFileFromTheCommittedRow(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(root, settingsFileName), []byte(`{"lazy_fetch":"nope"}`), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	committed := domain.Settings{LazyFetch: domain.LazyFetchOff}
+	committed := domain.DefaultSettings()
+	committed.LazyFetch = domain.LazyFetchOff
 	live := NewSettingsValue(domain.DefaultSettings())
 	sync := newStartupSync(root, live, &fakeSettingsStore{record: &SettingsRecord{Settings: committed, Revision: 1}})
 	usable, err := sync.Start(context.Background())
@@ -186,7 +195,9 @@ func TestSettingsStartRefusesAnInvalidFileWithoutACommittedRow(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(root, settingsFileName), bogus, 0o644); err != nil {
 		t.Fatal(err)
 	}
-	live := NewSettingsValue(domain.Settings{LazyFetch: domain.LazyFetchOff})
+	offSettings := domain.DefaultSettings()
+	offSettings.LazyFetch = domain.LazyFetchOff
+	live := NewSettingsValue(offSettings)
 	sync := newStartupSync(root, live, &fakeSettingsStore{})
 	usable, err := sync.Start(context.Background())
 	if err != nil {
@@ -205,7 +216,8 @@ func TestSettingsStartRefusesAnInvalidFileWithoutACommittedRow(t *testing.T) {
 
 func TestSettingsStartTrustsAValidFileWithoutACommittedRow(t *testing.T) {
 	root := t.TempDir()
-	fileSettings := domain.Settings{LazyFetch: domain.LazyFetchOff}
+	fileSettings := domain.DefaultSettings()
+	fileSettings.LazyFetch = domain.LazyFetchOff
 	if err := (SettingsFile{Root: root}).Save(fileSettings); err != nil {
 		t.Fatal(err)
 	}
@@ -241,6 +253,42 @@ func TestSettingsSetHandlerRefusalsAre409(t *testing.T) {
 		}
 		if _, statErr := os.Stat(filepath.Join(root, "settings.json")); !errors.Is(statErr, os.ErrNotExist) {
 			t.Fatalf("refused payload %s wrote settings.json: %v", payload, statErr)
+		}
+	}
+}
+
+func TestSettingsSetHandlerAppliesTunables(t *testing.T) {
+	live := NewSettingsValue(domain.DefaultSettings())
+	store := &fakeSettingsStore{}
+	payload := `{"lazy_fetch":"auto","res_path":"","download_base_seconds":10,"download_min_kib_per_second":64,"cache_max_age_seconds":0,"serving_refresh_seconds":2,"volume_mb":120}`
+	result, err := callSettings(SettingsSetHandler(SettingsFile{Root: t.TempDir()}, live, store), payload)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := domain.DefaultSettings()
+	want.DownloadBaseSeconds = 10
+	want.DownloadMinKiBPerSecond = 64
+	want.CacheMaxAgeSeconds = 0
+	want.ServingRefreshSeconds = 2
+	want.VolumeMB = 120
+	if change, ok := result.(SettingsChange); !ok || change.New != want {
+		t.Fatalf("result=%#v", result)
+	}
+}
+
+func TestSettingsSetHandlerRefusesOutOfBoundsTunables(t *testing.T) {
+	for _, payload := range []string{
+		`{"lazy_fetch":"auto","res_path":"","download_base_seconds":4}`,
+		`{"lazy_fetch":"auto","res_path":"","download_min_kib_per_second":102401}`,
+		`{"lazy_fetch":"auto","res_path":"","cache_max_age_seconds":-1}`,
+		`{"lazy_fetch":"auto","res_path":"","serving_refresh_seconds":301}`,
+		`{"lazy_fetch":"auto","res_path":"","volume_mb":0}`,
+	} {
+		live := NewSettingsValue(domain.DefaultSettings())
+		_, err := callSettings(SettingsSetHandler(SettingsFile{Root: t.TempDir()}, live, &fakeSettingsStore{}), payload)
+		var refusal *operator.Refusal
+		if !errors.As(err, &refusal) || refusal.Code != operator.CodePayloadInvalid {
+			t.Fatalf("payload %s err=%v", payload, err)
 		}
 	}
 }

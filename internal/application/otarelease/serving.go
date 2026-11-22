@@ -19,10 +19,6 @@ import (
 	domain "gxb.local/backend/v2/internal/domain/otarelease"
 )
 
-// ServingRefreshInterval is the plan's bound: the servable set is re-read from
-// the database at most every 5 s, and immediately through Refresh on publish.
-const ServingRefreshInterval = 5 * time.Second
-
 const (
 	maxMD5CacheEntries  = 4_096
 	resSidecarSuffix    = ".res.json"
@@ -230,13 +226,14 @@ func (s *Serving) now() time.Time {
 	return s.Now()
 }
 
-// current returns a snapshot no older than ServingRefreshInterval. A failed
-// refresh with a previous snapshot keeps serving that set rather than turning a
-// database blip into 404s the client retries.
+// current returns a snapshot no older than the live serving_refresh_seconds.
+// A failed refresh with a previous snapshot keeps serving that set rather than
+// turning a database blip into 404s the client retries.
 func (s *Serving) current(ctx context.Context) (*servingSnapshot, error) {
+	refreshInterval := s.settings().ServingRefreshInterval()
 	s.mu.Lock()
 	snapshot := s.snapshot
-	fresh := snapshot != nil && s.now().Sub(s.refreshedAt) < ServingRefreshInterval
+	fresh := snapshot != nil && s.now().Sub(s.refreshedAt) < refreshInterval
 	s.mu.Unlock()
 	if fresh {
 		return snapshot, nil
@@ -382,20 +379,27 @@ func (s *Serving) verifiedMD5(file *os.File, fullPath string, info os.FileInfo) 
 	return actual, nil
 }
 
-func (s *Serving) resPath() string {
+func (s *Serving) settings() domain.Settings {
 	if s == nil || s.Settings == nil {
-		return ""
+		return domain.DefaultSettings()
 	}
-	return s.Settings.Get().ResPath
+	return s.Settings.Get()
+}
+
+func (s *Serving) resPath() string {
+	return s.settings().ResPath
+}
+
+// DownloadWriteDeadline is the write deadline of a /updates or /res body of
+// size bytes at the live settings.
+func (s *Serving) DownloadWriteDeadline(size int64) time.Time {
+	return s.settings().DownloadWriteDeadline(s.now(), size)
 }
 
 // lazyFetchOff is the operator kill switch: "off" stops /res serving as well as
 // discovery (OA-3).
 func (s *Serving) lazyFetchOff() bool {
-	if s == nil || s.Settings == nil {
-		return false
-	}
-	return s.Settings.Get().LazyFetch == domain.LazyFetchOff
+	return s.settings().LazyFetch == domain.LazyFetchOff
 }
 
 func withinDirectory(root, candidate string) bool {

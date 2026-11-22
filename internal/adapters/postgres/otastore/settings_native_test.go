@@ -19,6 +19,56 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
+// L4h: the tunables survive the jsonb row, the file and the live value.
+func TestNativeSettingsRowRoundTripsTheTunables(t *testing.T) {
+	pool := l3Pool(t)
+	ctx := context.Background()
+	if _, err := pool.Raw().Exec(ctx, `DELETE FROM ota_settings`); err != nil {
+		t.Fatal(err)
+	}
+	root := t.TempDir()
+	file := appota.SettingsFile{Root: root}
+	live := appota.NewSettingsValue(otarelease.DefaultSettings())
+	runner := tx.Runner{DB: pool}
+	settingsSync := &appota.SettingsSync{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: otastore.Store{}, File: file, Live: live}
+	bus := operator.Bus{Runner: runner, Clock: clock.System{}, Store: operatorstore.Store{}, Handlers: map[string]operator.Handler{
+		"ota.settings.set": appota.SettingsSetHandler(file, live, otastore.Store{}),
+	}}
+	payload := map[string]any{
+		"lazy_fetch":                  "on",
+		"res_path":                    "",
+		"download_base_seconds":       10,
+		"download_min_kib_per_second": 64,
+		"cache_max_age_seconds":       0,
+		"serving_refresh_seconds":     2,
+		"volume_mb":                   120,
+	}
+	if outcome := l3Execute(t, bus, l3Command(t, "ota.settings.set", nil, payload)); outcome.State != operator.StateApplied {
+		t.Fatalf("outcome=%+v", outcome)
+	}
+	if err := settingsSync.Reconcile(ctx); err != nil {
+		t.Fatal(err)
+	}
+	loaded, err := file.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if loaded.DownloadBaseSeconds != 10 || loaded.DownloadMinKiBPerSecond != 64 || loaded.CacheMaxAgeSeconds != 0 ||
+		loaded.ServingRefreshSeconds != 2 || loaded.VolumeMB != 120 {
+		t.Fatalf("file=%+v", loaded)
+	}
+	if live.Get() != loaded {
+		t.Fatalf("live=%+v file=%+v", live.Get(), loaded)
+	}
+	var volumeMB, baseSeconds int
+	if err := pool.QueryRow(ctx, `SELECT (settings->>'volume_mb')::int, (settings->>'download_base_seconds')::int FROM ota_settings`).Scan(&volumeMB, &baseSeconds); err != nil {
+		t.Fatal(err)
+	}
+	if volumeMB != 120 || baseSeconds != 10 {
+		t.Fatalf("row volume_mb=%d download_base_seconds=%d", volumeMB, baseSeconds)
+	}
+}
+
 // OA-6: the command writes only the ota_settings row; the sync copies the
 // newest committed revision, so concurrent commands end at the last commit.
 func TestNativeSettingsRowIsTheRecordAndTheSyncCopiesTheNewest(t *testing.T) {

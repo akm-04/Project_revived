@@ -9,6 +9,7 @@ const (
 	CodeUnauthorized       = "AGENT_UNAUTHORIZED"
 	CodeForbidden          = "AGENT_FORBIDDEN"
 	CodeBodyInvalid        = "AGENT_BODY_INVALID"
+	CodeBodyTooLarge       = "AGENT_BODY_TOO_LARGE"
 	CodeNotFound           = "AGENT_NOT_FOUND"
 	CodeOperationRunning   = "AGENT_OP_RUNNING"
 	CodeOperationUnknown   = "AGENT_OP_UNKNOWN"

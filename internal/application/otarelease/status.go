@@ -50,6 +50,9 @@ type Status struct {
 	Served      []ServedCounter    `json:"served"`
 	Misses      []AssetMiss        `json:"misses"`
 	Truncated   TruncatedLists     `json:"truncated"`
+	// Settings are the effective live values, including a field a client or an
+	// operator sees without restarting the API (L4h).
+	Settings domain.Settings `json:"settings"`
 }
 
 // TruncatedLists says which ota.status list hit its bound and was cut.
@@ -101,6 +104,7 @@ type StatusService struct {
 	Runner     tx.Runner
 	Operations operation.Factory
 	Store      StatusStore
+	Live       *SettingsValue
 }
 
 func (s StatusService) Status(ctx context.Context) (Status, error) {
@@ -122,7 +126,12 @@ func (s StatusService) Status(ctx context.Context) (Status, error) {
 	if err != nil {
 		return Status{}, err
 	}
-	return foldStatus(snapshot)
+	status, err := foldStatus(snapshot)
+	if err != nil {
+		return Status{}, err
+	}
+	status.Settings = s.Live.Get()
+	return status, nil
 }
 
 func foldStatus(snapshot StatusSnapshot) (Status, error) {

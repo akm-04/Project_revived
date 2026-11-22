@@ -47,6 +47,8 @@ type Input struct {
 	// AssetsSidecar is the ACTIVE assets release's res sidecar that a code
 	// lazy refresh reads; required when LazyRefresh is set.
 	AssetsSidecar string
+	// VolumeByteLimit is the per-volume cap; zero means the default 99 MB.
+	VolumeByteLimit int64
 }
 
 // Result is one finished build: the ota.register_build payload plus the report
@@ -87,9 +89,9 @@ var (
 // apart even when they share a version and digest (L4f fix 1).
 var markerSerial atomic.Uint64
 
-// volumeByteLimit is ruling 5's per-volume cap; tests lower it to exercise the
-// split without a multi-megabyte fixture.
-var volumeByteLimit int64 = 99_000_000
+// defaultVolumeByteLimit is ruling 5's per-volume cap when Input does not set
+// one.
+const defaultVolumeByteLimit int64 = 99_000_000
 
 const maxTotalBytes int64 = 2_147_483_647
 
@@ -169,6 +171,10 @@ func Build(ctx context.Context, input Input) (Result, error) {
 		return Result{}, err
 	}
 
+	volumeByteLimit := input.VolumeByteLimit
+	if volumeByteLimit <= 0 {
+		volumeByteLimit = defaultVolumeByteLimit
+	}
 	sizes, err := planVolumeSizes(totalSize, volumeByteLimit)
 	if err != nil {
 		return Result{}, err

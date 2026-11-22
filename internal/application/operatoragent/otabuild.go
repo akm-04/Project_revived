@@ -180,11 +180,12 @@ func (build Build) Start(ctx context.Context, request BuildRequest) (Operation, 
 				input.LazyRefresh = true
 				input.AssetsSidecar = sidecar
 			}
+			settings, err := apprelease.SettingsFile{Root: build.Config.OTARoot}.Load()
+			if err != nil {
+				return nil, Refuse(CodeBuildConfig, "settings.json is unreadable: "+err.Error())
+			}
+			input.VolumeByteLimit = settings.VolumeLimitBytes()
 			if lane == domain.LaneAssets || request.LazyRefresh {
-				settings, err := apprelease.SettingsFile{Root: build.Config.OTARoot}.Load()
-				if err != nil {
-					return nil, Refuse(CodeBuildConfig, "settings.json is unreadable: "+err.Error())
-				}
 				input.ResPath = settings.ResPath
 			}
 			result, err := otabuild.Build(ctx, input)

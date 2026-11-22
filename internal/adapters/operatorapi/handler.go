@@ -8,7 +8,6 @@ import (
 	"crypto/subtle"
 	"encoding/json"
 	"errors"
-	"io"
 	"log"
 	"net"
 	"net/http"
@@ -28,6 +27,7 @@ const (
 
 	codeUnauthorized = "OPERATOR_UNAUTHORIZED"
 	codeBadRequest   = "OPERATOR_BAD_REQUEST"
+	codeBodyTooLarge = "OPERATOR_BODY_TOO_LARGE"
 	codeUnavailable  = "OPERATOR_UNAVAILABLE"
 	codeFailed       = "OPERATOR_FAILED"
 	codeUnknownRead  = "OPERATOR_UNKNOWN_READ"
@@ -149,9 +149,14 @@ func (handler Handler) serveRead(writer http.ResponseWriter, request *http.Reque
 
 func (handler Handler) serveCommand(writer http.ResponseWriter, httpRequest *http.Request, name string) {
 	var body request
-	decoder := json.NewDecoder(io.LimitReader(httpRequest.Body, maxRequestBody))
+	decoder := json.NewDecoder(http.MaxBytesReader(writer, httpRequest.Body, maxRequestBody))
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&body); err != nil {
+		var tooLarge *http.MaxBytesError
+		if errors.As(err, &tooLarge) {
+			writeError(writer, http.StatusRequestEntityTooLarge, codeBodyTooLarge, "the body exceeds 32 MiB")
+			return
+		}
 		writeError(writer, http.StatusBadRequest, codeBadRequest, "the body must be {envelope, payload}")
 		return
 	}

@@ -274,9 +274,7 @@ func TestDeterministicBuild(t *testing.T) {
 }
 
 func TestVolumeSplit(t *testing.T) {
-	previousLimit := volumeByteLimit
-	volumeByteLimit = 2048
-	t.Cleanup(func() { volumeByteLimit = previousLimit })
+	const volumeByteLimit int64 = 2048
 
 	fixture := newFixture(t)
 	large := make([]byte, 20000)
@@ -288,7 +286,9 @@ func TestVolumeSplit(t *testing.T) {
 		large[index] = byte(state)
 	}
 	fixture.addSource(t, "app/example/Large.lua", large)
-	request := fixture.build(t, fixture.input("1.631.2"))
+	input := fixture.input("1.631.2")
+	input.VolumeByteLimit = volumeByteLimit
+	request := fixture.build(t, input)
 	volumes := packageVolumes(t, request)
 
 	if len(volumes) < 2 {
@@ -667,9 +667,6 @@ func TestPatchTrailingDataRefused(t *testing.T) {
 }
 
 func TestCommitVolumesRollsBack(t *testing.T) {
-	previousLimit := volumeByteLimit
-	volumeByteLimit = 2048
-	t.Cleanup(func() { volumeByteLimit = previousLimit })
 	previousRename := renameFile
 	t.Cleanup(func() { renameFile = previousRename })
 
@@ -692,7 +689,9 @@ func TestCommitVolumesRollsBack(t *testing.T) {
 		}
 		return os.Rename(oldPath, newPath)
 	}
-	if _, err := Build(context.Background(), fixture.input("1.631.2")); err == nil {
+	rollbackInput := fixture.input("1.631.2")
+	rollbackInput.VolumeByteLimit = 2048
+	if _, err := Build(context.Background(), rollbackInput); err == nil {
 		t.Fatal("build succeeded despite the injected rename failure")
 	}
 	entries, err := os.ReadDir(fixture.updates)
