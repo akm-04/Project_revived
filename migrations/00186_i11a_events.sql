@@ -48,6 +48,9 @@ CREATE TABLE event_occurrences (
  ) WHERE (cancelled_at IS NULL AND settled_at IS NULL)
 );
 CREATE INDEX event_occurrences_server_activity ON event_occurrences (logical_server_id, activity_id, starts_at DESC, id DESC);
+-- events.list orders a server's occurrences by start; the activity-leading
+-- index above cannot serve that ordering.
+CREATE INDEX event_occurrences_server_started ON event_occurrences (logical_server_id, starts_at DESC, id DESC);
 
 CREATE TABLE event_cycle_settings (
  logical_server_id integer PRIMARY KEY REFERENCES logical_servers (logical_server_id),
@@ -71,3 +74,6 @@ CREATE TABLE player_event_claims (
  grant_receipt text NOT NULL CHECK (char_length(grant_receipt) BETWEEN 1 AND 256),
  PRIMARY KEY (player_id, occurrence_id, tier, period)
 );
+-- occurrence.show reads one occurrence's claims newest first; the player-leading
+-- primary key cannot serve that order.
+CREATE INDEX player_event_claims_occurrence_claimed ON player_event_claims (occurrence_id, claimed_at);

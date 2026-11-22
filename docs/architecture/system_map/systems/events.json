@@ -25,11 +25,12 @@
   "ranks": [
    {
     "name": "events.OccurrenceLockRank",
-    "rank": 350
+    "rank": 355
    }
   ],
   "row_lock_methods": {
    "event_occurrences": [
+    "eventstore.LockOccurrenceSharedTx",
     "eventstore.LockOccurrenceTx",
     "eventstore.LockOccurrencesTx"
    ]
@@ -64,6 +65,7 @@
    "player_event_claims"
   ],
   "written": [
+   "event_cycle_settings",
    "event_definitions",
    "event_occurrences",
    "player_event_claims"

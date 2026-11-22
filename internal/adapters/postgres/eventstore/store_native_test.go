@@ -5,6 +5,7 @@ package eventstore_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"os"
 	"reflect"
 	"strconv"
@@ -233,6 +234,9 @@ func TestScheduleOverlapAndLifecycle(t *testing.T) {
 	if scheduled.State != string(domainevents.PhaseScheduled) || scheduled.Revision != 1 || scheduled.EndsAt == nil {
 		t.Fatalf("scheduled = %+v", scheduled)
 	}
+	if scheduled.ClaimUntil == nil || scheduled.ClaimUntil.Sub(*scheduled.EndsAt) != 24*time.Hour {
+		t.Fatalf("the claim window must come from the seeded settings row: %+v", scheduled)
+	}
 	overlapPayload := map[string]any{"activity_id": 1080, "logical_server_ids": []int64{1}, "duration": "1d", "start": start}
 	overlap := e1Execute(t, bus, e1Command(t, "events.schedule", nil, "global", overlapPayload))
 	if overlap.State != operator.StateRefused || e1Code(t, overlap) != appevents.CodeOverlap {
@@ -347,22 +351,28 @@ func TestConcurrentOverlapRefused(t *testing.T) {
 	}
 }
 
+func seedPlayer(t *testing.T, pool *pg.Pool, playerID int64, uid string) {
+	t.Helper()
+	ctx := context.Background()
+	if _, err := pool.Raw().Exec(ctx, `INSERT INTO accounts(account_id,status,account_uid,created_at)
+		VALUES(gen_random_uuid(),'ACTIVE',$1,now()) ON CONFLICT (account_uid) DO NOTHING`, uid); err != nil {
+		t.Fatalf("seed account: %v", err)
+	}
+	if _, err := pool.Raw().Exec(ctx, `INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version)
+		SELECT $1,account_id,1,now(),'e1-native' FROM accounts WHERE account_uid=$2 ON CONFLICT (player_id) DO NOTHING`, playerID, uid); err != nil {
+		t.Fatalf("seed player: %v", err)
+	}
+}
+
 func TestClaimUniqueUnderConcurrentInserts(t *testing.T) {
 	pool := e1Pool(t)
 	bus := e1Bus(t, pool)
 	e1Deploy(t, bus, 1083, 1, 2)
-	occurrence := e1Schedule(t, bus, 1083, time.Now().UTC().Add(24*time.Hour).Format(time.RFC3339), "3d")
+	occurrence := e1Schedule(t, bus, 1083, time.Now().UTC().Add(-time.Hour).Format(time.RFC3339), "3d")
 
 	ctx := context.Background()
 	const playerID int64 = 100001
-	if _, err := pool.Raw().Exec(ctx, `INSERT INTO accounts(account_id,status,account_uid,created_at)
-		VALUES('11111111-1111-4111-8111-111111111111','ACTIVE','e1-claim-test',now()) ON CONFLICT (account_uid) DO NOTHING`); err != nil {
-		t.Fatalf("seed account: %v", err)
-	}
-	if _, err := pool.Raw().Exec(ctx, `INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version)
-		SELECT $1,account_id,1,now(),'e1-native' FROM accounts WHERE account_uid='e1-claim-test' ON CONFLICT (player_id) DO NOTHING`, playerID); err != nil {
-		t.Fatalf("seed player: %v", err)
-	}
+	seedPlayer(t, pool, playerID, "e1-claim-test")
 
 	insert := func() (bool, error) {
 		transaction, err := pool.Begin(ctx, tx.Options{Isolation: tx.ReadCommitted})
@@ -370,7 +380,7 @@ func TestClaimUniqueUnderConcurrentInserts(t *testing.T) {
 			return false, err
 		}
 		defer func() { _ = transaction.Rollback(ctx) }()
-		_, inserted, err := (eventstore.Store{}).InsertClaimTx(ctx, transaction, appevents.Claim{PlayerID: playerID, OccurrenceID: occurrence.ID, Tier: 1, Period: "once", Choice: 1, ClaimedAt: time.Now().UTC(), GrantReceipt: "receipt"})
+		_, inserted, err := (appevents.ClaimLedger{Store: eventstore.Store{}}).InsertClaimTx(ctx, transaction, appevents.Claim{PlayerID: playerID, OccurrenceID: occurrence.ID, Tier: 1, Period: "once", Choice: 1, ClaimedAt: time.Now().UTC(), GrantReceipt: "receipt"})
 		if err != nil {
 			return false, err
 		}
@@ -407,9 +417,197 @@ func TestClaimUniqueUnderConcurrentInserts(t *testing.T) {
 	if winners != 1 {
 		t.Fatalf("exactly one concurrent insert must win, got %d", winners)
 	}
-	claims, err := (eventstore.Store{}).ClaimsForPlayerTx(ctx, pool, playerID, occurrence.ID)
+	claims, err := (eventstore.Store{}).ClaimsForPlayerTx(ctx, pool, playerID, occurrence.ID, appevents.DefaultClaimsLimit)
 	if err != nil || len(claims) != 1 || claims[0].Choice != 1 {
 		t.Fatalf("stored claims = %+v, %v", claims, err)
+	}
+}
+
+func refusalCode(t *testing.T, err error) string {
+	t.Helper()
+	var refusal *operator.Refusal
+	if !errors.As(err, &refusal) {
+		t.Fatalf("want a refusal, got %v", err)
+	}
+	return refusal.Code
+}
+
+func TestClaimReplayAnswersSameTier(t *testing.T) {
+	pool := e1Pool(t)
+	bus := e1Bus(t, pool)
+	e1Deploy(t, bus, 1092, 1, 2)
+	occurrence := e1Schedule(t, bus, 1092, time.Now().UTC().Add(-time.Hour).Format(time.RFC3339), "3d")
+	const playerID int64 = 100002
+	seedPlayer(t, pool, playerID, "e1-claim-tier")
+
+	ctx := context.Background()
+	transaction, err := pool.Begin(ctx, tx.Options{Isolation: tx.ReadCommitted})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = transaction.Rollback(ctx) }()
+	ledger := appevents.ClaimLedger{Store: eventstore.Store{}}
+	claim := func(tier int64, choice int, receipt string) (appevents.Claim, bool) {
+		row, inserted, err := ledger.InsertClaimTx(ctx, transaction, appevents.Claim{PlayerID: playerID, OccurrenceID: occurrence.ID, Tier: tier, Period: "once", Choice: choice, ClaimedAt: time.Now().UTC(), GrantReceipt: receipt})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return row, inserted
+	}
+	if _, inserted := claim(1, 1, "tier-one"); !inserted {
+		t.Fatal("tier 1 must insert")
+	}
+	if _, inserted := claim(2, 2, "tier-two"); !inserted {
+		t.Fatal("tier 2 must insert")
+	}
+	replay, inserted := claim(2, 3, "tier-two-replay")
+	if inserted {
+		t.Fatal("the repeated tier 2 key must not insert")
+	}
+	if replay.Tier != 2 || replay.Choice != 2 || replay.GrantReceipt != "tier-two" {
+		t.Fatalf("replay answered another tier: %+v", replay)
+	}
+}
+
+func TestExtendAndSetPermanentRefuseOverlap(t *testing.T) {
+	pool := e1Pool(t)
+	bus := e1Bus(t, pool)
+	e1Deploy(t, bus, 1093, 1, 2)
+	e1Deploy(t, bus, 1094, 1, 2)
+	ctx := context.Background()
+	store := eventstore.Store{}
+	base := time.Now().UTC().Add(2 * time.Hour)
+
+	first := e1ScheduleOn(t, bus, 1, 1093, base.Format(time.RFC3339), "1d")
+	later := e1ScheduleOn(t, bus, 1, 1093, base.Add(72*time.Hour).Format(time.RFC3339), "1d")
+	extended := e1Mutate(t, bus, "events.extend", first.ID, 1, map[string]any{"duration": "7d"})
+	if extended.State != operator.StateRefused || e1Code(t, extended) != appevents.CodeOverlap {
+		t.Fatalf("extend into a later occurrence must be EVENT_OVERLAP: %s %s", extended.State, extended.Result)
+	}
+	unchanged, err := store.OccurrenceTx(ctx, pool, first.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if unchanged.Revision != 1 || unchanged.EndsAt == nil || !unchanged.EndsAt.Equal(*first.EndsAt) {
+		t.Fatalf("the refused extend changed the row: %+v", unchanged)
+	}
+	other, err := store.OccurrenceTx(ctx, pool, later.ID)
+	if err != nil || other.Revision != 1 {
+		t.Fatalf("the other row changed: %+v %v", other, err)
+	}
+
+	permanentCandidate := e1ScheduleOn(t, bus, 1, 1094, base.Format(time.RFC3339), "1d")
+	permanentLater := e1ScheduleOn(t, bus, 1, 1094, base.Add(72*time.Hour).Format(time.RFC3339), "1d")
+	madePermanent := e1Mutate(t, bus, "events.set_permanent", permanentCandidate.ID, 1, nil)
+	if madePermanent.State != operator.StateRefused || e1Code(t, madePermanent) != appevents.CodeOverlap {
+		t.Fatalf("set_permanent into a later occurrence must be EVENT_OVERLAP: %s %s", madePermanent.State, madePermanent.Result)
+	}
+	unchangedPermanent, err := store.OccurrenceTx(ctx, pool, permanentCandidate.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if unchangedPermanent.Revision != 1 || unchangedPermanent.EndsAt == nil {
+		t.Fatalf("the refused set_permanent changed the row: %+v", unchangedPermanent)
+	}
+	if _, err := store.OccurrenceTx(ctx, pool, permanentLater.ID); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestClaimSeesEndedOccurrence(t *testing.T) {
+	pool := e1Pool(t)
+	bus := e1Bus(t, pool)
+	e1Deploy(t, bus, 1095, 1, 2)
+	occurrence := e1Schedule(t, bus, 1095, time.Now().UTC().Add(-3*time.Hour).Format(time.RFC3339), "1d")
+	const playerID int64 = 100003
+	seedPlayer(t, pool, playerID, "e1-claim-ended")
+	ctx := context.Background()
+
+	at := time.Now().UTC()
+	sealed, err := pool.Begin(ctx, tx.Options{Isolation: tx.ReadCommitted})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var lockedID int64
+	if err := sealed.QueryRow(ctx, `SELECT id FROM event_occurrences WHERE id=$1 FOR UPDATE`, occurrence.ID).Scan(&lockedID); err != nil {
+		t.Fatalf("lock occurrence: %v", err)
+	}
+	if _, err := sealed.Exec(ctx, `UPDATE event_occurrences SET ends_at=$2,claim_until=$3,revision=revision+1 WHERE id=$1`, occurrence.ID, at.Add(-2*time.Hour), at.Add(-time.Hour)); err != nil {
+		t.Fatalf("end occurrence: %v", err)
+	}
+	if err := sealed.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	claiming, err := pool.Begin(ctx, tx.Options{Isolation: tx.ReadCommitted})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = claiming.Rollback(ctx) }()
+	_, _, err = (appevents.ClaimLedger{Store: eventstore.Store{}}).InsertClaimTx(ctx, claiming, appevents.Claim{PlayerID: playerID, OccurrenceID: occurrence.ID, Tier: 1, Period: "once", Choice: 1, ClaimedAt: at, GrantReceipt: "ended"})
+	if code := refusalCode(t, err); code != appevents.CodeStateInvalid {
+		t.Fatalf("code = %s, want %s", code, appevents.CodeStateInvalid)
+	}
+	claims, err := (eventstore.Store{}).ClaimsForPlayerTx(ctx, pool, playerID, occurrence.ID, appevents.DefaultClaimsLimit)
+	if err != nil || len(claims) != 0 {
+		t.Fatalf("a refused claim must not insert: %+v %v", claims, err)
+	}
+}
+
+func TestScheduleRefusesUnknownServer(t *testing.T) {
+	pool := e1Pool(t)
+	bus := e1Bus(t, pool)
+	e1Deploy(t, bus, 1096, 1, 2)
+	ctx := context.Background()
+	var unknown int64
+	if err := pool.Raw().QueryRow(ctx, `SELECT COALESCE(MAX(logical_server_id),0)+1000 FROM logical_servers`).Scan(&unknown); err != nil {
+		t.Fatal(err)
+	}
+	payload := map[string]any{"activity_id": 1096, "logical_server_ids": []int64{unknown}, "duration": "1d", "start": time.Now().UTC().Add(24 * time.Hour).Format(time.RFC3339)}
+	outcome := e1Execute(t, bus, e1Command(t, "events.schedule", nil, "global", payload))
+	if outcome.State != operator.StateRefused || e1Code(t, outcome) != appevents.CodeServerUnknown {
+		t.Fatalf("unknown server must be EVENT_SERVER_UNKNOWN: %s %s", outcome.State, outcome.Result)
+	}
+}
+
+func TestOccurrenceShowCountsEveryClaim(t *testing.T) {
+	pool := e1Pool(t)
+	bus := e1Bus(t, pool)
+	e1Deploy(t, bus, 1097, 1, 2)
+	occurrence := e1Schedule(t, bus, 1097, time.Now().UTC().Add(-time.Hour).Format(time.RFC3339), "3d")
+	const playerID int64 = 100004
+	seedPlayer(t, pool, playerID, "e1-claim-count")
+	ctx := context.Background()
+
+	transaction, err := pool.Begin(ctx, tx.Options{Isolation: tx.ReadCommitted})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = transaction.Rollback(ctx) }()
+	ledger := appevents.ClaimLedger{Store: eventstore.Store{}}
+	for tier := int64(1); tier <= 3; tier++ {
+		if _, _, err := ledger.InsertClaimTx(ctx, transaction, appevents.Claim{PlayerID: playerID, OccurrenceID: occurrence.ID, Tier: tier, Period: "once", Choice: 1, ClaimedAt: time.Now().UTC(), GrantReceipt: "count"}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := transaction.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	outcome := e1Execute(t, bus, e1Command(t, "events.occurrence.show", nil, "global", map[string]any{"occurrence_id": occurrence.ID, "limit": 1}))
+	if outcome.State != operator.StateApplied {
+		t.Fatalf("occurrence.show: %s %s", outcome.State, outcome.Result)
+	}
+	var shown struct {
+		ClaimCount int `json:"claim_count"`
+		Truncated  bool
+		Claims     []appevents.ClaimView `json:"claims"`
+	}
+	if err := json.Unmarshal(outcome.Result, &shown); err != nil {
+		t.Fatal(err)
+	}
+	if shown.ClaimCount != 3 || !shown.Truncated || len(shown.Claims) != 1 {
+		t.Fatalf("claim_count must count every claim, not the page: %s", outcome.Result)
 	}
 }
 

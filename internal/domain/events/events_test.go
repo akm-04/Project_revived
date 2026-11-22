@@ -45,16 +45,17 @@ func TestParseDefinitionUnknownFieldRefused(t *testing.T) {
 
 func TestParseDefinitionRefusals(t *testing.T) {
 	cases := map[string]string{
-		"unknown archetype": `{"activity_id":1,"revision":1,"archetype":"LOTTERY","client_requirements":{}}`,
-		"no hooks":          `{"activity_id":1,"revision":1,"archetype":"RULE_MODIFIER","client_requirements":{}}`,
-		"no tiers":          `{"activity_id":1,"revision":1,"archetype":"TIERED_CLAIM","client_requirements":{}}`,
-		"bad activity":      `{"activity_id":0,"revision":1,"archetype":"DISPLAY","client_requirements":{}}`,
-		"zero revision":     `{"activity_id":1,"revision":0,"archetype":"DISPLAY","client_requirements":{}}`,
-		"four choices":      `{"activity_id":1,"revision":1,"archetype":"TIERED_CLAIM","client_requirements":{},"tiers":[{"id":1,"requirement":{"kind":"player_level","value":1},"choices":[{"gift_id":1},{"gift_id":2},{"gift_id":3},{"gift_id":4}]}]}`,
-		"empty choice":      `{"activity_id":1,"revision":1,"archetype":"TIERED_CLAIM","client_requirements":{},"tiers":[{"id":1,"requirement":{"kind":"player_level","value":1},"choices":[{}]}]}`,
-		"both choice forms": `{"activity_id":1,"revision":1,"archetype":"TIERED_CLAIM","client_requirements":{},"tiers":[{"id":1,"requirement":{"kind":"player_level","value":1},"choices":[{"gift_id":1,"lines":[{"kind":"item","item_id":2,"amount":1}]}]}]}`,
-		"bad reward kind":   `{"activity_id":1,"revision":1,"archetype":"TIERED_CLAIM","client_requirements":{},"tiers":[{"id":1,"requirement":{"kind":"player_level","value":1},"choices":[{"lines":[{"kind":"crystal","amount":1}]}]}]}`,
-		"bad lazy md5":      `{"activity_id":1,"revision":1,"archetype":"DISPLAY","client_requirements":{"lazy_assets":[{"path":"a.csb","md5":"zz"}]}}`,
+		"unknown archetype":        `{"activity_id":1,"revision":1,"archetype":"LOTTERY","client_requirements":{}}`,
+		"no hooks":                 `{"activity_id":1,"revision":1,"archetype":"RULE_MODIFIER","client_requirements":{}}`,
+		"no tiers":                 `{"activity_id":1,"revision":1,"archetype":"TIERED_CLAIM","client_requirements":{}}`,
+		"bad activity":             `{"activity_id":0,"revision":1,"archetype":"DISPLAY","client_requirements":{}}`,
+		"zero revision":            `{"activity_id":1,"revision":0,"archetype":"DISPLAY","client_requirements":{}}`,
+		"four choices":             `{"activity_id":1,"revision":1,"archetype":"TIERED_CLAIM","client_requirements":{},"tiers":[{"id":1,"requirement":{"kind":"player_level","value":1},"choices":[{"gift_id":1},{"gift_id":2},{"gift_id":3},{"gift_id":4}]}]}`,
+		"empty choice":             `{"activity_id":1,"revision":1,"archetype":"TIERED_CLAIM","client_requirements":{},"tiers":[{"id":1,"requirement":{"kind":"player_level","value":1},"choices":[{}]}]}`,
+		"both choice forms":        `{"activity_id":1,"revision":1,"archetype":"TIERED_CLAIM","client_requirements":{},"tiers":[{"id":1,"requirement":{"kind":"player_level","value":1},"choices":[{"gift_id":1,"lines":[{"kind":"item","item_id":2,"amount":1}]}]}]}`,
+		"bad reward kind":          `{"activity_id":1,"revision":1,"archetype":"TIERED_CLAIM","client_requirements":{},"tiers":[{"id":1,"requirement":{"kind":"player_level","value":1},"choices":[{"lines":[{"kind":"crystal","amount":1}]}]}]}`,
+		"bad lazy md5":             `{"activity_id":1,"revision":1,"archetype":"DISPLAY","client_requirements":{"lazy_assets":[{"path":"a.csb","md5":"zz"}]}}`,
+		"unknown requirement kind": `{"activity_id":1,"revision":1,"archetype":"TIERED_CLAIM","client_requirements":{},"tiers":[{"id":1,"requirement":{"kind":"vip_level","value":5},"choices":[{"gift_id":1}]}]}`,
 	}
 	for name, raw := range cases {
 		t.Run(name, func(t *testing.T) {

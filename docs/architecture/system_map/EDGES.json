@@ -3863,21 +3863,23 @@
     "*ActiveHooksTx",
     "*CheckRewardsTx",
     "*ClaimsForPlayerTx",
+    "*CountOccurrenceClaimsTx",
     "*DefinitionTx",
+    "*EnsureSettingsTx",
     "*GiftTx",
     "*InsertClaimTx",
     "*InsertDefinitionTx",
     "*InsertOccurrenceTx",
     "*LatestDefinitionTx",
     "*ListDefinitionsTx",
+    "*LockOccurrenceSharedTx",
     "*LockOccurrenceTx",
     "*LockOccurrencesTx",
     "*OccurrenceClaimsTx",
     "*OccurrenceTx",
     "*OccurrencesTx",
     "*OverlapsTx",
-    "*SaveOccurrenceTx",
-    "*SettingsTx"
+    "*SaveOccurrenceTx"
    ]
   },
   "frienddm": {

@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"gxb.local/backend/v2/internal/application/operator"
 	"gxb.local/backend/v2/internal/domain/events"
 	"gxb.local/backend/v2/internal/domain/modes"
 	otadomain "gxb.local/backend/v2/internal/domain/otarelease"
@@ -28,6 +29,7 @@ var ErrUnavailable = errors.New("events: unavailable")
 var (
 	ErrOccurrenceOverlap = errors.New("events: occurrence overlap")
 	ErrRevisionExists    = errors.New("events: definition revision exists")
+	ErrServerUnknown     = errors.New("events: logical server does not exist")
 )
 
 // Refusal codes (I11A_OPERATOR_COMMANDS_V1 ruling 4; I11A_EVENTS_V1).
@@ -41,17 +43,14 @@ const (
 	CodeHookUnbuilt         = "EVENT_HOOK_UNBUILT"
 	CodeGiftUnsupported     = "EVENT_GIFT_UNSUPPORTED"
 	CodeOccurrenceUnknown   = "EVENT_OCCURRENCE_NOT_FOUND"
+	CodeServerUnknown       = "EVENT_SERVER_UNKNOWN"
 	CodeStateInvalid        = "EVENT_STATE_INVALID"
 	CodeStale               = "EVENT_STALE"
 )
 
-// DefaultClaimWindow is the tunable fallback when a server has no settings row
-// (lead decisions for E1).
-const DefaultClaimWindow = 24 * time.Hour
-
-// OccurrenceLockRank is the events occurrence row lock (EA-9): after the player
-// root 315 and before the i5 grant ranks at 610+.
-const OccurrenceLockRank uint16 = 350
+// OccurrenceLockRank is the events occurrence row lock (EA-9, EA-10): after the
+// player root 315 and the Guild audit rank 350, before the i5 grant ranks 610+.
+const OccurrenceLockRank uint16 = 355
 
 // DefinitionRecord is one stored immutable revision.
 type DefinitionRecord struct {
@@ -70,13 +69,6 @@ type Settings struct {
 	CycleBody     json.RawMessage
 	ClaimWindow   time.Duration
 	Lookahead     int
-}
-
-func (settings Settings) claimWindow() time.Duration {
-	if settings.ClaimWindow <= 0 {
-		return DefaultClaimWindow
-	}
-	return settings.ClaimWindow
 }
 
 // OccurrenceFilter is the bounded events.list query (OPERATOR_COMMANDS reads).
@@ -120,7 +112,21 @@ func ParseOccurrenceCursor(text string) (*OccurrenceCursor, error) {
 const (
 	DefaultListLimit = 50
 	MaxListLimit     = 200
+
+	// Operator reads page below these bounds (I11A_OPERATOR_COMMANDS_V1 reads).
+	DefaultClaimsLimit = 200
+	MaxClaimsLimit     = 1000
 )
+
+func boundedClaimsLimit(limit int) (int, error) {
+	if limit == 0 {
+		return DefaultClaimsLimit, nil
+	}
+	if limit < 1 || limit > MaxClaimsLimit {
+		return 0, fmt.Errorf("limit must be between 1 and %d", MaxClaimsLimit)
+	}
+	return limit, nil
+}
 
 func boundedLimit(limit int) (int, error) {
 	if limit == 0 {
@@ -189,19 +195,21 @@ type Store interface {
 	InsertDefinitionTx(context.Context, tx.Tx, DefinitionRecord, string, time.Time) error
 
 	LockOccurrencesTx(context.Context, tx.Tx, int64, int64) ([]events.Occurrence, error)
-	OverlapsTx(context.Context, tx.Queryer, int64, int64, time.Time, *time.Time) (bool, error)
+	OverlapsTx(context.Context, tx.Queryer, int64, int64, time.Time, *time.Time, int64) (bool, error)
 	InsertOccurrenceTx(context.Context, tx.Tx, events.Occurrence, string, time.Time) (int64, error)
 	LockOccurrenceTx(context.Context, tx.Tx, int64) (*events.Occurrence, error)
+	LockOccurrenceSharedTx(context.Context, tx.Tx, int64) (*events.Occurrence, error)
 	OccurrenceTx(context.Context, tx.Queryer, int64) (*events.Occurrence, error)
 	SaveOccurrenceTx(context.Context, tx.Tx, events.Occurrence) error
 	OccurrencesTx(context.Context, tx.Queryer, OccurrenceFilter) ([]events.Occurrence, error)
-	SettingsTx(context.Context, tx.Queryer, int64) (Settings, bool, error)
+	EnsureSettingsTx(context.Context, tx.Tx, int64, time.Time) (Settings, error)
 	OccurrenceClaimsTx(context.Context, tx.Queryer, int64, int) ([]Claim, error)
+	CountOccurrenceClaimsTx(context.Context, tx.Queryer, int64) (int, error)
 
 	ActiveHooksTx(context.Context, tx.Queryer, int64, time.Time, string) ([]json.RawMessage, error)
 
 	InsertClaimTx(context.Context, tx.Tx, Claim) (Claim, bool, error)
-	ClaimsForPlayerTx(context.Context, tx.Queryer, int64, int64) ([]Claim, error)
+	ClaimsForPlayerTx(context.Context, tx.Queryer, int64, int64, int) ([]Claim, error)
 }
 
 // Coverage is the OTA Covers seam (I11A_OTA_RELEASE_V1 ruling 5).
@@ -326,22 +334,43 @@ type ClaimLedger struct {
 	Store Store
 }
 
-// InsertClaimTx inserts one claim; inserted is false when the unique
-// (player, occurrence, tier, period) key already existed, and the existing row
-// is returned so a replay can answer with the stored award.
+// InsertClaimTx inserts one claim after taking the occurrence shared lock
+// (EA-9 rank 355). The caller must already hold the player root lock. The
+// locked row is re-read so a claim cannot land after the state it validated.
+// inserted is false when the unique (player, occurrence, tier, period) key
+// already existed, and the existing row is returned so a replay can answer
+// with the stored award.
 func (ledger ClaimLedger) InsertClaimTx(ctx context.Context, transaction tx.Tx, claim Claim) (Claim, bool, error) {
 	if ledger.Store == nil {
 		return Claim{}, false, ErrUnavailable
 	}
+	if transaction == nil || claim.OccurrenceID <= 0 || claim.ClaimedAt.IsZero() {
+		return Claim{}, false, ErrUnavailable
+	}
+	occurrence, err := ledger.Store.LockOccurrenceSharedTx(ctx, transaction, claim.OccurrenceID)
+	if err != nil {
+		return Claim{}, false, err
+	}
+	if occurrence == nil {
+		return Claim{}, false, operator.Refuse(CodeOccurrenceUnknown, "the occurrence does not exist", map[string]int64{"occurrence_id": claim.OccurrenceID})
+	}
+	if phase := occurrence.State(claim.ClaimedAt.UTC()); phase != events.PhaseRunning && phase != events.PhaseClaimWindow {
+		return Claim{}, false, operator.Refuse(CodeStateInvalid, "the occurrence is not open for claims", map[string]string{"state": string(phase)})
+	}
 	return ledger.Store.InsertClaimTx(ctx, transaction, claim)
 }
 
-// ClaimsForPlayerTx reads one player's claims of an occurrence.
-func (ledger ClaimLedger) ClaimsForPlayerTx(ctx context.Context, q tx.Queryer, playerID, occurrenceID int64) ([]Claim, error) {
+// ClaimsForPlayerTx reads one bounded page of one player's claims of an
+// occurrence, in (tier, period) order.
+func (ledger ClaimLedger) ClaimsForPlayerTx(ctx context.Context, q tx.Queryer, playerID, occurrenceID int64, limit int) ([]Claim, error) {
 	if ledger.Store == nil {
 		return nil, ErrUnavailable
 	}
-	return ledger.Store.ClaimsForPlayerTx(ctx, q, playerID, occurrenceID)
+	bounded, err := boundedClaimsLimit(limit)
+	if err != nil {
+		return nil, err
+	}
+	return ledger.Store.ClaimsForPlayerTx(ctx, q, playerID, occurrenceID, bounded)
 }
 
 // Duration is a schedule/extend span (ruling 5, EA-1).

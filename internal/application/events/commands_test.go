@@ -1,6 +1,7 @@
 package events
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"testing"
@@ -9,6 +10,8 @@ import (
 	"gxb.local/backend/v2/internal/application/operator"
 	"gxb.local/backend/v2/internal/domain/events"
 	otadomain "gxb.local/backend/v2/internal/domain/otarelease"
+	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
 func TestParseDuration(t *testing.T) {
@@ -148,3 +151,85 @@ func TestRefusalCodes(t *testing.T) {
 }
 
 func int64Ptr(value int64) *int64 { return &value }
+
+type stubTx struct{}
+
+func (stubTx) QueryRow(context.Context, string, ...any) tx.Row { return nil }
+func (stubTx) Exec(context.Context, string, ...any) (tx.CommandTag, error) {
+	return nil, nil
+}
+func (stubTx) Commit(context.Context) error   { return nil }
+func (stubTx) Rollback(context.Context) error { return nil }
+
+func handlerScope(at time.Time) tx.Scope {
+	return tx.Scope{Tx: stubTx{}, Operation: operation.Context{StartedAt: at}}
+}
+
+func handlerCommand(t *testing.T, name string, payload string) operator.Command {
+	t.Helper()
+	command, err := operator.NewCommand(name, operator.Envelope{Principal: "root", Role: operator.RoleRoot, Scope: "global", Reason: "unit test", SemanticKey: "unit-" + name}, json.RawMessage(payload))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return command
+}
+
+func refusalOf(t *testing.T, err error) *operator.Refusal {
+	t.Helper()
+	var refusal *operator.Refusal
+	if !errors.As(err, &refusal) {
+		t.Fatalf("want a refusal, got %v", err)
+	}
+	return refusal
+}
+
+func TestScheduleHandlerRefusesNonPositiveActivity(t *testing.T) {
+	commands := Commands{}
+	command := handlerCommand(t, "events.schedule", `{"activity_id":0,"logical_server_ids":[1],"duration":"1d"}`)
+	_, err := commands.scheduleHandler(context.Background(), handlerScope(time.Now().UTC()), command)
+	if refusal := refusalOf(t, err); refusal.Code != CodePayloadInvalid {
+		t.Fatalf("code = %s, want %s", refusal.Code, CodePayloadInvalid)
+	}
+}
+
+func TestDefinitionListRefusesNegativeActivity(t *testing.T) {
+	commands := Commands{}
+	command := handlerCommand(t, "events.definition.list", `{"activity_id":-1}`)
+	_, err := commands.definitionListHandler(context.Background(), handlerScope(time.Now().UTC()), command)
+	if refusal := refusalOf(t, err); refusal.Code != CodePayloadInvalid {
+		t.Fatalf("code = %s, want %s", refusal.Code, CodePayloadInvalid)
+	}
+}
+
+var errSettingsFault = errors.New("settings read timed out")
+
+type failingSettingsStore struct {
+	Store
+	occurrence *events.Occurrence
+}
+
+func (store failingSettingsStore) LockOccurrenceTx(context.Context, tx.Tx, int64) (*events.Occurrence, error) {
+	return store.occurrence, nil
+}
+
+func (failingSettingsStore) EnsureSettingsTx(context.Context, tx.Tx, int64, time.Time) (Settings, error) {
+	return Settings{}, errSettingsFault
+}
+
+func TestEndNowReturnsSettingsFaultRaw(t *testing.T) {
+	at := time.Date(2026, 11, 22, 12, 0, 0, 0, time.UTC)
+	endsAt := at.Add(time.Hour)
+	claimUntil := at.Add(2 * time.Hour)
+	occurrence := &events.Occurrence{ID: 9, LogicalServerID: 1, ActivityID: 1071, StartsAt: at.Add(-time.Hour), EndsAt: &endsAt, ClaimUntil: &claimUntil, Revision: 1}
+	commands := Commands{Store: failingSettingsStore{occurrence: occurrence}}
+	command := handlerCommand(t, "events.end_now", `{"occurrence_id":9}`)
+	command.Envelope.ExpectedRevision = int64Ptr(1)
+	_, err := commands.endNowHandler(context.Background(), handlerScope(at), command)
+	if err == nil || !errors.Is(err, errSettingsFault) {
+		t.Fatalf("want the raw settings fault, got %v", err)
+	}
+	var refusal *operator.Refusal
+	if errors.As(err, &refusal) {
+		t.Fatalf("a settings fault must not be a refusal: %+v", refusal)
+	}
+}

@@ -174,6 +174,9 @@ func (commands Commands) definitionListHandler(ctx context.Context, scope tx.Sco
 	if err := decodePayload(command.Payload, &payload); err != nil {
 		return nil, operator.Refuse(CodePayloadInvalid, err.Error(), nil)
 	}
+	if payload.ActivityID < 0 {
+		return nil, operator.Refuse(CodePayloadInvalid, "activity_id must not be negative", nil)
+	}
 	limit, err := boundedLimit(payload.Limit)
 	if err != nil {
 		return nil, operator.Refuse(CodePayloadInvalid, err.Error(), nil)
@@ -204,6 +207,9 @@ func (commands Commands) scheduleHandler(ctx context.Context, scope tx.Scope, co
 	var payload schedulePayload
 	if err := decodePayload(command.Payload, &payload); err != nil {
 		return nil, operator.Refuse(CodePayloadInvalid, err.Error(), nil)
+	}
+	if payload.ActivityID <= 0 {
+		return nil, operator.Refuse(CodePayloadInvalid, "activity_id must be a positive client activity id", nil)
 	}
 	owned, err := scopedServers(payload.LogicalServerIDs, command.Envelope.Scope)
 	if err != nil {
@@ -264,8 +270,11 @@ func scheduleStart(text string, now time.Time) (time.Time, error) {
 // Schedule creates one occurrence per server after the scheduling gate
 // (ruling 4) and the overlap check (ruling 2).
 func (commands Commands) Schedule(ctx context.Context, transaction tx.Tx, commandKey string, activityID int64, servers []int64, start time.Time, duration Duration, at time.Time) (scheduleResult, error) {
-	if transaction == nil || commandKey == "" || activityID <= 0 || len(servers) == 0 || start.IsZero() || at.IsZero() || commands.Store == nil {
+	if transaction == nil || commandKey == "" || start.IsZero() || at.IsZero() || commands.Store == nil {
 		return scheduleResult{}, operator.ErrUnavailable
+	}
+	if activityID <= 0 || len(servers) == 0 {
+		return scheduleResult{}, operator.Refuse(CodePayloadInvalid, "activity_id and at least one logical server are required", nil)
 	}
 	definition, err := commands.Store.LatestDefinitionTx(ctx, transaction, activityID)
 	if err != nil {
@@ -289,12 +298,12 @@ func (commands Commands) Schedule(ctx context.Context, transaction tx.Tx, comman
 	}
 	result := scheduleResult{Occurrences: make([]OccurrenceView, 0, len(servers))}
 	for _, server := range servers {
-		settings, found, err := commands.Store.SettingsTx(ctx, transaction, server)
+		settings, err := commands.Store.EnsureSettingsTx(ctx, transaction, server, at)
 		if err != nil {
+			if errors.Is(err, ErrServerUnknown) {
+				return scheduleResult{}, unknownServerRefusal(server)
+			}
 			return scheduleResult{}, err
-		}
-		if !found {
-			settings = Settings{}
 		}
 		occurrence := events.Occurrence{
 			LogicalServerID: server, ActivityID: activityID, DefinitionRevision: definition.Revision,
@@ -302,14 +311,14 @@ func (commands Commands) Schedule(ctx context.Context, transaction tx.Tx, comman
 		}
 		if !duration.Permanent {
 			end := start.Add(duration.Span)
-			claimUntil := end.Add(settings.claimWindow())
+			claimUntil := end.Add(settings.ClaimWindow)
 			occurrence.EndsAt = &end
 			occurrence.ClaimUntil = &claimUntil
 		}
 		if _, err := commands.Store.LockOccurrencesTx(ctx, transaction, server, activityID); err != nil {
 			return scheduleResult{}, err
 		}
-		overlaps, err := commands.Store.OverlapsTx(ctx, transaction, server, activityID, start, occurrence.ClaimUntil)
+		overlaps, err := commands.Store.OverlapsTx(ctx, transaction, server, activityID, start, occurrence.ClaimUntil, 0)
 		if err != nil {
 			return scheduleResult{}, err
 		}
@@ -318,8 +327,11 @@ func (commands Commands) Schedule(ctx context.Context, transaction tx.Tx, comman
 		}
 		id, err := commands.Store.InsertOccurrenceTx(ctx, transaction, occurrence, commandKey, at)
 		if err != nil {
-			if errors.Is(err, ErrOccurrenceOverlap) {
+			switch {
+			case errors.Is(err, ErrOccurrenceOverlap):
 				return scheduleResult{}, overlapRefusal(server, activityID)
+			case errors.Is(err, ErrServerUnknown):
+				return scheduleResult{}, unknownServerRefusal(server)
 			}
 			return scheduleResult{}, err
 		}
@@ -327,6 +339,10 @@ func (commands Commands) Schedule(ctx context.Context, transaction tx.Tx, comman
 		result.Occurrences = append(result.Occurrences, viewOf(occurrence, at))
 	}
 	return result, nil
+}
+
+func unknownServerRefusal(server int64) *operator.Refusal {
+	return operator.Refuse(CodeServerUnknown, "the logical server does not exist", map[string]int64{"logical_server_id": server})
 }
 
 func overlapRefusal(server, activityID int64) *operator.Refusal {
@@ -359,7 +375,7 @@ type occurrencePayload struct {
 
 // mutate locks one occurrence FOR UPDATE, checks its revision, applies the
 // command-specific change and saves it. The caller holds the bus row lock.
-func (commands Commands) mutate(ctx context.Context, transaction tx.Tx, occurrenceID int64, expected *int64, at time.Time, apply func(*events.Occurrence, time.Time) *operator.Refusal) (OccurrenceView, error) {
+func (commands Commands) mutate(ctx context.Context, transaction tx.Tx, occurrenceID int64, expected *int64, at time.Time, checkOverlap bool, apply func(*events.Occurrence, time.Time) error) (OccurrenceView, error) {
 	if transaction == nil || occurrenceID <= 0 || at.IsZero() {
 		return OccurrenceView{}, operator.ErrUnavailable
 	}
@@ -373,10 +389,22 @@ func (commands Commands) mutate(ctx context.Context, transaction tx.Tx, occurren
 	if refusal := requireRevision(expected, occurrence.Revision); refusal != nil {
 		return OccurrenceView{}, refusal
 	}
-	if refusal := apply(occurrence, at); refusal != nil {
-		return OccurrenceView{}, refusal
+	if err := apply(occurrence, at); err != nil {
+		return OccurrenceView{}, err
+	}
+	if checkOverlap {
+		overlaps, err := commands.Store.OverlapsTx(ctx, transaction, occurrence.LogicalServerID, occurrence.ActivityID, occurrence.StartsAt, occurrence.ClaimUntil, occurrence.ID)
+		if err != nil {
+			return OccurrenceView{}, err
+		}
+		if overlaps {
+			return OccurrenceView{}, overlapRefusal(occurrence.LogicalServerID, occurrence.ActivityID)
+		}
 	}
 	if err := commands.Store.SaveOccurrenceTx(ctx, transaction, *occurrence); err != nil {
+		if errors.Is(err, ErrOccurrenceOverlap) {
+			return OccurrenceView{}, overlapRefusal(occurrence.LogicalServerID, occurrence.ActivityID)
+		}
 		return OccurrenceView{}, err
 	}
 	return viewOf(*occurrence, at), nil
@@ -398,7 +426,7 @@ func (commands Commands) cancelHandler(ctx context.Context, scope tx.Scope, comm
 	if err != nil {
 		return nil, operator.Refuse(CodePayloadInvalid, err.Error(), nil)
 	}
-	return commands.mutate(ctx, scope.Tx, occurrenceID, command.Envelope.ExpectedRevision, scope.Operation.StartedAt.UTC(), func(occurrence *events.Occurrence, at time.Time) *operator.Refusal {
+	return commands.mutate(ctx, scope.Tx, occurrenceID, command.Envelope.ExpectedRevision, scope.Operation.StartedAt.UTC(), false, func(occurrence *events.Occurrence, at time.Time) error {
 		if occurrence.State(at) != events.PhaseScheduled {
 			return operator.Refuse(CodeStateInvalid, "only a SCHEDULED occurrence can be cancelled", map[string]string{"state": string(occurrence.State(at))})
 		}
@@ -414,18 +442,15 @@ func (commands Commands) endNowHandler(ctx context.Context, scope tx.Scope, comm
 	if err != nil {
 		return nil, operator.Refuse(CodePayloadInvalid, err.Error(), nil)
 	}
-	return commands.mutate(ctx, scope.Tx, occurrenceID, command.Envelope.ExpectedRevision, scope.Operation.StartedAt.UTC(), func(occurrence *events.Occurrence, at time.Time) *operator.Refusal {
+	return commands.mutate(ctx, scope.Tx, occurrenceID, command.Envelope.ExpectedRevision, scope.Operation.StartedAt.UTC(), false, func(occurrence *events.Occurrence, at time.Time) error {
 		if !occurrence.Active(at) {
 			return operator.Refuse(CodeStateInvalid, "only a RUNNING or CLAIM_WINDOW occurrence can be ended now", map[string]string{"state": string(occurrence.State(at))})
 		}
-		settings, found, err := commands.Store.SettingsTx(ctx, scope.Tx, occurrence.LogicalServerID)
+		settings, err := commands.Store.EnsureSettingsTx(ctx, scope.Tx, occurrence.LogicalServerID, at)
 		if err != nil {
-			return operator.Refuse(CodeStateInvalid, err.Error(), nil)
+			return err
 		}
-		if !found {
-			settings = Settings{}
-		}
-		claimUntil := at.Add(settings.claimWindow())
+		claimUntil := at.Add(settings.ClaimWindow)
 		occurrence.EndsAt = &at
 		occurrence.ClaimUntil = &claimUntil
 		occurrence.EndedEarlyByCommand = command.Envelope.SemanticKey
@@ -451,7 +476,7 @@ func (commands Commands) extendHandler(ctx context.Context, scope tx.Scope, comm
 	if err != nil || duration.Permanent {
 		return nil, operator.Refuse(CodePayloadInvalid, "extend needs a timed duration", nil)
 	}
-	return commands.mutate(ctx, scope.Tx, payload.OccurrenceID, command.Envelope.ExpectedRevision, scope.Operation.StartedAt.UTC(), func(occurrence *events.Occurrence, at time.Time) *operator.Refusal {
+	return commands.mutate(ctx, scope.Tx, payload.OccurrenceID, command.Envelope.ExpectedRevision, scope.Operation.StartedAt.UTC(), true, func(occurrence *events.Occurrence, at time.Time) error {
 		if occurrence.Permanent() {
 			return operator.Refuse(CodeStateInvalid, "a permanent occurrence has no end to move", nil)
 		}
@@ -472,7 +497,7 @@ func (commands Commands) setPermanentHandler(ctx context.Context, scope tx.Scope
 	if err != nil {
 		return nil, operator.Refuse(CodePayloadInvalid, err.Error(), nil)
 	}
-	return commands.mutate(ctx, scope.Tx, occurrenceID, command.Envelope.ExpectedRevision, scope.Operation.StartedAt.UTC(), func(occurrence *events.Occurrence, at time.Time) *operator.Refusal {
+	return commands.mutate(ctx, scope.Tx, occurrenceID, command.Envelope.ExpectedRevision, scope.Operation.StartedAt.UTC(), true, func(occurrence *events.Occurrence, at time.Time) error {
 		if phase := occurrence.State(at); phase != events.PhaseScheduled && phase != events.PhaseRunning {
 			return operator.Refuse(CodeStateInvalid, "only a SCHEDULED or RUNNING occurrence can become permanent", map[string]string{"state": string(phase)})
 		}
@@ -530,7 +555,11 @@ func (commands Commands) occurrenceShowHandler(ctx context.Context, scope tx.Sco
 	if err != nil {
 		return nil, err
 	}
-	result := occurrenceShowResult{Occurrence: viewOf(*occurrence, scope.Operation.StartedAt), Claims: make([]ClaimView, 0, limit)}
+	count, err := commands.Store.CountOccurrenceClaimsTx(ctx, scope.Tx, payload.OccurrenceID)
+	if err != nil {
+		return nil, err
+	}
+	result := occurrenceShowResult{Occurrence: viewOf(*occurrence, scope.Operation.StartedAt), ClaimCount: count, Claims: make([]ClaimView, 0, limit)}
 	if len(claims) > limit {
 		claims = claims[:limit]
 		result.Truncated = true
@@ -538,6 +567,5 @@ func (commands Commands) occurrenceShowHandler(ctx context.Context, scope tx.Sco
 	for _, claim := range claims {
 		result.Claims = append(result.Claims, ClaimView{PlayerID: claim.PlayerID, Tier: claim.Tier, Period: claim.Period, Choice: claim.Choice, ClaimedAt: claim.ClaimedAt.UTC()})
 	}
-	result.ClaimCount = len(result.Claims)
 	return result, nil
 }

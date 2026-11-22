@@ -89,6 +89,8 @@ func mapWriteError(err error) error {
 		return appevents.ErrOccurrenceOverlap
 	case pgErr.Code == "23505" && pgErr.ConstraintName == "event_definitions_pkey":
 		return appevents.ErrRevisionExists
+	case pgErr.Code == "23503" && (pgErr.ConstraintName == "event_occurrences_logical_server_id_fkey" || pgErr.ConstraintName == "event_cycle_settings_logical_server_id_fkey"):
+		return appevents.ErrServerUnknown
 	}
 	return err
 }
@@ -210,7 +212,7 @@ FROM (
 ) locked`
 
 // LockOccurrencesTx takes the occurrence FOR SHARE lock of one server and
-// activity (rank 350); the exclusion constraint decides a concurrent insert.
+// activity (rank 355, EA-10); the exclusion constraint decides a concurrent insert.
 func (Store) LockOccurrencesTx(ctx context.Context, transaction tx.Tx, server, activityID int64) ([]events.Occurrence, error) {
 	if transaction == nil || server <= 0 || activityID <= 0 {
 		return nil, errInvalid
@@ -225,17 +227,19 @@ func (Store) LockOccurrencesTx(ctx context.Context, transaction tx.Tx, server, a
 const overlaps = `SELECT EXISTS(
 	SELECT 1 FROM event_occurrences
 	WHERE logical_server_id=$1 AND activity_id=$2 AND cancelled_at IS NULL AND settled_at IS NULL
+	AND ($5=0 OR id<>$5)
 	AND tstzrange(starts_at, coalesce(claim_until, 'infinity'::timestamptz), '[)') && tstzrange($3, coalesce($4, 'infinity'::timestamptz), '[)')
 )`
 
-// OverlapsTx asks whether an occurrence of the same activity meets the new
-// interval; nil end means permanent.
-func (Store) OverlapsTx(ctx context.Context, query tx.Queryer, server, activityID int64, start time.Time, end *time.Time) (bool, error) {
-	if query == nil || server <= 0 || activityID <= 0 || start.IsZero() {
+// OverlapsTx asks whether another occurrence of the same activity meets the
+// interval; nil end means permanent, and excludeID (0 = none) skips the row
+// being mutated.
+func (Store) OverlapsTx(ctx context.Context, query tx.Queryer, server, activityID int64, start time.Time, end *time.Time, excludeID int64) (bool, error) {
+	if query == nil || server <= 0 || activityID <= 0 || start.IsZero() || excludeID < 0 {
 		return false, errInvalid
 	}
 	var found bool
-	if err := query.QueryRow(ctx, overlaps, server, activityID, start.UTC(), utcPtr(end)).Scan(&found); err != nil {
+	if err := query.QueryRow(ctx, overlaps, server, activityID, start.UTC(), utcPtr(end), excludeID).Scan(&found); err != nil {
 		return false, err
 	}
 	return found, nil
@@ -312,6 +316,29 @@ func (Store) LockOccurrenceTx(ctx context.Context, transaction tx.Tx, occurrence
 	return &occurrence, nil
 }
 
+const lockOccurrenceShared = `SELECT ` + occurrenceColumns + ` FROM event_occurrences WHERE id=$1 FOR SHARE`
+
+// LockOccurrenceSharedTx locks one occurrence FOR SHARE (rank 355, EA-9
+// claim order); nil when it does not exist.
+func (Store) LockOccurrenceSharedTx(ctx context.Context, transaction tx.Tx, occurrenceID int64) (*events.Occurrence, error) {
+	if transaction == nil || occurrenceID <= 0 {
+		return nil, errInvalid
+	}
+	var raw string
+	if err := transaction.QueryRow(ctx, lockOccurrenceShared, occurrenceID).Scan(&raw); err != nil {
+		if errors.Is(err, kernelstore.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	var row occurrenceRow
+	if err := json.Unmarshal([]byte(raw), &row); err != nil {
+		return nil, err
+	}
+	occurrence := row.domain()
+	return &occurrence, nil
+}
+
 const saveOccurrence = `UPDATE event_occurrences SET ends_at=$2,claim_until=$3,revision=$4,
 	ended_early_by_command=$5,cancelled_by_command=$6,cancelled_at=$7,settled_at=$8
 WHERE id=$1`
@@ -326,7 +353,7 @@ func (Store) SaveOccurrenceTx(ctx context.Context, transaction tx.Tx, occurrence
 		occurrence.Revision, nullableText(occurrence.EndedEarlyByCommand), nullableText(occurrence.CancelledByCommand),
 		utcPtr(occurrence.CancelledAt), utcPtr(occurrence.SettledAt))
 	if err != nil {
-		return err
+		return mapWriteError(err)
 	}
 	if effect == nil || effect.RowsAffected() != 1 {
 		return errors.New("eventstore: occurrence row disappeared under its lock")
@@ -404,8 +431,40 @@ func (Store) OccurrencesTx(ctx context.Context, query tx.Queryer, filter appeven
 
 const selectSettings = `SELECT mode,cycle_revision,COALESCE(cycle_body::text,''),claim_window_hours,lookahead FROM event_cycle_settings WHERE logical_server_id=$1`
 
+const insertSettingsDefaults = `INSERT INTO event_cycle_settings(logical_server_id,updated_at) VALUES($1,$2) ON CONFLICT (logical_server_id) DO NOTHING`
+
+// EnsureSettingsTx seeds the server's settings row with the migration defaults
+// when it is missing, then returns the row. The claim window therefore always
+// comes from the settings row. The savepoint keeps a failed seed (unknown
+// server) mappable to a refusal instead of aborting the command transaction.
+func (Store) EnsureSettingsTx(ctx context.Context, transaction tx.Tx, server int64, at time.Time) (appevents.Settings, error) {
+	if transaction == nil || server <= 0 || at.IsZero() {
+		return appevents.Settings{}, errInvalid
+	}
+	if _, err := transaction.Exec(ctx, "SAVEPOINT events_settings"); err != nil {
+		return appevents.Settings{}, err
+	}
+	if _, err := transaction.Exec(ctx, insertSettingsDefaults, server, at.UTC()); err != nil {
+		if _, rollbackErr := transaction.Exec(ctx, "ROLLBACK TO SAVEPOINT events_settings"); rollbackErr != nil {
+			return appevents.Settings{}, rollbackErr
+		}
+		return appevents.Settings{}, mapWriteError(err)
+	}
+	if _, err := transaction.Exec(ctx, "RELEASE SAVEPOINT events_settings"); err != nil {
+		return appevents.Settings{}, err
+	}
+	settings, found, err := (Store{}).SettingsTx(ctx, transaction, server)
+	if err != nil {
+		return appevents.Settings{}, err
+	}
+	if !found {
+		return appevents.Settings{}, errors.New("eventstore: settings row missing after insert")
+	}
+	return settings, nil
+}
+
 // SettingsTx reads one server's settings; found is false when the server has
-// no row yet, and the caller then uses the defaults.
+// no row yet.
 func (Store) SettingsTx(ctx context.Context, query tx.Queryer, server int64) (appevents.Settings, bool, error) {
 	if query == nil || server <= 0 {
 		return appevents.Settings{}, false, errInvalid
@@ -471,6 +530,21 @@ func (Store) OccurrenceClaimsTx(ctx context.Context, query tx.Queryer, occurrenc
 	return out, nil
 }
 
+const countOccurrenceClaims = `SELECT COUNT(*) FROM player_event_claims WHERE occurrence_id=$1`
+
+// CountOccurrenceClaimsTx counts every claim of one occurrence, so a bounded
+// page never stands in for the total.
+func (Store) CountOccurrenceClaimsTx(ctx context.Context, query tx.Queryer, occurrenceID int64) (int, error) {
+	if query == nil || occurrenceID <= 0 {
+		return 0, errInvalid
+	}
+	var count int
+	if err := query.QueryRow(ctx, countOccurrenceClaims, occurrenceID).Scan(&count); err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 const activeHooks = `SELECT COALESCE(jsonb_agg(hook ORDER BY occurrence_id,ordinality),'[]'::jsonb)::text FROM (
 	SELECT o.id AS occurrence_id,h.hook,h.ord AS ordinality
 	FROM event_occurrences o
@@ -500,7 +574,7 @@ func (Store) ActiveHooksTx(ctx context.Context, query tx.Queryer, server int64, 
 }
 
 const selectClaim = `SELECT player_id,occurrence_id,tier,period,choice,claimed_at,grant_receipt
-FROM player_event_claims WHERE player_id=$1 AND occurrence_id=$2 ORDER BY tier,period`
+FROM player_event_claims WHERE player_id=$1 AND occurrence_id=$2 AND tier=$3 AND period=$4`
 
 // InsertClaimTx inserts a claim; on the unique (player, occurrence, tier,
 // period) key it returns the existing row with inserted false.
@@ -522,7 +596,7 @@ func (Store) InsertClaimTx(ctx context.Context, transaction tx.Tx, claim appeven
 		return appevents.Claim{}, false, err
 	}
 	existing := claimRow{}
-	if err := transaction.QueryRow(ctx, selectClaim, claim.PlayerID, claim.OccurrenceID).Scan(&existing.PlayerID, &existing.OccurrenceID, &existing.Tier, &existing.Period, &existing.Choice, &existing.ClaimedAt, &existing.GrantReceipt); err != nil {
+	if err := transaction.QueryRow(ctx, selectClaim, claim.PlayerID, claim.OccurrenceID, claim.Tier, claim.Period).Scan(&existing.PlayerID, &existing.OccurrenceID, &existing.Tier, &existing.Period, &existing.Choice, &existing.ClaimedAt, &existing.GrantReceipt); err != nil {
 		return appevents.Claim{}, false, err
 	}
 	return existing.domain(), false, nil
@@ -531,15 +605,20 @@ func (Store) InsertClaimTx(ctx context.Context, transaction tx.Tx, claim appeven
 const selectPlayerClaims = `SELECT COALESCE(jsonb_agg(jsonb_build_object(
 	'player_id',player_id,'occurrence_id',occurrence_id,'tier',tier,'period',period,
 	'choice',choice,'claimed_at',claimed_at,'grant_receipt',grant_receipt) ORDER BY tier,period),'[]'::jsonb)::text
-FROM player_event_claims WHERE player_id=$1 AND occurrence_id=$2`
+FROM (
+	SELECT player_id,occurrence_id,tier,period,choice,claimed_at,grant_receipt
+	FROM player_event_claims WHERE player_id=$1 AND occurrence_id=$2
+	ORDER BY tier,period LIMIT $3
+) listed`
 
-// ClaimsForPlayerTx reads one player's claims of an occurrence.
-func (Store) ClaimsForPlayerTx(ctx context.Context, query tx.Queryer, playerID, occurrenceID int64) ([]appevents.Claim, error) {
-	if query == nil || playerID <= 0 || occurrenceID <= 0 {
+// ClaimsForPlayerTx reads one bounded page of one player's claims of an
+// occurrence, in (tier, period) order.
+func (Store) ClaimsForPlayerTx(ctx context.Context, query tx.Queryer, playerID, occurrenceID int64, limit int) ([]appevents.Claim, error) {
+	if query == nil || playerID <= 0 || occurrenceID <= 0 || limit < 1 || limit > appevents.MaxClaimsLimit {
 		return nil, errInvalid
 	}
 	var raw string
-	if err := query.QueryRow(ctx, selectPlayerClaims, playerID, occurrenceID).Scan(&raw); err != nil {
+	if err := query.QueryRow(ctx, selectPlayerClaims, playerID, occurrenceID, limit).Scan(&raw); err != nil {
 		return nil, err
 	}
 	var rows []claimRow

@@ -100,7 +100,10 @@ func (tier Tier) validate() error {
 	if tier.ID <= 0 {
 		return fmt.Errorf("%w: a tier id must be positive", ErrInvalidDefinition)
 	}
-	if strings.TrimSpace(string(tier.Requirement.Kind)) == "" || tier.Requirement.Value < 0 {
+	if tier.Requirement.Kind != RequirementPlayerLevel {
+		return fmt.Errorf("%w: tier %d has unknown requirement kind %q", ErrInvalidDefinition, tier.ID, tier.Requirement.Kind)
+	}
+	if tier.Requirement.Value < 0 {
 		return fmt.Errorf("%w: tier %d has no requirement", ErrInvalidDefinition, tier.ID)
 	}
 	if len(tier.Choices) < 1 || len(tier.Choices) > 3 {
