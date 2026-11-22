@@ -1791,7 +1791,11 @@
     "*PublicHistoryTx"
    ]
   },
-  "operator": {},
+  "operator": {
+   "otarelease": [
+    "Refuse"
+   ]
+  },
   "otarelease": {},
   "petcampaign": {
    "achievement": [
@@ -5280,7 +5284,14 @@
    ]
   },
   "operator": {},
-  "otarelease": {},
+  "otarelease": {
+   "operator": [
+    "Refuse"
+   ],
+   "store:otastore": [
+    "*FlushTx"
+   ]
+  },
   "petcampaign": {
    "characterasset": [
     "NewCoherentReadScope"

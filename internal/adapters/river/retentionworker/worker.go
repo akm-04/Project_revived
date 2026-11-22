@@ -76,6 +76,12 @@ func NewRules(policies retentionstore.Policies) func(time.Time) []Rule {
 			{Name: "media-history", Delete: func(c context.Context, t tx.Tx) (int64, error) {
 				return store.DeleteExpiredMediaHistory(c, t, now.Add(-mediaDays))
 			}},
+			{Name: "ota-asset-misses", Delete: func(c context.Context, t tx.Tx) (int64, error) {
+				return store.DeleteExpiredOTAAssetMisses(c, t, now.Add(-retentionDays))
+			}},
+			{Name: "ota-asset-served", Delete: func(c context.Context, t tx.Tx) (int64, error) {
+				return store.DeleteExpiredOTAAssetServedDaily(c, t, now.Add(-retentionDays))
+			}},
 		}
 	}
 }

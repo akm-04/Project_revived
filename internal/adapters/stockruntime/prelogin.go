@@ -26,6 +26,9 @@ type PreloginDispatcher struct {
 	PublicEngineURL string
 	Tracker         *lobby.BootTracker
 	Updates         UpdatePlanner
+	// ResourceDownloadURL is the MID 20480 lazy-fetch discovery answer; nil or
+	// an empty value means lazy fetch is off (I11A_OTA_RELEASE_V1 ruling 6).
+	ResourceDownloadURL func(context.Context) (string, error)
 }
 
 func (d PreloginDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchRequest) httpedge.Response {
@@ -37,8 +40,16 @@ func (d PreloginDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 		if strings.TrimSpace(d.PublicEngineURL) == "" {
 			return failureReply(defect(errors.New("public_engine_url_unconfigured")))
 		}
+		resourceDownloadURL := ""
+		if d.ResourceDownloadURL != nil {
+			value, err := d.ResourceDownloadURL(ctx)
+			if err != nil {
+				return failureFromRows(nil, err)
+			}
+			resourceDownloadURL = value
+		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{
-			"url": d.PublicEngineURL, "server_id": int64(1), "back_domain": "", "res_download_url": "",
+			"url": d.PublicEngineURL, "server_id": int64(1), "back_domain": "", "res_download_url": resourceDownloadURL,
 		}}
 	case mids.MIDVersionCheck:
 		return d.versionCheck(ctx, req)

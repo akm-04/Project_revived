@@ -16,6 +16,7 @@ type Config struct {
 	PublicEngineURL          string
 	ProfileMediaRoot         string
 	ProfileMediaPublicOrigin string
+	OTARoot                  string
 }
 
 type Secret string
@@ -34,6 +35,7 @@ func FromEnv() Config {
 		PublicEngineURL:          os.Getenv("GXB_PUBLIC_ENGINE_URL"),
 		ProfileMediaRoot:         os.Getenv("GXB_PROFILE_MEDIA_ROOT"),
 		ProfileMediaPublicOrigin: os.Getenv("GXB_PROFILE_MEDIA_PUBLIC_ORIGIN"),
+		OTARoot:                  os.Getenv("GXB_OTA_ROOT"),
 	}
 }
 func envDefault(k, v string) string {

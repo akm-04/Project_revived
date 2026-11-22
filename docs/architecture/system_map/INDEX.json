@@ -1395,7 +1395,7 @@
   },
   {
    "callees": 0,
-   "callers": 0,
+   "callers": 1,
    "mids": 0,
    "name": "operator",
    "path": "internal/application/operator",
@@ -1403,7 +1403,7 @@
    "tables": 1
   },
   {
-   "callees": 0,
+   "callees": 2,
    "callers": 0,
    "mids": 3,
    "name": "otarelease",

@@ -24,6 +24,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strconv"
 	"syscall"
 	"time"
@@ -483,14 +484,42 @@ func main() {
 		Operations:      operation.Factory{Clock: clock.System{}},
 		PublicEngineURL: cfg.PublicEngineURL,
 	}
-	prelogin := stockruntime.PreloginDispatcher{PublicEngineURL: cfg.PublicEngineURL, Tracker: tracker, Updates: otaRelease}
+	if cfg.OTARoot != "" && !filepath.IsAbs(cfg.OTARoot) {
+		log.Fatalf("GXB_OTA_ROOT must be an absolute path, got %q", cfg.OTARoot)
+	}
+	otaSettingsFile := appotarelease.SettingsFile{Root: cfg.OTARoot}
+	otaSettings, err := otaSettingsFile.Load()
+	if err != nil {
+		log.Fatalf("OTA settings: %v", err)
+	}
+	otaSettingsValue := appotarelease.NewSettingsValue(otaSettings)
+	otaLedger := appotarelease.NewLedger(runner, operation.Factory{Clock: clock.System{}}, otastore.LedgerStore{})
+	go otaLedger.Run(ctx, 30*time.Second)
+	otaServing := &appotarelease.Serving{
+		Load:            otaRelease.ActiveRows,
+		Root:            cfg.OTARoot,
+		Settings:        otaSettingsValue,
+		PublicEngineURL: cfg.PublicEngineURL,
+		Ledger:          otaLedger,
+	}
+	if err := otaRelease.StartupCheck(ctx, cfg.OTARoot); err != nil {
+		log.Fatalf("OTA startup: %v", err)
+	}
+	if cfg.OTARoot != "" {
+		if err := otaServing.Refresh(ctx); err != nil {
+			log.Fatalf("OTA serving: %v", err)
+		}
+	}
+	prelogin := stockruntime.PreloginDispatcher{PublicEngineURL: cfg.PublicEngineURL, Tracker: tracker, Updates: otaRelease, ResourceDownloadURL: otaServing.ResDownloadURL}
 	for _, mid := range []uint16{2, 2864, 20480} {
 		mustRegister(mid, prelogin)
 	}
 	energyDispatcher := stockruntime.ItemsEnergyDispatcher{Authority: authority, Service: itemsEnergy.Service}
 	mux := http.NewServeMux()
 	// The OTA leaves (I11A_1_PLAN L1-L3) register their ota.* handlers here.
-	startOperator(ctx, runner, map[string]operator.Handler{})
+	startOperator(ctx, runner, map[string]operator.Handler{
+		"ota.settings.set": appotarelease.SettingsSetHandler(otaSettingsFile, otaSettingsValue),
+	})
 	clientLogs, journal := startClientLog(ctx, pool, authority, cfg.ClientLogURL, retentionPolicies.RetentionDays, txMetrics, mux, handlerConcurrency("GXB_CLIENT_LOG_MAX_CONCURRENT", 4, poolConnections))
 	dailyReset := dailyreset.Service{Markers: dailyresetstore.Store{Queryer: pool}, Counters: itemsEnergy.Counters}
 	boot := stockruntime.BootstrapDispatcher{Bootstrap: bootstrap, Tracker: tracker, LogURLs: clientLogs, DailyReset: dailyReset}
@@ -1025,6 +1054,10 @@ func main() {
 	mux.Handle("/", h)
 	if mediaHandler != nil {
 		mux.Handle("/profile-media/", mediaHandler)
+	}
+	if cfg.OTARoot != "" {
+		mux.Handle("/updates/", stockruntime.OTAUpdatesGET{Serving: otaServing})
+		mux.Handle("/res/", stockruntime.OTAResGET{Serving: otaServing})
 	}
 	srv := &http.Server{Addr: cfg.HTTPAddr, Handler: mux, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: limits.StockMultipartHTTPTimeout + 5*time.Second, WriteTimeout: limits.StockMultipartHTTPTimeout + 5*time.Second, IdleTimeout: 60 * time.Second}
 	go func() {

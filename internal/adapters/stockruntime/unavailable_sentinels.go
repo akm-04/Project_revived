@@ -18,6 +18,7 @@ import (
 	unavailableapplibraryforum "gxb.local/backend/v2/internal/application/libraryforum"
 	unavailableapplibrarylocal "gxb.local/backend/v2/internal/application/librarylocal"
 	unavailableappmentor "gxb.local/backend/v2/internal/application/mentor"
+	unavailableappotarelease "gxb.local/backend/v2/internal/application/otarelease"
 	unavailableappplayerdisplay "gxb.local/backend/v2/internal/application/playerdisplay"
 	unavailableapppublication "gxb.local/backend/v2/internal/application/publication"
 	unavailableappsharedroom "gxb.local/backend/v2/internal/application/sharedroom"
@@ -72,6 +73,7 @@ var unavailableSentinels = []error{
 	unavailableapplibraryforum.ErrUnavailable,
 	unavailableapplibrarylocal.ErrUnavailable,
 	unavailableappmentor.ErrUnavailable,
+	unavailableappotarelease.ErrUnavailable,
 	unavailableappplayerdisplay.ErrUnavailable,
 	unavailableapppublication.ErrUnavailable,
 	unavailableappsharedroom.ErrUnavailable,

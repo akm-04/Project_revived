@@ -229,7 +229,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/prelogin.go",
-    "line": 31
+    "line": 34
    },
    "mid": 2,
    "name": ""
@@ -237,7 +237,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/prelogin.go",
-    "line": 31
+    "line": 34
    },
    "mid": 2864,
    "name": "GET_PLAYER_GROUP_BY_KEY"
@@ -245,7 +245,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/prelogin.go",
-    "line": 31
+    "line": 34
    },
    "mid": 20480,
    "name": ""
@@ -253,7 +253,9 @@
  ],
  "name": "otarelease",
  "pushes": [],
- "stores": [],
+ "stores": [
+  "internal/adapters/postgres/otastore"
+ ],
  "tables": {
   "owned": [
    "ota_activations",
@@ -262,13 +264,19 @@
    "ota_releases"
   ],
   "read": [],
-  "written": []
+  "written": [
+   "ota_asset_misses",
+   "ota_asset_served_daily"
+  ]
  },
  "tests": {
   "integration": [],
   "scenarios_naming": [
    "i9_tutorial_switches.json"
   ],
-  "unit": []
+  "unit": [
+   "serving_test.go",
+   "settings_test.go"
+  ]
  }
 }
