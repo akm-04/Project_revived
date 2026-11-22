@@ -529,11 +529,13 @@ func main() {
 	mux := http.NewServeMux()
 	otaCommands := appotarelease.Commands{Store: otastore.Store{}, Root: cfg.OTARoot}
 	otaStatus := appotarelease.StatusService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: otastore.Store{}}
+	otaReleaseLookup := appotarelease.ReleaseLookup{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: otastore.Store{}}
 	operatorAudit := operator.AuditService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Reader: operatorstore.Store{}}
 	backendVersion, gitCommit := buildIdentity()
 	operatorVersion := operator.VersionService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Reader: operatorstore.Store{}, BackendVersion: backendVersion, GitCommit: gitCommit}
 	operatorReads := map[string]operatorapi.Read{
 		"ota.status":          operatorapi.OTAStatus(otaStatus),
+		"ota.release":         operatorapi.OTARelease(otaReleaseLookup),
 		"operator.audit.list": operatorapi.AuditList(operatorAudit),
 	}
 	operatorVersionReply := func(ctx context.Context) (any, error) {

@@ -25,6 +25,23 @@ func OTAStatus(service OTAStatusService) Read {
 	}
 }
 
+// OTAReleaseService is the ota.release read.
+type OTAReleaseService interface {
+	Exists(context.Context, string) (appota.ReleaseExistence, error)
+}
+
+// OTARelease adapts ota.release to the read registry: it answers whether a
+// release number exists in any state (L4f fix 2).
+func OTARelease(service OTAReleaseService) Read {
+	return func(ctx context.Context, values url.Values) (any, error) {
+		version := values.Get("version")
+		if version == "" {
+			return nil, operator.Refuse(operator.CodeReadInvalid, "version is required", nil)
+		}
+		return service.Exists(ctx, version)
+	}
+}
+
 // AuditListService is the operator.audit.list read.
 type AuditListService interface {
 	List(context.Context, operator.AuditFilter) (operator.AuditPage, error)

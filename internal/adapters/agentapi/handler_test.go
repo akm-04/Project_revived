@@ -194,6 +194,62 @@ func TestAgentAPIRejectsTrailingData(t *testing.T) {
 	}
 }
 
+type fakeBuildStarter struct {
+	operation operatoragent.Operation
+	err       error
+	calls     int
+}
+
+func (starter *fakeBuildStarter) Start(context.Context, operatoragent.BuildRequest) (operatoragent.Operation, error) {
+	starter.calls++
+	return starter.operation, starter.err
+}
+
+func newBuildHandler(t *testing.T) (Handler, *fakeBuildStarter, string) {
+	t.Helper()
+	credentials := operatoragent.NewCredentials(t.TempDir())
+	if err := credentials.Setup("test password"); err != nil {
+		t.Fatal(err)
+	}
+	sessions := operatoragent.NewSessions(time.Now)
+	session, _, err := sessions.Login()
+	if err != nil {
+		t.Fatal(err)
+	}
+	starter := &fakeBuildStarter{operation: operatoragent.Operation{ID: "0123456789abcdef0123456789abcdef", State: operatoragent.OperationRunning}}
+	return Handler{Credentials: credentials, Sessions: sessions, Build: starter, Listen: testListen}, starter, session
+}
+
+func TestBuildRouteAnswers202WithOperationID(t *testing.T) {
+	handler, starter, session := newBuildHandler(t)
+	recorder := serveAgent(handler, http.MethodPost, "/agent/v1/ota/build", session, `{"lane":"code","version":"1.631.2"}`)
+	if recorder.Code != http.StatusAccepted {
+		t.Fatalf("status = %d, body = %s", recorder.Code, recorder.Body)
+	}
+	var started struct {
+		OperationID string `json:"operation_id"`
+	}
+	if err := json.Unmarshal(recorder.Body.Bytes(), &started); err != nil || started.OperationID != starter.operation.ID {
+		t.Fatalf("body = %s (%v)", recorder.Body, err)
+	}
+	if starter.calls != 1 {
+		t.Fatalf("starts = %d", starter.calls)
+	}
+}
+
+func TestBuildRouteRefusesWhileAnotherRuns(t *testing.T) {
+	handler, starter, session := newBuildHandler(t)
+	starter.err = operatoragent.Refuse(operatoragent.CodeOperationRunning, "another ota.build operation is running")
+	recorder := serveAgent(handler, http.MethodPost, "/agent/v1/ota/build", session, `{"lane":"code","version":"1.631.2"}`)
+	if recorder.Code != http.StatusConflict {
+		t.Fatalf("status = %d, body = %s", recorder.Code, recorder.Body)
+	}
+	var refusal operatoragent.Refusal
+	if err := json.Unmarshal(recorder.Body.Bytes(), &refusal); err != nil || refusal.Code != operatoragent.CodeOperationRunning {
+		t.Fatalf("refusal = %+v (%v)", refusal, err)
+	}
+}
+
 type blockingBackend struct {
 	stopped chan struct{}
 	release chan struct{}

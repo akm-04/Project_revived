@@ -34,6 +34,7 @@
    "credentials_test.go",
    "maintenance_test.go",
    "operations_test.go",
+   "otabuild_test.go",
    "sessions_test.go",
    "toollog_test.go"
   ]

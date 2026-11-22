@@ -36,6 +36,7 @@ type Config struct {
 	Listen        string            `json:"listen"`
 	OTARoot       string            `json:"ota_root"`
 	StockBaseline string            `json:"stock_baseline"`
+	StockCatalog  string            `json:"stock_catalog,omitempty"`
 	ClientTree    string            `json:"client_tree"`
 	Origins       map[string]string `json:"origins"`
 	Backend       BackendConfig     `json:"backend"`
@@ -54,7 +55,7 @@ func LoadConfig(root string) (Config, error) {
 	if err := decoder.Decode(&config); err != nil {
 		return Config{}, fmt.Errorf("%s: %w", AgentConfigFileName, err)
 	}
-	if err := ensureEndOfFile(decoder); err != nil {
+	if err := EnsureEndOfFile(decoder); err != nil {
 		return Config{}, fmt.Errorf("%s: %w", AgentConfigFileName, err)
 	}
 	if err := config.Validate(); err != nil {
@@ -63,14 +64,21 @@ func LoadConfig(root string) (Config, error) {
 	return config, nil
 }
 
-func ensureEndOfFile(decoder *json.Decoder) error {
+// ErrTrailingData reports that a JSON document carried a second value. Callers
+// that answer HTTP map it to their own status.
+var ErrTrailingData = errors.New("trailing data after the JSON object")
+
+// EnsureEndOfFile refuses a decoder that has another JSON value after the
+// document. It is the one helper both agent.json loading and the HTTP body
+// decoder use.
+func EnsureEndOfFile(decoder *json.Decoder) error {
 	var extra any
 	if err := decoder.Decode(&extra); errors.Is(err, io.EOF) {
 		return nil
 	} else if err != nil {
 		return err
 	}
-	return errors.New("trailing data after the JSON object")
+	return ErrTrailingData
 }
 
 // Validate enforces the loopback-only rule (I11A_ARCHITECTURE_V1 section 6).

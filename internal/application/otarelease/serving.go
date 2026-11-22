@@ -101,6 +101,7 @@ func (s *Serving) Refresh(ctx context.Context) error {
 		resources: map[string][]resAsset{},
 		active:    active,
 	}
+	winners := map[string]sidecarWinner{}
 	for _, release := range releases {
 		if release.State != domain.StateActive {
 			continue
@@ -113,10 +114,17 @@ func (s *Serving) Refresh(ctx context.Context) error {
 		for _, volume := range release.Volumes {
 			names[volume.Name] = struct{}{}
 		}
-		added := s.addSidecar(snapshot, release)
+		entries := s.readSidecar(release)
 		if release.Lane == domain.LaneAssets {
 			snapshot.assetsActive = true
-			snapshot.assetsIndexEntries += added
+			snapshot.assetsIndexEntries += len(entries)
+		}
+		mergeSidecarEntries(winners, release.Version, entries)
+	}
+	for _, winner := range winners {
+		for _, entry := range winner.assets {
+			key := resourceKey(entry.Path, entry.MD5)
+			snapshot.resources[key] = append(snapshot.resources[key], entry)
 		}
 	}
 	if resPath := s.resPath(); resPath != "" {
@@ -133,9 +141,17 @@ func (s *Serving) Refresh(ctx context.Context) error {
 	return nil
 }
 
-func (s *Serving) addSidecar(snapshot *servingSnapshot, release domain.Release) int {
+// sidecarWinner is the newest release's rows for one resource path; two rows of
+// the same release all stay, so a wrong-md5 row is still verified and missed.
+type sidecarWinner struct {
+	version domain.Version
+	assets  []resAsset
+}
+
+// readSidecar returns one release's usable rows, deduplicated by (path, md5).
+func (s *Serving) readSidecar(release domain.Release) []resAsset {
 	if s.Root == "" {
-		return 0
+		return nil
 	}
 	sidecarPath := filepath.Join(s.Root, updatesDirectory, string(release.Lane), release.PackageBase+resSidecarSuffix)
 	data, err := os.ReadFile(sidecarPath)
@@ -143,15 +159,15 @@ func (s *Serving) addSidecar(snapshot *servingSnapshot, release domain.Release) 
 		if !errors.Is(err, os.ErrNotExist) {
 			s.logSidecarOnce(sidecarPath, err)
 		}
-		return 0
+		return nil
 	}
 	var sidecar resSidecar
 	if err := json.Unmarshal(data, &sidecar); err != nil {
 		s.logSidecarOnce(sidecarPath, err)
-		return 0
+		return nil
 	}
 	seen := map[string]struct{}{}
-	added := 0
+	entries := make([]resAsset, 0, len(sidecar.Entries))
 	for _, entry := range sidecar.Entries {
 		clean, ok := validResourcePath(entry.Path)
 		if !ok || !validMD5(entry.MD5) {
@@ -163,11 +179,24 @@ func (s *Serving) addSidecar(snapshot *servingSnapshot, release domain.Release) 
 		}
 		seen[identity] = struct{}{}
 		entry.Path = clean
-		key := resourceKey(clean, entry.MD5)
-		snapshot.resources[key] = append(snapshot.resources[key], entry)
-		added++
+		entries = append(entries, entry)
 	}
-	return added
+	return entries
+}
+
+// mergeSidecarEntries keeps only the newest release's md5 for a path present in
+// two sidecars (L4f silent lazy refresh).
+func mergeSidecarEntries(winners map[string]sidecarWinner, version domain.Version, entries []resAsset) {
+	for _, entry := range entries {
+		current, found := winners[entry.Path]
+		switch {
+		case !found || version.Compare(current.version) > 0:
+			winners[entry.Path] = sidecarWinner{version: version, assets: []resAsset{entry}}
+		case version.Compare(current.version) == 0:
+			current.assets = append(current.assets, entry)
+			winners[entry.Path] = current
+		}
+	}
 }
 
 func (s *Serving) logOnce(key, message string) {

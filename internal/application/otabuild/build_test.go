@@ -93,11 +93,16 @@ func (fixture *fixture) input(version string) Input {
 
 func (fixture *fixture) build(t *testing.T, input Input) otarelease.BuildRequest {
 	t.Helper()
-	request, err := Build(context.Background(), input)
+	return fixture.buildResult(t, input).Request
+}
+
+func (fixture *fixture) buildResult(t *testing.T, input Input) Result {
+	t.Helper()
+	result, err := Build(context.Background(), input)
 	if err != nil {
 		t.Fatalf("Build: %v", err)
 	}
-	return request
+	return result
 }
 
 func standardPatch() map[string]any {
@@ -332,10 +337,19 @@ func TestImmutability(t *testing.T) {
 	request := fixture.build(t, fixture.input("1.631.2"))
 	assertEmptyDirectory(t, fixture.staging)
 
+	rebuilt := fixture.build(t, fixture.input("1.631.2"))
+	if rebuilt.SHA256 != request.SHA256 || rebuilt.MD5 != request.MD5 {
+		t.Fatal("the identical retry produced another package")
+	}
+
 	existing := filepath.Join(fixture.updates, packageVolumes(t, request)[0].Name)
 	before, err := os.ReadFile(existing)
 	if err != nil {
 		t.Fatalf("read existing artifact: %v", err)
+	}
+	tampered := append([]byte("x"), before[1:]...)
+	if err := os.WriteFile(existing, tampered, 0o644); err != nil {
+		t.Fatalf("tamper existing artifact: %v", err)
 	}
 	if _, err := Build(context.Background(), fixture.input("1.631.2")); !errors.Is(err, ErrTargetExists) {
 		t.Fatalf("rebuild error = %v, want %v", err, ErrTargetExists)
@@ -344,7 +358,7 @@ func TestImmutability(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read existing artifact: %v", err)
 	}
-	if !bytes.Equal(before, after) {
+	if !bytes.Equal(after, tampered) {
 		t.Fatal("a refused build changed the existing artifact")
 	}
 	assertEmptyDirectory(t, fixture.staging)
@@ -359,13 +373,13 @@ func TestRefusedBuildLeavesStagingEmpty(t *testing.T) {
 	assertEmptyDirectory(t, fixture.staging)
 }
 
-func TestAssetsLaneRefused(t *testing.T) {
+func TestAssetsLaneRefusedWithoutResPath(t *testing.T) {
 	fixture := newFixture(t)
 	fixture.addSource(t, "app/example/Feature.lua", []byte("return {}\n"))
 	input := fixture.input("1.631.1")
 	input.Lane = "assets"
-	if _, err := Build(context.Background(), input); !errors.Is(err, ErrAssetsLaneUnsupported) {
-		t.Fatalf("error = %v, want %v", err, ErrAssetsLaneUnsupported)
+	if _, err := Build(context.Background(), input); !errors.Is(err, ErrResPathMissing) {
+		t.Fatalf("error = %v, want %v", err, ErrResPathMissing)
 	}
 }
 
@@ -386,7 +400,7 @@ func TestOptInStockBaselineGolden(t *testing.T) {
 		t.Fatalf("read golden fixture: %v", err)
 	}
 	root := t.TempDir()
-	request, err := Build(context.Background(), Input{
+	result, err := Build(context.Background(), Input{
 		Lane:          "code",
 		Version:       "1.631.2",
 		StockBaseline: baseline,
@@ -397,7 +411,7 @@ func TestOptInStockBaselineGolden(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Build: %v", err)
 	}
-	assembled := readAssembled(t, filepath.Join(root, "updates", "code"), request)
+	assembled := readAssembled(t, filepath.Join(root, "updates", "code"), result.Request)
 	for _, entry := range []string{"src_32/app/common/network/Backend.lua", "src_64/app/common/network/Backend.lua"} {
 		if got := zipEntry(t, assembled, entry); !bytes.Equal(got, golden) {
 			t.Fatalf("%s does not equal the golden fixture", entry)

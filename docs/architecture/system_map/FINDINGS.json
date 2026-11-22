@@ -8543,9 +8543,7 @@
    "kind": "code_1"
   }
  ],
- "systems_not_wired": [
-  "otabuild"
- ],
+ "systems_not_wired": [],
  "tables_locked_by_many": [
   {
    "table": "account_sessions",

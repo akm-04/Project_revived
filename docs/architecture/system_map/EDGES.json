@@ -1802,10 +1802,17 @@
    ]
   },
   "operatoragent": {},
-  "otabuild": {},
+  "otabuild": {
+   "operatoragent": [
+    "Build"
+   ]
+  },
   "otarelease": {
    "events": [
     "*Covers"
+   ],
+   "operatoragent": [
+    "Load"
    ]
   },
   "petcampaign": {
@@ -5325,7 +5332,14 @@
    ]
   },
   "operator": {},
-  "operatoragent": {},
+  "operatoragent": {
+   "otabuild": [
+    "Build"
+   ],
+   "otarelease": [
+    "Load"
+   ]
+  },
   "otabuild": {},
   "otarelease": {
    "operator": [
@@ -5342,6 +5356,7 @@
     "*LockSettingsTx",
     "*ReadSettingsTx",
     "*ReadStatusTx",
+    "*ReleaseExistsTx",
     "*ReleaseTx",
     "*SaveSettingsTx",
     "*SupersedeLaneTx",

@@ -19,7 +19,6 @@ import (
 	"os/exec"
 	"strconv"
 	"sync"
-	"syscall"
 	"time"
 
 	"gxb.local/backend/v2/internal/adapters/combatresolver"
@@ -221,9 +220,12 @@ func (l *Launcher) start() (*process, error) {
 		"-max-open-files", strconv.FormatUint(l.limits.OpenFiles, 10))
 	command.Env = []string{}
 	command.Dir = workdir
+	if err := configureProcess(command); err != nil {
+		os.RemoveAll(workdir)
+		return nil, err
+	}
 	p := &process{command: command, workdir: workdir, stdout: &cappedBuffer{limit: int(l.limits.MaxOutputBytes) + 1}, stderr: &cappedBuffer{limit: maxStderrBytes}, done: make(chan error, 1)}
 	command.Stdout, command.Stderr = p.stdout, p.stderr
-	command.SysProcAttr = &syscall.SysProcAttr{Setpgid: true, Pdeathsig: syscall.SIGKILL}
 	if p.stdin, err = command.StdinPipe(); err != nil {
 		os.RemoveAll(workdir)
 		return nil, retryable("stdin: %v", err)
@@ -237,7 +239,7 @@ func (l *Launcher) start() (*process, error) {
 }
 
 func (p *process) kill() {
-	_ = syscall.Kill(-p.command.Process.Pid, syscall.SIGKILL)
+	killProcessGroup(p.command.Process.Pid)
 	<-p.done
 	os.RemoveAll(p.workdir)
 }
