@@ -10413,6 +10413,29 @@
         "references": [],
         "retention": null
       }
+    },
+    "ota_settings": {
+      "owner": "otarelease",
+      "allowed_query_owners": [
+        "otarelease"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/otastore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/otastore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00185_i11a_ota_settings.sql",
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
     }
   }
 }

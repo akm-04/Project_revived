@@ -170,7 +170,7 @@ func (handler Handler) serveCommand(writer http.ResponseWriter, httpRequest *htt
 		writeError(writer, http.StatusServiceUnavailable, codeUnavailable, "operator bus unavailable")
 	default:
 		log.Printf("operator command %s failed: %v", name, err)
-		writeError(writer, http.StatusInternalServerError, codeFailed, "the command failed; it is recorded as FAILED and may be retried with the same key")
+		writeError(writer, http.StatusInternalServerError, codeFailed, "the command failed; operator.audit.list shows its state; send the same command again with the same key")
 	}
 }
 

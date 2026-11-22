@@ -495,6 +495,12 @@ func main() {
 		log.Fatalf("OTA settings: %v", err)
 	}
 	otaSettingsValue := appotarelease.NewSettingsValue(otaSettings)
+	otaSettingsSync := &appotarelease.SettingsSync{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: otastore.Store{}, File: otaSettingsFile, Live: otaSettingsValue}
+	if cfg.OTARoot != "" {
+		if err := otaSettingsSync.Reconcile(ctx); err != nil {
+			log.Fatalf("OTA settings: copy the committed settings to settings.json: %v", err)
+		}
+	}
 	otaLedger := appotarelease.NewLedger(runner, operation.Factory{Clock: clock.System{}}, otastore.LedgerStore{})
 	go otaLedger.Run(ctx, 30*time.Second)
 	otaServing := &appotarelease.Serving{
@@ -531,8 +537,8 @@ func main() {
 		return operatorVersion.Version(ctx)
 	}
 	operatorHandlers := otaCommands.Handlers()
-	operatorHandlers["ota.settings.set"] = appotarelease.SettingsSetHandler(otaSettingsFile, otaSettingsValue)
-	startOperator(ctx, runner, operatorHandlers, operatorReads, operatorVersionReply, otaAfterCommit{Root: cfg.OTARoot, SettingsFile: otaSettingsFile, Settings: otaSettingsValue, Serving: otaServing})
+	operatorHandlers["ota.settings.set"] = appotarelease.SettingsSetHandler(otaSettingsFile, otaSettingsValue, otastore.Store{})
+	startOperator(ctx, runner, operatorHandlers, operatorReads, operatorVersionReply, otaAfterCommit{Root: cfg.OTARoot, ReconcileSettings: otaSettingsSync.Reconcile, Serving: otaServing})
 	clientLogs, journal := startClientLog(ctx, pool, authority, cfg.ClientLogURL, retentionPolicies.RetentionDays, txMetrics, mux, handlerConcurrency("GXB_CLIENT_LOG_MAX_CONCURRENT", 4, poolConnections))
 	dailyReset := dailyreset.Service{Markers: dailyresetstore.Store{Queryer: pool}, Counters: itemsEnergy.Counters}
 	boot := stockruntime.BootstrapDispatcher{Bootstrap: bootstrap, Tracker: tracker, LogURLs: clientLogs, DailyReset: dailyReset}

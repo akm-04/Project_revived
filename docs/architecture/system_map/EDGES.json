@@ -5297,8 +5297,11 @@
     "*InsertActivationTx",
     "*InsertBuildTx",
     "*LockLaneTx",
+    "*LockSettingsTx",
+    "*ReadSettingsTx",
     "*ReadStatusTx",
     "*ReleaseTx",
+    "*SaveSettingsTx",
     "*SupersedeLaneTx",
     "*WithdrawTx"
    ]

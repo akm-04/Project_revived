@@ -67,17 +67,18 @@ func startOperator(ctx context.Context, runner tx.Runner, handlers map[string]op
 
 // otaAfterCommit is what an applied OTA command changes outside the database.
 type otaAfterCommit struct {
-	Root         string
-	SettingsFile appotarelease.SettingsFile
-	Settings     *appotarelease.SettingsValue
-	Serving      *appotarelease.Serving
+	Root string
+	// ReconcileSettings is SettingsSync.Reconcile: it copies the committed
+	// ota_settings row to settings.json and the live value.
+	ReconcileSettings func(context.Context) error
+	Serving           *appotarelease.Serving
 }
 
 // postCommitExecutor runs the OTA effects that must not happen inside the bus
 // transaction, once the command has committed (OTA_AMENDMENTS OA-6): the
 // activation history mirror (the database stays the record, so a failed mirror
-// only logs), the settings file and live value, and a serving refresh so MID
-// 2/20480 and /res see the change at once instead of after the refresh interval.
+// only logs), the settings copy, and a serving refresh so MID 2/20480 and /res
+// see the change at once instead of after the refresh interval.
 type postCommitExecutor struct {
 	Next operatorapi.Executor
 	OTA  otaAfterCommit
@@ -85,23 +86,29 @@ type postCommitExecutor struct {
 
 func (executor postCommitExecutor) Execute(ctx context.Context, command operator.Command) (operator.Outcome, error) {
 	outcome, err := executor.Next.Execute(ctx, command)
-	if err != nil || outcome.State != operator.StateApplied || outcome.Replayed {
+	if err != nil || outcome.State != operator.StateApplied {
 		return outcome, err
 	}
+	// The effects outlive the request: a disconnected operator must not cut them.
+	detached := context.WithoutCancel(ctx)
 	switch command.ModuleCommand {
+	case "ota.settings.set":
+		// A replay reconciles too: it is how a committed change whose copy failed is applied.
+		if syncErr := executor.OTA.ReconcileSettings(detached); syncErr != nil {
+			return operator.Outcome{}, fmt.Errorf("ota.settings.set is committed but settings.json was not updated; send the same command again: %w", syncErr)
+		}
 	case "ota.publish", "ota.withdraw":
+		if outcome.Replayed {
+			return outcome, nil
+		}
 		if writeErr := mirrorActivation(executor.OTA.Root, command.Envelope.SemanticKey, outcome.Result); writeErr != nil {
 			log.Printf("ota history mirror: %v", writeErr)
-		}
-	case "ota.settings.set":
-		if applyErr := appotarelease.ApplySettings(executor.OTA.SettingsFile, executor.OTA.Settings, outcome.Result); applyErr != nil {
-			return operator.Outcome{}, fmt.Errorf("ota.settings.set committed but settings.json was not written; nothing changed, send the command again: %w", applyErr)
 		}
 	default:
 		return outcome, nil
 	}
 	if executor.OTA.Serving != nil {
-		if refreshErr := executor.OTA.Serving.Refresh(context.WithoutCancel(ctx)); refreshErr != nil {
+		if refreshErr := executor.OTA.Serving.Refresh(detached); refreshErr != nil {
 			log.Printf("ota serving refresh after %s: %v", command.ModuleCommand, refreshErr)
 		}
 	}

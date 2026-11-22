@@ -731,6 +731,7 @@
    "ota_asset_misses": "otarelease",
    "ota_asset_served_daily": "otarelease",
    "ota_releases": "otarelease",
+   "ota_settings": "otarelease",
    "petcampaign_players": "petcampaign",
    "player_book_admissions": "bookskill",
    "player_book_roots": "bookskill",
@@ -1409,7 +1410,7 @@
    "name": "otarelease",
    "path": "internal/application/otarelease",
    "purpose": "serves the OTA read side: the MID 2 update plan and the cross-contract ActiveRelease view (I11A_OTA_RELEASE_V1 rulings 4 and 5)",
-   "tables": 4
+   "tables": 5
   },
   {
    "callees": 13,

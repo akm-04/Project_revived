@@ -12,9 +12,12 @@ import (
 	"path/filepath"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"gxb.local/backend/v2/internal/application/operator"
 	domain "gxb.local/backend/v2/internal/domain/otarelease"
+	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -89,9 +92,8 @@ func (f SettingsFile) Save(settings domain.Settings) error {
 	return nil
 }
 
-// SettingsValue is the live in-memory copy swapped on every successful write.
+// SettingsValue is the live in-memory copy of the committed settings.
 type SettingsValue struct {
-	mu      sync.Mutex
 	current atomic.Pointer[domain.Settings]
 }
 
@@ -108,27 +110,41 @@ func (v *SettingsValue) Get() domain.Settings {
 	return *v.current.Load()
 }
 
-// Set swaps the value; callers that must serialize a read-modify-write (the
-// settings command) hold Lock for the old value and this call.
 func (v *SettingsValue) Set(next domain.Settings) {
 	v.current.Store(&next)
 }
 
-func (v *SettingsValue) Lock()   { v.mu.Lock() }
-func (v *SettingsValue) Unlock() { v.mu.Unlock() }
+// SettingsRecord is the ota_settings row: the committed settings and the
+// revision that orders the commits (OA-6). Revision 0 is the seed copied from
+// settings.json before the first command.
+type SettingsRecord struct {
+	Settings domain.Settings
+	Revision int64
+}
+
+// SettingsStore is the ota_settings row.
+type SettingsStore interface {
+	// LockSettingsTx inserts the seed when the row is missing, then locks the row.
+	LockSettingsTx(ctx context.Context, transaction tx.Tx, seed domain.Settings, at time.Time) (SettingsRecord, error)
+	SaveSettingsTx(ctx context.Context, transaction tx.Tx, record SettingsRecord, commandKey string, at time.Time) error
+	// ReadSettingsTx returns nil when no command has seeded the row yet.
+	ReadSettingsTx(ctx context.Context, query tx.Queryer) (*SettingsRecord, error)
+}
 
 // SettingsChange is the recorded result of `ota.settings.set`.
 type SettingsChange struct {
-	Old domain.Settings `json:"old"`
-	New domain.Settings `json:"new"`
+	Old      domain.Settings `json:"old"`
+	New      domain.Settings `json:"new"`
+	Revision int64           `json:"revision"`
 }
 
 // SettingsSetHandler is `ota.settings.set` (OTA ruling 6, live class): the
 // payload is the full settings object, no expected_revision, last writer wins.
-// It only validates; nothing changes until ApplySettings runs after the
-// command commits (OTA_AMENDMENTS OA-6). A bad payload is a 409 refusal.
-func SettingsSetHandler(file SettingsFile, live *SettingsValue) operator.Handler {
-	return func(_ context.Context, _ tx.Scope, command operator.Command) (any, error) {
+// It writes only the ota_settings row; settings.json and the live value follow
+// after commit through SettingsSync (OTA_AMENDMENTS OA-6). A bad payload is a
+// 409 refusal.
+func SettingsSetHandler(file SettingsFile, live *SettingsValue, store SettingsStore) operator.Handler {
+	return func(ctx context.Context, scope tx.Scope, command operator.Command) (any, error) {
 		if file.Root == "" {
 			return nil, operator.Refuse(CodeRootUnavailable, "the OTA root is not configured", nil)
 		}
@@ -148,23 +164,65 @@ func SettingsSetHandler(file SettingsFile, live *SettingsValue) operator.Handler
 		if next.ResPath != "" && !readableDirectory(next.ResPath) {
 			return nil, operator.Refuse(operator.CodePayloadInvalid, fmt.Sprintf("res_path %q is not a readable folder", next.ResPath), nil)
 		}
-		return SettingsChange{Old: live.Get(), New: next}, nil
+		current, err := store.LockSettingsTx(ctx, scope.Tx, live.Get(), scope.Operation.StartedAt)
+		if err != nil {
+			return nil, err
+		}
+		saved := SettingsRecord{Settings: next, Revision: current.Revision + 1}
+		if err := store.SaveSettingsTx(ctx, scope.Tx, saved, command.Envelope.SemanticKey, scope.Operation.StartedAt); err != nil {
+			return nil, err
+		}
+		return SettingsChange{Old: current.Settings, New: next, Revision: saved.Revision}, nil
 	}
 }
 
-// ApplySettings writes a committed `ota.settings.set` result to settings.json,
-// then swaps the live value (OA-6); a failed write leaves both unchanged.
-func ApplySettings(file SettingsFile, live *SettingsValue, result json.RawMessage) error {
-	var change SettingsChange
-	if err := json.Unmarshal(result, &change); err != nil {
+// SettingsSync copies the committed ota_settings row to settings.json and the
+// live value (OA-6). It runs at startup and after every applied settings
+// command, replays included, so a copy that failed or was cut by a crash is
+// made by the next run, and a run never installs an older revision.
+type SettingsSync struct {
+	Runner     tx.Runner
+	Operations operation.Factory
+	Store      SettingsStore
+	File       SettingsFile
+	Live       *SettingsValue
+
+	mu      sync.Mutex
+	applied int64
+}
+
+func (s *SettingsSync) Reconcile(ctx context.Context) error {
+	if s.Store == nil || s.Runner.DB == nil {
+		return ErrUnavailable
+	}
+	current, err := s.Operations.New(policy.Set{})
+	if err != nil {
 		return err
 	}
-	live.Lock()
-	defer live.Unlock()
-	if err := file.Save(change.New); err != nil {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var record *SettingsRecord
+	_, err = s.Runner.Run(ctx, current, ReadProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, scope tx.Scope) error {
+		loaded, readErr := s.Store.ReadSettingsTx(ctx, scope.Tx)
+		record = loaded
+		return readErr
+	})
+	if err != nil {
 		return err
 	}
-	live.Set(change.New)
+	return s.install(record)
+}
+
+// install is Reconcile after the read; the caller holds mu.
+func (s *SettingsSync) install(record *SettingsRecord) error {
+	if record == nil || record.Revision <= s.applied {
+		return nil
+	}
+	if err := s.File.Save(record.Settings); err != nil {
+		return err
+	}
+	s.Live.Set(record.Settings)
+	s.applied = record.Revision
 	return nil
 }
 
