@@ -10,7 +10,7 @@ func TestLoadGeneratedCatalog(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got, want := c.RevisionID(), "97bacefba111f05f49a3069c2196fbd537036f6b4b808de4e497db05b5751c53"; got != want {
+	if got, want := c.RevisionID(), "e60d417382d2ec07e8ab9290b95d7b34371e3037b1a1886b63e0e38d271943d4"; got != want {
 		t.Fatalf("revision id = %s, want %s", got, want)
 	}
 	if got, want := len(c.PlayerProgression.Rows), 100; got != want {

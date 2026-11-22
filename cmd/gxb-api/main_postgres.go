@@ -18,6 +18,7 @@ import (
 	"gxb.local/backend/v2/internal/application/dailyreset"
 	apponeonone "gxb.local/backend/v2/internal/application/oneonone"
 	"gxb.local/backend/v2/internal/application/operator"
+	"gxb.local/backend/v2/internal/application/operatorgrant"
 	"gxb.local/backend/v2/internal/application/playerdisplay"
 	apptopfloor "gxb.local/backend/v2/internal/application/topfloor"
 	domain "gxb.local/backend/v2/internal/domain/otarelease"
@@ -35,10 +36,12 @@ import (
 	"gxb.local/backend/v2/internal/adapters/guildpolicybridge"
 	"gxb.local/backend/v2/internal/adapters/guildviewread"
 	"gxb.local/backend/v2/internal/adapters/operatorapi"
+	opcatalogsource "gxb.local/backend/v2/internal/adapters/operatorcatalog"
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/achievementstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/activitystore"
 	"gxb.local/backend/v2/internal/adapters/postgres/adventurestore"
+	"gxb.local/backend/v2/internal/adapters/postgres/auditstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/bookstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/campaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterbirth"
@@ -171,6 +174,9 @@ import (
 )
 
 func main() {
+	if len(os.Args) > 1 && os.Args[1] == "catalog" {
+		os.Exit(runCatalogCommand(os.Args[2:]))
+	}
 	cfg := config.FromEnv()
 	digestSecret := []byte(os.Getenv("GXB_CREDENTIAL_DIGEST_SECRET"))
 	bearerSecret := []byte(os.Getenv("GXB_GAMEPLAY_BEARER_SECRET"))
@@ -266,7 +272,7 @@ func main() {
 	i5db := i5store.Store{Queryer: pool, StackUsage: appdorm.FurnitureUsage{Owner: dormstore.Store{}, Content: contentstore.Store{Queryer: pool}}}
 	contentDB := contentstore.Store{Queryer: pool}
 	privileges := commerceprivilege.Provider{Store: commerceprivilegestore.Store{}, Content: contentDB}
-	i5svc := appi5.Service{Runner: runner, Store: i5db, Content: contentDB, Privileges: privileges, Functions: appi5.LevelFunctionAnnouncements{}, CampaignClears: campaignstore.TutorialMilestones{}, Directory: i4store.DirectoryLevelProjection{}, Backpack: i5db, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, RedeemSecret: redeemSecret}
+	i5svc := appi5.Service{Runner: runner, Store: i5db, Content: contentDB, Privileges: privileges, Functions: appi5.LevelFunctionAnnouncements{}, CampaignClears: campaignstore.TutorialMilestones{}, Directory: i4store.DirectoryLevelProjection{}, Backpack: i5db, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, RedeemSecret: redeemSecret, Audit: auditstore.Emitter{Pool: pool}}
 	if e := i5svc.ValidateStartup(); e != nil {
 		log.Fatalf("I5 startup: %v", e)
 	}
@@ -533,17 +539,33 @@ func main() {
 	otaReleaseLookup := appotarelease.ReleaseLookup{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: otastore.Store{}}
 	operatorAudit := operator.AuditService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Reader: operatorstore.Store{}}
 	backendVersion, gitCommit := buildIdentity()
-	operatorVersion := operator.VersionService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Reader: operatorstore.Store{}, BackendVersion: backendVersion, GitCommit: gitCommit}
+	operatorCatalogue, err := opcatalogsource.Load(time.Now().UTC())
+	if err != nil {
+		log.Fatalf("operator catalogue: %v", err)
+	}
+	grantLineCap, err := operatorgrant.LineCapFromEnvironment(os.Getenv("GXB_OPERATOR_GRANT_LINE_CAP"))
+	if err != nil {
+		log.Fatalf("operator grant cap: %v", err)
+	}
+	operatorVersion := operator.VersionService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Reader: operatorstore.Store{}, BackendVersion: backendVersion, GitCommit: gitCommit, ContentRevision: &operatorCatalogue.ContentRevision}
+	playerReads := operator.PlayerReadService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Directory: i4store.PlayerDirectoryReader{}, Wallet: appi5.OperatorWalletService{Store: i5db, Privileges: privileges}}
 	operatorReads := map[string]operatorapi.Read{
 		"ota.status":          operatorapi.OTAStatus(otaStatus),
 		"ota.release":         operatorapi.OTARelease(otaReleaseLookup),
 		"operator.audit.list": operatorapi.AuditList(operatorAudit),
+		"catalog.search":      operatorapi.CatalogSearch(operatorCatalogue),
+		"player.find":         operatorapi.PlayerFind(playerReads),
+		"player.summary":      operatorapi.PlayerSummary(playerReads),
 	}
 	operatorVersionReply := func(ctx context.Context) (any, error) {
 		return operatorVersion.Version(ctx)
 	}
 	operatorHandlers := otaCommands.Handlers()
 	operatorHandlers["ota.settings.set"] = appotarelease.SettingsSetHandler(otaSettingsFile, otaSettingsValue, otastore.Store{})
+	grantCommands := operatorgrant.Commands{Catalogue: operatorCatalogue, Store: operatorstore.Store{}, Directory: i4store.PlayerDirectoryReader{}, Grants: i5svc, LineCap: grantLineCap}
+	for name, handler := range grantCommands.Handlers() {
+		operatorHandlers[name] = handler
+	}
 	eventHooks, err := appevents.NewHookRegistry(domainevents.HookCampaignDropMultiplier)
 	if err != nil {
 		log.Fatalf("events hook registry: %v", err)
@@ -555,6 +577,7 @@ func main() {
 	eventService := appevents.Service{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: eventstore.Store{}, Clock: clock.System{}}
 	operatorReads["events.list"] = operatorapi.EventsList(eventService)
 	startOperator(ctx, runner, operatorHandlers, operatorReads, operatorVersionReply, otaAfterCommit{Root: cfg.OTARoot, ReconcileSettings: otaSettingsSync.Reconcile, Serving: otaServing})
+	startOperatorBulkJob(ctx, pool, operatorgrant.Applier{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: operatorstore.Store{}, Grants: i5svc, Catalogue: operatorCatalogue, LineCap: grantLineCap})
 	clientLogs, journal := startClientLog(ctx, pool, authority, cfg.ClientLogURL, retentionPolicies.RetentionDays, txMetrics, mux, handlerConcurrency("GXB_CLIENT_LOG_MAX_CONCURRENT", 4, poolConnections))
 	dailyReset := dailyreset.Service{Markers: dailyresetstore.Store{Queryer: pool}, Counters: itemsEnergy.Counters}
 	boot := stockruntime.BootstrapDispatcher{Bootstrap: bootstrap, Tracker: tracker, LogURLs: clientLogs, DailyReset: dailyReset}

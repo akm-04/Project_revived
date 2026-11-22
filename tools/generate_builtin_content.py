@@ -1135,6 +1135,19 @@ def compile_dialog_relationship(
     return list(nodes_by_node_id.values()), duplicate_node_keys, placeholders, unresolved_edges
 
 
+def build_item_presentation(items: list[dict[str, str]]) -> dict[str, Any]:
+    rows = []
+    for index, row in enumerate(items, start=1):
+        item_id = parse_int(row["id"], label=f"item_presentation[{index}].id", allow_zero=False, allow_negative=False)
+        rows.append({"id": item_id, "name": row.get("name", ""), "icon": row.get("icon", "")})
+    rows.sort(key=lambda r: r["id"])
+    if len({r["id"] for r in rows}) != len(rows):
+        raise CompileError("item.lua presentation ids are not unique")
+    if not rows:
+        raise CompileError("item.lua presentation table is empty")
+    return {"items": rows, "schema_version": SCHEMA_VERSION, "source": "data/tables/item.lua"}
+
+
 def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[str, Any]:
     items = parse_encoded_item_table(blobs["data/tables/item.lua"].data)
     players = parse_generated_lua_table(blobs["data/tables/player.lua"].data)
@@ -2823,6 +2836,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "practice_catalog.json": practice_artifact,
         "appearance_catalog.json": appearance_artifact,
         "resource_catalog.json": resource_artifact,
+        "item_presentation_catalog.json": build_item_presentation(items),
     }
     artifact_bytes = {name: canonical_json_bytes(value) for name, value in artifacts.items()}
     artifact_hashes = {name: sha256_bytes(data) for name, data in sorted(artifact_bytes.items())}
