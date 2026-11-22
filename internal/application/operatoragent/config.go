@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net"
 	"os"
 	"strings"
 	"time"
 
 	"gxb.local/backend/v2/internal/application/otabuild"
+	"gxb.local/backend/v2/internal/foundation/jsonbody"
 )
 
 const (
@@ -86,30 +86,13 @@ func LoadConfig(root string) (Config, error) {
 	if err := decoder.Decode(&config); err != nil {
 		return Config{}, fmt.Errorf("%s: %w", AgentConfigFileName, err)
 	}
-	if err := EnsureEndOfFile(decoder); err != nil {
+	if err := jsonbody.EnsureEndOfFile(decoder); err != nil {
 		return Config{}, fmt.Errorf("%s: %w", AgentConfigFileName, err)
 	}
 	if err := config.Validate(); err != nil {
 		return Config{}, err
 	}
 	return config, nil
-}
-
-// ErrTrailingData reports that a JSON document carried a second value. Callers
-// that answer HTTP map it to their own status.
-var ErrTrailingData = errors.New("trailing data after the JSON object")
-
-// EnsureEndOfFile refuses a decoder that has another JSON value after the
-// document. It is the one helper both agent.json loading and the HTTP body
-// decoder use.
-func EnsureEndOfFile(decoder *json.Decoder) error {
-	var extra any
-	if err := decoder.Decode(&extra); errors.Is(err, io.EOF) {
-		return nil
-	} else if err != nil {
-		return err
-	}
-	return ErrTrailingData
 }
 
 // Validate enforces the loopback-only rule (I11A_ARCHITECTURE_V1 section 6).

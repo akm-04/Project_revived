@@ -33,6 +33,7 @@
    "config_test.go",
    "credentials_test.go",
    "maintenance_test.go",
+   "modules_test.go",
    "operations_test.go",
    "otabuild_test.go",
    "sessions_test.go",

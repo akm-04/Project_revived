@@ -20,6 +20,7 @@ import (
 
 	"gxb.local/backend/v2/internal/application/operator"
 	"gxb.local/backend/v2/internal/application/operatoragent"
+	"gxb.local/backend/v2/internal/foundation/jsonbody"
 )
 
 const (
@@ -36,6 +37,7 @@ const (
 	buildPath         = "/agent/v1/ota/build"
 	operationPrefix   = "/agent/v1/ops/"
 	logTailPath       = "/agent/v1/log/tail"
+	modulesPath       = "/agent/v1/modules"
 
 	maxBodyBytes = 1 << 20
 	// The agent re-marshals a command into a larger envelope, so it accepts
@@ -57,6 +59,7 @@ type Handler struct {
 	Maintenance operatoragent.Maintenance
 	Operations  *operatoragent.Operations
 	Build       operatoragent.OTAOperationStarter
+	Modules     operatoragent.ModuleLister
 	ToolLog     *operatoragent.ToolLog
 	ToolLogPath string
 	// Listen is the exact host:port the agent listens on; every route refuses
@@ -154,6 +157,8 @@ func (handler Handler) ServeHTTP(writer http.ResponseWriter, request *http.Reque
 		handler.serveOperation(writer, strings.TrimPrefix(request.URL.Path, operationPrefix))
 	case request.URL.Path == logTailPath && request.Method == http.MethodGet:
 		handler.serveLogTail(writer, request)
+	case request.URL.Path == modulesPath && request.Method == http.MethodGet:
+		handler.serveModules(writer, request)
 	default:
 		writeRefusal(writer, http.StatusNotFound, operatoragent.CodeNotFound, "no such agent route")
 	}
@@ -386,6 +391,18 @@ func (handler Handler) serveLogTail(writer http.ResponseWriter, request *http.Re
 	writeJSON(writer, http.StatusOK, map[string]any{"lines": lines})
 }
 
+// serveModules answers the backend's module list merged with the agent's own,
+// so the GUI and CLI see one registry (I11A_ARCHITECTURE_V1 section 2).
+func (handler Handler) serveModules(writer http.ResponseWriter, request *http.Request) {
+	if handler.Modules == nil {
+		writeRefusal(writer, http.StatusServiceUnavailable, operatoragent.CodeBackendUnavailable, "the module registry is not configured")
+		return
+	}
+	modules := handler.Modules.List(request.Context())
+	handler.record("modules", "list", "ok", map[string]any{"modules": len(modules.Modules)})
+	writeJSON(writer, http.StatusOK, modules)
+}
+
 func requestedTail(request *http.Request) int {
 	value := request.URL.Query().Get("n")
 	if value == "" {
@@ -472,8 +489,8 @@ func decodeOptionalBody(writer http.ResponseWriter, request *http.Request, targe
 // endOfBody uses the agent's one trailing-data helper; a second JSON value is
 // the caller's 400, a malformed tail is the generic bad body.
 func endOfBody(decoder *json.Decoder) error {
-	err := operatoragent.EnsureEndOfFile(decoder)
-	if err == nil || errors.Is(err, operatoragent.ErrTrailingData) {
+	err := jsonbody.EnsureEndOfFile(decoder)
+	if err == nil || errors.Is(err, jsonbody.ErrTrailingData) {
 		return err
 	}
 	var tooLarge *http.MaxBytesError
@@ -522,7 +539,7 @@ func (handler Handler) writeBodyError(writer http.ResponseWriter, err error) {
 		return
 	}
 	status := http.StatusConflict
-	if errors.Is(err, operatoragent.ErrTrailingData) {
+	if errors.Is(err, jsonbody.ErrTrailingData) {
 		status = http.StatusBadRequest
 	}
 	writeRefusal(writer, status, operatoragent.CodeBodyInvalid, err.Error())

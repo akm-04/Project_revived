@@ -103,7 +103,8 @@
   ],
   "scenarios_naming": [],
   "unit": [
-   "envelope_test.go"
+   "envelope_test.go",
+   "module_test.go"
   ]
  }
 }

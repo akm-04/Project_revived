@@ -97,8 +97,8 @@ var ErrInvalidRelease = errors.New("otarelease: invalid release row")
 const (
 	// maxVolumeBytes is ruling 5: the stock client cannot take a larger volume.
 	maxVolumeBytes int64 = 99_000_000
-	// maxTotalBytes keeps the total under 2^31-1 (ruling 5, migration 00184).
-	maxTotalBytes int64 = 2_147_483_647
+	// MaxTotalBytes keeps the total under 2^31-1 (ruling 5, migration 00184).
+	MaxTotalBytes int64 = 2_147_483_647
 )
 
 var (
@@ -161,7 +161,7 @@ func ParseReleaseWithoutManifest(row RawRelease) (Release, error) {
 	for _, volume := range volumes {
 		total += volume.Size
 	}
-	if row.TotalSize <= 0 || row.TotalSize >= maxTotalBytes || total != row.TotalSize {
+	if row.TotalSize <= 0 || row.TotalSize >= MaxTotalBytes || total != row.TotalSize {
 		return Release{}, invalid(fmt.Errorf("volumes total %d do not match total_size %d", total, row.TotalSize))
 	}
 	return Release{

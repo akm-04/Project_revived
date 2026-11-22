@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -8,7 +9,24 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
+
+	"gxb.local/backend/v2/internal/application/operator"
+	"gxb.local/backend/v2/internal/application/operatoragent"
 )
+
+func TestPrintModuleTableShowsCommandsRoutesAndPlannedRows(t *testing.T) {
+	var output bytes.Buffer
+	printModuleTable(&output, operatoragent.AgentModules{Modules: []operator.Module{
+		{ID: "ota", Title: "OTA", Commands: []operator.CommandSpec{{Name: "ota.build", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "build"}}},
+		{ID: "mail", Title: "Mail", Planned: "O3"},
+	}})
+	table := output.String()
+	for _, want := range []string{"MODULE", "ota.build", "live", "agent", "mail", "planned", "O3"} {
+		if !strings.Contains(table, want) {
+			t.Fatalf("table lacks %q:\n%s", want, table)
+		}
+	}
+}
 
 func TestWaitForOperationRetriesNotFound(t *testing.T) {
 	var calls atomic.Int32

@@ -1411,7 +1411,7 @@
   },
   {
    "callees": 2,
-   "callers": 4,
+   "callers": 6,
    "mids": 0,
    "name": "operator",
    "path": "internal/application/operator",
@@ -1419,7 +1419,7 @@
    "tables": 2
   },
   {
-   "callees": 2,
+   "callees": 3,
    "callers": 0,
    "mids": 0,
    "name": "operatoragent",
@@ -1428,7 +1428,7 @@
    "tables": 0
   },
   {
-   "callees": 0,
+   "callees": 1,
    "callers": 1,
    "mids": 0,
    "name": "operatorcatalog",
