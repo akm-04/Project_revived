@@ -120,6 +120,21 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 		}
 		return resp.StatusCode, out
 	}
+	// The API's own R7 startup maintenance (backfill/settle) writes the Ranking
+	// rows a SERIALIZABLE title selection reads. When the server's bounded retry
+	// loses that race the D5 mapper answers the retryable 35033, and nothing was
+	// committed, so the same request is safe to repeat.
+	postTransient := func(mid int, fields map[string]any) (int, map[string]any) {
+		t.Helper()
+		deadline := time.Now().Add(20 * time.Second)
+		for {
+			code, out := post(mid, fields)
+			if code != http.StatusServiceUnavailable || out["error_code"] != float64(35033) || time.Now().After(deadline) {
+				return code, out
+			}
+			time.Sleep(50 * time.Millisecond)
+		}
+	}
 
 	cmd := start()
 	running := true
@@ -133,7 +148,7 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 	defer stop()
 	board := func(want int64) {
 		t.Helper()
-		code, out := post(301, map[string]any{"rank_types": []int{37}})
+		code, out := postTransient(301, map[string]any{"rank_types": []int{37}})
 		if code != 200 || out["error_code"] != float64(0) {
 			t.Fatal("MID301", code, out)
 		}
@@ -185,11 +200,11 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 	if n := girlsCount(p, "ranking_girls_snapshots"); n != 1 {
 		t.Fatal("invalid request mutated Ranking", n)
 	}
-	code, out := post(2492, map[string]any{"title_id": 100059, "unique_id": 0})
+	code, out := postTransient(2492, map[string]any{"title_id": 100059, "unique_id": 0})
 	if code != 200 {
 		t.Fatal("genuine ranking title selection", code, out)
 	}
-	code, out = post(2490, map[string]any{})
+	code, out = postTransient(2490, map[string]any{})
 	if code != 200 || !strings.Contains(fmt.Sprint(out["title_list"]), "title_id:100059") {
 		t.Fatal("born ranking player title picker", code, out)
 	}
@@ -257,7 +272,7 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 	cmd = start()
 	running = true
 	board(3)
-	code, out = post(2492, map[string]any{"title_id": 100059, "unique_id": 0})
+	code, out = postTransient(2492, map[string]any{"title_id": 100059, "unique_id": 0})
 	if code != 200 {
 		t.Fatal("restored genuine title", code, out)
 	}
@@ -358,7 +373,7 @@ func TestI7C4CRankingActualAPIReopenRestartAndDatabaseRestore(t *testing.T) {
 	}
 	freshBoard := func() {
 		t.Helper()
-		code, out := post(301, map[string]any{"rank_types": []int{37}})
+		code, out := postTransient(301, map[string]any{"rank_types": []int{37}})
 		if code != 200 {
 			t.Fatal("genuine production Ranking input", code, out)
 		}
