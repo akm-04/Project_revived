@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -20,6 +21,7 @@ const (
 	SessionFileName     = "cli.session"
 	LogsDirectoryName   = "logs"
 	OperationsDirectory = "ops"
+	BackupDirectoryName = "backups"
 	ToolLogFileName     = "tool.log"
 	BackendLogFileName  = "backend.log"
 	DefaultAgentListen  = "127.0.0.1:8090"
@@ -31,6 +33,10 @@ const (
 	maxReadyTimeoutSeconds     = 600
 	minStopGraceSeconds        = 1
 	maxStopGraceSeconds        = 300
+
+	// DefaultBackupKeep is B1/F1: the last five snapshots are kept with no
+	// operator input; backup_keep below 1 is refused.
+	DefaultBackupKeep = 5
 )
 
 // BackendConfig names the backend binary the agent controls.
@@ -74,6 +80,30 @@ type Config struct {
 	// Empty until the operator sets them; the dashboard still renders (F1).
 	PublicURLs []string      `json:"public_urls,omitempty"`
 	Backend    BackendConfig `json:"backend"`
+	// BackupPath defaults to <agent root>/backups (P3); BackupKeep to 5 (B1).
+	BackupPath string `json:"backup_path,omitempty"`
+	BackupKeep *int   `json:"backup_keep,omitempty"`
+	// ToolchainPath is the P2 portable tools folder; unset means the agent's
+	// own PATH (the system-wide P2 choice).
+	ToolchainPath string `json:"toolchain_path,omitempty"`
+}
+
+// BackupDirectory resolves the snapshot folder: the configured path, else
+// <agent root>/backups (P3).
+func (config Config) BackupDirectory(root string) string {
+	if config.BackupPath != "" {
+		return config.BackupPath
+	}
+	return filepath.Join(root, BackupDirectoryName)
+}
+
+// BackupKeepValue resolves the retained snapshot count: the configured value,
+// else DefaultBackupKeep (B1).
+func (config Config) BackupKeepValue() int {
+	if config.BackupKeep == nil {
+		return DefaultBackupKeep
+	}
+	return *config.BackupKeep
 }
 
 // LoadConfig reads and validates <root>/agent.json.
@@ -133,7 +163,73 @@ func (config Config) Validate() error {
 	if value := config.Backend.StopGraceSeconds; value != nil && (*value < minStopGraceSeconds || *value > maxStopGraceSeconds) {
 		return fmt.Errorf("%s: backend.stop_grace_seconds %d is outside %d..%d", AgentConfigFileName, *value, minStopGraceSeconds, maxStopGraceSeconds)
 	}
+	if value := config.BackupKeep; value != nil && *value < 1 {
+		return fmt.Errorf("%s: backup_keep %d must be at least 1", AgentConfigFileName, *value)
+	}
+	if config.BackupPath != "" {
+		if !filepath.IsAbs(config.BackupPath) {
+			return errors.New(AgentConfigFileName + ": backup_path must be absolute")
+		}
+		for name, tree := range config.protectedTrees() {
+			if tree != "" && pathWithin(config.BackupPath, tree) {
+				return fmt.Errorf("%s: backup_path must not be inside %s", AgentConfigFileName, name)
+			}
+		}
+		if err := ensureWritableDirectory(config.BackupPath); err != nil {
+			return fmt.Errorf("%s: backup_path is not writable: %w", AgentConfigFileName, err)
+		}
+	}
+	if config.ToolchainPath != "" {
+		info, err := os.Stat(config.ToolchainPath)
+		if err != nil || !info.IsDir() {
+			return errors.New(AgentConfigFileName + ": toolchain_path is not a readable directory")
+		}
+	}
 	return nil
+}
+
+// protectedTrees are the res and backend trees B1 keeps the backup folder out
+// of: the OTA root (res), the client tree, the stock sources and the backend
+// binary's folder.
+func (config Config) protectedTrees() map[string]string {
+	trees := map[string]string{
+		"ota_root":     config.OTARoot,
+		"client_tree":  config.ClientTree,
+		"stock_source": config.StockSource,
+	}
+	if config.Backend.Binary != "" {
+		trees["backend_binary"] = filepath.Dir(config.Backend.Binary)
+	}
+	return trees
+}
+
+func pathWithin(child, parent string) bool {
+	childPath, err := filepath.Abs(child)
+	if err != nil {
+		return false
+	}
+	parentPath, err := filepath.Abs(parent)
+	if err != nil {
+		return false
+	}
+	relative, err := filepath.Rel(parentPath, childPath)
+	if err != nil {
+		return false
+	}
+	return relative == "." || (relative != ".." && !strings.HasPrefix(relative, ".."+string(os.PathSeparator)))
+}
+
+func ensureWritableDirectory(path string) error {
+	if err := os.MkdirAll(path, 0o700); err != nil {
+		return err
+	}
+	probe, err := os.CreateTemp(path, ".backup-write-check-*")
+	if err != nil {
+		return err
+	}
+	name := probe.Name()
+	_ = probe.Close()
+	return os.Remove(name)
 }
 
 func isLoopbackAddress(address string) bool {

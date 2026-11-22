@@ -6,7 +6,6 @@ import (
 	"errors"
 	"net/url"
 	"os"
-	"path/filepath"
 	"strconv"
 	"time"
 
@@ -21,8 +20,6 @@ const (
 	// CloudflareMetricsNotInV2 records the V2 scope: no Cloudflare token, so no
 	// cache metrics (OPERATOR_GUI_V2 design item 7).
 	CloudflareMetricsNotInV2 = "not_in_v2"
-	// BackupsDirectoryName is the P3 default snapshot folder inside the agent root.
-	BackupsDirectoryName = "backups"
 )
 
 // DashboardModule is the agent's dashboard module: one read that folds the
@@ -305,9 +302,4 @@ func orEmptyStrings(values []string) []string {
 		return []string{}
 	}
 	return values
-}
-
-// BackupsDirectory returns the P3 default snapshot folder under the agent root.
-func BackupsDirectory(root string) string {
-	return filepath.Join(root, BackupsDirectoryName)
 }

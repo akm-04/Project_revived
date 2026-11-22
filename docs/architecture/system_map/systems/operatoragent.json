@@ -30,6 +30,8 @@
   "integration": [],
   "scenarios_naming": [],
   "unit": [
+   "backup_native_test.go",
+   "backup_test.go",
    "config_test.go",
    "credentials_test.go",
    "dashboard_test.go",

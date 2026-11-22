@@ -26,7 +26,7 @@ func run(args []string) error {
 	switch invocation.command {
 	case "agent":
 		return runAgent(invocation.root, invocation.arguments)
-	case "setup", "login", "logout", "reset-password", "backend", "cmd", "read", "ota", "op", "modules", "log":
+	case "setup", "login", "logout", "reset-password", "backend", "cmd", "read", "ota", "backup", "op", "modules", "log":
 		return runClientCommand(invocation.root, invocation.command, invocation.arguments)
 	default:
 		usage()
@@ -66,6 +66,11 @@ func usage() {
   gxb-operator ota build --lane <code|assets|catalog> --version <v> [--rollback] [--no-wait]
   gxb-operator ota publish <version> --reason <text> [--key <key>]
   gxb-operator ota withdraw <version> --reason <text> [--key <key>]
+  gxb-operator backup snapshot [--kind manual|safety|pre-update|pre-delete] --reason <text>
+  gxb-operator backup list
+  gxb-operator backup prune --reason <text>
+  gxb-operator backup restore <id> --reason <text>
+  gxb-operator backup update-backend --reason <text>
   gxb-operator op status <id>
   gxb-operator modules [--json]
   gxb-operator log tail [-n N]

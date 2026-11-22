@@ -37,6 +37,10 @@ func (client fakeDashboardOperator) Command(context.Context, OperatorRequest) (B
 	return BackendResponse{}, errors.New("no command expected")
 }
 
+func (client fakeDashboardOperator) Version(context.Context) (operator.VersionInfo, error) {
+	return operator.VersionInfo{}, errors.New("no version expected")
+}
+
 func (client fakeDashboardOperator) Read(_ context.Context, name, _ string) (BackendResponse, error) {
 	if err := client.errs[name]; err != nil {
 		return BackendResponse{}, err

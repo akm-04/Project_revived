@@ -65,3 +65,34 @@ func TestModuleCatalogStillAnswersTheAgentModulesWithoutTheBackend(t *testing.T)
 		t.Fatalf("modules = %+v", list.Modules)
 	}
 }
+
+func TestBackupModuleIsRegisteredAsAnAgentModule(t *testing.T) {
+	module := BackupModule()
+	if module.ID != "backup" || module.Planned != "" || len(module.Commands) != 5 {
+		t.Fatalf("module = %+v", module)
+	}
+	for _, command := range module.Commands {
+		if command.Route != operator.RouteAgent {
+			t.Fatalf("command %q route = %q", command.Name, command.Route)
+		}
+	}
+	for _, planned := range operator.PlannedModules() {
+		if planned.ID == "backup" {
+			t.Fatal("the backend still declares backup as a later leaf")
+		}
+	}
+	catalog := ModuleCatalog{Backend: fakeBackendModules{}, Local: []operator.Module{BackupModule()}}
+	list := catalog.List(context.Background())
+	if len(list.Modules) != 1 || list.Modules[0].ID != "backup" || list.Modules[0].Planned != "" {
+		t.Fatalf("merged list = %+v", list.Modules)
+	}
+	for _, command := range list.Modules[0].Commands {
+		if command.Name == "backup.restore" {
+			if len(command.Fields) != 1 || command.Fields[0].Name != "id" || !command.Fields[0].Required {
+				t.Fatalf("backup.restore fields = %+v", command.Fields)
+			}
+			return
+		}
+	}
+	t.Fatal("backup.restore is not declared")
+}

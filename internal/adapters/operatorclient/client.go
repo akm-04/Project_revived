@@ -69,22 +69,6 @@ func (client *Client) Modules(ctx context.Context) ([]operator.Module, error) {
 	return reply.Modules, nil
 }
 
-// Version reads GET /operator/v1/version.
-func (client *Client) Version(ctx context.Context) (operator.VersionInfo, error) {
-	var version operator.VersionInfo
-	response, err := client.do(ctx, http.MethodGet, client.baseURL+"/operator/v1/version", nil)
-	if err != nil {
-		return version, err
-	}
-	if response.Status != http.StatusOK {
-		return version, fmt.Errorf("the backend version answered HTTP %d", response.Status)
-	}
-	if err := json.Unmarshal(response.Body, &version); err != nil {
-		return version, err
-	}
-	return version, nil
-}
-
 // Read runs one operator read.
 func (client *Client) Read(ctx context.Context, name, query string) (operatoragent.BackendResponse, error) {
 	url := client.baseURL + "/operator/v1/reads/" + name
@@ -92,6 +76,23 @@ func (client *Client) Read(ctx context.Context, name, query string) (operatorage
 		url += "?" + query
 	}
 	return client.do(ctx, http.MethodGet, url, nil)
+}
+
+// Version fetches the backend's build and migration facts (ruling 8); a
+// backend refusal passes through unchanged.
+func (client *Client) Version(ctx context.Context) (operator.VersionInfo, error) {
+	response, err := client.do(ctx, http.MethodGet, client.baseURL+"/operator/v1/version", nil)
+	if err != nil {
+		return operator.VersionInfo{}, err
+	}
+	if response.Status != http.StatusOK {
+		return operator.VersionInfo{}, &operatoragent.BackendRefusal{Status: response.Status, Body: response.Body}
+	}
+	var version operator.VersionInfo
+	if err := json.Unmarshal(response.Body, &version); err != nil {
+		return operator.VersionInfo{}, fmt.Errorf("the backend version reply is not JSON: %w", err)
+	}
+	return version, nil
 }
 
 func (client *Client) do(ctx context.Context, method, url string, body []byte) (operatoragent.BackendResponse, error) {

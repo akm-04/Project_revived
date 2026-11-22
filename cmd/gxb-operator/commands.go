@@ -35,6 +35,8 @@ func runClientCommand(root, command string, remaining []string) error {
 		return runRead(root, remaining)
 	case "ota":
 		return runOTA(root, remaining)
+	case "backup":
+		return runBackup(root, remaining)
 	case "op":
 		return runOperation(root, remaining)
 	case "modules":
@@ -208,6 +210,88 @@ func runCommand(root string, args []string) error {
 		return err
 	}
 	return printResult(status, body)
+}
+
+func runBackup(root string, args []string) error {
+	if len(args) == 0 {
+		return errors.New("usage: backup snapshot|list|prune|restore|update-backend")
+	}
+	client, err := newAgentClient(root, true)
+	if err != nil {
+		return err
+	}
+	switch args[0] {
+	case "snapshot":
+		flags := flag.NewFlagSet("backup snapshot", flag.ContinueOnError)
+		flags.SetOutput(os.Stderr)
+		kind := flags.String("kind", operatoragent.BackupKindManual, "manual, safety, pre-update or pre-delete")
+		reason := flags.String("reason", "", "why the snapshot is taken")
+		if err := flags.Parse(args[1:]); err != nil {
+			return err
+		}
+		if *reason == "" {
+			return errors.New("--reason is required")
+		}
+		status, body, err := client.request(http.MethodPost, "/agent/v1/backup/snapshot", map[string]string{"kind": *kind, "reason": *reason})
+		if err != nil {
+			return err
+		}
+		return printResult(status, body)
+	case "list":
+		status, body, err := client.request(http.MethodGet, "/agent/v1/backup/list", nil)
+		if err != nil {
+			return err
+		}
+		return printResult(status, body)
+	case "prune":
+		reason, err := backupReasonFlag(args[1:])
+		if err != nil {
+			return err
+		}
+		status, body, err := client.request(http.MethodPost, "/agent/v1/backup/prune", map[string]string{"reason": reason})
+		if err != nil {
+			return err
+		}
+		return printResult(status, body)
+	case "restore":
+		if len(args) < 2 {
+			return errors.New("usage: backup restore <id> --reason <text>")
+		}
+		reason, err := backupReasonFlag(args[2:])
+		if err != nil {
+			return err
+		}
+		status, body, err := client.request(http.MethodPost, "/agent/v1/backup/restore", map[string]string{"id": args[1], "reason": reason})
+		if err != nil {
+			return err
+		}
+		return printResult(status, body)
+	case "update-backend":
+		reason, err := backupReasonFlag(args[1:])
+		if err != nil {
+			return err
+		}
+		status, body, err := client.request(http.MethodPost, "/agent/v1/backup/update-backend", map[string]string{"reason": reason})
+		if err != nil {
+			return err
+		}
+		return printResult(status, body)
+	default:
+		return fmt.Errorf("unknown backup command %q", args[0])
+	}
+}
+
+func backupReasonFlag(args []string) (string, error) {
+	flags := flag.NewFlagSet("backup reason", flag.ContinueOnError)
+	flags.SetOutput(os.Stderr)
+	reason := flags.String("reason", "", "why the operator runs the backup command")
+	if err := flags.Parse(args); err != nil {
+		return "", err
+	}
+	if *reason == "" {
+		return "", errors.New("--reason is required")
+	}
+	return *reason, nil
 }
 
 func runRead(root string, args []string) error {

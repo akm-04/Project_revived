@@ -58,6 +58,7 @@ type BackendResponse struct {
 type OperatorClient interface {
 	Command(context.Context, OperatorRequest) (BackendResponse, error)
 	Read(ctx context.Context, name, query string) (BackendResponse, error)
+	Version(context.Context) (operator.VersionInfo, error)
 }
 
 // Maintenance is the OTA publish/withdraw flow of I11A_OTA_RELEASE_V1 ruling

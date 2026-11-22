@@ -441,6 +441,10 @@ func (staticOperator) Read(context.Context, string, string) (operatoragent.Backe
 	return operatoragent.BackendResponse{Status: http.StatusOK, Body: []byte(`{"revision":1}`)}, nil
 }
 
+func (staticOperator) Version(context.Context) (operator.VersionInfo, error) {
+	return operator.VersionInfo{Migration: 1}, nil
+}
+
 func TestBackendStartRefusedWhileMaintenanceRuns(t *testing.T) {
 	credentials := operatoragent.NewCredentials(t.TempDir())
 	if err := credentials.Setup("test password"); err != nil {
@@ -534,6 +538,10 @@ func (state *dashboardReadState) Command(context.Context, operatoragent.Operator
 	return operatoragent.BackendResponse{}, errors.New("no command expected")
 }
 
+func (state *dashboardReadState) Version(context.Context) (operator.VersionInfo, error) {
+	return operator.VersionInfo{}, errors.New("no version expected")
+}
+
 func (state *dashboardReadState) Read(_ context.Context, name, _ string) (operatoragent.BackendResponse, error) {
 	state.reads = append(state.reads, name)
 	switch name {
@@ -570,5 +578,56 @@ func TestDashboardReadIsComposedByTheAgent(t *testing.T) {
 	}
 	if len(reads.reads) != 3 {
 		t.Fatalf("backend reads = %v", reads.reads)
+	}
+}
+
+func TestBackupRoutesUseTheAgentService(t *testing.T) {
+	credentials := operatoragent.NewCredentials(t.TempDir())
+	if err := credentials.Setup("test password"); err != nil {
+		t.Fatal(err)
+	}
+	sessions := operatoragent.NewSessions(time.Now)
+	generation, err := credentials.Generation()
+	if err != nil {
+		t.Fatal(err)
+	}
+	session, _, err := sessions.Login(generation)
+	if err != nil {
+		t.Fatal(err)
+	}
+	directory := t.TempDir()
+	guard := &operatoragent.BackendGuard{}
+	backup := &operatoragent.BackupService{
+		Directory:  directory,
+		Keep:       5,
+		Operations: operatoragent.NewOperations(directory+"/ops", nil, time.Now),
+		Guard:      guard,
+		Now:        time.Now,
+	}
+	handler := Handler{Credentials: credentials, Sessions: sessions, Backup: backup, Listen: testListen, Guard: guard}
+
+	listed := serveAgent(handler, http.MethodGet, "/agent/v1/backup/list", session, "")
+	if listed.Code != http.StatusOK || !strings.Contains(listed.Body.String(), `"keep":5`) {
+		t.Fatalf("list: %d %s", listed.Code, listed.Body)
+	}
+
+	missingReason := serveAgent(handler, http.MethodPost, "/agent/v1/backup/snapshot", session, `{"kind":"manual"}`)
+	if missingReason.Code != http.StatusConflict || refusalCodeOf(t, missingReason) != operatoragent.CodeBodyInvalid {
+		t.Fatalf("missing reason: %d %s", missingReason.Code, missingReason.Body)
+	}
+
+	noTools := serveAgent(handler, http.MethodPost, "/agent/v1/backup/snapshot", session, `{"reason":"manual"}`)
+	if noTools.Code != http.StatusConflict || refusalCodeOf(t, noTools) != operatoragent.CodeBackupToolsMissing {
+		t.Fatalf("no tools: %d %s", noTools.Code, noTools.Body)
+	}
+
+	restoreBody := serveAgent(handler, http.MethodPost, "/agent/v1/backup/restore", session, `{"reason":"r"}`)
+	if restoreBody.Code != http.StatusConflict || refusalCodeOf(t, restoreBody) != operatoragent.CodeBodyInvalid {
+		t.Fatalf("restore without id: %d %s", restoreBody.Code, restoreBody.Body)
+	}
+
+	wrongMethod := serveAgent(handler, http.MethodGet, "/agent/v1/backup/snapshot", session, "")
+	if wrongMethod.Code != http.StatusNotFound {
+		t.Fatalf("wrong method: %d %s", wrongMethod.Code, wrongMethod.Body)
 	}
 }

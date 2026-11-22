@@ -102,7 +102,13 @@ func (operations *Operations) Recover() error {
 // The returned error is the failing step's own error, so a backend refusal
 // reaches the CLI unchanged; the operation document names the failed step.
 func (operations *Operations) Run(ctx context.Context, kind string, steps []Step) (Operation, error) {
-	operation, guard, err := operations.claim(kind, "", nil)
+	return operations.RunKeyed(ctx, kind, "", nil, steps)
+}
+
+// RunKeyed is Run with the semantic key and request recorded, so a crash
+// leaves the operator enough to reason about the operation.
+func (operations *Operations) RunKeyed(ctx context.Context, kind, semanticKey string, request json.RawMessage, steps []Step) (Operation, error) {
+	operation, guard, err := operations.claim(kind, semanticKey, request)
 	if err != nil {
 		return Operation{}, err
 	}
