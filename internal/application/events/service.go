@@ -35,18 +35,19 @@ var (
 
 // Refusal codes (I11A_OPERATOR_COMMANDS_V1 ruling 4; I11A_EVENTS_V1).
 const (
-	CodePayloadInvalid      = "EVENT_PAYLOAD_INVALID"
-	CodeDefinitionInvalid   = "EVENT_DEFINITION_INVALID"
-	CodeDefinitionUnknown   = "EVENT_DEFINITION_NOT_FOUND"
-	CodeRevisionExists      = "EVENT_REVISION_EXISTS"
-	CodeOverlap             = "EVENT_OVERLAP"
-	CodeClientContentMissed = "EVENT_CLIENT_CONTENT_MISSING"
-	CodeHookUnbuilt         = "EVENT_HOOK_UNBUILT"
-	CodeGiftUnsupported     = "EVENT_GIFT_UNSUPPORTED"
-	CodeOccurrenceUnknown   = "EVENT_OCCURRENCE_NOT_FOUND"
-	CodeServerUnknown       = "EVENT_SERVER_UNKNOWN"
-	CodeStateInvalid        = "EVENT_STATE_INVALID"
-	CodeStale               = "EVENT_STALE"
+	CodePayloadInvalid         = "EVENT_PAYLOAD_INVALID"
+	CodeDefinitionInvalid      = "EVENT_DEFINITION_INVALID"
+	CodeDefinitionsNotComposed = "EVENT_DEFINITIONS_NOT_COMPOSED"
+	CodeDefinitionUnknown      = "EVENT_DEFINITION_NOT_FOUND"
+	CodeRevisionExists         = "EVENT_REVISION_EXISTS"
+	CodeOverlap                = "EVENT_OVERLAP"
+	CodeClientContentMissed    = "EVENT_CLIENT_CONTENT_MISSING"
+	CodeHookUnbuilt            = "EVENT_HOOK_UNBUILT"
+	CodeGiftUnsupported        = "EVENT_GIFT_UNSUPPORTED"
+	CodeOccurrenceUnknown      = "EVENT_OCCURRENCE_NOT_FOUND"
+	CodeServerUnknown          = "EVENT_SERVER_UNKNOWN"
+	CodeStateInvalid           = "EVENT_STATE_INVALID"
+	CodeStale                  = "EVENT_STALE"
 )
 
 // OccurrenceLockRank is the events occurrence row lock (EA-9, EA-10): after the
@@ -285,6 +286,9 @@ type Commands struct {
 	Hooks             HookRegistry
 	OperatorCatalogue operatorcatalog.Document
 	Audit             operator.Store
+	// Content reads the active content revision that keys a shipped-file sync
+	// (EA-14.3); it is the ContentRevision seam MID 231 already uses.
+	Content ContentRevision
 	// Shipped are the definition files compiled into the API (EA-13); composition
 	// loads them from the content layer.
 	Shipped []DefinitionFile

@@ -28842,7 +28842,7 @@
     },
     {
      "file": "internal/adapters/postgres/eventstore/store.go",
-     "line": 742,
+     "line": 744,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',player_id,'occurrence_id',occurrence_id,'tier',tier,'period',period, 'choice',choice,'claimed_at',claimed_at,'grant_receipt',grant_receipt, 'award_body',COALESCE(award_body::text,''),'payload_version',payload_version) ORDER BY tier,period),'[]'::jsonb)::text FROM ("
     },
     {
@@ -29140,8 +29140,8 @@
    "state_writes": [
     "internal/adapters/postgres/characterstore/store.go:109",
     "internal/adapters/postgres/characterstore/store.go:95",
-    "internal/adapters/postgres/eventstore/store.go:679",
-    "internal/adapters/postgres/eventstore/store.go:716",
+    "internal/adapters/postgres/eventstore/store.go:681",
+    "internal/adapters/postgres/eventstore/store.go:718",
     "internal/adapters/postgres/i4store/directory_level_projection.go:34",
     "internal/adapters/postgres/i5store/scalar_daily_floor.go:26",
     "internal/adapters/postgres/i5store/store.go:252",
@@ -29287,7 +29287,7 @@
     },
     {
      "file": "internal/adapters/postgres/eventstore/store.go",
-     "line": 396,
+     "line": 398,
      "statement": "SELECT jsonb_build_object( 'id',id,'logical_server_id',logical_server_id,'activity_id',activity_id, 'definition_revision',definition_revision,'starts_at',starts_at,'ends_at',ends_at, 'claim_until',claim_until,'source',source,'revision',revision, 'created_by_command',created_by_command,'ended_early_by_command',ended_early_by_command, 'cancelled_by_command',cancelled_by_command,'cancelled_at',cancelled_at, 'settled_at',settled_at,'created_at',created_at) FROM event_occurrences WHERE id=$1 FOR SHARE"
     },
     {
@@ -29413,7 +29413,7 @@
     },
     {
      "file": "internal/adapters/postgres/eventstore/store.go",
-     "line": 742,
+     "line": 744,
      "statement": "SELECT COALESCE(jsonb_agg(jsonb_build_object( 'player_id',player_id,'occurrence_id',occurrence_id,'tier',tier,'period',period, 'choice',choice,'claimed_at',claimed_at,'grant_receipt',grant_receipt, 'award_body',COALESCE(award_body::text,''),'payload_version',payload_version) ORDER BY tier,period),'[]'::jsonb)::text FROM ("
     },
     {

@@ -570,7 +570,7 @@ func main() {
 	if err != nil {
 		log.Printf("events shipped definitions: %v", err)
 	}
-	eventCommands := appevents.Commands{Store: eventstore.Store{}, Coverage: otaServing, Gifts: eventstore.ContentGifts{}, Catalogue: eventstore.ContentCatalogue{}, Hooks: eventHooks, OperatorCatalogue: operatorCatalogue, Audit: operatorstore.Store{}}
+	eventCommands := appevents.Commands{Store: eventstore.Store{}, Coverage: otaServing, Gifts: eventstore.ContentGifts{}, Catalogue: eventstore.ContentCatalogue{}, Hooks: eventHooks, OperatorCatalogue: operatorCatalogue, Audit: operatorstore.Store{}, Content: contentDB}
 	for _, file := range shippedDefinitions {
 		eventCommands.Shipped = append(eventCommands.Shipped, appevents.DefinitionFile{Name: file.Name, Body: file.Body})
 	}

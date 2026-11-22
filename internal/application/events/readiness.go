@@ -18,9 +18,10 @@ const (
 // Readiness is the one scheduling gate. events.schedule refuses exactly when
 // State is not READY, and events.definition.list reports the same state.
 type Readiness struct {
-	State        string
-	MissingPaths []string
-	refusal      *operator.Refusal
+	State              string
+	MissingPaths       []string
+	MissingCodeVersion string
+	refusal            *operator.Refusal
 }
 
 // Refusal is the schedule refusal of a non-READY state, nil when READY.
@@ -39,7 +40,12 @@ func EvaluateReadiness(ctx context.Context, definition events.Definition, hooks 
 		return Readiness{}, err
 	}
 	if refusal := coverageGate(covered); refusal != nil {
-		return Readiness{State: ReadinessClientContentMissing, MissingPaths: covered.MissingClientPaths, refusal: refusal}, nil
+		missingPaths := make([]string, 0, len(covered.MissingClientPaths)+len(covered.MissingLazyAssets))
+		missingPaths = append(missingPaths, covered.MissingClientPaths...)
+		for _, asset := range covered.MissingLazyAssets {
+			missingPaths = append(missingPaths, asset.Path)
+		}
+		return Readiness{State: ReadinessClientContentMissing, MissingPaths: missingPaths, MissingCodeVersion: covered.MissingCodeVersion, refusal: refusal}, nil
 	}
 	return Readiness{State: ReadinessReady}, nil
 }

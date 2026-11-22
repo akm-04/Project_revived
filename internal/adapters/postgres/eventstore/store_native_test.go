@@ -9,6 +9,7 @@ import (
 	"os"
 	"reflect"
 	"strconv"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -64,6 +65,12 @@ type fakeCatalogue struct{}
 
 func (fakeCatalogue) CheckRewardsTx(context.Context, tx.Queryer, []domainevents.RewardLine) error {
 	return nil
+}
+
+type fakeContentRevision struct{ revision string }
+
+func (content *fakeContentRevision) ActiveRevision(context.Context, tx.Queryer) (string, error) {
+	return content.revision, nil
 }
 
 func e1BusFrom(t *testing.T, pool *pg.Pool, coverage appevents.Coverage) operator.Bus {
@@ -794,7 +801,7 @@ func TestDefinitionSyncIsIdempotentAndKeepsStoredRevision(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	commands := appevents.Commands{Store: eventstore.Store{}, Coverage: fakeCoverage{}, Gifts: fakeGifts{}, Catalogue: fakeCatalogue{}, Hooks: hooks, Audit: operatorstore.Store{}}
+	commands := appevents.Commands{Store: eventstore.Store{}, Coverage: fakeCoverage{}, Gifts: fakeGifts{}, Catalogue: fakeCatalogue{}, Hooks: hooks, Audit: operatorstore.Store{}, Content: &fakeContentRevision{revision: strings.Repeat("a", 64)}}
 	activityID := int64(1195)
 	original := []byte(`{"activity_id":1195,"revision":1,"archetype":"DISPLAY","client_requirements":{},"default_days":3}`)
 	files := []appevents.DefinitionFile{{Name: "1195.json", Body: original}}
@@ -847,7 +854,7 @@ func TestDefinitionReloadDeploysShippedFilesThroughTheBus(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	commands := appevents.Commands{Store: eventstore.Store{}, Coverage: fakeCoverage{}, Gifts: eventstore.ContentGifts{}, Catalogue: eventstore.ContentCatalogue{}, Hooks: hooks, Audit: operatorstore.Store{}, Shipped: e1ShippedFiles(t)}
+	commands := appevents.Commands{Store: eventstore.Store{}, Coverage: fakeCoverage{}, Gifts: eventstore.ContentGifts{}, Catalogue: eventstore.ContentCatalogue{}, Hooks: hooks, Audit: operatorstore.Store{}, Content: &fakeContentRevision{revision: strings.Repeat("a", 64)}, Shipped: e1ShippedFiles(t)}
 	bus := operator.Bus{Runner: tx.Runner{DB: pool}, Clock: clock.System{}, Store: operatorstore.Store{}, Handlers: commands.Handlers()}
 	outcome := e1Execute(t, bus, e1Command(t, "events.definition.reload", nil, "global", map[string]any{}))
 	if outcome.State != operator.StateApplied {
@@ -897,4 +904,88 @@ func e1ShippedFiles(t *testing.T) []appevents.DefinitionFile {
 		files = append(files, appevents.DefinitionFile{Name: file.Name, Body: file.Body})
 	}
 	return files
+}
+
+func TestDefinitionListShowsLatestRevisionAndClearsSupersededConflict(t *testing.T) {
+	pool := e1Pool(t)
+	hooks, err := appevents.NewHookRegistry()
+	if err != nil {
+		t.Fatal(err)
+	}
+	commands := appevents.Commands{Store: eventstore.Store{}, Coverage: fakeCoverage{}, Gifts: fakeGifts{}, Catalogue: fakeCatalogue{}, Hooks: hooks, Audit: operatorstore.Store{}, Content: &fakeContentRevision{revision: strings.Repeat("a", 64)}}
+	activityID := int64(1196)
+	first := []byte(`{"activity_id":1196,"revision":1,"archetype":"DISPLAY","client_requirements":{},"default_days":3}`)
+	conflicting := []byte(`{"activity_id":1196,"revision":1,"archetype":"DISPLAY","client_requirements":{},"default_days":9}`)
+	upgraded := []byte(`{"activity_id":1196,"revision":2,"archetype":"DISPLAY","client_requirements":{},"default_days":5}`)
+
+	if results := e1SyncFiles(t, pool, commands, []appevents.DefinitionFile{{Name: "1196.json", Body: first}}); len(results) != 1 || results[0].Outcome != appevents.SyncDeployed {
+		t.Fatalf("first sync = %+v", results)
+	}
+	if results := e1SyncFiles(t, pool, commands, []appevents.DefinitionFile{{Name: "1196.json", Body: conflicting}}); len(results) != 1 || results[0].Outcome != appevents.SyncConflict {
+		t.Fatalf("conflicting sync = %+v", results)
+	}
+	rows, err := (eventstore.Store{}).ListDefinitionsTx(context.Background(), pool, activityID, 10)
+	if err != nil || len(rows) != 1 || rows[0].Revision != 1 || rows[0].SyncConflictSHA256 == "" {
+		t.Fatalf("latest revision with its conflict = %+v %v", rows, err)
+	}
+
+	if results := e1SyncFiles(t, pool, commands, []appevents.DefinitionFile{{Name: "1196.json", Body: upgraded}}); len(results) != 1 || results[0].Outcome != appevents.SyncDeployed {
+		t.Fatalf("upgraded sync = %+v", results)
+	}
+	rows, err = (eventstore.Store{}).ListDefinitionsTx(context.Background(), pool, activityID, 10)
+	if err != nil || len(rows) != 1 || rows[0].Revision != 2 || rows[0].SyncConflictSHA256 != "" {
+		t.Fatalf("list must show only the latest revision: %+v %v", rows, err)
+	}
+	var conflicts int
+	if err := pool.Raw().QueryRow(context.Background(), `SELECT count(*) FROM event_definition_sync_conflicts WHERE activity_id=$1`, activityID).Scan(&conflicts); err != nil {
+		t.Fatal(err)
+	}
+	if conflicts != 0 {
+		t.Fatalf("a good sync must clear the older revision's conflict rows, got %d", conflicts)
+	}
+}
+
+func TestDefinitionSyncRetriesAfterContentRevisionChange(t *testing.T) {
+	pool := e1Pool(t)
+	hooks, err := appevents.NewHookRegistry()
+	if err != nil {
+		t.Fatal(err)
+	}
+	content := &fakeContentRevision{revision: strings.Repeat("a", 64)}
+	commands := appevents.Commands{Store: eventstore.Store{}, Coverage: fakeCoverage{}, Gifts: fakeGifts{}, Catalogue: fakeCatalogue{}, Hooks: hooks, Audit: operatorstore.Store{}, Content: content}
+	body := []byte(`{"activity_id":1197,"revision":1,"archetype":"TIERED_CLAIM","client_requirements":{},"default_days":-1,"tiers":[{"id":1,"requirement":{"kind":"player_level","value":10},"choices":[{"gift_id":90001428}]}]}`)
+	files := []appevents.DefinitionFile{{Name: "1197.json", Body: body}}
+
+	if results := e1SyncFiles(t, pool, commands, files); len(results) != 1 || results[0].Outcome != appevents.SyncInvalid || results[0].Error == "" {
+		t.Fatalf("a gift the content cannot expand must be invalid: %+v", results)
+	}
+	content.revision = strings.Repeat("b", 64)
+	if results := e1SyncFiles(t, pool, commands, files); len(results) != 1 || results[0].Outcome != appevents.SyncInvalid {
+		t.Fatalf("the retried sync must run again: %+v", results)
+	}
+
+	rows, err := pool.Raw().Query(context.Background(), `SELECT semantic_key FROM operator_commands WHERE semantic_key LIKE 'sync:1197:%' ORDER BY created_at, semantic_key`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rows.Close()
+	keys := make([]string, 0, 2)
+	for rows.Next() {
+		var key string
+		if err := rows.Scan(&key); err != nil {
+			t.Fatal(err)
+		}
+		keys = append(keys, key)
+	}
+	if err := rows.Err(); err != nil {
+		t.Fatal(err)
+	}
+	sawFirst, sawSecond := false, false
+	for _, key := range keys {
+		sawFirst = sawFirst || strings.HasSuffix(key, strings.Repeat("a", 16))
+		sawSecond = sawSecond || strings.HasSuffix(key, strings.Repeat("b", 16))
+	}
+	if len(keys) != 2 || !sawFirst || !sawSecond {
+		t.Fatalf("each content revision must carry its own sync key, got %+v", keys)
+	}
 }

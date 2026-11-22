@@ -61,12 +61,19 @@ func (commands Commands) reloadHandler(ctx context.Context, scope tx.Scope, comm
 // transaction. A file's refusal is data (SYNC_CONFLICT or invalid); an
 // infrastructure fault aborts so the transaction rolls back.
 func (commands Commands) SyncFiles(ctx context.Context, transaction tx.Tx, at time.Time, files []DefinitionFile) ([]SyncResult, error) {
-	if transaction == nil || at.IsZero() || commands.Store == nil || commands.Audit == nil {
+	if transaction == nil || at.IsZero() || commands.Store == nil || commands.Audit == nil || commands.Content == nil {
 		return nil, ErrUnavailable
+	}
+	if len(files) == 0 {
+		return nil, operator.Refuse(CodeDefinitionsNotComposed, "no shipped event definition files are composed", nil)
+	}
+	contentRevision, err := commands.Content.ActiveRevision(ctx, transaction)
+	if err != nil {
+		return nil, err
 	}
 	results := make([]SyncResult, 0, len(files))
 	for _, file := range files {
-		result, err := commands.syncFile(ctx, transaction, at, file)
+		result, err := commands.syncFile(ctx, transaction, at, contentRevision, file)
 		if err != nil {
 			return nil, err
 		}
@@ -75,7 +82,7 @@ func (commands Commands) SyncFiles(ctx context.Context, transaction tx.Tx, at ti
 	return results, nil
 }
 
-func (commands Commands) syncFile(ctx context.Context, transaction tx.Tx, at time.Time, file DefinitionFile) (SyncResult, error) {
+func (commands Commands) syncFile(ctx context.Context, transaction tx.Tx, at time.Time, contentRevision string, file DefinitionFile) (SyncResult, error) {
 	definition, err := domainevents.ParseDefinition(file.Body)
 	if err != nil {
 		return SyncResult{File: file.Name, Outcome: SyncInvalid, Error: err.Error()}, nil
@@ -84,7 +91,7 @@ func (commands Commands) syncFile(ctx context.Context, transaction tx.Tx, at tim
 	shippedSHA := fileDigest(file.Body)
 	command, err := operator.NewCommand("events.definition.deploy", operator.Envelope{
 		Principal: SyncSystemPrincipal, Role: operator.RoleRoot, Scope: "global", Reason: SyncSystemReason,
-		SemanticKey: syncCommandKey(definition, shippedSHA),
+		SemanticKey: syncCommandKey(definition, shippedSHA, contentRevision),
 	}, file.Body)
 	if err != nil {
 		result.Outcome, result.Error = SyncInvalid, err.Error()
@@ -95,6 +102,11 @@ func (commands Commands) syncFile(ctx context.Context, transaction tx.Tx, at tim
 		return SyncResult{}, err
 	}
 	if record != nil {
+		if record.ModuleCommand != command.ModuleCommand || record.PayloadSHA256 != command.PayloadSHA256 {
+			result.Outcome = SyncInvalid
+			result.Error = operator.CodeKeyReused + ": this semantic key was used with another command or payload"
+			return result, nil
+		}
 		switch record.State {
 		case operator.StateApplied:
 			if err := commands.Store.ClearDefinitionConflictTx(ctx, transaction, definition.ActivityID, definition.Revision); err != nil {
@@ -172,8 +184,19 @@ func fileDigest(body []byte) string {
 	return hex.EncodeToString(digest[:])
 }
 
-func syncCommandKey(definition domainevents.Definition, shippedSHA string) string {
-	return fmt.Sprintf("sync:%d:%d:%s", definition.ActivityID, definition.Revision, shippedSHA)
+// syncContentRevisionLimit keeps the key inside the 128-character envelope limit
+// (I11A_OPERATOR_COMMANDS_V1 ruling 2); the content revision itself is a 64-char sha.
+const syncContentRevisionLimit = 16
+
+func syncCommandKey(definition domainevents.Definition, shippedSHA, contentRevision string) string {
+	return fmt.Sprintf("sync:%d:%d:%s:%s", definition.ActivityID, definition.Revision, shippedSHA, shortContentRevision(contentRevision))
+}
+
+func shortContentRevision(revision string) string {
+	if len(revision) <= syncContentRevisionLimit {
+		return revision
+	}
+	return revision[:syncContentRevisionLimit]
 }
 
 // SyncShipped deploys the embedded definition files at API start in one owner

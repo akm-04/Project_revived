@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -114,8 +115,14 @@ func (coverage syncCoverage) Covers(context.Context, otadomain.CoversRequest) (o
 	return otadomain.CoversResult{Status: otadomain.CoversMissing, MissingClientPaths: []string{"windows/activities/1099/main.csb"}}, nil
 }
 
+type syncContent struct{ revision string }
+
+func (content syncContent) ActiveRevision(context.Context, tx.Queryer) (string, error) {
+	return content.revision, nil
+}
+
 func syncCommands(store Store, audit operator.Store, hooks HookRegistry, coverage Coverage) Commands {
-	return Commands{Store: store, Audit: audit, Hooks: hooks, Gifts: syncGifts{}, Catalogue: syncCatalogue{}, Coverage: coverage}
+	return Commands{Store: store, Audit: audit, Hooks: hooks, Gifts: syncGifts{}, Catalogue: syncCatalogue{}, Coverage: coverage, Content: syncContent{revision: "content-1"}}
 }
 
 func syncDefinition(activityID, revision, defaultDays int64) []byte {
@@ -222,9 +229,13 @@ func TestSyncFilesReportsAnUnexpandableGiftAsInvalid(t *testing.T) {
 }
 
 func TestSyncCommandKeyShape(t *testing.T) {
-	key := syncCommandKey(domainevents.Definition{ActivityID: 1071, Revision: 2}, "abc")
-	if key != "sync:1071:2:abc" {
+	key := syncCommandKey(domainevents.Definition{ActivityID: 1071, Revision: 2}, "abc", "content-1")
+	if key != "sync:1071:2:abc:content-1" {
 		t.Fatalf("key = %s", key)
+	}
+	long := syncCommandKey(domainevents.Definition{ActivityID: 1071, Revision: 2}, "abc", "0123456789abcdef0123456789abcdef")
+	if long != "sync:1071:2:abc:0123456789abcdef" {
+		t.Fatalf("long content revision must shorten inside the 128-char key limit: %s", long)
 	}
 }
 
@@ -268,5 +279,111 @@ func TestScheduleAndListAgreeOnAnUnbuiltHook(t *testing.T) {
 	result, ok := listed.(definitionListResult)
 	if !ok || len(result.Definitions) != 1 || result.Definitions[0].Readiness != ReadinessHookUnbuilt {
 		t.Fatalf("list result = %+v", listed)
+	}
+}
+
+type lazyMissingCoverage struct{}
+
+func (lazyMissingCoverage) Covers(context.Context, otadomain.CoversRequest) (otadomain.CoversResult, error) {
+	return otadomain.CoversResult{
+		Status:             otadomain.CoversMissing,
+		MissingClientPaths: []string{"res/web/windows/activities/1008/1008.csb"},
+		MissingLazyAssets:  []otadomain.LazyAsset{{Path: "res/web/images/activities/1008.png"}},
+		MissingCodeVersion: "1.631.9",
+	}, nil
+}
+
+func TestDefinitionListReportsLazyAssetPathsAndCodeVersion(t *testing.T) {
+	at := time.Date(2026, 11, 22, 12, 0, 0, 0, time.UTC)
+	definition := domainevents.Definition{ActivityID: 1008, Revision: 1, Archetype: domainevents.ArchetypeRuleModifier, DefaultDays: 1}
+	hooks, err := NewHookRegistry()
+	if err != nil {
+		t.Fatal(err)
+	}
+	commands := syncCommands(readinessStore{record: DefinitionRecord{ActivityID: 1008, Revision: 1, Body: definition}}, newSyncMemoryAudit(), hooks, lazyMissingCoverage{})
+
+	listed, err := commands.definitionListHandler(context.Background(), handlerScope(at), handlerCommand(t, "events.definition.list", `{}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, ok := listed.(definitionListResult)
+	if !ok || len(result.Definitions) != 1 {
+		t.Fatalf("list result = %+v", listed)
+	}
+	summary := result.Definitions[0]
+	if summary.Readiness != ReadinessClientContentMissing || summary.MissingCodeVersion != "1.631.9" {
+		t.Fatalf("summary = %+v", summary)
+	}
+	paths := map[string]bool{}
+	for _, path := range summary.MissingPaths {
+		paths[path] = true
+	}
+	if !paths["res/web/windows/activities/1008/1008.csb"] || !paths["res/web/images/activities/1008.png"] {
+		t.Fatalf("missing_paths must carry client and lazy paths: %+v", summary.MissingPaths)
+	}
+}
+
+func TestSyncFilesRefusesAReusedCommandKey(t *testing.T) {
+	hooks, err := NewHookRegistry()
+	if err != nil {
+		t.Fatal(err)
+	}
+	store := newSyncMemoryStore()
+	audit := newSyncMemoryAudit()
+	commands := syncCommands(store, audit, hooks, syncCoverage{covered: true})
+	at := time.Date(2026, 11, 22, 12, 0, 0, 0, time.UTC)
+	body := syncDefinition(1099, 1, 3)
+	definition, err := domainevents.ParseDefinition(body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	key := syncCommandKey(definition, fileDigest(body), "content-1")
+	audit.rows[key] = &operator.Record{SemanticKey: key, ModuleCommand: "events.definition.deploy", PayloadSHA256: "another-payload", State: operator.StateApplied, Result: json.RawMessage(`{}`)}
+
+	results, err := commands.SyncFiles(context.Background(), stubTx{}, at, []DefinitionFile{{Name: "1099.json", Body: body}})
+	if err != nil || len(results) != 1 {
+		t.Fatalf("results = %+v %v", results, err)
+	}
+	if results[0].Outcome != SyncInvalid || !strings.Contains(results[0].Error, operator.CodeKeyReused) {
+		t.Fatalf("a reused key must report %s, got %+v", operator.CodeKeyReused, results[0])
+	}
+	if len(store.definitions) != 0 {
+		t.Fatalf("a reused key must not deploy: %+v", store.definitions)
+	}
+}
+
+func TestSyncFilesKeysByContentRevision(t *testing.T) {
+	hooks, err := NewHookRegistry()
+	if err != nil {
+		t.Fatal(err)
+	}
+	store := newSyncMemoryStore()
+	audit := newSyncMemoryAudit()
+	commands := syncCommands(store, audit, hooks, syncCoverage{covered: true})
+	at := time.Date(2026, 11, 22, 12, 0, 0, 0, time.UTC)
+	files := []DefinitionFile{{Name: "1099.json", Body: syncDefinition(1099, 1, 3)}}
+
+	if first, err := commands.SyncFiles(context.Background(), stubTx{}, at, files); err != nil || first[0].Outcome != SyncDeployed {
+		t.Fatalf("first sync = %+v %v", first, err)
+	}
+	retried := commands
+	retried.Content = syncContent{revision: "content-2"}
+	if second, err := retried.SyncFiles(context.Background(), stubTx{}, at.Add(time.Hour), files); err != nil || second[0].Outcome != SyncUnchanged {
+		t.Fatalf("second sync = %+v %v", second, err)
+	}
+	if len(audit.rows) != 2 {
+		t.Fatalf("a content revision change must build a new command key, rows = %d", len(audit.rows))
+	}
+}
+
+func TestReloadWithNoShippedFilesRefuses(t *testing.T) {
+	hooks, err := NewHookRegistry()
+	if err != nil {
+		t.Fatal(err)
+	}
+	commands := syncCommands(newSyncMemoryStore(), newSyncMemoryAudit(), hooks, syncCoverage{covered: true})
+	_, err = commands.reloadHandler(context.Background(), handlerScope(time.Now().UTC()), handlerCommand(t, "events.definition.reload", `{}`))
+	if refusal := refusalOf(t, err); refusal.Code != CodeDefinitionsNotComposed {
+		t.Fatalf("code = %s, want %s", refusal.Code, CodeDefinitionsNotComposed)
 	}
 }
