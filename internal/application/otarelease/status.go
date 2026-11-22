@@ -37,14 +37,17 @@ type StatusSnapshot struct {
 }
 
 type ActiveRow struct {
-	Version string `json:"version"`
-	Lane    string `json:"lane"`
+	Version     string     `json:"version"`
+	Lane        string     `json:"lane"`
+	TotalSize   int64      `json:"total_size"`
+	PublishedAt *time.Time `json:"published_at"`
 }
 
 // Status is the ota.status reply (I11A_OTA_RELEASE_V1 "Commands").
 type Status struct {
 	Revision    int64              `json:"revision"`
 	Active      ActiveStatus       `json:"active"`
+	Lanes       []LaneSummary      `json:"lanes"`
 	Built       []BuiltRelease     `json:"built"`
 	Activations []ActivationStatus `json:"activations"`
 	Served      []ServedCounter    `json:"served"`
@@ -53,6 +56,17 @@ type Status struct {
 	// Settings are the effective live values, including a field a client or an
 	// operator sees without restarting the API (L4h).
 	Settings domain.Settings `json:"settings"`
+}
+
+// LaneSummary is one OTA lane's overview (OPERATOR_GUI_V2 design item 5):
+// the active version and the newest BUILT release that is not published yet.
+type LaneSummary struct {
+	Lane          string     `json:"lane"`
+	ActiveVersion *string    `json:"active_version"`
+	PublishedAt   *time.Time `json:"published_at,omitempty"`
+	BuiltVersion  *string    `json:"built_not_published,omitempty"`
+	BuiltAt       *time.Time `json:"built_at,omitempty"`
+	Size          int64      `json:"size,omitempty"`
 }
 
 // TruncatedLists says which ota.status list hit its bound and was cut.
@@ -156,6 +170,8 @@ func foldStatus(snapshot StatusSnapshot) (Status, error) {
 		},
 	}
 	catalog := make([]domain.Version, 0, len(active))
+	highestActive := make(map[string]domain.Version, len(active))
+	activeRows := make(map[string]ActiveRow, len(active))
 	for _, row := range active {
 		version, err := domain.ParseVersion(row.Version)
 		if err != nil {
@@ -164,6 +180,11 @@ func foldStatus(snapshot StatusSnapshot) (Status, error) {
 		lane, err := domain.ParseLane(row.Lane)
 		if err != nil {
 			return Status{}, err
+		}
+		current, seen := highestActive[string(lane)]
+		if !seen || version.Compare(current) > 0 {
+			highestActive[string(lane)] = version
+			activeRows[string(lane)] = row
 		}
 		switch lane {
 		case domain.LaneCode:
@@ -177,6 +198,39 @@ func foldStatus(snapshot StatusSnapshot) (Status, error) {
 	slices.SortFunc(catalog, domain.Version.Compare)
 	for _, version := range catalog {
 		status.Active.Catalog = append(status.Active.Catalog, version.String())
+	}
+	highestBuilt := make(map[string]domain.Version, len(snapshot.Built))
+	builtRows := make(map[string]BuiltRelease, len(snapshot.Built))
+	for _, release := range snapshot.Built {
+		version, err := domain.ParseVersion(release.Version)
+		if err != nil {
+			return Status{}, err
+		}
+		if _, err := domain.ParseLane(release.Lane); err != nil {
+			return Status{}, err
+		}
+		current, seen := highestBuilt[release.Lane]
+		if !seen || version.Compare(current) > 0 {
+			highestBuilt[release.Lane] = version
+			builtRows[release.Lane] = release
+		}
+	}
+	for _, lane := range []domain.Lane{domain.LaneCode, domain.LaneAssets, domain.LaneCatalog} {
+		summary := LaneSummary{Lane: string(lane)}
+		if version, seen := highestActive[string(lane)]; seen {
+			text := version.String()
+			summary.ActiveVersion = &text
+			summary.PublishedAt = activeRows[string(lane)].PublishedAt
+		}
+		if version, seen := highestBuilt[string(lane)]; seen {
+			text := version.String()
+			summary.BuiltVersion = &text
+			release := builtRows[string(lane)]
+			summary.Size = release.TotalSize
+			builtAt := release.BuiltAt.UTC()
+			summary.BuiltAt = &builtAt
+		}
+		status.Lanes = append(status.Lanes, summary)
 	}
 	return status, nil
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	domain "gxb.local/backend/v2/internal/domain/otarelease"
 	"gxb.local/backend/v2/internal/foundation/clock"
@@ -77,6 +78,37 @@ func TestFoldStatusTruncatesEveryListToItsBound(t *testing.T) {
 	}
 	if len(status.Active.Catalog) != StatusActiveLimit || len(status.Built) != StatusBuiltLimit || len(status.Activations) != StatusActivationLimit || len(status.Served) != StatusServedLimit || len(status.Misses) != StatusMissesLimit {
 		t.Fatalf("lengths active=%d built=%d activations=%d served=%d misses=%d", len(status.Active.Catalog), len(status.Built), len(status.Activations), len(status.Served), len(status.Misses))
+	}
+}
+
+func TestFoldStatusSummarisesEachLane(t *testing.T) {
+	published := time.Date(2026, 11, 20, 10, 0, 0, 0, time.UTC)
+	builtAt := time.Date(2026, 11, 22, 9, 0, 0, 0, time.UTC)
+	status, err := foldStatus(StatusSnapshot{
+		Active: []ActiveRow{{Version: "1.631.1", Lane: "assets", TotalSize: 100, PublishedAt: &published}},
+		Built:  []BuiltRelease{{Version: "1.631.3", Lane: "code", TotalSize: 200, BuiltAt: builtAt}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(status.Lanes) != 3 {
+		t.Fatalf("lanes = %+v", status.Lanes)
+	}
+	byLane := map[string]LaneSummary{}
+	for _, lane := range status.Lanes {
+		byLane[lane.Lane] = lane
+	}
+	assets := byLane["assets"]
+	if assets.ActiveVersion == nil || *assets.ActiveVersion != "1.631.1" || assets.PublishedAt == nil || !assets.PublishedAt.Equal(published) {
+		t.Fatalf("assets lane = %+v", assets)
+	}
+	code := byLane["code"]
+	if code.BuiltVersion == nil || *code.BuiltVersion != "1.631.3" || code.Size != 200 || code.BuiltAt == nil || !code.BuiltAt.Equal(builtAt) {
+		t.Fatalf("code lane = %+v", code)
+	}
+	catalog := byLane["catalog"]
+	if catalog.ActiveVersion != nil || catalog.BuiltVersion != nil {
+		t.Fatalf("catalog lane = %+v", catalog)
 	}
 }
 

@@ -198,6 +198,26 @@ func TestPublishReplayMakesOneActivationAndKeyReuseIsRefused(t *testing.T) {
 	if err := json.Unmarshal(status.Body.Bytes(), &report); err != nil || report.Revision != activation.ActivationID || report.Active.Code == nil || *report.Active.Code != version {
 		t.Fatalf("ota.status body=%s err=%v", status.Body, err)
 	}
+	var lanes struct {
+		Lanes []struct {
+			Lane          string  `json:"lane"`
+			ActiveVersion *string `json:"active_version"`
+			PublishedAt   *string `json:"published_at"`
+		} `json:"lanes"`
+	}
+	if err := json.Unmarshal(status.Body.Bytes(), &lanes); err != nil || len(lanes.Lanes) != 3 {
+		t.Fatalf("ota.status lanes=%s err=%v", status.Body, err)
+	}
+	codeLane := false
+	for _, lane := range lanes.Lanes {
+		if lane.Lane != "code" {
+			continue
+		}
+		codeLane = lane.ActiveVersion != nil && *lane.ActiveVersion == version && lane.PublishedAt != nil
+	}
+	if !codeLane {
+		t.Fatalf("the code lane summary is missing from %s", status.Body)
+	}
 }
 
 func resetNativeRelease(t *testing.T, pool *pg.Pool, version string) {

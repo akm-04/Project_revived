@@ -27,9 +27,9 @@ type fakeBuildOperator struct {
 	failNext       int
 	builtVersions  []string
 	releaseExists  bool
-	blockFirstRead bool
-	readEntered    chan struct{}
-	readRelease    chan struct{}
+	blockRelease   bool
+	releaseEntered chan struct{}
+	releaseGate    chan struct{}
 }
 
 func (fake *fakeBuildOperator) statusBody() []byte {
@@ -49,19 +49,19 @@ func (fake *fakeBuildOperator) ServeHTTP(writer http.ResponseWriter, request *ht
 	switch {
 	case request.URL.Path == "/operator/v1/reads/ota.status":
 		fake.mutex.Lock()
-		block := fake.blockFirstRead
-		fake.blockFirstRead = false
-		fake.mutex.Unlock()
-		if block {
-			close(fake.readEntered)
-			<-fake.readRelease
-		}
-		fake.mutex.Lock()
 		body := fake.statusBody()
 		fake.mutex.Unlock()
 		writer.Header().Set("Content-Type", "application/json")
 		_, _ = writer.Write(body)
 	case request.URL.Path == "/operator/v1/reads/ota.release":
+		fake.mutex.Lock()
+		block := fake.blockRelease
+		fake.blockRelease = false
+		fake.mutex.Unlock()
+		if block {
+			close(fake.releaseEntered)
+			<-fake.releaseGate
+		}
 		fake.mutex.Lock()
 		exists := fake.releaseExists
 		fake.mutex.Unlock()
@@ -112,7 +112,7 @@ func newBuildOperation(t *testing.T) (operatoragent.Build, *fakeBuildOperator, *
 	if err := os.WriteFile(filepath.Join(clientTree, "src", "Feature.lua"), []byte("return {}\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	fake := &fakeBuildOperator{readEntered: make(chan struct{}), readRelease: make(chan struct{})}
+	fake := &fakeBuildOperator{releaseEntered: make(chan struct{}), releaseGate: make(chan struct{})}
 	server := httptest.NewServer(fake)
 	t.Cleanup(server.Close)
 	tokens := &operatoragent.TokenHolder{}
@@ -269,13 +269,13 @@ func TestBuildOperationRefusesVersionAlreadyListed(t *testing.T) {
 
 func TestBuildOperationRefusesWhileAnotherRuns(t *testing.T) {
 	build, fake, operations, _ := newBuildOperation(t)
-	fake.blockFirstRead = true
+	fake.blockRelease = true
 	first, err := build.Start(context.Background(), operatoragent.BuildRequest{Lane: "code", Version: "1.631.2"})
 	if err != nil {
 		t.Fatal(err)
 	}
 	select {
-	case <-fake.readEntered:
+	case <-fake.releaseEntered:
 	case <-time.After(5 * time.Second):
 		t.Fatal("the first build did not start")
 	}
@@ -287,23 +287,17 @@ func TestBuildOperationRefusesWhileAnotherRuns(t *testing.T) {
 	if !errors.As(err, &refusal) || refusal.Code != operatoragent.CodeOperationRunning {
 		t.Fatalf("error = %v, want %s", err, operatoragent.CodeOperationRunning)
 	}
-	close(fake.readRelease)
+	close(fake.releaseGate)
 	waitOperation(t, operations, first.ID)
 }
 
 func TestBuildOperationBackendNotRunning(t *testing.T) {
-	build, _, operations, _ := newBuildOperation(t)
+	build, _, _, _ := newBuildOperation(t)
 	build.Operator = operatorclient.New("127.0.0.1:1", &operatoragent.TokenHolder{})
-	started, err := build.Start(context.Background(), operatoragent.BuildRequest{Lane: "code", Version: "1.631.2"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	failed := waitOperation(t, operations, started.ID)
-	if failed.State != operatoragent.OperationFailed || failed.FailedStep != "read ota.status" {
-		t.Fatalf("operation = %+v", failed)
-	}
-	if !strings.Contains(failed.Error, operatoragent.CodeBackendUnavailable) {
-		t.Fatalf("error = %q", failed.Error)
+	_, err := build.Start(context.Background(), operatoragent.BuildRequest{Lane: "code", Version: "1.631.2"})
+	var refusal *operatoragent.Refusal
+	if !errors.As(err, &refusal) || refusal.Code != operatoragent.CodeBackendUnavailable {
+		t.Fatalf("error = %v, want %s", err, operatoragent.CodeBackendUnavailable)
 	}
 }
 

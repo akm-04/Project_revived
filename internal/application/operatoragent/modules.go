@@ -39,7 +39,7 @@ func AgentOTAModule() operator.Module {
 		Commands: []operator.CommandSpec{
 			{Name: "ota.build", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Build a release offline; poll the returned operation id.", Fields: []operator.Field{
 				operator.NewField("lane", operator.FieldString, true, "artifact lane").WithEnum("code", "assets", "catalog"),
-				operator.NewField("version", operator.FieldString, true, "release number"),
+				operator.NewField("version", operator.FieldString, false, "release number; omitted builds the lane's next last-component increment, a rollback names the lower number"),
 				operator.NewField("rollback", operator.FieldBool, false, "allow a number below the lane's active release"),
 				operator.NewField("lazy_refresh", operator.FieldBool, false, "rewrite lazyFile.json from the active assets release"),
 			}},
