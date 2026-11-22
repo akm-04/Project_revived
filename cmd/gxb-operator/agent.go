@@ -56,7 +56,15 @@ func runAgent(root string, args []string) error {
 	operator := operatorclient.New(config.Backend.OperatorAddr, tokens)
 	backendGuard := &operatoragent.BackendGuard{}
 	buildOperation := operatoragent.Build{Config: config, Operator: operator, Operations: operations}
-	moduleCatalog := operatoragent.ModuleCatalog{Backend: operator, Local: []appoperator.Module{operatoragent.ServerModule(), operatoragent.AgentOTAModule()}}
+	moduleCatalog := operatoragent.ModuleCatalog{Backend: operator, Local: []appoperator.Module{operatoragent.ServerModule(), operatoragent.AgentOTAModule(), operatoragent.DashboardModule()}}
+	dashboard := operatoragent.Dashboard{
+		Backend:          backend,
+		Operator:         operator,
+		Version:          operator,
+		PublicURLs:       config.PublicURLs,
+		BackupsDirectory: operatoragent.BackupsDirectory(root),
+		Now:              time.Now,
+	}
 	handler := agentapi.Handler{
 		Credentials: operatoragent.NewCredentials(root),
 		Sessions:    operatoragent.NewSessions(time.Now),
@@ -67,6 +75,7 @@ func runAgent(root string, args []string) error {
 		Operations:  operations,
 		Build:       buildOperation,
 		Modules:     moduleCatalog,
+		Dashboard:   dashboard,
 		ToolLog:     toolLog,
 		ToolLogPath: filepath.Join(logsDirectory, operatoragent.ToolLogFileName),
 		OTARoot:     config.OTARoot,

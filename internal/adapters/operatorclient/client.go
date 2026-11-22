@@ -69,6 +69,22 @@ func (client *Client) Modules(ctx context.Context) ([]operator.Module, error) {
 	return reply.Modules, nil
 }
 
+// Version reads GET /operator/v1/version.
+func (client *Client) Version(ctx context.Context) (operator.VersionInfo, error) {
+	var version operator.VersionInfo
+	response, err := client.do(ctx, http.MethodGet, client.baseURL+"/operator/v1/version", nil)
+	if err != nil {
+		return version, err
+	}
+	if response.Status != http.StatusOK {
+		return version, fmt.Errorf("the backend version answered HTTP %d", response.Status)
+	}
+	if err := json.Unmarshal(response.Body, &version); err != nil {
+		return version, err
+	}
+	return version, nil
+}
+
 // Read runs one operator read.
 func (client *Client) Read(ctx context.Context, name, query string) (operatoragent.BackendResponse, error) {
 	url := client.baseURL + "/operator/v1/reads/" + name

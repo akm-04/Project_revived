@@ -3,6 +3,7 @@ package agentapi
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -402,5 +403,67 @@ func TestBackendStartRefusedWhileMaintenanceRuns(t *testing.T) {
 	recorder = serveAgent(handler, http.MethodPost, "/agent/v1/backend/start", session, `{}`)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("a start after maintenance: status = %d, body = %s", recorder.Code, recorder.Body)
+	}
+}
+
+type dashboardBackendState struct{}
+
+func (dashboardBackendState) Start(bool, string) error { return nil }
+func (dashboardBackendState) Stop() error              { return nil }
+func (dashboardBackendState) Status() operatoragent.BackendStatus {
+	return operatoragent.BackendStatus{Running: true, PID: 7, State: "running"}
+}
+
+type dashboardVersionState struct{}
+
+func (dashboardVersionState) Version(context.Context) (operator.VersionInfo, error) {
+	commit := "abc"
+	return operator.VersionInfo{GitCommit: &commit}, nil
+}
+
+type dashboardReadState struct {
+	reads []string
+}
+
+func (state *dashboardReadState) Command(context.Context, operatoragent.OperatorRequest) (operatoragent.BackendResponse, error) {
+	return operatoragent.BackendResponse{}, errors.New("no command expected")
+}
+
+func (state *dashboardReadState) Read(_ context.Context, name, _ string) (operatoragent.BackendResponse, error) {
+	state.reads = append(state.reads, name)
+	switch name {
+	case "server.list":
+		return operatoragent.BackendResponse{Status: 200, Body: []byte(`{"servers":[{"server_id":1,"name":"Alpha","open":true,"online_count":3}]}`)}, nil
+	case "events.list":
+		return operatoragent.BackendResponse{Status: 200, Body: []byte(`{"occurrences":[]}`)}, nil
+	case "ota.status":
+		return operatoragent.BackendResponse{Status: 200, Body: []byte(`{"active":{"code":"1.631.2","assets":null,"catalog":[]},"served":[],"misses":[]}`)}, nil
+	default:
+		return operatoragent.BackendResponse{Status: 404, Body: []byte(`{}`)}, nil
+	}
+}
+
+func TestDashboardReadIsComposedByTheAgent(t *testing.T) {
+	handler, _, session := newForwardingHandler(t)
+	reads := &dashboardReadState{}
+	handler.Dashboard = operatoragent.Dashboard{
+		Backend:  dashboardBackendState{},
+		Operator: reads,
+		Version:  dashboardVersionState{},
+		Now:      func() time.Time { return time.Unix(10_000, 0).UTC() },
+	}
+	recorder := serveAgent(handler, http.MethodGet, "/agent/v1/reads/dashboard.summary", session, "")
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("dashboard: %d %s", recorder.Code, recorder.Body)
+	}
+	var summary operatoragent.DashboardSummary
+	if err := json.Unmarshal(recorder.Body.Bytes(), &summary); err != nil {
+		t.Fatal(err)
+	}
+	if !summary.Backend.Running || len(summary.Servers) != 1 || summary.Servers[0].OnlineCount != 3 || summary.Version == nil {
+		t.Fatalf("summary = %+v", summary)
+	}
+	if len(reads.reads) != 3 {
+		t.Fatalf("backend reads = %v", reads.reads)
 	}
 }
