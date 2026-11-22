@@ -1796,6 +1796,9 @@
    "events": [
     "Refuse"
    ],
+   "identitylifecycle": [
+    "Refuse"
+   ],
    "otarelease": [
     "Refuse",
     "StaleRevision"
@@ -4696,19 +4699,26 @@
    ]
   },
   "identitylifecycle": {
+   "operator": [
+    "Refuse"
+   ],
    "store:auditstore": [
     "*InsertTx"
    ],
    "store:identitystore": [
+    "*FindLiveSessionIDsForPlayersTx",
+    "*FindLiveSessionsByPlayer",
     "*FindProviderBindingTx",
     "*InsertProviderBindingTx",
     "*InsertSessionCredentialTx",
     "*InsertSessionTx",
+    "*ListLiveSessionIDsTx",
     "*LockAccountTx",
     "*LockLiveContextTx",
     "*LockSessionTx",
     "*RevokeGameplayCredentialsTx",
     "*RevokeSessionCredentialsTx",
+    "*RevokeSessionsTx",
     "*SaveEndedContextTx",
     "*SaveRevokedSessionTx",
     "*TouchSessionActivityTx"

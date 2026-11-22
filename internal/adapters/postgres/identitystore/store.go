@@ -16,20 +16,26 @@ import (
 )
 
 const (
-	lockAccount               = `SELECT account_id::text,account_uid,status,created_at,disabled_at,liveness_version FROM accounts WHERE account_id=$1 FOR UPDATE`
-	findBinding               = `SELECT binding_id::text,account_id::text,provider_key,subject_normalized,linked_at,disabled_at FROM account_provider_bindings WHERE provider_key=$1 AND subject_normalized=$2 FOR UPDATE`
-	insertBinding             = `INSERT INTO account_provider_bindings(binding_id,account_id,provider_key,subject_normalized,linked_at,disabled_at) VALUES($1,$2,$3,$4,$5,$6)`
-	insertSession             = `INSERT INTO account_sessions(session_id,account_id,auth_profile,issued_at,absolute_expires_at,idle_timeout_seconds,last_activity_at,revoked_at,revocation_reason,liveness_version) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`
-	insertSessionCredential   = `INSERT INTO account_session_credentials(credential_id,session_id,kind,digest,issued_at,expires_at,revoked_at) VALUES($1,$2,$3,$4,$5,$6,$7)`
-	lockSession               = `SELECT session_id::text,account_id::text,auth_profile,issued_at,absolute_expires_at,idle_timeout_seconds,last_activity_at,revoked_at,revocation_reason,liveness_version FROM account_sessions WHERE session_id=$1 FOR UPDATE`
-	lockLiveContext           = `SELECT context_id::text,session_id::text,account_id::text,logical_server_id,player_id,context_generation,created_at,ended_at,end_reason,liveness_version FROM gameplay_contexts WHERE session_id=$1 AND ended_at IS NULL FOR UPDATE`
-	saveRevokedSession        = `UPDATE account_sessions SET revoked_at=$2,revocation_reason=$3,liveness_version=$4 WHERE session_id=$1 AND liveness_version=$5`
-	saveEndedContext          = `UPDATE gameplay_contexts SET ended_at=$2,end_reason=$3,liveness_version=$4 WHERE context_id=$1 AND liveness_version=$5 AND ended_at IS NULL`
-	revokeSessionCredentials  = `UPDATE account_session_credentials SET revoked_at=$2 WHERE session_id=$1 AND revoked_at IS NULL`
-	revokeGameplayCredentials = `UPDATE gameplay_context_credentials SET revoked_at=$2 WHERE session_id=$1 AND revoked_at IS NULL`
-	touchSessionActivity      = `UPDATE account_sessions SET last_activity_at=$3 WHERE session_id=$1 AND revoked_at IS NULL AND idle_timeout_seconds IS NOT NULL AND last_activity_at <= $2`
-	listLivePlayerSessions    = `SELECT COALESCE(jsonb_agg(session_id::text ORDER BY session_id),'[]'::jsonb)::text FROM (SELECT DISTINCT c.session_id FROM gameplay_contexts c JOIN account_sessions s ON s.session_id=c.session_id WHERE c.player_id=$1 AND s.revoked_at IS NULL AND c.ended_at IS NULL) live`
-	findLivePlayerSessions    = `SELECT COALESCE(array_agg(session_id::text ORDER BY created_at DESC), '{}'::text[]) FROM gameplay_contexts WHERE player_id=$1 AND ended_at IS NULL`
+	lockAccount                  = `SELECT account_id::text,account_uid,status,created_at,disabled_at,liveness_version FROM accounts WHERE account_id=$1 FOR UPDATE`
+	findBinding                  = `SELECT binding_id::text,account_id::text,provider_key,subject_normalized,linked_at,disabled_at FROM account_provider_bindings WHERE provider_key=$1 AND subject_normalized=$2 FOR UPDATE`
+	insertBinding                = `INSERT INTO account_provider_bindings(binding_id,account_id,provider_key,subject_normalized,linked_at,disabled_at) VALUES($1,$2,$3,$4,$5,$6)`
+	insertSession                = `INSERT INTO account_sessions(session_id,account_id,auth_profile,issued_at,absolute_expires_at,idle_timeout_seconds,last_activity_at,revoked_at,revocation_reason,liveness_version) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`
+	insertSessionCredential      = `INSERT INTO account_session_credentials(credential_id,session_id,kind,digest,issued_at,expires_at,revoked_at) VALUES($1,$2,$3,$4,$5,$6,$7)`
+	lockSession                  = `SELECT session_id::text,account_id::text,auth_profile,issued_at,absolute_expires_at,idle_timeout_seconds,last_activity_at,revoked_at,revocation_reason,liveness_version FROM account_sessions WHERE session_id=$1 FOR UPDATE`
+	lockLiveContext              = `SELECT context_id::text,session_id::text,account_id::text,logical_server_id,player_id,context_generation,created_at,ended_at,end_reason,liveness_version FROM gameplay_contexts WHERE session_id=$1 AND ended_at IS NULL FOR UPDATE`
+	saveRevokedSession           = `UPDATE account_sessions SET revoked_at=$2,revocation_reason=$3,liveness_version=$4 WHERE session_id=$1 AND liveness_version=$5`
+	saveEndedContext             = `UPDATE gameplay_contexts SET ended_at=$2,end_reason=$3,liveness_version=$4 WHERE context_id=$1 AND liveness_version=$5 AND ended_at IS NULL`
+	revokeSessionCredentials     = `UPDATE account_session_credentials SET revoked_at=$2 WHERE session_id=$1 AND revoked_at IS NULL`
+	revokeGameplayCredentials    = `UPDATE gameplay_context_credentials SET revoked_at=$2 WHERE session_id=$1 AND revoked_at IS NULL`
+	touchSessionActivity         = `UPDATE account_sessions SET last_activity_at=$3 WHERE session_id=$1 AND revoked_at IS NULL AND idle_timeout_seconds IS NOT NULL AND last_activity_at <= $2`
+	listLivePlayerSessions       = `SELECT COALESCE(jsonb_agg(session_id::text ORDER BY session_id),'[]'::jsonb)::text FROM (SELECT DISTINCT c.session_id FROM gameplay_contexts c JOIN account_sessions s ON s.session_id=c.session_id WHERE c.player_id=$1 AND s.revoked_at IS NULL AND c.ended_at IS NULL) live`
+	findLivePlayerSessions       = `SELECT COALESCE(array_agg(session_id::text ORDER BY created_at DESC), '{}'::text[]) FROM gameplay_contexts WHERE player_id=$1 AND ended_at IS NULL`
+	findLiveSessionIDsForPlayers = `SELECT COALESCE(array_agg(session_id::text ORDER BY session_id), '{}'::text[]) FROM (SELECT DISTINCT s.session_id FROM gameplay_contexts c JOIN account_sessions s ON s.session_id=c.session_id WHERE c.player_id = ANY($1::bigint[]) AND s.revoked_at IS NULL AND c.ended_at IS NULL) live`
+	listLiveSessionIDs           = `SELECT COALESCE(array_agg(session_id::text ORDER BY session_id), '{}'::text[]) FROM (SELECT s.session_id FROM account_sessions s WHERE s.revoked_at IS NULL AND s.session_id > $2 AND ($1::int IS NULL OR EXISTS (SELECT 1 FROM gameplay_contexts c WHERE c.session_id=s.session_id AND c.logical_server_id=$1 AND c.ended_at IS NULL)) ORDER BY s.session_id LIMIT $3) page`
+	revokeSessionsSet            = `UPDATE account_sessions SET revoked_at=$2,revocation_reason=$3,liveness_version=liveness_version+1 WHERE session_id = ANY($1::uuid[]) AND revoked_at IS NULL`
+	endContextsSet               = `UPDATE gameplay_contexts SET ended_at=$2,end_reason=$3,liveness_version=liveness_version+1 WHERE session_id = ANY($1::uuid[]) AND ended_at IS NULL`
+	revokeSessionCredsSet        = `UPDATE account_session_credentials SET revoked_at=$2 WHERE session_id = ANY($1::uuid[]) AND revoked_at IS NULL`
+	revokeGameplayCredsSet       = `UPDATE gameplay_context_credentials SET revoked_at=$2 WHERE session_id = ANY($1::uuid[]) AND revoked_at IS NULL`
 )
 
 type Store struct{}
@@ -261,6 +267,86 @@ func (Store) FindLiveSessionsByPlayer(ctx context.Context, q tx.Queryer, player 
 			return nil, err
 		}
 		out = append(out, sessionID)
+	}
+	return out, nil
+}
+
+// FindLiveSessionIDsForPlayersTx resolves the live sessions of every named
+// player; a player without a live context contributes nothing.
+func (Store) FindLiveSessionIDsForPlayersTx(ctx context.Context, q tx.Queryer, players []identity.PlayerID) ([]identity.SessionID, error) {
+	if q == nil || len(players) == 0 {
+		return nil, errors.New("player ids required")
+	}
+	raw := make([]int64, 0, len(players))
+	for _, player := range players {
+		if !player.Valid() {
+			return nil, errors.New("player id required")
+		}
+		raw = append(raw, int64(player))
+	}
+	var pages []string
+	if err := q.QueryRow(ctx, findLiveSessionIDsForPlayers, raw).Scan(&pages); err != nil {
+		return nil, err
+	}
+	return parseSessionIDs(pages)
+}
+
+// ListLiveSessionIDsTx pages live sessions in ascending id order. The caller
+// passes the last seen id (zero to start) and revokes the page before asking
+// for the next one, so a batch never grows past limit.
+func (Store) ListLiveSessionIDsTx(ctx context.Context, q tx.Queryer, server *identity.LogicalServerID, after identity.SessionID, limit int) ([]identity.SessionID, error) {
+	if q == nil || limit <= 0 {
+		return nil, errors.New("live session page requires a positive limit")
+	}
+	var serverID any
+	if server != nil {
+		if !server.Valid() {
+			return nil, errors.New("logical server id required")
+		}
+		serverID = int32(*server)
+	}
+	var pages []string
+	if err := q.QueryRow(ctx, listLiveSessionIDs, serverID, after.UUID().String(), limit).Scan(&pages); err != nil {
+		return nil, err
+	}
+	return parseSessionIDs(pages)
+}
+
+// RevokeSessionsTx revokes one batch of sessions and their child rows in the
+// identity lock order: session, then live context, then both credential
+// families. The count is the sessions that were still live.
+func (Store) RevokeSessionsTx(ctx context.Context, t tx.Tx, sessions []identity.SessionID, at time.Time, reason string) (int64, error) {
+	if t == nil || len(sessions) == 0 || at.IsZero() || reason == "" {
+		return 0, errors.New("session revocation requires a transaction, targets, time and reason")
+	}
+	ids := make([]string, 0, len(sessions))
+	for _, session := range sessions {
+		ids = append(ids, session.UUID().String())
+	}
+	tag, err := t.Exec(ctx, revokeSessionsSet, ids, at.UTC(), reason)
+	if err != nil {
+		return 0, err
+	}
+	if _, err := t.Exec(ctx, endContextsSet, ids, at.UTC(), reason); err != nil {
+		return 0, err
+	}
+	if _, err := t.Exec(ctx, revokeSessionCredsSet, ids, at.UTC()); err != nil {
+		return 0, err
+	}
+	if _, err := t.Exec(ctx, revokeGameplayCredsSet, ids, at.UTC()); err != nil {
+		return 0, err
+	}
+	return tag.RowsAffected(), nil
+}
+
+func parseSessionIDs(pages []string) ([]identity.SessionID, error) {
+	out := make([]identity.SessionID, 0, len(pages))
+	for _, value := range pages {
+		session, err := parseSessionID(value)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, session)
 	}
 	return out, nil
 }

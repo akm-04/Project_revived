@@ -1300,7 +1300,7 @@
    "tables": 0
   },
   {
-   "callees": 3,
+   "callees": 4,
    "callers": 0,
    "mids": 0,
    "name": "identitylifecycle",
@@ -1409,7 +1409,7 @@
   },
   {
    "callees": 0,
-   "callers": 2,
+   "callers": 3,
    "mids": 0,
    "name": "operator",
    "path": "internal/application/operator",

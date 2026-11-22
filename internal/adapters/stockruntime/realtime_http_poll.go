@@ -15,6 +15,7 @@ import (
 	"sync"
 	"time"
 
+	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/protocol/limits"
 	wireRT "gxb.local/backend/v2/internal/protocol/realtime"
 )
@@ -171,6 +172,7 @@ type httpPollSession struct {
 
 	mutex         sync.Mutex
 	closed        bool
+	sessionFailed bool
 	sockets       map[string]*pollSocketState
 	socketWait    sync.WaitGroup
 	outbound      []pollOutbound
@@ -292,6 +294,12 @@ func (s *HTTPPollServer) handlePoll(w http.ResponseWriter, request *http.Request
 			return
 		}
 		http.Error(w, http.StatusText(status), status)
+		return
+	}
+	// An idle lobby only sends the poll, so a revoked session must learn the
+	// relogin signal here too, not only on its next gameplay request (L6).
+	if session.failed() {
+		writePollSessionFailure(w)
 		return
 	}
 	now := time.Now()
@@ -463,6 +471,20 @@ func (session *httpPollSession) expire() {
 	}
 	session.mutex.Unlock()
 	session.cancel()
+}
+
+// failed reports a session whose gameplay bearer the authority declared not
+// live; every later poll answers the relogin signal.
+func (session *httpPollSession) failed() bool {
+	session.mutex.Lock()
+	defer session.mutex.Unlock()
+	return session.closed || session.sessionFailed
+}
+
+func (session *httpPollSession) markSessionFailed() {
+	session.mutex.Lock()
+	session.sessionFailed = true
+	session.mutex.Unlock()
 }
 
 func (session *httpPollSession) touchRequest(at time.Time) {
@@ -720,6 +742,9 @@ func (session *httpPollSession) runSocket(ctx context.Context, socket *pollSocke
 }
 
 func (session *httpPollSession) removeSocket(socket *pollSocketState, runError error) {
+	if errors.Is(runError, i4store.ErrGameplayBearerNotLive) {
+		session.markSessionFailed()
+	}
 	session.mutex.Lock()
 	if session.sockets[socket.tag] == socket {
 		delete(session.sockets, socket.tag)
@@ -737,6 +762,23 @@ func writePollConflict(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Content-Length", strconv.Itoa(len(body)))
 	w.WriteHeader(http.StatusConflict)
+	_, _ = w.Write(body)
+}
+
+// writePollSessionFailure answers the proven relogin signal: HTTP 401 with
+// message.lua 20003 and its non-empty text, which makes the stock client alert
+// and restart into login (Backend.lua:428-447).
+func writePollSessionFailure(w http.ResponseWriter) {
+	reply := failureReply(sessionFailure())
+	body, err := json.Marshal(reply.Body)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	body = append(body, '\n')
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Length", strconv.Itoa(len(body)))
+	w.WriteHeader(reply.HTTPStatus)
 	_, _ = w.Write(body)
 }
 

@@ -35,6 +35,10 @@ type Store interface {
 	// advance last_activity_at for a live, idle-expiry-enabled session whose
 	// stored timestamp is older than cutoff.
 	TouchSessionActivityTx(context.Context, tx.Tx, identity.SessionID, time.Time, time.Time) (bool, error)
+
+	// FindLiveSessionsByPlayer resolves a named player to the sessions that
+	// still hold a live gameplay context (the gxb-admin revoke target rule).
+	FindLiveSessionsByPlayer(context.Context, tx.Queryer, identity.PlayerID) ([]identity.SessionID, error)
 }
 
 // RevocationNotifier is a post-commit optimization only. PostgreSQL liveness

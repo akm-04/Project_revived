@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -16,7 +15,6 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/identitystore"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	appidentity "gxb.local/backend/v2/internal/application/identitylifecycle"
-	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/audit"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -28,25 +26,6 @@ const (
 	revokeSessionAction = "identity.session.revoke"
 	revokeSessionPolicy = "gxb.identity.session-revoke.v1"
 )
-
-type revokeTarget struct {
-	session identity.SessionID
-	player  identity.PlayerID
-}
-
-func (t revokeTarget) kind() string {
-	if t.player.Valid() {
-		return "player"
-	}
-	return "session"
-}
-
-func (t revokeTarget) key() string {
-	if t.player.Valid() {
-		return strconv.FormatInt(int64(t.player), 10)
-	}
-	return t.session.UUID().String()
-}
 
 func main() {
 	if len(os.Args) < 2 {
@@ -89,23 +68,6 @@ func run(ctx context.Context, arguments []string, dsn string) error {
 	if err != nil {
 		return err
 	}
-	target, err := resolveTarget(ctx, pool, command)
-	if err != nil {
-		emitRefusal(ctx, pool, command, revokeTarget{session: command.Session, player: command.Player}, operationContext)
-		return err
-	}
-	event := audit.Event{
-		OccurredAt:    operationContext.StartedAt.UTC(),
-		ActorKind:     "AdminOperator",
-		ActorID:       command.Operator,
-		Action:        revokeSessionAction,
-		TargetKind:    target.kind(),
-		TargetKey:     target.key(),
-		Outcome:       "SUCCEEDED",
-		ReasonCode:    command.Reason,
-		CorrelationID: operationContext.ID.String(),
-		PolicyVersion: revokeSessionPolicy,
-	}
 	service := appidentity.Service{
 		Runner:      tx.Runner{DB: pool},
 		Store:       identitystore.Store{},
@@ -113,41 +75,41 @@ func run(ctx context.Context, arguments []string, dsn string) error {
 		ReceiptRead: kernelstore.Reader{Queryer: pool},
 		Audit:       auditstore.Store{},
 	}
-	result, err := service.RevokeSession(ctx, appidentity.RevokeSessionCommand{SessionID: target.session, Reason: command.Reason, Audit: &event}, operationContext)
+	named := appidentity.SessionTarget{Session: command.Session, Player: command.Player}
+	target, err := service.ResolveSessionTarget(ctx, pool, command.Player, command.Session)
+	if err != nil {
+		emitRefusal(ctx, pool, command, named, operationContext)
+		return err
+	}
+	event := audit.Event{
+		OccurredAt:    operationContext.StartedAt.UTC(),
+		ActorKind:     "AdminOperator",
+		ActorID:       command.Operator,
+		Action:        revokeSessionAction,
+		TargetKind:    target.Kind(),
+		TargetKey:     target.Key(),
+		Outcome:       "SUCCEEDED",
+		ReasonCode:    command.Reason,
+		CorrelationID: operationContext.ID.String(),
+		PolicyVersion: revokeSessionPolicy,
+	}
+	result, err := service.RevokeSession(ctx, appidentity.RevokeSessionCommand{SessionID: target.Session, Reason: command.Reason, Audit: &event}, operationContext)
 	if err != nil {
 		emitRefusal(ctx, pool, command, target, operationContext)
 		return fmt.Errorf("revoke-session refused: %w", err)
 	}
-	fmt.Printf("revoked session %s for %s %s by %s\n", result.SessionID, target.kind(), target.key(), command.Operator)
+	fmt.Printf("revoked session %s for %s %s by %s\n", result.SessionID, target.Kind(), target.Key(), command.Operator)
 	return nil
 }
 
-func resolveTarget(ctx context.Context, pool *pg.Pool, command revokeSessionArgs) (revokeTarget, error) {
-	if command.Player <= 0 {
-		return revokeTarget{session: command.Session}, nil
-	}
-	sessions, err := (identitystore.Store{}).FindLiveSessionsByPlayer(ctx, pool, command.Player)
-	if err != nil {
-		return revokeTarget{}, fmt.Errorf("revoke-session: player %d sessions: %w", command.Player, err)
-	}
-	switch len(sessions) {
-	case 0:
-		return revokeTarget{}, fmt.Errorf("revoke-session refused: player %d has no live session", command.Player)
-	case 1:
-		return revokeTarget{player: command.Player, session: sessions[0]}, nil
-	default:
-		return revokeTarget{}, fmt.Errorf("revoke-session refused: player %d has %d live sessions; name one with -session", command.Player, len(sessions))
-	}
-}
-
-func emitRefusal(ctx context.Context, pool *pg.Pool, command revokeSessionArgs, target revokeTarget, operationContext operation.Context) {
+func emitRefusal(ctx context.Context, pool *pg.Pool, command revokeSessionArgs, target appidentity.SessionTarget, operationContext operation.Context) {
 	auditstore.Emitter{Pool: pool}.Emit(context.WithoutCancel(ctx), audit.Event{
 		OccurredAt:    operationContext.StartedAt.UTC(),
 		ActorKind:     "AdminOperator",
 		ActorID:       command.Operator,
 		Action:        revokeSessionAction,
-		TargetKind:    target.kind(),
-		TargetKey:     target.key(),
+		TargetKind:    target.Kind(),
+		TargetKey:     target.Key(),
 		Outcome:       "REFUSED",
 		ReasonCode:    command.Reason,
 		CorrelationID: operationContext.ID.String(),
