@@ -6,6 +6,7 @@ import (
 	unavailableappdormhouse "gxb.local/backend/v2/internal/application/dormhouse"
 	unavailableappelementequipment "gxb.local/backend/v2/internal/application/elementequipment"
 	unavailableappeventcentre "gxb.local/backend/v2/internal/application/eventcentre"
+	unavailableappevents "gxb.local/backend/v2/internal/application/events"
 	unavailableappfrienddm "gxb.local/backend/v2/internal/application/frienddm"
 	unavailableappgeneraldm "gxb.local/backend/v2/internal/application/generaldm"
 	unavailableappgmquestion "gxb.local/backend/v2/internal/application/gmquestion"
@@ -60,6 +61,7 @@ var unavailableSentinels = []error{
 	unavailableappcourse.ErrUnavailable,
 	unavailableappdormhouse.ErrUnavailable,
 	unavailableappelementequipment.ErrUnavailable,
+	unavailableappevents.ErrUnavailable,
 	unavailableappeventcentre.ErrUnavailable,
 	unavailableappfrienddm.ErrUnavailable,
 	unavailableappgeneraldm.ErrUnavailable,

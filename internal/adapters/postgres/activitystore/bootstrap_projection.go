@@ -44,7 +44,7 @@ func (b BootstrapProjection) OverlayMID1(ctx context.Context, q tx.Queryer, acto
 		}
 		return profile.Level, true, nil
 	}
-	rows, err := b.Directory.ListAt(ctx, actor, at, level)
+	rows, err := b.Directory.ListAt(appactivity.WithQueryer(ctx, q), actor, at, level)
 	if err != nil {
 		return err
 	}

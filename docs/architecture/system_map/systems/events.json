@@ -5,23 +5,78 @@
  ],
  "contracts": [
   {
+   "count": 2,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_10A_EVENT_CENTRE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
    "count": 1,
    "file": "docs/i9/I9_11B_ITEMS_ENERGY_V2.json"
   },
   {
    "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_MODE_SURFACE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 2,
    "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
   }
  ],
  "decorated_by": [],
- "dispatcher_files": [],
+ "dispatcher_files": [
+  "internal/adapters/stockruntime/activity_reward_dispatcher.go"
+ ],
  "facts": {
   "consumers": {},
   "emits": [],
   "reads": []
  },
  "locks": {
-  "profiles": [],
+  "profiles": [
+   {
+    "lock_timeout_ms": 2000,
+    "name": "events-claim"
+   }
+  ],
   "ranks": [
    {
     "name": "events.OccurrenceLockRank",
@@ -29,23 +84,51 @@
    }
   ],
   "row_lock_methods": {
+   "account_sessions": [
+    "i5store.FenceActorTx"
+   ],
+   "accounts": [
+    "i5store.FenceActorTx"
+   ],
    "event_occurrences": [
     "eventstore.LockOccurrenceSharedTx",
     "eventstore.LockOccurrenceTx",
     "eventstore.LockOccurrencesTx"
+   ],
+   "gameplay_contexts": [
+    "i5store.FenceActorTx"
+   ],
+   "players": [
+    "i4store.LockPlayerRootsTx"
    ]
   },
   "row_locks": [
-   "event_occurrences"
+   "account_sessions",
+   "accounts",
+   "event_occurrences",
+   "gameplay_contexts",
+   "players"
   ],
   "unresolved_methods": []
  },
  "login": [],
- "mids": [],
+ "mids": [
+  {
+   "handler": {
+    "file": "internal/adapters/stockruntime/activity_reward_dispatcher.go",
+    "line": 30
+   },
+   "mid": 231,
+   "name": "GET_ACTIVITY_REWARD"
+  }
+ ],
  "name": "events",
  "pushes": [],
  "stores": [
-  "internal/adapters/postgres/eventstore"
+  "internal/adapters/postgres/contentstore",
+  "internal/adapters/postgres/eventstore",
+  "internal/adapters/postgres/i4store",
+  "internal/adapters/postgres/i5store"
  ],
  "tables": {
   "owned": [
@@ -55,14 +138,21 @@
    "player_event_claims"
   ],
   "read": [
+   "account_sessions",
+   "accounts",
    "content_daily_buy_input_catalogs",
    "event_cycle_settings",
    "event_definitions",
    "event_occurrences",
+   "gameplay_contexts",
    "gxb_content_activation",
+   "gxb_content_hero_normal_star",
+   "gxb_content_hero_templates",
    "gxb_content_resource_definitions",
    "gxb_content_revisions",
-   "player_event_claims"
+   "player_directory_profiles",
+   "player_event_claims",
+   "players"
   ],
   "written": [
    "event_cycle_settings",
@@ -72,7 +162,9 @@
   ]
  },
  "tests": {
-  "integration": [],
+  "integration": [
+   "playerdisplay"
+  ],
   "scenarios_naming": [],
   "unit": [
    "commands_test.go"

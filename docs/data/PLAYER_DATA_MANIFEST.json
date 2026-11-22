@@ -1816,7 +1816,9 @@
    "references": [],
    "retention": null,
    "restore_order": 274,
-   "payload_columns": []
+   "payload_columns": [
+    "award_body"
+   ]
   },
   {
    "table": "player_function_eligibility",

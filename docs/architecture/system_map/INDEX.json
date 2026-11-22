@@ -243,6 +243,7 @@
    "2307": "memoir",
    "2308": "memoir",
    "2309": "memoir",
+   "231": "events",
    "2310": "memoir",
    "2311": "memoir",
    "2312": "memoir",
@@ -877,8 +878,8 @@
    "tables": 7
   },
   {
-   "callees": 2,
-   "callers": 0,
+   "callees": 3,
+   "callers": 1,
    "mids": 2,
    "name": "activitydirectory",
    "path": "internal/application/activitydirectory",
@@ -977,7 +978,7 @@
   },
   {
    "callees": 27,
-   "callers": 16,
+   "callers": 17,
    "mids": 24,
    "name": "characterhero",
    "path": "internal/application/characterhero",
@@ -1129,9 +1130,9 @@
    "tables": 2
   },
   {
-   "callees": 3,
-   "callers": 0,
-   "mids": 0,
+   "callees": 8,
+   "callers": 1,
+   "mids": 1,
    "name": "events",
    "path": "internal/application/events",
    "purpose": "applies the I11A event owner commands and serves its bounded reads (I11A_EVENTS_V1)",
@@ -1292,7 +1293,7 @@
   },
   {
    "callees": 14,
-   "callers": 61,
+   "callers": 62,
    "mids": 25,
    "name": "i5",
    "path": "internal/application/i5",

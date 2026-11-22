@@ -46,7 +46,9 @@
   ]
  },
  "tests": {
-  "integration": [],
+  "integration": [
+   "playerdisplay"
+  ],
   "scenarios_naming": [],
   "unit": [
    "envelope_test.go"

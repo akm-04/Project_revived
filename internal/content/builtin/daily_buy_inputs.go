@@ -135,7 +135,7 @@ func (c DailyBuyInputCatalog) QualifyDailyBuyInputs() error {
 	}
 	counts := c.SourceRowCounts
 	if len(c.Items) != counts.Items || counts.Items != 5838 ||
-		len(c.Gifts) != counts.GiftRowsReferenced || counts.GiftRowsReferenced != 2348 ||
+		len(c.Gifts) != counts.GiftRowsReferenced || counts.GiftRowsReferenced != 2361 ||
 		counts.GiftRowsMalformed != 7 ||
 		len(c.Dropboxes) != counts.DropboxesReferenced || counts.DropboxesReferenced != 188 ||
 		len(c.VIP) != 16 || len(c.RefreshCost) != 330 || len(c.DailyConsume) != 10 {

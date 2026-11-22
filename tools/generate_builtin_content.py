@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i9-11d-compat"
+COMPILER_VERSION = "i11a-events-gifts"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -1133,6 +1133,31 @@ def compile_dialog_relationship(
             if len(node["turn_ids"]) > 1 and "is_reward" not in target_node:
                 raise CompileError(f"dialog option target {target} has no is_reward ({relationship_id})")
     return list(nodes_by_node_id.values()), duplicate_node_keys, placeholders, unresolved_edges
+
+
+def event_definition_gift_ids() -> list[int]:
+    """Gift ids named by the shipped event definitions (EA-11). The definitions
+    are checked-in server data; the compiler exports the referenced stock gift
+    rows so events.definition.deploy can expand them from the content read."""
+    directory = Path(__file__).resolve().parents[1] / "content/events/definitions"
+    ids: set[int] = set()
+    if not directory.is_dir():
+        return []
+    for path in sorted(directory.glob("*.json")):
+        try:
+            definition = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise CompileError(f"event definition {path.name}: {exc}") from exc
+        tiers = definition.get("tiers")
+        if not isinstance(tiers, list):
+            continue
+        for tier in tiers:
+            choices = tier.get("choices") if isinstance(tier, dict) else None
+            for choice in choices or []:
+                gift = choice.get("gift_id") if isinstance(choice, dict) else None
+                if isinstance(gift, int) and gift > 0:
+                    ids.add(gift)
+    return sorted(ids)
 
 
 def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[str, Any]:
@@ -2789,7 +2814,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "guild_broadcast_policy.json":broadcast_artifact,
         "social_gift_catalog.json": social_gift_artifact,
         "social_input_catalog.json": build_social(blobs, parse_generated_lua_table, CompileError),
-        "daily_buy_input_catalog.json": build_daily_buy_inputs(items, gift_rows, dropbox_rows, vip_rows, monthly_privilege_rows, refresh_cost_rows, misc_by_key, daily_consume_rows, CompileError),
+        "daily_buy_input_catalog.json": build_daily_buy_inputs(items, gift_rows, dropbox_rows, vip_rows, monthly_privilege_rows, refresh_cost_rows, misc_by_key, daily_consume_rows, CompileError, event_definition_gift_ids()),
         "shop_catalog.json": build_shop_catalog(
             parse_generated_lua_table(blobs["data/tables/shop_config.lua"].data),
             {table: parse_generated_lua_table(blobs[f"data/tables/{table}.lua"].data) for table in (

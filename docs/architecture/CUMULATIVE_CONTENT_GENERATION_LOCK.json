@@ -597,14 +597,23 @@
       "scope": "New compat_message_push_catalog.json artifact and COMPAT_MESSAGE_PUSH_I9_11D capability from the exact archive (message_push.lua ids and sha256); every existing artifact byte-identical. Merged onto I9-11C core shops (lead, 11D merge): revision recomputed over both artifact sets.",
       "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE",
       "ordinal": 76
+    },
+    {
+      "ordinal": 77,
+      "stage": "I11A-2 Events Gifts",
+      "compiler_version": "i11a-events-gifts",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "e34f67f323cb4f3401f098daede8926997321f91591cd563f3bc1c61b85dec1e",
+      "scope": "daily_buy_input_catalog.json gains the 13 gift rows shipped content/events/definitions/1071.json names (gift.lua 90001428..90001440) so events.definition.deploy can expand the Rookie level gift tiers; every other artifact byte-identical.",
+      "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
     }
   ],
   "current": {
-    "stage": "I9-11D Compatibility",
-    "compiler_version": "i9-11d-compat",
+    "stage": "I11A-2 Events Gifts",
+    "compiler_version": "i11a-events-gifts",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "11902b0a5e92186765236aa0295d4e5939704c2cbeb46190e293c5fda46cc3bc",
-    "scope": "New compat_message_push_catalog.json artifact and COMPAT_MESSAGE_PUSH_I9_11D capability from the exact archive (message_push.lua ids and sha256); every existing artifact byte-identical. Merged onto I9-11C core shops (lead, 11D merge): revision recomputed over both artifact sets.",
+    "revision_id": "e34f67f323cb4f3401f098daede8926997321f91591cd563f3bc1c61b85dec1e",
+    "scope": "daily_buy_input_catalog.json gains the 13 gift rows shipped content/events/definitions/1071.json names (gift.lua 90001428..90001440) so events.definition.deploy can expand the Rookie level gift tiers; every other artifact byte-identical.",
     "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
   }
 }
