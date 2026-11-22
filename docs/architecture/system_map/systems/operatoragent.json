@@ -1,0 +1,40 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [],
+  "row_lock_methods": {},
+  "row_locks": [],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [],
+ "name": "operatoragent",
+ "pushes": [],
+ "stores": [],
+ "tables": {
+  "owned": [],
+  "read": [],
+  "written": []
+ },
+ "tests": {
+  "integration": [],
+  "scenarios_naming": [],
+  "unit": [
+   "config_test.go",
+   "credentials_test.go",
+   "maintenance_test.go",
+   "operations_test.go",
+   "toollog_test.go"
+  ]
+ }
+}

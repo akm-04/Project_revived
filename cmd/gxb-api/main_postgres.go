@@ -1076,6 +1076,10 @@ func main() {
 		mux.Handle("/profile-media/", mediaHandler)
 	}
 	registerOTARoutes(mux, otaServing)
+	gameListenerOpen, err := parseGameListener(os.Getenv("GXB_GAME_LISTENER"))
+	if err != nil {
+		log.Fatal(err)
+	}
 	srv := &http.Server{Addr: cfg.HTTPAddr, Handler: mux, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: limits.StockMultipartHTTPTimeout + 5*time.Second, WriteTimeout: limits.StockMultipartHTTPTimeout + 5*time.Second, IdleTimeout: 60 * time.Second}
 	go func() {
 		<-ctx.Done()
@@ -1083,6 +1087,11 @@ func main() {
 		defer cancel()
 		_ = srv.Shutdown(shutdownCtx)
 	}()
+	if !gameListenerOpen {
+		log.Printf("game listener closed by GXB_GAME_LISTENER=closed; the operator listener and workers keep running")
+		<-ctx.Done()
+		return
+	}
 	log.Printf("gxb-api listening on %s; advertised realtime=%s:%d", cfg.HTTPAddr, host, port)
 	if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatal(err)

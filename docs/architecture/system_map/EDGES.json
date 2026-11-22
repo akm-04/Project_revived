@@ -1797,6 +1797,7 @@
     "StaleRevision"
    ]
   },
+  "operatoragent": {},
   "otarelease": {},
   "petcampaign": {
    "achievement": [
@@ -5285,6 +5286,7 @@
    ]
   },
   "operator": {},
+  "operatoragent": {},
   "otarelease": {
    "operator": [
     "Refuse",
@@ -6626,6 +6628,7 @@
    "cmd/gxb-api/top_floor_postgres.go"
   ],
   "operator": [],
+  "operatoragent": [],
   "otarelease": [
    "cmd/gxb-api/main_postgres.go"
   ],

@@ -1,0 +1,129 @@
+package operatoragent
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+
+	"gxb.local/backend/v2/internal/application/operator"
+)
+
+// BackendStatus is what `backend status` reports.
+type BackendStatus struct {
+	Running bool   `json:"running"`
+	PID     int    `json:"pid,omitempty"`
+	State   string `json:"state,omitempty"`
+}
+
+// BackendControl is the agent's process-control port.
+type BackendControl interface {
+	Start(closed bool, token string) error
+	Stop() error
+	Status() BackendStatus
+}
+
+// OperatorRequest is one forwarded operator command.
+type OperatorRequest struct {
+	Name     string
+	Envelope operator.Envelope
+	Payload  json.RawMessage
+}
+
+// BackendResponse is a backend operator-API answer, status and body verbatim.
+type BackendResponse struct {
+	Status int
+	Body   []byte
+}
+
+// OperatorClient is the agent's outbound operator-API port.
+type OperatorClient interface {
+	Command(context.Context, OperatorRequest) (BackendResponse, error)
+	Read(ctx context.Context, name, query string) (BackendResponse, error)
+}
+
+// Maintenance is the OTA publish/withdraw flow of I11A_OTA_RELEASE_V1 ruling
+// 13: stop the game listener, apply the command, reopen. A failure leaves the
+// backend closed and names the failed step in the operation record.
+type Maintenance struct {
+	Backend    BackendControl
+	Operator   OperatorClient
+	Tokens     *TokenHolder
+	Operations *Operations
+}
+
+// StartBackend mints the per-start operator token and launches the backend.
+func StartBackend(backend BackendControl, tokens *TokenHolder, closed bool) error {
+	token, err := NewToken()
+	if err != nil {
+		return err
+	}
+	tokens.Set(token)
+	return backend.Start(closed, token)
+}
+
+// Publish runs stop -> start closed -> status -> publish -> stop -> start open.
+func (maintenance Maintenance) Publish(ctx context.Context, version, reason, semanticKey string) (Operation, error) {
+	return maintenance.run(ctx, "ota.publish", version, reason, semanticKey)
+}
+
+// Withdraw runs the same maintenance window for ota.withdraw.
+func (maintenance Maintenance) Withdraw(ctx context.Context, version, reason, semanticKey string) (Operation, error) {
+	return maintenance.run(ctx, "ota.withdraw", version, reason, semanticKey)
+}
+
+func (maintenance Maintenance) run(ctx context.Context, command, version, reason, semanticKey string) (Operation, error) {
+	var revision int64
+	steps := []Step{
+		{Name: "stop backend", Run: func(context.Context) (any, error) { return nil, maintenance.Backend.Stop() }},
+		{Name: "start backend closed", Run: func(context.Context) (any, error) {
+			return nil, StartBackend(maintenance.Backend, maintenance.Tokens, true)
+		}},
+		{Name: "read active revision", Run: func(ctx context.Context) (any, error) {
+			response, err := maintenance.Operator.Read(ctx, "ota.status", "")
+			if err != nil {
+				return nil, err
+			}
+			if response.Status != 200 {
+				return nil, &BackendRefusal{Status: response.Status, Body: response.Body}
+			}
+			var status struct {
+				Revision int64 `json:"revision"`
+			}
+			if err := json.Unmarshal(response.Body, &status); err != nil {
+				return nil, fmt.Errorf("ota.status replied no revision: %w", err)
+			}
+			revision = status.Revision
+			return map[string]any{"revision": revision}, nil
+		}},
+		{Name: command, Run: func(ctx context.Context) (any, error) {
+			payload, err := json.Marshal(map[string]string{"version": version})
+			if err != nil {
+				return nil, err
+			}
+			response, err := maintenance.Operator.Command(ctx, OperatorRequest{
+				Name: command,
+				Envelope: operator.Envelope{
+					Principal:        "root",
+					Role:             operator.RoleRoot,
+					Scope:            "global",
+					Reason:           reason,
+					SemanticKey:      semanticKey,
+					ExpectedRevision: &revision,
+				},
+				Payload: payload,
+			})
+			if err != nil {
+				return nil, err
+			}
+			if response.Status < 200 || response.Status >= 300 {
+				return nil, &BackendRefusal{Status: response.Status, Body: response.Body}
+			}
+			return json.RawMessage(response.Body), nil
+		}},
+		{Name: "stop backend", Run: func(context.Context) (any, error) { return nil, maintenance.Backend.Stop() }},
+		{Name: "start backend open", Run: func(context.Context) (any, error) {
+			return nil, StartBackend(maintenance.Backend, maintenance.Tokens, false)
+		}},
+	}
+	return maintenance.Operations.Run(ctx, "maintenance."+command, steps)
+}

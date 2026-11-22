@@ -1404,6 +1404,15 @@
    "tables": 1
   },
   {
+   "callees": 0,
+   "callers": 0,
+   "mids": 0,
+   "name": "operatoragent",
+   "path": "internal/application/operatoragent",
+   "purpose": "",
+   "tables": 0
+  },
+  {
    "callees": 2,
    "callers": 0,
    "mids": 3,
