@@ -16,23 +16,19 @@ import (
 // The GUI is compiled into the agent: plain HTML, CSS and JavaScript, no build
 // step, no CDN and no external font (I11A_2_PLAN "O5 GUI").
 //
-//go:embed guiassets/index.html guiassets/app.css guiassets/app.js
+//go:embed guiassets
 var guiAssets embed.FS
 
+const guiAssetsRoot = "guiassets/"
+
 const contentSecurityPolicy = "default-src 'self'; script-src 'self'; style-src 'self'; " +
-	"img-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; " +
+	"img-src 'self' blob: data:; connect-src 'self'; object-src 'none'; base-uri 'none'; " +
 	"frame-ancestors 'none'; form-action 'self'"
 
 var guiContentTypes = map[string]string{
-	"/":            "text/html; charset=utf-8",
-	"/gui/app.css": "text/css; charset=utf-8",
-	"/gui/app.js":  "text/javascript; charset=utf-8",
-}
-
-var guiAssetsByName = map[string]string{
-	"/":            "guiassets/index.html",
-	"/gui/app.css": "guiassets/app.css",
-	"/gui/app.js":  "guiassets/app.js",
+	".html": "text/html; charset=utf-8",
+	".css":  "text/css; charset=utf-8",
+	".js":   "text/javascript; charset=utf-8",
 }
 
 var imageContentTypes = map[string]string{
@@ -46,21 +42,67 @@ var imageContentTypes = map[string]string{
 
 // serveGUI answers the embedded GUI files. They carry no operator data, so the
 // login page itself is readable before a session exists; every data route still
-// needs the agent session.
+// needs the agent session. Only the index and files under /gui/ are served, and
+// only with the three asset content types; an unknown file or an escaping path
+// is not found.
 func (handler Handler) serveGUI(writer http.ResponseWriter, request *http.Request) {
-	name, found := guiAssetsByName[request.URL.Path]
-	if !found || request.Method != http.MethodGet {
+	if request.Method != http.MethodGet {
+		writeRefusal(writer, http.StatusNotFound, operatoragent.CodeNotFound, "no such GUI route")
+		return
+	}
+	name, found := guiAssetName(request.URL.Path)
+	if !found {
 		writeRefusal(writer, http.StatusNotFound, operatoragent.CodeNotFound, "no such GUI route")
 		return
 	}
 	contents, err := guiAssets.ReadFile(name)
 	if err != nil {
-		writeRefusal(writer, http.StatusInternalServerError, operatoragent.CodeFailed, "the GUI asset is unreadable")
+		writeRefusal(writer, http.StatusNotFound, operatoragent.CodeNotFound, "no such GUI route")
 		return
 	}
-	setGUIHeaders(writer, guiContentTypes[request.URL.Path])
+	setGUIHeaders(writer, guiContentTypes[strings.ToLower(path.Ext(name))])
 	writer.WriteHeader(http.StatusOK)
 	_, _ = writer.Write(contents)
+}
+
+// guiAssetName maps one URL path to an embedded file. The index is the only
+// path outside /gui/; every other asset must stay under guiassets/ with a
+// serveable extension.
+func guiAssetName(urlPath string) (string, bool) {
+	if urlPath == "/" {
+		return guiAssetsRoot + "index.html", true
+	}
+	relative, found := strings.CutPrefix(urlPath, "/gui/")
+	if !found {
+		return "", false
+	}
+	cleaned, valid := cleanAssetPath(relative)
+	if !valid {
+		return "", false
+	}
+	name := guiAssetsRoot + cleaned
+	if _, serveable := guiContentTypes[strings.ToLower(path.Ext(name))]; !serveable {
+		return "", false
+	}
+	return name, true
+}
+
+// cleanAssetPath keeps only a relative slash path whose segments never name
+// ".."; an empty, absolute or escaping path is refused.
+func cleanAssetPath(raw string) (string, bool) {
+	if raw == "" || strings.HasPrefix(raw, "/") || strings.Contains(raw, "\\") {
+		return "", false
+	}
+	for _, segment := range strings.Split(raw, "/") {
+		if segment == ".." {
+			return "", false
+		}
+	}
+	cleaned := path.Clean(raw)
+	if cleaned == "." || cleaned == ".." || strings.HasPrefix(cleaned, "../") {
+		return "", false
+	}
+	return cleaned, true
 }
 
 // serveRes serves one catalogue picture read-only from the OTA settings

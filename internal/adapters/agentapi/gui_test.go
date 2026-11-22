@@ -2,14 +2,44 @@ package agentapi
 
 import (
 	"encoding/json"
+	"io/fs"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
 )
+
+// guiScriptFiles returns the GUI's own ES modules (the vendored Tabler bundle
+// is not one of them).
+func guiScriptFiles(t *testing.T) map[string]string {
+	t.Helper()
+	scripts := map[string]string{}
+	err := fs.WalkDir(guiAssets, "guiassets", func(name string, entry fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.IsDir() || strings.Contains(name, "/vendor/") || path.Ext(name) != ".js" {
+			return nil
+		}
+		contents, readErr := guiAssets.ReadFile(name)
+		if readErr != nil {
+			return readErr
+		}
+		scripts[name] = string(contents)
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(scripts) == 0 {
+		t.Fatal("no GUI scripts are embedded")
+	}
+	return scripts
+}
 
 func TestGUIIndexAndAssetsCarryTheStrictPolicy(t *testing.T) {
 	handler, _, _ := newForwardingHandler(t)
@@ -46,8 +76,17 @@ func TestGUIIndexAndAssetsCarryTheStrictPolicy(t *testing.T) {
 
 func TestGUIIndexRefusesUnknownAndNonGet(t *testing.T) {
 	handler, _, session := newForwardingHandler(t)
-	if recorder := serveAgent(handler, http.MethodGet, "/gui/missing.js", session, ""); recorder.Code != http.StatusNotFound {
-		t.Fatalf("unknown asset: %d", recorder.Code)
+	for _, target := range []string{
+		"/gui/missing.js",
+		"/gui/../app.js",
+		"/gui/%2e%2e/app.js",
+		"/gui/..%2Fapp.js",
+		"/gui/vendor/../../app.js",
+		"/gui/README.md",
+	} {
+		if recorder := serveAgent(handler, http.MethodGet, target, session, ""); recorder.Code != http.StatusNotFound {
+			t.Fatalf("%s: status = %d", target, recorder.Code)
+		}
 	}
 	if recorder := serveAgent(handler, http.MethodPost, "/", session, `{}`); recorder.Code != http.StatusNotFound {
 		t.Fatalf("POST index: %d", recorder.Code)
@@ -176,12 +215,9 @@ func TestSameOriginBrowserRequestIsAllowed(t *testing.T) {
 }
 
 func TestEmbeddedGUIBuildsEveryModuleCommandAndRead(t *testing.T) {
-	script, err := guiAssets.ReadFile("guiassets/app.js")
-	if err != nil {
-		t.Fatal(err)
-	}
+	scripts := guiScriptFiles(t)
 	fragments := []string{
-		"for (const module of state.modules)",
+		"for (const module of modules)",
 		"for (const command of commands)",
 		"for (const read of reads)",
 		"for (const field of command.fields || [])",
@@ -193,37 +229,127 @@ func TestEmbeddedGUIBuildsEveryModuleCommandAndRead(t *testing.T) {
 		"command.class === \"maintenance\"",
 	}
 	for _, fragment := range fragments {
-		if !strings.Contains(string(script), fragment) {
+		found := false
+		for _, script := range scripts {
+			if strings.Contains(script, fragment) {
+				found = true
+				break
+			}
+		}
+		if !found {
 			t.Fatalf("the GUI no longer derives its forms from the registry: missing %q", fragment)
 		}
 	}
 }
 
 func TestEmbeddedGUIRefersOnlyToAgentEndpoints(t *testing.T) {
-	script, err := guiAssets.ReadFile("guiassets/app.js")
+	scripts := guiScriptFiles(t)
+	requestPattern := regexp.MustCompile(`(?:fetch|request)\(\s*"([^"]*)"`)
+	namedEndpoint := false
+	for name, script := range scripts {
+		for _, match := range requestPattern.FindAllStringSubmatch(script, -1) {
+			namedEndpoint = true
+			if !strings.HasPrefix(match[1], "/agent/v1/") {
+				t.Fatalf("%s calls %q, which is not an agent endpoint", name, match[1])
+			}
+		}
+	}
+	if !namedEndpoint {
+		t.Fatal("the GUI scripts name no agent endpoint")
+	}
+	index, err := guiAssets.ReadFile("guiassets/index.html")
 	if err != nil {
 		t.Fatal(err)
 	}
-	requestPattern := regexp.MustCompile(`(?:fetch|agentRequest)\(\s*"([^"]*)"`)
-	matches := requestPattern.FindAllStringSubmatch(string(script), -1)
-	if len(matches) == 0 {
-		t.Fatal("the GUI script names no agent endpoint")
-	}
-	for _, match := range matches {
-		if !strings.HasPrefix(match[1], "/agent/v1/") {
-			t.Fatalf("the GUI script calls %q, which is not an agent endpoint", match[1])
+	for name, script := range scripts {
+		for _, forbidden := range []string{"http://", "https://", "//cdn."} {
+			if strings.Contains(script, forbidden) {
+				t.Fatalf("%s references an external resource: %s", name, forbidden)
+			}
 		}
 	}
 	for _, forbidden := range []string{"http://", "https://", "//cdn."} {
-		if strings.Contains(string(script), forbidden) {
-			t.Fatalf("the GUI script references an external resource: %s", forbidden)
-		}
-		index, readErr := guiAssets.ReadFile("guiassets/index.html")
-		if readErr != nil {
-			t.Fatal(readErr)
-		}
 		if strings.Contains(string(index), forbidden) {
 			t.Fatalf("the GUI page references an external resource: %s", forbidden)
 		}
+	}
+}
+
+// TestGUIVendoredAssetsAreEmbeddedAndServed proves every vendored stylesheet and
+// script is compiled in, reachable at its /gui/ path and carries the strict
+// policy.
+func TestGUIVendoredAssetsAreEmbeddedAndServed(t *testing.T) {
+	handler, _, _ := newForwardingHandler(t)
+	index, err := guiAssets.ReadFile("guiassets/index.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	served := 0
+	err = fs.WalkDir(guiAssets, "guiassets/vendor", func(name string, entry fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.IsDir() {
+			return nil
+		}
+		contentType, serveable := guiContentTypes[strings.ToLower(path.Ext(name))]
+		if !serveable {
+			return nil
+		}
+		targetPath := "/gui/" + strings.TrimPrefix(name, guiAssetsRoot)
+		if !strings.Contains(string(index), targetPath) {
+			t.Fatalf("index does not reference the vendored file %s", targetPath)
+		}
+		recorder := serveAgent(handler, http.MethodGet, targetPath, "", "")
+		if recorder.Code != http.StatusOK {
+			t.Fatalf("%s: status = %d", targetPath, recorder.Code)
+		}
+		if recorder.Header().Get("Content-Security-Policy") != contentSecurityPolicy {
+			t.Fatalf("%s: missing the strict policy", targetPath)
+		}
+		if recorder.Header().Get("Content-Type") != contentType {
+			t.Fatalf("%s: content type = %q", targetPath, recorder.Header().Get("Content-Type"))
+		}
+		if recorder.Body.Len() == 0 {
+			t.Fatalf("%s: empty body", targetPath)
+		}
+		served++
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if served < 2 {
+		t.Fatalf("expected the vendored Tabler css and js, served %d files", served)
+	}
+}
+
+// TestGUIIndexReferencesOnlySameOriginAssets keeps the page free of a CDN and
+// of inline script, so the CSP stays self-only.
+func TestGUIIndexReferencesOnlySameOriginAssets(t *testing.T) {
+	contents, err := guiAssets.ReadFile("guiassets/index.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	index := string(contents)
+	references := regexp.MustCompile(`(?:src|href)="([^"]*)"`).FindAllStringSubmatch(index, -1)
+	if len(references) == 0 {
+		t.Fatal("the page references no scripts or stylesheets")
+	}
+	for _, reference := range references {
+		if !strings.HasPrefix(reference[1], "/") || strings.HasPrefix(reference[1], "//") {
+			t.Fatalf("the page references %q outside the agent origin", reference[1])
+		}
+	}
+	for _, tag := range regexp.MustCompile(`<script[^>]*>`).FindAllString(index, -1) {
+		if !strings.Contains(tag, "src=") {
+			t.Fatalf("the page carries an inline script tag: %s", tag)
+		}
+	}
+	if strings.Contains(contentSecurityPolicy, "unsafe-inline") {
+		t.Fatal("the GUI policy allows inline script")
+	}
+	if !strings.Contains(contentSecurityPolicy, "script-src 'self'") {
+		t.Fatalf("the GUI policy is not self-only for scripts: %s", contentSecurityPolicy)
 	}
 }
