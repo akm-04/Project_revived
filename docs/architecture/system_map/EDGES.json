@@ -1791,7 +1791,12 @@
     "*PublicHistoryTx"
    ]
   },
-  "operator": {},
+  "operator": {
+   "otarelease": [
+    "Refuse",
+    "StaleRevision"
+   ]
+  },
   "otarelease": {},
   "petcampaign": {
    "achievement": [
@@ -5280,7 +5285,23 @@
    ]
   },
   "operator": {},
-  "otarelease": {},
+  "otarelease": {
+   "operator": [
+    "Refuse",
+    "StaleRevision"
+   ],
+   "store:otastore": [
+    "*ActivateTx",
+    "*ActiveRevisionTx",
+    "*InsertActivationTx",
+    "*InsertBuildTx",
+    "*LockLaneTx",
+    "*ReadStatusTx",
+    "*ReleaseTx",
+    "*SupersedeLaneTx",
+    "*WithdrawTx"
+   ]
+  },
   "petcampaign": {
    "characterasset": [
     "NewCoherentReadScope"
