@@ -34,9 +34,11 @@ func TestNativeSettingsRowRoundTripsTheTunables(t *testing.T) {
 	bus := operator.Bus{Runner: runner, Clock: clock.System{}, Store: operatorstore.Store{}, Handlers: map[string]operator.Handler{
 		"ota.settings.set": appota.SettingsSetHandler(file, live, otastore.Store{}),
 	}}
+	recoveredPath := t.TempDir()
 	payload := map[string]any{
 		"lazy_fetch":                  "on",
 		"res_path":                    "",
+		"recovered_res_path":          recoveredPath,
 		"download_base_seconds":       10,
 		"download_min_kib_per_second": 64,
 		"cache_max_age_seconds":       0,
@@ -54,7 +56,7 @@ func TestNativeSettingsRowRoundTripsTheTunables(t *testing.T) {
 		t.Fatal(err)
 	}
 	if loaded.DownloadBaseSeconds != 10 || loaded.DownloadMinKiBPerSecond != 64 || loaded.CacheMaxAgeSeconds != 0 ||
-		loaded.ServingRefreshSeconds != 2 || loaded.VolumeMB != 120 {
+		loaded.ServingRefreshSeconds != 2 || loaded.VolumeMB != 120 || loaded.RecoveredResPath != recoveredPath {
 		t.Fatalf("file=%+v", loaded)
 	}
 	if live.Get() != loaded {

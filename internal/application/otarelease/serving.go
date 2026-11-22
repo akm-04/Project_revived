@@ -48,11 +48,14 @@ type Serving struct {
 	loggedSidecars map[string]struct{}
 }
 
-// resAsset is one sidecar row. The client asks for its basename plus md5.
+// resAsset is one sidecar row. The client asks for its basename plus md5. Lane
+// is the release lane the row came from, so /res resolves it under that lane's
+// root (OA-9).
 type resAsset struct {
-	Path string `json:"path"`
-	MD5  string `json:"md5"`
-	Size int64  `json:"size"`
+	Path string      `json:"path"`
+	MD5  string      `json:"md5"`
+	Size int64       `json:"size"`
+	Lane domain.Lane `json:"-"`
 }
 
 type resSidecar struct {
@@ -175,6 +178,7 @@ func (s *Serving) readSidecar(release domain.Release) []resAsset {
 		}
 		seen[identity] = struct{}{}
 		entry.Path = clean
+		entry.Lane = release.Lane
 		entries = append(entries, entry)
 	}
 	return entries
@@ -291,9 +295,8 @@ func (s *Serving) OpenResource(ctx context.Context, asset string) (io.ReadSeekCl
 		s.recordMiss(asset, expectedMD5)
 		return nil, time.Time{}, "", false, nil
 	}
-	resPath := s.resPath()
 	for _, candidate := range candidates {
-		file, modTime, err := s.openVerified(resPath, candidate)
+		file, modTime, err := s.openVerified(s.resourceRoot(candidate.Lane), candidate)
 		if err != nil {
 			continue
 		}
@@ -306,7 +309,7 @@ func (s *Serving) OpenResource(ctx context.Context, asset string) (io.ReadSeekCl
 
 func (s *Serving) openVerified(resPath string, asset resAsset) (io.ReadSeekCloser, time.Time, error) {
 	if resPath == "" {
-		return nil, time.Time{}, errors.New("otarelease: res_path is not configured")
+		return nil, time.Time{}, errors.New("otarelease: the res root is not configured")
 	}
 	clean, ok := validResourcePath(asset.Path)
 	if !ok {
@@ -322,7 +325,7 @@ func (s *Serving) openVerified(resPath string, asset resAsset) (io.ReadSeekClose
 		return nil, time.Time{}, err
 	}
 	if !withinDirectory(resolvedRoot, resolvedPath) {
-		return nil, time.Time{}, errors.New("otarelease: res path escapes res_path")
+		return nil, time.Time{}, errors.New("otarelease: res path escapes its root")
 	}
 	file, err := os.Open(resolvedPath)
 	if err != nil {
@@ -390,6 +393,20 @@ func (s *Serving) resPath() string {
 	return s.settings().ResPath
 }
 
+func (s *Serving) recoveredResPath() string {
+	return s.settings().RecoveredResPath
+}
+
+// resourceRoot is the folder a sidecar row resolves under: a code release's
+// recovered rows under recovered_res_path, an assets release's delivered rows
+// under res_path (OA-9).
+func (s *Serving) resourceRoot(lane domain.Lane) string {
+	if lane == domain.LaneCode {
+		return s.recoveredResPath()
+	}
+	return s.resPath()
+}
+
 // DownloadWriteDeadline is the write deadline of a /updates or /res body of
 // size bytes at the live settings.
 func (s *Serving) DownloadWriteDeadline(size int64) time.Time {
@@ -448,10 +465,9 @@ func (s *Serving) Covers(ctx context.Context, request domain.CoversRequest) (dom
 	if err != nil {
 		return domain.CoversResult{}, err
 	}
-	resPath := s.resPath()
 	present := func(asset domain.LazyAsset) bool {
 		for _, candidate := range snapshot.resources[resourceKey(asset.Path, asset.MD5)] {
-			file, _, err := s.openVerified(resPath, candidate)
+			file, _, err := s.openVerified(s.resourceRoot(candidate.Lane), candidate)
 			if err == nil {
 				file.Close()
 				return true

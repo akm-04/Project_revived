@@ -358,8 +358,8 @@ func TestBuildLazyRefreshWithoutAssetsRelease(t *testing.T) {
 func TestBuildLazyRefreshUsesStockCatalog(t *testing.T) {
 	build, fake, operations, root := newBuildOperation(t)
 	fake.activeAssets = "1.631.1"
-	resPath := prepareLazyRefreshRelease(t, build.Config.OTARoot, root)
-	writeBuildTestFile(t, filepath.Join(resPath, "web", "images", "recovered.png"), []byte("recovered"))
+	recoveredPath := prepareLazyRefreshRelease(t, build.Config.OTARoot, root)
+	writeBuildTestFile(t, filepath.Join(recoveredPath, "web", "images", "recovered.png"), []byte("recovered"))
 
 	catalogDirectory := filepath.Join(root, "catalog")
 	rows := []map[string]any{
@@ -385,14 +385,15 @@ func TestBuildLazyRefreshUsesStockCatalog(t *testing.T) {
 	}
 	var result struct {
 		Report struct {
-			LazySupplied int `json:"lazy_supplied"`
-			LazyRetained int `json:"lazy_retained"`
+			LazySupplied  int `json:"lazy_supplied"`
+			LazyRetained  int `json:"lazy_retained"`
+			LazyRecovered int `json:"lazy_recovered"`
 		} `json:"report"`
 	}
 	if err := json.Unmarshal(operation.Result, &result); err != nil {
 		t.Fatalf("result: %v (%s)", err, operation.Result)
 	}
-	if result.Report.LazySupplied != 1 || result.Report.LazyRetained != 1 {
+	if result.Report.LazySupplied != 1 || result.Report.LazyRetained != 1 || result.Report.LazyRecovered != 1 {
 		t.Fatalf("report = %+v", result.Report)
 	}
 	if fake.registers != 1 {
@@ -424,7 +425,7 @@ func TestBuildLazyRefreshRefusesWithoutCatalogue(t *testing.T) {
 }
 
 // prepareLazyRefreshRelease writes the ACTIVE assets release's sidecar and the
-// settings res_path a code lazy refresh reads.
+// settings recovered_res_path a code lazy refresh reads.
 func prepareLazyRefreshRelease(t *testing.T, otaRoot, root string) string {
 	t.Helper()
 	assetsDirectory := filepath.Join(otaRoot, "updates", "assets")
@@ -440,11 +441,11 @@ func prepareLazyRefreshRelease(t *testing.T, otaRoot, root string) string {
 	}
 	writeBuildTestFile(t, filepath.Join(assetsDirectory, "1.631.1-abcdefabcdef.zip.res.json"), encoded)
 
-	resPath := filepath.Join(root, "res")
-	if err := os.MkdirAll(resPath, 0o755); err != nil {
+	recoveredPath := filepath.Join(root, "recovered")
+	if err := os.MkdirAll(recoveredPath, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	settings, err := json.Marshal(map[string]any{"lazy_fetch": "auto", "res_path": resPath, "volume_mb": 99})
+	settings, err := json.Marshal(map[string]any{"lazy_fetch": "auto", "res_path": "", "recovered_res_path": recoveredPath, "volume_mb": 99})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -452,7 +453,7 @@ func prepareLazyRefreshRelease(t *testing.T, otaRoot, root string) string {
 		t.Fatal(err)
 	}
 	writeBuildTestFile(t, filepath.Join(otaRoot, "settings.json"), settings)
-	return resPath
+	return recoveredPath
 }
 
 func writeBuildTestFile(t *testing.T, path string, content []byte) {

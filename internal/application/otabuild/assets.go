@@ -60,6 +60,7 @@ type Report struct {
 	LazyConsidered int      `json:"lazy_considered"`
 	LazySupplied   int      `json:"lazy_supplied"`
 	LazyRetained   int      `json:"lazy_retained"`
+	LazyRecovered  int      `json:"lazy_recovered"`
 	MissingSample  []string `json:"missing_sample"`
 	MismatchSample []string `json:"mismatch_sample"`
 }

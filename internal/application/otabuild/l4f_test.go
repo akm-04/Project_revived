@@ -131,7 +131,7 @@ func TestLazyRefreshRewritesCodeLazyMap(t *testing.T) {
 	input := fixture.input("1.631.2")
 	input.LazyRefresh = true
 	input.AssetsSidecar = sidecarPath
-	input.ResPath = resPath
+	input.RecoveredResPath = resPath
 	result := fixture.buildResult(t, input)
 	if result.Report.LazySupplied != 1 || result.Report.LazyRetained != 2 {
 		t.Fatalf("report = %+v", result.Report)

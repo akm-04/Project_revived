@@ -41,6 +41,9 @@ type Input struct {
 	// ResPath is the P1 asset folder settings.json names; the assets lane reads
 	// its exact-current files there (I11A_1_PLAN "L4c decisions").
 	ResPath string
+	// RecoveredResPath is the asset-recovery lane folder settings.json names; a
+	// code lazy refresh resolves recovered files only there (OA-9).
+	RecoveredResPath string
 	// StockCatalog is the catalogue source when the stock baseline has no
 	// version.json (for example a Lua-only zip); empty means StockBaseline. The
 	// assets lane and a code lazy refresh both read it.
@@ -66,25 +69,26 @@ type Result struct {
 // Refusal kinds the agent maps to AGENT_* errors. Every refusal wraps exactly
 // one of them so callers can use errors.Is.
 var (
-	ErrInvalidLane          = errors.New("otabuild: unknown lane")
-	ErrInvalidVersion       = errors.New("otabuild: invalid version")
-	ErrInvalidInput         = errors.New("otabuild: invalid build input")
-	ErrEmptyPackage         = errors.New("otabuild: the release package has no file")
-	ErrDuplicatePath        = errors.New("otabuild: a client path is shipped twice")
-	ErrUpdateSceneForbidden = errors.New("otabuild: UpdateScene.lua stays in the APK")
-	ErrOriginMismatch       = errors.New("otabuild: a packaged origin differs from the configured origins")
-	ErrOriginsMissing       = errors.New("otabuild: an origin carrier is packaged without configured origins")
-	ErrAbiMismatch          = errors.New("otabuild: the stock src_32 and src_64 copies differ")
-	ErrStockHashMismatch    = errors.New("otabuild: the stock target does not match its pinned sha256")
-	ErrPatchKind            = errors.New("otabuild: unknown patch kind")
-	ErrInvalidPatch         = errors.New("otabuild: invalid patch definition")
-	ErrPatchAnchor          = errors.New("otabuild: patch anchor is missing or not unique")
-	ErrVolumeLimit          = errors.New("otabuild: the package does not fit the stock volume limits")
-	ErrTargetExists         = errors.New("otabuild: the release artifact already exists")
-	ErrCatalogInvalid       = errors.New("otabuild: the stock version.json is not usable")
-	ErrResPathMissing       = errors.New("otabuild: the res_path is empty or not a readable folder")
-	ErrNoExactAssets        = errors.New("otabuild: no exact-current asset file was found")
-	ErrAssetCollision       = errors.New("otabuild: two asset rows land on one zip name")
+	ErrInvalidLane             = errors.New("otabuild: unknown lane")
+	ErrInvalidVersion          = errors.New("otabuild: invalid version")
+	ErrInvalidInput            = errors.New("otabuild: invalid build input")
+	ErrEmptyPackage            = errors.New("otabuild: the release package has no file")
+	ErrDuplicatePath           = errors.New("otabuild: a client path is shipped twice")
+	ErrUpdateSceneForbidden    = errors.New("otabuild: UpdateScene.lua stays in the APK")
+	ErrOriginMismatch          = errors.New("otabuild: a packaged origin differs from the configured origins")
+	ErrOriginsMissing          = errors.New("otabuild: an origin carrier is packaged without configured origins")
+	ErrAbiMismatch             = errors.New("otabuild: the stock src_32 and src_64 copies differ")
+	ErrStockHashMismatch       = errors.New("otabuild: the stock target does not match its pinned sha256")
+	ErrPatchKind               = errors.New("otabuild: unknown patch kind")
+	ErrInvalidPatch            = errors.New("otabuild: invalid patch definition")
+	ErrPatchAnchor             = errors.New("otabuild: patch anchor is missing or not unique")
+	ErrVolumeLimit             = errors.New("otabuild: the package does not fit the stock volume limits")
+	ErrTargetExists            = errors.New("otabuild: the release artifact already exists")
+	ErrCatalogInvalid          = errors.New("otabuild: the stock version.json is not usable")
+	ErrResPathMissing          = errors.New("otabuild: the res_path is empty or not a readable folder")
+	ErrRecoveredResPathMissing = errors.New("otabuild: the recovered_res_path is not a readable folder")
+	ErrNoExactAssets           = errors.New("otabuild: no exact-current asset file was found")
+	ErrAssetCollision          = errors.New("otabuild: two asset rows land on one zip name")
 	// ErrBuildIO is a transient read/write defect (short copy, disk fault); the
 	// agent maps it to a temporary refusal (L4f fix 8).
 	ErrBuildIO = errors.New("otabuild: the build could not read or write its files")
@@ -140,7 +144,7 @@ func Build(ctx context.Context, input Input) (Result, error) {
 		entries, err = codeEntries(input)
 		if err == nil && input.LazyRefresh {
 			var lazyBytes []byte
-			lazyBytes, sidecar, report, err = lazyRefreshPackage(input.ResPath, input.AssetsSidecar, catalogBaseline, version.String())
+			lazyBytes, sidecar, report, err = lazyRefreshPackage(input.RecoveredResPath, input.AssetsSidecar, catalogBaseline, version.String())
 			if err == nil {
 				entries = append(entries, packageEntry{path: lazyFileMember, content: lazyBytes, size: int64(len(lazyBytes)), md5: md5Hex(lazyBytes)})
 				sort.Slice(entries, func(left, right int) bool { return entries[left].path < entries[right].path })
@@ -258,6 +262,9 @@ func validateInput(input Input) (otarelease.Lane, otarelease.Version, error) {
 		}
 		if input.AssetsSidecar == "" {
 			return "", otarelease.Version{}, fmt.Errorf("%w: lazy refresh needs the active assets sidecar", ErrInvalidInput)
+		}
+		if _, err := resolveRecoveredResRoot(input.RecoveredResPath); err != nil {
+			return "", otarelease.Version{}, err
 		}
 	}
 	if input.StockSource != "" {

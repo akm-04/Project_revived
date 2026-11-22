@@ -21,6 +21,19 @@ func TestParseSettingsDefaultsAndValues(t *testing.T) {
 	}
 }
 
+func TestParseSettingsAcceptsOptionalRecoveredResPath(t *testing.T) {
+	settings, err := ParseSettings([]byte(`{"lazy_fetch":"auto","res_path":"/srv/res","recovered_res_path":"/srv/recovered"}`))
+	if err != nil || settings.RecoveredResPath != "/srv/recovered" {
+		t.Fatalf("settings=%+v err=%v", settings, err)
+	}
+	if got := DefaultSettings(); got.RecoveredResPath != "" {
+		t.Fatalf("default recovered_res_path=%q, want empty", got.RecoveredResPath)
+	}
+	if _, err := ParseSettings([]byte(`{"lazy_fetch":"auto","res_path":"","recovered_res_path":"relative/recovered"}`)); !errors.Is(err, ErrInvalidSettings) {
+		t.Fatalf("a relative recovered_res_path was accepted: %v", err)
+	}
+}
+
 func TestParseSettingsRefusesUnknownFieldAndBadValues(t *testing.T) {
 	for _, input := range []string{
 		`{"lazy_fetch":"auto","res_path":"","extra":1}`,

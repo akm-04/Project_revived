@@ -27,9 +27,11 @@ func TestSettingsFileMissingIsDefaultsAndSaveReloads(t *testing.T) {
 		t.Fatalf("loaded=%+v err=%v", loaded, err)
 	}
 	res := t.TempDir()
+	recovered := t.TempDir()
 	next := domain.DefaultSettings()
 	next.LazyFetch = domain.LazyFetchOn
 	next.ResPath = res
+	next.RecoveredResPath = recovered
 	if err := file.Save(next); err != nil {
 		t.Fatal(err)
 	}
@@ -237,6 +239,8 @@ func TestSettingsSetHandlerRefusalsAre409(t *testing.T) {
 		`{"lazy_fetch":"sometimes","res_path":""}`,
 		`{"lazy_fetch":"auto","res_path":"relative/res"}`,
 		`{"lazy_fetch":"auto","res_path":"/definitely/not/a/folder"}`,
+		`{"lazy_fetch":"auto","res_path":"","recovered_res_path":"relative/recovered"}`,
+		`{"lazy_fetch":"auto","res_path":"","recovered_res_path":"/definitely/not/a/folder"}`,
 		`{"lazy_fetch":"auto","res_path":"","extra":1}`,
 	}
 	for _, payload := range cases {
@@ -260,12 +264,14 @@ func TestSettingsSetHandlerRefusalsAre409(t *testing.T) {
 func TestSettingsSetHandlerAppliesTunables(t *testing.T) {
 	live := NewSettingsValue(domain.DefaultSettings())
 	store := &fakeSettingsStore{}
-	payload := `{"lazy_fetch":"auto","res_path":"","download_base_seconds":10,"download_min_kib_per_second":64,"cache_max_age_seconds":0,"serving_refresh_seconds":2,"volume_mb":120}`
+	recovered := t.TempDir()
+	payload := `{"lazy_fetch":"auto","res_path":"","recovered_res_path":"` + recovered + `","download_base_seconds":10,"download_min_kib_per_second":64,"cache_max_age_seconds":0,"serving_refresh_seconds":2,"volume_mb":120}`
 	result, err := callSettings(SettingsSetHandler(SettingsFile{Root: t.TempDir()}, live, store), payload)
 	if err != nil {
 		t.Fatal(err)
 	}
 	want := domain.DefaultSettings()
+	want.RecoveredResPath = recovered
 	want.DownloadBaseSeconds = 10
 	want.DownloadMinKiBPerSecond = 64
 	want.CacheMaxAgeSeconds = 0
