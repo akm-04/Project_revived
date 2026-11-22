@@ -1248,6 +1248,11 @@ SELECT class,catalog_status,settlement_activation,COALESCE(resource_key,''),COAL
 FROM gxb_content_resource_definitions
 WHERE revision_id=$1 AND item_id=$2;
 
+-- name: ReadContentItemKinds :one
+SELECT COALESCE(jsonb_object_agg(item_id,item_type),'{}'::jsonb)::text
+FROM gxb_content_resource_definitions
+WHERE revision_id=$1 AND item_id = ANY($2::bigint[]) AND item_type IS NOT NULL;
+
 
 -- name: ReadContentPlayerProgressionPolicy :one
 SELECT COALESCE(jsonb_agg(jsonb_build_object(

@@ -27,6 +27,9 @@ const (
 // HookCampaignDropMultiplier is the first typed hook (ruling 10, EA-8).
 const HookCampaignDropMultiplier = "campaign.drop_multiplier"
 
+// maxDropMultiplier keeps the count multiplication far from int64 overflow.
+const maxDropMultiplier = 100
+
 var ErrInvalidDefinition = errors.New("events: invalid definition")
 
 // RequirementKind is the per-player condition of a TIERED_CLAIM tier (EA-3).
@@ -139,6 +142,9 @@ func (hook Hook) validate() error {
 	}
 	if hook.Multiplier < 1 {
 		return fmt.Errorf("%w: %s needs a multiplier of at least 1", ErrInvalidDefinition, hook.Kind)
+	}
+	if hook.Multiplier > maxDropMultiplier {
+		return fmt.Errorf("%w: %s multiplier must not exceed %d", ErrInvalidDefinition, hook.Kind, maxDropMultiplier)
 	}
 	if len(hook.ItemKinds) == 0 {
 		return fmt.Errorf("%w: %s needs item_kinds", ErrInvalidDefinition, hook.Kind)
