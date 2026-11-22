@@ -30,7 +30,7 @@ rm -rf "$V/unpack"
   go build -tags postgres -o "$V/bin/gxb-realtime" ./cmd/gxb-realtime
   . "$W/ops/testing/vcenv.sh"
   if [ -n "${GOMOD_DOWNLOAD:-}" ]; then export GOPROXY=file://$GOMOD_DOWNLOAD,$GOPROXY; fi
-  go build -o "$V/bin/" ./cmd/...
+  go build -tags postgres -o "$V/bin/" ./cmd/...
 )
 "$V/bin/gxb-asset-tree" -tarball "$GAME_ASSETS/gxb1_lazy_unified_assets_verified_1.631.0_25420.tar.zst" \
   -catalog "$GAME_ASSETS/current_lazy_catalog_pass283.csv" -out "$V/update-tree"

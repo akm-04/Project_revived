@@ -5,7 +5,7 @@
 # usage: build_emulator_apk.sh [engine-origin] [sdk-origin]
 set -euo pipefail
 W=/home/akm/Chatgpt/EOL_Game
-REPO=$W/inputs/Supplimental_Materials/gxb_workshop
+REPO=${WORKSHOP_REPO:-$W/inputs/Supplimental_Materials/gxb_workshop}
 B=$W/tmp/android/apk_build
 ENGINE=${1:-http://10.0.2.2:18853}
 SDK=${2:-http://10.0.2.2:18855/}
@@ -13,7 +13,8 @@ export PATH=$W/.toolchain/bin:$PATH
 
 rm -rf "$B" && mkdir -p "$B/repack/app"
 git -C "$REPO" archive v2 app_repack | tar -x -C "$B/repack" --strip-components=1
-cp "$REPO/app_repack/app/base.apk" "$B/repack/app/"
+(cd "$W/inputs/client_baseline" && sha256sum -c --quiet SHA256SUMS)
+cp "$W/inputs/client_baseline/base.apk" "$B/repack/app/"
 echo "workshop v2 $(git -C "$REPO" rev-parse v2)" > "$B/INPUTS.sha256"
 (cd "$B/repack" && find . -type f | sort | xargs sha256sum) >> "$B/INPUTS.sha256"
 bash "$B/repack/patch_game_v2.sh" "$ENGINE" "$SDK" "$B"

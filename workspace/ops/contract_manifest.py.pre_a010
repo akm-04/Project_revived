@@ -1,0 +1,1090 @@
+#!/usr/bin/env python3
+"""Deterministic lookups between the stage's portable contract registry (ops/contract_registry.py) and a backend
+tree's system map, kept separate: the registry says which rules bind, the map says what code exists. A contract binds
+a system when its document names one of the system's MIDs (by number in a MID context, or by MID name) or owned
+tables, or names its package path, when the system's source cites the contract id, or when the lead bound it with
+`contract_registry.py bind`. A live contract that nothing places is an unresolved coverage issue and stays listed.
+
+ops/fleet_queue.py builds a manifest for every task from its `Contract-Systems:` / `Contract-Tree:` header, pins
+the registry revision and each document's sha256 in NN-name.manifest.json, puts the manifest in the worker's message,
+checks the worker's `## Contract compliance` section, and appends the result to REGISTRY/dispatches.jsonl.
+
+A manifest row is `binding` when a MID, a MID name, an owned table, the contract id, a lead binding, the task header or
+a ruling places it, and `index` when only a package path or the system's source cites it. The worker owes a row for
+every binding contract; an index row is optional, and one the worker does write is checked like a binding row. APPLIED
+on a binding row must cite a non-test file changed between the manifest's `base_commit` and the tree's HEAD.
+
+  contract_manifest.py system <name> [--tree DIR]     contracts that bind a system, with the reason for each
+  contract_manifest.py contract <id> [--tree DIR]     systems a contract binds, with the reason for each
+  contract_manifest.py coverage [--tree DIR]          write REGISTRY/COVERAGE.md: unresolved contracts, systems
+                                                      without contracts, bindings naming unknown systems or kinds,
+                                                      and scope contracts with the systems they reach
+  contract_manifest.py merge-check --tree DIR --base COMMIT [--revalidation-queue QUEUE] [--dry-run] [--into REF]
+                                                      absorb the leaf's committed contract changes, then exit 1 on
+                                                      any problem below; --dry-run previews without absorbing
+  contract_manifest.py merge-hook                     the backend's merge hooks: merge-check a merge commit in the
+                                                      stage's integration worktree (other worktrees pass)
+  contract_manifest.py seal-check                     ops/seal_passmap.sh: registry check, merge-check of the canonical
+                                                      backend since the stage's base commit, then export
+  contract_manifest.py record-verdicts FILE --by POOL [--reviewed]
+                                                      file audit verdicts (a JSON list) in REGISTRY/verdicts.json,
+                                                      each pinned to the contract's current sha256, the integration
+                                                      tree's HEAD and the blob id of every file it cites
+  contract_manifest.py matrix [--tree DIR]            write REGISTRY/COMPLIANCE_MATRIX.json from the registry, the
+                                                      system map and the verdicts; print the counts; a verdict is
+                                                      STALE when the document or a cited blob changed, UNPINNED when
+                                                      it was recorded before blob pinning
+  contract_manifest.py lead-signoff --tree DIR --systems A,B --review FILE
+                                                      the lead's independent audit of DeepSeek work (user ruling U1,
+                                                      2026-11-14): a PASS dispatch row from pool `lead` at the tree's
+                                                      HEAD, pinned to a manifest; FILE is the lead's written review
+  contract_manifest.py --check                        self-check
+
+The merge check fails closed. A leaf merges only when its contract documents are absorbed and reviewed, every live
+contract is placed or bound, every file it changed has an owner or a lead path binding, and every system it touched
+has a passing manifest task from another pool at its current code. The lead's way past a problem is a recorded
+exception (`contract_registry.py waive`), which every later check prints.
+"""
+import argparse
+import collections
+import datetime
+import hashlib
+import json
+import os
+import pathlib
+import re
+import subprocess
+import sys
+import tempfile
+
+import contract_registry
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+MID_KEY_RE = re.compile(r'(?<![A-Za-z0-9])"?(?:\w*_)?mids?"?\s*:\s*\[?\s*("?\d+"?(?:\s*,\s*"?\d+"?)*)', re.IGNORECASE)
+MID_NUMBER = r"\d+(?:\s+[A-Z][A-Z0-9_]+)?"
+MID_PROSE_RE = re.compile(rf"(?<![A-Za-z0-9])MIDs?(?![A-Za-z])[\s#:=_]*({MID_NUMBER}(?:\s*(?:,|/|&|[-–]|\band\b|\bor\b)\s*{MID_NUMBER})*)")
+MID_GLUED_RE = re.compile(r"(?<![A-Za-z])mid(\d+)")
+MID_RANGE_LIMIT = 300
+TOKEN_RE = re.compile(r"[A-Za-z0-9_]+")
+HEADER_RE = re.compile(r"^Contract-(Systems|Tree|Ids):[ \t]*(.*)$", re.MULTILINE)
+LOCATION_RE = re.compile(r"([\w./-]+\.[A-Za-z0-9]+):(\d+)")
+TEST_NAME_RE = re.compile(r"\bTest[A-Z]\w*")
+COMPLIANCE_HEADING = "## Contract compliance"
+VERDICTS = ("APPLIED", "NOT_APPLICABLE", "CONFLICT")
+BINDING_REASON_PREFIXES = ("MID ", "owned table ", "the contract id names the system", "lead binding",
+                           "named by the task", "amends ")
+AUTHOR_POOLS = {"DeepSeek": "deepseek", "Codex": "codex", "Claude": "lead"}
+# Claude Code's default trailer names no pool: a worker that kept it would pass as the lead.
+GENERIC_TRAILER = "Claude Code"
+UNKNOWN_POOL = "unknown"
+TRAILER_RE = re.compile(r"^Co-Authored-By:\s*((\w+)[^<\n]*)", re.MULTILINE | re.IGNORECASE)
+LIVE_STATUSES_EXCLUDED = ("SUPERSEDED",)
+AUDIT_VERDICTS = ("UPHELD", "UPHELD_UNTESTED", "PARTIAL", "VIOLATED", "NOT_IMPLEMENTED", "SUPERSEDED", "NOT_APPLICABLE", "UNKNOWN")
+CITING_VERDICTS = ("UPHELD", "UPHELD_UNTESTED", "PARTIAL", "VIOLATED")
+BREACH_VERDICTS = ("PARTIAL", "VIOLATED")
+VERDICT_SEVERITY = ("VIOLATED", "PARTIAL", "NOT_IMPLEMENTED", "UNKNOWN", "UPHELD_UNTESTED", "UPHELD", "SUPERSEDED", "NOT_APPLICABLE")
+
+
+def registry_for(stage=None):
+    import state
+    phase_directory = ROOT / state.facts()["phase_workspace"]["path"]
+    return contract_registry.registry_directory(phase_directory, stage or state.facts()["frontier"]["stage"])
+
+
+def default_tree():
+    import state
+    return state.BACKEND
+
+
+def system_map(tree):
+    directory = tree / "docs/architecture/system_map/systems"
+    if not directory.is_dir():
+        sys.exit(f"{tree} has no system map at {directory}")
+    return {record["name"]: record for record in (json.loads(path.read_text(encoding="utf-8")) for path in sorted(directory.glob("*.json")))}
+
+
+def package_path(name):
+    return f"internal/application/{name}/"
+
+
+def source_tokens(tree, name, record):
+    files = [path for path in (tree / package_path(name)).rglob("*.go") if not path.name.endswith("_test.go")]
+    files += [tree / relative for relative in record.get("dispatcher_files") or []]
+    tokens = set()
+    for path in files:
+        if path.is_file():
+            tokens |= set(TOKEN_RE.findall(path.read_text(encoding="utf-8", errors="replace")))
+    return tokens
+
+
+def system_keys(tree, records):
+    return {name: dict(mids={int(row["mid"]) for row in record.get("mids") or []},
+                       mid_names={row["name"] for row in record.get("mids") or [] if row.get("name")},
+                       tables=set((record.get("tables") or {}).get("owned") or []),
+                       source=source_tokens(tree, name, record))
+            for name, record in records.items()}
+
+
+def listed_mids(listed):
+    """`32/33, 37 and 560-571` -> every number; a MID name after a number is skipped, a dash spans a range."""
+    numbers, spanning = [], False
+    for number, dash in re.findall(r"(\d+)|([-–])", re.sub(r"[A-Za-z_][A-Za-z0-9_]*", " ", listed)):
+        if dash:
+            spanning = True
+            continue
+        value = int(number)
+        if spanning and numbers and 0 < value - numbers[-1] <= MID_RANGE_LIMIT:
+            numbers += range(numbers[-1] + 1, value + 1)
+        else:
+            numbers.append(value)
+        spanning = False
+    return set(numbers)
+
+
+def document_mids(text):
+    """MIDs under any key ending in mid/mids (arrays included), every MID of a prose list (`MID 32/33`, `MID64`), and
+    lowercase names such as `"mid336": ...`. `MID-01:` is a requirement label, not a MID."""
+    mids = set()
+    for listed in MID_KEY_RE.findall(text):
+        mids |= {int(number) for number in re.findall(r"\d+", listed)}
+    for listed in MID_PROSE_RE.findall(text):
+        mids |= listed_mids(listed)
+    return mids | {int(number) for number in MID_GLUED_RE.findall(text)}
+
+
+def document_facts(identifier, text):
+    words = identifier.lower().split("_")
+    id_names = {"".join(words[start:end]) for start in range(len(words)) for end in range(start + 1, len(words) + 1)}
+    return dict(text=text, tokens=set(TOKEN_RE.findall(text)), mids=document_mids(text), id_names=id_names)
+
+
+def document_reasons(facts, name, keys):
+    reasons = [f"MID {mid}" for mid in sorted(keys["mids"] & facts["mids"])]
+    reasons += [f"MID name {mid_name}" for mid_name in sorted(keys["mid_names"] & facts["tokens"])]
+    reasons += [f"owned table {table}" for table in sorted(keys["tables"] & facts["tokens"])]
+    if package_path(name) in facts["text"]:
+        reasons.append(f"package {package_path(name)}")
+    if name in facts["id_names"]:
+        reasons.append("the contract id names the system")
+    return reasons
+
+
+def lookup(directory, tree, new_systems=()):
+    """{contract: {system or '*': [reasons]}} for every live contract, plus the unresolved ones. A new system, which the
+    map does not hold yet, is placed by contract id, package path and lead binding only."""
+    registry = contract_registry.load(directory)
+    bindings = contract_registry.load_bindings(directory)
+    kinds = contract_registry.load_kinds(directory)
+    records = system_map(tree)
+    keys = system_keys(tree, records)
+    keys.update({name: dict(mids=set(), mid_names=set(), tables=set(), source=set()) for name in new_systems if name not in keys})
+    placed, unresolved, no_code = {}, [], []
+    for identifier, entry in sorted(registry["contracts"].items()):
+        if entry["status"] in LIVE_STATUSES_EXCLUDED:
+            continue
+        facts = document_facts(identifier, (directory / entry["document"]).read_text(encoding="utf-8", errors="replace"))
+        systems = {}
+        for name, system in keys.items():
+            reasons = document_reasons(facts, name, system)
+            if identifier in system["source"]:
+                reasons.append("cited in the system's source")
+            if reasons:
+                systems[name] = reasons
+        binding = bindings.get(identifier)
+        for name in (binding or {}).get("systems") or []:
+            if name.startswith(contract_registry.KIND_PREFIX):
+                kind_name = name[len(contract_registry.KIND_PREFIX):]
+                for system_name in (kinds.get(kind_name) or {}).get("systems") or []:
+                    systems.setdefault(system_name, []).append(f"lead binding (kind {kind_name}): {binding['reason']}")
+            else:
+                systems.setdefault(name, []).append(f"lead binding: {binding['reason']}")
+        if systems:
+            placed[identifier] = systems
+        elif binding is not None:
+            no_code.append(identifier)
+        else:
+            unresolved.append(identifier)
+    stale_bindings = []
+    for identifier, row in bindings.items():
+        for name in row.get("systems") or []:
+            if name == contract_registry.GLOBAL:
+                continue
+            if not name.startswith(contract_registry.KIND_PREFIX):
+                if name not in records:
+                    stale_bindings.append(f"{identifier} -> {name}")
+                continue
+            kind_name = name[len(contract_registry.KIND_PREFIX):]
+            if kind_name not in kinds:
+                stale_bindings.append(f"{identifier} -> {name} (no such kind)")
+                continue
+            stale_bindings += [f"{identifier} -> {system} (kind {kind_name})" for system in kinds[kind_name]["systems"]
+                               if system != contract_registry.GLOBAL and system not in records]
+    return dict(registry=registry, placed=placed, unresolved=unresolved, no_code=no_code, systems=sorted(keys),
+                stale_bindings=sorted(stale_bindings), records=records)
+
+
+def contracts_for_system(found, name):
+    return {identifier: systems.get(name) or systems.get(contract_registry.GLOBAL)
+            for identifier, systems in found["placed"].items()
+            if name in systems or contract_registry.GLOBAL in systems}
+
+
+def systems_for_contract(found, identifier):
+    return found["placed"].get(identifier, {})
+
+
+def tree_head(tree):
+    return subprocess.run(["git", "-C", str(tree), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip() or None
+
+
+def git_blob(tree, commit, path):
+    """The blob id a cited path holds at a commit; None when git does not know the path."""
+    shown = subprocess.run(["git", "-C", str(tree), "rev-parse", f"{commit}:{path}"], capture_output=True, text=True)
+    return shown.stdout.strip() if shown.returncode == 0 else None
+
+
+def tree_blobs(tree):
+    """{path: blob id} for the tree's HEAD in one git call, or {} when git cannot read it."""
+    head = tree_head(tree)
+    if not head:
+        return {}
+    listed = subprocess.run(["git", "-C", str(tree), "ls-tree", "-r", head], capture_output=True, text=True)
+    if listed.returncode != 0:
+        return {}
+    pairs = (line.split("\t", 1) for line in listed.stdout.splitlines() if "\t" in line)
+    return {path: meta.split()[2] for meta, path in pairs if len(meta.split()) >= 3 and meta.split()[1] == "blob"}
+
+
+def evidence_paths(value):
+    """Every file path a verdict cites, through a string, a list or a finding's nested clauses."""
+    if isinstance(value, str):
+        return [path for path, _ in LOCATION_RE.findall(value)]
+    if isinstance(value, dict):
+        return [path for item in value.values() for path in evidence_paths(item)]
+    if isinstance(value, (list, tuple)):
+        return [path for item in value for path in evidence_paths(item)]
+    return []
+
+
+def named_contracts(text):
+    """`Contract-Ids:` adds contracts the lead names to the manifest, on top of what the lookup places."""
+    fields = {key: value.strip() for key, value in HEADER_RE.findall(text)}
+    return sorted({identifier.strip() for identifier in fields.get("Ids", "").split(",") if identifier.strip()})
+
+
+def task_header(text):
+    """(systems, reason for none, tree) from the prompt's header lines; systems None when the header is missing.
+    A system the task creates is written `name (new)`."""
+    fields = {key: value.strip() for key, value in HEADER_RE.findall(text)}
+    declared = fields.get("Systems")
+    tree = pathlib.Path(fields["Tree"]) if fields.get("Tree") else None
+    if not declared:
+        return None, None, tree
+    if declared.lower().startswith("none"):
+        return [], declared[4:].strip(" -—:()") or None, tree
+    return sorted({name.strip() for name in declared.split(",") if name.strip()}), None, tree
+
+
+def split_new(systems):
+    names = [name.removesuffix("(new)").strip() for name in systems]
+    return sorted(set(names)), sorted({name.removesuffix("(new)").strip() for name in systems if name.endswith("(new)")})
+
+
+def reason_tier(reasons):
+    """A row is binding when any reason places it by a MID, a table, its id, a lead binding, the task header or a
+    ruling; a row whose reasons are only a package path or the system's source is index evidence."""
+    return "binding" if any(reason.startswith(BINDING_REASON_PREFIXES) for reason in reasons) else "index"
+
+
+def build_manifest(directory, tree, declared, task, named=()):
+    systems, new_systems = split_new(declared)
+    found = lookup(directory, tree, new_systems)
+    missing = sorted(set(named) - set(found["registry"]["contracts"]))
+    if missing:
+        raise ValueError(f"Contract-Ids names contracts the registry does not hold: {', '.join(missing)}")
+    unknown = sorted(set(systems) - set(found["systems"]))
+    if unknown:
+        raise ValueError(f"Contract-Systems names systems missing from {tree}'s system map: {', '.join(unknown)} "
+                         "(write `name (new)` for a system the task creates)")
+    rows = {}
+
+    def row_for(identifier):
+        if identifier not in rows:
+            entry = found["registry"]["contracts"][identifier]
+            rows[identifier] = dict(id=identifier, status=entry["status"], review=entry.get("review"),
+                                    document=str(directory / entry["document"]), sha256=entry["sha256"],
+                                    systems=[], reasons=[])
+        return rows[identifier]
+
+    for name in systems:
+        for identifier, reasons in contracts_for_system(found, name).items():
+            row = row_for(identifier)
+            is_global = contract_registry.GLOBAL in found["placed"][identifier]
+            row["systems"] = [contract_registry.GLOBAL] if is_global else sorted(set(row["systems"]) | {name})
+            row["reasons"] = sorted(set(row["reasons"]) | set(reasons))
+    for identifier in named:
+        row = row_for(identifier)
+        row["reasons"] = sorted(set(row["reasons"]) | {"named by the task"})
+    rulings = {identifier: entry for identifier, entry in found["registry"]["contracts"].items()
+               if (entry.get("kind") or "contract") == "ruling"}
+    amended_by = collections.defaultdict(list)
+    for identifier, entry in rulings.items():
+        for target in entry.get("amends") or []:
+            target_id, _, clause = target.partition(":")
+            if target_id in rows:
+                amended_by[target_id].append(f"AMENDED BY {identifier}" + (f":{clause}" if clause else ""))
+    for target_id, marks in amended_by.items():
+        rows[target_id]["reasons"] = sorted(set(rows[target_id]["reasons"]) | set(marks))
+    for identifier, entry in sorted(rulings.items()):
+        amending = sorted({target.partition(":")[0] for target in entry.get("amends") or []} & set(amended_by))
+        if not amending:
+            continue
+        row = row_for(identifier)
+        row["reasons"] = sorted(set(row["reasons"]) | {f"amends {target_id}" for target_id in amending})
+        row["systems"] = sorted(set(row["systems"]) | {name for target_id in amending for name in rows[target_id]["systems"]})
+    for row in rows.values():
+        row["tier"] = reason_tier(row["reasons"])
+    registry_bytes = (directory / "registry.json").read_bytes()
+    return dict(task=task, tree=str(tree), base_commit=tree_head(tree), systems=systems, new_systems=new_systems, registry=str(directory),
+                revision=found["registry"].get("revision", 0), registry_sha256=hashlib.sha256(registry_bytes).hexdigest(),
+                generated=contract_registry.now(), unresolved=len(found["unresolved"]),
+                contracts=[rows[identifier] for identifier in sorted(rows)])
+
+
+def manifest_row_line(row):
+    status = row["status"] + (" REVIEW_PENDING" if row["review"] else "")
+    return (f"{row['id']} | {status} | {','.join(row['systems'])} | {'; '.join(row['reasons'])[:240]} | "
+            f"{row['document']} | {row['sha256'][:12]}")
+
+
+def render_manifest(manifest):
+    binding_rows = [row for row in manifest["contracts"] if row.get("tier") != "index"]
+    index_rows = [row for row in manifest["contracts"] if row.get("tier") == "index"]
+    lines = [f"## Contract manifest for this task (registry revision {manifest['revision']}, systems {', '.join(manifest['systems'])})",
+             "",
+             "Generated from the stage's portable contract registry and this tree's system map; it pins each document's "
+             "sha256. The first list is binding: its contracts bind this task through a MID, a MID name, an owned table, "
+             "their id, a lead binding or the task header. Read each one whose reason touches what you change; read the "
+             "document with the Read tool (the check looks for that read in your transcript). End your report with the "
+             f"section `{COMPLIANCE_HEADING}`: one row per binding contract, `id | verdict | evidence`, where verdict is "
+             "APPLIED (evidence: the server file:line that implements it, in a file this task changed, and the test that "
+             "proves it as a _test.go file:line or a Test function name), NOT_APPLICABLE (evidence: why, in one sentence "
+             "naming what this task does not touch) or CONFLICT (evidence: the clause and what contradicts it; stop the "
+             "conflicting work and report). A missing row, an APPLIED row without a file this task changed and an existing "
+             "test, or an APPLIED/CONFLICT contract you never opened fails the task automatically.",
+             ""]
+    if manifest["unresolved"]:
+        lines += [f"{manifest['unresolved']} live contracts are not yet placed on any system (registry COVERAGE.md). If "
+                  "you meet one that applies, read it, add it as a row and say so.", ""]
+    lines.append("id | status | systems | why it applies | document | sha256")
+    lines += [manifest_row_line(row) for row in binding_rows]
+    if not binding_rows:
+        lines.append("(no contract binds these systems: write the section with one row `none | NOT_APPLICABLE | <why>`)")
+    if index_rows:
+        lines += ["", "Index-tier contracts: code or a document cites these, but nothing places them on a system. Read "
+                      "one you used or broke and write its row; the check then treats that row like a binding row.", "",
+                  "id | status | systems | why it applies | document | sha256"]
+        lines += [manifest_row_line(row) for row in index_rows]
+    return "\n".join(lines) + "\n"
+
+
+def compliance_rows(answer):
+    start = answer.rfind(COMPLIANCE_HEADING)
+    if start < 0:
+        return None
+    rows = {}
+    for line in answer[start + len(COMPLIANCE_HEADING):].splitlines():
+        if line.startswith("## "):
+            break
+        cells = [cell.strip(" `*") for cell in line.strip().strip("|").split("|")]
+        if len(cells) >= 3 and cells[1] in VERDICTS:
+            rows[cells[0]] = (cells[1], "|".join(cells[2:]).strip())
+    return rows
+
+
+def tool_inputs(transcript):
+    if not transcript or not transcript.is_file():
+        return ""
+    texts = []
+    for line in transcript.read_text(encoding="utf-8").splitlines():
+        content = (json.loads(line).get("message") or {}).get("content")
+        for item in content if isinstance(content, list) else []:
+            if isinstance(item, dict) and item.get("type") == "tool_use":
+                texts.append(json.dumps(item.get("input")))
+    return "\n".join(texts)
+
+
+def read_documents(transcript):
+    """Paths the worker opened with a Read tool call; a path quoted in any other tool's arguments does not count."""
+    if not transcript or not transcript.is_file():
+        return set()
+    paths = set()
+    for line in transcript.read_text(encoding="utf-8").splitlines():
+        content = (json.loads(line).get("message") or {}).get("content")
+        for item in content if isinstance(content, list) else []:
+            if isinstance(item, dict) and item.get("type") == "tool_use" and item.get("name") == "Read":
+                path = (item.get("input") or {}).get("file_path")
+                if path:
+                    paths.add(pathlib.Path(path).resolve())
+    return paths
+
+
+def changed_files_between(tree, base):
+    """Files the tree changed since the manifest's base commit; a commit git cannot read proves no change."""
+    head = tree_head(tree)
+    if not base or not head:
+        return set()
+    found = subprocess.run(["git", "-C", str(tree), "diff", "--name-only", f"{base}..{head}"], capture_output=True, text=True)
+    return set(found.stdout.split()) if found.returncode == 0 else set()
+
+
+def tree_relative(tree, path):
+    candidate = pathlib.Path(path)
+    if not candidate.is_absolute():
+        return pathlib.PurePosixPath(path).as_posix()
+    try:
+        return candidate.resolve().relative_to(tree.resolve()).as_posix()
+    except ValueError:
+        return None
+
+
+def location_exists(tree, path, line):
+    for base in (tree, ROOT, pathlib.Path("/")):
+        candidate = base / path.lstrip("/") if base == pathlib.Path("/") else base / path
+        if candidate.is_file():
+            return int(line) <= len(candidate.read_text(encoding="utf-8", errors="replace").splitlines())
+    return False
+
+
+def test_cited(tree, evidence):
+    """A `_test.go` file:line that exists, or a Go test function the tree defines."""
+    locations = [(path, line) for path, line in LOCATION_RE.findall(evidence) if path.endswith("_test.go")]
+    if any(location_exists(tree, path, line) for path, line in locations):
+        return True
+    return any(subprocess.run(["git", "-C", str(tree), "grep", "-q", "-F", f"func {name}("], capture_output=True).returncode == 0
+               for name in set(TEST_NAME_RE.findall(evidence)))
+
+
+def conflict_rows(answer):
+    return [f"CONFLICT {identifier}: {evidence}" for identifier, (verdict, evidence) in sorted((compliance_rows(answer) or {}).items())
+            if verdict == "CONFLICT"]
+
+
+def verify(manifest, answer, transcript):
+    """Problems with the worker's compliance section; an empty list passes. A tiered manifest requires a row for its
+    binding contracts only and asks for changed-file evidence; a manifest written before tiers keeps the older rules."""
+    if not manifest["systems"]:
+        return []
+    rows = compliance_rows(answer)
+    if rows is None:
+        return [f"no `{COMPLIANCE_HEADING}` section"]
+    if not manifest["contracts"]:
+        return [] if rows else ["the compliance section has no row"]
+    tree = pathlib.Path(manifest["tree"])
+    tiered = any("tier" in contract for contract in manifest["contracts"])
+    opened_inputs = tool_inputs(transcript)
+    opened_documents = read_documents(transcript) if tiered else set()
+    changed = changed_files_between(tree, manifest.get("base_commit")) if tiered else set()
+    problems = []
+    for contract in manifest["contracts"]:
+        identifier = contract["id"]
+        if identifier not in rows:
+            if contract.get("tier") != "index":
+                problems.append(f"{identifier}: no row")
+            continue
+        verdict, evidence = rows[identifier]
+        opened = (pathlib.Path(contract["document"]).resolve() in opened_documents) if tiered else (
+            pathlib.Path(contract["document"]).name in opened_inputs)
+        if verdict in ("APPLIED", "CONFLICT") and not opened:
+            problems.append(f"{identifier}: {verdict} but its document {contract['document']} was never opened")
+        if verdict == "APPLIED" and not any(location_exists(tree, path, line) for path, line in LOCATION_RE.findall(evidence)
+                                            if not path.endswith("_test.go")):
+            problems.append(f"{identifier}: APPLIED without an existing file:line in the evidence")
+        if verdict == "APPLIED" and tiered and not any(
+                tree_relative(tree, path) in changed for path, line in LOCATION_RE.findall(evidence)
+                if not path.endswith("_test.go")):
+            problems.append(f"{identifier}: APPLIED without a non-test file changed since base commit "
+                            f"{manifest.get('base_commit')}")
+        if verdict == "APPLIED" and not test_cited(tree, evidence):
+            problems.append(f"{identifier}: APPLIED without the test that proves it (an existing _test.go file:line or Test function)")
+        if verdict == "NOT_APPLICABLE" and len(evidence.split()) < 4:
+            problems.append(f"{identifier}: NOT_APPLICABLE needs a one-sentence reason")
+    return problems
+
+
+def outcome(manifest, answer, problems):
+    if problems:
+        return "FAIL"
+    if conflict_rows(answer):
+        return "CONFLICT"
+    return "PASS"
+
+
+def record_dispatch(manifest, manifest_path, status, problems, session_id, pool, model):
+    """end_commit lets the merge check see code changed after this task was checked."""
+    row = dict(time=contract_registry.now(), task=manifest["task"], manifest=str(manifest_path), tree=manifest["tree"],
+               base_commit=manifest["base_commit"], end_commit=tree_head(pathlib.Path(manifest["tree"])), systems=manifest["systems"],
+               revision=manifest["revision"], status=status, problems=problems[:50], session_id=session_id, pool=pool, model=model)
+    with (pathlib.Path(manifest["registry"]) / "dispatches.jsonl").open("a", encoding="utf-8") as ledger:
+        ledger.write(json.dumps(row, sort_keys=True) + "\n")
+
+
+def lead_signoff(directory, tree, systems, review):
+    """The lead's audit counts as the independent pool for the systems it names, at the tree's current HEAD only."""
+    if not review.is_file() or not review.read_text(encoding="utf-8").strip():
+        raise ValueError(f"{review}: the lead's written review must exist and say what was read")
+    if subprocess.run(["git", "-C", str(tree), "status", "--porcelain", "--untracked-files=no"], capture_output=True,
+                      text=True).stdout.strip():
+        raise ValueError(f"{tree} has uncommitted changes; sign off a committed head")
+    manifest = build_manifest(directory, tree, systems, f"lead-signoff-{tree.name}")
+    manifest_file = review.with_suffix(".manifest.json")
+    manifest_file.write_text(json.dumps(manifest, indent=1) + "\n", encoding="utf-8")
+    record_dispatch(manifest, manifest_file, "PASS", [], None, "lead", f"lead-review:{review}")
+    return manifest
+
+
+def is_ancestor(tree, commit, head):
+    return bool(commit) and subprocess.run(["git", "-C", str(tree), "merge-base", "--is-ancestor", commit, head],
+                                           capture_output=True).returncode == 0
+
+
+def dispatches(directory, tree, head):
+    """Every task whose checked commit is in `head`'s history, whichever worktree it ran in, so a leaf's audit still
+    counts after the leaf is merged and a merged leaf's audit counts on the integration branch."""
+    path = directory / "dispatches.jsonl"
+    rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()] if path.is_file() else []
+    return [row for row in rows if is_ancestor(tree, row.get("end_commit"), head)]
+
+
+def file_systems(relative, records, read=lambda relative: ""):
+    """Deterministic owners of a changed file: the system's package, domain package, store or dispatcher; else a
+    migration naming its owned tables; else a file-name word that is a system name. The generated system map is not
+    code: the lead path-binds it."""
+    owned = set()
+    for name, record in records.items():
+        stores = [store for store in record.get("stores") or [] if pathlib.PurePath(store).name.startswith(name)]
+        prefixes = (package_path(name), f"internal/domain/{name}/", f"internal/adapters/postgres/{name}store/")
+        if (relative.startswith(prefixes) or relative in (record.get("dispatcher_files") or [])
+                or any(relative.startswith(store + "/") for store in stores)):
+            owned.add(name)
+    if owned:
+        return owned
+    if relative.startswith("migrations/") and relative.endswith(".sql"):
+        tokens = set(TOKEN_RE.findall(read(relative)))
+        return {name for name, record in records.items() if set((record.get("tables") or {}).get("owned") or []) & tokens}
+    words = set(pathlib.PurePosixPath(relative).stem.lower().split("_"))
+    return {name for name in records if name in words}
+
+
+def changed_files(tree, since, head, *merged):
+    """Files changed by the commits in `head` but not in `since` or any `merged` ref. Commits the integration branch
+    already holds are excluded even when leaves share history (two merge bases); a merge commit counts only the files
+    it resolved by hand."""
+    log = subprocess.run(["git", "-C", str(tree), "log", "--format=", "--name-only", "--diff-merges=dense-combined", head,
+                          "--not", since, *merged], capture_output=True, text=True, check=True).stdout
+    return sorted(set(log.split()))
+
+
+def author_pools(tree, base, head, files, *merged):
+    """Which pools wrote these files on the branch, read from the commits' Co-Authored-By trailers. Commits already
+    merged (see changed_files) are not the leaf's."""
+    log = subprocess.run(["git", "-C", str(tree), "log", "--format=%B", head, "--not", base, *merged, "--", *files],
+                         capture_output=True, text=True, check=True).stdout
+    return {UNKNOWN_POOL if author.strip() == GENERIC_TRAILER else AUTHOR_POOLS[name]
+            for author, name in TRAILER_RE.findall(log) if name in AUTHOR_POOLS}
+
+
+def touched_systems(tree, base, head, records, path_bindings, phase_name, merged_into=()):
+    """({system: [files]}, unmapped files). A path binding wins over the automatic rules; the leaf's contract documents
+    are the absorb step's business."""
+    systems, unmapped = collections.defaultdict(list), []
+    read = lambda relative: (contract_registry.git_bytes(tree, head, relative) or b"").decode("utf-8", errors="replace")
+    for relative in changed_files(tree, base, head, *merged_into):
+        if relative.startswith(f"docs/{phase_name}/") and relative.endswith(contract_registry.DOCUMENT_SUFFIXES):
+            continue
+        binding = contract_registry.path_binding(path_bindings, relative)
+        hits = set(binding["systems"]) if binding is not None else file_systems(relative, records, read)
+        for name in hits:
+            systems[name].append(relative)
+        if binding is None and not hits:
+            unmapped.append(relative)
+    return dict(systems), unmapped
+
+
+def pinned_problems(found, name, manifest):
+    """Contracts that bind `name` now but differ from what the manifest pinned: changed, new or reviewed since."""
+    pinned = {row["id"]: row["sha256"] for row in manifest["contracts"]}
+    current = contracts_for_system(found, name)
+    changed = []
+    for identifier in sorted(current):
+        sha = found["registry"]["contracts"][identifier]["sha256"]
+        if identifier not in pinned:
+            changed.append(f"{identifier} (new for {name} since revision {manifest['revision']})")
+        elif pinned[identifier] != sha:
+            changed.append(f"{identifier} (amended since revision {manifest['revision']})")
+    return changed
+
+
+def merge_check(directory, tree, base, head, phase_name, absorbing=True, merged_into=()):
+    """(problems, notes, revalidate {system: [contracts]}). `merged_into` names refs whose commits are already merged
+    (the integration HEAD), so a leaf is not charged with another leaf's shared commits. Fails closed: every changed file needs an owner or a lead
+    path binding, every live contract a placement or a lead binding, every absorbed contract the lead's review, and
+    every touched system a current, passing, independent manifest task."""
+    head = subprocess.run(["git", "-C", str(tree), "rev-parse", head], capture_output=True, text=True, check=True).stdout.strip()
+    notes, problems = [], []
+    if absorbing:
+        registered, conflicts = contract_registry.absorb(directory, tree, base, head, phase_name)
+        notes += [f"ABSORBED {identifier}" for identifier in registered]
+        problems += conflicts
+    pending = sorted(identifier for identifier, entry in contract_registry.load(directory)["contracts"].items() if entry.get("review"))
+    problems += [f"REVIEW_PENDING {identifier}: read it, then `contract_registry.py accept`" for identifier in pending]
+    found = lookup(directory, tree)
+    problems += [f"COVERAGE {identifier}: live contract placed on no system; `contract_registry.py bind` it (COVERAGE.md)"
+                 for identifier in found["unresolved"]]
+    problems += [f"STALE_BINDING {row}: the system map has no such system" for row in found["stale_bindings"]]
+    systems, unmapped = touched_systems(tree, base, head, found["records"], contract_registry.load_path_bindings(directory), phase_name,
+                                        merged_into)
+    problems += [f"UNMAPPED {path}: no system owns it; `contract_registry.py bind-path` it" for path in unmapped]
+    rows = dispatches(directory, tree, head)
+    revalidate = {}
+    for name in sorted(systems):
+        covering = [row for row in rows if name in row["systems"]]
+        if not covering:
+            problems.append(f"UNCOVERED {name}: the branch changed {', '.join(systems[name][:3])} but no task checked at a commit "
+                            "in its history was dispatched with a manifest for it")
+            continue
+        latest = covering[-1]
+        later = [path for path in changed_files(tree, latest["end_commit"], head) if path in systems[name]]
+        if later:
+            problems.append(f"CHANGED_AFTER_CHECK {name}: {', '.join(later[:3])} changed after {latest['task']} was checked; "
+                            "dispatch a manifest task on the current branch")
+            continue
+        authors = author_pools(tree, base, head, systems[name], *merged_into)
+        if UNKNOWN_POOL in authors:
+            problems.append(f"AUTHOR_UNKNOWN {name}: a commit touching it carries the generic `{GENERIC_TRAILER}` trailer, which names "
+                            "no pool; amend it to the writer's trailer (PROJECT_AGENT_RULES.md commit trailers)")
+        independent = [row for row in covering if row["status"] == "PASS" and row.get("pool") and row["pool"] not in authors]
+        if not independent:
+            problems.append(f"INDEPENDENT_AUDIT {name}: written by {', '.join(sorted(authors)) or 'unknown'}; no passing manifest task "
+                            "from another pool covers it (the lead's `lead-signoff` for DeepSeek work, user ruling U1)")
+        if latest["status"] != "PASS":
+            problems.append(f"COMPLIANCE {name}: the latest task for it ({latest['task']}) ended {latest['status']}: "
+                            f"{'; '.join(latest['problems'][:3]) or 'a CONFLICT the lead must settle'}")
+            continue
+        changed = pinned_problems(found, name, json.loads(pathlib.Path(latest["manifest"]).read_text(encoding="utf-8")))
+        if changed:
+            revalidate[name] = changed
+            problems.append(f"REVALIDATE {name}: {', '.join(changed)}")
+    problems, waived = apply_waivers(contract_registry.load_waivers(directory), problems)
+    return problems, notes + waived, revalidate
+
+
+def apply_waivers(waivers, problems):
+    """(blocking problems, WAIVED notes): a waiver key matches a problem it equals or that continues with `:` or a space."""
+    def waiver(problem):
+        return next((key for key in waivers if problem == key or problem.startswith((key + ":", key + " "))), None)
+    blocking = [problem for problem in problems if waiver(problem) is None]
+    waived = [f"WAIVED {problem} (lead: {waivers[waiver(problem)]['reason']})" for problem in problems if waiver(problem) is not None]
+    return blocking, waived
+
+
+def revalidation_prompt(tree, revalidate, directory):
+    lines = [f"Contract-Systems: {', '.join(sorted(revalidate))}", f"Contract-Tree: {tree}", "",
+             "Revalidation task (written by contract_manifest.py merge-check). Contracts that bind the systems this branch "
+             "changed were amended or added after your earlier task was dispatched. For each contract listed below, read "
+             "the current document named in the manifest above and check the branch against it. Fix any departure on "
+             "this branch, commit, and run the tests the change needs. The version your earlier task pinned is still at "
+             f"the document path in its manifest (registry documents under {directory}/documents/ are never overwritten).", ""]
+    lines += [f"- {name}: {contract}" for name, contracts in sorted(revalidate.items()) for contract in contracts]
+    return "\n".join(lines) + "\n"
+
+
+def coverage(directory, tree):
+    found = lookup(directory, tree)
+    bound = collections.Counter(name for systems in found["placed"].values() for name in systems)
+    empty = [name for name in found["systems"] if not bound[name]]
+    lines = [f"# Contract coverage, registry revision {found['registry'].get('revision', 0)}, system map of {tree}", "",
+             "Generated by ops/contract_manifest.py coverage; never edit. Resolve a row with "
+             "`contract_registry.py bind <stage> <id> --system <name> | --global | --no-code --reason ...`.", "",
+             f"## Unresolved: live contracts placed on no system ({len(found['unresolved'])})", ""]
+    lines += [f"- {identifier} | {found['registry']['contracts'][identifier]['status']} | {found['registry']['contracts'][identifier]['document']}"
+              for identifier in found["unresolved"]]
+    lines += ["", f"## Systems no contract places ({len(empty)})", ""] + [f"- {name}" for name in empty]
+    lines += ["", f"## Bindings naming a system the map lacks ({len(found['stale_bindings'])})", ""] + [f"- {row}" for row in found["stale_bindings"]]
+    lines += ["", f"## Bound to no code by the lead ({len(found['no_code'])})", ""] + [f"- {identifier}" for identifier in found["no_code"]]
+    bindings = contract_registry.load_bindings(directory)
+    scoped = []
+    for identifier, entry in sorted(found["registry"]["contracts"].items()):
+        path = directory / entry["document"]
+        if entry["status"] == "SUPERSEDED" or not path.is_file():
+            continue
+        phrases = contract_registry.scope_phrases(path.read_text(encoding="utf-8", errors="replace"))
+        if not phrases:
+            continue
+        placed = found["placed"].get(identifier, {})
+        reached = len(found["systems"]) if contract_registry.GLOBAL in placed else len(placed)
+        scoped.append(f"- {identifier} | reaches {reached} system(s) | {'bound' if identifier in bindings else 'UNBOUND'} | "
+                      f"{', '.join(phrases)}")
+    lines += ["", f"## Scope contracts: live documents naming a scope phrase ({len(scoped)})", ""] + scoped
+    (directory / "COVERAGE.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return found
+
+
+def self_check():
+    assert task_header("Contract-Systems: march, arena\nContract-Tree: /x\nbody") == (["arena", "march"], None, pathlib.Path("/x"))
+    assert task_header("Contract-Systems: none - asset inventory only\n") == ([], "asset inventory only", None)
+    assert task_header("no header")[0] is None
+    assert split_new(["shop (new)", "i5"]) == (["i5", "shop"], ["shop"])
+    assert named_contracts("Contract-Systems: a\nContract-Ids: B_V1, A_V1\n") == ["A_V1", "B_V1"]
+    assert document_mids('{"mids": [1072, 1073, 1074, 1091]}') == {1072, 1073, 1074, 1091}
+    assert document_mids('{"request_mids": ["32", "33"], "mid": 7}') == {32, 33, 7}
+    assert document_mids('MID 336, "mid": 337, "mids": [338, 9], MID_339 and 340') == {336, 337, 338, 9, 339, 340}
+    assert document_mids("MIDs 560-571 and 600") == set(range(560, 572)) | {600}
+    assert document_mids("MID 32 LOAD_MARCH, 33 SET_MARCH / 37") == {32, 33, 37}
+    assert document_mids("MID-01: refuse twice. MID-02 too") == set()
+    assert document_mids('MID64 and MID2336/2337, {mid:5,param}, "mid336": 1, cae-mid9-repair') == {64, 2336, 2337, 5, 336, 9}
+    assert document_mids("MIDs 5-9000") == {5, 9000}
+    keys = dict(mids={336}, mid_names={"LOAD_MARCH"}, tables={"march_players"}, source=set())
+    assert document_reasons(document_facts("I9_MARCH_POLICY_V1", "LOAD_MARCH writes march_players"), "march", keys) == [
+        "MID name LOAD_MARCH", "owned table march_players", "the contract id names the system"]
+    assert "guildrental" in document_facts("I9_GUILD_RENTAL_V1", "")["id_names"]
+    records = {"march": {"dispatcher_files": ["internal/adapters/stockruntime/march_dispatcher.go"],
+                         "stores": ["internal/adapters/postgres/marchstore", "internal/adapters/postgres/i5store"]}}
+    assert file_systems("internal/adapters/postgres/marchstore/x.go", records) == {"march"}
+    assert file_systems("internal/adapters/postgres/i5store/x.go", records) == set()
+    assert file_systems("internal/application/march/a.go", records) == {"march"}
+    with tempfile.TemporaryDirectory() as temporary:
+        base = pathlib.Path(temporary)
+        (base / "a.go").write_text("1\n2\n3\n")
+        (base / "a_test.go").write_text("package a\nfunc TestMarchReward(t *testing.T) {}\n")
+        subprocess.run(["git", "-C", temporary, "init", "-q"], check=True)
+        subprocess.run(["git", "-C", temporary, "add", "a_test.go"], check=True)
+        document = base / "A.json"
+        transcript = base / "t.jsonl"
+        transcript.write_text(json.dumps({"message": {"content": [{"type": "tool_use", "input": {"file_path": str(document)}}]}}) + "\n")
+        manifest = dict(systems=["march"], tree=str(base), contracts=[
+            dict(id="A_V1", document=str(document)), dict(id="B_V1", document=str(base / "B.json")), dict(id="C_V1", document=str(base / "C.json"))])
+        good = (f"x\n{COMPLIANCE_HEADING}\nid | verdict | evidence\nA_V1 | APPLIED | a.go:3 tested by a_test.go:2\n"
+                "B_V1 | NOT_APPLICABLE | this task adds no March reward rows\n| C_V1 | `APPLIED` | a.go:2, TestMarchReward |\n")
+        assert verify(manifest, good, transcript) == ["C_V1: APPLIED but its document " + str(base / "C.json") + " was never opened"]
+        assert verify(manifest, good.replace("a.go:3", "a.go:9"), transcript)[0] == "A_V1: APPLIED without an existing file:line in the evidence"
+        assert verify(manifest, good.replace("a_test.go:2", "a_test.go:9"), transcript)[0] == (
+            "A_V1: APPLIED without the test that proves it (an existing _test.go file:line or Test function)")
+        assert verify(manifest, good.replace("TestMarchReward", "TestMissing"), transcript)[-1].startswith("C_V1: APPLIED without the test")
+        assert conflict_rows(good.replace("C_V1 | `APPLIED`", "C_V1 | CONFLICT")) == ["CONFLICT C_V1: a.go:2, TestMarchReward"]
+        assert verify(manifest, "no section", transcript) == [f"no `{COMPLIANCE_HEADING}` section"]
+        assert verify(dict(manifest, systems=[]), "", transcript) == []
+        assert outcome(manifest, good.replace("C_V1 | `APPLIED`", "C_V1 | CONFLICT"), []) == "CONFLICT"
+        found = dict(registry={"contracts": {"A_V1": {"sha256": "new"}, "N_V1": {"sha256": "n"}}},
+                     placed={"A_V1": {"march": ["MID 336"]}, "N_V1": {"*": ["lead binding: all"]}})
+        pinned = dict(revision=3, contracts=[dict(id="A_V1", sha256="old")])
+        assert apply_waivers({"INDEPENDENT_AUDIT shop": {"reason": "lead audited"}},
+                             ["INDEPENDENT_AUDIT shop: x", "INDEPENDENT_AUDIT shopping: y"]) == (
+            ["INDEPENDENT_AUDIT shopping: y"], ["WAIVED INDEPENDENT_AUDIT shop: x (lead: lead audited)"])
+        assert pinned_problems(found, "march", pinned) == ["A_V1 (amended since revision 3)", "N_V1 (new for march since revision 3)"]
+        assert reason_tier(["package internal/application/shop/"]) == "index"
+        assert reason_tier(["cited in the system's source"]) == "index"
+        assert reason_tier(["AMENDED BY R_MODES_V1:2"]) == "index"
+        assert reason_tier(["MID name LOAD_MARCH", "package internal/application/march/"]) == "binding"
+        assert reason_tier(["named by the task"]) == "binding"
+        assert reason_tier(["amends SHOP_V1"]) == "binding"
+        tiered = base / "tiered"
+        tiered.mkdir()
+        (tiered / "B.json").write_text("{}")
+        (tiered / "a.go").write_text("1\n")
+        subprocess.run(["git", "-C", str(tiered), "init", "-q"], check=True)
+        subprocess.run(["git", "-C", str(tiered), "add", "a.go", "B.json"], check=True)
+        subprocess.run(["git", "-C", str(tiered), "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", "base"], check=True)
+        base_commit = subprocess.run(["git", "-C", str(tiered), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
+        opened = tiered / "t.jsonl"
+        opened.write_text(json.dumps({"message": {"content": [
+            {"type": "tool_use", "name": "Read", "input": {"file_path": str(tiered / "B.json")}}]}}) + "\n")
+        tier_manifest = dict(systems=["shop"], base_commit=base_commit, tree=str(tiered), contracts=[
+            dict(id="B_V1", document=str(tiered / "B.json"), tier="binding"),
+            dict(id="I_V1", document=str(tiered / "B.json"), tier="index")])
+        applied = f"{COMPLIANCE_HEADING}\nid | verdict | evidence\nB_V1 | APPLIED | a.go:1, TestA\n"
+        assert any("changed" in problem for problem in verify(tier_manifest, applied, opened))
+        (tiered / "a_test.go").write_text("package a\nfunc TestA(t *testing.T) {}\n")
+        (tiered / "a.go").write_text("1\n2\n")
+        subprocess.run(["git", "-C", str(tiered), "add", "-A"], check=True)
+        subprocess.run(["git", "-C", str(tiered), "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", "change"], check=True)
+        assert verify(tier_manifest, applied, opened) == []
+        index_answer = (f"{COMPLIANCE_HEADING}\nid | verdict | evidence\n"
+                        "B_V1 | NOT_APPLICABLE | this task changes no shop behaviour\nI_V1 | APPLIED | a.go:1, TestA\n")
+        assert verify(tier_manifest, index_answer, opened) == []
+        assert verify(tier_manifest, f"{COMPLIANCE_HEADING}\nid | verdict | evidence\n"
+                                    "B_V1 | NOT_APPLICABLE | this task changes no shop behaviour\n", opened) == []
+
+
+def phase_name():
+    import state
+    return (ROOT / state.facts()["phase_workspace"]["path"]).name
+
+
+def git_output(tree, *arguments):
+    found = subprocess.run(["git", "-C", str(tree), *arguments], capture_output=True, text=True)
+    return found.stdout.strip() if found.returncode == 0 else None
+
+
+def merge_hook():
+    """Run by the backend's pre-merge-commit and pre-commit hooks: a merge commit in the stage's integration worktree
+    must pass the merge check for the merged branch. Any other worktree, or a commit that is not a merge, passes.
+    A clean merge runs pre-merge-commit before git writes MERGE_HEAD, so the merged commit comes from git's
+    GITHEAD_<sha> variables; a merge whose single merged commit cannot be identified fails."""
+    tree = pathlib.Path(git_output(pathlib.Path.cwd(), "rev-parse", "--show-toplevel") or ".").resolve()
+    directory = registry_for()
+    if not (directory / "registry.json").is_file():
+        return 0
+    integration = contract_registry.load(directory).get("integration")
+    if not integration or pathlib.Path(integration).resolve() != tree:
+        return 0
+    merge_head = git_output(tree, "rev-parse", "-q", "--verify", "MERGE_HEAD")
+    heads = [merge_head] if merge_head else [name.removeprefix("GITHEAD_") for name in os.environ if name.startswith("GITHEAD_")]
+    if not heads and not os.environ.get("GIT_REFLOG_ACTION", "").startswith("merge"):
+        return 0
+    if len(heads) != 1:
+        print(f"MERGE_CONTRACT_CHECK FAIL: merge into the integration worktree with merged commits {heads or 'unknown'}; "
+              "merge one leaf at a time", file=sys.stderr)
+        return 1
+    base = git_output(tree, "merge-base", "HEAD", heads[0])
+    problems, notes, _ = merge_check(directory, tree, base, heads[0], phase_name(), merged_into=("HEAD",))
+    print("\n".join(notes + problems + ["MERGE_CONTRACT_CHECK " + ("FAIL" if problems else "PASS")]), file=sys.stderr)
+    return 1 if problems else 0
+
+
+def load_verdicts(directory):
+    path = directory / "verdicts.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
+
+
+def record_verdicts(directory, rows, pool, reviewed):
+    """A verdict holds only for the document revision it judged, per system (`*` for a contract with no code). UPHELD
+    needs a cited location and a named test that passed; existing code or tests alone are never compliance. Each
+    verdict is pinned to the integration tree's HEAD and to the blob id every cited file:line holds there, so a later
+    code change can turn it STALE without re-reading the document."""
+    registry = contract_registry.load(directory)
+    problems = []
+    for row in rows:
+        identifier, verdict = row.get("id"), row.get("verdict")
+        if identifier not in registry["contracts"]:
+            problems.append(f"{identifier}: not registered")
+        elif verdict not in AUDIT_VERDICTS:
+            problems.append(f"{identifier}: verdict {verdict} is not one of {', '.join(AUDIT_VERDICTS)}")
+        elif verdict in CITING_VERDICTS and not row.get("evidence"):
+            problems.append(f"{identifier}: {verdict} cites no file:line evidence")
+        elif verdict == "UPHELD" and not any(test.get("result") == "PASS" for test in row.get("tests") or []):
+            problems.append(f"{identifier}: UPHELD names no test that ran and passed; use UPHELD_UNTESTED")
+    if problems:
+        sys.exit("verdicts not recorded:\n" + "\n".join(problems))
+    tree = registry.get("integration")
+    head = tree_head(pathlib.Path(tree)) if tree else None
+    verdicts = load_verdicts(directory)
+    for row in rows:
+        sha = registry["contracts"][row["id"]]["sha256"]
+        recorded = verdicts.get(row["id"])
+        if recorded is None or recorded["sha256"] != sha:
+            recorded = verdicts[row["id"]] = {"sha256": sha, "systems": {}}
+        if head:
+            pinned = {path: blob for path in sorted(set(evidence_paths(row))) for blob in [git_blob(tree, head, path)] if blob}
+            recorded["tree_head"] = head
+            recorded["blobs"] = {**(recorded.get("blobs") or {}), **pinned}
+        finding = {key: value for key, value in row.items() if key not in ("id", "systems")}
+        for name in row.get("systems") or [contract_registry.GLOBAL]:
+            recorded["systems"][name] = {**finding, "by": pool, "reviewed": reviewed, "time": contract_registry.now()}
+    contract_registry.write_json(directory / "verdicts.json", dict(sorted(verdicts.items())))
+    contract_registry.save(directory, registry, "verdicts", [row["id"] for row in rows], by=pool, reviewed=reviewed)
+
+
+def verdict_state(entry, recorded, blobs):
+    """UNASSESSED without a verdict, STALE when the contract revision or a pinned blob moved, UNPINNED for a verdict
+    recorded before blob pinning (no blobs), else the worst finding. A verdict that cites no file has nothing to pin."""
+    if not recorded:
+        return "UNASSESSED"
+    if recorded["sha256"] != entry["sha256"]:
+        return "STALE"
+    pinned = recorded.get("blobs")
+    if pinned is None:
+        return "UNPINNED"
+    if any(blobs.get(path) != blob for path, blob in pinned.items()):
+        return "STALE"
+    return worst(recorded["systems"]) if recorded["systems"] else "UNASSESSED"
+
+
+def current_findings(entry, recorded):
+    """{system: finding} that hold for the contract's current revision; a verdict on an older revision is stale."""
+    return recorded["systems"] if recorded and recorded["sha256"] == entry["sha256"] else {}
+
+
+def worst(findings):
+    return min((finding["verdict"] for finding in findings.values()), key=VERDICT_SEVERITY.index)
+
+
+def matrix(directory, tree):
+    """One row per registered contract: its revision, origin, the systems and MIDs it binds, their production paths
+    and test files, and the per-system verdicts that hold for this revision and code. One `git ls-tree -r` reads the
+    tree's blobs, so a verdict whose cited file changed is STALE and one recorded before pinning is UNPINNED.
+    Generated; never edit."""
+    found = lookup(directory, tree)
+    verdicts = load_verdicts(directory)
+    blobs = tree_blobs(tree)
+    rows = []
+    for identifier, entry in sorted(found["registry"]["contracts"].items()):
+        systems = found["placed"].get(identifier, {})
+        recorded = verdicts.get(identifier)
+        findings = current_findings(entry, recorded)
+        verdict = verdict_state(entry, recorded, blobs)
+        named = [name for name in systems if name != contract_registry.GLOBAL]
+        records = {name: found["records"].get(name, {}) for name in named}
+        rows.append(dict(
+            id=identifier, sha256=entry["sha256"], status=entry["status"], stage=entry["stage"], phases=entry["phases"],
+            late_found=bool(((entry.get("provenance") or {}).get("origin"))), document=entry["document"],
+            systems={name: reasons for name, reasons in sorted(systems.items())},
+            mids=sorted(document_mids((directory / entry["document"]).read_text(encoding="utf-8", errors="replace"))),
+            production_paths=sorted({package_path(name) for name in named} |
+                                    {path for record in records.values() for path in record.get("dispatcher_files") or []}),
+            test_files=sorted(str(path.relative_to(tree)) for name in named for path in (tree / package_path(name)).rglob("*_test.go")),
+            verdict=verdict, reviewed=bool(findings) and all(finding["reviewed"] for finding in findings.values()),
+            unassessed_systems=sorted(set(named) - set(findings)), findings=findings))
+    live = [row for row in rows if row["status"] not in LIVE_STATUSES_EXCLUDED]
+    assessed = [row for row in live if row["findings"]]
+    counts = dict(
+        registered=len(rows), in_force=len(live), assessed=len(assessed), reviewed=sum(row["reviewed"] for row in assessed),
+        verified_upheld=sum(row["verdict"] == "UPHELD" and row["reviewed"] and not row["unassessed_systems"] for row in assessed),
+        violated=sum(row["verdict"] in BREACH_VERDICTS for row in assessed),
+        untested=sum(row["verdict"] == "UPHELD_UNTESTED" for row in assessed),
+        not_implemented=sum(row["verdict"] == "NOT_IMPLEMENTED" for row in assessed),
+        unknown=sum(row["verdict"] in ("UNKNOWN", "UNASSESSED", "STALE", "UNPINNED") for row in live),
+        stale=sum(row["verdict"] == "STALE" for row in live),
+        unpinned=sum(row["verdict"] == "UNPINNED" for row in live),
+        partly_assessed=sum(bool(row["unassessed_systems"]) for row in assessed))
+    contract_registry.write_json(directory / "COMPLIANCE_MATRIX.json",
+                                 dict(registry_revision=found["registry"].get("revision"), tree=str(tree), tree_head=tree_head(tree),
+                                      counts=counts, contracts=rows))
+    return counts
+
+
+def breaches(directory):
+    """Current PARTIAL or VIOLATED findings: the seal waits for the fix (which re-audits the new revision) or a waiver."""
+    registry = contract_registry.load(directory)
+    return [f"VIOLATED {identifier}@{name}: the {finding['verdict']} verdict ({finding.get('report') or finding['by']}) holds for this revision"
+            for identifier, recorded in sorted(load_verdicts(directory).items()) if identifier in registry["contracts"]
+            for name, finding in sorted(current_findings(registry["contracts"][identifier], recorded).items())
+            if finding["verdict"] in BREACH_VERDICTS]
+
+
+def seal_check():
+    """Run by ops/seal_passmap.sh before the sync: the frontier stage's registry checks clean against its folder and
+    the canonical backend, everything the canonical backend changed since the stage began passes the merge check, and
+    the stage's contracts are exported to passmap/inputs. A stage without a registry (a stage-start seal) is skipped."""
+    import state
+    directory = registry_for()
+    if not (directory / "registry.json").is_file():
+        print(f"SEAL_CONTRACT_CHECK SKIP: {directory} does not exist (stage-start seal)")
+        return 0
+    phase_directory = ROOT / state.facts()["phase_workspace"]["path"]
+    registry = contract_registry.load(directory)
+    problems = contract_registry.check(directory, [
+        (phase_directory / "stages" / state.facts()["frontier"]["stage"] / "contracts", contract_registry.stage_contract_identifier),
+        (state.BACKEND / "docs" / phase_directory.name, contract_registry.contract_identifier)])
+    problems += contract_registry.sweep(directory, contract_registry.sweep_roots(directory, state.BACKEND))
+    blocking, notes = apply_waivers(contract_registry.load_waivers(directory), breaches(directory))
+    problems += blocking
+    if not registry.get("base_commit"):
+        problems.append("NO_BASE_COMMIT: record it with `contract_registry.py integration <stage> DIR --base-commit COMMIT`")
+    else:
+        merge_problems, merge_notes, _ = merge_check(directory, state.BACKEND, registry["base_commit"], "HEAD", phase_directory.name, absorbing=False)
+        problems += merge_problems
+        notes += merge_notes
+    print("\n".join(notes + problems))
+    if contract_registry.failure_problems(problems):
+        print("SEAL_CONTRACT_CHECK FAIL")
+        return 1
+    exported = contract_registry.export(directory, phase_directory / "passmap/inputs",
+                                        contract_registry.sealed_document_names(ROOT / f"work/authority_p{registry['base_seal']}/hot"))
+    print(f"exported: {', '.join(exported)}\nSEAL_CONTRACT_CHECK PASS")
+    return 0
+
+
+def main():
+    if sys.argv[1:] == ["--check"]:
+        self_check()
+        return 0
+    parser = argparse.ArgumentParser()
+    commands = parser.add_subparsers(dest="command", required=True)
+    if sys.argv[1:] == ["merge-hook"]:
+        return merge_hook()
+    if sys.argv[1:] == ["seal-check"]:
+        return seal_check()
+    verdicting = commands.add_parser("record-verdicts")
+    verdicting.add_argument("file", type=pathlib.Path)
+    verdicting.add_argument("--by", required=True, help="the pool that audited: deepseek, codex or lead")
+    verdicting.add_argument("--reviewed", action="store_true", help="the lead read the cited evidence")
+    verdicting.add_argument("--stage")
+    verdicting.set_defaults(tree=None)
+    signing = commands.add_parser("lead-signoff")
+    signing.add_argument("--tree", type=pathlib.Path, required=True)
+    signing.add_argument("--systems", required=True, help="comma-separated systems the review covers")
+    signing.add_argument("--review", type=pathlib.Path, required=True)
+    signing.add_argument("--stage")
+    for name, argument in (("system", "name"), ("contract", "id"), ("coverage", None), ("merge-check", None), ("matrix", None)):
+        command = commands.add_parser(name)
+        if argument:
+            command.add_argument(argument)
+        command.add_argument("--tree", type=pathlib.Path)
+        command.add_argument("--stage")
+        if name == "merge-check":
+            command.add_argument("--base", required=True)
+            command.add_argument("--revalidation-queue", type=pathlib.Path)
+            command.add_argument("--dry-run", action="store_true", help="preview: absorb nothing into the registry")
+            command.add_argument("--into", action="append", default=[], help="a ref already merged (the integration branch); its commits are not charged to the leaf")
+    arguments = parser.parse_args()
+    directory = registry_for(arguments.stage)
+    tree = (arguments.tree or default_tree()).resolve()
+    if arguments.command == "system":
+        found = lookup(directory, tree)
+        if arguments.name not in found["systems"]:
+            sys.exit(f"{arguments.name} is not a system in {tree}'s map")
+        for identifier, reasons in sorted(contracts_for_system(found, arguments.name).items()):
+            print(f"{identifier} | {found['registry']['contracts'][identifier]['status']} | {'; '.join(reasons)}")
+        return 0
+    if arguments.command == "contract":
+        found = lookup(directory, tree)
+        systems = systems_for_contract(found, arguments.id)
+        print("\n".join(f"{name} | {'; '.join(reasons)}" for name, reasons in sorted(systems.items()))
+              or ("UNRESOLVED: placed on no system" if arguments.id in found["unresolved"] else "bound to no code or not live"))
+        return 0
+    if arguments.command == "lead-signoff":
+        try:
+            manifest = lead_signoff(directory, tree, [name.strip() for name in arguments.systems.split(",") if name.strip()],
+                                    arguments.review.resolve())
+        except ValueError as error:
+            sys.exit(str(error))
+        print(f"LEAD_SIGNOFF {', '.join(manifest['systems'])} at {manifest['base_commit']}")
+        return 0
+    if arguments.command == "record-verdicts":
+        record_verdicts(directory, json.loads(arguments.file.read_text(encoding="utf-8")), arguments.by, arguments.reviewed)
+        return 0
+    if arguments.command == "matrix":
+        counts = matrix(directory, tree)
+        print(f"{directory / 'COMPLIANCE_MATRIX.json'}: " + ", ".join(f"{key} {value}" for key, value in counts.items()))
+        return 0
+    if arguments.command == "coverage":
+        found = coverage(directory, tree)
+        print(f"{directory / 'COVERAGE.md'}: {len(found['placed'])} placed, {len(found['unresolved'])} unresolved, "
+              f"{len(found['no_code'])} bound to no code")
+        return 0
+    problems, notes, revalidate = merge_check(directory, tree, arguments.base, "HEAD", phase_name(), not arguments.dry_run, arguments.into)
+    print("\n".join(notes + problems) or "")
+    if revalidate and arguments.revalidation_queue:
+        queue = arguments.revalidation_queue
+        queue.mkdir(parents=True, exist_ok=True)
+        number = len(list(queue.glob("*.prompt"))) + 1
+        path = queue / f"{number:02d}-revalidate-{datetime.date.today().isoformat()}.prompt"
+        path.write_text(revalidation_prompt(tree, revalidate, directory), encoding="utf-8")
+        print(f"revalidation task written: {path}")
+    print("MERGE_CONTRACT_CHECK " + ("FAIL" if problems else "PASS"))
+    return 1 if problems else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

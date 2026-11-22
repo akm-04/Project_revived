@@ -1,0 +1,1028 @@
+"""Negative regression tests for the contract workflow: each test plants one defect and checks that the registry,
+the manifest lookup or the merge check catches it. Run: cd ops && ../.toolchain/bin/python3 -B -m unittest test_contract_workflow"""
+import contextlib
+import io
+import json
+import os
+import pathlib
+import subprocess
+import sys
+import tempfile
+import unittest
+from unittest.mock import patch
+
+import contract_manifest
+import contract_registry
+import state
+
+PHASE = "i9"
+DEEPSEEK = "Co-Authored-By: DeepSeek <noreply@deepseek.com>"
+SYSTEMS = {
+    "shop": {"name": "shop", "mids": [{"mid": 1072, "name": "SHOP_BUY"}, {"mid": 1091}], "tables": {"owned": ["shop_rows"]}},
+    "march": {"name": "march", "mids": [{"mid": 336, "name": "LOAD_MARCH"}], "tables": {"owned": ["march_players"]}},
+}
+
+
+def git(tree, *arguments):
+    return subprocess.run(["git", "-C", str(tree), *arguments], capture_output=True, text=True, check=True).stdout.strip()
+
+
+def commit(tree, files, message="change"):
+    for relative, content in files.items():
+        path = tree / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content if isinstance(content, str) else json.dumps(content))
+    git(tree, "add", "-A")
+    git(tree, "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", message)
+    return git(tree, "rev-parse", "HEAD")
+
+
+class Stage:
+    """A backend repository with a two-system map, and a stage registry opened from a fake seal holding SHOP_V1
+    (by MID array) and MARCH_V1 (by prose MID)."""
+
+    def __init__(self, base):
+        self.base = base
+        self.tree = base / "backend"
+        self.tree.mkdir()
+        git(self.tree, "init", "-q", "-b", "main")
+        files = {f"docs/architecture/system_map/systems/{name}.json": record for name, record in SYSTEMS.items()}
+        files.update({f"internal/application/{name}/{name}.go": f"package {name}\n" for name in SYSTEMS})
+        files["internal/application/shop/shop_test.go"] = "package shop\n\nfunc TestShopBuy(t *testing.T) {}\n"
+        self.base_commit = commit(self.tree, files, "base")
+        hot = base / "hot"
+        (hot / "contracts").mkdir(parents=True)
+        (hot / "contracts/SHOP.json").write_text(json.dumps({"contract_id": "SHOP_V1", "mids": [1072, 1073, 1074, 1091]}))
+        (hot / "contracts/MARCH.md").write_text("# March\nMID 336 refuses a second claim.\n")
+        (hot / "records").mkdir()
+        (hot / "records/contracts.json").write_text(json.dumps({"contracts": {
+            "SHOP_V1": {"document": "contracts/SHOP.json", "status": "IN_FORCE"},
+            "MARCH_V1": {"document": "contracts/MARCH.md", "status": "IN_FORCE"}}}))
+        self.hot = hot
+        self.inputs = base / "inputs"
+        self.stage_contracts = base / "stage_contracts"
+        self.directory = base / "REGISTRY"
+        contract_registry.open_registry(self.directory, 798, hot, self.inputs, self.stage_contracts, "I9-11", base_commit=self.base_commit)
+        contract_registry.set_integration(self.directory, self.tree)
+
+    def leaf(self, name):
+        git(self.tree, "checkout", "-q", "-b", name, self.base_commit)
+
+    def revision(self):
+        return contract_registry.load(self.directory)["revision"]
+
+    def dispatch(self, systems, status="PASS", pool="codex"):
+        manifest = contract_manifest.build_manifest(self.directory, self.tree, systems, f"task-{len(systems)}-{pool}")
+        path = self.base / f"manifest-{self.revision()}-{pool}-{git(self.tree, 'rev-parse', 'HEAD')[:8]}.json"
+        path.write_text(json.dumps(manifest))
+        contract_manifest.record_dispatch(manifest, path, status, [] if status == "PASS" else ["x: no row"], "session", pool, "model")
+
+    def merge_check(self, absorbing=True):
+        return contract_manifest.merge_check(self.directory, self.tree, self.base_commit, "HEAD", PHASE, absorbing)[0]
+
+
+def kinds(problems):
+    return sorted({problem.split()[0] for problem in problems})
+
+
+class MidExtractionTests(unittest.TestCase):
+    def test_every_mid_of_a_json_array(self):
+        self.assertEqual(contract_manifest.document_mids('{"mids": [1072, 1073, 1074, 1091]}'), {1072, 1073, 1074, 1091})
+
+    def test_keyed_string_and_scalar_mids(self):
+        self.assertEqual(contract_manifest.document_mids('{"reply_mids": ["32", "33"], "request_mid": 7}'), {32, 33, 7})
+
+    def test_prose_lists_names_and_ranges(self):
+        self.assertEqual(contract_manifest.document_mids("MIDs 560-571, 600 SHOP_BUY / 601 & 602 or 603"),
+                         set(range(560, 572)) | {600, 601, 602, 603})
+
+    def test_glued_and_lowercase_forms(self):
+        self.assertEqual(contract_manifest.document_mids('MID64, MID2336/2337, {mid:5,x}, "mid336": 1, cae-mid9-repair'),
+                         {64, 2336, 2337, 5, 336, 9})
+
+    def test_requirement_labels_are_not_mids(self):
+        self.assertEqual(contract_manifest.document_mids("MID-01: refuse twice; MIDDLE 5; mid 7"), set())
+
+    def test_a_contract_is_placed_by_its_last_array_mid(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            found = contract_manifest.lookup(stage.directory, stage.tree)
+            self.assertIn("MID 1091", found["placed"]["SHOP_V1"]["shop"])
+            self.assertEqual(found["unresolved"], [])
+
+
+class RegistryIdentityTests(unittest.TestCase):
+    def test_a_registered_file_name_does_not_hide_a_new_id(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            folder = stage.base / "scan"
+            folder.mkdir()
+            (folder / "SHOP.json").write_text(json.dumps({"contract_id": "SHOP_V2"}))
+            self.assertEqual(contract_registry.check(stage.directory, [(folder, contract_registry.contract_identifier)]),
+                             [f"UNREGISTERED SHOP_V2: {folder / 'SHOP.json'}"])
+
+    def test_a_legacy_alias_with_other_content_diverges(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            registry = contract_registry.load(stage.directory)
+            contract_registry.place(stage.directory, registry, "LEGACY", json.dumps({"policy_id": "LEGACY_DECLARED"}).encode(),
+                                    "L.json", dict(origin="sealed_798", status="IN_FORCE"))
+            contract_registry.save(stage.directory, registry, "test", ["LEGACY"])
+            folder = stage.base / "scan"
+            folder.mkdir()
+            (folder / "L.json").write_text(json.dumps({"policy_id": "LEGACY_DECLARED", "changed": True}))
+            self.assertEqual(kinds(contract_registry.check(stage.directory, [(folder, contract_registry.contract_identifier)])), ["DIVERGED"])
+
+    def test_two_files_declaring_one_id_differently(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            folder = stage.base / "scan"
+            folder.mkdir()
+            (folder / "a.json").write_text(json.dumps({"contract_id": "SHOP_V1", "x": 1}))
+            (folder / "b.json").write_text(json.dumps({"contract_id": "SHOP_V1", "x": 2}))
+            self.assertIn("DUPLICATE", kinds(contract_registry.check(stage.directory, [(folder, contract_registry.contract_identifier)])))
+
+    def test_an_edited_registry_document_is_caught(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            (stage.directory / contract_registry.load(stage.directory)["contracts"]["SHOP_V1"]["document"]).write_text("{}")
+            self.assertTrue(any("changed without `add`" in problem for problem in contract_registry.check(stage.directory, [])))
+
+
+class SweepTests(unittest.TestCase):
+    def sweep(self, files, classified=None):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            docs = stage.base / "docs"
+            for relative, content in files.items():
+                (docs / relative).parent.mkdir(parents=True, exist_ok=True)
+                (docs / relative).write_text(json.dumps(content))
+            for key, reason in (classified or {}).items():
+                contract_registry.classify(stage.directory, key, reason)
+            return contract_registry.sweep(stage.directory, [("docs", docs)])
+
+    def test_a_nested_policy_record_without_an_id_is_unclassified(self):
+        self.assertEqual(kinds(self.sweep({"i7c2f/deep/SOURCE_PROFILE_AMENDMENT.json": {"rules": [1]}})), ["UNCLASSIFIED"])
+
+    def test_a_nested_unregistered_id_is_unclassified(self):
+        problems = self.sweep({"i7a/x/notes.json": {"policy_id": "NEW_POLICY_V1"}})
+        self.assertEqual(problems, ["UNCLASSIFIED docs/i7a/x/notes.json: register it (`add` with --origin-*) or `classify` it with a reason"])
+
+    def test_registered_content_id_or_name_passes(self):
+        self.assertEqual(self.sweep({"a/SHOP_POLICY.json": {"contract_id": "SHOP_V1", "changed": True},
+                                     "b/SHOP_V1.md": {"x": 1}, "c/plain.json": {"x": 1}}), [])
+
+    def test_a_classified_document_passes_and_a_gone_one_is_stale(self):
+        problems = self.sweep({"a/AUTHORIZATION.json": {}}, {"docs/a/AUTHORIZATION.json": "approval record",
+                                                            "docs/gone/POLICY.json": "old"})
+        self.assertEqual(problems, ["STALE_CLASSIFICATION docs/gone/POLICY.json: the document is gone; drop it from not_contracts.json"])
+
+    def test_a_missing_root_fails_closed(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            self.assertEqual(kinds(contract_registry.sweep(stage.directory, [("hot", stage.base / "nowhere")])), ["SWEEP_ROOT_MISSING"])
+
+
+class AbsorbTests(unittest.TestCase):
+    def test_two_leaves_adding_the_same_file_name_keep_both_documents(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            stage.leaf("a")
+            commit(stage.tree, {f"docs/{PHASE}/POLICY.json": {"contract_id": "A_POLICY_V1", "rule": "a"}})
+            self.assertEqual(contract_registry.absorb(stage.directory, stage.tree, stage.base_commit, "HEAD", PHASE), (["A_POLICY_V1"], []))
+            stage.leaf("b")
+            commit(stage.tree, {f"docs/{PHASE}/POLICY.json": {"contract_id": "B_POLICY_V1", "rule": "b"}})
+            self.assertEqual(contract_registry.absorb(stage.directory, stage.tree, stage.base_commit, "HEAD", PHASE), (["B_POLICY_V1"], []))
+            contracts = contract_registry.load(stage.directory)["contracts"]
+            self.assertNotEqual(contracts["A_POLICY_V1"]["document"], contracts["B_POLICY_V1"]["document"])
+            self.assertEqual(contract_registry.check(stage.directory, []), [])
+
+    def test_markdown_needs_a_contract_id_line(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            stage.leaf("a")
+            commit(stage.tree, {f"docs/{PHASE}/SEAMS.md": "Contract-Id: I9_11_SEAMS_V1\n# seams\n",
+                                f"docs/{PHASE}/RESEARCH.md": "# research notes, not a contract\n"})
+            self.assertEqual(contract_registry.absorb(stage.directory, stage.tree, stage.base_commit, "HEAD", PHASE)[0], ["I9_11_SEAMS_V1"])
+
+    def test_an_amended_registered_markdown_is_absorbed_by_its_name(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            commit(stage.tree, {f"docs/{PHASE}/MARCH_V1.md": (stage.hot / "contracts/MARCH.md").read_text()}, "base doc")
+            stage.base_commit = git(stage.tree, "rev-parse", "HEAD")
+            stage.leaf("a")
+            commit(stage.tree, {f"docs/{PHASE}/MARCH_V1.md": "# March\nMID 336 refuses a third claim.\n"})
+            registered, conflicts = contract_registry.absorb(stage.directory, stage.tree, stage.base_commit, "HEAD", PHASE)
+            self.assertEqual((registered, conflicts), (["MARCH_V1"], []))
+
+    def test_rewriting_a_registered_contract_the_base_lacked_conflicts(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            stage.leaf("a")
+            commit(stage.tree, {f"docs/{PHASE}/MARCH_V1.md": "# March\nMID 336 refuses a third claim.\n"})
+            self.assertEqual(kinds(contract_registry.absorb(stage.directory, stage.tree, stage.base_commit, "HEAD", PHASE)[1]), ["CONFLICT"])
+
+    def test_absorb_reads_the_commit_not_the_working_copy(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            stage.leaf("a")
+            committed = json.dumps({"contract_id": "X_V1", "rule": "committed"})
+            commit(stage.tree, {f"docs/{PHASE}/X.json": committed})
+            (stage.tree / f"docs/{PHASE}/X.json").write_text(json.dumps({"contract_id": "X_V1", "rule": "dirty"}))
+            contract_registry.absorb(stage.directory, stage.tree, stage.base_commit, "HEAD", PHASE)
+            entry = contract_registry.load(stage.directory)["contracts"]["X_V1"]
+            self.assertEqual((stage.directory / entry["document"]).read_text(), committed)
+
+    def test_a_duplicate_id_saves_nothing(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            stage.leaf("a")
+            commit(stage.tree, {f"docs/{PHASE}/A.json": {"contract_id": "D_V1", "x": 1}, f"docs/{PHASE}/B.json": {"contract_id": "D_V1", "x": 2},
+                                f"docs/{PHASE}/C.json": {"contract_id": "OK_V1"}})
+            before = (stage.directory / "registry.json").read_bytes()
+            registered, conflicts = contract_registry.absorb(stage.directory, stage.tree, stage.base_commit, "HEAD", PHASE)
+            self.assertEqual((registered, kinds(conflicts)), ([], ["DUPLICATE"]))
+            self.assertEqual((stage.directory / "registry.json").read_bytes(), before)
+
+    def test_both_sides_changing_a_contract_conflicts(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            commit(stage.tree, {f"docs/{PHASE}/SHOP.json": {"contract_id": "SHOP_V1", "mids": [1072]}}, "base doc")
+            stage.base_commit = git(stage.tree, "rev-parse", "HEAD")
+            amended = stage.base / "SHOP.json"
+            amended.write_text(json.dumps({"contract_id": "SHOP_V1", "mids": [1072, 5]}))
+            contract_registry.add(stage.directory, amended, "SHOP_V1", "shop", "IN_FORCE", [])
+            stage.leaf("a")
+            commit(stage.tree, {f"docs/{PHASE}/SHOP.json": {"contract_id": "SHOP_V1", "mids": [1072, 6]}})
+            self.assertEqual(kinds(contract_registry.absorb(stage.directory, stage.tree, stage.base_commit, "HEAD", PHASE)[1]), ["CONFLICT"])
+
+
+class ExportTests(unittest.TestCase):
+    def test_export_names_files_by_id_and_refuses_a_sealed_name(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            source = stage.base / "anything.json"
+            source.write_text(json.dumps({"contract_id": "NEW_V1"}))
+            contract_registry.add(stage.directory, source, "NEW_V1", "new", "IN_FORCE", [])
+            sealed = contract_registry.sealed_document_names(stage.hot)
+            self.assertEqual(contract_registry.export(stage.directory, stage.inputs, sealed), ["NEW_V1"])
+            self.assertTrue((stage.inputs / "contracts/NEW_V1.json").is_file())
+            source.write_text(json.dumps({"contract_id": "SHOP"}))
+            contract_registry.add(stage.directory, source, "SHOP", "clash", "IN_FORCE", [])
+            with self.assertRaises(SystemExit):
+                contract_registry.export(stage.directory, stage.inputs, sealed)
+
+    def test_a_late_found_contract_keeps_the_stage_that_made_it(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            source = stage.base / "old.json"
+            source.write_text(json.dumps({"policy_id": "OLD_V1"}))
+            origin = {"stage": "I9-10", "phase": "I9", "commit": "9522d7f", "note": "found by the registry scan"}
+            contract_registry.add(stage.directory, source, "OLD_V1", "old", "IN_FORCE", [], origin)
+            entry = contract_registry.load(stage.directory)["contracts"]["OLD_V1"]
+            self.assertEqual((entry["stage"], entry["phases"], entry["provenance"]["origin"]["commit"]), ("I9-10", ["I9"], "9522d7f"))
+            contract_registry.export(stage.directory, stage.inputs, contract_registry.sealed_document_names(stage.hot))
+            row = next(row for row in json.loads((stage.inputs / "CONTRACTS.json").read_text())["contracts"] if row["id"] == "OLD_V1")
+            self.assertEqual((row["stage"], row["phases"], row["note"]), ("I9-10", ["I9"], "found by the registry scan"))
+
+
+class ComplianceTests(unittest.TestCase):
+    def answer(self, row):
+        return f"{contract_manifest.COMPLIANCE_HEADING}\nid | verdict | evidence\n{row}\n"
+
+    def check(self, row, opened=True, changed=True):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            manifest = contract_manifest.build_manifest(stage.directory, stage.tree, ["shop"], "task")
+            if changed:
+                commit(stage.tree, {"internal/application/shop/shop.go": "package shop\n// changed\n"})
+            transcript = stage.base / "t.jsonl"
+            documents = [row["document"] for row in manifest["contracts"]] if opened else []
+            transcript.write_text("".join(json.dumps({"message": {"content": [
+                {"type": "tool_use", "name": "Read", "input": {"file_path": path}}]}}) + "\n" for path in documents))
+            return contract_manifest.verify(manifest, self.answer(row), transcript)
+
+    def test_applied_with_code_and_test_passes(self):
+        self.assertEqual(self.check("SHOP_V1 | APPLIED | internal/application/shop/shop.go:1, TestShopBuy"), [])
+
+    def test_applied_without_a_test_fails(self):
+        self.assertEqual(self.check("SHOP_V1 | APPLIED | internal/application/shop/shop.go:1"),
+                         ["SHOP_V1: APPLIED without the test that proves it (an existing _test.go file:line or Test function)"])
+
+    def test_a_test_file_is_not_the_implementation(self):
+        self.assertIn("SHOP_V1: APPLIED without an existing file:line in the evidence",
+                      self.check("SHOP_V1 | APPLIED | internal/application/shop/shop_test.go:3"))
+
+    def test_a_missing_row_fails(self):
+        self.assertEqual(self.check("OTHER_V1 | NOT_APPLICABLE | this task changes nothing in the shop"), ["SHOP_V1: no row"])
+
+    def test_applied_without_opening_the_document_fails(self):
+        self.assertTrue(self.check("SHOP_V1 | APPLIED | internal/application/shop/shop.go:1, TestShopBuy", opened=False)[0]
+                        .endswith("was never opened"))
+
+
+class TierTests(unittest.TestCase):
+    INDEX_ID = "INDEX_RULE_V1"
+
+    def add_index_contract(self, stage, note="implemented in internal/application/shop/"):
+        source = stage.base / f"{self.INDEX_ID}.json"
+        source.write_text(json.dumps({"contract_id": self.INDEX_ID, "note": note}))
+        contract_registry.add(stage.directory, source, self.INDEX_ID, "shop", "IN_FORCE", [])
+
+    def manifest(self, stage):
+        return contract_manifest.build_manifest(stage.directory, stage.tree, ["shop"], "task")
+
+    def transcript(self, stage, entries):
+        path = stage.base / "t.jsonl"
+        path.write_text("".join(json.dumps({"message": {"content": [entry]}}) + "\n" for entry in entries))
+        return path
+
+    def read(self, document):
+        return {"type": "tool_use", "name": "Read", "input": {"file_path": document}}
+
+    def rows(self, manifest):
+        return {row["id"]: row for row in manifest["contracts"]}
+
+    def test_a_package_path_only_contract_is_index_and_a_mid_contract_is_binding(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            self.add_index_contract(stage)
+            rows = self.rows(self.manifest(stage))
+            self.assertEqual(rows[self.INDEX_ID]["tier"], "index")
+            self.assertEqual(rows["SHOP_V1"]["tier"], "binding")
+
+    def test_a_contract_cited_only_in_the_systems_source_is_index(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            identifier = "CITED_RULE_V1"
+            source = stage.base / f"{identifier}.json"
+            source.write_text(json.dumps({"contract_id": identifier, "note": "a rule the code follows"}))
+            contract_registry.add(stage.directory, source, identifier, "shop", "IN_FORCE", [])
+            (stage.tree / "internal/application/shop/shop.go").write_text(f"package shop\n// {identifier}\n")
+            self.assertEqual(self.rows(self.manifest(stage))[identifier]["tier"], "index")
+
+    def test_verify_needs_no_row_for_an_index_contract(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            self.add_index_contract(stage)
+            manifest = self.manifest(stage)
+            shop = self.rows(manifest)["SHOP_V1"]["document"]
+            problems = contract_manifest.verify(
+                manifest, "## Contract compliance\nid | verdict | evidence\n"
+                          "SHOP_V1 | NOT_APPLICABLE | this task changes no shop behaviour\n", self.transcript(stage, [self.read(shop)]))
+            self.assertEqual(problems, [])
+
+    def test_an_applied_binding_row_citing_an_unchanged_file_fails(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            manifest = self.manifest(stage)
+            commit(stage.tree, {"internal/application/shop/buy.go": "package shop\n"})
+            shop = self.rows(manifest)["SHOP_V1"]["document"]
+            problems = contract_manifest.verify(
+                manifest, "## Contract compliance\nid | verdict | evidence\n"
+                          "SHOP_V1 | APPLIED | internal/application/shop/shop.go:1, TestShopBuy\n",
+                self.transcript(stage, [self.read(shop)]))
+            self.assertTrue(any("changed" in problem for problem in problems), problems)
+
+    def test_an_applied_binding_row_citing_a_changed_file_passes(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            manifest = self.manifest(stage)
+            commit(stage.tree, {"internal/application/shop/shop.go": "package shop\n// changed\n"})
+            shop = self.rows(manifest)["SHOP_V1"]["document"]
+            self.assertEqual(contract_manifest.verify(
+                manifest, "## Contract compliance\nid | verdict | evidence\n"
+                          "SHOP_V1 | APPLIED | internal/application/shop/shop.go:1, TestShopBuy\n",
+                self.transcript(stage, [self.read(shop)])), [])
+
+    def test_a_document_named_only_in_a_bash_command_is_not_opened(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            manifest = self.manifest(stage)
+            commit(stage.tree, {"internal/application/shop/shop.go": "package shop\n// changed\n"})
+            shop = self.rows(manifest)["SHOP_V1"]["document"]
+            problems = contract_manifest.verify(
+                manifest, "## Contract compliance\nid | verdict | evidence\n"
+                          "SHOP_V1 | APPLIED | internal/application/shop/shop.go:1, TestShopBuy\n",
+                self.transcript(stage, [{"type": "tool_use", "name": "Bash", "input": {"command": f"cat {shop}"}}]))
+            self.assertTrue(any("was never opened" in problem for problem in problems), problems)
+
+    def test_an_index_row_the_worker_writes_is_checked_like_a_binding_row(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            self.add_index_contract(stage)
+            manifest = self.manifest(stage)
+            commit(stage.tree, {"internal/application/shop/buy.go": "package shop\n"})
+            documents = [row["document"] for row in manifest["contracts"]]
+            problems = contract_manifest.verify(
+                manifest, "## Contract compliance\nid | verdict | evidence\n"
+                          "SHOP_V1 | NOT_APPLICABLE | this task changes no shop behaviour\n"
+                          f"{self.INDEX_ID} | APPLIED | internal/application/shop/shop.go:1, TestShopBuy\n",
+                self.transcript(stage, [self.read(document) for document in documents]))
+            self.assertTrue(any(problem.startswith(f"{self.INDEX_ID}: ") and "changed" in problem for problem in problems), problems)
+
+    def test_render_prints_index_rows_after_the_binding_list(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            self.add_index_contract(stage)
+            rendered = contract_manifest.render_manifest(self.manifest(stage))
+            self.assertIn("Index-tier", rendered)
+            self.assertGreater(rendered.index(f"{self.INDEX_ID} |"), rendered.index("Index-tier"))
+            self.assertLess(rendered.index("SHOP_V1 |"), rendered.index("Index-tier"))
+
+    def test_an_old_manifest_without_tiers_verifies_as_before(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            document = stage.base / "OLD.json"
+            document.write_text("{}")
+            manifest = dict(systems=["shop"], tree=str(stage.tree),
+                            contracts=[dict(id="SHOP_V1", document=str(document))])
+            transcript = self.transcript(stage, [{"type": "tool_use", "name": "Bash", "input": {"command": f"cat {document}"}}])
+            self.assertEqual(contract_manifest.verify(
+                manifest, "## Contract compliance\nid | verdict | evidence\n"
+                          "SHOP_V1 | APPLIED | internal/application/shop/shop.go:1, TestShopBuy\n", transcript), [])
+
+
+class KindTests(unittest.TestCase):
+    def add_contract(self, stage, identifier="MODE_V1", rule="a closed loop"):
+        source = stage.base / f"{identifier}.json"
+        source.write_text(json.dumps({"contract_id": identifier, "rule": rule}))
+        contract_registry.add(stage.directory, source, identifier, "mode", "IN_FORCE", [])
+
+    def test_a_kind_binding_places_a_contract_on_every_system_of_the_kind(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            self.add_contract(stage)
+            contract_registry.define_kind(stage.directory, "market", ["shop", "march"], "systems that trade")
+            contract_registry.bind(stage.directory, "MODE_V1", ["kind:market"], "applies wherever goods move")
+            found = contract_manifest.lookup(stage.directory, stage.tree)
+            self.assertEqual(sorted(found["placed"]["MODE_V1"]), ["march", "shop"])
+            self.assertEqual(found["placed"]["MODE_V1"]["shop"], ["lead binding (kind market): applies wherever goods move"])
+            self.assertEqual(found["stale_bindings"], [])
+
+    def test_an_unknown_kind_is_a_stale_binding(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            contract_registry.bind(stage.directory, "SHOP_V1", ["kind:missing"], "definition lands later")
+            self.assertEqual(kinds(stage.merge_check()), ["STALE_BINDING"])
+            self.assertIn("kind:missing", stage.merge_check()[0])
+
+    def test_a_kind_naming_a_system_the_map_lacks_is_stale(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            contract_registry.define_kind(stage.directory, "market", ["shop", "gone"], "systems that trade")
+            contract_registry.bind(stage.directory, "SHOP_V1", ["kind:market"], "applies wherever goods move")
+            self.assertEqual(kinds(stage.merge_check()), ["STALE_BINDING"])
+            self.assertIn("gone", stage.merge_check()[0])
+
+
+class ScopeAlarmTests(unittest.TestCase):
+    def add_scope_contract(self, stage, text="This rule applies to every mode.", identifier="MODE_V1"):
+        source = stage.base / f"{identifier}.json"
+        source.write_text(json.dumps({"contract_id": identifier, "rule": text}))
+        contract_registry.add(stage.directory, source, identifier, "mode", "IN_FORCE", [])
+
+    def test_an_unbound_scope_contract_fails_check_until_bound(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            self.add_scope_contract(stage)
+            problems = contract_registry.check(stage.directory, [])
+            self.assertEqual(kinds(problems), ["SCOPE_ALARM"])
+            self.assertIn("every mode", problems[0])
+            contract_registry.bind(stage.directory, "MODE_V1", [], "a process rule with no code")
+            self.assertEqual(contract_registry.check(stage.directory, []), [])
+
+    def test_a_scope_phrase_is_matched_case_insensitively(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            self.add_scope_contract(stage, "Applies to ALL MODES of the game.")
+            self.assertTrue(any(problem.startswith("SCOPE_ALARM MODE_V1:") for problem in contract_registry.check(stage.directory, [])))
+
+    def test_coverage_lists_a_scope_contract_and_the_systems_it_reaches(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            self.add_scope_contract(stage)
+            contract_registry.define_kind(stage.directory, "market", ["shop", "march"], "systems that trade")
+            contract_registry.bind(stage.directory, "MODE_V1", ["kind:market"], "applies wherever goods move")
+            contract_manifest.coverage(stage.directory, stage.tree)
+            written = (stage.directory / "COVERAGE.md").read_text()
+            self.assertIn("## Scope contracts", written)
+            self.assertIn("- MODE_V1 | reaches 2 system(s) | bound", written)
+
+
+class RulingTests(unittest.TestCase):
+    def add_ruling(self, stage, identifier="R_MODES_V1", amends=("SHOP_V1:2",), kind="ruling"):
+        source = stage.base / f"{identifier}.md"
+        source.write_text(f"# {identifier}\n")
+        contract_registry.add(stage.directory, source, identifier, "ruling", "IN_FORCE", [], kind=kind, amends=list(amends))
+
+    def test_the_manifest_lists_a_ruling_that_amends_its_contracts(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            self.add_ruling(stage)
+            manifest = contract_manifest.build_manifest(stage.directory, stage.tree, ["shop"], "task")
+            rows = {row["id"]: row for row in manifest["contracts"]}
+            self.assertIn("R_MODES_V1", rows)
+            self.assertEqual(rows["R_MODES_V1"]["reasons"], ["amends SHOP_V1"])
+            self.assertEqual(rows["R_MODES_V1"]["tier"], "binding")
+            self.assertEqual(rows["R_MODES_V1"]["systems"], ["shop"])
+            self.assertIn("AMENDED BY R_MODES_V1:2", contract_manifest.render_manifest(manifest))
+
+    def test_a_ruling_for_another_system_is_not_added(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            self.add_ruling(stage, amends=["MARCH_V1"])
+            manifest = contract_manifest.build_manifest(stage.directory, stage.tree, ["shop"], "task")
+            self.assertNotIn("R_MODES_V1", [row["id"] for row in manifest["contracts"]])
+
+    def test_an_amends_target_that_is_not_registered_fails_check(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            self.add_ruling(stage, amends=["NOPE_V1:4"])
+            problems = contract_registry.check(stage.directory, [])
+            self.assertEqual(kinds(problems), ["AMENDS_UNREGISTERED"])
+            self.assertIn("NOPE_V1:4", problems[0])
+
+    def test_amend_edits_the_list_on_an_existing_ruling(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            self.add_ruling(stage, amends=[])
+            contract_registry.amend(stage.directory, "R_MODES_V1", ["MARCH_V1:3"])
+            entry = contract_registry.load(stage.directory)["contracts"]["R_MODES_V1"]
+            self.assertEqual((entry["kind"], entry["amends"]), ("ruling", ["MARCH_V1:3"]))
+            self.assertEqual(contract_registry.check(stage.directory, []), [])
+
+    def test_an_older_contract_amended_by_a_newer_ruling_warns_without_failing(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            self.add_ruling(stage)
+            registry = contract_registry.load(stage.directory)
+            registry["contracts"]["SHOP_V1"]["registered"] = "2020-01-01T00:00:00+00:00"
+            contract_registry.save(stage.directory, registry, "test", ["SHOP_V1"])
+            problems = contract_registry.check(stage.directory, [])
+            self.assertTrue(any(problem.startswith("WARNING AMENDED_OLDER SHOP_V1:") for problem in problems), problems)
+            self.assertEqual(contract_registry.failure_problems(problems), [])
+
+    def test_verify_requires_a_row_for_the_ruling_row(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            self.add_ruling(stage)
+            manifest = contract_manifest.build_manifest(stage.directory, stage.tree, ["shop"], "task")
+            transcript = stage.base / "t.jsonl"
+            document = next(row["document"] for row in manifest["contracts"] if row["id"] == "SHOP_V1")
+            transcript.write_text(json.dumps({"message": {"content": [{"type": "tool_use", "input": {"file_path": document}}]}}) + "\n")
+            answer = (f"{contract_manifest.COMPLIANCE_HEADING}\nid | verdict | evidence\n"
+                      "SHOP_V1 | APPLIED | internal/application/shop/shop.go:1, TestShopBuy\n")
+            self.assertIn("R_MODES_V1: no row", contract_manifest.verify(manifest, answer, transcript))
+
+
+class MergeCheckTests(unittest.TestCase):
+    def test_a_clean_audited_leaf_passes(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            stage.leaf("a")
+            commit(stage.tree, {"internal/application/shop/buy.go": "package shop\n"}, "shop buy\n\n" + DEEPSEEK)
+            stage.dispatch(["shop"], pool="codex")
+            self.assertEqual(stage.merge_check(), [])
+
+    def test_an_unaudited_system_is_uncovered(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            stage.leaf("a")
+            commit(stage.tree, {"internal/application/shop/buy.go": "package shop\n"})
+            self.assertEqual(kinds(stage.merge_check()), ["UNCOVERED"])
+
+    def test_the_author_pool_cannot_audit_itself(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            stage.leaf("a")
+            commit(stage.tree, {"internal/application/shop/buy.go": "package shop\n"}, "shop buy\n\n" + DEEPSEEK)
+            stage.dispatch(["shop"], pool="deepseek")
+            self.assertEqual(kinds(stage.merge_check()), ["INDEPENDENT_AUDIT"])
+
+    def test_the_lead_signoff_audits_deepseek_work(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            stage.leaf("a")
+            commit(stage.tree, {"internal/application/shop/buy.go": "package shop\n"}, "shop buy\n\n" + DEEPSEEK)
+            stage.dispatch(["shop"], pool="deepseek")
+            review = stage.base / "review.md"
+            with self.assertRaises(ValueError):
+                contract_manifest.lead_signoff(stage.directory, stage.tree, ["shop"], review)
+            review.write_text("read internal/application/shop/buy.go\n")
+            (stage.tree / "internal/application/shop/buy.go").write_text("package shop\n// dirty\n")
+            with self.assertRaises(ValueError):
+                contract_manifest.lead_signoff(stage.directory, stage.tree, ["shop"], review)
+            git(stage.tree, "checkout", "--", ".")
+            contract_manifest.lead_signoff(stage.directory, stage.tree, ["shop"], review)
+            self.assertEqual(stage.merge_check(), [])
+
+    def test_code_changed_after_the_audit(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            stage.leaf("a")
+            commit(stage.tree, {"internal/application/shop/buy.go": "package shop\n"})
+            stage.dispatch(["shop"])
+            commit(stage.tree, {"internal/application/shop/buy.go": "package shop\n// later\n"})
+            self.assertEqual(kinds(stage.merge_check()), ["CHANGED_AFTER_CHECK"])
+
+    def test_a_failed_latest_audit_blocks(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            stage.leaf("a")
+            commit(stage.tree, {"internal/application/shop/buy.go": "package shop\n"})
+            stage.dispatch(["shop"], status="FAIL")
+            self.assertIn("COMPLIANCE", kinds(stage.merge_check()))
+
+    def test_a_contract_amended_after_the_pin_needs_revalidation(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            stage.leaf("a")
+            commit(stage.tree, {"internal/application/shop/buy.go": "package shop\n"})
+            stage.dispatch(["shop"])
+            amended = stage.base / "SHOP.json"
+            amended.write_text(json.dumps({"contract_id": "SHOP_V1", "mids": [1072, 1091], "rule": "new"}))
+            contract_registry.add(stage.directory, amended, "SHOP_V1", "shop", "IN_FORCE", [])
+            self.assertEqual(kinds(stage.merge_check()), ["REVALIDATE"])
+
+    def test_an_unowned_file_blocks_until_the_lead_binds_its_path(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            stage.leaf("a")
+            commit(stage.tree, {"tools/generate.py": "print()\n"})
+            self.assertEqual(kinds(stage.merge_check()), ["UNMAPPED"])
+            contract_registry.bind_path(stage.directory, "tools/*.py", [], "content generators")
+            self.assertEqual(stage.merge_check(), [])
+
+    def test_an_absorbed_contract_blocks_until_reviewed_and_placed(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            stage.leaf("a")
+            commit(stage.tree, {f"docs/{PHASE}/NEW.json": {"contract_id": "NEW_V1", "rule": "places nothing"}})
+            self.assertEqual(kinds(stage.merge_check()), ["COVERAGE", "REVIEW_PENDING"])
+            contract_registry.accept(stage.directory, "NEW_V1", "IN_FORCE")
+            contract_registry.bind(stage.directory, "NEW_V1", [], "a process rule with no code")
+            self.assertEqual(stage.merge_check(), [])
+
+    def test_a_preview_absorbs_nothing(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            stage.leaf("a")
+            commit(stage.tree, {f"docs/{PHASE}/NEW.json": {"contract_id": "NEW_V1", "rule": "x"}})
+            before = (stage.directory / "registry.json").read_bytes()
+            stage.merge_check(absorbing=False)
+            self.assertEqual((stage.directory / "registry.json").read_bytes(), before)
+
+    def test_a_waiver_clears_only_the_named_contract(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            stage.leaf("a")
+            commit(stage.tree, {f"docs/{PHASE}/ONE.json": {"contract_id": "ONE_V1", "rule": "x"},
+                                f"docs/{PHASE}/TWO.json": {"contract_id": "TWO_V1", "rule": "y"}})
+            self.assertEqual(len(stage.merge_check()), 4)
+            for identifier in ("ONE_V1", "TWO_V1"):
+                contract_registry.accept(stage.directory, identifier, "IN_FORCE")
+            contract_registry.waive(stage.directory, "COVERAGE ONE_V1", "system not built yet")
+            self.assertEqual(stage.merge_check(), [stage.merge_check()[0]])
+            self.assertTrue(stage.merge_check()[0].startswith("COVERAGE TWO_V1:"))
+
+    def test_a_binding_to_a_missing_system_is_stale(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            contract_registry.bind(stage.directory, "SHOP_V1", ["gone"], "old name")
+            self.assertEqual(kinds(stage.merge_check()), ["STALE_BINDING"])
+
+    def test_the_audit_still_counts_after_a_fast_forward_merge(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            stage.leaf("a")
+            commit(stage.tree, {"internal/application/shop/buy.go": "package shop\n"})
+            stage.dispatch(["shop"])
+            git(stage.tree, "checkout", "-q", "main")
+            git(stage.tree, "merge", "-q", "--ff-only", "a")
+            self.assertEqual(stage.merge_check(), [])
+
+    def test_a_waiver_unblocks_and_is_reported(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            stage.leaf("a")
+            commit(stage.tree, {"internal/application/shop/buy.go": "package shop\n"})
+            contract_registry.waive(stage.directory, "UNCOVERED shop", "lead audited it by hand")
+            problems, notes, _ = contract_manifest.merge_check(stage.directory, stage.tree, stage.base_commit, "HEAD", PHASE)
+            self.assertEqual(problems, [])
+            self.assertTrue(notes[0].startswith("WAIVED UNCOVERED shop:"))
+
+
+class MergeHookTests(unittest.TestCase):
+    def run_hook(self, stage, worktree):
+        cwd = os.getcwd()
+        os.chdir(worktree)
+        try:
+            with patch.object(contract_manifest, "registry_for", return_value=stage.directory), \
+                 patch.object(contract_manifest, "phase_name", return_value=PHASE):
+                return contract_manifest.merge_hook()
+        finally:
+            os.chdir(cwd)
+
+    def test_the_hook_blocks_only_merges_in_the_integration_tree(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            stage.leaf("a")
+            commit(stage.tree, {"internal/application/shop/buy.go": "package shop\n"})
+            integration = stage.base / "integration"
+            git(stage.tree, "worktree", "add", "-q", str(integration), "main")
+            git(integration, "-c", "user.name=t", "-c", "user.email=t@t", "merge", "-q", "--no-ff", "--no-commit", "a")
+            self.assertEqual(self.run_hook(stage, integration), 0)
+            contract_registry.set_integration(stage.directory, integration)
+            self.assertEqual(self.run_hook(stage, integration), 1)
+            git(integration, "merge", "--abort")
+            self.assertEqual(self.run_hook(stage, integration), 0)
+
+    def test_a_leaf_is_not_charged_with_commits_the_integration_already_merged(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            stage.leaf("a")
+            shared = commit(stage.tree, {"tools/shared.py": "print()\n"})
+            git(stage.tree, "checkout", "-q", "-b", "b", shared)
+            leaf = commit(stage.tree, {"internal/application/shop/buy.go": "package shop\n"})
+            git(stage.tree, "checkout", "-q", "main")
+            commit(stage.tree, {"internal/application/march/claim.go": "package march\n"}, "main moves on")
+            git(stage.tree, "checkout", "-q", "b")
+            git(stage.tree, "-c", "user.name=t", "-c", "user.email=t@t", "merge", "-q", "--no-edit", "main")
+            stage.dispatch(["shop"])
+            integration = stage.base / "integration"
+            git(stage.tree, "worktree", "add", "-q", str(integration), "main")
+            git(integration, "-c", "user.name=t", "-c", "user.email=t@t", "merge", "-q", "--no-ff", "--no-verify", "--no-edit", "a")
+            contract_registry.set_integration(stage.directory, integration)
+            self.assertIn("UNMAPPED tools/shared.py", " ".join(contract_manifest.merge_check(
+                stage.directory, stage.tree, git(integration, "merge-base", "HEAD", "b"), "b", PHASE, False)[0]))
+            with patch.dict(os.environ, {f"GITHEAD_{git(stage.tree, 'rev-parse', 'b')}": "b", "GIT_REFLOG_ACTION": "merge b"}):
+                self.assertEqual(self.run_hook(stage, integration), 0, leaf)
+
+    def test_already_merged_commits_do_not_count_as_the_leafs_authors(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            stage.leaf("a")
+            shared = commit(stage.tree, {"internal/application/shop/buy.go": "package shop\n"}, "a\n\nCo-Authored-By: Codex Luna")
+            git(stage.tree, "checkout", "-q", "-b", "b", shared)
+            commit(stage.tree, {"internal/application/shop/buy.go": "package shop // b\n"}, f"b\n\n{DEEPSEEK}")
+            files = ["internal/application/shop/buy.go"]
+            self.assertEqual(contract_manifest.author_pools(stage.tree, stage.base_commit, "b", files), {"codex", "deepseek"})
+            self.assertEqual(contract_manifest.author_pools(stage.tree, stage.base_commit, "b", files, "a"), {"deepseek"})
+
+    def test_a_generic_claude_code_trailer_names_no_pool(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            stage.leaf("a")
+            commit(stage.tree, {"internal/application/shop/buy.go": "package shop\n"}, "a\n\nCo-Authored-By: Claude Code <noreply@anthropic.com>")
+            files = ["internal/application/shop/buy.go"]
+            self.assertEqual(contract_manifest.author_pools(stage.tree, stage.base_commit, "a", files), {"unknown"})
+            stage.dispatch(["shop"], pool="deepseek")
+            self.assertEqual(kinds(stage.merge_check()), ["AUTHOR_UNKNOWN"])
+            commit(stage.tree, {"internal/application/shop/sell.go": "package shop\n"}, "b\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>")
+            self.assertEqual(contract_manifest.author_pools(stage.tree, stage.base_commit, "a", ["internal/application/shop/sell.go"]), {"lead"})
+
+    def test_a_clean_merge_is_checked_before_git_writes_merge_head(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            stage.leaf("a")
+            leaf = commit(stage.tree, {"internal/application/shop/buy.go": "package shop\n"})
+            integration = stage.base / "integration"
+            git(stage.tree, "worktree", "add", "-q", str(integration), "main")
+            contract_registry.set_integration(stage.directory, integration)
+            with patch.dict(os.environ, {f"GITHEAD_{leaf}": "a", "GIT_REFLOG_ACTION": "merge a"}):
+                self.assertEqual(self.run_hook(stage, integration), 1)
+            with patch.dict(os.environ, {"GIT_REFLOG_ACTION": "merge a"}):
+                self.assertEqual(self.run_hook(stage, integration), 1)
+            stage.dispatch(["shop"])
+            with patch.dict(os.environ, {f"GITHEAD_{leaf}": "a", "GIT_REFLOG_ACTION": "merge a"}):
+                self.assertEqual(self.run_hook(stage, integration), 0)
+
+    def test_real_git_merge_runs_the_hook(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            hooks = stage.base / "hooks"
+            hooks.mkdir()
+            command = f"PYTHONPATH={pathlib.Path(__file__).resolve().parent} {sys.executable} -B -c " + repr(
+                "import sys, pathlib, contract_manifest; from unittest.mock import patch; "
+                f"patch.object(contract_manifest, 'registry_for', return_value=pathlib.Path({str(stage.directory)!r})).start(); "
+                f"patch.object(contract_manifest, 'phase_name', return_value={PHASE!r}).start(); "
+                "sys.exit(contract_manifest.merge_hook())")
+            (hooks / "pre-merge-commit").write_text(f"#!/bin/bash\ntop=$(pwd)\n(unset GIT_DIR GIT_INDEX_FILE GIT_WORK_TREE; cd \"$top\" && {command})\n")
+            (hooks / "pre-merge-commit").chmod(0o755)
+            git(stage.tree, "config", "core.hooksPath", str(hooks))
+            stage.leaf("a")
+            commit(stage.tree, {"internal/application/shop/buy.go": "package shop\n"})
+            git(stage.tree, "checkout", "-q", "main")
+            contract_registry.set_integration(stage.directory, stage.tree)
+            merged = subprocess.run(["git", "-C", str(stage.tree), "-c", "user.name=t", "-c", "user.email=t@t", "merge", "--no-ff", "-m", "m", "a"],
+                                    capture_output=True, text=True)
+            self.assertNotEqual(merged.returncode, 0, merged.stdout + merged.stderr)
+            self.assertIn("UNCOVERED shop", merged.stderr)
+            self.assertEqual(git(stage.tree, "rev-parse", "HEAD"), stage.base_commit)
+
+
+class SealCheckTests(unittest.TestCase):
+    """A merge made with `git merge --no-verify` skips the hooks; the seal entry point must still refuse it."""
+
+    def bypassed_merge(self, stage, files, message="leaf"):
+        stage.leaf("a")
+        commit(stage.tree, files, f"{message}\n\n{DEEPSEEK}")
+        stage.dispatch(["shop"])
+        git(stage.tree, "checkout", "-q", "main")
+        contract_registry.set_integration(stage.directory, stage.tree)
+        git(stage.tree, "-c", "user.name=t", "-c", "user.email=t@t", "merge", "-q", "--no-ff", "--no-verify", "--no-edit", "a")
+
+    def seal(self, stage):
+        root = stage.base / "root"
+        if not root.exists():
+            (root / "work/authority_p798").mkdir(parents=True)
+            (root / "work/authority_p798/hot").symlink_to(stage.hot)
+            (stage.hot / "00_PASSMAP").mkdir()
+            (root / "work/authority_p798" / contract_registry.HOT_V1_ARCHIVE).mkdir(parents=True)
+            (root / "work/i9").mkdir()
+        facts = {"phase_workspace": {"path": "work/i9"}, "frontier": {"stage": "I9-11"}}
+        printed = io.StringIO()
+        with patch.object(contract_manifest, "registry_for", return_value=stage.directory), \
+             patch.object(contract_manifest, "ROOT", root), patch.object(contract_registry, "ROOT", root), \
+             patch.object(state, "facts", return_value=facts), patch.object(state, "BACKEND", stage.tree), \
+             contextlib.redirect_stdout(printed):
+            status = contract_manifest.seal_check()
+        return status, printed.getvalue().strip()
+
+    def test_an_audited_leaf_seals(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            self.bypassed_merge(stage, {"internal/application/shop/buy.go": "package shop\n"})
+            self.assertEqual(self.seal(stage), (0, "exported: \nSEAL_CONTRACT_CHECK PASS"))
+
+    def test_an_unaudited_bypassed_merge_is_refused(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            self.bypassed_merge(stage, {"internal/application/march/claim.go": "package march\n"})
+            status, printed = self.seal(stage)
+            self.assertEqual(status, 1)
+            self.assertIn("UNCOVERED march", printed)
+
+    def test_a_missing_contract_is_refused(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            self.bypassed_merge(stage, {"internal/application/shop/buy.go": "package shop\n",
+                                        f"docs/{PHASE}/NEW.json": {"contract_id": "NEW_V1"},
+                                        f"docs/{PHASE}/deep/LIMIT_POLICY.json": {"rules": [1]}})
+            status, printed = self.seal(stage)
+            self.assertEqual(status, 1)
+            self.assertIn(f"UNREGISTERED NEW_V1: {stage.tree}/docs/{PHASE}/NEW.json", printed)
+            self.assertIn(f"UNCLASSIFIED docs/{PHASE}/deep/LIMIT_POLICY.json", printed)
+
+    def test_a_stale_contract_is_refused(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            self.bypassed_merge(stage, {"internal/application/shop/buy.go": "package shop\n",
+                                        f"docs/{PHASE}/SHOP.json": {"contract_id": "SHOP_V1", "mids": [1072], "amended": True}})
+            status, printed = self.seal(stage)
+            self.assertEqual(status, 1)
+            self.assertIn("DIVERGED SHOP_V1", printed)
+            registered = stage.directory / contract_registry.load(stage.directory)["contracts"]["MARCH_V1"]["document"]
+            registered.write_text("# March\nedited in place\n")
+            self.assertIn("MARCH_V1: documents/", self.seal(stage)[1])
+
+    def test_an_unreviewed_contract_is_refused(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            self.bypassed_merge(stage, {"internal/application/shop/buy.go": "package shop\n",
+                                        f"docs/{PHASE}/NEW.json": {"contract_id": "NEW_V1", "mids": [1072]}})
+            contract_registry.absorb(stage.directory, stage.tree, stage.base_commit, "HEAD", PHASE)
+            status, printed = self.seal(stage)
+            self.assertEqual(status, 1)
+            self.assertIn("REVIEW_PENDING NEW_V1", printed)
+            contract_registry.accept(stage.directory, "NEW_V1", "IN_FORCE")
+            self.assertEqual(self.seal(stage)[0], 1, "NEW_V1 changed the shop contracts the audit pinned")
+
+    def test_a_contract_the_v1_archive_preserved_is_not_registered(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            self.bypassed_merge(stage, {"internal/application/shop/buy.go": "package shop\n"})
+            self.seal(stage)
+            archive = stage.base / "root/work/authority_p798" / contract_registry.HOT_V1_ARCHIVE
+            (archive / "PASS574_CA6_3_POLICY_REGISTER_AMENDMENT.json").write_text(json.dumps({"rules": ["base ledger"]}))
+            (archive / "PASS663_I7B2A_IMPLEMENTATION_SPEC.json").write_text(json.dumps({"spec_id": "I7B2A_V1"}))
+            status, printed = self.seal(stage)
+            self.assertEqual(status, 1)
+            self.assertIn("UNCLASSIFIED hot763/PASS574_CA6_3_POLICY_REGISTER_AMENDMENT.json", printed)
+            self.assertIn("UNCLASSIFIED hot763/PASS663_I7B2A_IMPLEMENTATION_SPEC.json", printed)
+
+    def test_the_seal_script_runs_the_check_before_anything_else(self):
+        script = (pathlib.Path(__file__).resolve().parent / "seal_passmap.sh").read_text().splitlines()
+        commands = [line for line in script if line and not line.startswith(("#", " ", "set ", "if ")) and "=" not in line.split()[0]]
+        # Only refusal guards (clean tree, gate evidence) may run before the contract check.
+        check = next(index for index, line in enumerate(commands) if "contract_manifest.py\" seal-check" in line)
+        self.assertTrue(commands[check].endswith("contract_manifest.py\" seal-check > \"$logs/contracts_$generation.log\" 2>&1 \\"), commands[:4])
+        self.assertIn("exit 1", script[script.index(commands[check]) + 1])
+        self.assertEqual(commands[0], 'mkdir -p "$logs"')
+        for guard in commands[1:check]:
+            following = script[script.index(guard) + 1] if guard.endswith("\\") else guard
+            self.assertIn("exit 1", following, guard)
+
+
+
+UPHELD = {"id": "SHOP_V1", "verdict": "UPHELD", "systems": ["shop"], "evidence": ["internal/application/shop/shop.go:1"],
+          "tests": [{"name": "TestShopBuy", "result": "PASS"}]}
+
+
+class ComplianceMatrixTests(unittest.TestCase):
+    def test_upheld_needs_evidence_and_a_passing_test(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            for row in ({**UPHELD, "tests": []}, {**UPHELD, "tests": [{"name": "TestShopBuy", "result": "FAIL"}]},
+                        {**UPHELD, "evidence": []}, {**UPHELD, "verdict": "FINE"}, {**UPHELD, "id": "NOPE_V1"}):
+                with self.assertRaises(SystemExit):
+                    contract_manifest.record_verdicts(stage.directory, [row], "deepseek", False)
+            self.assertEqual(contract_manifest.load_verdicts(stage.directory), {})
+            contract_manifest.record_verdicts(stage.directory, [{**UPHELD, "verdict": "UPHELD_UNTESTED", "tests": []}], "deepseek", False)
+
+    def test_counts_need_lead_review_and_every_bound_system(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            counts = contract_manifest.matrix(stage.directory, stage.tree)
+            self.assertEqual((counts["registered"], counts["assessed"], counts["unknown"]), (2, 0, 2))
+            contract_manifest.record_verdicts(stage.directory, [UPHELD], "deepseek", False)
+            self.assertEqual(contract_manifest.matrix(stage.directory, stage.tree)["verified_upheld"], 0)
+            contract_manifest.record_verdicts(stage.directory, [{**UPHELD, "systems": ["march"]}], "deepseek", True)
+            self.assertEqual(contract_manifest.matrix(stage.directory, stage.tree)["verified_upheld"], 0, "march is not bound; shop unreviewed")
+            contract_manifest.record_verdicts(stage.directory, [UPHELD], "deepseek", True)
+            counts = contract_manifest.matrix(stage.directory, stage.tree)
+            self.assertEqual((counts["assessed"], counts["verified_upheld"], counts["unknown"]), (1, 1, 1))
+            row = json.loads((stage.directory / "COMPLIANCE_MATRIX.json").read_text())["contracts"][1]
+            self.assertEqual((row["id"], row["mids"], row["production_paths"], row["test_files"]),
+                             ("SHOP_V1", [1072, 1073, 1074, 1091], ["internal/application/shop/"], ["internal/application/shop/shop_test.go"]))
+
+    def test_an_amended_contract_makes_its_verdict_stale(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            contract_manifest.record_verdicts(stage.directory, [UPHELD], "deepseek", True)
+            amended = stage.base / "SHOP.json"
+            amended.write_text(json.dumps({"contract_id": "SHOP_V1", "mids": [1072], "amended": True}))
+            contract_registry.add(stage.directory, amended, "SHOP_V1", "", "IN_FORCE", [])
+            counts = contract_manifest.matrix(stage.directory, stage.tree)
+            self.assertEqual((counts["assessed"], counts["stale"], counts["verified_upheld"]), (0, 1, 0))
+
+    def test_a_violation_blocks_the_seal_until_reaudited_or_waived(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            seals = SealCheckTests()
+            seals.bypassed_merge(stage, {"internal/application/shop/buy.go": "package shop\n"})
+            contract_manifest.record_verdicts(stage.directory, [{**UPHELD, "verdict": "VIOLATED", "tests": []}], "deepseek", True)
+            status, printed = seals.seal(stage)
+            self.assertEqual(status, 1)
+            self.assertIn("VIOLATED SHOP_V1", printed)
+            self.assertIn("VIOLATED SHOP_V1@shop", printed)
+            contract_registry.waive(stage.directory, "VIOLATED SHOP_V1@shop", "fix lands next stage")
+            self.assertEqual(seals.seal(stage)[0], 0)
+            (stage.directory / "waivers.json").unlink()
+            contract_manifest.record_verdicts(stage.directory, [{**UPHELD, "systems": ["march"]}], "deepseek", True)
+            self.assertEqual(seals.seal(stage)[0], 1, "another system's verdict does not clear the shop violation")
+            contract_manifest.record_verdicts(stage.directory, [UPHELD], "deepseek", True)
+            self.assertEqual(seals.seal(stage)[0], 0)
+
+    def test_the_worst_system_verdict_is_the_contracts(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            contract_manifest.record_verdicts(stage.directory, [UPHELD, {**UPHELD, "systems": ["march"], "verdict": "PARTIAL"}], "deepseek", True)
+            counts = contract_manifest.matrix(stage.directory, stage.tree)
+            self.assertEqual((counts["violated"], counts["verified_upheld"]), (1, 0))
+
+    def test_every_bound_system_must_be_assessed(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            contract_registry.bind(stage.directory, "SHOP_V1", ["march"], "march sells through the shop")
+            contract_manifest.record_verdicts(stage.directory, [UPHELD], "deepseek", True)
+            counts = contract_manifest.matrix(stage.directory, stage.tree)
+            self.assertEqual((counts["verified_upheld"], counts["partly_assessed"]), (0, 1))
+
+    def test_a_verdict_turns_stale_after_its_cited_file_changes(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            contract_manifest.record_verdicts(stage.directory, [UPHELD], "deepseek", True)
+            recorded = contract_manifest.load_verdicts(stage.directory)["SHOP_V1"]
+            self.assertEqual(recorded["tree_head"], git(stage.tree, "rev-parse", "HEAD"))
+            self.assertIn("internal/application/shop/shop.go", recorded["blobs"])
+            commit(stage.tree, {"internal/application/shop/shop.go": "package shop\n\n// changed\n"})
+            counts = contract_manifest.matrix(stage.directory, stage.tree)
+            self.assertEqual((counts["stale"], counts["verified_upheld"]), (1, 0))
+
+    def test_a_verdict_recorded_before_pinning_is_unpinned_not_stale(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            contract_manifest.record_verdicts(stage.directory, [UPHELD], "deepseek", True)
+            path = stage.directory / "verdicts.json"
+            verdicts = json.loads(path.read_text(encoding="utf-8"))
+            verdicts["SHOP_V1"].pop("blobs")
+            verdicts["SHOP_V1"].pop("tree_head")
+            path.write_text(json.dumps(verdicts))
+            commit(stage.tree, {"internal/application/shop/shop.go": "package shop\n\n// changed\n"})
+            counts = contract_manifest.matrix(stage.directory, stage.tree)
+            self.assertEqual((counts["stale"], counts["unpinned"]), (0, 1))
+
+if __name__ == "__main__":
+    unittest.main()

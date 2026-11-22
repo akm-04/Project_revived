@@ -1,0 +1,626 @@
+#!/usr/bin/env python3
+"""Write side of a PassMap v2 authority. Agents never edit hot/ by hand; they write phase inputs and run sync.
+
+  sync    --authority A --inputs DIR --phase P --generation N [--backend REPO]
+          apply the phase inputs to the records, regenerate every generated view, write the manifests
+  check   --authority A [--backend REPO]     seal guard; exits non-zero on any finding
+  package --authority A --output ZIP --verify DIR
+          outer bundle (hot zip + deduplicated cold + tools), restored into DIR and re-checked
+  restore --bundle ZIP|DIR --destination DIR  restore the outer bundle (zip or extracted directory)
+
+Phase inputs (all optional, JSON unless noted), applied idempotently:
+  FRONTIER.json     {node, stage, step, next_action, open_questions[], summary}
+  STAGES.json       {node_id: {status, status_detail, title, parent, depends_on[], scope, closure_record, evidence[]}}
+  CONTRACTS.json    {contracts: [{id, title, phases[], document, status, supersedes[]}]}   document is relative to DIR
+  IDENTIFIERS.json  {identifier: {phase, contract, note}}
+  OBLIGATIONS.json  {phase, source, obligations}                                            replaces that phase's record
+  LESSONS.json      {add: [text]}
+  UNKNOWNS.json     {add: [row], resolve: {id: resolution}}
+  RULES.json        the full rules record (task routing, where new information goes)
+  INPUTS.json       {required: [...], conditional: {...}}
+  DECISIONS.md      decision starts (optional `- ` bullet, `Dnn` or a range, optional `(who, date)`) parsed into
+                    records/decisions/<phase>.json with structured who/date; an unparsed start fails the sync
+  CONTRACT_SCOPE.json {bindings, path_bindings, kinds}                                       replaces records/contract_scope.json
+  ROADMAP_RULES.json {key: value}                                     sets those top-level keys of records/roadmap/_rules.json
+"""
+from pathlib import Path, PurePosixPath
+import argparse, datetime, hashlib, json, re, shutil, subprocess, sys, tempfile, zipfile
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from passmap import PassMap
+import cold_transport
+
+ENTRY_BUDGET = 48 * 1024
+RECORD_BUDGET = 256 * 1024
+# shortcut: the contract registry outgrew 256 KiB at seal 799 (648 contracts, 330 KB); split it per phase like
+# records/decisions/ when it nears this larger budget (lead 2026-11-18, listed for user review).
+RECORD_BUDGETS = {'records/contracts.json': 512 * 1024}
+HOT_BUDGET = 40 * 1024 * 1024
+GENERATED = ['ENTRY.md', 'ROUTES.json', 'records/backend.json', 'records/identifiers.json']
+FRONTIER_ONLY_KEYS = {'next', 'next_action', 'next_permitted_action', 'current_pass', 'current_node', 'current_stage'}
+VERSIONED_IDENTIFIER = re.compile(r'"([A-Z][A-Z0-9_]*_V[0-9]+)"')
+EXCLUDED = {'cache'}
+
+
+def sha(path):
+    with Path(path).open('rb') as handle:
+        return hashlib.file_digest(handle, 'sha256').hexdigest()
+
+
+def dump(payload):
+    return json.dumps(payload, indent=1, sort_keys=True, ensure_ascii=False) + '\n'
+
+
+def files_under(root):
+    return sorted(path for path in Path(root).rglob('*')
+                  if path.is_file() and not EXCLUDED & set(path.relative_to(root).parts) and '__pycache__' not in path.parts)
+
+
+def write_manifest(root):
+    lines = [f'{sha(path)}  {path.relative_to(root).as_posix()}' for path in files_under(root) if path.name != 'FILE_MANIFEST.sha256']
+    manifest = Path(root) / 'FILE_MANIFEST.sha256'
+    # COLD files are hard links into the previous sealed authority; never write through one.
+    manifest.unlink(missing_ok=True)
+    manifest.write_text('\n'.join(lines) + '\n')
+
+
+# --- inputs --------------------------------------------------------------------------------------------------------------
+DECISION_START = re.compile(r'^[ \t]*(?:-[ \t]+)?(D\d+)(?:[ \t]*(?:-|–|to)[ \t]*D?(\d+))?')
+DECISION_DATE = re.compile(r'\b\d{4}-\d{2}-\d{2}\b')
+
+
+def decision_identifiers(line):
+    """The ids a decision-start line introduces: one id, or every id of a range such as D306-D309 or D311–D315."""
+    match = DECISION_START.match(line)
+    if match is None:
+        return []
+    start = int(match.group(1)[1:])
+    if match.group(2) is None:
+        return [f'D{start}']
+    end = int(match.group(2))
+    if end < start:
+        return []
+    return [f'D{number}' for number in range(start, end + 1)]
+
+
+def decision_author(parenthetical):
+    """(who, date) from `(who, date, ...)`: the author stays structured, apart from the date it was given."""
+    parts = [part.strip() for part in parenthetical.split(',')]
+    date = next((DECISION_DATE.search(part).group(0) for part in parts if DECISION_DATE.search(part)), None)
+    return (parts[0] if parts else None), date
+
+
+def parse_decisions(text):
+    """Every decision start: an optional Markdown bullet, a single id or a range, then an optional `(who, date, ...)`.
+    A line that starts a decision but yields no row fails the sync instead of being dropped (audit sweep row 5)."""
+    lines = text.splitlines()
+    rows, seen, problems = [], set(), []
+    index = 0
+    while index < len(lines):
+        match = DECISION_START.match(lines[index])
+        if match is None:
+            index += 1
+            continue
+        identifiers = decision_identifiers(lines[index])
+        if not identifiers:
+            problems.append(f'line {index + 1}: {lines[index].strip()[:120]}')
+            index += 1
+            continue
+        end = index + 1
+        while end < len(lines) and (not lines[end] or lines[end][:1].isspace()):
+            end += 1
+        remainder = lines[index][match.end():].strip()
+        who = date = None
+        if remainder.startswith('('):
+            close = remainder.find(')')
+            if close != -1:
+                who, date = decision_author(remainder[1:close])
+                remainder = remainder[close + 1:].strip()
+        body = ' '.join([remainder, *[line.strip() for line in lines[index + 1:end]]]).strip()
+        body = ' '.join(body.split())
+        for identifier in identifiers:
+            if identifier in seen:
+                continue
+            seen.add(identifier)
+            rows.append(dict(id=identifier, who=who, date=date, text=body))
+        index = end
+    if problems:
+        raise SystemExit('decisions not parsed (fix the form):\n' + '\n'.join(problems))
+    return rows
+
+
+def apply_inputs(passmap, inputs, phase):
+    applied = {}
+
+    def take(name):
+        path = inputs / name
+        if not path.is_file():
+            return None
+        applied[name] = sha(path)
+        return path.read_text() if name.endswith('.md') else json.loads(path.read_text())
+
+    def save(relative, payload):
+        target = passmap.records / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(dump(payload))
+
+    frontier = take('FRONTIER.json')
+    if frontier is not None:
+        save('frontier.json', frontier)
+    stages = take('STAGES.json')
+    for node_id, change in (stages or {}).items():
+        shard = route_of_node(passmap, node_id) or new_node_shard(passmap, change.get('parent'))
+        payload = json.loads(shard.read_text()) if shard.is_file() else dict(top=node_id, nodes={})
+        payload['nodes'].setdefault(node_id, dict(id=node_id, children_note=None)).update(change)
+        payload['nodes'][node_id].pop('children_note', None)
+        shard.parent.mkdir(parents=True, exist_ok=True)
+        shard.write_text(dump(payload))
+    contracts_input = take('CONTRACTS.json')
+    if contracts_input is not None:
+        registry = passmap.record('contracts.json')
+        for row in contracts_input['contracts']:
+            source = inputs / row['document']
+            document = f"contracts/{Path(row['document']).name}"
+            (passmap.hot / 'contracts').mkdir(exist_ok=True)
+            shutil.copy2(source, passmap.hot / document)
+            registry['contracts'][row['id']] = dict(
+                id=row['id'], title=row.get('title'), document=document, sha256=sha(source), phases=row.get('phases', [phase]),
+                status=row.get('status', 'IN_FORCE'), superseded_by=None, aliases=[], extends=row.get('supersedes', []),
+                stage=row.get('stage', phase), creation_status='FROZEN', rule_count=None,
+                kind=row.get('kind', 'contract'), amends=row.get('amends', []))
+        # After every row is placed: a row may supersede one that sorts after it.
+        for row in contracts_input['contracts']:
+            for old in row.get('supersedes', []):
+                registry['contracts'][old].update(status='SUPERSEDED', superseded_by=row['id'])
+        save('contracts.json', registry)
+    contract_scope = take('CONTRACT_SCOPE.json')
+    if contract_scope is not None:
+        save('contract_scope.json', contract_scope)
+    identifiers = take('IDENTIFIERS.json')
+    if identifiers is not None:
+        declarations = passmap.record('identifier_declarations.json')
+        declarations['identifiers'].update(identifiers)
+        save('identifier_declarations.json', declarations)
+    obligations = take('OBLIGATIONS.json')
+    if obligations is not None:
+        save(f"obligations/{obligations['phase']}.json", obligations)
+    lessons = take('LESSONS.json')
+    if lessons is not None:
+        record = passmap.record('lessons.json')
+        record['negative_memory'] += [text for text in lessons['add'] if text not in record['negative_memory']]
+        save('lessons.json', record)
+    unknowns = take('UNKNOWNS.json')
+    if unknowns is not None:
+        record = passmap.record('unknowns.json')
+        known_ids = {row.get('id') for row in record['bounded_unknowns']}
+        record['bounded_unknowns'] += [row for row in unknowns.get('add', []) if row.get('id') not in known_ids]
+        for row in record['bounded_unknowns']:
+            if row.get('id') in unknowns.get('resolve', {}):
+                row.update(status='RESOLVED', resolution=unknowns['resolve'][row['id']])
+        save('unknowns.json', record)
+    roadmap_rules = take('ROADMAP_RULES.json')
+    if roadmap_rules is not None:
+        save('roadmap/_rules.json', passmap.record('roadmap/_rules.json') | roadmap_rules)
+    for name, relative in [('RULES.json', 'rules.json'), ('INPUTS.json', 'inputs.json')]:
+        payload = take(name)
+        if payload is not None:
+            save(relative, payload)
+    decisions = take('DECISIONS.md')
+    if decisions is not None:
+        save(f'decisions/{phase}.json', dict(phase=phase, source=str(inputs / 'DECISIONS.md'), decisions=parse_decisions(decisions)))
+    return applied
+
+
+def route_of_node(passmap, node_id):
+    for path in sorted((passmap.records / 'roadmap').rglob('*.json')):
+        if not path.name.startswith('_') and node_id in json.loads(path.read_text())['nodes']:
+            return path
+    return None
+
+
+def new_node_shard(passmap, parent):
+    if parent is None:
+        raise ValueError('a new top-level node needs its own shard; give it a parent or add it in the migration')
+    return route_of_node(passmap, parent)
+
+
+# --- generated views -----------------------------------------------------------------------------------------------------
+def backend_record(passmap, repository):
+    previous = passmap.record('backend.json') if (passmap.records / 'backend.json').is_file() else {}
+    repository = Path(repository) if repository else None
+    if repository is None or not (repository / '.git').exists():
+        return previous
+
+    def git(*arguments):
+        return subprocess.run(['git', *arguments], cwd=repository, capture_output=True, text=True, check=True).stdout.strip()
+
+    migrations = sorted(path.name for path in (repository / 'migrations').glob('*.sql'))
+    return dict(repository=previous.get('repository', str(repository)), branch=git('branch', '--show-current'), head=git('rev-parse', 'HEAD'),
+                parent=git('rev-parse', 'HEAD~1'), subject=git('log', '-1', '--format=%s'),
+                version=(repository / 'VERSION').read_text().strip(), migration_head=migrations[-1] if migrations else None,
+                uncommitted_changes=bool(git('status', '--porcelain', '--untracked-files=no')),
+                accepted=previous.get('accepted'), rule=previous.get('rule'))
+
+
+def identifiers_record(passmap, repository, backend):
+    previous = passmap.record('identifiers.json') if (passmap.records / 'identifiers.json').is_file() else {}
+    repository = Path(repository) if repository else None
+    if repository is None or not (repository / '.git').exists():
+        return previous
+    listed = subprocess.run(['git', 'ls-files', '*.go'], cwd=repository, capture_output=True, text=True, check=True).stdout.split()
+    locations = {}
+    for name in listed:
+        if name.endswith('_test.go'):
+            continue
+        for identifier in set(VERSIONED_IDENTIFIER.findall((repository / name).read_text(errors='replace'))):
+            locations.setdefault(identifier, []).append(name)
+    documents = {row['id']: (passmap.hot / row['document']).read_text(errors='replace') for row in passmap.contracts().values()
+                 if row['status'] == 'IN_FORCE' and (passmap.hot / row['document']).is_file()}
+    declarations = passmap.record('identifier_declarations.json')['identifiers']
+    rows = {}
+    for identifier, files in sorted(locations.items()):
+        rows[identifier] = dict(code=sorted(files), contracts=sorted(cid for cid, text in documents.items() if identifier in text),
+                                declaration=declarations.get(identifier))
+    return dict(backend_head=backend.get('head'), rule='Every versioned identifier in product code names a contract or a declaration.',
+                identifiers=rows)
+
+
+def routes_record(passmap):
+    shard_of = lambda path: path.relative_to(passmap.hot).as_posix()
+    nodes = {}
+    for path in sorted((passmap.records / 'roadmap').rglob('*.json')):
+        if not path.name.startswith('_'):
+            nodes.update({node_id: shard_of(path) for node_id in json.loads(path.read_text())['nodes']})
+    decisions = {}
+    for path in sorted((passmap.records / 'decisions').glob('*.json')):
+        for row in json.loads(path.read_text()).get('decisions', []):
+            decisions[f"{path.stem} {row['id']}"] = shard_of(path)
+    return dict(
+        rule='Generated by passmap_maintain.py sync. Old names resolve through cold/HISTORICAL_NAMES.json.',
+        nodes=nodes, decisions=decisions,
+        contracts={cid: row['document'] for cid, row in sorted(passmap.contracts().items())},
+        catalog_topics={path.stem: shard_of(path) for path in sorted((passmap.records / 'catalogs').glob('*.json'))},
+        records={shard_of(path): path.stat().st_size for path in passmap.record_files()})
+
+
+def entry_markdown(passmap, generation):
+    frontier = passmap.record('frontier.json')
+    backend = passmap.record('backend.json')
+    rules = passmap.record('rules.json')
+    roadmap_rules = passmap.record('roadmap/_rules.json')
+    nodes = passmap.nodes()
+    inputs = passmap.record('inputs.json')
+    lines = [f'# GXB1 PassMap v2, generation {generation}', '',
+             'Memory bank for the GXB1 backend reconstruction (a private server for a discontinued mobile game, rebuilt from the stock '
+             'client src_64 and the frozen V1 oracle). Read this file first; it routes to everything else. It is generated by '
+             '`hot/tools/passmap_maintain.py sync`; never edit hot/ by hand.', '',
+             '## Authority', *[f'- {line}' for line in rules['authority']], '',
+             '## Frontier',
+             f"- Node {frontier['node']}, stage {frontier['stage']}, step {frontier['step']}.",
+             f"- Next: {frontier['next_action']}"]
+    lines += [f'- Open question: {question}' for question in frontier.get('open_questions', [])]
+    lines += ['', '## Backend',
+              f"- {backend.get('repository')} branch {backend.get('branch')} head {backend.get('head')} ({backend.get('subject')}), "
+              f"{backend.get('version')}, migration head {backend.get('migration_head')}."]
+    if backend.get('accepted'):
+        lines.append(f"- Accepted: {backend['accepted']}")
+    lines += ['', '## Required inputs']
+    lines += [f"- {row['name']} sha256 {row.get('sha256') or row.get('zip_sha256_if_supplied_as_locked_current_oracle')}: {row['purpose']}"
+              for row in inputs['required']]
+    lines += ['', '## Roadmap (milestone order; `passmap.py node <id>` for detail)', '', '| Node | Status | Title or detail |', '|---|---|---|']
+    for node_id in roadmap_rules['milestone_order']:
+        node = nodes[node_id]
+        lines.append(f"| {node_id} | {node['status']} | {(node.get('title') or node.get('status_detail') or '')[:110]} |")
+    active = [node for node in nodes.values() if node['status'] == 'ACTIVE' and node.get('parent')]
+    for node in sorted(active, key=lambda row: row['id']):
+        parent = node['parent']
+        children = sorted((child for child in nodes.values() if child.get('parent') == parent), key=lambda row: row['id'])
+        lines += ['', f'### {parent} stages', '', '| Stage | Status | Title |', '|---|---|---|']
+        lines += [f"| {child['id']} | {child['status']} | {child.get('title') or ''} |" for child in children]
+        break
+    lines += ['', '## If you are working on ...', '', '| Work | Read first |', '|---|---|']
+    lines += [f"| {row['work']} | {row['read']} |" for row in rules['task_routing']]
+    lines += ['', '## Before you change a system, read its contracts', '',
+              '`passmap.py contract <id> --text` for each; an amendment goes through CONTRACTS.json with a D-number.', '',
+              '| System | Contracts in force | Watch for |', '|---|---|---|']
+    lines += [f"| {row['system']} | {', '.join(row['contracts'])} | {row['watch']} |" for row in rules['system_contracts']]
+    lines += ['', '## Where new information goes', '', '| Fact | Phase input | Lands in |', '|---|---|---|']
+    lines += [f"| {row['fact']} | {row['input']} | {row['record']} |" for row in rules['new_information']]
+    lines += ['', '## Records (each is read whole)', '', '| Record | Bytes | Holds |', '|---|---|---|']
+    descriptions = rules['record_descriptions']
+    for path in passmap.record_files():
+        relative = path.relative_to(passmap.records).as_posix()
+        key = next((pattern for pattern in descriptions if re.fullmatch(pattern, relative)), None)
+        lines.append(f"| records/{relative} | {path.stat().st_size} | {descriptions.get(key, '')} |")
+    lines += ['', '## Commands', *[f'- `{line}`' for line in rules['commands']], '']
+    return '\n'.join(lines)
+
+
+def regenerate(passmap, repository, generation):
+    backend = backend_record(passmap, repository)
+    outputs = {'records/backend.json': dump(backend)}
+    (passmap.records / 'backend.json').write_text(outputs['records/backend.json'])
+    outputs['records/identifiers.json'] = dump(identifiers_record(passmap, repository, backend))
+    (passmap.records / 'identifiers.json').write_text(outputs['records/identifiers.json'])
+    outputs['ROUTES.json'] = dump(routes_record(passmap))
+    outputs['ENTRY.md'] = entry_markdown(passmap, generation)
+    return outputs
+
+
+def command_sync(arguments):
+    passmap = PassMap(arguments.authority)
+    ledger_path = passmap.hot / 'GENERATION.json'
+    previous = json.loads(ledger_path.read_text()) if ledger_path.is_file() else {}
+    applied = apply_inputs(passmap, arguments.inputs, arguments.phase) if arguments.inputs else {}
+    ledger = dict(generation=arguments.generation, previous_generation=previous.get('generation'), phase=arguments.phase,
+                  synced_at=datetime.date.today().isoformat(), inputs_directory=str(arguments.inputs) if arguments.inputs else None,
+                  inputs=applied, layout='PASSMAP_V2')
+    ledger_path.write_text(dump(ledger))
+    history = passmap.record('history.json')
+    frontier = passmap.record('frontier.json')
+    history.setdefault('generations', {})[str(arguments.generation)] = dict(phase=arguments.phase, summary=frontier.get('summary'))
+    (passmap.records / 'history.json').write_text(dump(history))
+    for relative, text in regenerate(passmap, arguments.backend, arguments.generation).items():
+        (passmap.hot / relative).write_text(text)
+    write_manifest(passmap.hot)
+    write_manifest(passmap.cold)
+    print(json.dumps(dict(status='SYNCED', generation=arguments.generation, inputs=sorted(applied)), indent=1))
+
+
+# --- guard ---------------------------------------------------------------------------------------------------------------
+def reference_roots(passmap, workspace=None):
+    """Where a node reference may resolve: the sealed hot, then the workspace that holds it (authority -> work -> root).
+    A restored copy outside the workspace (the package roundtrip) passes the source workspace explicitly."""
+    if workspace is None:
+        parents = passmap.authority.parents
+        workspace = parents[1] if len(parents) > 1 else passmap.authority
+    return passmap.hot, workspace
+
+
+def missing_release_ancestors(nodes, release_ancestors):
+    """D520: every node reachable from a release root has each required node among its depends_on ancestors."""
+    if not release_ancestors:
+        return ['roadmap/_rules.json has no release_ancestors (D520): the release path is unchecked']
+    dependents = {}
+    for node_id, node in nodes.items():
+        for dependency in node.get('depends_on', []):
+            dependents.setdefault(dependency, []).append(node_id)
+
+    def walk(start, edges):
+        seen, pending = set(), [start]
+        while pending:
+            for following in edges(pending.pop()):
+                if following not in seen:
+                    seen.add(following)
+                    pending.append(following)
+        return seen
+
+    release_nodes = set()
+    for root in release_ancestors['roots']:
+        release_nodes |= {root} | walk(root, lambda node_id: dependents.get(node_id, []))
+    findings = []
+    for node_id in sorted(release_nodes):
+        ancestors = walk(node_id, lambda current: nodes.get(current, {}).get('depends_on', []))
+        findings += [f'release node {node_id} lacks required ancestor {required} (D520)'
+                     for required in release_ancestors['required'] if required not in ancestors]
+    return findings
+
+
+BACKEND_REFERENCE_PREFIX = 'backend '
+
+
+def unresolved_node_references(passmap, nodes, names, repository=None, workspace=None):
+    """Every closure_record/contract_documents/evidence reference that resolves at no root and is no historical name.
+    A 'backend <path>' reference names a file in the canonical backend tree (`repository`)."""
+    roots = reference_roots(passmap, workspace)
+    findings = []
+    for node_id, node in nodes.items():
+        references = [node.get('closure_record'), *node.get('contract_documents', []), *node.get('evidence', [])]
+        for reference in references:
+            if not reference or reference in names:
+                continue
+            if reference.startswith(BACKEND_REFERENCE_PREFIX):
+                backend_path = reference[len(BACKEND_REFERENCE_PREFIX):]
+                if repository is None or not (Path(repository) / backend_path).exists():
+                    findings.append(f'node {node_id} reference {reference} resolves nowhere (tried backend {repository})')
+                continue
+            if not any((root / reference).exists() for root in roots):
+                findings.append(f'node {node_id} reference {reference} resolves nowhere (tried {roots[0]}, {roots[1]})')
+    return findings
+
+
+def findings_of(passmap, repository, workspace=None):
+    findings = []
+    generation = json.loads((passmap.hot / 'GENERATION.json').read_text())['generation']
+    hot_bytes = sum(path.stat().st_size for path in files_under(passmap.hot))
+    if hot_bytes > HOT_BUDGET:
+        findings.append(f'HOT is {hot_bytes} bytes, budget {HOT_BUDGET}')
+    if (passmap.hot / 'ENTRY.md').stat().st_size > ENTRY_BUDGET:
+        findings.append(f'ENTRY.md over {ENTRY_BUDGET} bytes')
+    for path in passmap.record_files():
+        relative = path.relative_to(passmap.hot).as_posix()
+        budget = RECORD_BUDGETS.get(relative, RECORD_BUDGET)
+        if path.stat().st_size > budget:
+            findings.append(f'{relative} over {budget} bytes')
+        payload = json.loads(path.read_text())
+        if relative != 'records/frontier.json' and isinstance(payload, dict) and FRONTIER_ONLY_KEYS & set(payload):
+            findings.append(f'{relative} repeats frontier keys {sorted(FRONTIER_ONLY_KEYS & set(payload))}')
+    with tempfile.TemporaryDirectory() as scratch:
+        copy = Path(scratch) / 'authority'
+        shutil.copytree(passmap.hot, copy / 'hot', ignore=shutil.ignore_patterns('cache', '__pycache__'))
+        (copy / 'cold').symlink_to(passmap.cold)
+        for relative, text in regenerate(PassMap(copy), repository, generation).items():
+            if (passmap.hot / relative).read_text() != text:
+                findings.append(f'{relative} differs from what sync generates (hand edit or stale sync)')
+    names = passmap.historical_names()
+    nodes = passmap.nodes()
+    frontier = passmap.record('frontier.json')
+    for key in ('node', 'stage'):
+        if frontier.get(key) not in nodes:
+            findings.append(f'frontier {key} {frontier.get(key)} is not a roadmap node')
+    for node_id, node in nodes.items():
+        if node.get('parent') and node['parent'] not in nodes:
+            findings.append(f'node {node_id} parent {node["parent"]} missing')
+        for dependency in node.get('depends_on', []):
+            if dependency not in nodes:
+                findings.append(f'node {node_id} depends on missing {dependency}')
+    findings += unresolved_node_references(passmap, nodes, names, repository, workspace)
+    findings += missing_release_ancestors(nodes, passmap.record('roadmap/_rules.json').get('release_ancestors'))
+    contracts = passmap.contracts()
+    for contract_id, row in contracts.items():
+        document = passmap.hot / row['document']
+        if row['status'] == 'IN_FORCE' and (not document.is_file() or sha(document) != row['sha256']):
+            findings.append(f'contract {contract_id} document missing or changed: {row["document"]}')
+        if row.get('superseded_by') and row['superseded_by'] not in contracts and row['superseded_by'] not in names:
+            findings.append(f'contract {contract_id} superseded_by {row["superseded_by"]} resolves nowhere')
+    for identifier, row in passmap.record('identifiers.json')['identifiers'].items():
+        if not row['contracts'] and not row['declaration']:
+            findings.append(f'identifier {identifier} ({row["code"][0]}) has no contract or declaration')
+    rules = passmap.record('rules.json')
+    for row in rules['system_contracts']:
+        findings += [f'system_contracts {row["system"]} names unknown contract {cid}' for cid in row['contracts'] if cid not in contracts]
+    for row in rules['task_routing'] + rules['new_information']:
+        for target in re.findall(r'records/[\w./-]+\.json|contracts/[\w./-]+|00_PASSMAP/[\w./-]+', json.dumps(row)):
+            if not (passmap.hot / target).exists():
+                findings.append(f'rules route to missing {target}')
+    backend = passmap.record('backend.json')
+    if repository and Path(repository, '.git').exists():
+        head = subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=repository, capture_output=True, text=True).stdout.strip()
+        if head != backend.get('head'):
+            findings.append(f'backend.json head {backend.get("head")} differs from repository head {head}')
+    for tier in (passmap.hot, passmap.cold):
+        listed = {line.split('  ', 1)[1]: line.split('  ', 1)[0] for line in (tier / 'FILE_MANIFEST.sha256').read_text().splitlines()}
+        actual = {path.relative_to(tier).as_posix() for path in files_under(tier) if path.name != 'FILE_MANIFEST.sha256'}
+        if set(listed) != actual:
+            findings.append(f'{tier.name} manifest lists {len(listed)} files, tier has {len(actual)}')
+        elif tier == passmap.hot:
+            findings += [f'hot/{name} changed after sync' for name, digest in listed.items() if sha(tier / name) != digest]
+    return findings
+
+
+def command_check(arguments):
+    findings = findings_of(PassMap(arguments.authority), arguments.backend)
+    for finding in findings[:300]:
+        print('FINDING', finding)
+    print(json.dumps(dict(status='PASS' if not findings else 'FAIL', findings=len(findings))))
+    sys.exit(1 if findings else 0)
+
+
+# --- package / restore ---------------------------------------------------------------------------------------------------
+def command_package(arguments):
+    passmap = PassMap(arguments.authority)
+    generation = json.loads((passmap.hot / 'GENERATION.json').read_text())['generation']
+    output, verify = arguments.output.resolve(), arguments.verify.resolve()
+    if output.exists() or verify.exists():
+        raise SystemExit('output or verification directory exists')
+    findings = findings_of(passmap, arguments.backend)
+    if findings:
+        raise SystemExit(f'refuse to package: {len(findings)} guard findings; run check')
+    parts = verify / 'bundle'
+    parts.mkdir(parents=True)
+    hot_zip = parts / f'gxb-backend-pass-{generation}-hot.zip'
+    with zipfile.ZipFile(hot_zip, 'w', zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
+        for path in files_under(passmap.hot):
+            archive.write(path, path.relative_to(passmap.hot).as_posix())
+    cold_zip = parts / f'gxb-backend-pass-{generation}-cold.zip'
+    transport = cold_transport.pack(passmap.cold, cold_zip)
+    for tool in ('passmap.py', 'passmap_maintain.py', 'cold_transport.py'):
+        shutil.copy2(passmap.hot / 'tools' / tool, parts / tool)
+    (parts / 'README.txt').write_text(
+        f'GXB1 PassMap v2 generation {generation}. Restore with:\n'
+        '  python3 passmap_maintain.py restore --bundle <this zip or its extracted directory> --destination /absolute/new/directory\n'
+        'Then read <destination>/hot/ENTRY.md (or: python3 <destination>/hot/tools/passmap.py entry). Needs Python 3.11+ and zstd.\n')
+    names = sorted(path.name for path in parts.iterdir())
+    (parts / 'CHECKSUMS.sha256').write_text(''.join(f'{sha(parts / name)}  {name}\n' for name in names))
+    with zipfile.ZipFile(output, 'w', zipfile.ZIP_STORED) as archive:
+        for name in names + ['CHECKSUMS.sha256']:
+            archive.write(parts / name, name)
+    extracted = verify / 'extracted'
+    with zipfile.ZipFile(output) as archive:
+        if archive.testzip() is not None:
+            raise SystemExit('outer zip CRC failure')
+        archive.extractall(extracted)
+    restored = verify / 'restored'
+    restore(extracted, restored)
+    for tier in ('hot', 'cold'):
+        source = {path.relative_to(passmap.authority / tier).as_posix(): sha(path) for path in files_under(passmap.authority / tier)}
+        target = {path.relative_to(restored / tier).as_posix(): sha(path) for path in files_under(restored / tier)}
+        if source != target:
+            raise SystemExit(f'restored {tier} differs from the sealed source')
+    restored_findings = findings_of(PassMap(restored), arguments.backend, reference_roots(passmap)[1])
+    if restored_findings:
+        raise SystemExit(f'restored authority fails the guard: {restored_findings[:5]}')
+    verification = dict(status='PASS_PACKAGED_RESTORED_ZERO_DIFF_GUARD_GREEN', generation=generation, path=str(output), sha256=sha(output),
+                        bytes=output.stat().st_size, hot_files=len(files_under(passmap.hot)), cold_transport=transport)
+    output.with_suffix('.verification.json').write_text(json.dumps(verification, indent=1) + '\n')
+    output.with_suffix('.sha256').write_text(f"{verification['sha256']}  {output.name}\n")
+    shutil.rmtree(restored)
+    shutil.rmtree(extracted)
+    print(json.dumps(verification, indent=1))
+
+
+def restore(bundle, destination):
+    bundle, destination = Path(bundle).resolve(), Path(destination).resolve()
+    if destination.exists():
+        raise SystemExit('destination exists; use a new directory')
+    if bundle.is_file():
+        with tempfile.TemporaryDirectory(dir=destination.parent) as scratch:
+            with zipfile.ZipFile(bundle) as archive:
+                if any(Path(name).name != name for name in archive.namelist()):
+                    raise SystemExit('unexpected nested path in the outer bundle')
+                archive.extractall(scratch)
+            return restore(scratch, destination)
+    for line in (bundle / 'CHECKSUMS.sha256').read_text().splitlines():
+        digest, name = line.split('  ', 1)
+        if Path(name).name != name or sha(bundle / name) != digest:
+            raise SystemExit(f'bundle checksum mismatch {name}')
+    hot_zip = next(bundle.glob('*-hot.zip'))
+    cold_zip = next(bundle.glob('*-cold.zip'))
+    with zipfile.ZipFile(hot_zip) as archive:
+        for member in archive.infolist():
+            name = PurePosixPath(member.filename)
+            if name.is_absolute() or '..' in name.parts:
+                raise SystemExit(f'unsafe path in hot zip {member.filename}')
+        archive.extractall(destination / 'hot')
+    cold_transport.restore(cold_zip, destination / 'cold')
+    for tier in ('hot', 'cold'):
+        for line in (destination / tier / 'FILE_MANIFEST.sha256').read_text().splitlines():
+            digest, name = line.split('  ', 1)
+            if sha(destination / tier / name) != digest:
+                raise SystemExit(f'{tier}/{name} hash mismatch after restore')
+    return dict(status='RESTORED', destination=str(destination), read_first=str(destination / 'hot/ENTRY.md'))
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = parser.add_subparsers(dest='command', required=True)
+    sync = sub.add_parser('sync')
+    sync.add_argument('--authority', type=Path, required=True)
+    sync.add_argument('--inputs', type=Path)
+    sync.add_argument('--phase', required=True)
+    sync.add_argument('--generation', type=int, required=True)
+    sync.add_argument('--backend', type=Path)
+    check = sub.add_parser('check')
+    check.add_argument('--authority', type=Path, required=True)
+    check.add_argument('--backend', type=Path)
+    package = sub.add_parser('package')
+    package.add_argument('--authority', type=Path, required=True)
+    package.add_argument('--output', type=Path, required=True)
+    package.add_argument('--verify', type=Path, required=True)
+    package.add_argument('--backend', type=Path)
+    restore_parser = sub.add_parser('restore')
+    restore_parser.add_argument('--bundle', type=Path, required=True)
+    restore_parser.add_argument('--destination', type=Path, required=True)
+    arguments = parser.parse_args()
+    if arguments.command == 'sync':
+        command_sync(arguments)
+    elif arguments.command == 'check':
+        command_check(arguments)
+    elif arguments.command == 'package':
+        command_package(arguments)
+    elif arguments.command == 'restore':
+        print(json.dumps(restore(arguments.bundle, arguments.destination), indent=1))
+
+
+if __name__ == '__main__':
+    main()

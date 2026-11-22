@@ -25,7 +25,7 @@ git -C "$backend" archive HEAD | tar -x -C "$staging/backend"
   export GOMODCACHE=$root/tmp/cache/virtualclient/go-mod GOCACHE=$root/tmp/cache/virtualclient/go-build
   export GOPROXY=file://$root/tmp/cache/virtualclient/go-mod/cache/download,file://$T/cache/go-mod/cache/download
   cd virtualclient
-  go build -o "$kit/bin/" ./cmd/...
+  go build -tags postgres -o "$kit/bin/" ./cmd/...
 )
 cp -a "$root/tmp/cache/virtualclient/go-mod/cache/download" "$kit/go-mod-download"
 cp -a "$root/ops/testing" "$kit/testing"

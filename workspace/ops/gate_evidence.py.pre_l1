@@ -1,0 +1,93 @@
+#!/usr/bin/env python3
+"""Seal guard (audit A-012): does the gate evidence cover the backend HEAD?
+
+  gate_evidence.py <backend> <STRICT_GATE.json | COMPOSITE_GATE.json>
+
+A STRICT_GATE.json passes when its verdict is GREEN, its commit is HEAD, and it is a serial full gate. A
+COMPOSITE_GATE.json (the user's composite evidence rule: last full gate plus impacted reruns) passes when its head is
+HEAD, its full gate exists and is a serial full gate, and every rerun is GREEN or PARTIAL_GREEN at HEAD. A full gate
+(a direct report or a composite's `full_gate`) must have `mode` `serial` or absent, `selection` null and no
+`packages`: a parallel or package-limited gate is foundation evidence, never the level 3 release gate
+(ACCEPTANCE_V2_DESIGN.md). Exit 0 and print GATE_EVIDENCE OK, or exit 1 with the reason.
+"""
+import json
+import pathlib
+import subprocess
+import sys
+
+RERUN_VERDICTS = ("GREEN", "PARTIAL_GREEN")
+
+
+def full_gate_problems(path, evidence):
+    """Level 3 of ACCEPTANCE_V2_DESIGN.md: only a whole-tree serial gate can back a seal."""
+    found = []
+    if evidence.get("mode") not in (None, "serial"):
+        found.append(f"{path}: level 3 of ACCEPTANCE_V2_DESIGN.md needs a serial full gate, not mode {evidence.get('mode')}")
+    if evidence.get("selection") is not None:
+        found.append(f"{path}: level 3 of ACCEPTANCE_V2_DESIGN.md needs no selection, found {evidence.get('selection')}")
+    if evidence.get("packages"):
+        found.append(f"{path}: level 3 of ACCEPTANCE_V2_DESIGN.md needs the whole tree, not packages {evidence.get('packages')}")
+    return found
+
+
+def problems(head, evidence_path):
+    evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+    if "full_gate" not in evidence:
+        found = full_gate_problems(evidence_path, evidence)
+        if evidence.get("verdict") != "GREEN":
+            found.append(f"{evidence_path}: verdict {evidence.get('verdict')}, not GREEN")
+        if evidence.get("commit") != head:
+            found.append(f"{evidence_path}: gate commit {evidence.get('commit')} is not HEAD {head}")
+        return found
+    found = [] if evidence.get("head") == head else [f"{evidence_path}: composite head {evidence.get('head')} is not HEAD {head}"]
+    full_gate = pathlib.Path(evidence["full_gate"])
+    if not full_gate.is_file():
+        found.append(f"full gate {evidence['full_gate']} is missing")
+    else:
+        found += full_gate_problems(full_gate, json.loads(full_gate.read_text(encoding="utf-8")))
+    if not evidence.get("reruns"):
+        found.append("a composite needs at least one rerun at HEAD")
+    for rerun_path in evidence.get("reruns") or []:
+        rerun = json.loads(pathlib.Path(rerun_path).read_text(encoding="utf-8"))
+        if rerun.get("verdict") not in RERUN_VERDICTS or rerun.get("commit") != head:
+            found.append(f"rerun {rerun_path}: {rerun.get('verdict')} at {rerun.get('commit')}")
+    return found
+
+
+def self_check():
+    import tempfile
+    with tempfile.TemporaryDirectory() as directory:
+        root = pathlib.Path(directory)
+        def write(name, data):
+            (root / name).write_text(json.dumps(data))
+            return root / name
+        assert problems("h", write("g.json", {"verdict": "GREEN", "commit": "h"})) == []
+        assert problems("h", write("r.json", {"verdict": "RED", "commit": "h"}))
+        assert problems("h", write("o.json", {"verdict": "GREEN", "commit": "old"}))
+        assert problems("h", write("s.json", {"verdict": "GREEN", "commit": "h", "mode": "serial", "selection": None, "packages": []})) == []
+        assert "level 3" in problems("h", write("p.json", {"verdict": "GREEN", "commit": "h", "mode": "parallel"}))[0]
+        assert "level 3" in problems("h", write("x.json", {"verdict": "GREEN", "commit": "h", "selection": ["a"]}))[0]
+        assert "level 3" in problems("h", write("k.json", {"verdict": "GREEN", "commit": "h", "packages": ["./internal/a"]}))[0]
+        rerun = write("r.json", {"verdict": "PARTIAL_GREEN", "commit": "h"})
+        full = write("f.json", {"verdict": "GREEN", "commit": "old"})
+        assert problems("h", write("c.json", {"head": "h", "full_gate": str(full), "reruns": [str(rerun)]})) == []
+        parallel_full = write("pf.json", {"verdict": "GREEN", "commit": "old", "mode": "parallel"})
+        assert "level 3" in problems("h", write("c4.json", {"head": "h", "full_gate": str(parallel_full), "reruns": [str(rerun)]}))[0]
+        assert problems("h", write("c2.json", {"head": "h", "full_gate": str(full), "reruns": []}))
+        assert problems("h", write("c3.json", {"head": "x", "full_gate": str(full), "reruns": [str(rerun)]}))
+
+
+def main():
+    if sys.argv[1:] == ["--check"]:
+        self_check()
+        print("gate_evidence self-check ok")
+        return 0
+    backend, evidence_path = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
+    head = subprocess.run(["git", "-C", str(backend), "rev-parse", "HEAD"], capture_output=True, text=True, check=True).stdout.strip()
+    found = problems(head, evidence_path)
+    print("\n".join(found) or f"GATE_EVIDENCE OK {head}")
+    return 1 if found else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

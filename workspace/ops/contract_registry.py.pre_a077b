@@ -1,0 +1,742 @@
+#!/usr/bin/env python3
+"""The portable contract registry of one stage: a self-contained copy of every contract in force, opened from the
+sealed PassMap when the stage starts, the only place contracts are registered during the stage, and exported into
+the phase's passmap/inputs at stage close so the seal records it. The next stage opens a new copy from the new seal.
+Every change bumps `revision` and appends a row to history.jsonl, so a worker's manifest can pin what it was given.
+
+A contract's identity is the id its document declares (`contract_id` or `policy_id` in JSON, a `Contract-Id:` line in
+Markdown; a Markdown file named after a registered contract is that contract), never its file name. Documents are
+stored content-addressed under documents/<id>/<sha256 prefix>-<name> and never overwritten, and registry.json is
+replaced atomically, so a pinned manifest path stays readable and a failed command leaves no half-written state.
+
+  contract_registry.py open <stage>      copy the sealed registry, the phase inputs' contracts and the stage's
+                                         contracts/ (*.json, *.md) into work/<phase>/stages/<stage>/REGISTRY; the
+                                         system and path bindings carry over from the newest earlier registry
+  contract_registry.py add <stage> <document> --id ID --title T [--status S] [--supersedes OLD]
+        [--kind ruling --amends ID[:clause] ...]
+        [--origin-stage STAGE --origin-phase PHASE --origin-commit COMMIT --note TEXT]
+                                         register a new or amended contract (lead only); the document is copied in;
+                                         the origin options file a late-found contract under the stage that made it;
+                                         `--kind ruling` registers a ruling that amends contracts (a ruling may
+                                         also be amended later with `amend`)
+  contract_registry.py amend <stage> RULING_ID --amends ID[:clause] ...
+                                         replace the list of contracts (or clauses) an existing ruling amends
+  contract_registry.py kind <stage> <kind> --system NAME ... --reason TEXT
+                                         name the systems a kind reaches, so `bind --kind` places a contract on all
+                                         of them; an unknown kind or a missing system is a STALE_BINDING problem
+  contract_registry.py absorb <stage> --tree DIR --base COMMIT
+                                         register what a leaf committed in its docs/<phase> since COMMIT, marked
+                                         review=pending; exit 1 on a conflict (the registry moved on since COMMIT too)
+                                         or a duplicate id
+  contract_registry.py accept <stage> ID [--status S]
+                                         the lead reviewed an absorbed contract
+  contract_registry.py bind <stage> ID (--system NAME ... | --kind NAME ... | --global | --no-code) --reason TEXT
+                                         resolve a contract the deterministic system lookup cannot place; `--kind`
+                                         expands to every system of that kind (repeatable)
+  contract_registry.py bind-path <stage> GLOB (--system NAME ... | --no-code) --reason TEXT
+                                         assign changed files the system map cannot place (fnmatch, `*` crosses /);
+                                         a path binding wins over the automatic file rules
+  contract_registry.py waive <stage> "KIND SUBJECT" --reason TEXT
+                                         record an exception: merge and seal check problems starting with KIND SUBJECT
+                                         stop blocking and are printed as WAIVED with the reason
+  contract_registry.py integration <stage> DIR [--base-commit COMMIT]
+                                         record the stage's integration worktree (its pre-merge-commit hook enforces
+                                         the merge check) and the canonical backend commit the stage started from
+  contract_registry.py check <stage> [--tree DIR ...]
+                                         exit 1 on a missing or altered document, a shared document path, an invalid
+                                         id, a live contract whose text declares an every-mode/all-shops scope but
+                                         has no binding (SCOPE_ALARM), a ruling amending an unregistered id, or a
+                                         contract document in the stage folder, the canonical backend docs or a named
+                                         worktree's docs that the registry does not hold or that differs from it;
+                                         a warning (WARNING) does not fail the check
+  contract_registry.py export <stage>    write every contract the stage added or amended into passmap/inputs
+                                         (CONTRACTS.json + contracts/<id>.<ext>) for the seal; refuses a status other
+                                         than IN_FORCE or SUPERSEDED, a pending review, or a file name a different
+                                         sealed contract already uses
+  contract_registry.py --check           self-check
+"""
+import argparse
+import collections
+import datetime
+import fnmatch
+import hashlib
+import json
+import os
+import pathlib
+import re
+import subprocess
+import sys
+import tempfile
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+SEALABLE = ("IN_FORCE", "SUPERSEDED")
+ABSORBED_STATUSES = ("IN_FORCE", "SUPERSEDED", "WORKING_DESIGN_NOT_STAGE_ACCEPTED")
+GLOBAL = "*"
+# The v1 hot PassMap the v2 migration (seal 764) moved to cold: preserved there is not registered.
+HOT_V1_ARCHIVE = "cold/ARCHIVE/HOT_P763/00_PASSMAP"
+DOCUMENT_SUFFIXES = (".json", ".md")
+IDENTIFIER_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
+MARKDOWN_IDENTIFIER_RE = re.compile(r"^Contract-Id:[ \t]*(\S+)[ \t]*$", re.MULTILINE)
+CONTRACT_NAME_RE = re.compile(r"CONTRACT|POLICY|DECISION|AMENDMENT|AUTHORI[SZ]ATION|REGISTER|IMPLEMENTATION_NOTES|MERGE|SPEC", re.IGNORECASE)
+KIND_PREFIX = "kind:"
+# A live contract whose text claims a whole scope must be bound: the lead's declared scope replaces the accidental
+# lexical placement A-001 found (a contract saying "every mode" landed on one system because it mentioned MID 1).
+SCOPE_PHRASES = ("every mode", "all modes", "every dispatcher", "every MID", "any system", "every shop", "all shops")
+WARNING_PREFIX = "WARNING "
+
+
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def now():
+    return datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
+
+
+def registry_directory(phase_directory, stage):
+    return phase_directory / "stages" / stage / "REGISTRY"
+
+
+def write_atomic(path, content):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(dir=path.parent, delete=False) as handle:
+        handle.write(content)
+    os.replace(handle.name, path)
+
+
+def write_json(path, value):
+    write_atomic(path, (json.dumps(value, indent=1, sort_keys=True) + "\n").encode("utf-8"))
+
+
+def load(directory):
+    return json.loads((directory / "registry.json").read_text(encoding="utf-8"))
+
+
+def load_bindings(directory):
+    path = directory / "bindings.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
+
+
+def load_path_bindings(directory):
+    path = directory / "path_bindings.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
+
+
+def load_kinds(directory):
+    path = directory / "kinds.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
+
+
+def scope_phrases(text):
+    """The scope phrases the document uses, case-insensitive; a contract that matches one must be bound."""
+    lowered = text.lower()
+    return [phrase for phrase in SCOPE_PHRASES if phrase.lower() in lowered]
+
+
+def failure_problems(problems):
+    """The check problems that block; a `WARNING ` problem is reported but does not fail."""
+    return [problem for problem in problems if not problem.startswith(WARNING_PREFIX)]
+
+
+def path_binding(path_bindings, relative):
+    """The lead's binding for a changed file: the longest matching pattern, or None."""
+    matching = [pattern for pattern in path_bindings if fnmatch.fnmatchcase(relative, pattern)]
+    return path_bindings[max(matching, key=len)] if matching else None
+
+
+def save(directory, registry, action, identifiers, **detail):
+    registry["revision"] = registry.get("revision", 0) + 1
+    write_json(directory / "registry.json", registry)
+    row = {"revision": registry["revision"], "time": now(), "action": action, "ids": sorted(identifiers),
+           "sha256": {identifier: registry["contracts"][identifier]["sha256"] for identifier in identifiers
+                      if identifier in registry["contracts"]}, **detail}
+    with (directory / "history.jsonl").open("a", encoding="utf-8") as history:
+        history.write(json.dumps(row, sort_keys=True) + "\n")
+
+
+def place(directory, registry, identifier, content, name, entry):
+    if not IDENTIFIER_RE.match(identifier):
+        raise ValueError(f"contract id {identifier!r} is not a plain identifier")
+    sha = hashlib.sha256(content).hexdigest()
+    relative = pathlib.Path("documents") / identifier / f"{sha[:16]}-{name}"
+    if not (directory / relative).is_file():
+        write_atomic(directory / relative, content)
+    registry["contracts"][identifier] = {**entry, "kind": entry.get("kind") or "contract",
+                                         "amends": list(entry.get("amends") or []),
+                                         # The content-addressed copy is written once, so its entry time is when this
+                                         # revision was registered: `check` compares it with a ruling's.
+                                         "registered": entry.get("registered") or now(),
+                                         "document": str(relative), "sha256": sha}
+
+
+def json_fields(content):
+    try:
+        document = json.loads(content)
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return {}
+    return document if isinstance(document, dict) else {}
+
+
+def declared_identifier(name, content):
+    if name.endswith(".md"):
+        found = MARKDOWN_IDENTIFIER_RE.search(content.decode("utf-8", errors="replace"))
+        return found.group(1) if found else None
+    fields = json_fields(content)
+    return fields.get("contract_id") or fields.get("policy_id") or None
+
+
+def contract_identifier(path):
+    try:
+        return declared_identifier(path.name, path.read_bytes())
+    except OSError:
+        return None
+
+
+def stage_contract_identifier(path):
+    """Everything in a stage's contracts/ folder is a contract; an undeclared Markdown seam document is named by its file."""
+    return contract_identifier(path) or (path.stem if path.suffix == ".md" else None)
+
+
+def identities(directory, registry):
+    """{declared id: registry id}. A few legacy sealed contracts are registered under another id than the one their
+    document declares; both name the same contract."""
+    found = {identifier: identifier for identifier in registry["contracts"]}
+    for identifier, entry in registry["contracts"].items():
+        path = directory / entry["document"]
+        declared = contract_identifier(path) if path.is_file() else None
+        if declared and declared not in registry["contracts"]:
+            found[declared] = identifier
+    return found
+
+
+def stage_documents(stage_contracts):
+    if not stage_contracts.is_dir():
+        return []
+    return sorted(path for path in stage_contracts.iterdir() if path.suffix in DOCUMENT_SUFFIXES)
+
+
+def inherited_bindings(directory):
+    """The newest other registry of any phase, so the lead classifies an unplaceable contract or path once."""
+    earlier = [path for path in ROOT.glob("work/*/stages/*/REGISTRY/registry.json") if path.parent != directory]
+    if not earlier:
+        return {}, {}, {}
+    newest = max(earlier, key=lambda path: json.loads(path.read_text(encoding="utf-8")).get("opened", ""))
+    return load_bindings(newest.parent), load_path_bindings(newest.parent), load_kinds(newest.parent)
+
+
+def open_registry(directory, generation, sealed_hot, phase_inputs, stage_contracts, stage, bindings=None, path_bindings=None,
+                  base_commit=None, kinds=None):
+    if (directory / "registry.json").exists():
+        sys.exit(f"{directory} already exists; a stage opens its registry once")
+    registry = {"stage": stage, "base_seal": generation, "base_commit": base_commit, "integration": None, "opened": now(),
+                "revision": 0, "contracts": {}}
+    for identifier, entry in json.loads((sealed_hot / "records/contracts.json").read_text(encoding="utf-8"))["contracts"].items():
+        source = sealed_hot / entry["document"]
+        place(directory, registry, identifier, source.read_bytes(), source.name,
+              dict(origin=f"sealed_{generation}", status=entry.get("status"), stage=entry.get("stage"), phases=entry.get("phases") or [],
+                   title=entry.get("title") or "", superseded_by=entry.get("superseded_by"), supersedes=entry.get("extends") or [],
+                   kind=entry.get("kind"), amends=entry.get("amends") or []))
+    inputs_file = phase_inputs / "CONTRACTS.json"
+    for entry in json.loads(inputs_file.read_text(encoding="utf-8"))["contracts"] if inputs_file.is_file() else []:
+        source = phase_inputs / entry["document"]
+        known = registry["contracts"].get(entry["id"])
+        if known and known["sha256"] == digest(source):
+            continue
+        place(directory, registry, entry["id"], source.read_bytes(), source.name,
+              dict(origin="phase_inputs", status=entry.get("status", "IN_FORCE"), stage=entry.get("stage"), phases=entry.get("phases") or [],
+                   title=entry.get("title") or "", superseded_by=None, supersedes=entry.get("supersedes") or [],
+                   kind=entry.get("kind"), amends=entry.get("amends") or []))
+    for source in stage_documents(stage_contracts):
+        identifier = stage_contract_identifier(source)
+        if identifier and identifier not in registry["contracts"]:
+            content = source.read_bytes()
+            status = json_fields(content).get("status") or "WORKING_DESIGN_NOT_STAGE_ACCEPTED"
+            place(directory, registry, identifier, content, source.name,
+                  dict(origin="stage", status=status, stage=stage, phases=[stage.split("-")[0]], title="", superseded_by=None, supersedes=[]))
+    write_json(directory / "bindings.json", {identifier: row for identifier, row in (bindings or {}).items() if identifier in registry["contracts"]})
+    write_json(directory / "path_bindings.json", path_bindings or {})
+    write_json(directory / "kinds.json", dict(sorted((kinds or {}).items())))
+    save(directory, registry, "open", list(registry["contracts"]), base_seal=generation, base_commit=base_commit)
+    return registry
+
+
+def register(registry, directory, content, name, identifier, title, status, supersedes, review=None, provenance=None,
+             origin=None, kind=None, amends=()):
+    """`origin` ({stage, phase, ...}) files a contract an earlier stage introduced under that stage, keeping history."""
+    previous, origin = registry["contracts"].get(identifier, {}), origin or {}
+    place(directory, registry, identifier, content, name,
+          dict(origin="stage", status=status, stage=origin.get("stage") or registry["stage"],
+               phases=[origin["phase"]] if origin.get("phase") else previous.get("phases") or [registry["stage"].split("-")[0]],
+               title=title or previous.get("title") or "", superseded_by=None, supersedes=supersedes or previous.get("supersedes") or [],
+               review=review, provenance=provenance, kind=kind, amends=amends))
+    for old in supersedes:
+        registry["contracts"][old].update(status="SUPERSEDED", superseded_by=identifier)
+
+
+def add(directory, source, identifier, title, status, supersedes, origin=None, kind="contract", amends=()):
+    registry = load(directory)
+    register(registry, directory, source.read_bytes(), source.name, identifier, title, status, supersedes,
+             provenance={"by": "lead", "source": str(source), **({"origin": origin} if origin else {})}, origin=origin,
+             kind=kind, amends=amends)
+    save(directory, registry, "add", [identifier, *supersedes], source=str(source), kind=kind, amends=sorted(set(amends)))
+
+
+def amend(directory, identifier, amends):
+    """Replace the `amends` list of an existing ruling; `check` verifies each target is registered."""
+    registry = load(directory)
+    entry = registry["contracts"].get(identifier)
+    if entry is None:
+        sys.exit(f"{identifier} is not registered")
+    if (entry.get("kind") or "contract") != "ruling":
+        sys.exit(f"{identifier} is not a ruling; register it with `add --kind ruling`")
+    entry["amends"] = sorted(set(amends))
+    save(directory, registry, "amend", [identifier], amends=entry["amends"])
+
+
+def accept(directory, identifier, status=None):
+    registry = load(directory)
+    entry = registry["contracts"][identifier]
+    entry["review"] = None
+    if status:
+        entry["status"] = status
+    save(directory, registry, "accept", [identifier])
+
+
+def bind(directory, identifier, systems, reason):
+    registry = load(directory)
+    if identifier not in registry["contracts"]:
+        sys.exit(f"{identifier} is not registered")
+    bindings = load_bindings(directory)
+    bindings[identifier] = {"systems": sorted(systems), "reason": reason, "time": now()}
+    write_json(directory / "bindings.json", bindings)
+    save(directory, registry, "bind", [identifier], systems=sorted(systems))
+
+
+def bind_path(directory, pattern, systems, reason):
+    registry = load(directory)
+    path_bindings = load_path_bindings(directory)
+    path_bindings[pattern] = {"systems": sorted(systems), "reason": reason, "time": now()}
+    write_json(directory / "path_bindings.json", path_bindings)
+    save(directory, registry, "bind-path", [], pattern=pattern, systems=sorted(systems))
+
+
+def define_kind(directory, kind, systems, reason):
+    """Name the systems a kind reaches; `bind --kind` stores `kind:<name>` in the binding and `lookup` expands it."""
+    if not IDENTIFIER_RE.match(kind):
+        sys.exit(f"kind {kind!r} is not a plain identifier")
+    registry = load(directory)
+    kinds = load_kinds(directory)
+    kinds[kind] = {"systems": sorted(systems), "reason": reason, "time": now()}
+    write_json(directory / "kinds.json", dict(sorted(kinds.items())))
+    save(directory, registry, "kind", [], kind=kind, systems=sorted(systems), reason=reason)
+
+
+def load_waivers(directory):
+    path = directory / "waivers.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
+
+
+def waive(directory, problem, reason):
+    """The lead's recorded exception: a merge or seal check problem starting with `problem` (its kind and subject,
+    e.g. `INDEPENDENT_AUDIT shop`) no longer blocks, and every check prints it as WAIVED with the reason."""
+    registry = load(directory)
+    if len(problem.split()) < 2:
+        sys.exit("a waiver names the problem kind and its subject, e.g. `INDEPENDENT_AUDIT shop`")
+    waivers = load_waivers(directory)
+    waivers[problem] = {"reason": reason, "time": now()}
+    write_json(directory / "waivers.json", waivers)
+    save(directory, registry, "waive", [], problem=problem, reason=reason)
+
+
+def set_integration(directory, tree, base_commit=None):
+    registry = load(directory)
+    registry["integration"] = str(tree)
+    if base_commit:
+        registry["base_commit"] = base_commit
+    save(directory, registry, "integration", [], integration=str(tree), base_commit=registry.get("base_commit"))
+
+
+def git_bytes(tree, commit, relative):
+    shown = subprocess.run(["git", "-C", str(tree), "show", f"{commit}:{relative}"], capture_output=True)
+    return shown.stdout if shown.returncode == 0 else None
+
+
+def committed_documents(tree, commit, folder):
+    listed = subprocess.run(["git", "-C", str(tree), "ls-tree", "--name-only", f"{commit}:{folder}"], capture_output=True, text=True)
+    return sorted(name for name in listed.stdout.splitlines() if name.endswith(DOCUMENT_SUFFIXES)) if listed.returncode == 0 else []
+
+
+def absorb(directory, tree, base, head, phase_name):
+    """Reads the leaf's committed docs/<phase> at `head`. A contract document is new (register it), amended while the
+    registry still holds the base version (register the amendment), unchanged by the leaf while the registry moved on
+    (nothing to do), or changed on both sides (a conflict for the lead). Absorbed entries carry review=pending until
+    the lead accepts them. Nothing is saved unless every document was handled."""
+    registry = load(directory)
+    known = identities(directory, registry)
+    folder = f"docs/{phase_name}"
+    commit = subprocess.run(["git", "-C", str(tree), "rev-parse", head], capture_output=True, text=True).stdout.strip()
+    registered, conflicts, declared = [], [], {}
+    for name in committed_documents(tree, commit, folder):
+        content = git_bytes(tree, commit, f"{folder}/{name}")
+        if content is None:
+            conflicts.append(f"UNREADABLE {folder}/{name} at {commit[:12]}")
+            continue
+        identifier = declared_identifier(name, content)
+        if identifier is None and name.endswith(".md") and name[:-3] in known:
+            identifier = name[:-3]
+        if not identifier:
+            continue
+        if identifier in declared:
+            conflicts.append(f"DUPLICATE {identifier}: {folder}/{declared[identifier]} and {folder}/{name} both declare it at {commit[:12]}")
+            continue
+        declared[identifier] = name
+        identifier = known.get(identifier, identifier)
+        entry = registry["contracts"].get(identifier)
+        leaf = hashlib.sha256(content).hexdigest()
+        if entry is not None and entry["sha256"] == leaf:
+            continue
+        before_content = git_bytes(tree, base, f"{folder}/{name}")
+        before = hashlib.sha256(before_content).hexdigest() if before_content is not None else None
+        if entry is not None and before == leaf:
+            continue
+        if entry is not None and entry["sha256"] != before:
+            conflicts.append(f"CONFLICT {identifier}: {folder}/{name} and the registry both changed it since {base}")
+            continue
+        fields = json_fields(content)
+        status = fields.get("status") if fields.get("status") in ABSORBED_STATUSES else None
+        status = status or (entry or {}).get("status") or "WORKING_DESIGN_NOT_STAGE_ACCEPTED"
+        supersedes = [old for old in fields.get("supersedes") or [] if old in registry["contracts"]]
+        register(registry, directory, content, name, identifier, str(fields.get("title") or ""), status, supersedes, review="pending",
+                 provenance={"by": "absorb", "tree": str(tree), "commit": commit, "base": base})
+        registered.append(identifier)
+    if conflicts:
+        return [], conflicts
+    if registered:
+        save(directory, registry, "absorb", registered, tree=str(tree), commit=commit, base=base)
+    return registered, conflicts
+
+
+def check(directory, scanned_directories):
+    registry = load(directory)
+    bindings = load_bindings(directory)
+    problems = []
+    shared = collections.Counter(entry["document"] for entry in registry["contracts"].values())
+    for identifier, entry in registry["contracts"].items():
+        path = directory / entry["document"]
+        if not IDENTIFIER_RE.match(identifier):
+            problems.append(f"{identifier}: not a plain identifier")
+        if shared[entry["document"]] > 1:
+            problems.append(f"{identifier}: shares {entry['document']} with another contract")
+        if not path.is_file():
+            problems.append(f"{identifier}: document {entry['document']} missing")
+        elif digest(path) != entry["sha256"]:
+            problems.append(f"{identifier}: {entry['document']} changed without `add` (sha256 differs)")
+        for target in entry.get("amends") or []:
+            if target.split(":", 1)[0] not in registry["contracts"]:
+                problems.append(f"AMENDS_UNREGISTERED {identifier}: amends {target}, which is not registered")
+        if (entry.get("kind") or "contract") == "ruling":
+            continue
+        if entry["status"] == "SUPERSEDED" or identifier in bindings or not path.is_file():
+            continue
+        phrases = scope_phrases(path.read_text(encoding="utf-8", errors="replace"))
+        if phrases:
+            problems.append(f"SCOPE_ALARM {identifier}: its document says {', '.join(phrases)}; declare the scope with "
+                            "`bind --global`, `--system` or `--kind`")
+    # A ruling newer than a contract it amends means the contract document has not caught up; the lead re-adds it.
+    for identifier, entry in registry["contracts"].items():
+        if (entry.get("kind") or "contract") != "ruling":
+            continue
+        for target in entry.get("amends") or []:
+            amended = registry["contracts"].get(target.split(":", 1)[0])
+            amended_time = (amended or {}).get("registered")
+            if amended is not None and amended_time and entry.get("registered") and amended_time < entry["registered"]:
+                problems.append(f"{WARNING_PREFIX}AMENDED_OLDER {target.split(':', 1)[0]}: {identifier} amends it but was "
+                                "registered after its document; re-add the contract")
+    known = identities(directory, registry)
+    for scanned, identify in scanned_directories:
+        seen = {}
+        for path in sorted(scanned.iterdir()) if scanned.is_dir() else []:
+            identifier = identify(path) if path.suffix in DOCUMENT_SUFFIXES else None
+            if identifier is None and path.suffix == ".md" and path.stem in known:
+                identifier = path.stem
+            if not identifier:
+                continue
+            sha = digest(path)
+            if identifier in seen and seen[identifier][1] != sha:
+                problems.append(f"DUPLICATE {identifier}: {seen[identifier][0]} and {path} declare it with different content")
+            seen.setdefault(identifier, (path, sha))
+            registered = known.get(identifier)
+            if registered is None:
+                problems.append(f"UNREGISTERED {identifier}: {path}")
+            elif sha != registry["contracts"][registered]["sha256"]:
+                problems.append(f"DIVERGED {registered}: {path} differs from the registry copy")
+    return problems
+
+
+def load_classifications(directory):
+    path = directory / "not_contracts.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
+
+
+def classify(directory, key, reason):
+    """The lead's reviewed verdict that a swept document is history, a plan or a record, not a contract."""
+    registry = load(directory)
+    classifications = load_classifications(directory)
+    classifications[key] = {"reason": reason, "time": now()}
+    write_json(directory / "not_contracts.json", dict(sorted(classifications.items())))
+    save(directory, registry, "classify", [], document=key, reason=reason)
+
+
+def sweep_roots(directory, backend):
+    registry = load(directory)
+    authority = ROOT / f"work/authority_p{registry['base_seal']}"
+    return [("docs", backend / "docs"), ("hot", authority / "hot/00_PASSMAP"), ("hot763", authority / HOT_V1_ARCHIVE)]
+
+
+def sweep(directory, roots):
+    """Every document anywhere below the roots ([(label, folder)]) that declares a contract id or is named like a
+    contract, policy, decision or authorization record is either in the registry (by content, declared id or name) or
+    classified by the lead in REGISTRY/not_contracts.json under `<label>/<path>`. Seal 798 lost 50+ contracts that
+    nothing looked for below docs/<phase> or outside the sealed records."""
+    registry = load(directory)
+    held = {entry["sha256"] for entry in registry["contracts"].values()}
+    known = identities(directory, registry)
+    classifications = load_classifications(directory)
+    problems, seen = [], set()
+    for label, root in roots:
+        if not root.is_dir():
+            problems.append(f"SWEEP_ROOT_MISSING {label}: {root}")
+            continue
+        for path in sorted(root.rglob("*")):
+            if path.suffix not in DOCUMENT_SUFFIXES or not path.is_file():
+                continue
+            identifier = contract_identifier(path)
+            if not identifier and not CONTRACT_NAME_RE.search(path.name):
+                continue
+            key = f"{label}/{path.relative_to(root).as_posix()}"
+            seen.add(key)
+            if key in classifications or digest(path) in held or identifier in known or path.stem in known:
+                continue
+            problems.append(f"UNCLASSIFIED {key}: register it (`add` with --origin-*) or `classify` it with a reason")
+    scanned = {label for label, _ in roots}
+    problems += [f"STALE_CLASSIFICATION {key}: the document is gone; drop it from not_contracts.json"
+                 for key in sorted(classifications) if key.split("/", 1)[0] in scanned and key not in seen]
+    return problems
+
+
+def sealed_document_names(sealed_hot):
+    contracts = json.loads((sealed_hot / "records/contracts.json").read_text(encoding="utf-8"))["contracts"]
+    return {pathlib.Path(entry["document"]).name: identifier for identifier, entry in contracts.items()}
+
+
+def export(directory, phase_inputs, sealed_names):
+    """The seal files each exported document under hot/contracts/<its name>, so the name is the contract id and must
+    not be a file a different sealed contract already owns."""
+    registry = load(directory)
+    added = {identifier: entry for identifier, entry in registry["contracts"].items()
+             if entry["origin"] in ("stage", "phase_inputs") or entry.get("superseded_by")}
+    drafts = sorted(identifier for identifier, entry in added.items() if entry["status"] not in SEALABLE)
+    pending = sorted(identifier for identifier, entry in added.items() if entry.get("review"))
+    exported = {identifier: pathlib.Path("contracts") / (identifier + pathlib.Path(entry["document"]).suffix)
+                for identifier, entry in added.items() if not entry["origin"].startswith("sealed_")}
+    taken = sorted(f"{document.name} (sealed as {sealed_names[document.name]})" for identifier, document in exported.items()
+                   if sealed_names.get(document.name, identifier) != identifier)
+    reasons = []
+    if drafts:
+        reasons.append("set IN_FORCE with `add` or `accept --status` first: " + ", ".join(drafts))
+    if pending:
+        reasons.append("review pending, run `accept` after reading: " + ", ".join(pending))
+    if taken:
+        reasons.append("file names a different sealed contract owns: " + ", ".join(taken))
+    if reasons:
+        sys.exit("not sealable: " + "; ".join(reasons))
+    inputs_file = phase_inputs / "CONTRACTS.json"
+    inputs = json.loads(inputs_file.read_text(encoding="utf-8")) if inputs_file.is_file() else {"contracts": []}
+    rows = {row["id"]: row for row in inputs["contracts"]}
+    for identifier, document in sorted(exported.items()):
+        entry = added[identifier]
+        write_atomic(phase_inputs / document, (directory / entry["document"]).read_bytes())
+        previous = rows.get(identifier, {})
+        rows[identifier] = {**previous, "id": identifier, "title": entry["title"] or previous.get("title", identifier),
+                            "phases": entry["phases"], "document": str(document), "stage": entry["stage"], "status": entry["status"],
+                            "supersedes": entry["supersedes"],
+                            **({"kind": entry.get("kind"), "amends": entry.get("amends") or []}
+                               if entry.get("kind") == "ruling" or entry.get("amends") else {}),
+                            "note": ((entry.get("provenance") or {}).get("origin") or {}).get("note") or previous.get("note")
+                                    or f"Exported from the {registry['stage']} portable registry."}
+        replaced = previous.get("document")
+        if replaced and replaced != str(document) and all(row.get("document") != replaced for row in rows.values()):
+            (phase_inputs / replaced).unlink(missing_ok=True)
+    inputs["contracts"] = list(rows.values())
+    write_atomic(inputs_file, (json.dumps(inputs, indent=1, ensure_ascii=False) + "\n").encode("utf-8"))
+    return sorted(exported)
+
+
+def self_check():
+    with tempfile.TemporaryDirectory() as temporary:
+        base = pathlib.Path(temporary)
+        hot, inputs, stage_contracts, directory = base / "hot", base / "inputs", base / "stage", base / "REGISTRY"
+        (hot / "records").mkdir(parents=True)
+        (hot / "contracts").mkdir()
+        stage_contracts.mkdir()
+        (hot / "contracts/A.json").write_text('{"contract_id": "A_V1"}')
+        (hot / "records/contracts.json").write_text(json.dumps({"contracts": {"A_V1": {"document": "contracts/A.json", "status": "IN_FORCE", "phases": ["I9"]}}}))
+        (stage_contracts / "B.json").write_text('{"contract_id": "B_V1", "status": "WORKING_DESIGN"}')
+        (stage_contracts / "SEAMS.md").write_text("# seams\n")
+        open_registry(directory, 7, hot, inputs, stage_contracts, "I9-11", {"A_V1": {"systems": ["*"]}, "GONE": {"systems": []}})
+        stage_scan = [(stage_contracts, stage_contract_identifier)]
+        assert set(load(directory)["contracts"]) == {"A_V1", "B_V1", "SEAMS"} and check(directory, stage_scan) == []
+        assert load(directory)["revision"] == 1 and list(load_bindings(directory)) == ["A_V1"]
+        (stage_contracts / "C.json").write_text('{"policy_id": "C_V1"}')
+        assert check(directory, stage_scan) == [f"UNREGISTERED C_V1: {stage_contracts / 'C.json'}"]
+        try:
+            export(directory, inputs, {})
+            raise AssertionError("a working draft must block export")
+        except SystemExit:
+            pass
+        add(directory, stage_contracts / "B.json", "B_V1", "b", "IN_FORCE", [])
+        add(directory, stage_contracts / "C.json", "C_V2", "c", "IN_FORCE", ["A_V1"])
+        add(directory, stage_contracts / "SEAMS.md", "SEAMS", "seams", "IN_FORCE", [])
+        assert load(directory)["contracts"]["A_V1"]["status"] == "SUPERSEDED" and load(directory)["revision"] == 4
+        assert export(directory, inputs, sealed_document_names(hot)) == ["B_V1", "C_V2", "SEAMS"]
+        rows = {row["id"]: row for row in json.loads((inputs / "CONTRACTS.json").read_text())["contracts"]}
+        assert rows["C_V2"]["supersedes"] == ["A_V1"] and rows["B_V1"]["document"] == "contracts/B_V1.json"
+        assert (inputs / rows["SEAMS"]["document"]).is_file()
+        bind(directory, "B_V1", ["march"], "names the March tables")
+        bind_path(directory, "migrations/*.sql", [], "content only")
+        assert load_bindings(directory)["B_V1"]["systems"] == ["march"] and path_binding(load_path_bindings(directory), "migrations/1.sql")["systems"] == []
+        (directory / load(directory)["contracts"]["B_V1"]["document"]).write_text("{}")
+        assert any("changed without `add`" in problem for problem in check(directory, []))
+
+
+def main():
+    if sys.argv[1:] == ["--check"]:
+        self_check()
+        return 0
+    import state
+    parser = argparse.ArgumentParser()
+    commands = parser.add_subparsers(dest="command", required=True)
+    for name in ("open", "check", "export"):
+        command = commands.add_parser(name)
+        command.add_argument("stage")
+        if name == "check":
+            command.add_argument("--tree", action="append", default=[], type=pathlib.Path)
+    adding = commands.add_parser("add")
+    adding.add_argument("stage")
+    adding.add_argument("document", type=pathlib.Path)
+    adding.add_argument("--id", required=True)
+    adding.add_argument("--title", required=True)
+    adding.add_argument("--status", default="IN_FORCE")
+    adding.add_argument("--supersedes", action="append", default=[])
+    adding.add_argument("--kind", choices=("contract", "ruling"), default="contract")
+    adding.add_argument("--amends", action="append", default=[], help="a contract ID or ID:clause this ruling amends")
+    adding.add_argument("--origin-stage", help="the earlier stage that introduced it (history), e.g. I9-10")
+    adding.add_argument("--origin-phase", help="its phase as the sealed registry names it, e.g. I9 or I7C4FC")
+    adding.add_argument("--origin-commit", help="the backend commit that introduced or amended it")
+    adding.add_argument("--note", help="why it is registered late; exported as the PassMap note")
+    absorbing = commands.add_parser("absorb")
+    absorbing.add_argument("stage")
+    absorbing.add_argument("--tree", required=True, type=pathlib.Path)
+    absorbing.add_argument("--base", required=True)
+    accepting = commands.add_parser("accept")
+    accepting.add_argument("stage")
+    accepting.add_argument("id")
+    accepting.add_argument("--status")
+    for name in ("bind", "bind-path"):
+        binding = commands.add_parser(name)
+        binding.add_argument("stage")
+        binding.add_argument("id" if name == "bind" else "pattern")
+        target = binding.add_mutually_exclusive_group(required=True)
+        target.add_argument("--system", action="append")
+        if name == "bind":
+            target.add_argument("--global", dest="global_binding", action="store_true")
+            target.add_argument("--kind", action="append", help="every system of a kind defined with `kind`")
+        target.add_argument("--no-code", action="store_true", help="binds no system")
+        binding.add_argument("--reason", required=True)
+    defining = commands.add_parser("kind")
+    defining.add_argument("stage")
+    defining.add_argument("kind")
+    defining.add_argument("--system", action="append", required=True)
+    defining.add_argument("--reason", required=True)
+    amending = commands.add_parser("amend")
+    amending.add_argument("stage")
+    amending.add_argument("id")
+    amending.add_argument("--amends", action="append", default=[], help="the ruling's new amends list, ID or ID:clause")
+    classifying = commands.add_parser("classify")
+    classifying.add_argument("stage")
+    classifying.add_argument("document", help="the swept key, e.g. hot/PASS646_I7A6A_AUTHORIZATION.json")
+    classifying.add_argument("--reason", required=True)
+    waiving = commands.add_parser("waive")
+    waiving.add_argument("stage")
+    waiving.add_argument("problem")
+    waiving.add_argument("--reason", required=True)
+    integrating = commands.add_parser("integration")
+    integrating.add_argument("stage")
+    integrating.add_argument("tree", type=pathlib.Path)
+    integrating.add_argument("--base-commit")
+    arguments = parser.parse_args()
+    phase_directory = ROOT / state.facts()["phase_workspace"]["path"]
+    directory = registry_directory(phase_directory, arguments.stage)
+    phase_inputs = phase_directory / "passmap/inputs"
+    if arguments.command == "open":
+        generation, _ = state.sealed_authority()
+        base_commit = subprocess.run(["git", "-C", str(state.BACKEND), "rev-parse", "HEAD"], capture_output=True, text=True, check=True).stdout.strip()
+        bindings, path_bindings, kinds = inherited_bindings(directory)
+        registry = open_registry(directory, generation, ROOT / f"work/authority_p{generation}/hot", phase_inputs,
+                                 phase_directory / "stages" / arguments.stage / "contracts", arguments.stage, bindings, path_bindings, base_commit, kinds)
+        print(f"opened {directory}: {len(registry['contracts'])} contracts from seal {generation}; record the integration "
+              "worktree with `integration` once it exists")
+    elif arguments.command == "add":
+        origin = {key: value for key, value in (("stage", arguments.origin_stage), ("phase", arguments.origin_phase),
+                                                ("commit", arguments.origin_commit), ("note", arguments.note)) if value}
+        add(directory, arguments.document, arguments.id, arguments.title, arguments.status, arguments.supersedes, origin or None,
+            arguments.kind, arguments.amends)
+        print(f"registered {arguments.id} in {directory}")
+    elif arguments.command == "amend":
+        amend(directory, arguments.id, arguments.amends)
+        print(f"amended {arguments.id}: {', '.join(arguments.amends) or 'amends nothing'}")
+    elif arguments.command == "absorb":
+        registered, conflicts = absorb(directory, arguments.tree.resolve(), arguments.base, "HEAD", phase_directory.name)
+        print("\n".join([f"ABSORBED {identifier} (review pending)" for identifier in registered] + conflicts) or "nothing to absorb")
+        return 1 if conflicts else 0
+    elif arguments.command == "accept":
+        accept(directory, arguments.id, arguments.status)
+        print(f"accepted {arguments.id}")
+    elif arguments.command == "bind":
+        systems = ([GLOBAL] if arguments.global_binding else [] if arguments.no_code
+                   else arguments.system or [f"{KIND_PREFIX}{name}" for name in arguments.kind])
+        bind(directory, arguments.id, systems, arguments.reason)
+        print(f"bound {arguments.id} to {systems or 'no system'}")
+    elif arguments.command == "kind":
+        define_kind(directory, arguments.kind, arguments.system, arguments.reason)
+        print(f"kind {arguments.kind} reaches {', '.join(sorted(arguments.system))}")
+    elif arguments.command == "bind-path":
+        systems = [] if arguments.no_code else arguments.system
+        bind_path(directory, arguments.pattern, systems, arguments.reason)
+        print(f"bound {arguments.pattern} to {systems or 'no system'}")
+    elif arguments.command == "classify":
+        classify(directory, arguments.document, arguments.reason)
+        print(f"classified {arguments.document}")
+    elif arguments.command == "waive":
+        waive(directory, arguments.problem, arguments.reason)
+        print(f"waived {arguments.problem}")
+    elif arguments.command == "integration":
+        set_integration(directory, arguments.tree.resolve(), arguments.base_commit)
+        print(f"integration worktree of {arguments.stage}: {arguments.tree.resolve()}")
+    elif arguments.command == "check":
+        scanned = [(phase_directory / "stages" / arguments.stage / "contracts", stage_contract_identifier),
+                   (state.BACKEND / "docs" / phase_directory.name, contract_identifier)]
+        scanned += [(tree / "docs" / phase_directory.name, contract_identifier) for tree in arguments.tree]
+        problems = check(directory, scanned) + sweep(directory, sweep_roots(directory, state.BACKEND)
+                                                     + [("docs", tree / "docs") for tree in arguments.tree])
+        print("\n".join(problems) or f"REGISTRY_CHECK PASS {directory}")
+        return 1 if failure_problems(problems) else 0
+    else:
+        registry = load(directory)
+        exported = export(directory, phase_inputs, sealed_document_names(ROOT / f"work/authority_p{registry['base_seal']}/hot"))
+        print("exported: " + ", ".join(exported))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
