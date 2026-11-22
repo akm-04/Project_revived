@@ -1792,6 +1792,7 @@
    ]
   },
   "operator": {},
+  "otarelease": {},
   "petcampaign": {
    "achievement": [
     "*MaxFloorTx"
@@ -5279,6 +5280,7 @@
    ]
   },
   "operator": {},
+  "otarelease": {},
   "petcampaign": {
    "characterasset": [
     "NewCoherentReadScope"
@@ -6599,6 +6601,9 @@
    "cmd/gxb-api/top_floor_postgres.go"
   ],
   "operator": [],
+  "otarelease": [
+   "cmd/gxb-api/main_postgres.go"
+  ],
   "petcampaign": [
    "cmd/gxb-api/petcampaign_postgres.go"
   ],

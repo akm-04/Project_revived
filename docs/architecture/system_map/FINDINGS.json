@@ -282,13 +282,13 @@
   }
  ],
  "client_senders_without_live_handler": {
-  "count": 554,
+  "count": 553,
   "window_sender_mid_count": 138,
-  "non_window_sender_mid_count": 416,
+  "non_window_sender_mid_count": 415,
   "registration_status_counts": {
    "inactive_fallback": 550,
    "no_registration": 1,
-   "unattributed_registration": 3,
+   "unattributed_registration": 2,
    "registration_without_dispatch_handler": 0
   },
   "runtime_reachability": "unknown from source-file references alone",
@@ -5971,19 +5971,6 @@
     "runtime_reachability": "unknown"
    },
    {
-    "mid": 2864,
-    "name": "GET_PLAYER_GROUP_BY_KEY",
-    "registration_status": "unattributed_registration",
-    "senders": [
-     "app/model/SelfPlayer.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/SelfPlayer.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
     "mid": 2880,
     "name": "POLAR_NIGHT_INFO",
     "registration_status": "inactive_fallback",
@@ -8262,7 +8249,7 @@
   {
    "mid": 2,
    "name": "",
-   "system": ""
+   "system": "otarelease"
   },
   {
    "mid": 6,
@@ -8497,7 +8484,7 @@
   {
    "mid": 20480,
    "name": "",
-   "system": ""
+   "system": "otarelease"
   },
   {
    "mid": 32000,
@@ -9016,12 +9003,6 @@
  "tables_without_owner_row": [],
  "unattributed_mids": [
   {
-   "mid": 2,
-   "name": "",
-   "client_files": [],
-   "reason": "no application package resolves from the dispatcher or its wiring"
-  },
-  {
    "mid": 3,
    "name": "QUERY_SERVER_TIME",
    "client_files": [
@@ -9036,20 +9017,6 @@
    "client_files": [
     "app/windows/MainSceneTopWindow.lua"
    ],
-   "reason": "no application package resolves from the dispatcher or its wiring"
-  },
-  {
-   "mid": 2864,
-   "name": "GET_PLAYER_GROUP_BY_KEY",
-   "client_files": [
-    "app/model/SelfPlayer.lua"
-   ],
-   "reason": "no application package resolves from the dispatcher or its wiring"
-  },
-  {
-   "mid": 20480,
-   "name": "",
-   "client_files": [],
    "reason": "no application package resolves from the dispatcher or its wiring"
   }
  ],

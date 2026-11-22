@@ -133,15 +133,46 @@
   },
   {
    "handler": "internal/adapters/stockruntime/prelogin.go",
-   "isolation": [],
+   "isolation": [
+    {
+     "file": "internal/application/otarelease/service.go",
+     "line": 72,
+     "value": "repeatable_read"
+    }
+   ],
    "mid": 2,
-   "read_only": [],
+   "read_only": [
+    {
+     "file": "internal/application/otarelease/service.go",
+     "line": 72,
+     "value": "true"
+    }
+   ],
    "receipt_writes": [],
-   "retry": [],
+   "retry": [
+    {
+     "file": "internal/application/otarelease/service.go",
+     "line": 72,
+     "value": "1"
+    }
+   ],
    "state_writes": [],
-   "transactions": [],
+   "system": "otarelease",
+   "transactions": [
+    {
+     "file": "internal/application/otarelease/service.go",
+     "function": "Service.activeRows",
+     "isolation": "repeatable_read",
+     "line": 72,
+     "read_only": "true",
+     "retry": "1"
+    }
+   ],
    "unbounded_read": [],
-   "writes": "none"
+   "unknown": [
+    "UNRESOLVED read at internal/application/otarelease/service.go:73"
+   ],
+   "writes": "UNKNOWN"
   },
   {
    "handler": "internal/adapters/stockruntime/http_dispatchers.go",
@@ -145617,6 +145648,7 @@
    "receipt_writes": [],
    "retry": [],
    "state_writes": [],
+   "system": "otarelease",
    "transactions": [],
    "unbounded_read": [],
    "writes": "none"
@@ -152719,6 +152751,7 @@
    "receipt_writes": [],
    "retry": [],
    "state_writes": [],
+   "system": "otarelease",
    "transactions": [],
    "unbounded_read": [],
    "writes": "none"
