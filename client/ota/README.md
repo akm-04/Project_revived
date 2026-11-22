@@ -44,7 +44,7 @@ go run client/ota/patches/backend_http_poll/tests/cjson_runner.go \
 ```
 
 A code release built with `lazy_refresh` marks every force=0 stock-catalogue row the ACTIVE assets release did not deliver (never a force=1 or delivered row).
-A file recovered under `res_path` carries the recovered md5/size and is served by `/res`; no catalogue or an empty delivered set refuses the build (OA-8).
+A file recovered under `recovered_res_path` carries that file's md5/size and code-lane `/res` rows resolve there while assets-lane rows resolve under `res_path`; no catalogue or an empty delivered set refuses the build (OA-8, OA-9).
 
 The league room test reuses that runner with both `league_room_stop_*` patch directories:
 

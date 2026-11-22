@@ -17,9 +17,9 @@ import (
 )
 
 type lazyRefreshCase struct {
-	fixture *fixture
-	input   Input
-	resPath string
+	fixture       *fixture
+	input         Input
+	recoveredPath string
 }
 
 func newLazyRefreshCase(t *testing.T, rows []catalogRow, delivered []resSidecarEntry) lazyRefreshCase {
@@ -33,12 +33,12 @@ func newLazyRefreshCase(t *testing.T, rows []catalogRow, delivered []resSidecarE
 		t.Fatal(err)
 	}
 	writeTestFile(t, sidecarPath, encoded)
-	resPath := t.TempDir()
+	recoveredPath := t.TempDir()
 	input := fixture.input("1.631.2")
 	input.LazyRefresh = true
 	input.AssetsSidecar = sidecarPath
-	input.ResPath = resPath
-	return lazyRefreshCase{fixture: fixture, input: input, resPath: resPath}
+	input.RecoveredResPath = recoveredPath
+	return lazyRefreshCase{fixture: fixture, input: input, recoveredPath: recoveredPath}
 }
 
 func readLazyMap(t *testing.T, updatesDirectory string, request domain.BuildRequest) map[string]string {
@@ -96,8 +96,8 @@ func TestLazyRefreshKeepsOnlyUndeliveredCatalogueRows(t *testing.T) {
 		{Path: "web/images/delivered.png", MD5: md5Hex(deliveredContent), Size: int64(len(deliveredContent))},
 	}
 	testCase := newLazyRefreshCase(t, rows, delivered)
-	assetResFile(t, testCase.resPath, "web/images/delivered.png", deliveredContent)
-	assetResFile(t, testCase.resPath, "web/images/recovered.png", recoveredContent)
+	assetResFile(t, testCase.recoveredPath, "web/images/delivered.png", deliveredContent)
+	assetResFile(t, testCase.recoveredPath, "web/images/recovered.png", recoveredContent)
 
 	result := testCase.fixture.buildResult(t, testCase.input)
 	lazyMap := readLazyMap(t, testCase.fixture.updates, result.Request)
@@ -136,7 +136,7 @@ func TestLazyRefreshKeepsOnlyUndeliveredCatalogueRows(t *testing.T) {
 	if _, shipped := sidecar["web/images/delivered.png"]; shipped {
 		t.Fatal("a delivered row reached the code sidecar")
 	}
-	if result.Report.LazyConsidered != 3 || result.Report.LazySupplied != 1 || result.Report.LazyRetained != 2 {
+	if result.Report.LazyConsidered != 3 || result.Report.LazySupplied != 1 || result.Report.LazyRetained != 2 || result.Report.LazyRecovered != 1 {
 		t.Fatalf("report = %+v", result.Report)
 	}
 }
@@ -148,7 +148,7 @@ func TestCodeReleaseServesRecoveredUndeliveredMarker(t *testing.T) {
 	rows := []catalogRow{assetRow("res/web/images/recovered.png", strings.Repeat("c", 32), 4)}
 	delivered := []resSidecarEntry{{Path: "web/images/delivered.png", MD5: strings.Repeat("d", 32), Size: 5}}
 	testCase := newLazyRefreshCase(t, rows, delivered)
-	assetResFile(t, testCase.resPath, "web/images/recovered.png", recoveredContent)
+	assetResFile(t, testCase.recoveredPath, "web/images/recovered.png", recoveredContent)
 
 	result := testCase.fixture.buildResult(t, testCase.input)
 	lazyValue := lazyValueOf(t, readLazyMap(t, testCase.fixture.updates, result.Request), "__lazy__res___web___images___recovered.png")
@@ -171,7 +171,7 @@ func TestCodeReleaseServesRecoveredUndeliveredMarker(t *testing.T) {
 		Manifest:     result.Request.Manifest,
 	}
 	settings := domain.DefaultSettings()
-	settings.ResPath = testCase.resPath
+	settings.RecoveredResPath = testCase.recoveredPath
 	serving := &apprelease.Serving{
 		Load:     func(context.Context) ([]domain.RawRelease, error) { return []domain.RawRelease{raw}, nil },
 		Root:     filepath.Dir(filepath.Dir(testCase.fixture.updates)),
@@ -240,6 +240,62 @@ func TestLazyRefreshRefusesUnusableDelivery(t *testing.T) {
 			t.Fatalf("error = %v, want %v", err, ErrCatalogInvalid)
 		}
 	})
+}
+
+// TestLazyRefreshResolvesRecoveredOnlyUnderRecoveredResPath is OA-9 item 1: a
+// file present only under res_path is not recovered, so its marker keeps the
+// catalogue md5 and the report counts no recovered row.
+func TestLazyRefreshResolvesRecoveredOnlyUnderRecoveredResPath(t *testing.T) {
+	catalogMD5 := strings.Repeat("a", 32)
+	rows := []catalogRow{assetRow("res/web/images/original.png", catalogMD5, 3)}
+	delivered := []resSidecarEntry{{Path: "web/images/delivered.png", MD5: strings.Repeat("d", 32), Size: 5}}
+	testCase := newLazyRefreshCase(t, rows, delivered)
+	testCase.input.ResPath = t.TempDir()
+	assetResFile(t, testCase.input.ResPath, "web/images/original.png", []byte("res_path bytes with another md5"))
+
+	result := testCase.fixture.buildResult(t, testCase.input)
+	if result.Report.LazyRecovered != 0 {
+		t.Fatalf("a res_path file counted as recovered: %+v", result.Report)
+	}
+	lazyValue := lazyValueOf(t, readLazyMap(t, testCase.fixture.updates, result.Request), "__lazy__res___web___images___original.png")
+	if lazyValue.MD5 != catalogMD5 || lazyValue.Size != 3 {
+		t.Fatalf("lazy value = %+v, want the catalogue row", lazyValue)
+	}
+	sidecar := readCodeSidecar(t, testCase.fixture.updates, result.Request)
+	if sidecar["web/images/original.png"].MD5 != catalogMD5 {
+		t.Fatalf("code sidecar row = %+v", sidecar["web/images/original.png"])
+	}
+}
+
+// TestLazyRefreshWithoutRecoveredResPathBuildsWithZeroRecovered is OA-9 item 3:
+// an empty recovered_res_path still builds and reports recovered 0.
+func TestLazyRefreshWithoutRecoveredResPathBuildsWithZeroRecovered(t *testing.T) {
+	catalogMD5 := strings.Repeat("b", 32)
+	rows := []catalogRow{assetRow("res/web/images/missing.png", catalogMD5, 7)}
+	delivered := []resSidecarEntry{{Path: "web/images/delivered.png", MD5: strings.Repeat("d", 32), Size: 5}}
+	testCase := newLazyRefreshCase(t, rows, delivered)
+	testCase.input.RecoveredResPath = ""
+
+	result := testCase.fixture.buildResult(t, testCase.input)
+	if result.Report.LazyRecovered != 0 || result.Report.LazyRetained != 1 {
+		t.Fatalf("report = %+v", result.Report)
+	}
+	lazyValue := lazyValueOf(t, readLazyMap(t, testCase.fixture.updates, result.Request), "__lazy__res___web___images___missing.png")
+	if lazyValue.MD5 != catalogMD5 || lazyValue.Size != 7 {
+		t.Fatalf("lazy value = %+v", lazyValue)
+	}
+}
+
+// TestLazyRefreshRefusesMissingRecoveredResPath is OA-9 item 3: a set but
+// unusable recovered_res_path is a typed refusal, not a silent empty recovery.
+func TestLazyRefreshRefusesMissingRecoveredResPath(t *testing.T) {
+	rows := []catalogRow{assetRow("res/web/images/missing.png", strings.Repeat("b", 32), 7)}
+	delivered := []resSidecarEntry{{Path: "web/images/delivered.png", MD5: strings.Repeat("d", 32), Size: 5}}
+	testCase := newLazyRefreshCase(t, rows, delivered)
+	testCase.input.RecoveredResPath = filepath.Join(t.TempDir(), "missing")
+	if _, err := Build(context.Background(), testCase.input); !errors.Is(err, ErrRecoveredResPathMissing) {
+		t.Fatalf("error = %v, want %v", err, ErrRecoveredResPathMissing)
+	}
 }
 
 // TestLazyRefreshReadsStockCatalog proves the agent's stock_catalog reaches the

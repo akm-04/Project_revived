@@ -373,10 +373,12 @@ func TestServingNewestSidecarWinsForOnePath(t *testing.T) {
 	writeSidecar(codeRow, resAsset{Path: "res/web/a.png", MD5: newMD5, Size: int64(len(content))})
 
 	rows := []domain.RawRelease{assetsRow, codeRow}
+	settings := testSettings(domain.LazyFetchOn, res)
+	settings.RecoveredResPath = res
 	serving := &Serving{
 		Load:     func(context.Context) ([]domain.RawRelease, error) { return rows, nil },
 		Root:     root,
-		Settings: NewSettingsValue(testSettings(domain.LazyFetchOn, res)),
+		Settings: NewSettingsValue(settings),
 	}
 	if err := serving.Refresh(context.Background()); err != nil {
 		t.Fatal(err)
@@ -430,8 +432,123 @@ func TestServingOpenResourceRejectsSymlinkEscape(t *testing.T) {
 	}
 }
 
+// TestServingSplitsCodeAndAssetRoots is OA-9 item 2: a code release's /res row
+// resolves under recovered_res_path, an assets release's row under res_path, and
+// neither resolves or escapes through the other root.
+func TestServingSplitsCodeAndAssetRoots(t *testing.T) {
+	root := t.TempDir()
+	resPath := t.TempDir()
+	recoveredPath := t.TempDir()
+	write := func(directory, relative string, content []byte) string {
+		t.Helper()
+		full := filepath.Join(directory, filepath.FromSlash(relative))
+		if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(full, content, 0o644); err != nil {
+			t.Fatal(err)
+		}
+		return full
+	}
+	assetContent := []byte("asset bytes")
+	recoveredContent := []byte("recovered bytes")
+	resOnlyContent := []byte("res_path only")
+	write(resPath, "res/web/asset.png", assetContent)
+	write(recoveredPath, "res/web/recovered.png", recoveredContent)
+	write(resPath, "res/web/codeonly.png", resOnlyContent)
+
+	secret := []byte("outside every root")
+	outsidePath := write(t.TempDir(), "secret.png", secret)
+	link := func(directory, relative, target string) {
+		t.Helper()
+		full := filepath.Join(directory, filepath.FromSlash(relative))
+		if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.Symlink(target, full); err != nil {
+			t.Fatal(err)
+		}
+	}
+	link(resPath, "res/web/asset-escape.png", outsidePath)
+	link(recoveredPath, "res/web/code-escape.png", outsidePath)
+
+	assetsRow := servingRow(t, "1.631.1", domain.LaneAssets, 12, nil)
+	codeRow := servingRow(t, "1.631.2", domain.LaneCode, 12, nil)
+	writeSidecar := func(release domain.RawRelease, entries []resAsset) {
+		t.Helper()
+		directory := filepath.Join(root, "updates", release.Lane)
+		if err := os.MkdirAll(directory, 0o755); err != nil {
+			t.Fatal(err)
+		}
+		encoded, err := json.Marshal(resSidecar{Entries: entries})
+		if err != nil {
+			t.Fatal(err)
+		}
+		base := strings.TrimSuffix(volumeName(release.Version), ".001")
+		if err := os.WriteFile(filepath.Join(directory, base+".res.json"), encoded, 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	writeSidecar(assetsRow, []resAsset{
+		{Path: "res/web/asset.png", MD5: md5Hex(assetContent), Size: int64(len(assetContent))},
+		{Path: "res/web/asset-escape.png", MD5: md5Hex(secret), Size: int64(len(secret))},
+	})
+	writeSidecar(codeRow, []resAsset{
+		{Path: "res/web/recovered.png", MD5: md5Hex(recoveredContent), Size: int64(len(recoveredContent))},
+		{Path: "res/web/codeonly.png", MD5: md5Hex(resOnlyContent), Size: int64(len(resOnlyContent))},
+		{Path: "res/web/code-escape.png", MD5: md5Hex(secret), Size: int64(len(secret))},
+	})
+	settings := domain.DefaultSettings()
+	settings.LazyFetch = domain.LazyFetchOn
+	settings.ResPath = resPath
+	settings.RecoveredResPath = recoveredPath
+	rows := []domain.RawRelease{assetsRow, codeRow}
+	serving := &Serving{
+		Load:     func(context.Context) ([]domain.RawRelease, error) { return rows, nil },
+		Root:     root,
+		Settings: NewSettingsValue(settings),
+	}
+	if err := serving.Refresh(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	served := func(key string) (string, bool) {
+		t.Helper()
+		file, _, _, found, err := serving.OpenResource(context.Background(), key)
+		if err != nil {
+			t.Fatalf("%s: %v", key, err)
+		}
+		if !found {
+			return "", false
+		}
+		defer file.Close()
+		content, err := io.ReadAll(file)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return string(content), true
+	}
+	if content, found := served("asset.png." + md5Hex(assetContent)); !found || content != string(assetContent) {
+		t.Fatalf("the assets row was not served from res_path: %q found=%v", content, found)
+	}
+	if content, found := served("recovered.png." + md5Hex(recoveredContent)); !found || content != string(recoveredContent) {
+		t.Fatalf("the code row was not served from recovered_res_path: %q found=%v", content, found)
+	}
+	if _, found := served("codeonly.png." + md5Hex(resOnlyContent)); found {
+		t.Fatal("a code row resolved under res_path")
+	}
+	if _, found := served("asset-escape.png." + md5Hex(secret)); found {
+		t.Fatal("an assets row escaped res_path")
+	}
+	if _, found := served("code-escape.png." + md5Hex(secret)); found {
+		t.Fatal("a code row escaped recovered_res_path")
+	}
+}
+
 func TestServingCovers(t *testing.T) {
 	fixture := newServingFixture(t, servingRow(t, "1.631.2", domain.LaneCode, 12, []string{"src_64/app/a.lua"}), []byte("asset"))
+	settings := testSettings(domain.LazyFetchOn, fixture.res)
+	settings.RecoveredResPath = fixture.res
+	fixture.serving.Settings = NewSettingsValue(settings)
 	covered := domain.CoversRequest{
 		ClientPaths:    []string{"src_64/app/a.lua"},
 		LazyAssets:     []domain.LazyAsset{{Path: "res/web/a.png", MD5: md5Hex(fixture.asset)}},

@@ -186,9 +186,10 @@ func (build Build) Start(ctx context.Context, request BuildRequest) (Operation, 
 				return nil, Refuse(CodeBuildConfig, "settings.json is unreadable: "+err.Error())
 			}
 			input.VolumeByteLimit = settings.VolumeLimitBytes()
-			if lane == domain.LaneAssets || request.LazyRefresh {
+			if lane == domain.LaneAssets {
 				input.ResPath = settings.ResPath
 			}
+			input.RecoveredResPath = settings.RecoveredResPath
 			result, err := otabuild.Build(ctx, input)
 			if err != nil {
 				return nil, buildRefusal(err)
@@ -246,6 +247,7 @@ var buildRefusalCodes = []struct {
 	{otabuild.ErrTargetExists, CodeBuildTargetExists},
 	{otabuild.ErrCatalogInvalid, CodeBuildCatalogInvalid},
 	{otabuild.ErrResPathMissing, CodeBuildResPathMissing},
+	{otabuild.ErrRecoveredResPathMissing, CodeBuildRecoveredResPathMissing},
 	{otabuild.ErrNoExactAssets, CodeBuildNoExactAssets},
 	{otabuild.ErrAssetCollision, CodeBuildAssetCollision},
 }

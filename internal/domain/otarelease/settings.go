@@ -49,6 +49,7 @@ const (
 type Settings struct {
 	LazyFetch               LazyFetch `json:"lazy_fetch"`
 	ResPath                 string    `json:"res_path"`
+	RecoveredResPath        string    `json:"recovered_res_path"`
 	DownloadBaseSeconds     int       `json:"download_base_seconds"`
 	DownloadMinKiBPerSecond int       `json:"download_min_kib_per_second"`
 	CacheMaxAgeSeconds      int       `json:"cache_max_age_seconds"`
@@ -62,6 +63,7 @@ func DefaultSettings() Settings {
 	return Settings{
 		LazyFetch:               LazyFetchAuto,
 		ResPath:                 "",
+		RecoveredResPath:        "",
 		DownloadBaseSeconds:     DefaultDownloadBaseSeconds,
 		DownloadMinKiBPerSecond: DefaultDownloadMinKiBPerSecond,
 		CacheMaxAgeSeconds:      DefaultCacheMaxAgeSeconds,
@@ -91,8 +93,9 @@ func ParseSettings(data []byte) (Settings, error) {
 	return settings, nil
 }
 
-// Validate accepts the values the plan defines; a relative res_path would
-// resolve against the process working directory, so it is refused.
+// Validate accepts the values the plan defines; a relative res_path or
+// recovered_res_path would resolve against the process working directory, so it
+// is refused.
 func (s Settings) Validate() error {
 	switch s.LazyFetch {
 	case LazyFetchAuto, LazyFetchOn, LazyFetchOff:
@@ -101,6 +104,9 @@ func (s Settings) Validate() error {
 	}
 	if s.ResPath != "" && !filepath.IsAbs(s.ResPath) {
 		return fmt.Errorf("%w: res_path %q is not absolute", ErrInvalidSettings, s.ResPath)
+	}
+	if s.RecoveredResPath != "" && !filepath.IsAbs(s.RecoveredResPath) {
+		return fmt.Errorf("%w: recovered_res_path %q is not absolute", ErrInvalidSettings, s.RecoveredResPath)
 	}
 	for _, bound := range []struct {
 		name             string

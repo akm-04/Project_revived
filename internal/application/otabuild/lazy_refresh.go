@@ -19,15 +19,16 @@ import (
 // lane's own rule (buildLazyMap): the stock catalogue rows are the input and the
 // ACTIVE assets release's delivered paths are `supplied`. force=1 and delivered
 // rows get no marker; every other force=0 row keeps one. A row whose file is
-// recovered under res_path carries the recovered md5 and size and is added to
-// the code release's res sidecar, so /res serves it at that md5 (OA-8).
-func lazyRefreshPackage(resPath, sidecarPath string, catalogBaseline stockBaseline, version string) ([]byte, []resSidecarEntry, Report, error) {
+// recovered under recovered_res_path carries that file's md5 and size and is
+// added to the code release's res sidecar, so /res serves it at that md5
+// (OA-8, OA-9).
+func lazyRefreshPackage(recoveredResPath, sidecarPath string, catalogBaseline stockBaseline, version string) ([]byte, []resSidecarEntry, Report, error) {
 	report := Report{Lane: string(otarelease.LaneCode), Version: version, MissingSample: []string{}, MismatchSample: []string{}}
 	rows, err := readCatalog(catalogBaseline)
 	if err != nil {
 		return nil, nil, report, err
 	}
-	root, err := resolveResRoot(resPath)
+	root, err := resolveRecoveredResRoot(recoveredResPath)
 	if err != nil {
 		return nil, nil, report, err
 	}
@@ -42,7 +43,7 @@ func lazyRefreshPackage(resPath, sidecarPath string, catalogBaseline stockBaseli
 	if len(supplied) == 0 {
 		return nil, nil, report, fmt.Errorf("%w: the active assets release delivered no file", ErrNoExactAssets)
 	}
-	rows, sidecar, err := recoveredLazyRows(rows, supplied, root)
+	rows, sidecar, recovered, err := recoveredLazyRows(rows, supplied, root)
 	if err != nil {
 		return nil, nil, report, err
 	}
@@ -59,6 +60,7 @@ func lazyRefreshPackage(resPath, sidecarPath string, catalogBaseline stockBaseli
 	report.LazyConsidered = summary.considered
 	report.LazySupplied = summary.supplied
 	report.LazyRetained = summary.retained
+	report.LazyRecovered = recovered
 	lazyBytes, err := marshalLazyFile(lazyMap)
 	if err != nil {
 		return nil, nil, report, err
@@ -81,14 +83,28 @@ func deliveredCataloguePaths(entries []resSidecarEntry) (map[string]struct{}, er
 	return supplied, nil
 }
 
+// resolveRecoveredResRoot resolves the optional recovery folder; empty means the
+// build has no recovered files, a set but unusable folder is refused (OA-9).
+func resolveRecoveredResRoot(recoveredResPath string) (resRoot, error) {
+	if recoveredResPath == "" {
+		return resRoot{}, nil
+	}
+	root, err := resolveResRoot(recoveredResPath)
+	if err != nil {
+		return resRoot{}, fmt.Errorf("%w: %v", ErrRecoveredResPathMissing, err)
+	}
+	return root, nil
+}
+
 // recoveredLazyRows replaces a marker row's catalogue md5 and size with the
-// file found under res_path and returns the sidecar rows for every marker. An
-// unrecovered row keeps its catalogue row and points at the path the recovery
-// lane will supply (res/web/... -> web/...).
-func recoveredLazyRows(rows []catalogRow, supplied map[string]struct{}, root resRoot) ([]catalogRow, []resSidecarEntry, error) {
+// file found under recovered_res_path and returns the sidecar rows for every
+// marker. An unrecovered row keeps its catalogue row and points at the path the
+// recovery lane will supply (res/web/... -> web/...).
+func recoveredLazyRows(rows []catalogRow, supplied map[string]struct{}, root resRoot) ([]catalogRow, []resSidecarEntry, int, error) {
 	adjusted := make([]catalogRow, len(rows))
 	copy(adjusted, rows)
 	sidecar := make([]resSidecarEntry, 0, len(rows))
+	recovered := 0
 	for index := range adjusted {
 		row := &adjusted[index]
 		if row.Force == 1 {
@@ -103,17 +119,18 @@ func recoveredLazyRows(rows []catalogRow, supplied map[string]struct{}, root res
 		}
 		relative, size, md5Text, found, err := recoveredFile(root, catalogPath)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, 0, err
 		}
 		if found {
 			row.MD5 = md5Text
 			row.Size = size
+			recovered++
 			sidecar = append(sidecar, resSidecarEntry{Path: relative, MD5: md5Text, Size: size})
 			continue
 		}
 		sidecar = append(sidecar, resSidecarEntry{Path: strings.TrimPrefix(catalogPath, "res/"), MD5: strings.ToLower(row.MD5), Size: row.Size})
 	}
-	return adjusted, sidecar, nil
+	return adjusted, sidecar, recovered, nil
 }
 
 // checkDeliveredUnmarked fails closed when the map and delivered set overlap.
@@ -147,8 +164,11 @@ func readResourceSidecar(path string) ([]resSidecarEntry, error) {
 
 // recoveredFile finds the current file for a catalogue row through the same
 // candidate forms the assets lane collects, and returns its path relative to
-// res_path plus its current size and md5.
+// recovered_res_path plus its current size and md5.
 func recoveredFile(root resRoot, catalogPath string) (string, int64, string, bool, error) {
+	if root.lexical == "" {
+		return "", 0, "", false, nil
+	}
 	for _, candidate := range assetCandidates(root.lexical, catalogPath) {
 		info, err := os.Stat(candidate)
 		if err != nil || !info.Mode().IsRegular() {
