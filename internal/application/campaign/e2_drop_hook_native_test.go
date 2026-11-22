@@ -59,10 +59,12 @@ func e2Pool(t *testing.T) *pg.Pool {
 	return pool
 }
 
+// e2Coverage is the real pure Covers decision with the lazy asset present, so
+// the shipped 1008 requirement set is exercised instead of bypassed.
 type e2Coverage struct{}
 
-func (e2Coverage) Covers(context.Context, otadomain.CoversRequest) (otadomain.CoversResult, error) {
-	return otadomain.CoversResult{Status: otadomain.CoversCovered}, nil
+func (e2Coverage) Covers(_ context.Context, request otadomain.CoversRequest) (otadomain.CoversResult, error) {
+	return otadomain.EvaluateCovers(request, nil, nil, func(otadomain.LazyAsset) bool { return true }), nil
 }
 
 func e2Bus(t *testing.T, pool *pg.Pool) operator.Bus {
@@ -106,7 +108,12 @@ func e2Execute(t *testing.T, bus operator.Bus, command operator.Command) operato
 
 func e2Schedule(t *testing.T, bus operator.Bus, activityID int64, start time.Time) appevents.OccurrenceView {
 	t.Helper()
-	payload := map[string]any{"activity_id": activityID, "logical_server_ids": []int64{1}, "duration": "3d", "start": start.UTC().Format(time.RFC3339)}
+	return e2ScheduleOnServer(t, bus, activityID, 1, start)
+}
+
+func e2ScheduleOnServer(t *testing.T, bus operator.Bus, activityID, serverID int64, start time.Time) appevents.OccurrenceView {
+	t.Helper()
+	payload := map[string]any{"activity_id": activityID, "logical_server_ids": []int64{serverID}, "duration": "3d", "start": start.UTC().Format(time.RFC3339)}
 	outcome := e2Execute(t, bus, e2Command(t, "events.schedule", nil, payload))
 	var result struct {
 		Occurrences []appevents.OccurrenceView `json:"occurrences"`
@@ -178,6 +185,58 @@ func (combatant *e2Combat) AttestSummaryTx(context.Context, tx.Tx, combat.Summar
 
 func (combatant *e2Combat) BorrowedTx(context.Context, tx.Tx, cd.Locator) (bool, error) {
 	return false, nil
+}
+
+// e2FightCombat returns the drawn package so Fight can freeze it; e2Combat
+// exists to observe a direct start instead.
+type e2FightCombat struct {
+	Combat
+	seed [32]byte
+}
+
+func (combatant *e2FightCombat) StartTx(_ context.Context, _ tx.Tx, _ ca.CoherentReadScope, request combat.StartRequest) (combat.Started, error) {
+	value, err := request.Package(cd.NewStream(combatant.seed))
+	if err != nil {
+		return combat.Started{}, err
+	}
+	canonical, err := cd.CanonicalJSON(value)
+	if err != nil {
+		return combat.Started{}, err
+	}
+	return combat.Started{Package: &cd.StartPackage{Canonical: canonical}}, nil
+}
+
+func (combatant *e2FightCombat) AttestSummaryTx(context.Context, tx.Tx, combat.SummaryRequest) (combat.SummaryAttested, error) {
+	return combat.SummaryAttested{}, nil
+}
+
+func (combatant *e2FightCombat) BorrowedTx(context.Context, tx.Tx, cd.Locator) (bool, error) {
+	return false, nil
+}
+
+type e2BattleCounts struct{}
+
+func (e2BattleCounts) ObserveBattleTx(context.Context, tx.Tx, identity.PlayerID, []int64, time.Time) error {
+	return nil
+}
+
+// e2GrantRecorder keeps the grant lines Result settles so the test can compare
+// them with the 113 preview.
+type e2GrantRecorder struct{ lines []grant.Line }
+
+func (recorder *e2GrantRecorder) SettleGrantTx(_ context.Context, _ tx.Tx, _ identity.ActorContext, plan grant.Plan, _ operation.Context, _ i5.GrantTxOptions) (i5.GrantResult, error) {
+	recorder.lines = append(recorder.lines, plan.Lines...)
+	return i5.GrantResult{}, nil
+}
+
+func e2StackCounts(lines []grant.Line) map[int64]int64 {
+	counts := map[int64]int64{}
+	for _, line := range lines {
+		if line.Kind == grant.StackItem {
+			counts[line.ItemID] += line.Amount
+		}
+	}
+	return counts
 }
 
 type e2Fence struct{}
@@ -387,6 +446,11 @@ func e2SeedChain(t *testing.T, pool *pg.Pool, catalog d.Catalog, playerID identi
 
 func e2Player(t *testing.T, pool *pg.Pool, playerID identity.PlayerID) {
 	t.Helper()
+	e2PlayerOnServer(t, pool, playerID, 1)
+}
+
+func e2PlayerOnServer(t *testing.T, pool *pg.Pool, playerID identity.PlayerID, serverID int64) {
+	t.Helper()
 	account, err := ids.NewUUID()
 	if err != nil {
 		t.Fatal(err)
@@ -395,7 +459,7 @@ func e2Player(t *testing.T, pool *pg.Pool, playerID identity.PlayerID) {
 	if _, err = pool.Raw().Exec(ctx, `INSERT INTO accounts(account_id,account_uid,status,created_at)VALUES($1,$2,'ACTIVE',now())`, account.String(), account.String()); err != nil {
 		t.Fatal(err)
 	}
-	if _, err = pool.Raw().Exec(ctx, `INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version)VALUES($1,$2,1,now(),'i11a-e2')`, int64(playerID), account.String()); err != nil {
+	if _, err = pool.Raw().Exec(ctx, `INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version)VALUES($1,$2,$3,now(),'i11a-e2')`, int64(playerID), account.String(), serverID); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -543,6 +607,119 @@ func TestCampaignDropMultiplier1008Native(t *testing.T) {
 	e2EndNow(t, bus, occurrence1008)
 	ended := e2Start(t, pool, mode, actor, currentView, normal, repeat, time.Now().UTC().Add(time.Second))
 	e2AssertScaled(t, e2ItemCounts(baselineRepeat), e2ItemCounts(ended), normalKinds, nil)
+}
+
+func e2TimedOperation(at time.Time, marker byte) operation.Context {
+	id := ids.UUID{}
+	id[0], id[15] = 7, marker
+	return operation.Context{ID: id, StartedAt: at, EntropySeed: [32]byte{marker}}
+}
+
+func e2FightOnce(t *testing.T, mode Mode, actor identity.ActorContext, request Fight, at time.Time, marker byte) map[int64]int64 {
+	t.Helper()
+	out, err := mode.Fight(context.Background(), actor, request, e2TimedOperation(at, marker))
+	if err != nil {
+		t.Fatalf("113: %v", err)
+	}
+	items, ok := out["items"].([]d.Item)
+	if !ok || len(items) == 0 {
+		t.Fatalf("113 items = %T %+v", out["items"], out["items"])
+	}
+	return e2ItemCounts(items)
+}
+
+func e2SettleOnce(t *testing.T, mode Mode, actor identity.ActorContext, request Result, at time.Time) {
+	t.Helper()
+	settled, err := mode.Result(context.Background(), actor, request, e2TimedOperation(at, 8))
+	if err != nil {
+		t.Fatalf("114: %v", err)
+	}
+	if settled.Body == nil {
+		t.Fatalf("114 settled no body")
+	}
+}
+
+// TestCampaignDropMultiplier1008FightResultNative drives the real 113 -> 114
+// flow under an active 1008 hook: the 114 grant lines must equal the 113
+// preview, and a replayed 113 must return the frozen counts.
+func TestCampaignDropMultiplier1008FightResultNative(t *testing.T) {
+	pool := e2Pool(t)
+	ctx := context.Background()
+	bus := e2Bus(t, pool)
+	raw, err := os.ReadFile("../../../content/events/definitions/1008.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	e2Execute(t, bus, e2Command(t, "events.definition.deploy", nil, json.RawMessage(raw)))
+
+	store := contentstore.Store{}
+	revision, err := store.ActiveRevision(ctx, pool)
+	if err != nil {
+		t.Fatal(err)
+	}
+	catalog, err := store.CampaignCatalogTx(ctx, pool, revision)
+	if err != nil {
+		t.Fatal(err)
+	}
+	normal, found := catalog.Node(e2NormalNode)
+	if !found || normal.Type != d.Normal {
+		t.Fatalf("normal node: %+v %v", normal, found)
+	}
+	e2PlayerOnServer(t, pool, 200003, 2)
+	e2SeedChain(t, pool, catalog, 200003, normal.ID)
+	at := time.Now().UTC()
+	e2ScheduleOnServer(t, bus, 1008, 2, at.Add(-time.Minute))
+
+	grants := &e2GrantRecorder{}
+	mode := Mode{
+		Timed:        gen.TimedRunner{Binder: gen.Binder{Time: pg.AuthoritativeTime{Queryer: pool}}, Runner: tx.Runner{DB: pool}},
+		Fresh:        pool,
+		Store:        campaignstore.Store{},
+		Content:      store,
+		Drops:        e2DropHooks{Events: appevents.Service{Store: eventstore.Store{}}},
+		Fence:        e2Fence{},
+		Functions:    e2Functions{},
+		Directory:    e2Directory{},
+		Heroes:       e2Heroes{},
+		HeroExp:      e2HeroExp{},
+		Awakening:    e2Awakening{},
+		Combat:       &e2FightCombat{seed: [32]byte{7}},
+		Energy:       e2Energy{},
+		Grants:       grants,
+		Stages:       e2Stages{},
+		Facts:        e2Facts{},
+		Receipts:     e2Receipts{},
+		ReceiptRead:  e2ReceiptRead{},
+		BattleCounts: e2BattleCounts{},
+	}
+	actor := identity.ActorContext{PlayerID: 200003, LogicalServerID: 2}
+	request := Fight{CampaignID: normal.ID, Type: normal.Type, Formation: []int64{100001}}
+	preview := e2FightOnce(t, mode, actor, request, at, 1)
+	replayed := e2FightOnce(t, mode, actor, request, at.Add(time.Second), 2)
+	if !equalCounts(preview, replayed) {
+		t.Fatalf("replayed 113 %v != first 113 %v", replayed, preview)
+	}
+
+	kinds := e2ItemKinds(t, pool, store, revision, catalog, normal.RepeatBox)
+	multiplied := 0
+	for itemID, count := range preview {
+		if !slices.Contains([]int64{1, 2, 5, 6}, kinds[itemID]) {
+			continue
+		}
+		if count%2 != 0 {
+			t.Fatalf("item %d kind %d count %d is not doubled by the active 1008 hook", itemID, kinds[itemID], count)
+		}
+		multiplied++
+	}
+	if multiplied == 0 {
+		t.Fatal("the active 1008 hook multiplied no preview item")
+	}
+
+	e2SettleOnce(t, mode, actor, Result{CampaignID: normal.ID, Type: normal.Type, Star: 3, Formation: request.Formation}, at.Add(2*time.Second))
+	granted := e2StackCounts(grants.lines)
+	if !equalCounts(preview, granted) {
+		t.Fatalf("114 granted %v != 113 preview %v", granted, preview)
+	}
 }
 
 func equalCounts(left, right map[int64]int64) bool {

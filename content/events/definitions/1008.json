@@ -11,7 +11,12 @@
     }
   ],
   "client_requirements": {
-    "client_paths": ["windows/activities/1008/1008.csb"]
+    "lazy_assets": [
+      {
+        "path": "res/web/windows/activities/1008/1008.csb",
+        "md5": "67433bf1269e1fb05b36471e3cc142fc"
+      }
+    ]
   },
   "default_days": 3
 }
