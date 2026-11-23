@@ -77,6 +77,7 @@ const (
 	CodeBackupKindInvalid     = "AGENT_BACKUP_KIND_INVALID"
 	CodeBackupUnknown         = "AGENT_BACKUP_UNKNOWN"
 	CodeBackupDamaged         = "AGENT_BACKUP_DAMAGED"
+	CodeBackupNameInvalid     = "AGENT_BACKUP_NAME_INVALID"
 	CodeBackupMigrationTooNew = "AGENT_BACKUP_MIGRATION_TOO_NEW"
 	CodeBackupDSNMissing      = "AGENT_BACKUP_DSN_MISSING"
 	CodeBackupDSNInvalid      = "AGENT_BACKUP_DSN_INVALID"

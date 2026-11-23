@@ -75,6 +75,47 @@ func TestDumpAndQueryPassTheirArguments(t *testing.T) {
 	}
 }
 
+func TestMigrateUsesTheGooseRunner(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("shell fixtures are POSIX only")
+	}
+	directory := t.TempDir()
+	record := filepath.Join(directory, "args")
+	for _, name := range []string{DumpExecutable, RestoreExecutable, SQLExecutable} {
+		writeExecutable(t, directory, name, "exit 0")
+	}
+	writeExecutable(t, directory, GooseExecutable, `printf '%s\n' "$@" > `+record)
+	tools, err := Resolve(directory)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if tools.GoosePath != filepath.Join(directory, GooseExecutable) {
+		t.Fatalf("goose path = %q", tools.GoosePath)
+	}
+	dsn := "postgres://postgres@/gxb_bk?host=127.0.0.1&port=55853"
+	if err := tools.Migrate(context.Background(), dsn, "/srv/migrations"); err != nil {
+		t.Fatal(err)
+	}
+	recorded, err := os.ReadFile(record)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, wanted := range []string{"-dir", "/srv/migrations", "postgres", dsn, "up"} {
+		if !strings.Contains(string(recorded), wanted) {
+			t.Fatalf("migrate arguments = %s", recorded)
+		}
+	}
+}
+
+func TestMigrateRefusesWithoutARunnerOrFolder(t *testing.T) {
+	if err := (Tools{}).Migrate(context.Background(), "postgres://postgres@/gxb_bk", "/srv/migrations"); err == nil {
+		t.Fatal("a missing goose runner was accepted")
+	}
+	if err := (Tools{GoosePath: "goose"}).Migrate(context.Background(), "postgres://postgres@/gxb_bk", ""); err == nil {
+		t.Fatal("a missing migrations folder was accepted")
+	}
+}
+
 func TestToolFailureCarriesStderr(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("shell fixtures are POSIX only")

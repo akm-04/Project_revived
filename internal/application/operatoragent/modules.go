@@ -92,13 +92,22 @@ func BackupModule() operator.Module {
 		Title:      "Backups",
 		Role:       operator.RoleRoot,
 		LogChannel: "backup",
-		Screen:     operator.Screen{Tab: "Backups", Columns: []string{"id", "kind", "created_at", "size", "migration", "damaged"}},
+		Screen:     operator.Screen{Tab: "Backups", Columns: []string{"id", "name", "pinned", "kind", "created_at", "size", "migration", "damaged"}},
 		Commands: []operator.CommandSpec{
 			{Name: "backup.snapshot", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Take a database snapshot.", Fields: []operator.Field{
 				operator.NewField("kind", operator.FieldString, false, "manual, safety, pre-update or pre-delete").WithEnum("manual", "safety", "pre-update", "pre-delete").WithDefault("manual"),
+				operator.NewField("name", operator.FieldString, false, "snapshot name, 1-80 printable characters"),
+				operator.NewField("pin", operator.FieldBool, false, "keep this snapshot: pinned snapshots are never pruned"),
 			}},
 			{Name: "backup.list", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "List snapshots newest first, with the newest age and damage state."},
-			{Name: "backup.prune", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Delete all but the newest backup_keep snapshots."},
+			{Name: "backup.prune", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Delete all but the newest backup_keep snapshots; pinned snapshots stay."},
+			{Name: "backup.pin", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Name a snapshot and keep it out of every prune.", Fields: []operator.Field{
+				operator.NewField("id", operator.FieldString, true, "snapshot id from backup.list"),
+				operator.NewField("name", operator.FieldString, true, "name, 1-80 printable characters"),
+			}},
+			{Name: "backup.unpin", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Return a pinned snapshot to normal pruning.", Fields: []operator.Field{
+				operator.NewField("id", operator.FieldString, true, "snapshot id from backup.list"),
+			}},
 			{Name: "backup.restore", Class: operator.ClassMaintenance, Route: operator.RouteAgent, Help: "Restore a snapshot with a safety snapshot and a rename swap.", Fields: []operator.Field{
 				operator.NewField("id", operator.FieldString, true, "snapshot id from backup.list"),
 			}},

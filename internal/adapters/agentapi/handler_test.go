@@ -8,6 +8,8 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"testing"
@@ -664,6 +666,32 @@ func TestBackupRoutesUseTheAgentService(t *testing.T) {
 	restoreBody := serveAgent(handler, http.MethodPost, "/agent/v1/backup/restore", session, `{"reason":"r"}`)
 	if restoreBody.Code != http.StatusConflict || refusalCodeOf(t, restoreBody) != operatoragent.CodeBodyInvalid {
 		t.Fatalf("restore without id: %d %s", restoreBody.Code, restoreBody.Body)
+	}
+
+	snapshotID := "20260101T000000.000000000Z-manual"
+	manifest := operatoragent.BackupManifest{ID: snapshotID, Kind: operatoragent.BackupKindManual, CreatedAt: time.Now().UTC(), Database: "gxb_bk", Migration: 183}
+	encoded, err := json.Marshal(manifest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(directory, snapshotID+".json"), encoded, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	pinned := serveAgent(handler, http.MethodPost, "/agent/v1/backup/pin", session, `{"id":"`+snapshotID+`","name":"keep me"}`)
+	if pinned.Code != http.StatusOK || !strings.Contains(pinned.Body.String(), `"pinned":true`) {
+		t.Fatalf("pin: %d %s", pinned.Code, pinned.Body)
+	}
+	unpinned := serveAgent(handler, http.MethodPost, "/agent/v1/backup/unpin", session, `{"id":"`+snapshotID+`"}`)
+	if unpinned.Code != http.StatusOK || !strings.Contains(unpinned.Body.String(), `"name":"keep me"`) {
+		t.Fatalf("unpin: %d %s", unpinned.Code, unpinned.Body)
+	}
+	unknownPin := serveAgent(handler, http.MethodPost, "/agent/v1/backup/pin", session, `{"id":"20260102T000000.000000000Z-manual","name":"x"}`)
+	if unknownPin.Code != http.StatusConflict || refusalCodeOf(t, unknownPin) != operatoragent.CodeBackupUnknown {
+		t.Fatalf("unknown pin: %d %s", unknownPin.Code, unknownPin.Body)
+	}
+	pinWithoutName := serveAgent(handler, http.MethodPost, "/agent/v1/backup/pin", session, `{"id":"`+snapshotID+`"}`)
+	if pinWithoutName.Code != http.StatusConflict || refusalCodeOf(t, pinWithoutName) != operatoragent.CodeBodyInvalid {
+		t.Fatalf("pin without name: %d %s", pinWithoutName.Code, pinWithoutName.Body)
 	}
 
 	wrongMethod := serveAgent(handler, http.MethodGet, "/agent/v1/backup/snapshot", session, "")

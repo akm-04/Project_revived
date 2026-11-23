@@ -128,6 +128,17 @@ type buildRequest struct {
 type backupSnapshotRequest struct {
 	Kind   string `json:"kind"`
 	Reason string `json:"reason"`
+	Name   string `json:"name"`
+	Pin    bool   `json:"pin"`
+}
+
+type backupPinRequest struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type backupIDRequest struct {
+	ID string `json:"id"`
 }
 
 type backupReasonRequest struct {
@@ -776,6 +787,16 @@ func (handler Handler) serveBackup(writer http.ResponseWriter, request *http.Req
 			handler.writeAgentError(writer, "backup.list", err)
 			return
 		}
+		if handler.Operator != nil {
+			// The list must still answer while the backend is down, so the
+			// version read is a short best effort.
+			versionContext, cancel := context.WithTimeout(request.Context(), 2*time.Second)
+			if version, versionErr := handler.Operator.Version(versionContext); versionErr == nil {
+				migration := version.Migration
+				list.BackendMigration = &migration
+			}
+			cancel()
+		}
 		handler.record("backup.list", "list", "ok", map[string]any{"backups": len(list.Backups)})
 		writeJSON(writer, http.StatusOK, list)
 	case action == "snapshot" && request.Method == http.MethodPost:
@@ -792,7 +813,7 @@ func (handler Handler) serveBackup(writer http.ResponseWriter, request *http.Req
 		if kind == "" {
 			kind = operatoragent.BackupKindManual
 		}
-		operation, err := handler.Backup.Snapshot(request.Context(), kind, body.Reason)
+		operation, err := handler.Backup.Snapshot(request.Context(), operatoragent.SnapshotOptions{Kind: kind, Reason: body.Reason, Name: body.Name, Pinned: body.Pin})
 		if err != nil {
 			handler.record("backup.snapshot", "snapshot", "failed", map[string]any{"operation_id": operation.ID, "failed_step": operation.FailedStep})
 			handler.writeAgentError(writer, "backup.snapshot", err)
@@ -800,6 +821,40 @@ func (handler Handler) serveBackup(writer http.ResponseWriter, request *http.Req
 		}
 		handler.record("backup.snapshot", "snapshot", "ok", map[string]any{"operation_id": operation.ID})
 		writeJSON(writer, http.StatusOK, operation)
+	case action == "pin" && request.Method == http.MethodPost:
+		var body backupPinRequest
+		if err := decodeBody(writer, request, maxBodyBytes, &body); err != nil {
+			handler.writeBodyError(writer, err)
+			return
+		}
+		if body.ID == "" || body.Name == "" {
+			writeRefusal(writer, http.StatusConflict, operatoragent.CodeBodyInvalid, "id and name are required")
+			return
+		}
+		manifest, err := handler.Backup.Pin(body.ID, body.Name)
+		if err != nil {
+			handler.writeAgentError(writer, "backup.pin", err)
+			return
+		}
+		handler.record("backup.pin", "pin", "ok", map[string]any{"id": manifest.ID})
+		writeJSON(writer, http.StatusOK, manifest)
+	case action == "unpin" && request.Method == http.MethodPost:
+		var body backupIDRequest
+		if err := decodeBody(writer, request, maxBodyBytes, &body); err != nil {
+			handler.writeBodyError(writer, err)
+			return
+		}
+		if body.ID == "" {
+			writeRefusal(writer, http.StatusConflict, operatoragent.CodeBodyInvalid, "id is required")
+			return
+		}
+		manifest, err := handler.Backup.Unpin(body.ID)
+		if err != nil {
+			handler.writeAgentError(writer, "backup.unpin", err)
+			return
+		}
+		handler.record("backup.unpin", "unpin", "ok", map[string]any{"id": manifest.ID})
+		writeJSON(writer, http.StatusOK, manifest)
 	case action == "prune" && request.Method == http.MethodPost:
 		var body backupReasonRequest
 		if err := decodeBody(writer, request, maxBodyBytes, &body); err != nil {

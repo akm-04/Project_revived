@@ -15,6 +15,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"unicode"
+	"unicode/utf8"
 
 	"gxb.local/backend/v2/internal/application/operator"
 )
@@ -35,6 +37,8 @@ const (
 	BackupKindPreDelete = "pre-delete"
 
 	backupOperator = "root"
+	// backupNameLimit is the G54 snapshot name length in characters.
+	backupNameLimit = 80
 )
 
 var backupKinds = map[string]bool{
@@ -59,6 +63,10 @@ type BackupManifest struct {
 	SHA256         string    `json:"sha256"`
 	Reason         string    `json:"reason,omitempty"`
 	Operator       string    `json:"operator,omitempty"`
+	// Name and Pinned are the G54 keep mark: a pinned snapshot is never pruned
+	// and stays out of every automatic step until it is unpinned.
+	Name   string `json:"name,omitempty"`
+	Pinned bool   `json:"pinned,omitempty"`
 }
 
 // BackupEntry is one list row: a manifest plus damage state and age.
@@ -76,6 +84,9 @@ type BackupList struct {
 	Keep             int           `json:"keep"`
 	Backups          []BackupEntry `json:"backups"`
 	NewestAgeSeconds *int64        `json:"newest_age_seconds"`
+	// BackendMigration is the deployed backend's applied migration when it is
+	// reachable; the restore dialog compares it with a snapshot's own number.
+	BackendMigration *int64 `json:"backend_migration,omitempty"`
 }
 
 // PruneResult is backup.prune (B4).
@@ -95,6 +106,7 @@ type DatabaseTools interface {
 	Restore(ctx context.Context, dsn, path string) error
 	Execute(ctx context.Context, dsn, statement string) error
 	Query(ctx context.Context, dsn, statement string) (string, error)
+	Migrate(ctx context.Context, dsn, directory string) error
 }
 
 // BackupService runs the agent-side backup commands (B1-B7). It never opens
@@ -112,6 +124,10 @@ type BackupService struct {
 	Guard           *BackendGuard
 	Log             *ToolLog
 	Now             func() time.Time
+	// MigrationsDirectory holds the forward-only goose migrations. It is
+	// required only when a restore replaces an older snapshot than the deployed
+	// backend's schema.
+	MigrationsDirectory string
 }
 
 type restoreState struct {
@@ -154,26 +170,60 @@ func (service BackupService) log(op, step, outcome string, detail any) {
 	service.Log.Write(op, step, outcome, detail)
 }
 
+// SnapshotOptions is one backup.snapshot request: the kind and reason plus the
+// G54 optional name and keep mark.
+type SnapshotOptions struct {
+	Kind   string
+	Reason string
+	Name   string
+	Pinned bool
+}
+
 // Snapshot takes a live pg_dump snapshot (B2). It is an Operations journal
 // entry (L6) and prunes after success (B4).
-func (service BackupService) Snapshot(ctx context.Context, kind, reason string) (Operation, error) {
-	if !backupKinds[kind] {
+func (service BackupService) Snapshot(ctx context.Context, options SnapshotOptions) (Operation, error) {
+	if !backupKinds[options.Kind] {
 		return Operation{}, Refuse(CodeBackupKindInvalid, "unknown backup kind")
+	}
+	name, err := normalizeSnapshotName(options.Name, options.Pinned)
+	if err != nil {
+		return Operation{}, err
 	}
 	if !service.Guard.TryLock() {
 		return Operation{}, Refuse(CodeBackendBusy, "a backend operation is already running")
 	}
 	defer service.Guard.Unlock()
-	return service.snapshot(ctx, kind, reason)
+	return service.snapshot(ctx, options.Kind, options.Reason, name, options.Pinned)
+}
+
+// normalizeSnapshotName trims the G54 name and enforces 1-80 printable
+// characters. An empty name is allowed only for a normal snapshot.
+func normalizeSnapshotName(name string, pinned bool) (string, error) {
+	trimmed := strings.TrimSpace(name)
+	if trimmed == "" {
+		if pinned {
+			return "", Refuse(CodeBackupNameInvalid, "a pinned snapshot needs a name of 1 to 80 printable characters")
+		}
+		return "", nil
+	}
+	if utf8.RuneCountInString(trimmed) > backupNameLimit {
+		return "", Refuse(CodeBackupNameInvalid, "the snapshot name must hold at most 80 characters")
+	}
+	for _, character := range trimmed {
+		if !unicode.IsPrint(character) {
+			return "", Refuse(CodeBackupNameInvalid, "the snapshot name must hold printable characters only")
+		}
+	}
+	return trimmed, nil
 }
 
 // SnapshotBeforeDestructive is the one helper other operations call before a
 // destructive step (B7); the caller already holds the backend guard.
 func (service BackupService) SnapshotBeforeDestructive(ctx context.Context, reason string) (Operation, error) {
-	return service.snapshot(ctx, BackupKindPreDelete, reason)
+	return service.snapshot(ctx, BackupKindPreDelete, reason, "", false)
 }
 
-func (service BackupService) snapshot(ctx context.Context, kind, reason string) (Operation, error) {
+func (service BackupService) snapshot(ctx context.Context, kind, reason, name string, pinned bool) (Operation, error) {
 	if err := service.ready(); err != nil {
 		return Operation{}, err
 	}
@@ -230,6 +280,8 @@ func (service BackupService) snapshot(ctx context.Context, kind, reason string) 
 				SHA256:         digest,
 				Reason:         reason,
 				Operator:       backupOperator,
+				Name:           name,
+				Pinned:         pinned,
 			}
 			return map[string]any{"sha256": digest, "size": size}, nil
 		}},
@@ -247,17 +299,17 @@ func (service BackupService) snapshot(ctx context.Context, kind, reason string) 
 			return map[string]any{"manifest": manifest, "prune": pruned}, nil
 		}},
 	}
-	operation, err := service.Operations.RunKeyed(ctx, "backup.snapshot", "", snapshotRequest(kind, reason), steps)
+	operation, err := service.Operations.RunKeyed(ctx, "backup.snapshot", "", snapshotRequest(kind, reason, name, pinned), steps)
 	if err != nil {
 		_ = os.Remove(partialPath)
 		return operation, err
 	}
-	service.log("backup.snapshot", "finish", "done", map[string]any{"id": id, "size": manifest.Size})
+	service.log("backup.snapshot", "finish", "done", map[string]any{"id": id, "size": manifest.Size, "pinned": pinned})
 	return operation, nil
 }
 
-func snapshotRequest(kind, reason string) json.RawMessage {
-	encoded, _ := json.Marshal(map[string]string{"kind": kind, "reason": reason})
+func snapshotRequest(kind, reason, name string, pinned bool) json.RawMessage {
+	encoded, _ := json.Marshal(map[string]any{"kind": kind, "reason": reason, "name": name, "pin": pinned})
 	return encoded
 }
 
@@ -279,10 +331,58 @@ func (service BackupService) List(ctx context.Context) (BackupList, error) {
 	return list, nil
 }
 
+// Pin names a snapshot and keeps it out of every future prune (G54). The
+// manifest sidecar is replaced atomically, so an interrupted pin leaves the
+// old manifest.
+func (service BackupService) Pin(id, name string) (BackupManifest, error) {
+	normalized, err := normalizeSnapshotName(name, true)
+	if err != nil {
+		return BackupManifest{}, err
+	}
+	manifest, err := service.keepableManifest(id)
+	if err != nil {
+		return BackupManifest{}, err
+	}
+	manifest.Name = normalized
+	manifest.Pinned = true
+	if err := writeBackupManifest(filepath.Join(service.Directory, id+backupManifestSuffix), manifest); err != nil {
+		return BackupManifest{}, Temporarily(CodeBackupFailed, "the manifest cannot be written: "+err.Error())
+	}
+	service.log("backup.pin", "pin", "done", map[string]any{"id": id, "name": normalized})
+	return manifest, nil
+}
+
+// Unpin returns a pinned snapshot to normal pruning; the name is kept.
+func (service BackupService) Unpin(id string) (BackupManifest, error) {
+	manifest, err := service.keepableManifest(id)
+	if err != nil {
+		return BackupManifest{}, err
+	}
+	manifest.Pinned = false
+	if err := writeBackupManifest(filepath.Join(service.Directory, id+backupManifestSuffix), manifest); err != nil {
+		return BackupManifest{}, Temporarily(CodeBackupFailed, "the manifest cannot be written: "+err.Error())
+	}
+	service.log("backup.pin", "unpin", "done", map[string]any{"id": id})
+	return manifest, nil
+}
+
+// keepableManifest reads the manifest pin and unpin change. A dump without a
+// readable manifest naming the id is unknown, never a newly invented manifest.
+func (service BackupService) keepableManifest(id string) (BackupManifest, error) {
+	if !backupIDPattern.MatchString(id) {
+		return BackupManifest{}, Refuse(CodeBackupUnknown, "no such snapshot")
+	}
+	manifest, err := readBackupManifest(filepath.Join(service.Directory, id+backupManifestSuffix))
+	if err != nil || manifest.ID != id {
+		return BackupManifest{}, Refuse(CodeBackupUnknown, "no such snapshot")
+	}
+	return manifest, nil
+}
+
 // Prune keeps the newest backup_keep snapshots (B4), never deletes the newest,
-// a snapshot an unfinished operation references, or a damaged dump without
-// listing it. It also drops a retained prerestore database once the backend
-// is healthy again.
+// a pinned snapshot, a snapshot an unfinished operation references, or a
+// damaged dump without listing it. It also drops a retained prerestore database
+// once the backend is healthy again.
 func (service BackupService) Prune(ctx context.Context) (Operation, error) {
 	if !service.Guard.TryLock() {
 		return Operation{}, Refuse(CodeBackendBusy, "a backend operation is already running")
@@ -305,7 +405,7 @@ func (service BackupService) prune(ctx context.Context) (PruneResult, error) {
 	keep := service.keep()
 	result := PruneResult{Keep: keep, Removed: []string{}, Kept: []string{}, Damaged: []string{}}
 	for index, entry := range entries {
-		protected := index == 0 || entry.Damaged || strings.Contains(referenced, entry.ID)
+		protected := index == 0 || entry.Damaged || entry.Pinned || strings.Contains(referenced, entry.ID)
 		if entry.Damaged {
 			result.Damaged = append(result.Damaged, entry.ID)
 		}
@@ -465,6 +565,8 @@ func (service BackupService) Restore(ctx context.Context, id, reason string) (Op
 	statePath := filepath.Join(service.Directory, backupStateFileName)
 	safety := Operation{}
 	swapped := false
+	var deployedMigration int64
+	var restoredDSN string
 
 	steps := []Step{
 		{Name: "verify snapshot", Run: func(ctx context.Context) (any, error) {
@@ -472,13 +574,17 @@ func (service BackupService) Restore(ctx context.Context, id, reason string) (Op
 			if err != nil {
 				return nil, err
 			}
+			deployedMigration = deployed.Migration
 			if manifest.Migration > deployed.Migration {
-				return nil, Refuse(CodeBackupMigrationTooNew, "the snapshot needs a newer migration than the deployed backend")
+				return nil, Refuse(CodeBackupMigrationTooNew, fmt.Sprintf("the snapshot migration %d is newer than the deployed backend migration %d", manifest.Migration, deployed.Migration))
 			}
-			return map[string]any{"migration": deployed.Migration}, nil
+			if manifest.Migration < deployed.Migration && service.MigrationsDirectory == "" {
+				return nil, Refuse(CodeBackupToolsMissing, "the snapshot is older than the backend schema and the migrations folder is not configured")
+			}
+			return map[string]any{"migration": deployed.Migration, "snapshot_migration": manifest.Migration}, nil
 		}},
 		{Name: "safety snapshot", Run: func(ctx context.Context) (any, error) {
-			operation, err := service.snapshot(ctx, BackupKindSafety, "before restore "+id)
+			operation, err := service.snapshot(ctx, BackupKindSafety, "before restore "+id, "", false)
 			if err != nil {
 				return nil, err
 			}
@@ -498,10 +604,11 @@ func (service BackupService) Restore(ctx context.Context, id, reason string) (Op
 				service.startOriginal()
 				return nil, Temporarily(CodeBackupToolFailed, MaskString(err.Error()))
 			}
-			restoredDSN, err := DSNWithDatabase(dsn, restoredDatabase)
+			candidate, err := DSNWithDatabase(dsn, restoredDatabase)
 			if err != nil {
 				return nil, Refuse(CodeBackupDSNInvalid, "the backend DSN cannot name another database")
 			}
+			restoredDSN = candidate
 			if err := service.Tools.Restore(ctx, restoredDSN, dumpPath); err != nil {
 				_ = service.Tools.Execute(ctx, adminDSN, `DROP DATABASE IF EXISTS "`+restoredDatabase+`"`)
 				_ = os.Remove(statePath)
@@ -509,6 +616,19 @@ func (service BackupService) Restore(ctx context.Context, id, reason string) (Op
 				return nil, Temporarily(CodeBackupToolFailed, MaskString(err.Error()))
 			}
 			return map[string]any{"database": restoredDatabase}, nil
+		}},
+		{Name: "migrate restored database", Run: func(ctx context.Context) (any, error) {
+			if manifest.Migration >= deployedMigration {
+				return map[string]any{"migration": manifest.Migration}, nil
+			}
+			if err := service.Tools.Migrate(ctx, restoredDSN, service.MigrationsDirectory); err != nil {
+				_ = service.Tools.Execute(ctx, adminDSN, `DROP DATABASE IF EXISTS "`+restoredDatabase+`"`)
+				_ = os.Remove(statePath)
+				service.startOriginal()
+				return nil, Temporarily(CodeBackupToolFailed, MaskString(err.Error()))
+			}
+			service.log("backup.restore", "migrate", "done", map[string]any{"snapshot_migration": manifest.Migration, "deployment_migration": deployedMigration})
+			return map[string]any{"from": manifest.Migration, "to": deployedMigration}, nil
 		}},
 		{Name: "swap databases", Run: func(ctx context.Context) (any, error) {
 			state := restoreState{Phase: "swapping", Database: database, Restored: restoredDatabase, PreRestore: preRestoreDatabase, Stamp: stamp, UpdatedAt: service.now().UTC()}
@@ -596,7 +716,7 @@ func (service BackupService) UpdateBackend(ctx context.Context, reason string) (
 	}
 	steps := []Step{
 		{Name: "pre-update snapshot", Run: func(ctx context.Context) (any, error) {
-			operation, err := service.snapshot(ctx, BackupKindPreUpdate, reason)
+			operation, err := service.snapshot(ctx, BackupKindPreUpdate, reason, "", false)
 			if err != nil {
 				return nil, err
 			}
@@ -609,7 +729,7 @@ func (service BackupService) UpdateBackend(ctx context.Context, reason string) (
 			return map[string]string{"next": "swap the backend binary, then start the backend"}, nil
 		}},
 	}
-	return service.Operations.RunKeyed(ctx, "backup.update_backend", "", snapshotRequest("", reason), steps)
+	return service.Operations.RunKeyed(ctx, "backup.update_backend", "", snapshotRequest("", reason, "", false), steps)
 }
 
 func (service BackupService) ready() error {
