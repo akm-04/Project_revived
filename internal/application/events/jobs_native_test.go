@@ -83,7 +83,7 @@ func e4BusAt(t *testing.T, pool *pg.Pool, operatorClock clock.Clock) operator.Bu
 	if err != nil {
 		t.Fatal(err)
 	}
-	commands := appevents.Commands{Store: eventstore.Store{}, Coverage: e4Coverage{}, Gifts: e4Gifts{}, Catalogue: e4Catalogue{}, Hooks: hooks}
+	commands := appevents.Commands{Store: eventstore.Store{}, Coverage: e4Coverage{}, Gifts: e4Gifts{}, Catalogue: e4Catalogue{}, Hooks: hooks, Servers: i4store.ServerDirectoryReader{}}
 	return operator.Bus{Runner: tx.Runner{DB: pool}, Clock: operatorClock, Store: operatorstore.Store{}, Handlers: commands.Handlers()}
 }
 
@@ -177,6 +177,7 @@ func e4Jobs(t *testing.T, pool *pg.Pool, clk clock.Clock) appevents.Jobs {
 		Servers:      i4store.PlayerRootLocker{},
 		Players:      i4store.EventPlayerSource{},
 		Mail:         appi5.SettlementMail{Store: i5store.Store{}},
+		Directory:    i4store.ServerDirectoryReader{},
 	}
 }
 

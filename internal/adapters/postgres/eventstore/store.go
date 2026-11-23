@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -34,6 +35,7 @@ type occurrenceRow struct {
 	ClaimUntil          *time.Time `json:"claim_until"`
 	Source              string     `json:"source"`
 	Revision            int64      `json:"revision"`
+	GlobalGroupID       *int64     `json:"global_group_id"`
 	CreatedByCommand    string     `json:"created_by_command"`
 	EndedEarlyByCommand string     `json:"ended_early_by_command"`
 	CancelledByCommand  string     `json:"cancelled_by_command"`
@@ -46,7 +48,7 @@ func (row occurrenceRow) domain() events.Occurrence {
 	return events.Occurrence{
 		ID: row.ID, LogicalServerID: row.LogicalServerID, ActivityID: row.ActivityID, DefinitionRevision: row.DefinitionRevision,
 		StartsAt: row.StartsAt.UTC(), EndsAt: utcPtr(row.EndsAt), ClaimUntil: utcPtr(row.ClaimUntil), Source: row.Source,
-		Revision: row.Revision, CreatedByCommand: row.CreatedByCommand, EndedEarlyByCommand: row.EndedEarlyByCommand,
+		Revision: row.Revision, GlobalGroupID: row.GlobalGroupID, CreatedByCommand: row.CreatedByCommand, EndedEarlyByCommand: row.EndedEarlyByCommand,
 		CancelledByCommand: row.CancelledByCommand, CancelledAt: utcPtr(row.CancelledAt), SettledAt: utcPtr(row.SettledAt), CreatedAt: row.CreatedAt.UTC(),
 	}
 }
@@ -63,6 +65,7 @@ const occurrenceColumns = `jsonb_build_object(
 	'id',id,'logical_server_id',logical_server_id,'activity_id',activity_id,
 	'definition_revision',definition_revision,'starts_at',starts_at,'ends_at',ends_at,
 	'claim_until',claim_until,'source',source,'revision',revision,
+	'global_group_id',global_group_id,
 	'created_by_command',created_by_command,'ended_early_by_command',ended_early_by_command,
 	'cancelled_by_command',cancelled_by_command,'cancelled_at',cancelled_at,
 	'settled_at',settled_at,'created_at',created_at)`
@@ -91,6 +94,8 @@ func mapWriteError(err error) error {
 		return appevents.ErrRevisionExists
 	case pgErr.Code == "23503" && (pgErr.ConstraintName == "event_occurrences_logical_server_id_fkey" || pgErr.ConstraintName == "event_cycle_settings_logical_server_id_fkey"):
 		return appevents.ErrServerUnknown
+	case pgErr.Code == "23503" && pgErr.ConstraintName == "event_occurrences_global_group_id_fkey":
+		return appevents.ErrGroupUnknown
 	}
 	return err
 }
@@ -280,8 +285,8 @@ func (Store) OverlapsTx(ctx context.Context, query tx.Queryer, server, activityI
 
 const insertOccurrence = `INSERT INTO event_occurrences(
 	logical_server_id,activity_id,definition_revision,starts_at,ends_at,claim_until,source,revision,
-	created_by_command,cancelled_by_command,cancelled_at,settled_at,created_at)
-VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,NULL,NULL,NULL,$10) RETURNING id`
+	global_group_id,created_by_command,cancelled_by_command,cancelled_at,settled_at,created_at)
+VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,NULL,NULL,NULL,$11) RETURNING id`
 
 // InsertOccurrenceTx stores one occurrence; the overlap exclusion maps to
 // appevents.ErrOccurrenceOverlap.
@@ -297,12 +302,44 @@ func (Store) InsertOccurrenceTx(ctx context.Context, transaction tx.Tx, occurren
 	err := transaction.QueryRow(ctx, insertOccurrence,
 		occurrence.LogicalServerID, occurrence.ActivityID, occurrence.DefinitionRevision, occurrence.StartsAt.UTC(),
 		utcPtr(occurrence.EndsAt), utcPtr(occurrence.ClaimUntil), occurrence.Source, occurrence.Revision,
-		command, occurrence.CreatedAt.UTC(),
+		occurrence.GlobalGroupID, command, occurrence.CreatedAt.UTC(),
 	).Scan(&id)
 	if err != nil {
 		return 0, mapWriteError(err)
 	}
 	return id, nil
+}
+
+const insertGroupOccurrence = `INSERT INTO event_occurrences(
+	logical_server_id,activity_id,definition_revision,starts_at,ends_at,claim_until,source,revision,
+	global_group_id,created_by_command,cancelled_by_command,cancelled_at,settled_at,created_at)
+VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,NULL,NULL,NULL,$11)
+ON CONFLICT (global_group_id, logical_server_id) DO NOTHING RETURNING id`
+
+// InsertGroupOccurrenceTx stores one group occurrence unless the server already
+// holds one (the unique (global_group_id, logical_server_id) law). inserted is
+// false on that conflict, so the maintenance join is idempotent.
+func (Store) InsertGroupOccurrenceTx(ctx context.Context, transaction tx.Tx, occurrence events.Occurrence, commandKey string, at time.Time) (int64, bool, error) {
+	if transaction == nil || at.IsZero() || occurrence.LogicalServerID <= 0 || occurrence.GlobalGroupID == nil || *occurrence.GlobalGroupID <= 0 || occurrence.ActivityID <= 0 || occurrence.DefinitionRevision <= 0 || occurrence.StartsAt.IsZero() || occurrence.Revision <= 0 {
+		return 0, false, errInvalid
+	}
+	var command *string
+	if commandKey != "" {
+		command = &commandKey
+	}
+	var id int64
+	err := transaction.QueryRow(ctx, insertGroupOccurrence,
+		occurrence.LogicalServerID, occurrence.ActivityID, occurrence.DefinitionRevision, occurrence.StartsAt.UTC(),
+		utcPtr(occurrence.EndsAt), utcPtr(occurrence.ClaimUntil), occurrence.Source, occurrence.Revision,
+		occurrence.GlobalGroupID, command, occurrence.CreatedAt.UTC(),
+	).Scan(&id)
+	if errors.Is(err, kernelstore.ErrNoRows) {
+		return 0, false, nil
+	}
+	if err != nil {
+		return 0, false, mapWriteError(err)
+	}
+	return id, true, nil
 }
 
 const selectOccurrence = `SELECT ` + occurrenceColumns + ` FROM event_occurrences WHERE id=$1`
@@ -443,40 +480,63 @@ func nullableText(value string) *string {
 	return &value
 }
 
-// phasePredicate returns the derived-state SQL fragment for a phase (the state
+// phasePredicate returns the derived-state SQL template for a phase (the state
 // is not stored, so a bounded list filters the same way domain State computes).
-// needsTime reports whether the fragment uses $2, the decision instant.
-func phasePredicate(phase events.Phase) (predicate string, needsTime bool, ok bool) {
+// needsTime reports whether the template takes the decision instant as %s.
+func phasePredicate(phase events.Phase) (template string, needsTime bool, ok bool) {
 	switch phase {
 	case events.PhaseCancelled:
-		return "cancelled_at IS NOT NULL", false, true
+		return "(cancelled_at IS NOT NULL)", false, true
 	case events.PhaseArchived:
 		return "(cancelled_at IS NULL AND settled_at IS NOT NULL)", false, true
 	case events.PhaseScheduled:
-		return "(cancelled_at IS NULL AND settled_at IS NULL AND starts_at > $2)", true, true
+		return "(cancelled_at IS NULL AND settled_at IS NULL AND starts_at > %s)", true, true
 	case events.PhaseRunning:
-		return "(cancelled_at IS NULL AND settled_at IS NULL AND starts_at <= $2 AND (ends_at IS NULL OR ends_at > $2))", true, true
+		return "(cancelled_at IS NULL AND settled_at IS NULL AND starts_at <= %s AND (ends_at IS NULL OR ends_at > %s))", true, true
 	case events.PhaseClaimWindow:
-		return "(cancelled_at IS NULL AND settled_at IS NULL AND ends_at <= $2 AND claim_until > $2)", true, true
+		return "(cancelled_at IS NULL AND settled_at IS NULL AND ends_at <= %s AND claim_until > %s)", true, true
 	case events.PhaseEnded:
-		return "(cancelled_at IS NULL AND settled_at IS NULL AND claim_until <= $2)", true, true
+		return "(cancelled_at IS NULL AND settled_at IS NULL AND claim_until <= %s)", true, true
 	default:
 		return "", false, false
 	}
 }
 
-// OccurrencesTx reads one bounded, newest-first page plus the caller's one
-// extra row, filtered by the same derived state domain State computes.
+// OccurrencesTx reads one bounded, newest-first page of one server plus the
+// caller's one extra row, filtered by the same derived state domain State
+// computes.
 func (Store) OccurrencesTx(ctx context.Context, query tx.Queryer, filter appevents.OccurrenceFilter) ([]events.Occurrence, error) {
-	if query == nil || filter.LogicalServerID <= 0 || filter.Limit < 1 || filter.DecisionAt.IsZero() {
+	if query == nil || filter.LogicalServerID <= 0 {
 		return nil, errInvalid
 	}
-	args := []any{filter.LogicalServerID}
-	conditions := []string{"logical_server_id=$1"}
+	return occurrencePage(ctx, query, filter, []string{"logical_server_id=$1"}, []any{filter.LogicalServerID})
+}
+
+// ServerOnlyOccurrencesTx reads the bounded newest-first page of the
+// occurrences that belong to no global group (the global events.list, EA-15
+// item 5).
+func (Store) ServerOnlyOccurrencesTx(ctx context.Context, query tx.Queryer, filter appevents.OccurrenceFilter) ([]events.Occurrence, error) {
+	if query == nil {
+		return nil, errInvalid
+	}
+	return occurrencePage(ctx, query, filter, []string{"global_group_id IS NULL"}, nil)
+}
+
+func occurrencePage(ctx context.Context, query tx.Queryer, filter appevents.OccurrenceFilter, conditions []string, args []any) ([]events.Occurrence, error) {
+	if query == nil || filter.Limit < 1 || filter.DecisionAt.IsZero() {
+		return nil, errInvalid
+	}
 	if filter.Phase != nil {
-		if predicate, needsTime, ok := phasePredicate(*filter.Phase); ok {
+		if template, needsTime, ok := phasePredicate(*filter.Phase); ok {
+			predicate := template
 			if needsTime {
 				args = append(args, filter.DecisionAt.UTC())
+				placeholder := "$" + strconv.Itoa(len(args))
+				values := make([]any, strings.Count(template, "%s"))
+				for index := range values {
+					values[index] = placeholder
+				}
+				predicate = fmt.Sprintf(template, values...)
 			}
 			conditions = append(conditions, predicate)
 		}
@@ -729,8 +789,7 @@ func (Store) UpdateClaimReplyTx(ctx context.Context, transaction tx.Tx, claim ap
 	return nil
 }
 
-const selectPlayerClaims = `SELECT COALESCE(jsonb_agg(jsonb_build_object(
-	'player_id',player_id,'occurrence_id',occurrence_id,'tier',tier,'period',period,
+const selectPlayerClaims = `SELECT COALESCE(jsonb_agg(jsonb_build_object(	'player_id',player_id,'occurrence_id',occurrence_id,'tier',tier,'period',period,
 	'choice',choice,'claimed_at',claimed_at,'grant_receipt',grant_receipt,
 	'award_body',COALESCE(award_body::text,''),'payload_version',payload_version) ORDER BY tier,period),'[]'::jsonb)::text
 FROM (
@@ -754,6 +813,176 @@ func (Store) ClaimsForPlayerTx(ctx context.Context, query tx.Queryer, playerID, 
 		return nil, err
 	}
 	out := make([]appevents.Claim, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, row.domain())
+	}
+	return out, nil
+}
+
+type groupRow struct {
+	ID                 int64           `json:"id"`
+	ActivityID         int64           `json:"activity_id"`
+	DefinitionRevision int64           `json:"definition_revision"`
+	StartsAt           time.Time       `json:"starts_at"`
+	EndsAt             *time.Time      `json:"ends_at"`
+	State              string          `json:"state"`
+	Revision           int64           `json:"revision"`
+	CreatedAt          time.Time       `json:"created_at"`
+	EndedAt            *time.Time      `json:"ended_at"`
+	CreatedByCommand   string          `json:"created_by_command"`
+	Occurrences        []occurrenceRow `json:"occurrences"`
+}
+
+func (row groupRow) domain() appevents.GlobalGroup {
+	group := appevents.GlobalGroup{
+		GlobalGroup: events.GlobalGroup{
+			ID: row.ID, ActivityID: row.ActivityID, DefinitionRevision: row.DefinitionRevision,
+			StartsAt: row.StartsAt.UTC(), EndsAt: utcPtr(row.EndsAt), State: row.State, Revision: row.Revision,
+			CreatedAt: row.CreatedAt.UTC(), EndedAt: utcPtr(row.EndedAt), CreatedByCommand: row.CreatedByCommand,
+		},
+		Occurrences: make([]events.Occurrence, 0, len(row.Occurrences)),
+	}
+	for _, occurrence := range row.Occurrences {
+		group.Occurrences = append(group.Occurrences, occurrence.domain())
+	}
+	return group
+}
+
+const groupColumns = `jsonb_build_object(
+	'id',id,'activity_id',activity_id,'definition_revision',definition_revision,
+	'starts_at',starts_at,'ends_at',ends_at,'state',state,'revision',revision,
+	'created_at',created_at,'ended_at',ended_at,'created_by_command',COALESCE(created_by_command,''))`
+
+const insertGlobalGroup = `INSERT INTO event_global_groups(activity_id,definition_revision,starts_at,ends_at,state,revision,created_at,created_by_command)
+VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id`
+
+// InsertGlobalGroupTx stores one global group and returns its id.
+func (Store) InsertGlobalGroupTx(ctx context.Context, transaction tx.Tx, group appevents.GlobalGroup, commandKey string, at time.Time) (int64, error) {
+	if transaction == nil || at.IsZero() || group.ActivityID <= 0 || group.DefinitionRevision <= 0 || group.StartsAt.IsZero() || group.Revision <= 0 {
+		return 0, errInvalid
+	}
+	if group.State != events.GroupScheduled && group.State != events.GroupRunning {
+		return 0, errInvalid
+	}
+	var command *string
+	if commandKey != "" {
+		command = &commandKey
+	}
+	var id int64
+	if err := transaction.QueryRow(ctx, insertGlobalGroup,
+		group.ActivityID, group.DefinitionRevision, group.StartsAt.UTC(), utcPtr(group.EndsAt),
+		group.State, group.Revision, at.UTC(), command,
+	).Scan(&id); err != nil {
+		return 0, mapWriteError(err)
+	}
+	return id, nil
+}
+
+const lockGlobalGroup = `SELECT ` + groupColumns + ` FROM event_global_groups WHERE id=$1 FOR UPDATE`
+
+// LockGlobalGroupTx locks one group FOR UPDATE (rank 355); nil when absent.
+func (Store) LockGlobalGroupTx(ctx context.Context, transaction tx.Tx, groupID int64) (*appevents.GlobalGroup, error) {
+	if transaction == nil || groupID <= 0 {
+		return nil, errInvalid
+	}
+	var raw string
+	if err := transaction.QueryRow(ctx, lockGlobalGroup, groupID).Scan(&raw); err != nil {
+		if errors.Is(err, kernelstore.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	var row groupRow
+	if err := json.Unmarshal([]byte(raw), &row); err != nil {
+		return nil, err
+	}
+	group := row.domain()
+	return &group, nil
+}
+
+const saveGlobalGroup = `UPDATE event_global_groups SET starts_at=$2,ends_at=$3,state=$4,revision=$5,ended_at=$6 WHERE id=$1`
+
+// SaveGlobalGroupTx writes the group lifecycle columns; the caller holds the
+// row lock.
+func (Store) SaveGlobalGroupTx(ctx context.Context, transaction tx.Tx, group appevents.GlobalGroup) error {
+	if transaction == nil || group.ID <= 0 || group.Revision <= 0 {
+		return errInvalid
+	}
+	effect, err := transaction.Exec(ctx, saveGlobalGroup, group.ID, group.StartsAt.UTC(), utcPtr(group.EndsAt), group.State, group.Revision, utcPtr(group.EndedAt))
+	if err != nil {
+		return mapWriteError(err)
+	}
+	if effect == nil || effect.RowsAffected() != 1 {
+		return errors.New("eventstore: group row disappeared under its lock")
+	}
+	return nil
+}
+
+const lockGroupOccurrences = `SELECT COALESCE(jsonb_agg(` + occurrenceColumns + ` ORDER BY id),'[]'::jsonb)::text
+FROM (SELECT * FROM event_occurrences WHERE global_group_id=$1 ORDER BY id FOR UPDATE) locked`
+
+// LockGroupOccurrencesTx locks every occurrence of one group FOR UPDATE in id
+// order (EA-15 item 6) and returns them.
+func (Store) LockGroupOccurrencesTx(ctx context.Context, transaction tx.Tx, groupID int64) ([]events.Occurrence, error) {
+	if transaction == nil || groupID <= 0 {
+		return nil, errInvalid
+	}
+	var raw string
+	if err := transaction.QueryRow(ctx, lockGroupOccurrences, groupID).Scan(&raw); err != nil {
+		return nil, err
+	}
+	return decodeOccurrences(raw)
+}
+
+const listJoinableGroups = `SELECT COALESCE(jsonb_agg(` + groupColumns + ` ORDER BY id),'[]'::jsonb)::text
+FROM (SELECT * FROM event_global_groups
+	WHERE id>$1 AND ended_at IS NULL AND (ends_at IS NULL OR ends_at>$2)
+	ORDER BY id LIMIT $3) g`
+
+// ListJoinableGroupsAfterTx pages the groups a maintenance run may join: not
+// ended, and SCHEDULED or RUNNING at at (EA-15 item 4).
+func (Store) ListJoinableGroupsAfterTx(ctx context.Context, query tx.Queryer, at time.Time, afterID int64, limit int) ([]appevents.GlobalGroup, error) {
+	if query == nil || at.IsZero() || afterID < 0 || limit < 1 || limit > 200 {
+		return nil, errInvalid
+	}
+	var raw string
+	if err := query.QueryRow(ctx, listJoinableGroups, afterID, at.UTC(), limit).Scan(&raw); err != nil {
+		return nil, err
+	}
+	var rows []groupRow
+	if err := json.Unmarshal([]byte(raw), &rows); err != nil {
+		return nil, err
+	}
+	out := make([]appevents.GlobalGroup, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, row.domain())
+	}
+	return out, nil
+}
+
+const listGlobalGroups = `SELECT COALESCE(jsonb_agg(jsonb_build_object(
+	'id',g.id,'activity_id',g.activity_id,'definition_revision',g.definition_revision,
+	'starts_at',g.starts_at,'ends_at',g.ends_at,'state',g.state,'revision',g.revision,
+	'created_at',g.created_at,'ended_at',g.ended_at,'created_by_command',COALESCE(g.created_by_command,''),
+	'occurrences',COALESCE((SELECT jsonb_agg(` + occurrenceColumns + ` ORDER BY o.id) FROM event_occurrences o WHERE o.global_group_id=g.id),'[]'::jsonb)
+) ORDER BY g.starts_at DESC,g.id DESC),'[]'::jsonb)::text
+FROM (SELECT * FROM event_global_groups ORDER BY starts_at DESC,id DESC LIMIT $1) g`
+
+// ListGlobalGroupsTx reads the bounded global view: newest group first, each
+// with its per-server occurrences.
+func (Store) ListGlobalGroupsTx(ctx context.Context, query tx.Queryer, limit int) ([]appevents.GlobalGroup, error) {
+	if query == nil || limit < 1 || limit > 200 {
+		return nil, errInvalid
+	}
+	var raw string
+	if err := query.QueryRow(ctx, listGlobalGroups, limit).Scan(&raw); err != nil {
+		return nil, err
+	}
+	var rows []groupRow
+	if err := json.Unmarshal([]byte(raw), &rows); err != nil {
+		return nil, err
+	}
+	out := make([]appevents.GlobalGroup, 0, len(rows))
 	for _, row := range rows {
 		out = append(out, row.domain())
 	}

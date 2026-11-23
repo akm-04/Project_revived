@@ -10483,6 +10483,29 @@
         "retention": null
       }
     },
+    "event_global_groups": {
+      "owner": "events",
+      "migration": "migrations/00193_i11a_events_global_groups.sql",
+      "allowed_query_owners": [
+        "events"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/eventstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/eventstore/"
+      ],
+      "write_exceptions": [],
+      "data": {
+        "scope": "server",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
+    },
     "event_occurrences": {
       "owner": "events",
       "migration": "migrations/00186_i11a_events.sql",

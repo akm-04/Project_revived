@@ -4010,9 +4010,15 @@
     "*InsertClaimTx",
     "*InsertCycleOccurrenceTx",
     "*InsertDefinitionTx",
+    "*InsertGlobalGroupTx",
+    "*InsertGroupOccurrenceTx",
     "*InsertOccurrenceTx",
     "*LatestDefinitionTx",
     "*ListDefinitionsTx",
+    "*ListGlobalGroupsTx",
+    "*ListJoinableGroupsAfterTx",
+    "*LockGlobalGroupTx",
+    "*LockGroupOccurrencesTx",
     "*LockOccurrenceSharedTx",
     "*LockOccurrenceTx",
     "*LockOccurrencesTx",
@@ -4022,7 +4028,9 @@
     "*OccurrencesTx",
     "*OverlapsTx",
     "*RecordDefinitionConflictTx",
+    "*SaveGlobalGroupTx",
     "*SaveOccurrenceTx",
+    "*ServerOnlyOccurrencesTx",
     "*SetCycleBodyTx",
     "*SetCycleModeTx",
     "*UpdateClaimReplyTx"
@@ -4030,6 +4038,7 @@
    "store:i4store": [
     "*ListLogicalServersAfterTx",
     "*LockPlayerRootsTx",
+    "*OperatorServersTx",
     "*PlayerLevelTx",
     "*PlayersOfServerAfterTx"
    ]

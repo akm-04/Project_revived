@@ -69,20 +69,20 @@ func TestEventsModuleRefusesEachDeclaredRequiredFieldWhenMissing(t *testing.T) {
 	}
 }
 
-func TestEventsListReadRequiresOnlyTheServer(t *testing.T) {
+func TestEventsListServerIsOptional(t *testing.T) {
 	module := Commands{}.Module()
 	if len(module.Reads) != 1 || module.Reads[0].Name != "events.list" {
 		t.Fatalf("reads = %+v", module.Reads)
 	}
-	required := map[string]bool{}
 	for _, field := range module.Reads[0].Fields {
 		if field.Required {
-			required[field.Name] = true
+			t.Fatalf("events.list field %s is required; without server it returns the global view (EA-15 item 5)", field.Name)
+		}
+		if field.Name == "server" {
+			return
 		}
 	}
-	if len(required) != 1 || !required["server"] {
-		t.Fatalf("required read fields = %v", required)
-	}
+	t.Fatal("events.list no longer declares the optional server field")
 }
 
 func TestEventsModuleDeclaresEveryCommand(t *testing.T) {
