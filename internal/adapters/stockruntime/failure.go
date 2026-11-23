@@ -100,6 +100,13 @@ func refusalWithCause(code int64, cause error) *classifiedFailure {
 	return &classifiedFailure{class: failureRefusal, code: code, cause: cause}
 }
 
+// refusalWithBodyCause is refusalWithBody plus a journal-only cause. The cause
+// never reaches the wire: failureReply writes only error_code, error_msg and the
+// refusal body, and the edge journals resp.Cause for the operator.
+func refusalWithBodyCause(code int64, body map[string]any, cause error) *classifiedFailure {
+	return &classifiedFailure{class: failureRefusal, code: code, extra: body, cause: cause}
+}
+
 func unavailable(cause error) *classifiedFailure {
 	return &classifiedFailure{class: failureUnavailable, cause: cause}
 }
