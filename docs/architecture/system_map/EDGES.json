@@ -5574,8 +5574,9 @@
     "*LockSettingsTx",
     "*ReadSettingsTx",
     "*ReadStatusTx",
-    "*ReleaseExistsTx",
+    "*ReleaseStatusTx",
     "*ReleaseTx",
+    "*ReuseBuildTx",
     "*SaveSettingsTx",
     "*SupersedeLaneTx",
     "*WithdrawTx"

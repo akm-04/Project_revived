@@ -10,8 +10,11 @@ const buildPath = "/agent/v1/ota/build";
 const publishPath = "/agent/v1/ota/publish";
 const operationPollMilliseconds = 1000;
 const operationPollLimit = 120;
+const versionCheckDebounceMilliseconds = 250;
+const firstReleaseVersion = "1.631.1";
 const rollbackAcknowledgementText = "I understand clients must clear app data";
 const rollbackWarningText = "installed clients will not step down by themselves: players must clear the app's data or reinstall to take the rolled-back release";
+const publishWarningText = "Publish runs the maintenance window: the game closes, every player is logged out, the release goes live, the game reopens.";
 
 const lanes = [
   { id: "assets", title: "Loud (assets)", action: "assets" },
@@ -96,6 +99,9 @@ function createLaneCard(lane) {
   versionInput.id = "ota-version-" + lane.id;
   versionInput.autocomplete = "off";
   versionInput.placeholder = "1.631.1";
+  const allowedInfo = document.createElement("p");
+  allowedInfo.className = "hint mb-1";
+  allowedInfo.id = "ota-allowed-" + lane.id;
   const versionHint = document.createElement("p");
   versionHint.className = "hint mb-1";
   versionHint.id = "ota-version-hint-" + lane.id;
@@ -121,16 +127,24 @@ function createLaneCard(lane) {
   const publish = actionButton("Publish staged", false, "ota-publish-" + lane.id);
   publish.disabled = true;
   actions.append(stage, publish);
+  const publishWarning = document.createElement("p");
+  publishWarning.className = "status mt-2";
+  publishWarning.id = "ota-publish-warning-" + lane.id;
+  publishWarning.textContent = publishWarningText;
   const log = document.createElement("section");
   log.className = "result";
   log.id = "ota-log-" + lane.id;
-  card.append(title, rows, staleWarning, versionLabel, versionInput, versionHint, rollbackWarning, acknowledgementLabel, actions, log);
+  card.append(title, rows, staleWarning, versionLabel, versionInput, allowedInfo, versionHint, rollbackWarning, acknowledgementLabel, actions, publishWarning, log);
 
+  let nextVersion = "";
   let activeVersion = "";
   let stagedVersion = "";
-  let proposedVersion = "";
   let userEdited = false;
   let rollbackRequired = false;
+  let checkGeneration = 0;
+  let checkTimer = null;
+  let checkedVersion = "";
+  let usedRelease = null;
 
   function refreshForm() {
     const typed = versionInput.value.trim();
@@ -142,38 +156,90 @@ function createLaneCard(lane) {
     if (!rollbackRequired) {
       acknowledgement.checked = false;
     }
+    allowedInfo.textContent = allowedVersionsText(nextVersion);
     if (rollbackRequired) {
-      rollbackWarning.textContent = typed + " is below the active " + activeVersion + ". A rollback: " + rollbackWarningText + ".";
+      rollbackWarning.textContent = typed + " is below the active " + activeVersion + ". A rollback: " + rollbackWarningText +
+        " To undo a change, revert the source and stage " + (nextVersion || "the next number") +
+        ": clients update normally without clearing data. A rollback number must be lower than the active one and never used.";
     } else {
       rollbackWarning.textContent = "";
     }
-    if (classification.kind === "invalid") {
-      versionHint.textContent = "Use a strict x.y.z number, e.g. " + (proposedVersion || "1.631.1") + ".";
-    } else if (classification.kind === "otherLine") {
-      versionHint.textContent = typed + " is on another version line and is refused: keep " + classification.line + " and change only the last number.";
-    } else if (classification.kind === "equal") {
-      versionHint.textContent = typed + " is already the active version.";
-    } else if (typed === "" && proposedVersion === "") {
-      versionHint.textContent = "Enter the lane's first version.";
-    } else if (typed === "") {
-      versionHint.textContent = "Empty stages the proposed next version " + proposedVersion + ".";
-    } else {
-      versionHint.textContent = "The proposed next version is " + (proposedVersion || "unknown") + ".";
-    }
+    const checking = typed !== "" && parseVersion(typed) !== null && checkedVersion !== typed;
+    const used = typed !== "" && checkedVersion === typed ? usedRelease : null;
+    const usedReusable = used !== null && rollbackRequired && used.reusable;
+    versionHint.textContent = versionHintText(typed, classification, checking, used, usedReusable, nextVersion);
     stage.disabled = classification.kind === "invalid" || classification.kind === "equal" ||
       classification.kind === "otherLine" ||
       (rollbackRequired && !acknowledgement.checked) ||
-      (typed === "" && proposedVersion === "");
+      (typed === "" && nextVersion === "") ||
+      checking ||
+      (used !== null && !usedReusable);
+  }
+
+  function scheduleVersionCheck() {
+    if (checkTimer !== null) {
+      clearTimeout(checkTimer);
+      checkTimer = null;
+    }
+    const generation = ++checkGeneration;
+    const typed = versionInput.value.trim();
+    if (typed === "" || parseVersion(typed) === null) {
+      checkedVersion = typed;
+      usedRelease = null;
+      refreshForm();
+      return;
+    }
+    checkedVersion = "";
+    usedRelease = null;
+    refreshForm();
+    checkTimer = setTimeout(() => {
+      checkTimer = null;
+      void runVersionCheck(typed, generation);
+    }, versionCheckDebounceMilliseconds);
+  }
+
+  async function runVersionCheck(typed, generation) {
+    const reply = await request(releaseRead + "?version=" + encodeURIComponent(typed));
+    if (generation !== checkGeneration || reply.unauthorized) {
+      return;
+    }
+    checkedVersion = typed;
+    usedRelease = releaseFromReply(reply);
+    refreshForm();
+  }
+
+  async function checkVersionNow(typed) {
+    if (checkTimer !== null) {
+      clearTimeout(checkTimer);
+      checkTimer = null;
+    }
+    const generation = ++checkGeneration;
+    checkedVersion = "";
+    usedRelease = null;
+    refreshForm();
+    await runVersionCheck(typed, generation);
   }
 
   versionInput.addEventListener("input", () => {
     userEdited = true;
     refreshForm();
+    scheduleVersionCheck();
   });
   acknowledgement.addEventListener("change", refreshForm);
   stage.addEventListener("click", () => {
-    void stageLane(lane, versionInput.value.trim(), rollbackRequired, activeVersion, log);
+    void stageLaneAfterCheck();
   });
+  async function stageLaneAfterCheck() {
+    const typed = versionInput.value.trim();
+    if (typed !== "" && parseVersion(typed) !== null && checkedVersion !== typed) {
+      await checkVersionNow(typed);
+      refreshForm();
+    }
+    if (stage.disabled) {
+      return;
+    }
+    await stageLane(lane, versionInput.value.trim(), rollbackRequired, activeVersion, log);
+  }
   publish.addEventListener("click", () => {
     void publishLane(lane, stagedVersion, isStale(stagedVersion, activeVersion), log);
   });
@@ -182,7 +248,8 @@ function createLaneCard(lane) {
     card,
     values,
     publish,
-    setSummary(summary) {
+    setSummary(summary, proposedNextVersion) {
+      nextVersion = typeof proposedNextVersion === "string" ? proposedNextVersion : "";
       activeVersion = stringField(summary, "active_version");
       stagedVersion = stringField(summary, "built_not_published");
       values.get("active").textContent = activeVersion === "" ? "unknown" : activeVersion;
@@ -196,9 +263,10 @@ function createLaneCard(lane) {
       staleWarning.textContent = stale
         ? "The staged " + stagedVersion + " is not newer than the active " + activeVersion + ". Publishing it is a rollback: " + rollbackWarningText + "."
         : "";
-      proposedVersion = proposedNextVersion(activeVersion, stagedVersion);
       if (!userEdited) {
-        versionInput.value = proposedVersion;
+        versionInput.value = nextVersion;
+        checkedVersion = nextVersion;
+        usedRelease = null;
       }
       refreshForm();
     },
@@ -219,9 +287,10 @@ async function load(views, status, button) {
   status.textContent = "Loaded " + new Date().toLocaleTimeString();
   const body = reply.body && typeof reply.body === "object" ? reply.body : {};
   const summaries = Array.isArray(body.lanes) ? body.lanes : [];
+  const nextVersion = stringField(body, "next_version");
   for (const lane of lanes) {
     const summary = summaries.find((candidate) => candidate.lane === lane.id);
-    views.get(lane.id).setSummary(summary);
+    views.get(lane.id).setSummary(summary, nextVersion);
   }
 }
 
@@ -456,24 +525,70 @@ function compareVersions(left, right) {
   return 0;
 }
 
-function proposedNextVersion(activeText, stagedText) {
-  const highest = highestVersion(activeText, stagedText);
-  if (highest === null) {
-    return "";
+// versionHintText orders the form's guidance: a malformed or out-of-line number
+// first, then the live duplicate check, then the shared next number (G44).
+function versionHintText(typed, classification, checking, used, usedReusable, nextVersion) {
+  if (classification.kind === "invalid") {
+    return "Use a strict x.y.z number, e.g. " + (nextVersion || firstReleaseVersion) + ".";
   }
-  return highest.major + "." + highest.minor + "." + (highest.patch + 1);
+  if (classification.kind === "otherLine") {
+    return typed + " is on another version line and is refused: keep " + classification.line + " and change only the last number.";
+  }
+  if (classification.kind === "equal") {
+    return typed + " is already the active version.";
+  }
+  if (used !== null) {
+    const usedBy = typed + " is already used by the " + used.lane + " release (" + used.state + ").";
+    if (usedReusable) {
+      return usedBy + " " + usedNumberReuseWarning(typed);
+    }
+    return usedBy + " A new release never reuses a number: a client that installed a number never downloads it again. Use " + (nextVersion || "the next number") + ".";
+  }
+  if (checking) {
+    return "Checking whether " + typed + " is already used…";
+  }
+  if (typed === "" && nextVersion === "") {
+    return "Enter the lane's first version.";
+  }
+  if (typed === "") {
+    return "Empty stages the proposed next version " + nextVersion + ".";
+  }
+  return "The proposed next version is " + (nextVersion || "unknown") + ".";
 }
 
-function highestVersion(leftText, rightText) {
-  const left = parseVersion(leftText);
-  const right = parseVersion(rightText);
-  if (left === null) {
-    return right;
+// usedNumberReuseWarning is OA-10 clause 4: the rollback reuse is allowed, but
+// players who keep their data keep the content they already hold.
+function usedNumberReuseWarning(version) {
+  return "Players who keep their data and already hold " + version + " keep the old " + version + " content without any prompt.";
+}
+
+// allowedVersionsText is the permanent line under the Version field: the one
+// shared counter, the fixed line, and the only reuse exception (OA-10).
+function allowedVersionsText(nextVersion) {
+  if (nextVersion === "") {
+    return "Allowed: " + firstReleaseVersion + " or higher";
   }
-  if (right === null) {
-    return left;
+  const parsed = parseVersion(nextVersion);
+  if (parsed === null) {
+    return "Allowed: " + nextVersion + " or higher";
   }
-  return compareVersions(left, right) >= 0 ? left : right;
+  const line = parsed.major + "." + parsed.minor;
+  return "Allowed: " + nextVersion + " or higher (" + line + ".x with x >= " + parsed.patch + "). " + line +
+    " stays fixed (another line is a new APK); 1.631.0 is the APK's own number; numbers are shared by all lanes; only a rollback may reuse one (OA-10).";
+}
+
+// releaseFromReply reads the ota.release answer: lane, state and whether OA-10
+// would let a rollback take the number over.
+function releaseFromReply(reply) {
+  if (!reply.ok || reply.body === null || typeof reply.body !== "object" || reply.body.exists !== true) {
+    return null;
+  }
+  const state = stringField(reply.body, "state");
+  return {
+    lane: stringField(reply.body, "lane") || "unknown",
+    state: state || "unknown",
+    reusable: state === "SUPERSEDED" || state === "WITHDRAWN",
+  };
 }
 
 function isStale(stagedText, activeText) {

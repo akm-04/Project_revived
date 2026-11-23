@@ -127,3 +127,29 @@ func TestFoldStatusReportsNoTruncationAtTheBound(t *testing.T) {
 		t.Fatalf("truncated=%+v", status.Truncated)
 	}
 }
+
+// TestNextVersionCountsEveryLaneAndStateNumerically proves G44: the proposed
+// number is the highest of any lane and state plus one, compared as numbers.
+func TestNextVersionCountsEveryLaneAndStateNumerically(t *testing.T) {
+	cases := []struct {
+		name     string
+		versions []string
+		want     string
+	}{
+		{name: "no release", versions: nil, want: ""},
+		{name: "mixed lanes", versions: []string{"1.631.8", "1.631.7", "1.631.6"}, want: "1.631.9"},
+		{name: "ten above nine", versions: []string{"1.631.9", "1.631.10", "1.631.2"}, want: "1.631.11"},
+		{name: "highest is a replaced or old state", versions: []string{"1.631.3", "1.631.12", "1.631.4"}, want: "1.631.13"},
+	}
+	for _, testCase := range cases {
+		t.Run(testCase.name, func(t *testing.T) {
+			status, err := foldStatus(StatusSnapshot{Versions: testCase.versions})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if status.NextVersion != testCase.want {
+				t.Fatalf("next_version=%q want %q", status.NextVersion, testCase.want)
+			}
+		})
+	}
+}
