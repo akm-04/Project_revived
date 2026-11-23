@@ -11,6 +11,9 @@ import {
 import { renderAdvanced } from "./advanced.js";
 
 const statusPollMilliseconds = 15000;
+const themeStorageKey = "gxbOperatorTheme";
+const themeChoices = ["auto", "light", "dark"];
+const systemDark = window.matchMedia("(prefers-color-scheme: dark)");
 
 const pages = [
   { id: "dashboard", label: "Dashboard" },
@@ -64,6 +67,7 @@ changePasswordButton.addEventListener("click", openPasswordModal);
 passwordForm.addEventListener("submit", handlePasswordChange);
 passwordCancel.addEventListener("click", closePasswordModal);
 setInterval(pollWhileIdle, statusPollMilliseconds);
+startTheme();
 
 if (getToken() === "") {
   showLogin();
@@ -82,6 +86,50 @@ function showLogin() {
 function showApplication() {
   loginView.hidden = true;
   appView.hidden = false;
+}
+
+// G24: light, dark or auto (the system preference), kept per browser. The
+// choice drives Tabler's data-bs-theme on the root element.
+function startTheme() {
+  const choice = readThemeChoice();
+  applyTheme(choice);
+  for (const radio of document.querySelectorAll('input[name="theme-choice"]')) {
+    radio.checked = radio.value === choice;
+    radio.addEventListener("change", () => {
+      if (!radio.checked) {
+        return;
+      }
+      saveThemeChoice(radio.value);
+      applyTheme(radio.value);
+    });
+  }
+  systemDark.addEventListener("change", () => {
+    if (readThemeChoice() === "auto") {
+      applyTheme("auto");
+    }
+  });
+}
+
+function readThemeChoice() {
+  try {
+    const stored = localStorage.getItem(themeStorageKey);
+    return themeChoices.includes(stored) ? stored : "auto";
+  } catch (error) {
+    return "auto";
+  }
+}
+
+function saveThemeChoice(choice) {
+  try {
+    localStorage.setItem(themeStorageKey, choice);
+  } catch (error) {
+    return;
+  }
+}
+
+function applyTheme(choice) {
+  const dark = choice === "dark" || (choice === "auto" && systemDark.matches);
+  document.documentElement.dataset.bsTheme = dark ? "dark" : "light";
 }
 
 async function handleLogin(event) {
@@ -130,6 +178,7 @@ function resetApplication() {
   state.activePage = "dashboard";
   navView.replaceChildren();
   pageView.replaceChildren();
+  document.title = "GXB operator";
   backendError.textContent = "";
   backendState.textContent = "";
   backendState.className = "nav-link";
@@ -263,6 +312,7 @@ async function renderPage() {
   pageView.replaceChildren();
   backendError.textContent = state.backendError;
   const page = pages.find((candidate) => candidate.id === state.activePage) || pages[0];
+  document.title = page.label + " · GXB operator";
   if (page.id === "advanced") {
     renderAdvanced(pageView, state.modules);
     return;

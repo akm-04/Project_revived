@@ -1,6 +1,7 @@
 "use strict";
 
 import { confirmAction } from "../components/confirm_action.js";
+import { pageHeader, setStatus } from "../components/format.js";
 import { describeReply, request } from "../transport.js";
 
 const answerFieldPattern = /answer|reply|response|message|text|content|body/i;
@@ -14,6 +15,7 @@ const catcherAllowListFieldPattern = /allow|list|uid|player/i;
 // the registry marks planned is not called (fail closed).
 export function renderPage(container, context) {
   container.replaceChildren();
+  container.append(pageHeader(context.page.label));
   const gmModule = findModule(context.modules, "gm");
   const inbox = buildInbox();
   const overview = buildOverview(gmModule);
@@ -57,7 +59,7 @@ export function renderPage(container, context) {
       inbox.selectedIndex = -1;
       fillInbox(inbox, []);
       overview.count.textContent = "unknown";
-      inbox.status.textContent = describeReply(reply);
+      setStatus(inbox.status, describeReply(reply), "error");
       return;
     }
     const body = reply.body && typeof reply.body === "object" ? reply.body : {};
@@ -70,6 +72,7 @@ export function renderPage(container, context) {
       overview.catcher.textContent = body.catcher_mode;
     }
     inbox.status.textContent = "Loaded " + inbox.entries.length + " message" + (inbox.entries.length === 1 ? "." : "s.");
+    inbox.status.classList.remove("text-danger");
   }
 
   inbox.refresh.addEventListener("click", () => {
@@ -88,12 +91,12 @@ export function renderPage(container, context) {
   answer.button.addEventListener("click", async () => {
     const entry = selectedEntry(inbox);
     if (entry === null) {
-      answer.status.textContent = "Select a message first.";
+      setStatus(answer.status, "Select a message first.", "error");
       return;
     }
     const text = answer.text.value.trim();
     if (text === "") {
-      answer.status.textContent = "Type an answer first.";
+      setStatus(answer.status, "Type an answer first.", "error");
       return;
     }
     const confirmation = await confirmAction({
@@ -216,7 +219,7 @@ function buildInbox() {
   heading.className = "card-title";
   heading.textContent = "Inbox";
   const controls = document.createElement("div");
-  controls.className = "d-flex gap-2 mb-2";
+  controls.className = "btn-list mb-2";
   const refresh = document.createElement("button");
   refresh.type = "button";
   refresh.className = "btn btn-outline-secondary btn-sm";
@@ -224,12 +227,16 @@ function buildInbox() {
   refresh.textContent = "Refresh inbox";
   controls.append(refresh);
   const table = document.createElement("table");
+  table.className = "table table-sm table-vcenter card-table mb-0";
   table.id = "gm-inbox";
   const status = document.createElement("p");
   status.className = "status";
   status.id = "gm-inbox-status";
   status.setAttribute("role", "status");
-  card.append(heading, controls, table, status);
+  const tableWrap = document.createElement("div");
+  tableWrap.className = "table-responsive";
+  tableWrap.append(table);
+  card.append(heading, controls, tableWrap, status);
   return { card, table, status, refresh, entries: [], selectedIndex: -1 };
 }
 
@@ -471,7 +478,7 @@ function showReply(box, reply, confirmation) {
     return;
   }
   if (!reply.ok) {
-    box.status.textContent = describeReply(reply);
+    setStatus(box.status, describeReply(reply), "error");
     return;
   }
   const lines = ["HTTP " + reply.status, "reason: " + confirmation.reason, "semantic_key: " + confirmation.semantic_key];

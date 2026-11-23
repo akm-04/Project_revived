@@ -3,6 +3,7 @@
 import { describeReply, request } from "../transport.js";
 import { confirmAction } from "../components/confirm_action.js";
 import { openDurationPicker } from "../components/duration_picker.js";
+import { emptyState, formatTime, formatTimeText, pageHeader, setStatus } from "../components/format.js";
 import { openPlayerPicker } from "../components/player_picker.js";
 import { openResourcePicker } from "../components/resource_picker.js";
 
@@ -15,6 +16,7 @@ const redeemListLimit = 200;
 // the redeem codes the redeem module declares (internal/application/operatorgrant/redeem.go).
 export function renderPage(container, context) {
   container.replaceChildren();
+  container.append(pageHeader(context.page.label));
   container.setAttribute("aria-label", context.page.label);
 
   const state = {
@@ -30,6 +32,7 @@ export function renderPage(container, context) {
   const codesStatus = errorParagraph();
   codesStatus.id = "redeem-list-result";
   const codesHost = document.createElement("div");
+  codesHost.className = "table-responsive";
   codesHost.id = "redeem-list";
   codesCard.body.append(refreshCodes, codesStatus, codesHost);
 
@@ -89,7 +92,7 @@ export function renderPage(container, context) {
       return;
     }
     if (!reply.ok) {
-      codesStatus.textContent = describeReply(reply);
+      setStatus(codesStatus, describeReply(reply), "error");
       renderCodes([]);
       return;
     }
@@ -113,11 +116,11 @@ export function renderPage(container, context) {
       disableSelect.append(option);
     }
     if (entries.length === 0) {
-      codesHost.append(paragraph("hint mb-0", "No redeem codes."));
+      codesHost.append(emptyState("No redeem codes."));
       return;
     }
     const table = document.createElement("table");
-    table.className = "table table-sm table-vcenter mb-0";
+    table.className = "table table-sm table-vcenter card-table mb-0";
     const head = document.createElement("thead");
     const headRow = document.createElement("tr");
     for (const label of ["code", "state", "used", "total cap", "ends at", "reward lines"]) {
@@ -134,12 +137,16 @@ export function renderPage(container, context) {
         entry.state,
         String(entry.used_count),
         entry.total_cap === null || entry.total_cap === undefined ? "none" : String(entry.total_cap),
-        entry.ends_at === null || entry.ends_at === undefined ? "none" : String(entry.ends_at),
+        entry.ends_at === null || entry.ends_at === undefined ? "none" : formatTime(entry.ends_at),
         describeLines(Array.isArray(entry.lines) ? entry.lines : []),
       ];
       for (const value of values) {
         const cell = document.createElement("td");
-        cell.textContent = value;
+        if (value instanceof Node) {
+          cell.append(value);
+        } else {
+          cell.textContent = value;
+        }
         row.append(cell);
       }
       body.append(row);
@@ -169,11 +176,11 @@ export function renderPage(container, context) {
   async function grant() {
     grantResult.textContent = "";
     if (state.grantPlayers.length === 0) {
-      grantResult.textContent = "Select at least one player.";
+      setStatus(grantResult, "Select at least one player.", "error");
       return;
     }
     if (state.grantLines.length === 0) {
-      grantResult.textContent = "Select at least one resource line.";
+      setStatus(grantResult, "Select at least one resource line.", "error");
       return;
     }
     const confirmation = await confirmAction({
@@ -200,7 +207,7 @@ export function renderPage(container, context) {
     if (reply.unauthorized) {
       return;
     }
-    grantResult.textContent = describeBulkReply(reply) + "\nreason: " + confirmation.reason;
+    setStatus(grantResult, describeBulkReply(reply) + "\nreason: " + confirmation.reason, reply.ok ? "success" : "error");
   }
 
   async function chooseRedeemLines() {
@@ -218,13 +225,13 @@ export function renderPage(container, context) {
       return;
     }
     state.redeemExpiry = duration.end;
-    redeemExpirySummary.textContent = "Expires at " + duration.end + ".";
+    redeemExpirySummary.textContent = "Expires at " + formatTimeText(duration.end) + ".";
   }
 
   async function createRedeemCode() {
     createResult.textContent = "";
     if (state.redeemLines.length === 0) {
-      createResult.textContent = "Select at least one reward line.";
+      setStatus(createResult, "Select at least one reward line.", "error");
       return;
     }
     const totalCapText = totalCapInput.value.trim();
@@ -232,14 +239,14 @@ export function renderPage(container, context) {
     if (totalCapText !== "") {
       totalCap = Number(totalCapText);
       if (!Number.isInteger(totalCap) || totalCap < 1) {
-        createResult.textContent = "The total use cap must be a positive whole number.";
+        setStatus(createResult, "The total use cap must be a positive whole number.", "error");
         return;
       }
     }
     const confirmation = await confirmAction({
       title: "Create redeem code",
       summary: "Create a code for " + describeLines(state.redeemLines) + " with " +
-        (state.redeemExpiry === null ? "no expiry" : "expiry " + state.redeemExpiry) + ".",
+        (state.redeemExpiry === null ? "no expiry" : "expiry " + formatTimeText(state.redeemExpiry)) + ".",
       confirmLabel: "Create code",
     });
     if (confirmation === null) {
@@ -265,7 +272,7 @@ export function renderPage(container, context) {
     if (reply.unauthorized) {
       return;
     }
-    createResult.textContent = describeRedeemReply(reply) + "\nreason: " + confirmation.reason;
+    setStatus(createResult, describeRedeemReply(reply) + "\nreason: " + confirmation.reason, reply.ok ? "success" : "error");
     if (reply.ok) {
       await loadCodes();
     }
@@ -275,7 +282,7 @@ export function renderPage(container, context) {
     disableResult.textContent = "";
     const code = disableSelect.value;
     if (code === "") {
-      disableResult.textContent = "Select an active code.";
+      setStatus(disableResult, "Select an active code.", "error");
       return;
     }
     const confirmation = await confirmAction({
@@ -295,7 +302,7 @@ export function renderPage(container, context) {
     if (reply.unauthorized) {
       return;
     }
-    disableResult.textContent = describeRedeemReply(reply) + "\nreason: " + confirmation.reason;
+    setStatus(disableResult, describeRedeemReply(reply) + "\nreason: " + confirmation.reason, reply.ok ? "success" : "error");
     if (reply.ok) {
       await loadCodes();
     }
@@ -338,7 +345,7 @@ function describeRedeemReply(reply) {
     parts.push("code state " + result.state);
   }
   if (typeof result.expires_at === "string" && result.expires_at !== "") {
-    parts.push("expires " + result.expires_at);
+    parts.push("expires " + formatTimeText(result.expires_at));
   }
   if (result.total_cap !== undefined && result.total_cap !== null) {
     parts.push("total cap " + result.total_cap);

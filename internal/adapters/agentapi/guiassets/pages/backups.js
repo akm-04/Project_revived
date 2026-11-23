@@ -1,14 +1,16 @@
 "use strict";
 
 import { confirmAction } from "../components/confirm_action.js";
+import { formatTime, pageHeader, setStatus } from "../components/format.js";
 import { describeReply, request } from "../transport.js";
 
 const operationPollMilliseconds = 1000;
 
 // renderPage is the Backups screen: the snapshot overview and table first, the
 // three agent-run actions below. Update backend stays under Advanced.
-export function renderPage(container) {
+export function renderPage(container, context) {
   container.replaceChildren();
+  container.append(pageHeader(context.page.label));
   const overview = buildOverview();
   const list = buildList();
   const snapshot = buildAction("Snapshot now");
@@ -37,7 +39,7 @@ export function renderPage(container) {
     if (!reply.ok) {
       fillOverview(overview, null);
       list.table.replaceChildren(noRowsRow(6, "The snapshot list is unavailable."));
-      list.status.textContent = describeReply(reply);
+      setStatus(list.status, describeReply(reply), "error");
       return;
     }
     const body = reply.body && typeof reply.body === "object" ? reply.body : {};
@@ -46,7 +48,7 @@ export function renderPage(container) {
     restore.button.disabled = true;
     fillOverview(overview, body);
     fillTable(list.table, backups, selectSnapshot);
-    list.status.textContent = "Loaded " + backups.length + " snapshot" + (backups.length === 1 ? "." : "s.");
+    setStatus(list.status, "Loaded " + backups.length + " snapshot" + (backups.length === 1 ? "." : "s."), "success");
   }
 
   snapshot.button.addEventListener("click", async () => {
@@ -70,7 +72,7 @@ export function renderPage(container) {
 
   restore.button.addEventListener("click", async () => {
     if (selectedID === "") {
-      restore.status.textContent = "Select a valid snapshot row first.";
+      setStatus(restore.status, "Select a valid snapshot row first.", "error");
       return;
     }
     const confirmation = await confirmAction({
@@ -180,7 +182,7 @@ function buildList() {
   heading.className = "card-title";
   heading.textContent = "Snapshots";
   const controls = document.createElement("div");
-  controls.className = "d-flex gap-2 mb-2";
+  controls.className = "btn-list mb-2";
   const refresh = document.createElement("button");
   refresh.type = "button";
   refresh.className = "btn btn-outline-secondary btn-sm";
@@ -188,12 +190,16 @@ function buildList() {
   refresh.textContent = "Refresh";
   controls.append(refresh);
   const table = document.createElement("table");
+  table.className = "table table-sm table-vcenter card-table mb-0";
   table.id = "backup-table";
   const status = document.createElement("p");
   status.className = "status";
   status.id = "backup-list-status";
   status.setAttribute("role", "status");
-  card.append(heading, controls, table, status);
+  const tableWrap = document.createElement("div");
+  tableWrap.className = "table-responsive";
+  tableWrap.append(table);
+  card.append(heading, controls, tableWrap, status);
   return { card, table, status, refresh };
 }
 
@@ -268,7 +274,11 @@ function tableHead(labels) {
 
 function textCell(value) {
   const cell = document.createElement("td");
-  cell.textContent = value;
+  if (value instanceof Node) {
+    cell.append(value);
+  } else {
+    cell.textContent = value;
+  }
   return cell;
 }
 
@@ -301,7 +311,7 @@ async function showOperation(box, reply, confirmation) {
     return;
   }
   if (!reply.ok) {
-    box.status.textContent = describeReply(reply);
+    setStatus(box.status, describeReply(reply), "error");
     return;
   }
   const operation = reply.body && typeof reply.body === "object" ? reply.body : {};
@@ -322,14 +332,14 @@ async function followOperation(box, operation, header) {
       return;
     }
     if (!reply.ok) {
-      box.status.textContent = describeReply(reply);
+      setStatus(box.status, describeReply(reply), "error");
       return;
     }
     current = reply.body && typeof reply.body === "object" ? reply.body : {};
     box.result.textContent = header + "\n" + describeOperation(current);
   }
   if (current && current.state === "FAILED") {
-    box.status.textContent = "The operation failed at step " + presentText(current.failed_step, "unknown") + ".";
+    setStatus(box.status, "The operation failed at step " + presentText(current.failed_step, "unknown") + ".", "error");
   }
 }
 
@@ -355,14 +365,6 @@ function presentText(value, fallback) {
 
 function presentNumber(value, fallback) {
   return typeof value === "number" && Number.isFinite(value) ? String(value) : fallback;
-}
-
-function formatTime(value) {
-  if (typeof value !== "string" || value === "") {
-    return "unknown";
-  }
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime()) ? value : parsed.toISOString();
 }
 
 function formatSize(value) {
