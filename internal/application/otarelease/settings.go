@@ -66,8 +66,9 @@ func (f SettingsFile) Load() (domain.Settings, error) {
 	return settings, nil
 }
 
-// Save replaces the file atomically: a temp file in the same folder then a
-// rename, so a reader never sees a half-written settings.json.
+// Save replaces the file atomically: a temp file in the same folder, fsynced,
+// then a rename and a folder fsync, so a reader never sees a half-written
+// settings.json.
 func (f SettingsFile) Save(settings domain.Settings) error {
 	if f.Root == "" {
 		return errors.New("otarelease: OTA root is not configured")
@@ -79,28 +80,7 @@ func (f SettingsFile) Save(settings domain.Settings) error {
 	if err != nil {
 		return err
 	}
-	temporary, err := os.CreateTemp(f.Root, ".settings-*.json")
-	if err != nil {
-		return err
-	}
-	temporaryName := temporary.Name()
-	cleanup := func() {
-		_ = temporary.Close()
-		_ = os.Remove(temporaryName)
-	}
-	if _, err := temporary.Write(append(data, '\n')); err != nil {
-		cleanup()
-		return err
-	}
-	if err := temporary.Close(); err != nil {
-		_ = os.Remove(temporaryName)
-		return err
-	}
-	if err := os.Rename(temporaryName, f.path()); err != nil {
-		_ = os.Remove(temporaryName)
-		return err
-	}
-	return nil
+	return writeFileAtomically(f.path(), append(data, '\n'))
 }
 
 // SettingsValue is the live in-memory copy of the committed settings.

@@ -12,8 +12,9 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-// Store owns the ota_settings row and the one-time release export. The release
-// and activation rows themselves live in the OTA root's releases.json.
+// Store owns the ota_settings row, the one-time release export and the
+// ota.status ledger read. The release and activation rows themselves live in
+// the OTA root's releases.json.
 type Store struct{}
 
 const (

@@ -3,6 +3,7 @@
 package main
 
 import (
+	"os"
 	"testing"
 
 	appotarelease "gxb.local/backend/v2/internal/application/otarelease"
@@ -32,6 +33,16 @@ func TestRefuseOpenWithoutAssets(t *testing.T) {
 	}
 	if refuseOpenWithoutAssets(true, state) {
 		t.Fatal("an open start with an ACTIVE assets release was refused")
+	}
+}
+
+func TestRefuseOpenWithoutAssetsFailsClosedOnACorruptRecord(t *testing.T) {
+	state := appotarelease.NewStateFile(t.TempDir())
+	if err := os.WriteFile(state.Path(), []byte("{"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if !refuseOpenWithoutAssets(true, state) {
+		t.Fatal("an unreadable release record did not refuse the open start")
 	}
 }
 

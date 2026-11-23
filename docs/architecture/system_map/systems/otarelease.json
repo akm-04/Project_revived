@@ -293,6 +293,7 @@
    "module_test.go",
    "serving_test.go",
    "settings_test.go",
+   "statefile_commands_test.go",
    "statefile_test.go",
    "status_test.go"
   ]

@@ -3,6 +3,8 @@ package otarelease
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -134,15 +136,133 @@ func TestStateFileAssetsGuard(t *testing.T) {
 func TestStateFileWritesAtomically(t *testing.T) {
 	root := t.TempDir()
 	store := NewStateFile(root)
-	if err := store.InsertBuildTx(context.Background(), nil, stateRelease("1.631.2", domain.LaneCode), "command", time.Now()); err != nil {
+	at := time.Now().UTC().Truncate(time.Microsecond)
+	if err := store.InsertBuildTx(context.Background(), nil, stateRelease("1.631.0", domain.LaneCode), "initial", at); err != nil {
 		t.Fatal(err)
+	}
+	stop := make(chan struct{})
+	done := make(chan struct{})
+	failures := make(chan error, 1)
+	go func() {
+		defer close(done)
+		for {
+			select {
+			case <-stop:
+				return
+			default:
+			}
+			data, err := os.ReadFile(store.Path())
+			if err != nil {
+				failures <- err
+				return
+			}
+			var document StateDocument
+			if err := json.Unmarshal(data, &document); err != nil {
+				failures <- err
+				return
+			}
+			if document.Version != stateSchemaVersion {
+				failures <- errors.New("reader saw a document without the schema marker")
+				return
+			}
+		}
+	}()
+	for index := 1; index <= 40; index++ {
+		version := fmt.Sprintf("1.631.%d", index)
+		if err := store.InsertBuildTx(context.Background(), nil, stateRelease(version, domain.LaneCode), "command-"+version, at); err != nil {
+			close(stop)
+			<-done
+			t.Fatal(err)
+		}
+	}
+	close(stop)
+	<-done
+	select {
+	case err := <-failures:
+		t.Fatalf("a concurrent reader saw a partial record: %v", err)
+	default:
 	}
 	entries, err := os.ReadDir(root)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(entries) != 1 || entries[0].Name() != releaseStateFileName {
-		t.Fatalf("folder after one write = %v", entries)
+		t.Fatalf("folder after writes = %v", entries)
+	}
+}
+
+func TestStateFileCorruptFileFailsClosed(t *testing.T) {
+	for _, content := range []string{"", "{", "null", "{}", `{"releases":[]}`} {
+		root := t.TempDir()
+		if err := os.WriteFile(filepath.Join(root, releaseStateFileName), []byte(content), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		store := NewStateFile(root)
+		if _, err := store.Load(); err == nil {
+			t.Fatalf("Load accepted the corrupt record %q", content)
+		}
+		if _, err := store.HasActiveAssets(); err == nil {
+			t.Fatalf("the open guard accepted the corrupt record %q", content)
+		}
+	}
+}
+
+func TestStateFileSeedNeverOverwritesANewerFile(t *testing.T) {
+	root := t.TempDir()
+	store := NewStateFile(root)
+	at := time.Now().UTC().Truncate(time.Microsecond)
+	newer := StateDocument{Releases: []StoredRelease{{
+		RawRelease: domain.RawRelease{ID: 9, Version: "1.631.9", Lane: string(domain.LaneAssets), State: string(domain.StateActive)},
+		BuiltAt:    &at,
+	}}}
+	if err := store.Save(newer); err != nil {
+		t.Fatal(err)
+	}
+	exporter := &fixedStateExporter{document: StateDocument{Releases: []StoredRelease{{
+		RawRelease: domain.RawRelease{ID: 2, Version: "1.631.2", Lane: string(domain.LaneAssets), State: string(domain.StateActive)},
+	}}}}
+	seeded, err := store.Seed(context.Background(), tx.Runner{DB: fakeDB{}}, exporter)
+	if err != nil || seeded || exporter.calls != 0 {
+		t.Fatalf("seed = %v err=%v calls=%d", seeded, err, exporter.calls)
+	}
+	document, err := store.Load()
+	if err != nil || len(document.Releases) != 1 || document.Releases[0].Version != "1.631.9" {
+		t.Fatalf("the newer file was replaced: %+v err=%v", document.Releases, err)
+	}
+}
+
+func TestExclusivePublishLeavesAnExistingFile(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "state")
+	if err := os.WriteFile(path, []byte("old"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	wrote, err := writeFileExclusively(path, []byte("new"))
+	if err != nil || wrote {
+		t.Fatalf("exclusive publish = %v err=%v", wrote, err)
+	}
+	contents, err := os.ReadFile(path)
+	if err != nil || string(contents) != "old" {
+		t.Fatalf("existing file = %q err=%v", contents, err)
+	}
+}
+
+func TestStateFileSeedsOverAnEmptyFile(t *testing.T) {
+	root := t.TempDir()
+	store := NewStateFile(root)
+	if err := store.Save(StateDocument{}); err != nil {
+		t.Fatal(err)
+	}
+	at := time.Now().UTC().Truncate(time.Microsecond)
+	exporter := &fixedStateExporter{document: StateDocument{Releases: []StoredRelease{{
+		RawRelease: domain.RawRelease{ID: 4, Version: "1.631.2", Lane: string(domain.LaneAssets), State: string(domain.StateActive)},
+		BuiltAt:    &at,
+	}}}}
+	seeded, err := store.Seed(context.Background(), tx.Runner{DB: fakeDB{}}, exporter)
+	if err != nil || !seeded || exporter.calls != 1 {
+		t.Fatalf("seed = %v err=%v calls=%d", seeded, err, exporter.calls)
+	}
+	if active, err := store.HasActiveAssets(); err != nil || !active {
+		t.Fatalf("seeded assets missing: %v %v", active, err)
 	}
 }
 

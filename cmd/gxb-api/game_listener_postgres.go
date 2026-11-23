@@ -4,6 +4,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	appotarelease "gxb.local/backend/v2/internal/application/otarelease"
 )
@@ -31,5 +32,9 @@ func refuseOpenWithoutAssets(open bool, state *appotarelease.StateFile) bool {
 		return false
 	}
 	active, err := state.HasActiveAssets()
-	return err != nil || !active
+	if err != nil {
+		log.Printf("refusing to open: the OTA release record %s is unreadable: %v", state.Path(), err)
+		return true
+	}
+	return !active
 }

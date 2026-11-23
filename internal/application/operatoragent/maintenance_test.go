@@ -303,3 +303,35 @@ func TestRefusedStartKeepsPreviousToken(t *testing.T) {
 		t.Fatalf("the forwarded call carried %q", got)
 	}
 }
+
+type refusingOpenBackend struct {
+	closed bool
+}
+
+func (backend *refusingOpenBackend) Start(closed bool, _ string) error {
+	if closed {
+		backend.closed = true
+		return nil
+	}
+	return operatoragent.Refuse(operatoragent.CodeBackendNoAssetsRelease, "no ACTIVE assets release is published; start closed, publish an assets release, then open")
+}
+
+func (backend *refusingOpenBackend) Stop() error { return nil }
+
+func (backend *refusingOpenBackend) Status() operatoragent.BackendStatus {
+	return operatoragent.BackendStatus{}
+}
+
+// TestRestartKeepsTheNoAssetsRefusal proves a GUI restart reports the guard's
+// own code and remedy instead of a generic restart failure.
+func TestRestartKeepsTheNoAssetsRefusal(t *testing.T) {
+	backend := &refusingOpenBackend{}
+	err := operatoragent.RestartBackend(backend, &operatoragent.TokenHolder{}, false)
+	var refusal *operatoragent.Refusal
+	if !errors.As(err, &refusal) || refusal.Code != operatoragent.CodeBackendNoAssetsRelease {
+		t.Fatalf("want the no-assets refusal, got %v", err)
+	}
+	if !strings.Contains(refusal.Message, "now stopped") {
+		t.Fatalf("the refusal does not say the backend is stopped: %v", err)
+	}
+}

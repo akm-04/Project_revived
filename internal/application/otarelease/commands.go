@@ -40,9 +40,9 @@ const (
 // assets and at most this many catalog releases (OTA_AMENDMENTS OA-1).
 const maxActiveCatalogReleases = 14
 
-// CommandStore is the write side of ota_releases and ota_activations. Every
-// method runs in the bus transaction, so lock order is the bus row first, then
-// the lane's release rows ordered by version, then the activation insert.
+// CommandStore is the write side of the OTA release record. With the file store
+// every method is an in-memory change to one document; CommandTransaction makes
+// a whole command's changes and its recorded reply one atomic rewrite.
 type CommandStore interface {
 	ReleaseTx(context.Context, tx.Queryer, string) (*domain.RawRelease, error)
 	LockLaneTx(context.Context, tx.Tx, domain.Lane, string) ([]domain.RawRelease, error)
@@ -56,6 +56,23 @@ type CommandStore interface {
 	ActivateTx(context.Context, tx.Tx, string, string, time.Time) error
 	WithdrawTx(context.Context, tx.Tx, string, time.Time) error
 	InsertActivationTx(context.Context, tx.Tx, ActivationRow) (int64, error)
+}
+
+// CommandTransaction is one command applied to a single loaded document.
+// Commit saves it once; Rollback discards every change. The file lock is held
+// from BeginCommand until one of them.
+type CommandTransaction interface {
+	CommandStore
+	AppliedResult(string) (json.RawMessage, bool, error)
+	RecordApplied(string, any) error
+	Commit() error
+	Rollback()
+}
+
+// commandTransactor is implemented by a store that can apply a whole command to
+// one loaded document and save it once.
+type commandTransactor interface {
+	BeginCommand() (CommandTransaction, error)
 }
 
 // Commands applies the ota.* commands; Root is the OTA root the operator passed.
@@ -84,8 +101,9 @@ type Activation struct {
 	At           time.Time `json:"at"`
 }
 
-// ActivationRow is one ota_activations insert. ReleaseID is the release row's
-// surrogate id, so an activation never names a REPLACED row (OA-10).
+// ActivationRow is one activation record in the release file. ReleaseID is the
+// release row's surrogate id, so an activation never names a REPLACED row
+// (OA-10).
 type ActivationRow struct {
 	ReleaseID  int64
 	Version    string
@@ -107,74 +125,110 @@ func (commands Commands) Handlers() map[string]operator.Handler {
 	}
 }
 
-// commandMutex serializes the OTA commands: the release record is one file, and
-// a publish rewrites it in several store calls that must not interleave.
+// commandMutex serializes the OTA commands in this process. The release record
+// is one file, so a command's read and its single save must not interleave.
+//
+// shortcut: one backend process per OTA root, which the agent's single-child
+// guard enforces; upgrade to an exclusive flock on the root if a second writer
+// can ever share one OTA root.
 var commandMutex sync.Mutex
 
-func (commands Commands) registerBuildHandler(ctx context.Context, scope tx.Scope, command operator.Command) (any, error) {
-	commandMutex.Lock()
-	defer commandMutex.Unlock()
-	if applied, found, err := replayApplied(commands.Store, command.Envelope.SemanticKey); err != nil {
-		return nil, err
-	} else if found {
-		return applied, nil
+// runCommand applies one handler body to one loaded document when the store
+// supports it, so the command and its recorded reply become a single atomic
+// rewrite. A body error discards every change; a store without transactions
+// keeps the older per-call behaviour.
+func (commands Commands) runCommand(body func(Commands) (any, error)) (any, error) {
+	transactor, ok := commands.Store.(commandTransactor)
+	if !ok {
+		return body(commands)
 	}
-	var request domain.BuildRequest
-	if err := decodePayload(command.Payload, &request); err != nil {
-		return nil, operator.Refuse(CodePayloadInvalid, err.Error(), nil)
-	}
-	result, err := commands.RegisterBuild(ctx, scope.Tx, command.Envelope.SemanticKey, request, scope.Operation.StartedAt)
+	transaction, err := transactor.BeginCommand()
 	if err != nil {
 		return nil, err
 	}
-	if err := recordApplied(commands.Store, command.Envelope.SemanticKey, result); err != nil {
+	scoped := commands
+	scoped.Store = transaction
+	result, err := body(scoped)
+	if err != nil {
+		transaction.Rollback()
+		return nil, err
+	}
+	if err := transaction.Commit(); err != nil {
 		return nil, err
 	}
 	return result, nil
 }
 
+func (commands Commands) registerBuildHandler(ctx context.Context, scope tx.Scope, command operator.Command) (any, error) {
+	commandMutex.Lock()
+	defer commandMutex.Unlock()
+	return commands.runCommand(func(scoped Commands) (any, error) {
+		if applied, found, err := replayApplied(scoped.Store, command.Envelope.SemanticKey); err != nil {
+			return nil, err
+		} else if found {
+			return applied, nil
+		}
+		var request domain.BuildRequest
+		if err := decodePayload(command.Payload, &request); err != nil {
+			return nil, operator.Refuse(CodePayloadInvalid, err.Error(), nil)
+		}
+		result, err := scoped.RegisterBuild(ctx, scope.Tx, command.Envelope.SemanticKey, request, scope.Operation.StartedAt)
+		if err != nil {
+			return nil, err
+		}
+		if err := recordApplied(scoped.Store, command.Envelope.SemanticKey, result); err != nil {
+			return nil, err
+		}
+		return result, nil
+	})
+}
+
 func (commands Commands) publishHandler(ctx context.Context, scope tx.Scope, command operator.Command) (any, error) {
 	commandMutex.Lock()
 	defer commandMutex.Unlock()
-	if applied, found, err := replayApplied(commands.Store, command.Envelope.SemanticKey); err != nil {
-		return nil, err
-	} else if found {
-		return applied, nil
-	}
-	var request releasePayload
-	if err := decodePayload(command.Payload, &request); err != nil {
-		return nil, operator.Refuse(CodePayloadInvalid, err.Error(), nil)
-	}
-	activation, err := commands.Publish(ctx, scope.Tx, command.Envelope.SemanticKey, command.Envelope.ExpectedRevision, request.Version, scope.Operation.StartedAt)
-	if err != nil {
-		return nil, err
-	}
-	if err := recordApplied(commands.Store, command.Envelope.SemanticKey, activation); err != nil {
-		return nil, err
-	}
-	return activation, nil
+	return commands.runCommand(func(scoped Commands) (any, error) {
+		if applied, found, err := replayApplied(scoped.Store, command.Envelope.SemanticKey); err != nil {
+			return nil, err
+		} else if found {
+			return applied, nil
+		}
+		var request releasePayload
+		if err := decodePayload(command.Payload, &request); err != nil {
+			return nil, operator.Refuse(CodePayloadInvalid, err.Error(), nil)
+		}
+		activation, err := scoped.Publish(ctx, scope.Tx, command.Envelope.SemanticKey, command.Envelope.ExpectedRevision, request.Version, scope.Operation.StartedAt)
+		if err != nil {
+			return nil, err
+		}
+		if err := recordApplied(scoped.Store, command.Envelope.SemanticKey, activation); err != nil {
+			return nil, err
+		}
+		return activation, nil
+	})
 }
 
 func (commands Commands) withdrawHandler(ctx context.Context, scope tx.Scope, command operator.Command) (any, error) {
 	commandMutex.Lock()
 	defer commandMutex.Unlock()
-	if applied, found, err := replayApplied(commands.Store, command.Envelope.SemanticKey); err != nil {
-		return nil, err
-	} else if found {
-		return applied, nil
-	}
-	var request releasePayload
-	if err := decodePayload(command.Payload, &request); err != nil {
-		return nil, operator.Refuse(CodePayloadInvalid, err.Error(), nil)
-	}
-	activation, err := commands.Withdraw(ctx, scope.Tx, command.Envelope.SemanticKey, command.Envelope.ExpectedRevision, request.Version, scope.Operation.StartedAt)
-	if err != nil {
-		return nil, err
-	}
-	if err := recordApplied(commands.Store, command.Envelope.SemanticKey, activation); err != nil {
-		return nil, err
-	}
-	return activation, nil
+	return commands.runCommand(func(scoped Commands) (any, error) {
+		if applied, found, err := replayApplied(scoped.Store, command.Envelope.SemanticKey); err != nil {
+			return nil, err
+		} else if found {
+			return applied, nil
+		}
+		var request releasePayload
+		if err := decodePayload(command.Payload, &request); err != nil {
+			return nil, operator.Refuse(CodePayloadInvalid, err.Error(), nil)
+		}
+		activation, err := scoped.Withdraw(ctx, scope.Tx, command.Envelope.SemanticKey, command.Envelope.ExpectedRevision, request.Version, scope.Operation.StartedAt)
+		if err != nil {
+			return nil, err
+		}
+		if err := recordApplied(scoped.Store, command.Envelope.SemanticKey, activation); err != nil {
+			return nil, err
+		}
+		return activation, nil
+	})
 }
 
 // appliedCommandStore is implemented by StateFile: the bus retries a body on a

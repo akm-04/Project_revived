@@ -17,7 +17,9 @@ var errInvalid = errors.New("otastore: invalid input")
 const exportReleases = `SELECT COALESCE(jsonb_agg(jsonb_build_object(
 	'id',id,'version',version,'lane',lane,'state',state,'package_files',package_files,
 	'total_size',total_size,'md5',md5,'sha256',sha256,'manifest',manifest,
-	'built_at',built_at,'published_at',published_at
+	'built_at',built_at,'published_at',published_at,
+	'superseded_at',superseded_at,'withdrawn_at',withdrawn_at,
+	'replaced_at',replaced_at,'replaced_by',replaced_by
 ) ORDER BY id),'[]'::jsonb)::text FROM ota_releases`
 
 const exportActivations = `SELECT COALESCE(jsonb_agg(jsonb_build_object(

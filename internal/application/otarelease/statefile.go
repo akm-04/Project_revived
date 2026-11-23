@@ -31,18 +31,25 @@ const NoAssetsExitCode = 78
 // a read fails closed rather than silently drop a live release.
 const maxActiveStateReleases = 16
 
+// stateSchemaVersion marks the release file's layout. A document without it is
+// not an empty record: it is a corrupt or foreign file and fails closed.
+const stateSchemaVersion = 1
+
 var errInvalidState = errors.New("otarelease: invalid OTA release state")
 
-// StoredRelease is one release row plus the timestamps ota.status reports.
+// StoredRelease is one release row plus the lifecycle timestamps ota.status and
+// the OA-10 rollback-reuse audit trail keep.
 type StoredRelease struct {
 	domain.RawRelease
 	BuiltAt      *time.Time `json:"built_at,omitempty"`
 	PublishedAt  *time.Time `json:"published_at,omitempty"`
 	SupersededAt *time.Time `json:"superseded_at,omitempty"`
 	WithdrawnAt  *time.Time `json:"withdrawn_at,omitempty"`
+	ReplacedAt   *time.Time `json:"replaced_at,omitempty"`
+	ReplacedBy   *int64     `json:"replaced_by,omitempty"`
 }
 
-// StoredActivation is one ota_activations row; ID is the revision every
+// StoredActivation is one activation record; ID is the revision every
 // maintenance command names as expected_revision.
 type StoredActivation struct {
 	ID         int64     `json:"id"`
@@ -57,6 +64,7 @@ type StoredActivation struct {
 // command's reply: the operator bus retries a transaction body on a serializable
 // abort, and a retried OTA command must not apply its file change twice.
 type StateDocument struct {
+	Version     int                        `json:"version"`
 	Releases    []StoredRelease            `json:"releases"`
 	Activations []StoredActivation         `json:"activations"`
 	Applied     map[string]json.RawMessage `json:"applied,omitempty"`
@@ -104,61 +112,52 @@ func (f *StateFile) Load() (StateDocument, error) {
 	if err := json.Unmarshal(data, &document); err != nil {
 		return StateDocument{}, fmt.Errorf("otarelease: %s: %w", f.Path(), err)
 	}
+	if document.Version != stateSchemaVersion {
+		return StateDocument{}, fmt.Errorf("otarelease: %s: unsupported release state version %d", f.Path(), document.Version)
+	}
 	return document, nil
 }
 
-// Save replaces the file atomically: a temp file in the same folder then a
-// rename, so a reader never sees a half-written record.
+// Save replaces the file atomically: a temp file in the same folder, fsynced,
+// then a rename and a folder fsync, so a reader never sees a half-written
+// record and a crash leaves the previous or the new one.
 func (f *StateFile) Save(document StateDocument) error {
 	if f == nil || f.Root == "" {
 		return errors.New("otarelease: OTA root is not configured")
 	}
-	data, err := json.MarshalIndent(document, "", "  ")
+	data, err := encodedState(document)
 	if err != nil {
 		return err
 	}
-	temporary, err := os.CreateTemp(f.Root, ".releases-*.json")
-	if err != nil {
-		return err
-	}
-	temporaryName := temporary.Name()
-	cleanup := func() {
-		_ = temporary.Close()
-		_ = os.Remove(temporaryName)
-	}
-	if _, err := temporary.Write(append(data, '\n')); err != nil {
-		cleanup()
-		return err
-	}
-	if err := temporary.Close(); err != nil {
-		_ = os.Remove(temporaryName)
-		return err
-	}
-	if err := os.Rename(temporaryName, f.Path()); err != nil {
-		_ = os.Remove(temporaryName)
-		return err
-	}
-	return nil
+	return writeFileAtomically(f.Path(), data)
 }
 
 // Seed imports the database rows once, when the release file does not exist
-// yet, and leaves the file untouched afterwards. A database restore therefore
-// never rewrites the live OTA.
+// yet or holds nothing, and leaves a populated file untouched afterwards. A
+// database restore therefore never rewrites the live OTA.
 func (f *StateFile) Seed(ctx context.Context, runner tx.Runner, exporter StateExporter) (bool, error) {
 	if f == nil || f.Root == "" || exporter == nil || runner.DB == nil {
 		return false, nil
 	}
+	exists := false
 	if _, err := os.Stat(f.Path()); err == nil {
-		return false, nil
+		exists = true
+		current, err := f.Load()
+		if err != nil {
+			return false, err
+		}
+		if !emptyState(current) {
+			return false, nil
+		}
 	} else if !errors.Is(err, os.ErrNotExist) {
 		return false, err
 	}
-	current, err := (operation.Factory{Clock: clock.System{}}).New(policy.Set{})
+	currentOperation, err := (operation.Factory{Clock: clock.System{}}).New(policy.Set{})
 	if err != nil {
 		return false, err
 	}
 	var document StateDocument
-	_, err = runner.Run(ctx, current, ReadProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, scope tx.Scope) error {
+	_, err = runner.Run(ctx, currentOperation, ReadProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, scope tx.Scope) error {
 		loaded, readErr := exporter.ExportStateTx(ctx, scope.Tx)
 		if readErr == nil {
 			document = loaded
@@ -168,10 +167,29 @@ func (f *StateFile) Seed(ctx context.Context, runner tx.Runner, exporter StateEx
 	if err != nil {
 		return false, err
 	}
-	if err := f.Save(document); err != nil {
-		return false, err
+	if !exists {
+		// Another process seeding the same root wins the link; its newer file
+		// is left alone.
+		data, err := encodedState(document)
+		if err != nil {
+			return false, err
+		}
+		return writeFileExclusively(f.Path(), data)
 	}
-	return true, nil
+	return true, f.Save(document)
+}
+
+func encodedState(document StateDocument) ([]byte, error) {
+	document.Version = stateSchemaVersion
+	data, err := json.MarshalIndent(document, "", "  ")
+	if err != nil {
+		return nil, err
+	}
+	return append(data, '\n'), nil
+}
+
+func emptyState(document StateDocument) bool {
+	return len(document.Releases) == 0 && len(document.Activations) == 0 && len(document.Applied) == 0
 }
 
 // HasActiveAssets reports whether any ACTIVE assets release is published.
@@ -212,10 +230,7 @@ func (f *StateFile) RecordApplied(commandKey string, result any) error {
 		return err
 	}
 	return f.mutate(func(document *StateDocument) error {
-		if document.Applied == nil {
-			document.Applied = map[string]json.RawMessage{}
-		}
-		document.Applied[commandKey] = encoded
+		recordAppliedIn(document, commandKey, encoded)
 		return nil
 	})
 }
@@ -261,12 +276,8 @@ func (f *StateFile) ReleaseStatusTx(_ context.Context, _ tx.Queryer, version str
 	if err != nil {
 		return false, "", "", err
 	}
-	for _, release := range document.Releases {
-		if release.Version == version && release.State != string(domain.StateReplaced) {
-			return true, release.Lane, release.State, nil
-		}
-	}
-	return false, "", "", nil
+	exists, lane, state := releaseStatusFromDocument(document, version)
+	return exists, lane, state, nil
 }
 
 func (f *StateFile) ReleaseTx(_ context.Context, _ tx.Queryer, version string) (*domain.RawRelease, error) {
@@ -277,13 +288,7 @@ func (f *StateFile) ReleaseTx(_ context.Context, _ tx.Queryer, version string) (
 	if err != nil {
 		return nil, err
 	}
-	for _, release := range document.Releases {
-		if release.Version == version && release.State != string(domain.StateReplaced) {
-			row := release.RawRelease
-			return &row, nil
-		}
-	}
-	return nil, nil
+	return releaseFromDocument(document, version), nil
 }
 
 func (f *StateFile) LockLaneTx(_ context.Context, _ tx.Tx, lane domain.Lane, version string) ([]domain.RawRelease, error) {
@@ -294,19 +299,7 @@ func (f *StateFile) LockLaneTx(_ context.Context, _ tx.Tx, lane domain.Lane, ver
 	if err != nil {
 		return nil, err
 	}
-	rows := make([]domain.RawRelease, 0)
-	for _, release := range document.Releases {
-		if release.State == string(domain.StateReplaced) || release.Lane != string(lane) {
-			continue
-		}
-		if release.State == string(domain.StateActive) || release.State == string(domain.StateBuilt) || release.Version == version {
-			rows = append(rows, release.RawRelease)
-		}
-	}
-	if err := sortRawReleases(rows); err != nil {
-		return nil, err
-	}
-	return rows, nil
+	return lockLaneInDocument(document, lane, version)
 }
 
 func (f *StateFile) ActiveRevisionTx(context.Context, tx.Queryer) (int64, error) {
@@ -322,12 +315,7 @@ func (f *StateFile) InsertBuildTx(_ context.Context, _ tx.Tx, release domain.Rel
 		return errInvalidState
 	}
 	return f.mutate(func(document *StateDocument) error {
-		stored, err := storedRelease(release, nextReleaseID(*document), at)
-		if err != nil {
-			return err
-		}
-		document.Releases = append(document.Releases, stored)
-		return nil
+		return insertBuildIn(document, release, at)
 	})
 }
 
@@ -336,24 +324,7 @@ func (f *StateFile) ReuseBuildTx(_ context.Context, _ tx.Tx, replacedID int64, r
 		return errInvalidState
 	}
 	return f.mutate(func(document *StateDocument) error {
-		found := false
-		for index := range document.Releases {
-			row := &document.Releases[index]
-			if row.ID == replacedID && row.State != string(domain.StateReplaced) {
-				row.State = string(domain.StateReplaced)
-				found = true
-				break
-			}
-		}
-		if !found {
-			return errors.New("otarelease: the reused release is already replaced")
-		}
-		stored, err := storedRelease(release, nextReleaseID(*document), at)
-		if err != nil {
-			return err
-		}
-		document.Releases = append(document.Releases, stored)
-		return nil
+		return reuseBuildIn(document, replacedID, release, at)
 	})
 }
 
@@ -363,17 +334,9 @@ func (f *StateFile) SupersedeLaneTx(_ context.Context, _ tx.Tx, lane domain.Lane
 	}
 	var versions []string
 	err := f.mutate(func(document *StateDocument) error {
-		supersededAt := at.UTC()
-		for index := range document.Releases {
-			row := &document.Releases[index]
-			if row.Lane != string(lane) || row.State != string(domain.StateActive) {
-				continue
-			}
-			row.State = string(domain.StateSuperseded)
-			row.SupersededAt = &supersededAt
-			versions = append(versions, row.Version)
-		}
-		return sortVersionTexts(versions)
+		superseded, applyErr := supersedeLaneIn(document, lane, at)
+		versions = superseded
+		return applyErr
 	})
 	if err != nil {
 		return nil, err
@@ -386,17 +349,7 @@ func (f *StateFile) ActivateTx(_ context.Context, _ tx.Tx, version, commandKey s
 		return errInvalidState
 	}
 	return f.mutate(func(document *StateDocument) error {
-		publishedAt := at.UTC()
-		for index := range document.Releases {
-			row := &document.Releases[index]
-			if row.Version != version || row.State != string(domain.StateBuilt) {
-				continue
-			}
-			row.State = string(domain.StateActive)
-			row.PublishedAt = &publishedAt
-			return nil
-		}
-		return errors.New("otarelease: release is not BUILT")
+		return activateIn(document, version, at)
 	})
 }
 
@@ -405,31 +358,17 @@ func (f *StateFile) WithdrawTx(_ context.Context, _ tx.Tx, version string, at ti
 		return errInvalidState
 	}
 	return f.mutate(func(document *StateDocument) error {
-		withdrawnAt := at.UTC()
-		for index := range document.Releases {
-			row := &document.Releases[index]
-			if row.Version != version || row.State != string(domain.StateActive) {
-				continue
-			}
-			row.State = string(domain.StateWithdrawn)
-			row.WithdrawnAt = &withdrawnAt
-			return nil
-		}
-		return errors.New("otarelease: release is not ACTIVE")
+		return withdrawIn(document, version, at)
 	})
 }
 
 func (f *StateFile) InsertActivationTx(_ context.Context, _ tx.Tx, activation ActivationRow) (int64, error) {
-	if activation.ReleaseID <= 0 || activation.Version == "" || activation.Action == "" || activation.CommandKey == "" || activation.At.IsZero() {
+	if !validActivation(activation) {
 		return 0, errInvalidState
 	}
 	var id int64
 	err := f.mutate(func(document *StateDocument) error {
-		id = highestActivationID(*document) + 1
-		document.Activations = append(document.Activations, StoredActivation{
-			ID: id, ReleaseID: activation.ReleaseID, Version: activation.Version,
-			Action: activation.Action, CommandKey: activation.CommandKey, At: activation.At.UTC(),
-		})
+		id = insertActivationIn(document, activation)
 		return nil
 	})
 	if err != nil {
@@ -438,10 +377,264 @@ func (f *StateFile) InsertActivationTx(_ context.Context, _ tx.Tx, activation Ac
 	return id, nil
 }
 
+// BeginCommand loads the document once and holds the file lock until Commit or
+// Rollback, so an operator command's several store calls become one atomic
+// rewrite instead of one rename per call.
+func (f *StateFile) BeginCommand() (CommandTransaction, error) {
+	if f == nil {
+		return nil, errors.New("otarelease: OTA state is not configured")
+	}
+	f.mu.Lock()
+	document, err := f.Load()
+	if err != nil {
+		f.mu.Unlock()
+		return nil, err
+	}
+	return &commandTransaction{file: f, document: document}, nil
+}
+
+type commandTransaction struct {
+	file     *StateFile
+	document StateDocument
+	closed   bool
+}
+
+func (transaction *commandTransaction) finish() {
+	if transaction.closed {
+		return
+	}
+	transaction.closed = true
+	transaction.file.mu.Unlock()
+}
+
+func (transaction *commandTransaction) Commit() error {
+	defer transaction.finish()
+	return transaction.file.Save(transaction.document)
+}
+
+func (transaction *commandTransaction) Rollback() {
+	transaction.finish()
+}
+
+func (transaction *commandTransaction) ReleaseTx(_ context.Context, _ tx.Queryer, version string) (*domain.RawRelease, error) {
+	if version == "" {
+		return nil, errInvalidState
+	}
+	return releaseFromDocument(transaction.document, version), nil
+}
+
+func (transaction *commandTransaction) LockLaneTx(_ context.Context, _ tx.Tx, lane domain.Lane, version string) ([]domain.RawRelease, error) {
+	if lane == "" || version == "" {
+		return nil, errInvalidState
+	}
+	return lockLaneInDocument(transaction.document, lane, version)
+}
+
+func (transaction *commandTransaction) ActiveRevisionTx(context.Context, tx.Queryer) (int64, error) {
+	return highestActivationID(transaction.document), nil
+}
+
+func (transaction *commandTransaction) InsertBuildTx(_ context.Context, _ tx.Tx, release domain.Release, commandKey string, at time.Time) error {
+	if commandKey == "" || at.IsZero() {
+		return errInvalidState
+	}
+	return insertBuildIn(&transaction.document, release, at)
+}
+
+func (transaction *commandTransaction) ReuseBuildTx(_ context.Context, _ tx.Tx, replacedID int64, release domain.Release, commandKey string, at time.Time) error {
+	if replacedID <= 0 || commandKey == "" || at.IsZero() {
+		return errInvalidState
+	}
+	return reuseBuildIn(&transaction.document, replacedID, release, at)
+}
+
+func (transaction *commandTransaction) SupersedeLaneTx(_ context.Context, _ tx.Tx, lane domain.Lane, at time.Time) ([]string, error) {
+	if lane == "" || at.IsZero() {
+		return nil, errInvalidState
+	}
+	return supersedeLaneIn(&transaction.document, lane, at)
+}
+
+func (transaction *commandTransaction) ActivateTx(_ context.Context, _ tx.Tx, version, commandKey string, at time.Time) error {
+	if version == "" || commandKey == "" || at.IsZero() {
+		return errInvalidState
+	}
+	return activateIn(&transaction.document, version, at)
+}
+
+func (transaction *commandTransaction) WithdrawTx(_ context.Context, _ tx.Tx, version string, at time.Time) error {
+	if version == "" || at.IsZero() {
+		return errInvalidState
+	}
+	return withdrawIn(&transaction.document, version, at)
+}
+
+func (transaction *commandTransaction) InsertActivationTx(_ context.Context, _ tx.Tx, activation ActivationRow) (int64, error) {
+	if !validActivation(activation) {
+		return 0, errInvalidState
+	}
+	return insertActivationIn(&transaction.document, activation), nil
+}
+
+func (transaction *commandTransaction) AppliedResult(commandKey string) (json.RawMessage, bool, error) {
+	if commandKey == "" {
+		return nil, false, nil
+	}
+	result, found := transaction.document.Applied[commandKey]
+	return result, found, nil
+}
+
+func (transaction *commandTransaction) RecordApplied(commandKey string, result any) error {
+	if commandKey == "" {
+		return errInvalidState
+	}
+	encoded, err := json.Marshal(result)
+	if err != nil {
+		return err
+	}
+	recordAppliedIn(&transaction.document, commandKey, encoded)
+	return nil
+}
+
+func releaseFromDocument(document StateDocument, version string) *domain.RawRelease {
+	for _, release := range document.Releases {
+		if release.Version == version && release.State != string(domain.StateReplaced) {
+			row := release.RawRelease
+			return &row
+		}
+	}
+	return nil
+}
+
+func releaseStatusFromDocument(document StateDocument, version string) (bool, string, string) {
+	for _, release := range document.Releases {
+		if release.Version == version && release.State != string(domain.StateReplaced) {
+			return true, release.Lane, release.State
+		}
+	}
+	return false, "", ""
+}
+
+func lockLaneInDocument(document StateDocument, lane domain.Lane, version string) ([]domain.RawRelease, error) {
+	rows := make([]domain.RawRelease, 0)
+	for _, release := range document.Releases {
+		if release.State == string(domain.StateReplaced) || release.Lane != string(lane) {
+			continue
+		}
+		if release.State == string(domain.StateActive) || release.State == string(domain.StateBuilt) || release.Version == version {
+			rows = append(rows, release.RawRelease)
+		}
+	}
+	if err := sortRawReleases(rows); err != nil {
+		return nil, err
+	}
+	return rows, nil
+}
+
+func insertBuildIn(document *StateDocument, release domain.Release, at time.Time) error {
+	stored, err := storedRelease(release, nextReleaseID(*document), at)
+	if err != nil {
+		return err
+	}
+	document.Releases = append(document.Releases, stored)
+	return nil
+}
+
+func reuseBuildIn(document *StateDocument, replacedID int64, release domain.Release, at time.Time) error {
+	newID := nextReleaseID(*document)
+	found := false
+	for index := range document.Releases {
+		row := &document.Releases[index]
+		if row.ID == replacedID && row.State != string(domain.StateReplaced) {
+			replacedAt := at.UTC()
+			row.State = string(domain.StateReplaced)
+			row.ReplacedAt = &replacedAt
+			row.ReplacedBy = &newID
+			found = true
+			break
+		}
+	}
+	if !found {
+		return errors.New("otarelease: the reused release is already replaced")
+	}
+	stored, err := storedRelease(release, newID, at)
+	if err != nil {
+		return err
+	}
+	document.Releases = append(document.Releases, stored)
+	return nil
+}
+
+func supersedeLaneIn(document *StateDocument, lane domain.Lane, at time.Time) ([]string, error) {
+	var versions []string
+	supersededAt := at.UTC()
+	for index := range document.Releases {
+		row := &document.Releases[index]
+		if row.Lane != string(lane) || row.State != string(domain.StateActive) {
+			continue
+		}
+		row.State = string(domain.StateSuperseded)
+		row.SupersededAt = &supersededAt
+		versions = append(versions, row.Version)
+	}
+	if err := sortVersionTexts(versions); err != nil {
+		return nil, err
+	}
+	return versions, nil
+}
+
+func activateIn(document *StateDocument, version string, at time.Time) error {
+	publishedAt := at.UTC()
+	for index := range document.Releases {
+		row := &document.Releases[index]
+		if row.Version != version || row.State != string(domain.StateBuilt) {
+			continue
+		}
+		row.State = string(domain.StateActive)
+		row.PublishedAt = &publishedAt
+		return nil
+	}
+	return errors.New("otarelease: release is not BUILT")
+}
+
+func withdrawIn(document *StateDocument, version string, at time.Time) error {
+	withdrawnAt := at.UTC()
+	for index := range document.Releases {
+		row := &document.Releases[index]
+		if row.Version != version || row.State != string(domain.StateActive) {
+			continue
+		}
+		row.State = string(domain.StateWithdrawn)
+		row.WithdrawnAt = &withdrawnAt
+		return nil
+	}
+	return errors.New("otarelease: release is not ACTIVE")
+}
+
+func validActivation(activation ActivationRow) bool {
+	return activation.ReleaseID > 0 && activation.Version != "" && activation.Action != "" && activation.CommandKey != "" && !activation.At.IsZero()
+}
+
+func insertActivationIn(document *StateDocument, activation ActivationRow) int64 {
+	id := highestActivationID(*document) + 1
+	document.Activations = append(document.Activations, StoredActivation{
+		ID: id, ReleaseID: activation.ReleaseID, Version: activation.Version,
+		Action: activation.Action, CommandKey: activation.CommandKey, At: activation.At.UTC(),
+	})
+	return id
+}
+
+func recordAppliedIn(document *StateDocument, commandKey string, encoded json.RawMessage) {
+	if document.Applied == nil {
+		document.Applied = map[string]json.RawMessage{}
+	}
+	document.Applied[commandKey] = encoded
+}
+
 // ReadStatusTx folds the file into the ota.status snapshot. The serving
-// counters and misses are telemetry and stay in their database tables; they are
-// read through the caller's read-only transaction.
-func (f *StateFile) ReadStatusTx(ctx context.Context, query tx.Queryer) (StatusSnapshot, error) {
+// counters and misses are telemetry and stay in their database tables, so the
+// status service reads them through its ledger port instead.
+func (f *StateFile) ReadStatusTx(context.Context, tx.Queryer) (StatusSnapshot, error) {
 	document, err := f.Load()
 	if err != nil {
 		return StatusSnapshot{}, err
@@ -482,33 +675,7 @@ func (f *StateFile) ReadStatusTx(ctx context.Context, query tx.Queryer) (StatusS
 		return StatusSnapshot{}, err
 	}
 	snapshot.Versions = boundRows(snapshot.Versions, StatusVersionLimit)
-	if query != nil {
-		if err := readLedgerStatus(ctx, query, &snapshot); err != nil {
-			return StatusSnapshot{}, err
-		}
-	}
 	return snapshot, nil
-}
-
-const readServedCounters = `SELECT COALESCE(jsonb_agg(jsonb_build_object('path',path,'hits',hits) ORDER BY hits DESC, path),'[]'::jsonb)::text
-FROM (SELECT path,sum(hits) AS hits FROM ota_asset_served_daily GROUP BY path ORDER BY hits DESC, path LIMIT $1) served`
-
-const readAssetMisses = `SELECT COALESCE(jsonb_agg(jsonb_build_object(
-	'path',path,'md5',md5,'first_seen',first_seen,'last_seen',last_seen,'hits',hits,'first_uid',first_uid) ORDER BY hits DESC, path),'[]'::jsonb)::text
-FROM (SELECT path,md5,first_seen,last_seen,hits,first_uid FROM ota_asset_misses ORDER BY hits DESC, path LIMIT $1) misses`
-
-func readLedgerStatus(ctx context.Context, query tx.Queryer, snapshot *StatusSnapshot) error {
-	var servedRaw, missesRaw string
-	if err := query.QueryRow(ctx, readServedCounters, StatusServedLimit+1).Scan(&servedRaw); err != nil {
-		return err
-	}
-	if err := json.Unmarshal([]byte(servedRaw), &snapshot.Served); err != nil {
-		return err
-	}
-	if err := query.QueryRow(ctx, readAssetMisses, StatusMissesLimit+1).Scan(&missesRaw); err != nil {
-		return err
-	}
-	return json.Unmarshal([]byte(missesRaw), &snapshot.Misses)
 }
 
 func (f *StateFile) mutate(change func(*StateDocument) error) error {

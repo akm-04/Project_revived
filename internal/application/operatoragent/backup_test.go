@@ -92,18 +92,24 @@ func (reader fakeVersionReader) Version(context.Context) (operator.VersionInfo, 
 }
 
 type fakeProcess struct {
-	running  bool
-	starts   int
-	stops    int
-	startErr error
-	stopErr  error
+	running         bool
+	starts          int
+	stops           int
+	startErr        error
+	openErr         error
+	stopErr         error
+	lastStartClosed bool
 }
 
-func (process *fakeProcess) Start(bool, string) error {
+func (process *fakeProcess) Start(closed bool, _ string) error {
+	if !closed && process.openErr != nil {
+		return process.openErr
+	}
 	if process.startErr != nil {
 		return process.startErr
 	}
 	process.starts++
+	process.lastStartClosed = closed
 	process.running = true
 	return nil
 }
@@ -363,6 +369,51 @@ func TestRestoreSwapsDatabasesAndRetainsPreRestore(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(service.Directory, backupStateFileName)); !errors.Is(err, os.ErrNotExist) {
 		t.Fatalf("the restore state was not cleared: %v", err)
+	}
+}
+
+// TestRestoreCompletesClosedWhenTheOpenStartLacksAnAssetsRelease proves the
+// release guard does not turn a good restore into a rolled-back one.
+func TestRestoreCompletesClosedWhenTheOpenStartLacksAnAssetsRelease(t *testing.T) {
+	service, _, process := newBackupService(t)
+	process.openErr = Refuse(CodeBackendNoAssetsRelease, "no ACTIVE assets release is published; start closed, publish an assets release, then open")
+	id := "20260101T000000.000000000Z-manual"
+	writeSnapshot(t, service.Directory, id, BackupKindManual, time.Date(2026, 11, 20, 10, 0, 0, 0, time.UTC), "restore me")
+	operation, err := service.Restore(context.Background(), id, "lost ota state")
+	if err != nil || operation.State != OperationDone || operation.FailedStep != "" {
+		t.Fatalf("restore: %+v %v", operation, err)
+	}
+	if process.running {
+		t.Fatal("a refused open left the backend running")
+	}
+	if _, err := os.Stat(filepath.Join(service.Directory, backupPreRestoreFileName)); err != nil {
+		t.Fatalf("the prerestore marker is missing: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(service.Directory, backupStateFileName)); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("the restore state was not cleared: %v", err)
+	}
+	var result map[string]any
+	if err := json.Unmarshal(operation.Result, &result); err != nil {
+		t.Fatal(err)
+	}
+	if result["error_code"] != CodeBackendNoAssetsRelease || result["backend"] != "closed" {
+		t.Fatalf("restore result = %+v", result)
+	}
+}
+
+// TestRestoreFailureStartsClosedWhenTheOpenStartLacksAssets proves the rollback
+// path keeps the guard semantics instead of leaving the backend stopped.
+func TestRestoreFailureStartsClosedWhenTheOpenStartLacksAssets(t *testing.T) {
+	service, tools, process := newBackupService(t)
+	tools.restoreErr = errors.New("pg_restore: input file does not appear to be a valid archive")
+	process.openErr = Refuse(CodeBackendNoAssetsRelease, "no ACTIVE assets release is published")
+	id := "20260101T000000.000000000Z-manual"
+	writeSnapshot(t, service.Directory, id, BackupKindManual, time.Date(2026, 11, 20, 10, 0, 0, 0, time.UTC), "restore me")
+	if _, err := service.Restore(context.Background(), id, "bad archive"); err == nil {
+		t.Fatal("the failing restore was not reported")
+	}
+	if !process.running || !process.lastStartClosed {
+		t.Fatalf("original start = running %v closed %v", process.running, process.lastStartClosed)
 	}
 }
 

@@ -5668,6 +5668,7 @@
     "*ExportStateTx",
     "*FlushTx",
     "*LockSettingsTx",
+    "*ReadLedgerTx",
     "*ReadSettingsTx",
     "*SaveSettingsTx"
    ]
