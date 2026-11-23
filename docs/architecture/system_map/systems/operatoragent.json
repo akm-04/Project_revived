@@ -35,6 +35,7 @@
    "config_test.go",
    "credentials_test.go",
    "dashboard_test.go",
+   "filebrowser_test.go",
    "logfiles_test.go",
    "logs_test.go",
    "maintenance_test.go",

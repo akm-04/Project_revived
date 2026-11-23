@@ -129,6 +129,7 @@ func runAgent(root string, args []string) error {
 		ToolLog:     toolLog,
 		Logs:        logService,
 		Settings:    settings,
+		Files:       &operatoragent.FileBrowser{Root: root},
 		Pings:       pings,
 		Media:       media,
 		OTARoot:     config.OTARoot,

@@ -2,6 +2,7 @@
 
 import { describeReply, request } from "../transport.js";
 import { pageHeader } from "../components/format.js";
+import { openPathPicker } from "../components/path_picker.js";
 
 const settingsRead = "/agent/v1/reads/agent.settings";
 const serverListRead = "/agent/v1/reads/server.list";
@@ -235,14 +236,14 @@ function buildPathsSection() {
   const grid = document.createElement("div");
   grid.className = "row g-2";
   const fields = {
-    backendPath: pathField(grid, "settings-backend-path", "Backend path", "absolute path of the gxb-api binary"),
-    backupPath: pathField(grid, "settings-backup-path", "Backup folder", "empty uses the agent root's backups folder"),
-    appRepackPath: pathField(grid, "settings-app-repack-path", "App repack folder", "absolute app_repack folder for the APK build"),
-    toolchainPath: pathField(grid, "settings-toolchain-path", "Toolchain folder", "empty uses the system PATH"),
-    mediaPath: pathField(grid, "settings-media-path", "Media folder", "set media_path in agent.json to change it"),
-    resPath: pathField(grid, "settings-res-path", "Res path", "absolute asset folder the OTA server serves"),
-    apkResPath: pathField(grid, "settings-apk-res-path", "APK res path", "optional second picture root"),
-    recoveredResPath: pathField(grid, "settings-recovered-res-path", "Recovered res path", "absolute asset-recovery folder"),
+    backendPath: pathField(grid, "settings-backend-path", "Backend path", "absolute path of the gxb-api binary", "file"),
+    backupPath: pathField(grid, "settings-backup-path", "Backup folder", "empty uses the agent root's backups folder", "folder"),
+    appRepackPath: pathField(grid, "settings-app-repack-path", "App repack folder", "absolute app_repack folder for the APK build", "folder"),
+    toolchainPath: pathField(grid, "settings-toolchain-path", "Toolchain folder", "empty uses the system PATH", "folder"),
+    mediaPath: pathField(grid, "settings-media-path", "Media folder", "set media_path in agent.json to change it", null),
+    resPath: pathField(grid, "settings-res-path", "Res path", "absolute asset folder the OTA server serves", "folder"),
+    apkResPath: pathField(grid, "settings-apk-res-path", "APK res path", "optional second picture root", "folder"),
+    recoveredResPath: pathField(grid, "settings-recovered-res-path", "Recovered res path", "absolute asset-recovery folder", "folder"),
   };
   fields.mediaPath.readOnly = true;
   const save = document.createElement("button");
@@ -261,7 +262,7 @@ function buildPathsSection() {
   return Object.assign({ card, save, status }, fields);
 }
 
-function pathField(grid, identifier, label, hint) {
+function pathField(grid, identifier, label, hint, mode) {
   const column = document.createElement("div");
   column.className = "col-12 col-md-6";
   const labelElement = document.createElement("label");
@@ -275,9 +276,33 @@ function pathField(grid, identifier, label, hint) {
   input.autocomplete = "off";
   input.spellcheck = false;
   input.placeholder = hint;
-  column.append(labelElement, input);
+  const group = document.createElement("div");
+  group.className = "input-group";
+  group.append(input);
+  if (mode !== null) {
+    const browse = document.createElement("button");
+    browse.type = "button";
+    browse.className = "btn btn-outline-secondary";
+    browse.id = identifier + "-browse";
+    browse.textContent = "Browse...";
+    browse.setAttribute("aria-label", "Browse for " + label);
+    browse.addEventListener("click", () => void browsePath(input, label, mode));
+    group.append(browse);
+  }
+  column.append(labelElement, group);
   grid.append(column);
   return input;
+}
+
+// browsePath fills the field and fires input; nothing is saved until the page's
+// Save button runs.
+async function browsePath(input, label, mode) {
+  const chosen = await openPathPicker({ title: label, start: input.value.trim(), mode });
+  if (chosen === null) {
+    return;
+  }
+  input.value = chosen;
+  input.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
 function buildServerURLSection() {

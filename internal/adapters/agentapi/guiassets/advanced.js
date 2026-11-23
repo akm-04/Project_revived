@@ -2,6 +2,7 @@
 
 import { request } from "./transport.js";
 import { pageHeader } from "./components/format.js";
+import { openPathPicker } from "./components/path_picker.js";
 import { pictureElement } from "./pictures.js";
 
 const operationPollMilliseconds = 1000;
@@ -215,11 +216,37 @@ function createFieldControl(field) {
   }
   control.id = "field-" + field.name;
   label.htmlFor = control.id;
-  row.append(control);
+  // shortcut: registry string fields ending in _path get a Browse button by
+  // name, upgrade to a registry path kind when a path field arrives without it.
+  if (field.type === "string" && typeof field.name === "string" && field.name.endsWith("_path")) {
+    const mode = field.name === "backend_path" ? "file" : "folder";
+    const group = document.createElement("div");
+    group.className = "input-group";
+    const browse = document.createElement("button");
+    browse.type = "button";
+    browse.className = "btn btn-outline-secondary";
+    browse.id = control.id + "-browse";
+    browse.textContent = "Browse...";
+    browse.setAttribute("aria-label", "Browse for " + field.name);
+    browse.addEventListener("click", () => void browseField(control, field.name, mode));
+    group.append(control, browse);
+    row.append(group);
+  } else {
+    row.append(control);
+  }
   if (field.help) {
     row.append(paragraph("help", field.help));
   }
   return { row, readValue, field };
+}
+
+async function browseField(input, label, mode) {
+  const chosen = await openPathPicker({ title: label, start: input.value.trim(), mode });
+  if (chosen === null) {
+    return;
+  }
+  input.value = chosen;
+  input.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
 function textValue(raw, field) {

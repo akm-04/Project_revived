@@ -458,6 +458,7 @@ func TestGUIComponentsAreEmbeddedAndServed(t *testing.T) {
 		"guiassets/components/demo.js",
 		"guiassets/components/duration_picker.js",
 		"guiassets/components/modal.js",
+		"guiassets/components/path_picker.js",
 		"guiassets/components/player_picker.js",
 		"guiassets/components/resource_picker.js",
 		"guiassets/components/server_picker.js",

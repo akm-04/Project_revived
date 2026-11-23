@@ -665,6 +665,17 @@ textarea:not(.form-control) {
   overflow: auto;
 }
 
+.path-picker-list {
+  max-height: 45vh;
+  overflow-y: auto;
+}
+
+.path-picker-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .duration-presets {
   display: flex;
   flex-wrap: wrap;
