@@ -296,11 +296,13 @@ func PlayerSummary(service PlayerSummaryService) Read {
 
 func parseEventsFilter(values url.Values) (appevents.OccurrenceFilter, error) {
 	var filter appevents.OccurrenceFilter
-	server, err := strconv.ParseInt(values.Get("server"), 10, 64)
-	if err != nil || server <= 0 {
-		return appevents.OccurrenceFilter{}, operator.Refuse(operator.CodeReadInvalid, "server must be a positive logical server id", nil)
+	if rawServer := values.Get("server"); rawServer != "" {
+		server, err := strconv.ParseInt(rawServer, 10, 64)
+		if err != nil || server <= 0 {
+			return appevents.OccurrenceFilter{}, operator.Refuse(operator.CodeReadInvalid, "server must be a positive logical server id", nil)
+		}
+		filter.LogicalServerID = server
 	}
-	filter.LogicalServerID = server
 	if rawState := values.Get("state"); rawState != "" {
 		phase := events.Phase(rawState)
 		switch phase {

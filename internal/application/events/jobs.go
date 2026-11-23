@@ -7,6 +7,7 @@ import (
 	"time"
 
 	appi5 "gxb.local/backend/v2/internal/application/i5"
+	"gxb.local/backend/v2/internal/application/operator"
 	"gxb.local/backend/v2/internal/domain/events"
 	"gxb.local/backend/v2/internal/domain/grant"
 	"gxb.local/backend/v2/internal/domain/identity"
@@ -22,6 +23,7 @@ const (
 	DefaultServerPageSize        = 100
 	DefaultSettlementOccurrences = 50
 	DefaultSettlementPlayers     = 200
+	DefaultGlobalGroupPageSize   = 100
 )
 
 // SettlementMailSourceKind is the i5 source kind of an unclaimed tier mail.
@@ -74,6 +76,9 @@ type Jobs struct {
 	Mail         Mailer
 	Content      ContentRevision
 	ClaimGrant   ChoiceGrant
+	// Directory enumerates every registered logical server for the global
+	// group join (EA-15 item 4), not only servers that already hold players.
+	Directory ServerDirectory
 
 	OccurrenceBatch int
 	PlayerPage      int
@@ -135,9 +140,14 @@ func (jobs Jobs) newOperation() (operation.Context, error) {
 }
 
 // MaterialiseCycle walks every server with players in bounded pages and keeps
-// its next look-ahead cycle slots materialised (ruling 8).
+// its next look-ahead cycle slots materialised (ruling 8). It also reconciles
+// the global groups first, so a server created since the last tick joins every
+// running or scheduled global event (EA-15 item 4).
 func (jobs Jobs) MaterialiseCycle(ctx context.Context) error {
 	if err := jobs.cycleReady(); err != nil {
+		return err
+	}
+	if err := jobs.ReconcileGlobalGroups(ctx); err != nil {
 		return err
 	}
 	op, err := jobs.newOperation()
@@ -163,6 +173,138 @@ func (jobs Jobs) MaterialiseCycle(ctx context.Context) error {
 		}
 		after = page[len(page)-1]
 	}
+}
+
+// ReconcileGlobalGroups joins every SCHEDULED or RUNNING group to each current
+// logical server that lacks its occurrence (EA-15 item 4). A server blocked by
+// its own overlapping occurrence is skipped, never overwritten; the join is
+// idempotent through the unique (global_group_id, logical_server_id) law.
+func (jobs Jobs) ReconcileGlobalGroups(ctx context.Context) error {
+	if jobs.Runner.DB == nil || jobs.Store == nil || jobs.Clock == nil || jobs.Directory == nil {
+		return ErrUnavailable
+	}
+	op, err := jobs.newOperation()
+	if err != nil {
+		return err
+	}
+	at := jobs.Clock.Now().UTC()
+	servers, err := jobs.directoryServers(ctx, op)
+	if err != nil {
+		return err
+	}
+	if len(servers) == 0 {
+		return nil
+	}
+	after := int64(0)
+	for {
+		groups, err := jobs.joinableGroupsAfter(ctx, op, at, after, DefaultGlobalGroupPageSize)
+		if err != nil {
+			return err
+		}
+		if len(groups) == 0 {
+			return nil
+		}
+		for _, group := range groups {
+			if err := jobs.reconcileGroup(ctx, op, group, servers, at); err != nil {
+				return err
+			}
+			after = group.ID
+		}
+		if len(groups) < DefaultGlobalGroupPageSize {
+			return nil
+		}
+	}
+}
+
+func (jobs Jobs) directoryServers(ctx context.Context, op operation.Context) ([]int64, error) {
+	var servers []operator.OperatorServer
+	err := jobs.read(ctx, op, "events-global-servers", func(ctx context.Context, scope tx.Scope) error {
+		loaded, err := jobs.Directory.OperatorServersTx(ctx, scope.Tx)
+		if err == nil {
+			servers = loaded
+		}
+		return err
+	})
+	if err != nil {
+		return nil, err
+	}
+	ids := make([]int64, 0, len(servers))
+	for _, server := range servers {
+		ids = append(ids, server.ServerID)
+	}
+	return ids, nil
+}
+
+func (jobs Jobs) joinableGroupsAfter(ctx context.Context, op operation.Context, at time.Time, after int64, limit int) ([]GlobalGroup, error) {
+	var groups []GlobalGroup
+	err := jobs.read(ctx, op, "events-global-groups", func(ctx context.Context, scope tx.Scope) error {
+		loaded, err := jobs.Store.ListJoinableGroupsAfterTx(ctx, scope.Tx, at, after, limit)
+		if err == nil {
+			groups = loaded
+		}
+		return err
+	})
+	return groups, err
+}
+
+func (jobs Jobs) reconcileGroup(ctx context.Context, op operation.Context, group GlobalGroup, servers []int64, at time.Time) error {
+	return jobs.write(ctx, op, "events-global-join", func(ctx context.Context, scope tx.Scope) error {
+		locked, err := jobs.Store.LockGlobalGroupTx(ctx, scope.Tx, group.ID)
+		if err != nil {
+			return err
+		}
+		if locked == nil || !locked.Joinable(at) {
+			return nil
+		}
+		joined, err := jobs.Store.LockGroupOccurrencesTx(ctx, scope.Tx, locked.ID)
+		if err != nil {
+			return err
+		}
+		present := make(map[int64]struct{}, len(joined))
+		for _, occurrence := range joined {
+			present[occurrence.LogicalServerID] = struct{}{}
+		}
+		for _, server := range servers {
+			if _, exists := present[server]; exists {
+				continue
+			}
+			if err := jobs.joinServer(ctx, scope.Tx, *locked, server, at); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
+func (jobs Jobs) joinServer(ctx context.Context, transaction tx.Tx, group GlobalGroup, server int64, at time.Time) error {
+	settings, err := jobs.Store.EnsureSettingsTx(ctx, transaction, server, at)
+	if err != nil {
+		if errors.Is(err, ErrServerUnknown) {
+			return nil
+		}
+		return err
+	}
+	overlaps, err := jobs.Store.OverlapsTx(ctx, transaction, server, group.ActivityID, group.StartsAt, group.EndsAt, 0)
+	if err != nil {
+		return err
+	}
+	if overlaps {
+		return nil
+	}
+	groupID := group.ID
+	occurrence := events.Occurrence{
+		LogicalServerID: server, ActivityID: group.ActivityID, DefinitionRevision: group.DefinitionRevision,
+		StartsAt: group.StartsAt, Source: "OPERATOR", Revision: 1, GlobalGroupID: &groupID,
+		CreatedByCommand: group.CreatedByCommand, CreatedAt: at,
+	}
+	if group.EndsAt != nil {
+		end := *group.EndsAt
+		claimUntil := end.Add(settings.ClaimWindow)
+		occurrence.EndsAt = &end
+		occurrence.ClaimUntil = &claimUntil
+	}
+	_, _, err = jobs.Store.InsertGroupOccurrenceTx(ctx, transaction, occurrence, group.CreatedByCommand, at)
+	return err
 }
 
 func (jobs Jobs) serversAfter(ctx context.Context, op operation.Context, after identity.LogicalServerID) ([]identity.LogicalServerID, error) {

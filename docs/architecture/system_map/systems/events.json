@@ -90,7 +90,11 @@
    "accounts": [
     "i5store.FenceActorTx"
    ],
+   "event_global_groups": [
+    "eventstore.LockGlobalGroupTx"
+   ],
    "event_occurrences": [
+    "eventstore.LockGroupOccurrencesTx",
     "eventstore.LockOccurrenceSharedTx",
     "eventstore.LockOccurrenceTx",
     "eventstore.LockOccurrencesTx"
@@ -108,6 +112,7 @@
   "row_locks": [
    "account_sessions",
    "accounts",
+   "event_global_groups",
    "event_occurrences",
    "gameplay_contexts",
    "operator_commands",
@@ -140,6 +145,7 @@
    "event_cycle_settings",
    "event_definition_sync_conflicts",
    "event_definitions",
+   "event_global_groups",
    "event_occurrences",
    "player_event_claims"
   ],
@@ -150,6 +156,7 @@
    "event_cycle_settings",
    "event_definition_sync_conflicts",
    "event_definitions",
+   "event_global_groups",
    "event_occurrences",
    "gameplay_contexts",
    "gxb_content_activation",
@@ -167,6 +174,7 @@
    "event_cycle_settings",
    "event_definition_sync_conflicts",
    "event_definitions",
+   "event_global_groups",
    "event_occurrences",
    "operator_commands",
    "player_event_claims"
@@ -181,6 +189,7 @@
    "activity_test.go",
    "claim_grant_test.go",
    "commands_test.go",
+   "global_groups_native_test.go",
    "jobs_native_test.go",
    "module_test.go",
    "sync_test.go"

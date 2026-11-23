@@ -29,7 +29,7 @@ func (Store) InsertCycleOccurrenceTx(ctx context.Context, transaction tx.Tx, occ
 	_, err := transaction.Exec(ctx, insertOccurrence,
 		occurrence.LogicalServerID, occurrence.ActivityID, occurrence.DefinitionRevision, occurrence.StartsAt.UTC(),
 		utcPtr(occurrence.EndsAt), utcPtr(occurrence.ClaimUntil), occurrence.Source, occurrence.Revision,
-		nil, occurrence.CreatedAt.UTC(),
+		nil, nil, occurrence.CreatedAt.UTC(),
 	)
 	if err != nil {
 		if _, rollbackErr := transaction.Exec(ctx, "ROLLBACK TO SAVEPOINT events_cycle_slot"); rollbackErr != nil {

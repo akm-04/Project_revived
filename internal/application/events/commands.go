@@ -224,14 +224,23 @@ func (commands Commands) definitionListHandler(ctx context.Context, scope tx.Sco
 
 type schedulePayload struct {
 	ActivityID       int64   `json:"activity_id"`
-	LogicalServerIDs []int64 `json:"logical_server_ids"`
+	Scope            string  `json:"scope,omitempty"`
+	LogicalServerIDs []int64 `json:"logical_server_ids,omitempty"`
 	Start            string  `json:"start,omitempty"`
 	Duration         string  `json:"duration"`
 }
 
+// scheduleResult is the events.schedule reply. Group is set for a global
+// schedule, whose per-server occurrences are still listed in Occurrences.
 type scheduleResult struct {
 	Occurrences []OccurrenceView `json:"occurrences"`
+	Group       *groupResult     `json:"group,omitempty"`
 }
+
+const (
+	scheduleScopeServer = "server"
+	scheduleScopeGlobal = "global"
+)
 
 func (commands Commands) scheduleHandler(ctx context.Context, scope tx.Scope, command operator.Command) (any, error) {
 	var payload schedulePayload
@@ -241,9 +250,12 @@ func (commands Commands) scheduleHandler(ctx context.Context, scope tx.Scope, co
 	if payload.ActivityID <= 0 {
 		return nil, operator.Refuse(CodePayloadInvalid, "activity_id must be a positive client activity id", nil)
 	}
-	owned, err := scopedServers(payload.LogicalServerIDs, command.Envelope.Scope)
-	if err != nil {
-		return nil, operator.Refuse(CodePayloadInvalid, err.Error(), nil)
+	payloadScope := payload.Scope
+	if payloadScope == "" {
+		payloadScope = scheduleScopeServer
+	}
+	if payloadScope != scheduleScopeServer && payloadScope != scheduleScopeGlobal {
+		return nil, operator.Refuse(CodePayloadInvalid, "scope must be server or global", nil)
 	}
 	duration, err := ParseDuration(payload.Duration)
 	if err != nil {
@@ -251,6 +263,16 @@ func (commands Commands) scheduleHandler(ctx context.Context, scope tx.Scope, co
 	}
 	at := scope.Operation.StartedAt.UTC()
 	start, err := scheduleStart(payload.Start, at)
+	if err != nil {
+		return nil, operator.Refuse(CodePayloadInvalid, err.Error(), nil)
+	}
+	if payloadScope == scheduleScopeGlobal {
+		if len(payload.LogicalServerIDs) != 0 {
+			return nil, operator.Refuse(CodePayloadInvalid, "a global schedule takes no logical_server_ids; every current server joins", nil)
+		}
+		return commands.ScheduleGlobal(ctx, scope.Tx, command.Envelope.SemanticKey, payload.ActivityID, start, duration, at)
+	}
+	owned, err := scopedServers(payload.LogicalServerIDs, command.Envelope.Scope)
 	if err != nil {
 		return nil, operator.Refuse(CodePayloadInvalid, err.Error(), nil)
 	}
@@ -306,63 +328,147 @@ func (commands Commands) Schedule(ctx context.Context, transaction tx.Tx, comman
 	if activityID <= 0 || len(servers) == 0 {
 		return scheduleResult{}, operator.Refuse(CodePayloadInvalid, "activity_id and at least one logical server are required", nil)
 	}
-	definition, err := commands.Store.LatestDefinitionTx(ctx, transaction, activityID)
+	definition, err := commands.schedulableDefinition(ctx, transaction, activityID)
 	if err != nil {
 		return scheduleResult{}, err
-	}
-	if definition == nil {
-		return scheduleResult{}, operator.Refuse(CodeDefinitionUnknown, "no definition revision is deployed for this activity", map[string]int64{"activity_id": activityID})
-	}
-	readiness, err := EvaluateReadiness(ctx, definition.Body, commands.Hooks, commands.Coverage)
-	if err != nil {
-		return scheduleResult{}, err
-	}
-	if refusal := readiness.Refusal(); refusal != nil {
-		return scheduleResult{}, refusal
 	}
 	result := scheduleResult{Occurrences: make([]OccurrenceView, 0, len(servers))}
 	for _, server := range servers {
-		settings, err := commands.Store.EnsureSettingsTx(ctx, transaction, server, at)
-		if err != nil {
-			if errors.Is(err, ErrServerUnknown) {
-				return scheduleResult{}, unknownServerRefusal(server)
-			}
-			return scheduleResult{}, err
-		}
-		occurrence := events.Occurrence{
-			LogicalServerID: server, ActivityID: activityID, DefinitionRevision: definition.Revision,
-			StartsAt: start, Source: "OPERATOR", Revision: 1, CreatedByCommand: commandKey, CreatedAt: at,
-		}
-		if !duration.Permanent {
-			end := start.Add(duration.Span)
-			claimUntil := end.Add(settings.ClaimWindow)
-			occurrence.EndsAt = &end
-			occurrence.ClaimUntil = &claimUntil
-		}
-		if _, err := commands.Store.LockOccurrencesTx(ctx, transaction, server, activityID); err != nil {
-			return scheduleResult{}, err
-		}
-		overlaps, err := commands.Store.OverlapsTx(ctx, transaction, server, activityID, start, occurrence.ClaimUntil, 0)
+		occurrence, err := commands.preparedOccurrence(ctx, transaction, definition.Revision, activityID, server, start, duration, at)
 		if err != nil {
 			return scheduleResult{}, err
-		}
-		if overlaps {
-			return scheduleResult{}, overlapRefusal(server, activityID)
 		}
 		id, err := commands.Store.InsertOccurrenceTx(ctx, transaction, occurrence, commandKey, at)
 		if err != nil {
-			switch {
-			case errors.Is(err, ErrOccurrenceOverlap):
-				return scheduleResult{}, overlapRefusal(server, activityID)
-			case errors.Is(err, ErrServerUnknown):
-				return scheduleResult{}, unknownServerRefusal(server)
-			}
-			return scheduleResult{}, err
+			return scheduleResult{}, occurrenceWriteRefusal(err, server, activityID)
 		}
 		occurrence.ID = id
 		result.Occurrences = append(result.Occurrences, viewOf(occurrence, at))
 	}
 	return result, nil
+}
+
+// ScheduleGlobal creates one group and an occurrence on every current logical
+// server in one transaction, all or nothing (EA-15 item 3). A server already
+// holding an overlapping occurrence refuses the whole schedule and is named.
+func (commands Commands) ScheduleGlobal(ctx context.Context, transaction tx.Tx, commandKey string, activityID int64, start time.Time, duration Duration, at time.Time) (scheduleResult, error) {
+	if transaction == nil || commandKey == "" || start.IsZero() || at.IsZero() || commands.Store == nil || commands.Servers == nil {
+		return scheduleResult{}, operator.ErrUnavailable
+	}
+	if activityID <= 0 {
+		return scheduleResult{}, operator.Refuse(CodePayloadInvalid, "activity_id is required", nil)
+	}
+	definition, err := commands.schedulableDefinition(ctx, transaction, activityID)
+	if err != nil {
+		return scheduleResult{}, err
+	}
+	directory, err := commands.Servers.OperatorServersTx(ctx, transaction)
+	if err != nil {
+		return scheduleResult{}, err
+	}
+	occurrences := make([]events.Occurrence, 0, len(directory))
+	for _, server := range directory {
+		occurrence, err := commands.preparedOccurrence(ctx, transaction, definition.Revision, activityID, server.ServerID, start, duration, at)
+		if err != nil {
+			return scheduleResult{}, err
+		}
+		occurrences = append(occurrences, occurrence)
+	}
+	group := GlobalGroup{GlobalGroup: events.GlobalGroup{
+		ActivityID: activityID, DefinitionRevision: definition.Revision, StartsAt: start,
+		State: groupStateFor(start, at), Revision: 1, CreatedAt: at, CreatedByCommand: commandKey,
+	}}
+	if !duration.Permanent {
+		end := start.Add(duration.Span)
+		group.EndsAt = &end
+	}
+	groupID, err := commands.Store.InsertGlobalGroupTx(ctx, transaction, group, commandKey, at)
+	if err != nil {
+		return scheduleResult{}, err
+	}
+	group.ID = groupID
+	result := scheduleResult{Occurrences: make([]OccurrenceView, 0, len(occurrences))}
+	for index := range occurrences {
+		occurrences[index].GlobalGroupID = &group.ID
+		id, err := commands.Store.InsertOccurrenceTx(ctx, transaction, occurrences[index], commandKey, at)
+		if err != nil {
+			return scheduleResult{}, occurrenceWriteRefusal(err, occurrences[index].LogicalServerID, activityID)
+		}
+		occurrences[index].ID = id
+		result.Occurrences = append(result.Occurrences, viewOf(occurrences[index], at))
+	}
+	view := groupResultOf(group, len(occurrences))
+	result.Group = &view
+	return result, nil
+}
+
+// schedulableDefinition is the one scheduling gate of ruling 4.
+func (commands Commands) schedulableDefinition(ctx context.Context, transaction tx.Tx, activityID int64) (*DefinitionRecord, error) {
+	definition, err := commands.Store.LatestDefinitionTx(ctx, transaction, activityID)
+	if err != nil {
+		return nil, err
+	}
+	if definition == nil {
+		return nil, operator.Refuse(CodeDefinitionUnknown, "no definition revision is deployed for this activity", map[string]int64{"activity_id": activityID})
+	}
+	readiness, err := EvaluateReadiness(ctx, definition.Body, commands.Hooks, commands.Coverage)
+	if err != nil {
+		return nil, err
+	}
+	if refusal := readiness.Refusal(); refusal != nil {
+		return nil, refusal
+	}
+	return definition, nil
+}
+
+// preparedOccurrence validates the server and the overlap law and builds the
+// occurrence a schedule inserts (ruling 2).
+func (commands Commands) preparedOccurrence(ctx context.Context, transaction tx.Tx, definitionRevision, activityID, server int64, start time.Time, duration Duration, at time.Time) (events.Occurrence, error) {
+	settings, err := commands.Store.EnsureSettingsTx(ctx, transaction, server, at)
+	if err != nil {
+		if errors.Is(err, ErrServerUnknown) {
+			return events.Occurrence{}, unknownServerRefusal(server)
+		}
+		return events.Occurrence{}, err
+	}
+	occurrence := events.Occurrence{
+		LogicalServerID: server, ActivityID: activityID, DefinitionRevision: definitionRevision,
+		StartsAt: start, Source: "OPERATOR", Revision: 1, CreatedByCommand: "", CreatedAt: at,
+	}
+	if !duration.Permanent {
+		end := start.Add(duration.Span)
+		claimUntil := end.Add(settings.ClaimWindow)
+		occurrence.EndsAt = &end
+		occurrence.ClaimUntil = &claimUntil
+	}
+	if _, err := commands.Store.LockOccurrencesTx(ctx, transaction, server, activityID); err != nil {
+		return events.Occurrence{}, err
+	}
+	overlaps, err := commands.Store.OverlapsTx(ctx, transaction, server, activityID, start, occurrence.ClaimUntil, 0)
+	if err != nil {
+		return events.Occurrence{}, err
+	}
+	if overlaps {
+		return events.Occurrence{}, overlapRefusal(server, activityID)
+	}
+	return occurrence, nil
+}
+
+func occurrenceWriteRefusal(err error, server, activityID int64) error {
+	switch {
+	case errors.Is(err, ErrOccurrenceOverlap):
+		return overlapRefusal(server, activityID)
+	case errors.Is(err, ErrServerUnknown):
+		return unknownServerRefusal(server)
+	}
+	return err
+}
+
+func groupStateFor(start, at time.Time) string {
+	if at.Before(start) {
+		return events.GroupScheduled
+	}
+	return events.GroupRunning
 }
 
 func unknownServerRefusal(server int64) *operator.Refusal {
@@ -394,7 +500,35 @@ func coverageGate(coverage otadomain.CoversResult) *operator.Refusal {
 }
 
 type occurrencePayload struct {
-	OccurrenceID int64 `json:"occurrence_id"`
+	OccurrenceID int64 `json:"occurrence_id,omitempty"`
+	GroupID      int64 `json:"group_id,omitempty"`
+}
+
+func decodeOccurrence(payload json.RawMessage) (int64, error) {
+	var decoded occurrencePayload
+	if err := decodePayload(payload, &decoded); err != nil {
+		return 0, err
+	}
+	if decoded.OccurrenceID <= 0 || decoded.GroupID != 0 {
+		return 0, errors.New("occurrence_id is required and group_id is not allowed here")
+	}
+	return decoded.OccurrenceID, nil
+}
+
+// decodeMutation reads the one target of events.end_now and
+// events.set_permanent: a single occurrence, or a global group (EA-15 item 6).
+func decodeMutation(payload json.RawMessage) (occurrenceID, groupID int64, err error) {
+	var decoded occurrencePayload
+	if err := decodePayload(payload, &decoded); err != nil {
+		return 0, 0, err
+	}
+	switch {
+	case decoded.OccurrenceID > 0 && decoded.GroupID > 0:
+		return 0, 0, errors.New("give either occurrence_id or group_id, not both")
+	case decoded.OccurrenceID <= 0 && decoded.GroupID <= 0:
+		return 0, 0, errors.New("occurrence_id or group_id is required")
+	}
+	return decoded.OccurrenceID, decoded.GroupID, nil
 }
 
 // mutate locks one occurrence FOR UPDATE, checks its revision, applies the
@@ -434,17 +568,6 @@ func (commands Commands) mutate(ctx context.Context, transaction tx.Tx, occurren
 	return viewOf(*occurrence, at), nil
 }
 
-func decodeOccurrence(payload json.RawMessage) (int64, error) {
-	var decoded occurrencePayload
-	if err := decodePayload(payload, &decoded); err != nil {
-		return 0, err
-	}
-	if decoded.OccurrenceID <= 0 {
-		return 0, errors.New("occurrence_id is required")
-	}
-	return decoded.OccurrenceID, nil
-}
-
 func (commands Commands) cancelHandler(ctx context.Context, scope tx.Scope, command operator.Command) (any, error) {
 	occurrenceID, err := decodeOccurrence(command.Payload)
 	if err != nil {
@@ -462,11 +585,15 @@ func (commands Commands) cancelHandler(ctx context.Context, scope tx.Scope, comm
 }
 
 func (commands Commands) endNowHandler(ctx context.Context, scope tx.Scope, command operator.Command) (any, error) {
-	occurrenceID, err := decodeOccurrence(command.Payload)
+	occurrenceID, groupID, err := decodeMutation(command.Payload)
 	if err != nil {
 		return nil, operator.Refuse(CodePayloadInvalid, err.Error(), nil)
 	}
-	return commands.mutate(ctx, scope.Tx, occurrenceID, command.Envelope.ExpectedRevision, scope.Operation.StartedAt.UTC(), false, func(occurrence *events.Occurrence, at time.Time) error {
+	at := scope.Operation.StartedAt.UTC()
+	if groupID > 0 {
+		return commands.endGroupNow(ctx, scope.Tx, groupID, command.Envelope.ExpectedRevision, command.Envelope.SemanticKey, at)
+	}
+	return commands.mutate(ctx, scope.Tx, occurrenceID, command.Envelope.ExpectedRevision, at, false, func(occurrence *events.Occurrence, at time.Time) error {
 		if !occurrence.Active(at) {
 			return operator.Refuse(CodeStateInvalid, "only a RUNNING or CLAIM_WINDOW occurrence can be ended now", map[string]string{"state": string(occurrence.State(at))})
 		}
@@ -517,11 +644,15 @@ func (commands Commands) extendHandler(ctx context.Context, scope tx.Scope, comm
 }
 
 func (commands Commands) setPermanentHandler(ctx context.Context, scope tx.Scope, command operator.Command) (any, error) {
-	occurrenceID, err := decodeOccurrence(command.Payload)
+	occurrenceID, groupID, err := decodeMutation(command.Payload)
 	if err != nil {
 		return nil, operator.Refuse(CodePayloadInvalid, err.Error(), nil)
 	}
-	return commands.mutate(ctx, scope.Tx, occurrenceID, command.Envelope.ExpectedRevision, scope.Operation.StartedAt.UTC(), true, func(occurrence *events.Occurrence, at time.Time) error {
+	at := scope.Operation.StartedAt.UTC()
+	if groupID > 0 {
+		return commands.setGroupPermanent(ctx, scope.Tx, groupID, command.Envelope.ExpectedRevision, at)
+	}
+	return commands.mutate(ctx, scope.Tx, occurrenceID, command.Envelope.ExpectedRevision, at, true, func(occurrence *events.Occurrence, at time.Time) error {
 		if phase := occurrence.State(at); phase != events.PhaseScheduled && phase != events.PhaseRunning {
 			return operator.Refuse(CodeStateInvalid, "only a SCHEDULED or RUNNING occurrence can become permanent", map[string]string{"state": string(phase)})
 		}
@@ -533,6 +664,125 @@ func (commands Commands) setPermanentHandler(ctx context.Context, scope tx.Scope
 		occurrence.Revision++
 		return nil
 	})
+}
+
+// groupResult is the reply of a global group command.
+type groupResult struct {
+	GroupID         int64      `json:"group_id"`
+	State           string     `json:"state"`
+	Revision        int64      `json:"revision"`
+	StartsAt        time.Time  `json:"starts_at"`
+	EndsAt          *time.Time `json:"ends_at"`
+	EndedAt         *time.Time `json:"ended_at"`
+	OccurrenceCount int        `json:"occurrence_count"`
+}
+
+func groupResultOf(group GlobalGroup, occurrenceCount int) groupResult {
+	return groupResult{
+		GroupID: group.ID, State: group.State, Revision: group.Revision,
+		StartsAt: group.StartsAt.UTC(), EndsAt: utcPtr(group.EndsAt), EndedAt: utcPtr(group.EndedAt), OccurrenceCount: occurrenceCount,
+	}
+}
+
+func groupUnknownRefusal(groupID int64) *operator.Refusal {
+	return operator.Refuse(CodeGroupUnknown, "the global event group does not exist", map[string]int64{"group_id": groupID})
+}
+
+// endGroupNow ends the group and every one of its occurrences in one
+// transaction, all or nothing (EA-15 item 6). An ended group stops joining.
+func (commands Commands) endGroupNow(ctx context.Context, transaction tx.Tx, groupID int64, expected *int64, commandKey string, at time.Time) (groupResult, error) {
+	if transaction == nil || groupID <= 0 || at.IsZero() || commandKey == "" || commands.Store == nil {
+		return groupResult{}, operator.ErrUnavailable
+	}
+	group, err := commands.Store.LockGlobalGroupTx(ctx, transaction, groupID)
+	if err != nil {
+		return groupResult{}, err
+	}
+	if group == nil {
+		return groupResult{}, groupUnknownRefusal(groupID)
+	}
+	if refusal := requireRevision(expected, group.Revision); refusal != nil {
+		return groupResult{}, refusal
+	}
+	if phase := group.Phase(at); phase != events.PhaseRunning && phase != events.PhaseClaimWindow {
+		return groupResult{}, operator.Refuse(CodeStateInvalid, "only a RUNNING group can be ended now", map[string]string{"state": string(phase)})
+	}
+	occurrences, err := commands.Store.LockGroupOccurrencesTx(ctx, transaction, groupID)
+	if err != nil {
+		return groupResult{}, err
+	}
+	if err := commands.endGroupOccurrences(ctx, transaction, occurrences, commandKey, at); err != nil {
+		return groupResult{}, err
+	}
+	group.EndsAt = &at
+	group.EndedAt = &at
+	group.State = events.GroupEnded
+	group.Revision++
+	if err := commands.Store.SaveGlobalGroupTx(ctx, transaction, *group); err != nil {
+		return groupResult{}, err
+	}
+	return groupResultOf(*group, len(occurrences)), nil
+}
+
+func (commands Commands) endGroupOccurrences(ctx context.Context, transaction tx.Tx, occurrences []events.Occurrence, commandKey string, at time.Time) error {
+	for index := range occurrences {
+		settings, err := commands.Store.EnsureSettingsTx(ctx, transaction, occurrences[index].LogicalServerID, at)
+		if err != nil {
+			return err
+		}
+		claimUntil := at.Add(settings.ClaimWindow)
+		occurrences[index].EndsAt = &at
+		occurrences[index].ClaimUntil = &claimUntil
+		occurrences[index].EndedEarlyByCommand = commandKey
+		occurrences[index].Revision++
+		if err := commands.Store.SaveOccurrenceTx(ctx, transaction, occurrences[index]); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// setGroupPermanent makes the group and all its occurrences permanent in one
+// transaction (EA-15 item 6).
+func (commands Commands) setGroupPermanent(ctx context.Context, transaction tx.Tx, groupID int64, expected *int64, at time.Time) (groupResult, error) {
+	if transaction == nil || groupID <= 0 || at.IsZero() || commands.Store == nil {
+		return groupResult{}, operator.ErrUnavailable
+	}
+	group, err := commands.Store.LockGlobalGroupTx(ctx, transaction, groupID)
+	if err != nil {
+		return groupResult{}, err
+	}
+	if group == nil {
+		return groupResult{}, groupUnknownRefusal(groupID)
+	}
+	if refusal := requireRevision(expected, group.Revision); refusal != nil {
+		return groupResult{}, refusal
+	}
+	if phase := group.Phase(at); phase != events.PhaseScheduled && phase != events.PhaseRunning {
+		return groupResult{}, operator.Refuse(CodeStateInvalid, "only a SCHEDULED or RUNNING group can become permanent", map[string]string{"state": string(phase)})
+	}
+	occurrences, err := commands.Store.LockGroupOccurrencesTx(ctx, transaction, groupID)
+	if err != nil {
+		return groupResult{}, err
+	}
+	if group.EndsAt == nil {
+		return groupResultOf(*group, len(occurrences)), nil
+	}
+	for index := range occurrences {
+		occurrences[index].EndsAt = nil
+		occurrences[index].ClaimUntil = nil
+		occurrences[index].Revision++
+		if err := commands.Store.SaveOccurrenceTx(ctx, transaction, occurrences[index]); err != nil {
+			return groupResult{}, err
+		}
+	}
+	group.EndsAt = nil
+	group.State = groupStateFor(group.StartsAt, at)
+	group.Revision++
+	if err := commands.Store.SaveGlobalGroupTx(ctx, transaction, *group); err != nil {
+		return groupResult{}, err
+	}
+	return groupResultOf(*group, len(occurrences)), nil
 }
 
 type occurrenceShowPayload struct {

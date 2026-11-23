@@ -31,6 +31,7 @@ var (
 	ErrOccurrenceOverlap = errors.New("events: occurrence overlap")
 	ErrRevisionExists    = errors.New("events: definition revision exists")
 	ErrServerUnknown     = errors.New("events: logical server does not exist")
+	ErrGroupUnknown      = errors.New("events: global group does not exist")
 )
 
 // Refusal codes (I11A_OPERATOR_COMMANDS_V1 ruling 4; I11A_EVENTS_V1).
@@ -48,6 +49,7 @@ const (
 	CodeServerUnknown          = "EVENT_SERVER_UNKNOWN"
 	CodeStateInvalid           = "EVENT_STATE_INVALID"
 	CodeStale                  = "EVENT_STALE"
+	CodeGroupUnknown           = "EVENT_GROUP_NOT_FOUND"
 )
 
 // OccurrenceLockRank is the events occurrence row lock (EA-9, EA-10): after the
@@ -66,6 +68,13 @@ type DefinitionRecord struct {
 	SyncConflictSHA256 string
 }
 
+// GlobalGroup is one event group shared by every logical server (EA-15). Its
+// occurrences are the per-server rows created with or joined to it.
+type GlobalGroup struct {
+	events.GlobalGroup
+	Occurrences []events.Occurrence
+}
+
 // Settings is the per-server event settings row, defaulted when absent.
 type Settings struct {
 	Mode          string
@@ -76,6 +85,7 @@ type Settings struct {
 }
 
 // OccurrenceFilter is the bounded events.list query (OPERATOR_COMMANDS reads).
+// LogicalServerID 0 asks for the global view: groups plus server-only rows.
 type OccurrenceFilter struct {
 	LogicalServerID int64
 	Phase           *events.Phase
@@ -154,6 +164,7 @@ type OccurrenceView struct {
 	ClaimUntil         *time.Time `json:"claim_until"`
 	Source             string     `json:"source"`
 	Revision           int64      `json:"revision"`
+	GlobalGroupID      *int64     `json:"global_group_id"`
 }
 
 func viewOf(occurrence events.Occurrence, at time.Time) OccurrenceView {
@@ -161,7 +172,7 @@ func viewOf(occurrence events.Occurrence, at time.Time) OccurrenceView {
 		ID: occurrence.ID, LogicalServerID: occurrence.LogicalServerID, ActivityID: occurrence.ActivityID,
 		DefinitionRevision: occurrence.DefinitionRevision, State: string(occurrence.State(at)),
 		StartsAt: occurrence.StartsAt.UTC(), EndsAt: utcPtr(occurrence.EndsAt), ClaimUntil: utcPtr(occurrence.ClaimUntil),
-		Source: occurrence.Source, Revision: occurrence.Revision,
+		Source: occurrence.Source, Revision: occurrence.Revision, GlobalGroupID: occurrence.GlobalGroupID,
 	}
 }
 
@@ -173,11 +184,45 @@ func utcPtr(value *time.Time) *time.Time {
 	return &at
 }
 
-// OccurrencePage is one events.list page, newest start first.
+// OccurrencePage is one events.list page. The per-server view fills
+// Occurrences; the global view fills Groups with the server-only rows in
+// Occurrences (EA-15 item 5), newest start first.
 type OccurrencePage struct {
 	Occurrences []OccurrenceView `json:"occurrences"`
+	Groups      []GroupView      `json:"groups,omitempty"`
 	NextCursor  string           `json:"next_cursor,omitempty"`
 }
+
+// GroupView is one global group row of the global events.list. ServerCount is
+// the number of current logical servers; JoinedCount the number holding an
+// occurrence; MissingServers names the rest and why they lack one.
+type GroupView struct {
+	ID                 int64               `json:"id"`
+	ActivityID         int64               `json:"activity_id"`
+	DefinitionRevision int64               `json:"definition_revision"`
+	State              string              `json:"state"`
+	StartsAt           time.Time           `json:"starts_at"`
+	EndsAt             *time.Time          `json:"ends_at"`
+	Revision           int64               `json:"revision"`
+	ServerCount        int                 `json:"server_count"`
+	JoinedCount        int                 `json:"joined_count"`
+	MissingServers     []MissingServerView `json:"missing_servers"`
+	Occurrences        []OccurrenceView    `json:"occurrences"`
+}
+
+// MissingServerView is a current server without an occurrence of the group.
+// Reason is "runs its own event" when an overlapping occurrence blocks the
+// join, "not joined yet" when the maintenance tick has not reached it.
+type MissingServerView struct {
+	ServerID int64  `json:"server_id"`
+	Name     string `json:"name"`
+	Reason   string `json:"reason"`
+}
+
+const (
+	missingRunsOwn      = "runs its own event"
+	missingNotJoinedYet = "not joined yet"
+)
 
 // Claim is one claim-ledger row (ruling 12); kept forever (P4). AwardBody is
 // the stored MID 231 reply, so a repeat of the same claim re-answers exactly
@@ -208,6 +253,7 @@ type Store interface {
 	OverlapsTx(context.Context, tx.Queryer, int64, int64, time.Time, *time.Time, int64) (bool, error)
 	CycleSlotTakenTx(context.Context, tx.Queryer, int64, time.Time) (bool, error)
 	InsertOccurrenceTx(context.Context, tx.Tx, events.Occurrence, string, time.Time) (int64, error)
+	InsertGroupOccurrenceTx(context.Context, tx.Tx, events.Occurrence, string, time.Time) (int64, bool, error)
 	InsertCycleOccurrenceTx(context.Context, tx.Tx, events.Occurrence, time.Time) (bool, error)
 	LockOccurrenceTx(context.Context, tx.Tx, int64) (*events.Occurrence, error)
 	LockOccurrenceSharedTx(context.Context, tx.Tx, int64) (*events.Occurrence, error)
@@ -216,9 +262,17 @@ type Store interface {
 	OccurrenceTx(context.Context, tx.Queryer, int64) (*events.Occurrence, error)
 	SaveOccurrenceTx(context.Context, tx.Tx, events.Occurrence) error
 	OccurrencesTx(context.Context, tx.Queryer, OccurrenceFilter) ([]events.Occurrence, error)
+	ServerOnlyOccurrencesTx(context.Context, tx.Queryer, OccurrenceFilter) ([]events.Occurrence, error)
 	DueOccurrencesAfterTx(context.Context, tx.Queryer, time.Time, int64, int) ([]events.Occurrence, error)
 	MarkSettledTx(context.Context, tx.Tx, int64, time.Time) (bool, error)
 	EnsureSettingsTx(context.Context, tx.Tx, int64, time.Time) (Settings, error)
+
+	InsertGlobalGroupTx(context.Context, tx.Tx, GlobalGroup, string, time.Time) (int64, error)
+	LockGlobalGroupTx(context.Context, tx.Tx, int64) (*GlobalGroup, error)
+	SaveGlobalGroupTx(context.Context, tx.Tx, GlobalGroup) error
+	LockGroupOccurrencesTx(context.Context, tx.Tx, int64) ([]events.Occurrence, error)
+	ListJoinableGroupsAfterTx(context.Context, tx.Queryer, time.Time, int64, int) ([]GlobalGroup, error)
+	ListGlobalGroupsTx(context.Context, tx.Queryer, int) ([]GlobalGroup, error)
 	SetCycleModeTx(context.Context, tx.Tx, int64, string, string, time.Time) (Settings, error)
 	SetCycleBodyTx(context.Context, tx.Tx, int64, int64, int64, json.RawMessage, string, time.Time) (Settings, bool, error)
 	OccurrenceClaimsTx(context.Context, tx.Queryer, int64, int) ([]Claim, error)
@@ -235,6 +289,12 @@ type Store interface {
 // Coverage is the OTA Covers seam (I11A_OTA_RELEASE_V1 ruling 5).
 type Coverage interface {
 	Covers(context.Context, otadomain.CoversRequest) (otadomain.CoversResult, error)
+}
+
+// ServerDirectory enumerates every registered logical server (the I4 owner
+// read; no events code reads another owner's table).
+type ServerDirectory interface {
+	OperatorServersTx(context.Context, tx.Queryer) ([]operator.OperatorServer, error)
 }
 
 // GiftSource resolves a client gift id to item lines from backend content
@@ -292,6 +352,8 @@ type Commands struct {
 	// Shipped are the definition files compiled into the API (EA-13); composition
 	// loads them from the content layer.
 	Shipped []DefinitionFile
+	// Servers enumerates every logical server a global schedule covers (EA-15).
+	Servers ServerDirectory
 }
 
 // Service serves the bounded reads and the ActiveModifiers seam.
@@ -300,6 +362,7 @@ type Service struct {
 	Operations operation.Factory
 	Store      Store
 	Clock      clock.Clock
+	Servers    ServerDirectory
 }
 
 func readProfile(name string) tx.Profile {
@@ -311,8 +374,11 @@ func (s Service) List(ctx context.Context, filter OccurrenceFilter) (OccurrenceP
 	if s.Store == nil || s.Runner.DB == nil || s.Clock == nil {
 		return OccurrencePage{}, ErrUnavailable
 	}
-	if filter.LogicalServerID <= 0 {
-		return OccurrencePage{}, errors.New("server is required")
+	if filter.LogicalServerID < 0 {
+		return OccurrencePage{}, errors.New("server must not be negative")
+	}
+	if filter.LogicalServerID == 0 {
+		return s.listGlobal(ctx, filter)
 	}
 	limit, err := boundedLimit(filter.Limit)
 	if err != nil {
@@ -347,6 +413,109 @@ func (s Service) List(ctx context.Context, filter OccurrenceFilter) (OccurrenceP
 		page.Occurrences = append(page.Occurrences, viewOf(row, at))
 	}
 	return page, nil
+}
+
+// listGlobal serves events.list without a server: the global groups with their
+// per-server occurrences, plus the server-only occurrences (EA-15 item 5).
+func (s Service) listGlobal(ctx context.Context, filter OccurrenceFilter) (OccurrencePage, error) {
+	if s.Store == nil || s.Runner.DB == nil || s.Clock == nil || s.Servers == nil {
+		return OccurrencePage{}, ErrUnavailable
+	}
+	limit, err := boundedLimit(filter.Limit)
+	if err != nil {
+		return OccurrencePage{}, err
+	}
+	at := s.Clock.Now().UTC()
+	filter.DecisionAt = at
+	filter.Limit = limit + 1
+	current, err := s.Operations.New(policy.Set{})
+	if err != nil {
+		return OccurrencePage{}, err
+	}
+	var groups []GlobalGroup
+	var rows []events.Occurrence
+	var views []GroupView
+	_, err = s.Runner.Run(ctx, current, readProfile("events-list-global"), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, scope tx.Scope) error {
+		loadedGroups, readErr := s.Store.ListGlobalGroupsTx(ctx, scope.Tx, limit)
+		if readErr != nil {
+			return readErr
+		}
+		groups = loadedGroups
+		loadedRows, readErr := s.Store.ServerOnlyOccurrencesTx(ctx, scope.Tx, filter)
+		if readErr != nil {
+			return readErr
+		}
+		rows = loadedRows
+		servers, readErr := s.Servers.OperatorServersTx(ctx, scope.Tx)
+		if readErr != nil {
+			return readErr
+		}
+		names := make(map[int64]string, len(servers))
+		for _, server := range servers {
+			names[server.ServerID] = server.Name
+		}
+		for _, group := range groups {
+			view, viewErr := s.groupView(ctx, scope.Tx, group, servers, names, at)
+			if viewErr != nil {
+				return viewErr
+			}
+			views = append(views, view)
+		}
+		return nil
+	})
+	if err != nil {
+		return OccurrencePage{}, err
+	}
+	page := OccurrencePage{Occurrences: make([]OccurrenceView, 0, limit), Groups: make([]GroupView, 0, len(views))}
+	if len(rows) > limit {
+		rows = rows[:limit]
+		last := rows[len(rows)-1]
+		page.NextCursor = OccurrenceCursor{StartsAt: last.StartsAt, ID: last.ID}.String()
+	}
+	for _, row := range rows {
+		page.Occurrences = append(page.Occurrences, viewOf(row, at))
+	}
+	page.Groups = views
+	return page, nil
+}
+
+func (s Service) groupView(ctx context.Context, q tx.Queryer, group GlobalGroup, servers []operator.OperatorServer, names map[int64]string, at time.Time) (GroupView, error) {
+	view := GroupView{
+		ID: group.ID, ActivityID: group.ActivityID, DefinitionRevision: group.DefinitionRevision,
+		State: string(group.Phase(at)), StartsAt: group.StartsAt.UTC(), EndsAt: utcPtr(group.EndsAt), Revision: group.Revision,
+		ServerCount: len(servers), MissingServers: []MissingServerView{},
+		Occurrences: make([]OccurrenceView, 0, len(group.Occurrences)),
+	}
+	joined := make(map[int64]struct{}, len(group.Occurrences))
+	for _, occurrence := range group.Occurrences {
+		view.Occurrences = append(view.Occurrences, viewOf(occurrence, at))
+		joined[occurrence.LogicalServerID] = struct{}{}
+	}
+	view.JoinedCount = len(joined)
+	for _, server := range servers {
+		if _, present := joined[server.ServerID]; present {
+			continue
+		}
+		reason := missingNotJoinedYet
+		if group.Joinable(at) {
+			blocked, err := s.Store.OverlapsTx(ctx, q, server.ServerID, group.ActivityID, group.StartsAt, group.EndsAt, 0)
+			if err != nil {
+				return GroupView{}, err
+			}
+			if blocked {
+				reason = missingRunsOwn
+			}
+		}
+		view.MissingServers = append(view.MissingServers, MissingServerView{ServerID: server.ServerID, Name: nameOf(names, server.ServerID), Reason: reason})
+	}
+	return view, nil
+}
+
+func nameOf(names map[int64]string, serverID int64) string {
+	if name := names[serverID]; name != "" {
+		return name
+	}
+	return "unknown"
 }
 
 // ActiveModifiers reads the RUNNING occurrences' hooks of one kind inside the

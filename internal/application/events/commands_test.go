@@ -201,6 +201,54 @@ func TestDefinitionListRefusesNegativeActivity(t *testing.T) {
 	}
 }
 
+func TestDecodeMutation(t *testing.T) {
+	occurrenceID, groupID, err := decodeMutation([]byte(`{"occurrence_id":7}`))
+	if err != nil || occurrenceID != 7 || groupID != 0 {
+		t.Fatalf("occurrence: %d %d %v", occurrenceID, groupID, err)
+	}
+	occurrenceID, groupID, err = decodeMutation([]byte(`{"group_id":9}`))
+	if err != nil || occurrenceID != 0 || groupID != 9 {
+		t.Fatalf("group: %d %d %v", occurrenceID, groupID, err)
+	}
+	if _, _, err := decodeMutation([]byte(`{}`)); err == nil {
+		t.Fatal("an empty target must be refused")
+	}
+	if _, _, err := decodeMutation([]byte(`{"occurrence_id":7,"group_id":9}`)); err == nil {
+		t.Fatal("both targets must be refused")
+	}
+	if _, err := decodeOccurrence([]byte(`{"group_id":9}`)); err == nil {
+		t.Fatal("cancel must not accept a group id")
+	}
+}
+
+func TestScheduleHandlerRefusesUnknownScope(t *testing.T) {
+	commands := Commands{}
+	command := handlerCommand(t, "events.schedule", `{"activity_id":1008,"logical_server_ids":[1],"duration":"1d","scope":"team"}`)
+	_, err := commands.scheduleHandler(context.Background(), handlerScope(time.Now().UTC()), command)
+	if refusal := refusalOf(t, err); refusal.Code != CodePayloadInvalid {
+		t.Fatalf("code = %s, want %s", refusal.Code, CodePayloadInvalid)
+	}
+}
+
+func TestScheduleGlobalRefusesServerList(t *testing.T) {
+	commands := Commands{}
+	command := handlerCommand(t, "events.schedule", `{"activity_id":1008,"duration":"1d","scope":"global","logical_server_ids":[1]}`)
+	_, err := commands.scheduleHandler(context.Background(), handlerScope(time.Now().UTC()), command)
+	if refusal := refusalOf(t, err); refusal.Code != CodePayloadInvalid {
+		t.Fatalf("code = %s, want %s", refusal.Code, CodePayloadInvalid)
+	}
+}
+
+func TestGroupStateFor(t *testing.T) {
+	at := time.Date(2026, 11, 23, 12, 0, 0, 0, time.UTC)
+	if got := groupStateFor(at.Add(time.Hour), at); got != events.GroupScheduled {
+		t.Fatalf("future start state = %s", got)
+	}
+	if got := groupStateFor(at.Add(-time.Hour), at); got != events.GroupRunning {
+		t.Fatalf("started state = %s", got)
+	}
+}
+
 var errSettingsFault = errors.New("settings read timed out")
 
 type failingSettingsStore struct {

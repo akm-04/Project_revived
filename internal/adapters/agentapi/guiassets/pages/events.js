@@ -15,17 +15,19 @@ const commandEndNow = "events.end_now";
 const commandSetPermanent = "events.set_permanent";
 const eventsListLimit = 200;
 
-// Events (G5): the running and scheduled occurrences of one logical server
-// (events.list requires `server`; internal/application/events/module.go:48-55),
-// the occurrences' lifecycle actions, and the schedule action.
+// Events (G5, EA-15): the global groups and the server-only occurrences, the
+// occurrences' lifecycle actions, and the schedule action. The page opens on
+// scope "All servers"; one server stays selectable for a server-only event.
 export function renderPage(container, context) {
   container.replaceChildren();
   container.append(pageHeader(context.page.label));
   container.setAttribute("aria-label", context.page.label);
 
   const state = {
+    scope: "global",
     serverID: null,
     occurrences: [],
+    groups: [],
     definitions: [],
     names: new Map(),
     scheduleDuration: null,
@@ -37,10 +39,12 @@ export function renderPage(container, context) {
   const refreshButton = actionButton("Refresh events", false, "events-refresh");
   const overviewStatus = errorParagraph();
   overviewStatus.id = "events-status";
+  const groupsHost = document.createElement("div");
+  groupsHost.id = "events-groups";
   const tableHost = document.createElement("div");
   tableHost.className = "table-responsive";
   tableHost.id = "events-table-host";
-  overview.body.append(serverPickerHost, refreshButton, overviewStatus, tableHost);
+  overview.body.append(serverPickerHost, refreshButton, overviewStatus, groupsHost, tableHost);
 
   const scheduleCard = createCard("Schedule an event", "events-schedule-card");
   const definitionsStatus = paragraph("hint", "Loading deployed event definitions…");
@@ -55,7 +59,7 @@ export function renderPage(container, context) {
   scheduleResult.id = "events-schedule-result";
   scheduleCard.body.append(definitionsStatus, definitionsHost, pickScheduleDuration, scheduleDurationSummary, scheduleButton, scheduleResult);
 
-  const actionCard = createCard("Change a running or scheduled event", "events-actions-card");
+  const actionCard = createCard("Change a single-server event", "events-actions-card");
   const occurrenceSelect = createSelect(actionCard.body, "events-action-target", "Occurrence", []);
   const extendButton = actionButton("Extend", false, "events-extend");
   const endNowButton = actionButton("End now", false, "events-end-now");
@@ -88,11 +92,13 @@ export function renderPage(container, context) {
       state.serverID = Number(loaded.servers[0].server_id);
     }
     mountServerPicker(serverPickerHost, {
-      includeGlobal: false,
+      includeGlobal: true,
       multiple: false,
-      selected: state.serverID === null ? [] : [state.serverID],
+      global: true,
+      selected: [],
       idPrefix: "events-server",
       onChange: (value) => {
+        state.scope = value.global ? "global" : "server";
         state.serverID = value.server_ids.length === 1 ? value.server_ids[0] : null;
         void refreshEvents();
       },
@@ -103,10 +109,15 @@ export function renderPage(container, context) {
 
   async function refreshEvents() {
     overviewStatus.textContent = "";
+    if (state.scope === "global") {
+      await refreshGlobalEvents();
+      return;
+    }
     if (state.serverID === null) {
-      overviewStatus.textContent = "No logical server is selected; events.list needs one.";
+      overviewStatus.textContent = "Select one server, or All servers.";
       state.occurrences = [];
-      renderOccurrences();
+      state.groups = [];
+      renderEvents();
       return;
     }
     overviewStatus.textContent = "Loading events…";
@@ -117,13 +128,44 @@ export function renderPage(container, context) {
     if (running.error !== "" || scheduled.error !== "") {
       setStatus(overviewStatus, running.error !== "" ? running.error : scheduled.error, "error");
       state.occurrences = [];
-      renderOccurrences();
+      state.groups = [];
+      renderEvents();
       return;
     }
+    state.groups = [];
     state.occurrences = running.occurrences.concat(scheduled.occurrences);
     state.occurrences.sort((left, right) => String(left.starts_at).localeCompare(String(right.starts_at)));
     overviewStatus.textContent = state.occurrences.length === 0 ? "No running or scheduled events on this server." : "";
-    renderOccurrences();
+    renderEvents();
+  }
+
+  // The global view reads groups plus server-only rows in one bounded page
+  // (internal/application/events/service.go listGlobal); the page shows the
+  // running and scheduled ones.
+  async function refreshGlobalEvents() {
+    overviewStatus.textContent = "Loading events…";
+    const reply = await request("/agent/v1/reads/" + encodeURIComponent(readEventsList) + "?limit=" + eventsListLimit);
+    if (reply.unauthorized) {
+      return;
+    }
+    if (!reply.ok) {
+      setStatus(overviewStatus, describeReply(reply), "error");
+      state.groups = [];
+      state.occurrences = [];
+      renderEvents();
+      return;
+    }
+    const body = reply.body && typeof reply.body === "object" ? reply.body : {};
+    const groups = Array.isArray(body.groups) ? body.groups : [];
+    const occurrences = Array.isArray(body.occurrences) ? body.occurrences : [];
+    state.groups = groups.filter(isLiveEvent);
+    state.occurrences = occurrences.filter(isLiveEvent);
+    state.groups.sort((left, right) => String(left.starts_at).localeCompare(String(right.starts_at)));
+    state.occurrences.sort((left, right) => String(left.starts_at).localeCompare(String(right.starts_at)));
+    overviewStatus.textContent = state.groups.length === 0 && state.occurrences.length === 0
+      ? "No running or scheduled events."
+      : "";
+    renderEvents();
   }
 
   async function readOccurrences(serverID, phase) {
@@ -142,14 +184,30 @@ export function renderPage(container, context) {
     return { occurrences: Array.isArray(body.occurrences) ? body.occurrences : [], error: "" };
   }
 
+  function renderEvents() {
+    renderOccurrences();
+    renderGroups();
+    updateScheduleHint();
+  }
+
+  function updateScheduleHint() {
+    if (state.definitions.length === 0) {
+      return;
+    }
+    definitionsStatus.textContent = state.scope === "global"
+      ? "Tick the events to schedule on all current and future servers."
+      : "Tick the events to schedule on the selected server.";
+  }
+
   function renderOccurrences() {
     tableHost.replaceChildren();
     occurrenceSelect.replaceChildren();
+    const selectable = state.occurrences.filter(isServerOnly);
     const blank = document.createElement("option");
     blank.value = "";
-    blank.textContent = state.occurrences.length === 0 ? "No occurrences" : "choose one";
+    blank.textContent = selectable.length === 0 ? "No single-server occurrences" : "choose one";
     occurrenceSelect.append(blank);
-    for (const occurrence of state.occurrences) {
+    for (const occurrence of selectable) {
       const option = document.createElement("option");
       option.value = String(occurrence.id);
       option.textContent = "#" + occurrence.id + " · " + activityLabel(occurrence.activity_id) + " · " + occurrence.state;
@@ -159,28 +217,140 @@ export function renderPage(container, context) {
       updateActionAvailability();
       return;
     }
+    tableHost.append(occurrenceTable(state.occurrences, state.scope === "global" ? "global" : "server"));
+    updateActionAvailability();
+  }
+
+  // Each global group is one native <details> row: the summary carries the
+  // activity, state and "all N servers" / "K of N", and expanding it shows the
+  // per-server rows and the two group commands (EA-15 items 4-6).
+  function renderGroups() {
+    groupsHost.replaceChildren();
+    if (state.scope !== "global" || state.groups.length === 0) {
+      return;
+    }
+    const heading = document.createElement("h3");
+    heading.className = "card-title mt-3";
+    heading.textContent = "All-server events";
+    const list = document.createElement("div");
+    list.className = "d-flex flex-column gap-2";
+    for (const group of state.groups) {
+      list.append(groupDetails(group));
+    }
+    groupsHost.append(heading, list);
+  }
+
+  function groupDetails(group) {
+    const details = document.createElement("details");
+    details.className = "border rounded p-2";
+    details.id = "event-group-" + group.id;
+
+    const summary = document.createElement("summary");
+    summary.className = "d-flex flex-wrap align-items-center gap-2";
+    const title = document.createElement("span");
+    title.className = "fw-bold";
+    title.textContent = "activity " + activityLabel(group.activity_id);
+    const stateBadge = document.createElement("span");
+    stateBadge.className = "badge bg-secondary-lt text-secondary";
+    stateBadge.textContent = group.state || "unknown";
+    const coverage = document.createElement("span");
+    coverage.className = "text-secondary";
+    coverage.textContent = coverageText(group);
+    summary.append(title, stateBadge, coverage);
+    details.append(summary);
+
+    const meta = document.createElement("p");
+    meta.className = "mb-1";
+    meta.textContent = "starts " + timeText(group.starts_at, "unknown") + " · ends " + timeText(group.ends_at, "permanent");
+    details.append(meta);
+
+    const missing = missingServers(group);
+    if (missing !== "") {
+      const missingLine = document.createElement("p");
+      missingLine.className = "text-warning mb-1";
+      missingLine.textContent = missing;
+      details.append(missingLine);
+    }
+
+    const actions = document.createElement("div");
+    actions.className = "btn-list mb-2";
+    const endButton = actionButton("End now", false, "event-group-end-" + group.id);
+    endButton.disabled = group.state !== "RUNNING";
+    const permanentButton = actionButton("Make permanent", false, "event-group-permanent-" + group.id);
+    permanentButton.disabled = (group.state !== "RUNNING" && group.state !== "SCHEDULED") || group.ends_at === null || group.ends_at === undefined;
+    endButton.addEventListener("click", () => endGroupNow(group));
+    permanentButton.addEventListener("click", () => makeGroupPermanent(group));
+    actions.append(endButton, permanentButton);
+    details.append(actions);
+
+    const result = errorParagraph();
+    result.id = "event-group-result-" + group.id;
+    details.append(result);
+
+    details.append(occurrenceTable(Array.isArray(group.occurrences) ? group.occurrences : [], "global"));
+    return details;
+  }
+
+  function coverageText(group) {
+    if (!Number.isInteger(group.server_count) || !Number.isInteger(group.joined_count)) {
+      return "unknown servers";
+    }
+    if (group.joined_count === group.server_count) {
+      return "all " + group.server_count + " servers";
+    }
+    return group.joined_count + " of " + group.server_count + " servers";
+  }
+
+  function missingServers(group) {
+    if (!Array.isArray(group.missing_servers) || group.missing_servers.length === 0) {
+      return "";
+    }
+    const names = group.missing_servers.map((server) =>
+      "#" + server.server_id + " " + (typeof server.name === "string" && server.name !== "" ? server.name : "unknown") +
+      " (" + (typeof server.reason === "string" && server.reason !== "" ? server.reason : "unknown") + ")");
+    return "not in this event: " + names.join(", ");
+  }
+
+  // occurrenceTable renders the run of one server's or one group's
+  // occurrences. mode "global" starts with the server column; mode "server"
+  // marks the group membership instead, so a group row is never mistaken for
+  // a single-server event.
+  function occurrenceTable(occurrenceRows, mode) {
+    const wrap = document.createElement("div");
+    wrap.className = "table-responsive";
     const table = document.createElement("table");
     table.className = "table table-sm table-vcenter card-table mb-0";
     const head = document.createElement("thead");
     const headRow = document.createElement("tr");
-    for (const label of ["banner", "activity", "state", "starts", "ends", "claim until"]) {
+    const labels = mode === "global"
+      ? ["server", "banner", "activity", "state", "starts", "ends", "claim until"]
+      : ["banner", "activity", "scope", "state", "starts", "ends", "claim until"];
+    for (const label of labels) {
       const cell = document.createElement("th");
       cell.textContent = label;
       headRow.append(cell);
     }
     head.append(headRow);
     const body = document.createElement("tbody");
-    for (const occurrence of state.occurrences) {
+    for (const occurrence of occurrenceRows) {
       const row = document.createElement("tr");
+      if (mode === "global") {
+        row.append(numberCell(occurrence.logical_server_id));
+      }
       const banner = document.createElement("td");
       banner.append(pictureElement(activityBannerPath(occurrence.activity_id)));
       const activity = document.createElement("td");
       activity.textContent = activityLabel(occurrence.activity_id);
+      if (mode !== "global") {
+        const scopeCell = document.createElement("td");
+        scopeCell.textContent = isServerOnly(occurrence) ? "single server" : "group #" + occurrence.global_group_id;
+        row.append(banner, activity, scopeCell);
+      } else {
+        row.append(banner, activity);
+      }
       const stateCell = document.createElement("td");
       stateCell.textContent = occurrence.state;
       row.append(
-        banner,
-        activity,
         stateCell,
         timeCell(occurrence.starts_at, "unknown"),
         timeCell(occurrence.ends_at, "permanent"),
@@ -189,8 +359,26 @@ export function renderPage(container, context) {
       body.append(row);
     }
     table.append(head, body);
-    tableHost.append(table);
-    updateActionAvailability();
+    wrap.append(table);
+    return wrap;
+  }
+
+  function numberCell(value) {
+    const cell = document.createElement("td");
+    cell.textContent = Number.isInteger(value) ? "#" + value : "unknown";
+    return cell;
+  }
+
+  function isServerOnly(occurrence) {
+    return occurrence.global_group_id === null || occurrence.global_group_id === undefined;
+  }
+
+  function isLiveEvent(entry) {
+    return entry.state === "RUNNING" || entry.state === "SCHEDULED";
+  }
+
+  function timeText(value, fallback) {
+    return value === null || value === undefined ? fallback : formatTimeText(value);
   }
 
   // events.definition.list carries the activity name (DefinitionSummary.Name,
@@ -230,10 +418,9 @@ export function renderPage(container, context) {
     }
     if (state.definitions.length === 0) {
       definitionsStatus.textContent = "No event definitions are deployed; deploy one under Advanced.";
-      renderOccurrences();
+      renderEvents();
       return;
     }
-    definitionsStatus.textContent = "Tick the events to schedule on the selected server.";
     for (const definition of state.definitions) {
       const row = document.createElement("label");
       row.className = "form-check";
@@ -250,7 +437,7 @@ export function renderPage(container, context) {
       row.append(box, text);
       definitionsHost.append(row);
     }
-    renderOccurrences();
+    renderEvents();
   }
 
   async function chooseScheduleDuration() {
@@ -264,8 +451,8 @@ export function renderPage(container, context) {
 
   async function scheduleEvents() {
     scheduleResult.textContent = "";
-    if (state.serverID === null) {
-      setStatus(scheduleResult, "Select a server first.", "error");
+    if (state.scope === "server" && state.serverID === null) {
+      setStatus(scheduleResult, "Select one server, or All servers.", "error");
       return;
     }
     if (state.scheduleDuration === null) {
@@ -283,9 +470,10 @@ export function renderPage(container, context) {
       return;
     }
     const activityIDs = ticked.map((box) => Number(box.id.slice("event-definition-".length)));
+    const target = state.scope === "global" ? "every current and future server" : "server #" + state.serverID;
     const confirmation = await confirmAction({
       title: "Schedule events",
-      summary: "Schedule activity " + activityIDs.join(", ") + " on server #" + state.serverID +
+      summary: "Schedule activity " + activityIDs.join(", ") + " on " + target +
         " from " + formatTimeText(state.scheduleDuration.start) + " for " + duration.text + ".",
       confirmLabel: "Schedule",
     });
@@ -299,17 +487,23 @@ export function renderPage(container, context) {
       const semanticKey = activityIDs.length === 1
         ? confirmation.semantic_key
         : confirmation.semantic_key + "-" + index;
+      const payload = {
+        activity_id: activityIDs[index],
+        start: state.scheduleDuration.start,
+        duration: duration.text,
+      };
+      if (state.scope === "global") {
+        payload.scope = "global";
+      } else {
+        payload.scope = "server";
+        payload.logical_server_ids = [state.serverID];
+      }
       const reply = await request("/agent/v1/commands/" + encodeURIComponent(commandSchedule), {
         method: "POST",
         body: {
           reason: confirmation.reason,
           semantic_key: semanticKey,
-          payload: {
-            activity_id: activityIDs[index],
-            logical_server_ids: [state.serverID],
-            start: state.scheduleDuration.start,
-            duration: duration.text,
-          },
+          payload,
         },
       });
       if (reply.unauthorized) {
@@ -423,6 +617,55 @@ export function renderPage(container, context) {
       await refreshEvents();
     }
   }
+
+  async function endGroupNow(group) {
+    const confirmation = await confirmAction({
+      title: "End all-server event",
+      summary: "End group #" + group.id + " now on every server; each claim window still opens.",
+      confirmLabel: "End now",
+    });
+    if (confirmation === null) {
+      return;
+    }
+    await runGroupCommand(commandEndNow, { group_id: group.id }, group, confirmation, "end now");
+  }
+
+  async function makeGroupPermanent(group) {
+    const confirmation = await confirmAction({
+      title: "Make all-server event permanent",
+      summary: "Make group #" + group.id + " permanent on every server; it then runs until ended by hand.",
+      confirmLabel: "Make permanent",
+    });
+    if (confirmation === null) {
+      return;
+    }
+    await runGroupCommand(commandSetPermanent, { group_id: group.id }, group, confirmation, "make permanent");
+  }
+
+  async function runGroupCommand(name, payload, group, confirmation, label) {
+    const reply = await request("/agent/v1/commands/" + encodeURIComponent(name), {
+      method: "POST",
+      body: {
+        reason: confirmation.reason,
+        semantic_key: confirmation.semantic_key,
+        expected_revision: group.revision,
+        payload,
+      },
+    });
+    if (reply.unauthorized) {
+      return;
+    }
+    const box = document.getElementById("event-group-result-" + group.id);
+    const text = label + ": " + describeGroupReply(reply) + "\nreason: " + confirmation.reason;
+    if (box === null) {
+      setStatus(overviewStatus, text, reply.ok ? "success" : "error");
+    } else {
+      setStatus(box, text, reply.ok ? "success" : "error");
+    }
+    if (reply.ok) {
+      await refreshEvents();
+    }
+  }
 }
 
 // The client activity table's icon column is images/activities/<id>.png for
@@ -478,6 +721,9 @@ function describeOccurrenceReply(reply) {
   if (Array.isArray(result.occurrences)) {
     parts.push(result.occurrences.length + " occurrence(s)");
   }
+  if (result.group && typeof result.group === "object" && Number.isInteger(result.group.group_id)) {
+    parts.push("group #" + result.group.group_id + " " + (typeof result.group.state === "string" ? result.group.state : "unknown"));
+  }
   if (Number.isInteger(result.id)) {
     parts.push("occurrence #" + result.id + " " + (typeof result.state === "string" ? result.state : "unknown"));
   }
@@ -487,6 +733,29 @@ function describeOccurrenceReply(reply) {
     parts.push("ends " + result.ends_at);
   }
   return parts.join(", ");
+}
+
+function describeGroupReply(reply) {
+  if (!reply.ok) {
+    return describeReply(reply);
+  }
+  const result = commandResult(reply);
+  const parts = [];
+  if (Number.isInteger(result.group_id)) {
+    parts.push("group #" + result.group_id);
+  }
+  if (typeof result.state === "string" && result.state !== "") {
+    parts.push("state " + result.state);
+  }
+  if (Number.isInteger(result.occurrence_count)) {
+    parts.push(result.occurrence_count + " occurrence(s)");
+  }
+  if (result.ends_at === null) {
+    parts.push("permanent");
+  } else if (typeof result.ends_at === "string" && result.ends_at !== "") {
+    parts.push("ends " + result.ends_at);
+  }
+  return parts.length === 0 ? "unknown" : parts.join(", ");
 }
 
 function newSemanticKey() {

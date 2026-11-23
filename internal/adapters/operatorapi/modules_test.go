@@ -74,7 +74,7 @@ func TestEveryReadWithARequirementRefusesEmptyQuery(t *testing.T) {
 	// The adapter itself refuses these when the declared required input is
 	// missing. player.find validates in the application service; its test
 	// lives with PlayerReadService.
-	enforced := map[string]bool{"ota.release": true, "events.list": true, "player.summary": true, "operator.bulk.show": true}
+	enforced := map[string]bool{"ota.release": true, "player.summary": true, "operator.bulk.show": true}
 	for _, module := range modules {
 		for _, read := range module.Reads {
 			_, err := read.Handler(context.Background(), url.Values{})
@@ -88,6 +88,18 @@ func TestEveryReadWithARequirementRefusesEmptyQuery(t *testing.T) {
 			if !errors.As(err, &refusal) {
 				t.Fatalf("%s did not refuse an empty query: %v", read.Name, err)
 			}
+		}
+	}
+}
+
+func TestEventsListAcceptsTheGlobalViewAndRefusesABadServer(t *testing.T) {
+	handler := EventsList(fakeEventsList{})
+	if _, err := handler(context.Background(), url.Values{}); err != nil {
+		t.Fatalf("an empty query asks for the global view (EA-15 item 5): %v", err)
+	}
+	for _, server := range []string{"0", "-1", "abc"} {
+		if _, err := handler(context.Background(), url.Values{"server": []string{server}}); err == nil {
+			t.Fatalf("server %q must be refused", server)
 		}
 	}
 }

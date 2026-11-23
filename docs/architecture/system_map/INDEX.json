@@ -652,6 +652,7 @@
    "event_cycle_settings": "events",
    "event_definition_sync_conflicts": "events",
    "event_definitions": "events",
+   "event_global_groups": "events",
    "event_occurrences": "events",
    "friend_dm_delivery": "frienddm",
    "friend_dm_occurrences": "frienddm",
@@ -1139,7 +1140,7 @@
    "name": "events",
    "path": "internal/application/events",
    "purpose": "applies the I11A event owner commands and serves its bounded reads (I11A_EVENTS_V1)",
-   "tables": 5
+   "tables": 6
   },
   {
    "callees": 7,

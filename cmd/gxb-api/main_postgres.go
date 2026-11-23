@@ -577,7 +577,7 @@ func main() {
 	if err != nil {
 		log.Printf("events shipped definitions: %v", err)
 	}
-	eventCommands := appevents.Commands{Store: eventstore.Store{}, Coverage: otaServing, Gifts: eventstore.ContentGifts{}, Catalogue: eventstore.ContentCatalogue{}, Hooks: eventHooks, OperatorCatalogue: operatorCatalogue, Audit: operatorstore.Store{}, Content: contentDB}
+	eventCommands := appevents.Commands{Store: eventstore.Store{}, Coverage: otaServing, Gifts: eventstore.ContentGifts{}, Catalogue: eventstore.ContentCatalogue{}, Hooks: eventHooks, OperatorCatalogue: operatorCatalogue, Audit: operatorstore.Store{}, Content: contentDB, Servers: i4store.ServerDirectoryReader{}}
 	for _, file := range shippedDefinitions {
 		eventCommands.Shipped = append(eventCommands.Shipped, appevents.DefinitionFile{Name: file.Name, Body: file.Body})
 	}
@@ -595,7 +595,7 @@ func main() {
 		}
 		log.Printf("events definition sync: file=%s activity=%d revision=%d outcome=%s", result.File, result.ActivityID, result.Revision, result.Outcome)
 	}
-	eventService := appevents.Service{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: eventstore.Store{}, Clock: clock.System{}}
+	eventService := appevents.Service{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: eventstore.Store{}, Clock: clock.System{}, Servers: i4store.ServerDirectoryReader{}}
 	otaModule := bindModule(otaCommands.Module(),
 		map[string]operator.Handler{"ota.settings.set": appotarelease.SettingsSetHandler(otaSettingsFile, otaSettingsValue, otastore.Store{})},
 		map[string]operator.ReadHandler{"ota.status": operatorapi.OTAStatus(otaStatus), "ota.release": operatorapi.OTARelease(otaReleaseLookup)})
@@ -634,7 +634,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("events default cycle: %v", err)
 	}
-	eventJobs := appevents.Jobs{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: eventstore.Store{}, Coverage: otaServing, Hooks: eventHooks, Clock: clock.System{}, DefaultCycle: defaultCycle, Servers: i4store.PlayerRootLocker{}, Players: i4store.EventPlayerSource{}, Mail: appi5.SettlementMail{Store: i5db}, Content: contentDB, ClaimGrant: appevents.ChoiceGrant{HeroContent: contentDB, Heroes: heroSvc, Fragments: contentDB, Grants: i5svc, HeroWire: heroproj.StockHero}}
+	eventJobs := appevents.Jobs{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: eventstore.Store{}, Coverage: otaServing, Hooks: eventHooks, Clock: clock.System{}, DefaultCycle: defaultCycle, Servers: i4store.PlayerRootLocker{}, Players: i4store.EventPlayerSource{}, Mail: appi5.SettlementMail{Store: i5db}, Content: contentDB, ClaimGrant: appevents.ChoiceGrant{HeroContent: contentDB, Heroes: heroSvc, Fragments: contentDB, Grants: i5svc, HeroWire: heroproj.StockHero}, Directory: i4store.ServerDirectoryReader{}}
 	startEventsJobs(ctx, pool, eventJobs)
 	startOperator(ctx, runner, registry.Handlers(), registry.Reads(), registry.Modules(), operatorVersionReply, otaAfterCommit{Root: cfg.OTARoot, ReconcileSettings: otaSettingsSync.Reconcile, Serving: otaServing})
 	startOperatorBulkJob(ctx, pool, operatorgrant.Applier{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: operatorstore.Store{}, Grants: i5svc, Mail: i5svc, Catalogue: operatorCatalogue, LineCap: grantLineCap})

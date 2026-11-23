@@ -27,6 +27,7 @@ type Occurrence struct {
 	ClaimUntil          *time.Time
 	Source              string
 	Revision            int64
+	GlobalGroupID       *int64
 	CreatedByCommand    string
 	EndedEarlyByCommand string
 	CancelledByCommand  string
