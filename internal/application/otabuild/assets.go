@@ -23,6 +23,12 @@ import (
 
 const lazyFileMember = "lazyFile.json"
 
+// catalogMember is the client's own load-on-demand catalogue, which the client
+// promotes from src_32/src_64 to its writable root at the next boot. A lazy
+// refresh ships it so a recovered file (different bytes) is requested at its own
+// md5 instead of the lost stock one.
+const catalogMember = "version.json"
+
 // catalogRow is one version.json row. Only the fields the collection and the
 // lazy state need are decoded; the stock file also carries rows for src_32 and
 // src_64, which the assets lane ignores.
@@ -31,7 +37,7 @@ type catalogRow struct {
 	MD5     string          `json:"md5"`
 	Size    int64           `json:"size"`
 	Force   int             `json:"force"`
-	Version json.RawMessage `json:"version"`
+	Version json.RawMessage `json:"version,omitempty"`
 }
 
 // assetFile is one exact-current file found on disk. source is the resolved

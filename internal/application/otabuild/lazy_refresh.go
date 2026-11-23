@@ -22,40 +22,48 @@ import (
 // recovered under recovered_res_path carries that file's md5 and size and is
 // added to the code release's res sidecar, so /res serves it at that md5
 // (OA-8, OA-9).
-func lazyRefreshPackage(recoveredResPath, sidecarPath string, catalogBaseline stockBaseline, version string) ([]byte, []resSidecarEntry, Report, error) {
+//
+// The same recovered rows are returned as a catalogue document: the client
+// builds every load-on-demand URL from version.json (AssetDownload.getDownloadInfo_,
+// basename.md5) and verifies the download against it, so a recovered file whose
+// bytes differ from the stock catalogue can only be fetched once the client's
+// version.json carries its md5 and size. A shipped src_32/src_64 version.json is
+// promoted to the client's own catalogue at the next boot
+// (UpdateScene_64.lua:424-462), which is the silent-patch route for it.
+func lazyRefreshPackage(recoveredResPath, sidecarPath string, catalogBaseline stockBaseline, version string) ([]byte, []byte, []resSidecarEntry, Report, error) {
 	report := Report{Lane: string(otarelease.LaneCode), Version: version, MissingSample: []string{}, MismatchSample: []string{}}
 	rows, err := readCatalog(catalogBaseline)
 	if err != nil {
-		return nil, nil, report, err
+		return nil, nil, nil, report, err
 	}
 	root, err := resolveRecoveredResRoot(recoveredResPath)
 	if err != nil {
-		return nil, nil, report, err
+		return nil, nil, nil, report, err
 	}
 	deliveredEntries, err := readResourceSidecar(sidecarPath)
 	if err != nil {
-		return nil, nil, report, err
+		return nil, nil, nil, report, err
 	}
 	supplied, err := deliveredCataloguePaths(deliveredEntries)
 	if err != nil {
-		return nil, nil, report, err
+		return nil, nil, nil, report, err
 	}
 	if len(supplied) == 0 {
-		return nil, nil, report, fmt.Errorf("%w: the active assets release delivered no file", ErrNoExactAssets)
+		return nil, nil, nil, report, fmt.Errorf("%w: the active assets release delivered no file", ErrNoExactAssets)
 	}
 	rows, sidecar, recovered, err := recoveredLazyRows(rows, supplied, root)
 	if err != nil {
-		return nil, nil, report, err
+		return nil, nil, nil, report, err
 	}
 	lazyMap, summary, err := buildLazyMap(rows, supplied)
 	if err != nil {
-		return nil, nil, report, err
+		return nil, nil, nil, report, err
 	}
 	if err := checkDeliveredUnmarked(lazyMap, supplied); err != nil {
-		return nil, nil, report, err
+		return nil, nil, nil, report, err
 	}
 	if len(lazyMap) == 0 {
-		return nil, nil, report, fmt.Errorf("%w: the lazy refresh would ship no marker", ErrCatalogInvalid)
+		return nil, nil, nil, report, fmt.Errorf("%w: the lazy refresh would ship no marker", ErrCatalogInvalid)
 	}
 	report.LazyConsidered = summary.considered
 	report.LazySupplied = summary.supplied
@@ -63,10 +71,24 @@ func lazyRefreshPackage(recoveredResPath, sidecarPath string, catalogBaseline st
 	report.LazyRecovered = recovered
 	lazyBytes, err := marshalLazyFile(lazyMap)
 	if err != nil {
-		return nil, nil, report, err
+		return nil, nil, nil, report, err
+	}
+	catalogBytes, err := marshalCatalog(rows)
+	if err != nil {
+		return nil, nil, nil, report, err
 	}
 	sort.Slice(sidecar, func(left, right int) bool { return sidecar[left].Path < sidecar[right].Path })
-	return lazyBytes, sidecar, report, nil
+	return lazyBytes, catalogBytes, sidecar, report, nil
+}
+
+// marshalCatalog serialises the refreshed rows in the stock file's shape so the
+// client can read it as its own catalogue.
+func marshalCatalog(rows []catalogRow) ([]byte, error) {
+	encoded, err := marshalNoEscape(rows)
+	if err != nil {
+		return nil, err
+	}
+	return append(encoded, '\n'), nil
 }
 
 // deliveredCataloguePaths maps the assets release's res-index paths to the

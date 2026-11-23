@@ -143,10 +143,13 @@ func Build(ctx context.Context, input Input) (Result, error) {
 	} else {
 		entries, err = codeEntries(input)
 		if err == nil && input.LazyRefresh {
-			var lazyBytes []byte
-			lazyBytes, sidecar, report, err = lazyRefreshPackage(input.RecoveredResPath, input.AssetsSidecar, catalogBaseline, version.String())
+			var lazyBytes, catalogBytes []byte
+			lazyBytes, catalogBytes, sidecar, report, err = lazyRefreshPackage(input.RecoveredResPath, input.AssetsSidecar, catalogBaseline, version.String())
 			if err == nil {
 				entries = append(entries, packageEntry{path: lazyFileMember, content: lazyBytes, size: int64(len(lazyBytes)), md5: md5Hex(lazyBytes)})
+				for _, prefix := range []string{"src_32/", "src_64/"} {
+					entries = append(entries, packageEntry{path: prefix + catalogMember, content: catalogBytes, size: int64(len(catalogBytes)), md5: md5Hex(catalogBytes)})
+				}
 				sort.Slice(entries, func(left, right int) bool { return entries[left].path < entries[right].path })
 			}
 		}

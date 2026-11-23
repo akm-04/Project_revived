@@ -321,3 +321,63 @@ func TestLazyRefreshReadsStockCatalog(t *testing.T) {
 		t.Fatalf("lazy value = %+v", lazyValue)
 	}
 }
+
+// TestLazyRefreshShipsRefreshedCatalogue is the silent-patch route for a
+// recovered file whose bytes differ from the stock catalogue: the client builds
+// every lazy URL from version.json and verifies the download against it, so the
+// release must carry the recovered md5 and size in both ABI copies.
+func TestLazyRefreshShipsRefreshedCatalogue(t *testing.T) {
+	recoveredContent := []byte("recovered bytes")
+	recoveredPath := "res/web/windows/awake_hero_wnd/awake_hero.csb"
+	untouchedMD5 := strings.Repeat("b", 32)
+	rows := []catalogRow{
+		assetRow(recoveredPath, strings.Repeat("a", 32), 856),
+		assetRow("res/web/images/keep.png", untouchedMD5, 7),
+		{Path: "src_64/app/example/Feature.lua", MD5: strings.Repeat("e", 32), Size: 12, Force: 1},
+	}
+	delivered := []resSidecarEntry{{Path: "web/images/delivered.png", MD5: strings.Repeat("d", 32), Size: 5}}
+	testCase := newLazyRefreshCase(t, rows, delivered)
+	assetResFile(t, testCase.recoveredPath, "web/windows/awake_hero_wnd/awake_hero.csb", recoveredContent)
+
+	result := testCase.fixture.buildResult(t, testCase.input)
+	assembled := readAssembled(t, testCase.fixture.updates, result.Request)
+
+	seen := map[string][]catalogRow{}
+	for _, prefix := range []string{"src_32/", "src_64/"} {
+		var catalog []catalogRow
+		if err := json.Unmarshal(zipEntry(t, assembled, prefix+catalogMember), &catalog); err != nil {
+			t.Fatalf("%s%s: %v", prefix, catalogMember, err)
+		}
+		seen[prefix] = catalog
+	}
+
+	if !bytes.Equal(zipEntry(t, assembled, "src_32/"+catalogMember), zipEntry(t, assembled, "src_64/"+catalogMember)) {
+		t.Fatal("the two ABI catalogues differ")
+	}
+
+	byPath := map[string]catalogRow{}
+	for _, row := range seen["src_64/"] {
+		byPath[row.Path] = row
+	}
+	recovered, found := byPath[recoveredPath]
+	if !found {
+		t.Fatalf("%s is missing from the shipped catalogue", recoveredPath)
+	}
+	if recovered.MD5 != md5Hex(recoveredContent) || recovered.Size != int64(len(recoveredContent)) {
+		t.Fatalf("recovered row = %s/%d, want %s/%d", recovered.MD5, recovered.Size, md5Hex(recoveredContent), len(recoveredContent))
+	}
+	untouched, found := byPath["res/web/images/keep.png"]
+	if !found || untouched.MD5 != untouchedMD5 || untouched.Size != 7 {
+		t.Fatalf("untouched row = %+v", untouched)
+	}
+	forced, found := byPath["src_64/app/example/Feature.lua"]
+	if !found || forced.Force != 1 || forced.MD5 != strings.Repeat("e", 32) {
+		t.Fatalf("force row = %+v", forced)
+	}
+
+	lazyValue := lazyValueOf(t, readLazyMap(t, testCase.fixture.updates, result.Request),
+		"__lazy__res___web___windows___awake_hero_wnd___awake_hero.csb")
+	if lazyValue.MD5 != recovered.MD5 || lazyValue.Size != recovered.Size {
+		t.Fatalf("lazy marker %s/%d does not match the catalogue %s/%d", lazyValue.MD5, lazyValue.Size, recovered.MD5, recovered.Size)
+	}
+}
