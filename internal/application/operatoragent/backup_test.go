@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -1003,5 +1004,132 @@ func TestNewestAutomaticTimeIgnoresManualSnapshots(t *testing.T) {
 	}
 	if got := newestAutomaticTime(entries); !got.Equal(newest) {
 		t.Fatalf("newest automatic = %v", got)
+	}
+}
+
+// TestSettingsSettersRaceWithTheScheduleReader is the finding-1 regression: the
+// schedule goroutine reads Directory, Keep and Schedule while the HTTP handlers
+// write them. Run with -race.
+func TestSettingsSettersRaceWithTheScheduleReader(t *testing.T) {
+	root := t.TempDir()
+	config := `{"listen":"127.0.0.1:8090","backend":{"operator_addr":"127.0.0.1:8091"}}`
+	if err := os.WriteFile(filepath.Join(root, AgentConfigFileName), []byte(config), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	service, _, process := newBackupService(t)
+	process.running = false
+	service.Root = root
+	service.writeSchedule(time.Hour)
+	other := t.TempDir()
+
+	stop := make(chan struct{})
+	var reader sync.WaitGroup
+	reader.Add(1)
+	go func() {
+		defer reader.Done()
+		for {
+			select {
+			case <-stop:
+				return
+			default:
+			}
+			service.snapshotScheduled(context.Background())
+			_ = service.Settings()
+			_, _ = service.prune(context.Background())
+		}
+	}()
+
+	var setters sync.WaitGroup
+	for index := range 20 {
+		setters.Add(1)
+		go func(index int) {
+			defer setters.Done()
+			if index%2 == 0 {
+				_, _ = service.SetPath(other)
+				_, _ = service.SetSchedule("1d")
+				return
+			}
+			_, _ = service.SetPath(service.directory())
+			_, _ = service.SetSchedule("off")
+			_, _ = service.SetKeep(10)
+			_, _ = service.SetKeep(5)
+		}(index)
+	}
+	setters.Wait()
+	close(stop)
+	reader.Wait()
+}
+
+// TestSetKeepLoweringWhileBusyKeepsTheStoredValue is the finding-2 regression:
+// the guard is taken before the new value is saved, so a refusal changes
+// neither agent.json nor the live retention.
+func TestSetKeepLoweringWhileBusyKeepsTheStoredValue(t *testing.T) {
+	service := newBackupServiceWithConfig(t, `{"listen":"127.0.0.1:8090","backup_keep":10,"backend":{"operator_addr":"127.0.0.1:8091"}}`)
+	service.writeKeep(10)
+	if !service.Guard.TryLock() {
+		t.Fatal("the guard was already held")
+	}
+	defer service.Guard.Unlock()
+	if _, err := service.SetKeep(5); !backupRefusalCode(err, CodeBackendBusy) {
+		t.Fatalf("set keep while busy: %v", err)
+	}
+	stored, err := LoadConfig(service.Root)
+	if err != nil || stored.BackupKeepValue() != 10 {
+		t.Fatalf("a busy lowering changed agent.json: keep = %d (%v)", stored.BackupKeepValue(), err)
+	}
+	if service.keep() != 10 {
+		t.Fatalf("a busy lowering changed the live keep: %d", service.keep())
+	}
+}
+
+// TestKeepPruneCountsProtectedAutomaticSnapshots is the finding-4 regression:
+// pinned and damaged automatic snapshots consume keep slots, so the preview the
+// GUI shows must count the same snapshots the agent's prune does.
+func TestKeepPruneCountsProtectedAutomaticSnapshots(t *testing.T) {
+	base := time.Date(2026, 11, 20, 10, 0, 0, 0, time.UTC)
+	entries := make([]BackupEntry, 0, 9)
+	for index := range 8 {
+		entries = append(entries, BackupEntry{BackupManifest: BackupManifest{
+			ID:        "id" + strconv.Itoa(index),
+			Kind:      BackupKindScheduled,
+			CreatedAt: base.Add(-time.Duration(index) * time.Minute),
+		}})
+	}
+	entries[1].Pinned = true
+	entries[2].Damaged = true
+	entries = append(entries, BackupEntry{BackupManifest: BackupManifest{
+		ID:        "manual",
+		Kind:      BackupKindManual,
+		CreatedAt: base.Add(-time.Hour),
+	}})
+	counts := keepPruneCounts(entries, "")
+	if counts["5"] != 3 {
+		t.Fatalf("keep 5 removes %d automatic snapshots, want 3", counts["5"])
+	}
+	if counts["10"] != 0 {
+		t.Fatalf("keep 10 removes %d automatic snapshots, want 0", counts["10"])
+	}
+}
+
+// TestSetPathRefusesWhileAnOperationRuns covers the other half of finding 1: a
+// folder change must not land in the middle of a snapshot or restore.
+func TestSetPathRefusesWhileAnOperationRuns(t *testing.T) {
+	root := t.TempDir()
+	config := `{"listen":"127.0.0.1:8090","backend":{"operator_addr":"127.0.0.1:8091"}}`
+	if err := os.WriteFile(filepath.Join(root, AgentConfigFileName), []byte(config), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	service, _, _ := newBackupService(t)
+	service.Root = root
+	if !service.Guard.TryLock() {
+		t.Fatal("the guard was already held")
+	}
+	defer service.Guard.Unlock()
+	if _, err := service.SetPath(t.TempDir()); !backupRefusalCode(err, CodeBackendBusy) {
+		t.Fatalf("set path while busy: %v", err)
+	}
+	stored, err := LoadConfig(root)
+	if err != nil || stored.BackupPath != "" {
+		t.Fatalf("a busy set path changed agent.json: %q (%v)", stored.BackupPath, err)
 	}
 }

@@ -27,6 +27,7 @@ export function renderPage(container, context) {
   let selectedEntry = null;
   let backendMigration = null;
   let loadedBackups = [];
+  let loadedKeepPrune = {};
   let currentKeep = null;
   let currentSchedule = "1d";
   const selectedIDs = new Set();
@@ -83,6 +84,7 @@ export function renderPage(container, context) {
       setStatus(folder.status, noBackupFolderMessage, "error");
     }
     loadedBackups = backups;
+    loadedKeepPrune = body.keep_prune && typeof body.keep_prune === "object" ? body.keep_prune : {};
     selectedEntry = null;
     selectedIDs.clear();
     updateDeleteSelected();
@@ -232,7 +234,7 @@ export function renderPage(container, context) {
       return;
     }
     if (currentKeep !== null && value < currentKeep) {
-      const count = automaticPruneCount(loadedBackups, value);
+      const count = presentNumber(loadedKeepPrune[String(value)], 0);
       const snapshots = count === 1 ? "snapshot" : "snapshots";
       const confirmation = await confirmAction({
         title: "Lower automatic retention",
@@ -330,25 +332,9 @@ function snapshotLabel(entry) {
   return name === "" ? id : name + " (" + id + ")";
 }
 
-// scheduleLabel and automaticPruneCount mirror the agent's choices so the
-// confirm dialog states how many snapshots the lowering removes.
+// scheduleLabel mirrors the agent's schedule names in the status line.
 function scheduleLabel(value) {
   return value === "off" ? "off" : "every " + value;
-}
-
-function automaticPruneCount(backups, keep) {
-  let automaticSeen = 0;
-  let count = 0;
-  backups.forEach((entry, index) => {
-    if (entry.damaged === true || entry.pinned === true || entry.kind === "manual") {
-      return;
-    }
-    automaticSeen += 1;
-    if (index > 0 && automaticSeen > keep) {
-      count += 1;
-    }
-  });
-  return count;
 }
 
 function selectRadio(group, value) {

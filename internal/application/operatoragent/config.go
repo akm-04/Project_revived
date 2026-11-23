@@ -418,19 +418,31 @@ func (config Config) protectedTrees() map[string]string {
 }
 
 func pathWithin(child, parent string) bool {
-	childPath, err := filepath.Abs(child)
-	if err != nil {
-		return false
-	}
-	parentPath, err := filepath.Abs(parent)
-	if err != nil {
-		return false
-	}
+	childPath := resolvePath(child)
+	parentPath := resolvePath(parent)
 	relative, err := filepath.Rel(parentPath, childPath)
 	if err != nil {
 		return false
 	}
 	return relative == "." || (relative != ".." && !strings.HasPrefix(relative, ".."+string(os.PathSeparator)))
+}
+
+// resolvePath makes a path absolute and follows symlinks, so a linked folder
+// cannot hide a protected tree. A path that does not exist yet is resolved
+// through its deepest existing parent.
+func resolvePath(path string) string {
+	absolute, err := filepath.Abs(path)
+	if err != nil {
+		return path
+	}
+	if resolved, err := filepath.EvalSymlinks(absolute); err == nil {
+		return resolved
+	}
+	parent := filepath.Dir(absolute)
+	if parent == absolute {
+		return absolute
+	}
+	return filepath.Join(resolvePath(parent), filepath.Base(absolute))
 }
 
 func ensureWritableDirectory(path string) error {

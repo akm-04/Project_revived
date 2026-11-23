@@ -650,7 +650,14 @@ func (handler Handler) servePublicURLsSet(writer http.ResponseWriter, body comma
 	// form sends the three flat fields. Both reach the same validation.
 	values := change.PublicURLs
 	if values == nil {
-		values = map[string]string{}
+		// The flat form is a merge: seed the stored roles so one it omits is
+		// not erased by the full replacement SetPublicURLs performs.
+		stored, err := handler.Settings.StoredPublicURLs()
+		if err != nil {
+			handler.writeAgentError(writer, "server.public_urls.set", operatoragent.Refuse(operatoragent.CodeSettingsUnavailable, "agent.json is unreadable: "+err.Error()))
+			return
+		}
+		values = stored
 	}
 	for role, value := range map[string]string{
 		operatoragent.PublicRoleSDK:    change.SDK,

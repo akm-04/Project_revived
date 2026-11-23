@@ -437,3 +437,23 @@ func TestLoadConfigToolLogDaysDefaultAndBounds(t *testing.T) {
 		t.Fatalf("config = %+v", config)
 	}
 }
+
+// TestBackupPathSymlinkIntoAProtectedTreeIsRefused is the finding-6 regression:
+// pathInside resolves symlinks, so a linked folder cannot hide the OTA root.
+func TestBackupPathSymlinkIntoAProtectedTreeIsRefused(t *testing.T) {
+	otaRoot := t.TempDir()
+	linked := filepath.Join(t.TempDir(), "backups")
+	if err := os.Symlink(otaRoot, linked); err != nil {
+		t.Skipf("symlinks are unsupported here: %v", err)
+	}
+	config := Config{
+		Listen:     "127.0.0.1:8090",
+		OTARoot:    otaRoot,
+		Backend:    BackendConfig{OperatorAddr: "127.0.0.1:8091"},
+		BackupPath: linked,
+	}
+	err := config.Validate()
+	if err == nil || !strings.Contains(err.Error(), "ota_root") {
+		t.Fatalf("a symlink into ota_root was accepted: %v", err)
+	}
+}

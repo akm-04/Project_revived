@@ -113,3 +113,15 @@ func TestServerURLSetWritesTheEnvFileAndWarnsAboutTheAPK(t *testing.T) {
 		t.Fatal("a refused URL changed the env file")
 	}
 }
+
+// TestAgentSettingsNoLongerWritesTheBackupFolder is the finding-3 regression:
+// the Backups page alone owns the snapshot folder, so the Settings command does
+// not accept backup_path.
+func TestAgentSettingsNoLongerWritesTheBackupFolder(t *testing.T) {
+	handler, _, _, session := newSettingsHandler(t)
+	body := `{"reason":"set","semantic_key":"settings-backup","payload":{"backup_path":"/srv/backups"}}`
+	recorder := serveAgent(handler, http.MethodPost, "/agent/v1/commands/agent.settings.set", session, body)
+	if recorder.Code != http.StatusConflict || refusalCodeOf(t, recorder) != operatoragent.CodeBodyInvalid {
+		t.Fatalf("status = %d, body = %s", recorder.Code, recorder.Body)
+	}
+}

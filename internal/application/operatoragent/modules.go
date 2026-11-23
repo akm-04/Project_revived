@@ -48,9 +48,8 @@ func AgentSettingsModule() operator.Module {
 		LogChannel: "agent",
 		Screen:     operator.Screen{Tab: "Settings"},
 		Commands: []operator.CommandSpec{
-			{Name: "agent.settings.set", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Set the agent.json paths; every value is validated and a refused value keeps the old one.", Fields: []operator.Field{
+			{Name: "agent.settings.set", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Set the agent.json paths; every value is validated and a refused value keeps the old one. The backup folder is set on the Backups page.", Fields: []operator.Field{
 				operator.NewField("backend_path", operator.FieldString, false, "absolute path of the gxb-api binary"),
-				operator.NewField("backup_path", operator.FieldString, false, "absolute snapshot folder; empty keeps the old <agent root>/backups only when it exists"),
 				operator.NewField("app_repack_path", operator.FieldString, false, "absolute app_repack folder for the APK build"),
 				operator.NewField("toolchain_path", operator.FieldString, false, "portable tools folder; empty uses the system PATH"),
 			}},

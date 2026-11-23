@@ -57,10 +57,10 @@ type AgentSettingsValues struct {
 }
 
 // AgentSettingsChange is the agent.settings.set payload. A nil field is
-// unchanged; an empty toolchain or backup path restores its default.
+// unchanged; an empty toolchain path restores its default. The backup folder is
+// owned by the Backups page alone (backup.path), so it has no field here.
 type AgentSettingsChange struct {
 	BackendPath   *string `json:"backend_path,omitempty"`
-	BackupPath    *string `json:"backup_path,omitempty"`
 	AppRepackPath *string `json:"app_repack_path,omitempty"`
 	ToolchainPath *string `json:"toolchain_path,omitempty"`
 }
@@ -158,9 +158,6 @@ func (service SettingsService) SetAgent(change AgentSettingsChange) (AgentSettin
 		}
 		config.Backend.Binary = value
 	}
-	if change.BackupPath != nil {
-		config.BackupPath = strings.TrimSpace(*change.BackupPath)
-	}
 	if change.AppRepackPath != nil {
 		value := strings.TrimSpace(*change.AppRepackPath)
 		if err := validateReadableDirectory("app_repack_path", value); err != nil {
@@ -216,6 +213,16 @@ func (service SettingsService) SetServerURL(raw string) (ServerURLReply, error) 
 	}, nil
 }
 
+// StoredPublicURLs reads the role map exactly as agent.json holds it. The flat
+// Advanced form merges onto it, so a role it omits is not erased.
+func (service SettingsService) StoredPublicURLs() (PublicURLs, error) {
+	config, err := ReadConfig(service.Root)
+	if err != nil {
+		return PublicURLs{}, err
+	}
+	return config.PublicURLs.Copy(), nil
+}
+
 // SetPublicURLs validates and stores the role-keyed public URLs in agent.json.
 // The game API role is also written to the backend env file when one is
 // configured, because that is where the backend reads the client-facing URL.
@@ -232,14 +239,16 @@ func (service SettingsService) SetPublicURLs(values map[string]string) (AgentSet
 		return AgentSettingsReply{}, Refuse(CodeSettingsUnavailable, "agent.json is unreadable: "+err.Error())
 	}
 	apiURL := updated[PublicRoleAPI]
+	config.PublicURLs = updated
+	if err := config.Validate(); err != nil {
+		return AgentSettingsReply{}, Refuse(CodeSettingsInvalid, err.Error())
+	}
+	// Validate before touching the env file: a refused config must leave the
+	// old API URL in place, not report a refusal after changing it.
 	if apiURL != "" && config.Backend.EnvFile != "" {
 		if err := WriteEnvValue(config.Backend.EnvFile, PublicEngineURLKey, apiURL); err != nil {
 			return AgentSettingsReply{}, Refuse(CodeSettingsUnavailable, "the backend env file cannot be written: "+err.Error())
 		}
-	}
-	config.PublicURLs = updated
-	if err := config.Validate(); err != nil {
-		return AgentSettingsReply{}, Refuse(CodeSettingsInvalid, err.Error())
 	}
 	if err := SaveConfig(service.Root, config); err != nil {
 		return AgentSettingsReply{}, Temporarily(CodeFailed, "agent.json cannot be written")
