@@ -8,23 +8,23 @@ import {
   setToken,
   setUnauthorizedHandler,
 } from "./transport.js";
-import { renderAdvanced, renderModuleForms } from "./advanced.js";
+import { renderAdvanced } from "./advanced.js";
 
 const statusPollMilliseconds = 15000;
 
 const pages = [
-  { id: "dashboard", label: "Dashboard", modules: [] },
-  { id: "ota", label: "OTA", modules: ["ota"] },
-  { id: "events", label: "Events", modules: ["events"] },
-  { id: "notices", label: "Notices", modules: ["publication"] },
-  { id: "players", label: "Players", modules: ["player", "session"] },
-  { id: "mail", label: "Mail", modules: ["mail"] },
-  { id: "rewards", label: "Rewards & Redeem", modules: ["grant", "redeem"] },
-  { id: "gm", label: "GM", modules: ["gm"] },
-  { id: "server", label: "Server", modules: ["server"] },
-  { id: "backups", label: "Backups", modules: ["backup"] },
-  { id: "logs", label: "Logs", modules: ["logs"] },
-  { id: "advanced", label: "Advanced", modules: null },
+  { id: "dashboard", label: "Dashboard" },
+  { id: "ota", label: "OTA" },
+  { id: "events", label: "Events" },
+  { id: "notices", label: "Notices" },
+  { id: "players", label: "Players" },
+  { id: "mail", label: "Mail" },
+  { id: "rewards", label: "Rewards & Redeem" },
+  { id: "gm", label: "GM" },
+  { id: "server", label: "Server" },
+  { id: "backups", label: "Backups" },
+  { id: "logs", label: "Logs" },
+  { id: "advanced", label: "Advanced" },
 ];
 
 const state = {
@@ -277,25 +277,6 @@ async function renderPage() {
   } else {
     content.append(placeholderCard(page.label));
   }
-  const modules = modulesForPage(page);
-  if (modules.length === 0) {
-    return;
-  }
-  const details = document.createElement("details");
-  details.className = "card mt-3";
-  const summary = document.createElement("summary");
-  summary.className = "card-header";
-  summary.textContent = "Advanced";
-  details.append(summary);
-  const body = document.createElement("div");
-  body.className = "card-body";
-  for (const module of modules) {
-    const moduleForms = document.createElement("div");
-    renderModuleForms(moduleForms, module);
-    body.append(moduleForms);
-  }
-  details.append(body);
-  pageView.append(details);
 }
 
 async function loadPageView(pageId) {
@@ -305,13 +286,6 @@ async function loadPageView(pageId) {
   } catch (error) {
     return null;
   }
-}
-
-function modulesForPage(page) {
-  if (!Array.isArray(page.modules) || page.modules.length === 0) {
-    return [];
-  }
-  return state.modules.filter((module) => page.modules.includes(module.id));
 }
 
 function placeholderCard(label) {

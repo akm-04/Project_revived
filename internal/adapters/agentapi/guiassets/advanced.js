@@ -54,7 +54,7 @@ export function renderAdvanced(container, modules) {
 }
 
 // renderModuleForms puts one module's heading and generic forms into container.
-export function renderModuleForms(container, module) {
+function renderModuleForms(container, module) {
   container.replaceChildren();
   const heading = document.createElement("h3");
   heading.className = "module-title";
