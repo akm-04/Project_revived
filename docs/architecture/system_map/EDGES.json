@@ -4874,10 +4874,18 @@
     "*InsertTx"
    ],
    "store:identitystore": [
+    "*FindLiveSDKAccountBySIDDigestTx",
     "*FindLiveSessionIDsForPlayersTx",
     "*FindLiveSessionsByPlayer",
     "*FindProviderBindingTx",
+    "*FindSDKAccountByDeviceTx",
+    "*FindSDKAccountByUIDTx",
+    "*FindSDKLoginTx",
     "*InsertProviderBindingTx",
+    "*InsertSDKAccountIfAbsentTx",
+    "*InsertSDKAccountTx",
+    "*InsertSDKDeviceTx",
+    "*InsertSDKLoginTx",
     "*InsertSessionCredentialTx",
     "*InsertSessionHoldTx",
     "*InsertSessionTx",

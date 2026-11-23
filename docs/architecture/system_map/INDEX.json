@@ -824,6 +824,8 @@
    "realtime_presence_leases": "socialpresence",
    "realtime_presence_owner_state": "socialpresence",
    "request_journal": "clientlog",
+   "sdk_devices": "bootstrap",
+   "sdk_logins": "bootstrap",
    "shared_room_seats": "sharedroom",
    "shared_rooms": "sharedroom",
    "shop_players": "shop",
@@ -933,7 +935,7 @@
    "name": "bootstrap",
    "path": "internal/application/bootstrap",
    "purpose": "",
-   "tables": 11
+   "tables": 13
   },
   {
    "callees": 0,

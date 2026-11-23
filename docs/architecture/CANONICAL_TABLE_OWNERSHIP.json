@@ -8470,6 +8470,52 @@
         "review": "immutable combat history (combat_append_only / combat_attempt_guard triggers): restore keeps it, like other ledgers (U7; audit A-076)"
       }
     },
+    "sdk_devices": {
+      "owner": "identity/logicalserver/bootstrap",
+      "allowed_query_owners": [
+        "identity/logicalserver/bootstrap"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/identitystore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/identitystore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00196_i11a_sdk_logins.sql",
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
+    },
+    "sdk_logins": {
+      "owner": "identity/logicalserver/bootstrap",
+      "allowed_query_owners": [
+        "identity/logicalserver/bootstrap"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/identitystore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/identitystore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00196_i11a_sdk_logins.sql",
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
+    },
     "shared_rooms": {
       "owner": "sharedroom",
       "allowed_query_owners": [
