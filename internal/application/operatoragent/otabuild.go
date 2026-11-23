@@ -200,27 +200,45 @@ func resolveBuildVersion(status otaStatusReply, lane domain.Lane, requested stri
 	return supplied, nil
 }
 
-// releaseExists asks the backend's exact-version read. Any failure fails the
+// releaseStatusReply is the ota.release answer: Lane and State are set only when
+// the number exists (OA-10).
+type releaseStatusReply struct {
+	Exists bool   `json:"exists"`
+	Lane   string `json:"lane"`
+	State  string `json:"state"`
+}
+
+// reusableByRollback reports whether OA-10 lets a rollback take the number over:
+// the existing release is SUPERSEDED or WITHDRAWN, never ACTIVE or BUILT.
+func (reply releaseStatusReply) reusableByRollback() bool {
+	return reply.State == string(domain.StateSuperseded) || reply.State == string(domain.StateWithdrawn)
+}
+
+// releaseStatus asks the backend's exact-version read. Any failure fails the
 // step closed, so a release that the bounded status list omits (WITHDRAWN,
 // SUPERSEDED or past its bound) can still not be built twice (L4f fix 2).
-func (build Build) releaseExists(ctx context.Context, version string) (bool, error) {
+func (build Build) releaseStatus(ctx context.Context, version string) (releaseStatusReply, error) {
 	response, err := build.Operator.Read(ctx, "ota.release", "version="+url.QueryEscape(version))
 	if err != nil {
-		return false, err
+		return releaseStatusReply{}, err
 	}
 	if response.Status != 200 {
 		if response.Status == 409 {
-			return false, &BackendRefusal{Status: response.Status, Body: response.Body}
+			return releaseStatusReply{}, &BackendRefusal{Status: response.Status, Body: response.Body}
 		}
-		return false, fmt.Errorf("ota.release answered HTTP %d", response.Status)
+		return releaseStatusReply{}, fmt.Errorf("ota.release answered HTTP %d", response.Status)
 	}
-	var reply struct {
-		Exists bool `json:"exists"`
-	}
+	var reply releaseStatusReply
 	if err := json.Unmarshal(response.Body, &reply); err != nil {
-		return false, fmt.Errorf("ota.release replied no existence flag: %w", err)
+		return releaseStatusReply{}, fmt.Errorf("ota.release replied no release status: %w", err)
 	}
-	return reply.Exists, nil
+	return reply, nil
+}
+
+// usedNumberRefusal is the backend's OA-10 refusal text for a number that may
+// not be reused, so the agent stops the doomed build before writing an artifact.
+func usedNumberRefusal(release releaseStatusReply) error {
+	return Refuse(CodeVersionExists, fmt.Sprintf("the release number is already used by the %s release (%s)", release.Lane, release.State))
 }
 
 // assetsSidecarPath names the active assets release's res sidecar; the build
@@ -290,12 +308,12 @@ func (build Build) Start(ctx context.Context, request BuildRequest) (Operation, 
 			if current.Active.Assets != nil {
 				assetsVersion = *current.Active.Assets
 			}
-			exists, err := build.releaseExists(ctx, version.String())
+			release, err := build.releaseStatus(ctx, version.String())
 			if err != nil {
 				return nil, err
 			}
-			if exists {
-				return nil, Refuse(CodeVersionExists, "the release number already exists")
+			if release.Exists && !(request.Rollback && release.reusableByRollback()) {
+				return nil, usedNumberRefusal(release)
 			}
 			return map[string]any{"revision": current.Revision}, nil
 		}},

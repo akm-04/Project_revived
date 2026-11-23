@@ -27,6 +27,8 @@ type fakeBuildOperator struct {
 	failNext       int
 	builtVersions  []string
 	releaseExists  bool
+	releaseLane    string
+	releaseState   string
 	blockFirstRead bool
 	readEntered    chan struct{}
 	readRelease    chan struct{}
@@ -72,9 +74,15 @@ func (fake *fakeBuildOperator) ServeHTTP(writer http.ResponseWriter, request *ht
 		}
 		fake.mutex.Lock()
 		exists := fake.releaseExists
+		lane := fake.releaseLane
+		state := fake.releaseState
 		fake.mutex.Unlock()
 		writer.Header().Set("Content-Type", "application/json")
-		_, _ = fmt.Fprintf(writer, `{"version":%q,"exists":%t}`, request.URL.Query().Get("version"), exists)
+		if !exists {
+			_, _ = fmt.Fprintf(writer, `{"version":%q,"exists":false}`, request.URL.Query().Get("version"))
+			return
+		}
+		_, _ = fmt.Fprintf(writer, `{"version":%q,"exists":true,"lane":%q,"state":%q}`, request.URL.Query().Get("version"), lane, state)
 	case request.URL.Path == "/operator/v1/commands/ota.register_build":
 		body, _ := io.ReadAll(request.Body)
 		var submitted struct {
@@ -259,6 +267,8 @@ func TestBuildOperationRegisterFailureRetriesIdempotently(t *testing.T) {
 func TestBuildOperationRefusesVersionAlreadyListed(t *testing.T) {
 	build, fake, operations, _ := newBuildOperation(t)
 	fake.releaseExists = true
+	fake.releaseLane = "code"
+	fake.releaseState = "ACTIVE"
 	started, err := build.Start(context.Background(), operatoragent.BuildRequest{Lane: "code", Version: "1.631.2"})
 	if err != nil {
 		t.Fatal(err)
@@ -312,6 +322,8 @@ func TestBuildOperationBackendNotRunning(t *testing.T) {
 func TestBuildRefusesExistingReleaseOutsideStatusList(t *testing.T) {
 	build, fake, operations, root := newBuildOperation(t)
 	fake.releaseExists = true
+	fake.releaseLane = "code"
+	fake.releaseState = "BUILT"
 	started, err := build.Start(context.Background(), operatoragent.BuildRequest{Lane: "code", Version: "1.631.2"})
 	if err != nil {
 		t.Fatal(err)
@@ -328,6 +340,81 @@ func TestBuildRefusesExistingReleaseOutsideStatusList(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(root, "ota", "updates", "code")); !errors.Is(err, os.ErrNotExist) {
 		t.Fatalf("a refused version started build work: %v", err)
+	}
+}
+
+func TestBuildRollbackReusesOnlyInactiveNumber(t *testing.T) {
+	for _, state := range []string{"SUPERSEDED", "WITHDRAWN"} {
+		t.Run(state, func(t *testing.T) {
+			build, fake, operations, _ := newBuildOperation(t)
+			fake.releaseExists = true
+			fake.releaseLane = "code"
+			fake.releaseState = state
+			started, err := build.Start(context.Background(), operatoragent.BuildRequest{Lane: "code", Version: "1.631.2", Rollback: true})
+			if err != nil {
+				t.Fatal(err)
+			}
+			operation := waitOperation(t, operations, started.ID)
+			if operation.State != operatoragent.OperationDone {
+				t.Fatalf("operation = %+v", operation)
+			}
+			if fake.registers != 1 {
+				t.Fatalf("registers = %d", fake.registers)
+			}
+		})
+	}
+}
+
+func TestBuildRefusesReusedNumberUnlessRollbackReusesAnInactiveOne(t *testing.T) {
+	cases := []struct {
+		name     string
+		state    string
+		rollback bool
+	}{
+		{name: "rollback_over_ACTIVE", state: "ACTIVE", rollback: true},
+		{name: "rollback_over_BUILT", state: "BUILT", rollback: true},
+		{name: "forward_over_SUPERSEDED", state: "SUPERSEDED", rollback: false},
+	}
+	for _, testCase := range cases {
+		t.Run(testCase.name, func(t *testing.T) {
+			build, fake, operations, root := newBuildOperation(t)
+			fake.releaseExists = true
+			fake.releaseLane = "code"
+			fake.releaseState = testCase.state
+			started, err := build.Start(context.Background(), operatoragent.BuildRequest{Lane: "code", Version: "1.631.2", Rollback: testCase.rollback})
+			if err != nil {
+				t.Fatal(err)
+			}
+			failed := waitOperation(t, operations, started.ID)
+			if failed.State != operatoragent.OperationFailed || failed.FailedStep != "read ota.status" {
+				t.Fatalf("operation = %+v", failed)
+			}
+			want := "already used by the code release (" + testCase.state + ")"
+			if !strings.Contains(failed.Error, operatoragent.CodeVersionExists) || !strings.Contains(failed.Error, want) {
+				t.Fatalf("error = %q, want %s and %q", failed.Error, operatoragent.CodeVersionExists, want)
+			}
+			if fake.registers != 0 {
+				t.Fatalf("registers = %d", fake.registers)
+			}
+			if _, statErr := os.Stat(filepath.Join(root, "ota", "updates", "code")); !errors.Is(statErr, os.ErrNotExist) {
+				t.Fatalf("a refused version started build work: %v", statErr)
+			}
+		})
+	}
+}
+
+func TestBuildAllowsUnusedNumber(t *testing.T) {
+	build, fake, operations, _ := newBuildOperation(t)
+	started, err := build.Start(context.Background(), operatoragent.BuildRequest{Lane: "code", Version: "1.631.2", Rollback: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	operation := waitOperation(t, operations, started.ID)
+	if operation.State != operatoragent.OperationDone {
+		t.Fatalf("operation = %+v", operation)
+	}
+	if fake.registers != 1 {
+		t.Fatalf("registers = %d", fake.registers)
 	}
 }
 
