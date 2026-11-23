@@ -86,6 +86,16 @@ func runAgent(root string, args []string) error {
 	}
 	buildOperation := operatoragent.Build{Config: config, Operator: operator, Operations: operations}
 	settings := &operatoragent.SettingsService{Root: root, OTARoot: config.OTARoot}
+	pings := operatoragent.NewPingSampler(operatoragent.PingPlan{
+		Config: config,
+		ServerURL: func() (string, string) {
+			values, err := settings.Values()
+			if err != nil {
+				return "", ""
+			}
+			return values.ServerURL, values.ServerURLSource
+		},
+	}, time.Now)
 	moduleCatalog := operatoragent.ModuleCatalog{Backend: operator, Local: []appoperator.Module{operatoragent.ServerModule(), operatoragent.AgentOTAModule(), operatoragent.AgentSettingsModule(), operatoragent.DashboardModule(), operatoragent.BackupModule(), operatoragent.AgentLogsModule()}}
 	dashboard := operatoragent.Dashboard{
 		Backend:    backend,
@@ -111,6 +121,7 @@ func runAgent(root string, args []string) error {
 		ToolLog:     toolLog,
 		Logs:        logService,
 		Settings:    settings,
+		Pings:       pings,
 		OTARoot:     config.OTARoot,
 		Listen:      config.Listen,
 		Guard:       backendGuard,
@@ -123,6 +134,7 @@ func runAgent(root string, args []string) error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	go operatoragent.RunLogRetention(ctx, logsDirectory, config.ToolLogRetentionDays(), time.Now, time.Hour)
+	go pings.Run(ctx)
 	toolLog.Write("agent", "start", "ok", map[string]any{"listen": config.Listen})
 	if err := agentapi.Serve(ctx, server, listener, backend); err != nil {
 		return err

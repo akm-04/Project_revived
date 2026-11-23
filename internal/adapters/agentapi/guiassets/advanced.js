@@ -338,6 +338,8 @@ function runAgentRoute(name, payload, reason, semanticKey) {
   switch (name) {
     case "server.start":
       return request("/agent/v1/backend/start", { method: "POST", body: { closed: Boolean(payload.closed) } });
+    case "server.restart":
+      return request("/agent/v1/backend/restart", { method: "POST", body: { closed: Boolean(payload.closed) } });
     case "server.stop":
       return request("/agent/v1/backend/stop", { method: "POST", body: {} });
     case "server.status":

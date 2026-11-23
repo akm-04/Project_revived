@@ -54,7 +54,7 @@ func TestModuleCatalogMergesTheAgentCommandsIntoTheBackendList(t *testing.T) {
 	for _, command := range list.Modules[2].Commands {
 		serverRoutes[command.Name] = command.Route
 	}
-	for _, name := range []string{"server.start", "server.stop", "server.status", "server.url.set"} {
+	for _, name := range []string{"server.start", "server.restart", "server.stop", "server.status", "server.url.set"} {
 		if serverRoutes[name] != operator.RouteAgent {
 			t.Fatalf("server command %q route = %q", name, serverRoutes[name])
 		}

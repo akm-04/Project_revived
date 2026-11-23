@@ -119,24 +119,28 @@ func (handler Handler) serveRes(writer http.ResponseWriter, request *http.Reques
 		writeRefusal(writer, http.StatusNotFound, operatoragent.CodeNotFound, "the res folder is not configured")
 		return
 	}
-	resolved := ""
+	// The game keeps lazily downloaded files under res/web/<rest>, the same file
+	// as res/<rest> (stock writable alias), so each root is tried plain and
+	// under web/. Every candidate still has to resolve inside that root.
+	var resolved string
+	var resolvedInfo os.FileInfo
 	for _, root := range roots {
-		candidate, resolveErr := filepath.EvalSymlinks(filepath.Join(root, relative))
-		if resolveErr != nil || !withinResRoot(candidate, root) {
-			continue
+		for _, base := range []string{root, filepath.Join(root, "web")} {
+			candidate, resolveErr := filepath.EvalSymlinks(filepath.Join(base, relative))
+			if resolveErr != nil || !withinResRoot(candidate, root) {
+				continue
+			}
+			info, statErr := os.Stat(candidate)
+			if statErr == nil && info.Mode().IsRegular() {
+				resolved, resolvedInfo = candidate, info
+				break
+			}
 		}
-		info, statErr := os.Stat(candidate)
-		if statErr == nil && info.Mode().IsRegular() {
-			resolved = candidate
+		if resolved != "" {
 			break
 		}
 	}
 	if resolved == "" {
-		writeRefusal(writer, http.StatusNotFound, operatoragent.CodeNotFound, "no such picture")
-		return
-	}
-	info, err := os.Stat(resolved)
-	if err != nil {
 		writeRefusal(writer, http.StatusNotFound, operatoragent.CodeNotFound, "no such picture")
 		return
 	}
@@ -153,7 +157,7 @@ func (handler Handler) serveRes(writer http.ResponseWriter, request *http.Reques
 	defer file.Close()
 	setGUIHeaders(writer, mediaType)
 	writer.Header().Set("Cache-Control", "no-store")
-	http.ServeContent(writer, request, info.Name(), info.ModTime(), file)
+	http.ServeContent(writer, request, resolvedInfo.Name(), resolvedInfo.ModTime(), file)
 }
 
 // resRoots resolves the picture roots in lookup order: res_path first, then the

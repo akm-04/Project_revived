@@ -239,6 +239,48 @@ func TestGUIResFallsBackToApkResPath(t *testing.T) {
 	}
 }
 
+// TestGUIResServesTheWritableWebAlias proves a lazily downloaded file under
+// res/web/<rest> is served for the catalogue path <rest>, the plain file wins
+// when both exist, and the escape guard covers the alias too (G33).
+func TestGUIResServesTheWritableWebAlias(t *testing.T) {
+	handler, session := newGUIResHandler(t)
+	roots, err := handler.resRoots()
+	if err != nil {
+		t.Fatal(err)
+	}
+	resRoot := roots[0]
+	writePicture(t, resRoot, "web/images/icon/item.png")
+	if err := os.MkdirAll(filepath.Join(resRoot, "images", "icon"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(resRoot, "web", "images", "icon"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(resRoot, "images", "icon", "plain.png"), []byte("plain"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(resRoot, "web", "images", "icon", "plain.png"), []byte("alias"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	outside := writePicture(t, t.TempDir(), "outside.png")
+	if err := os.Symlink(outside, filepath.Join(resRoot, "web", "images", "icon", "escaped.png")); err != nil {
+		t.Fatal(err)
+	}
+
+	recorder := serveAgent(handler, http.MethodGet, "/agent/v1/res/images/icon/item.png", session, "")
+	if recorder.Code != http.StatusOK || recorder.Body.String() != string([]byte{0x89, 'P', 'N', 'G'}) {
+		t.Fatalf("web alias: %d %q", recorder.Code, recorder.Body)
+	}
+	recorder = serveAgent(handler, http.MethodGet, "/agent/v1/res/images/icon/plain.png", session, "")
+	if recorder.Code != http.StatusOK || recorder.Body.String() != "plain" {
+		t.Fatalf("plain path must win: %d %q", recorder.Code, recorder.Body)
+	}
+	recorder = serveAgent(handler, http.MethodGet, "/agent/v1/res/images/icon/escaped.png", session, "")
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("web alias symlink out: %d", recorder.Code)
+	}
+}
+
 func TestGUIResUnconfiguredResPathIsNotFound(t *testing.T) {
 	handler, session := newGUIResHandler(t)
 	handler.OTARoot = t.TempDir()
@@ -335,7 +377,10 @@ func TestEmbeddedGUIRefersOnlyToAgentEndpoints(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// The inline SVG namespace is a name, not a fetched resource (G37).
+	const svgNamespace = "http://www.w3.org/2000/svg"
 	for name, script := range scripts {
+		script = strings.ReplaceAll(script, svgNamespace, "")
 		for _, forbidden := range []string{"http://", "https://", "//cdn."} {
 			if strings.Contains(script, forbidden) {
 				t.Fatalf("%s references an external resource: %s", name, forbidden)
