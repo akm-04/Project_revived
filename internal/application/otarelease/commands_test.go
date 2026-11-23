@@ -39,6 +39,8 @@ type fakeStore struct {
 	releases    map[string]*domain.RawRelease
 	activations []ActivationRow
 	nextID      int64
+	nextRelease int64
+	replacedIDs []int64
 	builtBy     map[string]string
 }
 
@@ -79,12 +81,23 @@ func (store *fakeStore) InsertBuildTx(_ context.Context, _ tx.Tx, release domain
 	if err != nil {
 		return err
 	}
+	store.nextRelease++
 	store.releases[release.Version.String()] = &domain.RawRelease{
-		Version: release.Version.String(), Lane: string(release.Lane), State: string(domain.StateBuilt),
+		ID: store.nextRelease, Version: release.Version.String(), Lane: string(release.Lane), State: string(domain.StateBuilt),
 		PackageFiles: packageFiles, TotalSize: release.TotalSize, MD5: release.MD5, SHA256: release.SHA256, Manifest: manifest,
 	}
 	store.builtBy[release.Version.String()] = commandKey
 	return nil
+}
+
+func (store *fakeStore) ReuseBuildTx(_ context.Context, _ tx.Tx, replacedID int64, release domain.Release, commandKey string, _ time.Time) error {
+	old, found := store.releases[release.Version.String()]
+	if !found || old.ID != replacedID || old.State == string(domain.StateActive) || old.State == string(domain.StateBuilt) {
+		return errors.New("not reusable")
+	}
+	store.replacedIDs = append(store.replacedIDs, replacedID)
+	delete(store.releases, release.Version.String())
+	return store.InsertBuildTx(context.Background(), nil, release, commandKey, time.Time{})
 }
 
 func (store *fakeStore) SupersedeLaneTx(_ context.Context, _ tx.Tx, lane domain.Lane, _ time.Time) ([]string, error) {
@@ -407,5 +420,62 @@ func TestWithdrawOnlyActive(t *testing.T) {
 	activation, err := commands.Withdraw(ctx, noTx{}, "cmd-withdraw", &revision, "1.631.2", at)
 	if err != nil || activation.Action != "WITHDRAW" || activation.State != string(domain.StateWithdrawn) || store.releases["1.631.2"].State != string(domain.StateWithdrawn) {
 		t.Fatalf("withdraw=%+v err=%v", activation, err)
+	}
+}
+
+// TestRegisterBuildReusesOnlyAnInactiveNumber proves OA-10: a rollback build may
+// take a SUPERSEDED or WITHDRAWN number, but a forward build or an ACTIVE/BUILT
+// number stays refused.
+func TestRegisterBuildReusesOnlyAnInactiveNumber(t *testing.T) {
+	ctx := context.Background()
+	at := time.Unix(1000, 0).UTC()
+	active := buildPayload(t, "1.631.5", "code", 2000)
+	reused := buildPayload(t, "1.631.4", "code", 2000)
+	reused.Rollback = true
+	store := newFakeStore()
+	store.releases["1.631.5"] = &domain.RawRelease{ID: 7, Version: "1.631.5", Lane: "code", State: string(domain.StateActive)}
+	store.releases["1.631.4"] = &domain.RawRelease{ID: 42, Version: "1.631.4", Lane: "code", State: string(domain.StateSuperseded)}
+	commands := Commands{Store: store, Root: rootWithVolumes(t, active, reused)}
+
+	forward := reused
+	forward.Rollback = false
+	_, err := commands.RegisterBuild(ctx, noTx{}, "cmd-forward", forward, at)
+	var refusal *operator.Refusal
+	if !errors.As(err, &refusal) || refusal.Code != CodeVersionExists || !strings.Contains(refusal.Message, "code release (SUPERSEDED)") {
+		t.Fatalf("forward reuse err=%v", err)
+	}
+	store.releases["1.631.4"].State = string(domain.StateBuilt)
+	if _, err := commands.RegisterBuild(ctx, noTx{}, "cmd-built", reused, at); refusalCode(t, err) != CodeVersionExists {
+		t.Fatalf("BUILT reuse err=%v", err)
+	}
+	store.releases["1.631.4"].State = string(domain.StateSuperseded)
+	result, err := commands.RegisterBuild(ctx, noTx{}, "cmd-reuse", reused, at)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !result.Rollback || len(store.replacedIDs) != 1 || store.replacedIDs[0] != 42 || store.releases["1.631.4"].State != string(domain.StateBuilt) {
+		t.Fatalf("reuse result=%+v replaced=%v", result, store.replacedIDs)
+	}
+}
+
+// TestRegisterBuildRefusesCodeRollbackBelowActiveAssets proves OA-10 clause 3: a
+// cleared client's plan would install the code release before its bootstrap.
+func TestRegisterBuildRefusesCodeRollbackBelowActiveAssets(t *testing.T) {
+	ctx := context.Background()
+	at := time.Unix(1000, 0).UTC()
+	activeCode := buildPayload(t, "1.631.5", "code", 2000)
+	rollback := buildPayload(t, "1.631.3", "code", 2000)
+	rollback.Rollback = true
+	store := newFakeStore()
+	store.releases["1.631.4"] = &domain.RawRelease{ID: 9, Version: "1.631.4", Lane: "assets", State: string(domain.StateActive)}
+	store.releases["1.631.5"] = &domain.RawRelease{ID: 10, Version: "1.631.5", Lane: "code", State: string(domain.StateActive)}
+	commands := Commands{Store: store, Root: rootWithVolumes(t, activeCode, rollback)}
+	_, err := commands.RegisterBuild(ctx, noTx{}, "cmd-rollback", rollback, at)
+	var refusal *operator.Refusal
+	if !errors.As(err, &refusal) || refusal.Code != CodeRollbackBelowAssets || !strings.Contains(refusal.Message, "1.631.4") {
+		t.Fatalf("rollback below assets err=%v", err)
+	}
+	if store.releases["1.631.3"] != nil {
+		t.Fatal("refused rollback left a release row")
 	}
 }

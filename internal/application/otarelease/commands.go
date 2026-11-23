@@ -29,6 +29,10 @@ const (
 	CodeRevisionRequired    = "OTA_REVISION_REQUIRED"
 	CodeRootUnavailable     = "OTA_ROOT_UNAVAILABLE"
 	CodeActiveLimit         = "OTA_ACTIVE_LIMIT"
+	// CodeRollbackBelowAssets refuses a code rollback at or below the active
+	// assets release: a cleared client would install the code release before the
+	// asset bootstrap the plan needs (OA-10 clause 3).
+	CodeRollbackBelowAssets = "OTA_ROLLBACK_BELOW_ASSETS"
 )
 
 // maxActiveCatalogReleases keeps one ACTIVE read at 16 rows: one code, one
@@ -43,6 +47,10 @@ type CommandStore interface {
 	LockLaneTx(context.Context, tx.Tx, domain.Lane, string) ([]domain.RawRelease, error)
 	ActiveRevisionTx(context.Context, tx.Queryer) (int64, error)
 	InsertBuildTx(context.Context, tx.Tx, domain.Release, string, time.Time) error
+	// ReuseBuildTx marks the row whose number a rollback reuse takes over as
+	// REPLACED and inserts the new BUILT row, replaced_by the old id, in one
+	// transaction (OA-10 clause 2).
+	ReuseBuildTx(context.Context, tx.Tx, int64, domain.Release, string, time.Time) error
 	SupersedeLaneTx(context.Context, tx.Tx, domain.Lane, time.Time) ([]string, error)
 	ActivateTx(context.Context, tx.Tx, string, string, time.Time) error
 	WithdrawTx(context.Context, tx.Tx, string, time.Time) error
@@ -75,8 +83,10 @@ type Activation struct {
 	At           time.Time `json:"at"`
 }
 
-// ActivationRow is one ota_activations insert.
+// ActivationRow is one ota_activations insert. ReleaseID is the release row's
+// surrogate id, so an activation never names a REPLACED row (OA-10).
 type ActivationRow struct {
+	ReleaseID  int64
 	Version    string
 	Action     string
 	CommandKey string
@@ -137,7 +147,10 @@ func decodePayload(payload json.RawMessage, target any) error {
 	return nil
 }
 
-// RegisterBuild validates and stores a finished build as BUILT.
+// RegisterBuild validates and stores a finished build as BUILT. A forward build
+// refuses any used number; a rollback build with the clear-data acknowledgement
+// may reuse a number whose release is neither ACTIVE nor BUILT, keeping the old
+// row as REPLACED (OA-10).
 func (commands Commands) RegisterBuild(ctx context.Context, transaction tx.Tx, commandKey string, request domain.BuildRequest, at time.Time) (BuildResult, error) {
 	if transaction == nil || commandKey == "" || at.IsZero() {
 		return BuildResult{}, operator.ErrUnavailable
@@ -150,8 +163,25 @@ func (commands Commands) RegisterBuild(ctx context.Context, transaction tx.Tx, c
 	if err != nil {
 		return BuildResult{}, err
 	}
-	if existing != nil {
-		return BuildResult{}, operator.Refuse(CodeVersionExists, "the release number already exists", map[string]string{"version": release.Version.String()})
+	reusing := existing != nil
+	if reusing {
+		if !request.Rollback || !reusableRelease(existing) {
+			return BuildResult{}, operator.Refuse(CodeVersionExists, usedNumberMessage(existing), usedNumberDetail(existing))
+		}
+	}
+	// Lock order: a code rollback reads the assets lane before its own lane, the
+	// one direction in which two lanes are ever locked together.
+	var activeAssets *domain.Version
+	if release.Lane == domain.LaneCode && request.Rollback {
+		rows, err := commands.Store.LockLaneTx(ctx, transaction, domain.LaneAssets, release.Version.String())
+		if err != nil {
+			return BuildResult{}, err
+		}
+		if assetsActive, _, err := laneVersions(rows); err != nil {
+			return BuildResult{}, err
+		} else {
+			activeAssets = assetsActive
+		}
 	}
 	rows, err := commands.Store.LockLaneTx(ctx, transaction, release.Lane, release.Version.String())
 	if err != nil {
@@ -171,10 +201,20 @@ func (commands Commands) RegisterBuild(ctx context.Context, transaction tx.Tx, c
 	if domain.LowersActive(release.Version, active) && !request.Rollback {
 		return BuildResult{}, operator.Refuse(CodeRollbackRequired, "the release number is below the lane's active release; set rollback to register it: "+domain.RollbackWarning, map[string]string{"active_version": active.String()})
 	}
+	if reusing && (active == nil || release.Version.Compare(*active) >= 0) {
+		return BuildResult{}, operator.Refuse(CodeRollbackRequired, "a reused release number must be below the lane's active release", nil)
+	}
+	if release.Lane == domain.LaneCode && request.Rollback && activeAssets != nil && release.Version.Compare(*activeAssets) <= 0 {
+		return BuildResult{}, operator.Refuse(CodeRollbackBelowAssets, fmt.Sprintf("the code rollback %s must stay above the active assets release %s: a cleared client installs the code release before its asset bootstrap", release.Version, *activeAssets), map[string]string{"assets_version": activeAssets.String()})
+	}
 	if err := commands.verifyVolumes(release); err != nil {
 		return BuildResult{}, err
 	}
-	if err := commands.Store.InsertBuildTx(ctx, transaction, release, commandKey, at); err != nil {
+	if reusing {
+		if err := commands.Store.ReuseBuildTx(ctx, transaction, existing.ID, release, commandKey, at); err != nil {
+			return BuildResult{}, err
+		}
+	} else if err := commands.Store.InsertBuildTx(ctx, transaction, release, commandKey, at); err != nil {
 		return BuildResult{}, err
 	}
 	result := BuildResult{Version: release.Version.String(), Lane: string(release.Lane), State: string(domain.StateBuilt), Rollback: domain.LowersActive(release.Version, active)}
@@ -182,6 +222,20 @@ func (commands Commands) RegisterBuild(ctx context.Context, transaction tx.Tx, c
 		result.Warning = domain.RollbackWarning
 	}
 	return result, nil
+}
+
+// reusableRelease reports whether a used number may be taken over by a rollback
+// build: its release is neither ACTIVE nor BUILT (OA-10 clause 1).
+func reusableRelease(row *domain.RawRelease) bool {
+	return row.State != string(domain.StateActive) && row.State != string(domain.StateBuilt)
+}
+
+func usedNumberMessage(row *domain.RawRelease) string {
+	return fmt.Sprintf("the release number is already used by the %s release (%s); a new release never reuses a number: a client that installed a number never downloads it again", row.Lane, row.State)
+}
+
+func usedNumberDetail(row *domain.RawRelease) map[string]string {
+	return map[string]string{"version": row.Version, "lane": row.Lane, "state": row.State}
 }
 
 // Publish activates a BUILT release (I11A_1_PLAN "Command semantics").
@@ -216,7 +270,7 @@ func (commands Commands) Publish(ctx context.Context, transaction tx.Tx, command
 	if err := commands.Store.ActivateTx(ctx, transaction, release.Version.String(), commandKey, at); err != nil {
 		return Activation{}, err
 	}
-	activationID, err := commands.Store.InsertActivationTx(ctx, transaction, ActivationRow{Version: release.Version.String(), Action: "PUBLISH", CommandKey: commandKey, At: at})
+	activationID, err := commands.Store.InsertActivationTx(ctx, transaction, ActivationRow{ReleaseID: locked.ID, Version: release.Version.String(), Action: "PUBLISH", CommandKey: commandKey, At: at})
 	if err != nil {
 		return Activation{}, err
 	}
@@ -242,7 +296,7 @@ func (commands Commands) Withdraw(ctx context.Context, transaction tx.Tx, comman
 	if err := commands.Store.WithdrawTx(ctx, transaction, release.Version.String(), at); err != nil {
 		return Activation{}, err
 	}
-	activationID, err := commands.Store.InsertActivationTx(ctx, transaction, ActivationRow{Version: release.Version.String(), Action: "WITHDRAW", CommandKey: commandKey, At: at})
+	activationID, err := commands.Store.InsertActivationTx(ctx, transaction, ActivationRow{ReleaseID: locked.ID, Version: release.Version.String(), Action: "WITHDRAW", CommandKey: commandKey, At: at})
 	if err != nil {
 		return Activation{}, err
 	}

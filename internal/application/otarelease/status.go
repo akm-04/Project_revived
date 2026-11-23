@@ -2,6 +2,7 @@ package otarelease
 
 import (
 	"context"
+	"math"
 	"slices"
 	"time"
 
@@ -19,6 +20,9 @@ const (
 	StatusActivationLimit = 20
 	StatusServedLimit     = 50
 	StatusMissesLimit     = 50
+	// StatusVersionLimit bounds the release-number read behind next_version. The
+	// rows come newest first, so a cut cannot hide the highest number.
+	StatusVersionLimit = 512
 )
 
 // StatusStore is the ota.status read side.
@@ -34,6 +38,9 @@ type StatusSnapshot struct {
 	Activations []ActivationStatus `json:"activations"`
 	Served      []ServedCounter    `json:"served"`
 	Misses      []AssetMiss        `json:"misses"`
+	// Versions is every release number of every lane and state, newest first, so
+	// next_version counts one shared counter across lanes (G44).
+	Versions []string `json:"versions"`
 }
 
 type ActiveRow struct {
@@ -53,6 +60,9 @@ type Status struct {
 	Served      []ServedCounter    `json:"served"`
 	Misses      []AssetMiss        `json:"misses"`
 	Truncated   TruncatedLists     `json:"truncated"`
+	// NextVersion is the highest release number of any lane and state plus one,
+	// empty when there is no release (G44).
+	NextVersion string `json:"next_version"`
 	// Settings are the effective live values, including a field a client or an
 	// operator sees without restarting the API (L4h).
 	Settings domain.Settings `json:"settings"`
@@ -149,6 +159,10 @@ func (s StatusService) Status(ctx context.Context) (Status, error) {
 }
 
 func foldStatus(snapshot StatusSnapshot) (Status, error) {
+	nextVersion, err := nextReleaseVersion(snapshot.Versions)
+	if err != nil {
+		return Status{}, err
+	}
 	active, activeTruncated := bounded(snapshot.Active, StatusActiveLimit)
 	built, builtTruncated := bounded(snapshot.Built, StatusBuiltLimit)
 	activations, activationsTruncated := bounded(snapshot.Activations, StatusActivationLimit)
@@ -161,6 +175,7 @@ func foldStatus(snapshot StatusSnapshot) (Status, error) {
 		Served:      orEmpty(served),
 		Misses:      orEmpty(misses),
 		Active:      ActiveStatus{Catalog: []string{}},
+		NextVersion: nextVersion,
 		Truncated: TruncatedLists{
 			Active:      activeTruncated,
 			Built:       builtTruncated,
@@ -233,6 +248,27 @@ func foldStatus(snapshot StatusSnapshot) (Status, error) {
 		status.Lanes = append(status.Lanes, summary)
 	}
 	return status, nil
+}
+
+// nextReleaseVersion is the one shared counter: the highest number of any lane
+// and state, plus one on its last component. Parsing and comparison happen here
+// in Go so 1.631.10 sorts above 1.631.9 (G44).
+func nextReleaseVersion(versions []string) (string, error) {
+	var highest *domain.Version
+	for _, text := range versions {
+		version, err := domain.ParseVersion(text)
+		if err != nil {
+			return "", err
+		}
+		if highest == nil || version.Compare(*highest) > 0 {
+			candidate := version
+			highest = &candidate
+		}
+	}
+	if highest == nil || highest.Patch == math.MaxInt64 {
+		return "", nil
+	}
+	return domain.Version{Major: highest.Major, Minor: highest.Minor, Patch: highest.Patch + 1}.String(), nil
 }
 
 func keepNewer(current *string, candidate domain.Version) *string {

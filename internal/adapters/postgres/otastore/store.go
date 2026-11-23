@@ -18,20 +18,26 @@ var errInvalid = errors.New("otastore: invalid input")
 // fails closed rather than silently drop a live release.
 const maxActiveReleases = 16
 
+// Every order over a release number sorts the dotted components as numbers:
+// text order would put 1.631.10 below 1.631.9 (G44).
+const versionOrder = `string_to_array(version,'.')::bigint[]`
+
 const selectActiveReleases = `SELECT COALESCE(jsonb_agg(jsonb_build_object(
 	'version',version,'lane',lane,'state',state,'package_files',package_files,
 	'total_size',total_size,'md5',md5,'sha256',sha256,'manifest',manifest
-) ORDER BY version),'[]'::jsonb)::text FROM (
-	SELECT version,lane,state,package_files,total_size,md5,sha256,manifest
-	FROM ota_releases WHERE state='ACTIVE' ORDER BY version LIMIT $1
+) ORDER BY version_key),'[]'::jsonb)::text FROM (
+	SELECT version,lane,state,package_files,total_size,md5,sha256,manifest,
+		string_to_array(version,'.')::bigint[] AS version_key
+	FROM ota_releases WHERE state='ACTIVE' ORDER BY version_key LIMIT $1
 ) active`
 
 const selectActiveDescriptors = `SELECT COALESCE(jsonb_agg(jsonb_build_object(
 	'version',version,'lane',lane,'state',state,'package_files',package_files,
 	'total_size',total_size,'md5',md5,'sha256',sha256
-) ORDER BY version),'[]'::jsonb)::text FROM (
-	SELECT version,lane,state,package_files,total_size,md5,sha256
-	FROM ota_releases WHERE state='ACTIVE' ORDER BY version LIMIT $1
+) ORDER BY version_key),'[]'::jsonb)::text FROM (
+	SELECT version,lane,state,package_files,total_size,md5,sha256,
+		string_to_array(version,'.')::bigint[] AS version_key
+	FROM ota_releases WHERE state='ACTIVE' ORDER BY version_key LIMIT $1
 ) active`
 
 // Store reads ota_releases rows.

@@ -405,8 +405,8 @@ func TestReleaseExistsCoversEveryState(t *testing.T) {
 	}
 	lookup := appota.ReleaseLookup{Runner: tx.Runner{DB: pool}, Operations: operation.Factory{Clock: clock.System{}}, Store: otastore.Store{}}
 	withdrawn, err := lookup.Exists(context.Background(), "9.302.1")
-	if err != nil || !withdrawn.Exists {
-		t.Fatalf("a WITHDRAWN version was not reported: %+v err=%v", withdrawn, err)
+	if err != nil || !withdrawn.Exists || withdrawn.Lane != "code" || withdrawn.State != "WITHDRAWN" {
+		t.Fatalf("a WITHDRAWN version was not reported with its lane and state: %+v err=%v", withdrawn, err)
 	}
 	unknown, err := lookup.Exists(context.Background(), "9.302.2")
 	if err != nil || unknown.Exists {
@@ -427,4 +427,199 @@ func resetL3Releases(t *testing.T, pool *pg.Pool, versions []string) {
 	}
 	remove()
 	t.Cleanup(remove)
+}
+
+const (
+	l3AltSHA = "abababababababababababababababababababababababababababababababab"
+	l3AltMD5 = "acacacacacacacacacacacacacacacac"
+)
+
+func l3BuildRequestWithSHA(t *testing.T, version, lane, sha string) otarelease.BuildRequest {
+	t.Helper()
+	packageFiles, err := json.Marshal([]otarelease.PackageVolume{{Name: version + "-" + sha[:12] + ".zip.001", Size: 1000, MD5: l3MD5, SHA256: sha}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	manifest, err := json.Marshal(map[string]any{"files": []otarelease.ManifestEntry{{Path: "src_64/app/" + sha[:8] + ".lua", Size: 1, MD5: l3MD5}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return otarelease.BuildRequest{Version: version, Lane: lane, PackageFiles: packageFiles, TotalSize: 1000, MD5: l3MD5, SHA256: sha, Manifest: manifest}
+}
+
+func l3RegisterAndPublish(t *testing.T, bus operator.Bus, pool *pg.Pool, request otarelease.BuildRequest) {
+	t.Helper()
+	if outcome := l3Execute(t, bus, l3Command(t, "ota.register_build", nil, request)); outcome.State != operator.StateApplied {
+		t.Fatalf("register %s: %s %s", request.Version, outcome.State, outcome.Result)
+	}
+	revision := l3Revision(t, pool)
+	if outcome := l3Execute(t, bus, l3Command(t, "ota.publish", &revision, map[string]string{"version": request.Version})); outcome.State != operator.StateApplied {
+		t.Fatalf("publish %s: %s %s", request.Version, outcome.State, outcome.Result)
+	}
+}
+
+// TestNumericOrderReadsOneSharedCounter proves G44 through the real store:
+// 1.631.10 sorts above 1.631.9 in every release read, and next_version counts
+// one counter across lanes.
+
+// resetL3All clears every OTA row so a test's lane line and counter do not
+// depend on another test file's leftovers.
+func resetL3All(t *testing.T, pool *pg.Pool) {
+	t.Helper()
+	remove := func() {
+		ctx := context.Background()
+		if _, err := pool.Raw().Exec(ctx, `DELETE FROM ota_activations`); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := pool.Raw().Exec(ctx, `DELETE FROM ota_releases`); err != nil {
+			t.Fatal(err)
+		}
+	}
+	remove()
+	t.Cleanup(remove)
+}
+
+func TestNumericOrderReadsOneSharedCounter(t *testing.T) {
+	pool := l3Pool(t)
+	resetL3All(t, pool)
+	low := l3BuildRequestWithSHA(t, "1.631.9", "catalog", l3SHA)
+	high := l3BuildRequestWithSHA(t, "1.631.10", "catalog", l3AltSHA)
+	bus := l3Bus(pool, l3Root(t, low, high))
+	l3RegisterAndPublish(t, bus, pool, low)
+	l3RegisterAndPublish(t, bus, pool, high)
+
+	snapshot, err := (otastore.Store{}).ReadStatusTx(context.Background(), pool)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(snapshot.Active) != 2 || snapshot.Active[0].Version != "1.631.9" || snapshot.Active[1].Version != "1.631.10" {
+		t.Fatalf("active order=%+v", snapshot.Active)
+	}
+	if len(snapshot.Versions) != 2 || snapshot.Versions[0] != "1.631.10" || snapshot.Versions[1] != "1.631.9" {
+		t.Fatalf("versions order=%v", snapshot.Versions)
+	}
+	rows, err := (otastore.Store{}).ListActiveDescriptorsTx(context.Background(), pool)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rows) != 2 || rows[0].Version != "1.631.9" || rows[1].Version != "1.631.10" {
+		t.Fatalf("descriptor order=%+v", rows)
+	}
+	service := appota.StatusService{Runner: tx.Runner{DB: pool}, Operations: operation.Factory{Clock: clock.System{}}, Store: otastore.Store{}, Live: appota.NewSettingsValue(otarelease.DefaultSettings())}
+	status, err := service.Status(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if status.NextVersion != "1.631.11" {
+		t.Fatalf("next_version=%q", status.NextVersion)
+	}
+	if len(status.Active.Catalog) != 2 || status.Active.Catalog[0] != "1.631.9" || status.Active.Catalog[1] != "1.631.10" {
+		t.Fatalf("catalog=%v", status.Active.Catalog)
+	}
+}
+
+// TestRollbackReuseKeepsTheReplacedRowAndBothArtifacts proves OA-10 clauses 1-2
+// and the scheduler order after a reuse (clause 3).
+func TestRollbackReuseKeepsTheReplacedRowAndBothArtifacts(t *testing.T) {
+	pool := l3Pool(t)
+	resetL3All(t, pool)
+	assets := l3BuildRequestWithSHA(t, "9.360.1", "assets", l3SHA)
+	first := l3BuildRequestWithSHA(t, "9.360.2", "code", l3SHA)
+	second := l3BuildRequestWithSHA(t, "9.360.3", "code", l3SHA)
+	reuse := l3BuildRequestWithSHA(t, "9.360.2", "code", l3AltSHA)
+	reuse.Rollback = true
+	root := l3Root(t, assets, first, second, reuse)
+	bus := l3Bus(pool, root)
+	l3RegisterAndPublish(t, bus, pool, assets)
+	l3RegisterAndPublish(t, bus, pool, first)
+	l3RegisterAndPublish(t, bus, pool, second)
+	if state := l3State(t, pool, "9.360.2"); state != "SUPERSEDED" {
+		t.Fatalf("before reuse state=%s", state)
+	}
+	forward := reuse
+	forward.Rollback = false
+	refused := l3Execute(t, bus, l3Command(t, "ota.register_build", nil, forward))
+	if code := l3RefusalCode(t, refused); code != appota.CodeVersionExists {
+		t.Fatalf("forward reuse code=%s", code)
+	}
+	if outcome := l3Execute(t, bus, l3Command(t, "ota.register_build", nil, reuse)); outcome.State != operator.StateApplied {
+		t.Fatalf("reuse: %s %s", outcome.State, outcome.Result)
+	}
+
+	rows, err := pool.Raw().Query(context.Background(), `SELECT id,state,replaced_by FROM ota_releases WHERE version=$1 ORDER BY id`, "9.360.2")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rows.Close()
+	type releaseRow struct {
+		id         int64
+		state      string
+		replacedBy *int64
+	}
+	var releaseRows []releaseRow
+	for rows.Next() {
+		var row releaseRow
+		if err := rows.Scan(&row.id, &row.state, &row.replacedBy); err != nil {
+			t.Fatal(err)
+		}
+		releaseRows = append(releaseRows, row)
+	}
+	if len(releaseRows) != 2 || releaseRows[0].state != "REPLACED" || releaseRows[0].replacedBy == nil || *releaseRows[0].replacedBy != releaseRows[1].id || releaseRows[1].state != "BUILT" {
+		t.Fatalf("released rows=%+v", releaseRows)
+	}
+	lookup := appota.ReleaseLookup{Runner: tx.Runner{DB: pool}, Operations: operation.Factory{Clock: clock.System{}}, Store: otastore.Store{}}
+	reused, err := lookup.Exists(context.Background(), "9.360.2")
+	if err != nil || !reused.Exists || reused.Lane != "code" || reused.State != "BUILT" {
+		t.Fatalf("the live row of a reused number was not reported: %+v err=%v", reused, err)
+	}
+	for _, volume := range []string{l3SHA[:12], l3AltSHA[:12]} {
+		if _, err := os.Stat(filepath.Join(root, "updates", "code", "9.360.2-"+volume+".zip.001")); err != nil {
+			t.Fatalf("artifact %s: %v", volume, err)
+		}
+	}
+
+	revision := l3Revision(t, pool)
+	if outcome := l3Execute(t, bus, l3Command(t, "ota.publish", &revision, map[string]string{"version": "9.360.2"})); outcome.State != operator.StateApplied {
+		t.Fatalf("publish reuse: %s %s", outcome.State, outcome.Result)
+	}
+	if plan := l3PlanVersions(t, pool); len(plan) != 2 || plan[0] != "9.360.1" || plan[1] != "9.360.2" {
+		t.Fatalf("plan after reuse=%v", plan)
+	}
+}
+
+func TestReuseOfActiveOrBuiltNumberRefused(t *testing.T) {
+	pool := l3Pool(t)
+	resetL3All(t, pool)
+	active := l3BuildRequestWithSHA(t, "9.361.2", "code", l3SHA)
+	built := l3BuildRequestWithSHA(t, "9.361.3", "code", l3AltSHA)
+	reuseActive := l3BuildRequestWithSHA(t, "9.361.2", "code", l3AltSHA)
+	reuseActive.Rollback = true
+	reuseBuilt := l3BuildRequestWithSHA(t, "9.361.3", "code", l3SHA)
+	reuseBuilt.Rollback = true
+	bus := l3Bus(pool, l3Root(t, active, built, reuseActive, reuseBuilt))
+	l3RegisterAndPublish(t, bus, pool, active)
+	if outcome := l3Execute(t, bus, l3Command(t, "ota.register_build", nil, built)); outcome.State != operator.StateApplied {
+		t.Fatalf("register built: %s %s", outcome.State, outcome.Result)
+	}
+	for _, request := range []otarelease.BuildRequest{reuseActive, reuseBuilt} {
+		if code := l3RefusalCode(t, l3Execute(t, bus, l3Command(t, "ota.register_build", nil, request))); code != appota.CodeVersionExists {
+			t.Fatalf("reuse %s code=%s", request.Version, code)
+		}
+	}
+}
+
+func TestCodeRollbackBelowActiveAssetsRefused(t *testing.T) {
+	pool := l3Pool(t)
+	resetL3All(t, pool)
+	assets := l3BuildRequestWithSHA(t, "9.362.4", "assets", l3SHA)
+	code := l3BuildRequestWithSHA(t, "9.362.5", "code", l3SHA)
+	rollback := l3BuildRequestWithSHA(t, "9.362.3", "code", l3AltSHA)
+	rollback.Rollback = true
+	bus := l3Bus(pool, l3Root(t, assets, code, rollback))
+	l3RegisterAndPublish(t, bus, pool, assets)
+	l3RegisterAndPublish(t, bus, pool, code)
+	outcome := l3Execute(t, bus, l3Command(t, "ota.register_build", nil, rollback))
+	if code := l3RefusalCode(t, outcome); code != appota.CodeRollbackBelowAssets {
+		t.Fatalf("rollback below assets code=%s result=%s", code, outcome.Result)
+	}
 }

@@ -38,12 +38,15 @@ const (
 	StateActive     State = "ACTIVE"
 	StateSuperseded State = "SUPERSEDED"
 	StateWithdrawn  State = "WITHDRAWN"
+	// StateReplaced marks a release row whose number a rollback reuse took over
+	// (OA-10); it stays for the audit trail and is never found by version.
+	StateReplaced State = "REPLACED"
 )
 
 func ParseState(text string) (State, error) {
 	state := State(text)
 	switch state {
-	case StateBuilt, StateActive, StateSuperseded, StateWithdrawn:
+	case StateBuilt, StateActive, StateSuperseded, StateWithdrawn, StateReplaced:
 		return state, nil
 	}
 	return "", fmt.Errorf("otarelease: unknown state %q", text)
@@ -80,6 +83,7 @@ type Release struct {
 
 // RawRelease is the store's read shape, JSON-tagged for the jsonb aggregate.
 type RawRelease struct {
+	ID           int64           `json:"id"`
 	Version      string          `json:"version"`
 	Lane         string          `json:"lane"`
 	State        string          `json:"state"`
