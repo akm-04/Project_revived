@@ -6,6 +6,9 @@ import { pictureElement } from "../pictures.js";
 
 const catalogRead = "/agent/v1/reads/catalog.search";
 const pageSize = 60;
+// The backend's per-line grant cap (operatorgrant.DefaultLineCap,
+// internal/application/operatorgrant/commands.go); a line above it is refused.
+const maxLineAmount = 1000000;
 const kindOptions = ["STACK_ITEM", "SCALAR_CURRENCY", "PLAYER_EXP", "TEMPORAL", "SPECIALIZED_DOMAIN", "PARTNER_ENTITY"];
 const grantReasonTexts = {
   SPECIALIZED_DOMAIN: "not grantable yet: needs its own grant rules",
@@ -37,6 +40,7 @@ export function openResourcePicker(options) {
     const fields = document.createElement("div");
     fields.className = "row g-2 mb-2";
     const searchInput = labeledControl(fields, "resource-search", "Name or id", "search");
+    const categorySelect = labeledSelect(fields, "resource-category", "Category", [], "All");
     const kindSelect = labeledSelect(fields, "resource-kind", "Kind", kindOptions);
     const raritySelect = labeledSelect(fields, "resource-rarity", "Rarity", ["1", "2", "3", "4", "5", "6"]);
     fields.append(searchButtonCell(actionButton("Search", true, "resource-search-button")));
@@ -73,6 +77,7 @@ export function openResourcePicker(options) {
         void runSearch(true);
       }
     });
+    categorySelect.addEventListener("change", () => void runSearch(true));
     kindSelect.addEventListener("change", () => void runSearch(true));
     raritySelect.addEventListener("change", () => void runSearch(true));
     onlyGrantableBox.addEventListener("change", applyGrantableFilter);
@@ -96,8 +101,8 @@ export function openResourcePicker(options) {
     confirm.addEventListener("click", () => {
       const lines = [];
       for (const [identifier, pick] of selected) {
-        if (!Number.isInteger(pick.amount) || pick.amount <= 0) {
-          failure.textContent = "The amount of " + identifier + " must be a positive whole number.";
+        if (!Number.isInteger(pick.amount) || pick.amount <= 0 || pick.amount > maxLineAmount) {
+          failure.textContent = "The amount of " + identifier + " must be a whole number from 1 to " + maxLineAmount + ".";
           return;
         }
         lines.push({ id: identifier, amount: pick.amount });
@@ -126,6 +131,10 @@ export function openResourcePicker(options) {
       status.textContent = reset ? "Searching…" : "Loading more…";
       const query = new URLSearchParams();
       query.set("limit", String(pageSize));
+      const category = categorySelect.value;
+      if (category !== "") {
+        query.set("category", category);
+      }
       const kind = kindSelect.value;
       if (kind !== "") {
         query.set("kind", kind);
@@ -153,6 +162,7 @@ export function openResourcePicker(options) {
         return;
       }
       const body = reply.body && typeof reply.body === "object" ? reply.body : {};
+      fillCategories(body.categories);
       const entries = Array.isArray(body.entries) ? body.entries : [];
       nextAfter = typeof body.next_after === "string" ? body.next_after : "";
       loadMore.hidden = nextAfter === "";
@@ -161,6 +171,31 @@ export function openResourcePicker(options) {
       }
       contentRevision = typeof body.content_revision === "string" && body.content_revision !== "" ? " · content " + body.content_revision.slice(0, 12) : "";
       applyGrantableFilter();
+    }
+
+    // The reply carries the whole document's item type buckets, so the select
+    // fills from the same search and keeps "All" as the first choice.
+    function fillCategories(categories) {
+      if (categorySelect.dataset.filled === "yes" || !Array.isArray(categories) || categories.length === 0) {
+        return;
+      }
+      const chosen = categorySelect.value;
+      const all = document.createElement("option");
+      all.value = "";
+      all.textContent = "All";
+      categorySelect.replaceChildren(all);
+      for (const category of categories) {
+        if (typeof category.item_type !== "number") {
+          continue;
+        }
+        const option = document.createElement("option");
+        option.value = String(category.item_type);
+        const label = typeof category.label === "string" && category.label !== "" ? category.label : "Other (type " + category.item_type + ")";
+        option.textContent = label + " (" + category.count + ")";
+        categorySelect.append(option);
+      }
+      categorySelect.value = chosen;
+      categorySelect.dataset.filled = "yes";
     }
 
     function applyGrantableFilter() {
@@ -180,6 +215,7 @@ export function openResourcePicker(options) {
       const card = document.createElement("div");
       card.className = "resource-card";
       card.dataset.id = entry.id;
+      card.dataset.itemType = typeof entry.item_type === "number" ? String(entry.item_type) : "";
       const enabled = entry.grantable === "ENABLED";
       card.dataset.grantable = enabled ? "yes" : "no";
       if (!enabled) {
@@ -200,11 +236,22 @@ export function openResourcePicker(options) {
       name.textContent = entry.name === "" ? entry.id : entry.name;
       const meta = document.createElement("div");
       meta.className = "resource-meta";
-      meta.textContent = entry.id + " · " + entry.kind + (entry.rarity ? " · " + entry.rarity + "★" : "");
+      const details = [entry.id, entry.kind];
+      if (typeof entry.category === "string" && entry.category !== "") {
+        details.push(entry.category);
+      }
+      if (entry.rarity) {
+        details.push(entry.rarity + "★");
+      }
+      if (typeof entry.stack_cap === "number" && entry.stack_cap > 0) {
+        details.push("stack holds " + entry.stack_cap);
+      }
+      meta.textContent = details.join(" · ");
       const amount = document.createElement("input");
       amount.type = "number";
       amount.className = "form-control resource-amount";
       amount.min = "1";
+      amount.max = String(maxLineAmount);
       amount.step = "1";
       amount.value = "1";
       amount.disabled = true;
@@ -261,7 +308,7 @@ function labeledControl(container, identifier, label, type) {
   return input;
 }
 
-function labeledSelect(container, identifier, label, values) {
+function labeledSelect(container, identifier, label, values, anyLabel) {
   const column = document.createElement("div");
   column.className = "col-md-3";
   const element = document.createElement("label");
@@ -273,7 +320,7 @@ function labeledSelect(container, identifier, label, values) {
   select.id = identifier;
   const any = document.createElement("option");
   any.value = "";
-  any.textContent = "any";
+  any.textContent = anyLabel || "any";
   select.append(any);
   for (const value of values) {
     const option = document.createElement("option");

@@ -116,6 +116,85 @@ func TestScalarPresentationAndRarity(t *testing.T) {
 	}
 }
 
+func TestEntryCarriesItemTypeCategoryAndStackCap(t *testing.T) {
+	document, err := Build([]Resource{
+		{DefinitionKey: "stack_item:20001001", Class: "STACK_ITEM", Activation: "ENABLED_R4", ItemID: 20001001, ItemType: 1, StackCap: 999},
+		{DefinitionKey: "stack_item:41001", Class: "STACK_ITEM", Activation: "ENABLED_R4", ItemID: 41001, ItemType: 3, StackCap: 9999},
+		{DefinitionKey: "specialized:item:250000111", Class: "SPECIALIZED_DOMAIN", Activation: "FAIL_CLOSED", ItemID: 250000111, ItemType: 24, StackCap: 999999},
+		{DefinitionKey: "stack_item:150001001", Class: "STACK_ITEM", Activation: "ENABLED_R4", ItemID: 150001001, ItemType: 15, StackCap: 999},
+		{DefinitionKey: "scalar_currency:crystal", Class: "SCALAR_CURRENCY", Activation: "ENABLED_R4"},
+	}, nil, time.Unix(100, 0))
+	if err != nil {
+		t.Fatal(err)
+	}
+	equipment, _ := document.Lookup("stack_item:20001001")
+	if equipment.ItemType == nil || *equipment.ItemType != 1 || equipment.Category != "Equipment" {
+		t.Fatalf("equipment = %+v", equipment)
+	}
+	if equipment.StackCap == nil || *equipment.StackCap != 999 {
+		t.Fatalf("equipment stack cap = %v", equipment.StackCap)
+	}
+	scroll, _ := document.Lookup("stack_item:41001")
+	if scroll.ItemType == nil || *scroll.ItemType != 3 || scroll.Category != "Soul stone" {
+		t.Fatalf("scroll = %+v", scroll)
+	}
+	horcrux, _ := document.Lookup("specialized:item:250000111")
+	if horcrux.ItemType == nil || *horcrux.ItemType != 24 || horcrux.Category != "Horcrux" {
+		t.Fatalf("horcrux = %+v", horcrux)
+	}
+	unnamed, _ := document.Lookup("stack_item:150001001")
+	if unnamed.Category != "Other (type 15)" {
+		t.Fatalf("a client-unnamed type = %q", unnamed.Category)
+	}
+	scalar, _ := document.Lookup("scalar_currency:crystal")
+	if scalar.ItemType != nil || scalar.Category != "" || scalar.StackCap != nil {
+		t.Fatalf("a scalar resource carries item presentation: %+v", scalar)
+	}
+}
+
+func TestSearchByCategoryReturnsCategoryCounts(t *testing.T) {
+	document, err := Build([]Resource{
+		{DefinitionKey: "stack_item:20001001", Class: "STACK_ITEM", Activation: "ENABLED_R4", ItemID: 20001001, ItemType: 1},
+		{DefinitionKey: "stack_item:20001002", Class: "STACK_ITEM", Activation: "ENABLED_R4", ItemID: 20001002, ItemType: 1},
+		{DefinitionKey: "stack_item:41001", Class: "STACK_ITEM", Activation: "ENABLED_R4", ItemID: 41001, ItemType: 3},
+		{DefinitionKey: "scalar_currency:crystal", Class: "SCALAR_CURRENCY", Activation: "ENABLED_R4"},
+	}, nil, time.Unix(100, 0))
+	if err != nil {
+		t.Fatal(err)
+	}
+	category := int64(1)
+	page, err := document.Search(SearchFilter{Category: &category})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(page.Entries) != 2 {
+		t.Fatalf("category 1 entries = %d", len(page.Entries))
+	}
+	for _, entry := range page.Entries {
+		if entry.ItemType == nil || *entry.ItemType != 1 {
+			t.Fatalf("category 1 page carries %+v", entry)
+		}
+	}
+	if len(page.Categories) != 2 {
+		t.Fatalf("categories = %+v", page.Categories)
+	}
+	if page.Categories[0] != (Category{ItemType: 1, Label: "Equipment", Count: 2}) {
+		t.Fatalf("equipment bucket = %+v", page.Categories[0])
+	}
+	if page.Categories[1] != (Category{ItemType: 3, Label: "Soul stone", Count: 1}) {
+		t.Fatalf("soul stone bucket = %+v", page.Categories[1])
+	}
+	scalarCategory := int64(0)
+	noScalars, err := document.Search(SearchFilter{Category: &scalarCategory})
+	if err != nil || len(noScalars.Entries) != 0 {
+		t.Fatalf("category 0 page = %+v err=%v", noScalars, err)
+	}
+	all, err := document.Search(SearchFilter{})
+	if err != nil || len(all.Entries) != 4 {
+		t.Fatalf("unfiltered page = %+v err=%v", all, err)
+	}
+}
+
 func TestSearchPagesAndFilters(t *testing.T) {
 	document, err := Build([]Resource{
 		{DefinitionKey: "stack_item:1", Class: "STACK_ITEM", Activation: "ENABLED_R4", ItemID: 1},

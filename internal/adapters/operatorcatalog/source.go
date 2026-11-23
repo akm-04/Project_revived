@@ -25,6 +25,8 @@ func Load(generatedAt time.Time) (appcatalog.Document, error) {
 			Class:         definition.Class,
 			Activation:    definition.SettlementActivation,
 			ItemID:        definition.ItemID,
+			ItemType:      definition.ItemType,
+			StackCap:      definition.StackCap,
 			ResourceKey:   definition.ResourceKey,
 			Reason:        definition.Reason,
 		})
