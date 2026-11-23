@@ -29,7 +29,7 @@ export function renderPage(container, context) {
   const serverNames = buildServerNamesSection();
   container.append(heading, help, loadStatus, paths.card, serverURL.card, serverNames.card);
 
-  const state = { otaSettings: null };
+  const state = { otaSettings: null, serverNames: [] };
 
   async function loadSettings() {
     loadStatus.textContent = "";
@@ -65,7 +65,7 @@ export function renderPage(container, context) {
       return;
     }
     const body = reply.body && typeof reply.body === "object" ? reply.body : {};
-    fillServerTable(serverNames.table, Array.isArray(body.servers) ? body.servers : []);
+    fillServerTable(state, serverNames.table, Array.isArray(body.servers) ? body.servers : []);
   }
 
   paths.save.addEventListener("click", () => {
@@ -78,11 +78,22 @@ export function renderPage(container, context) {
     void saveServerURL(serverURL);
   });
 
-  async function rename(serverID, input, button) {
-    serverNames.status.textContent = "";
-    button.disabled = true;
-    const reply = await request(serverRenameCommand, commandBody({ server_id: serverID, name: input.value }, "Settings: rename a server"));
-    button.disabled = false;
+  async function saveNames() {
+    serverNames.status.replaceChildren();
+    const changes = [];
+    for (const entry of state.serverNames) {
+      const name = entry.input.value.trim();
+      if (name !== entry.original) {
+        changes.push({ server_id: entry.serverID, name });
+      }
+    }
+    if (changes.length === 0) {
+      serverNames.status.textContent = "No names changed.";
+      return;
+    }
+    serverNames.save.disabled = true;
+    const reply = await request(serverRenameCommand, commandBody({ names: changes }, "Settings: rename servers"));
+    serverNames.save.disabled = false;
     if (reply.unauthorized) {
       return;
     }
@@ -90,16 +101,28 @@ export function renderPage(container, context) {
       serverNames.status.textContent = describeReply(reply);
       return;
     }
-    const result = reply.body && typeof reply.body === "object" ? reply.body : {};
+    const body = reply.body && typeof reply.body === "object" ? reply.body : {};
+    const result = body.result && typeof body.result === "object" ? body.result : {};
+    const renames = Array.isArray(result.renames) ? result.renames : [];
+    if (renames.length === 0) {
+      serverNames.status.textContent = "The names are saved.";
+    }
+    for (const rename of renames) {
+      const line = document.createElement("p");
+      line.className = "mb-1";
+      line.textContent = "Server " + presentText(String(rename.server_id), "unknown") + ": " +
+        presentText(rename.old_name, "unknown") + " -> " + presentText(rename.new_name, "unknown");
+      serverNames.status.append(line);
+    }
     await loadServers();
-    serverNames.status.textContent = "Server " + serverID + " is now " + presentText(result.new_name, input.value) + ".";
   }
 
-  function fillServerTable(table, servers) {
+  function fillServerTable(state, table, servers) {
+    state.serverNames = [];
     table.replaceChildren();
     const head = document.createElement("thead");
     const headRow = document.createElement("tr");
-    for (const label of ["Server", "Current name", "New name", ""]) {
+    for (const label of ["Server", "Current name", "New name"]) {
       const cell = document.createElement("th");
       cell.textContent = label;
       headRow.append(cell);
@@ -110,7 +133,7 @@ export function renderPage(container, context) {
     if (servers.length === 0) {
       const row = document.createElement("tr");
       const cell = document.createElement("td");
-      cell.colSpan = 4;
+      cell.colSpan = 3;
       cell.textContent = "No servers are registered.";
       row.append(cell);
       body.append(row);
@@ -120,6 +143,7 @@ export function renderPage(container, context) {
     for (const server of servers) {
       const entry = server && typeof server === "object" ? server : {};
       const serverID = Number(entry.server_id);
+      const original = presentText(entry.name, "");
       const row = document.createElement("tr");
       const idCell = document.createElement("td");
       idCell.textContent = "#" + presentText(String(entry.server_id), "unknown");
@@ -129,23 +153,19 @@ export function renderPage(container, context) {
       const input = document.createElement("input");
       input.type = "text";
       input.className = "form-control form-control-sm";
-      input.value = presentText(entry.name, "");
+      input.value = original;
       input.setAttribute("aria-label", "New name for server " + presentText(String(entry.server_id), ""));
       inputCell.append(input);
-      const actionCell = document.createElement("td");
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "btn btn-sm btn-primary";
-      button.textContent = "Rename";
-      actionCell.append(button);
-      button.addEventListener("click", () => {
-        void rename(serverID, input, button);
-      });
-      row.append(idCell, currentCell, inputCell, actionCell);
+      row.append(idCell, currentCell, inputCell);
       body.append(row);
+      state.serverNames.push({ serverID, original, input });
     }
     table.append(body);
   }
+
+  serverNames.save.addEventListener("click", () => {
+    void saveNames();
+  });
 
   void loadSettings();
   void loadServers();
@@ -318,13 +338,18 @@ function buildServerNamesSection() {
   table.className = "table table-sm";
   table.id = "settings-server-table";
   responsive.append(table);
-  const status = document.createElement("p");
+  const save = document.createElement("button");
+  save.type = "button";
+  save.className = "btn btn-primary mt-2";
+  save.id = "settings-server-save";
+  save.textContent = "Save names";
+  const status = document.createElement("div");
   status.className = "status mt-2";
   status.id = "settings-server-status";
   status.setAttribute("role", "status");
-  fieldset.append(legend, help, responsive, status);
+  fieldset.append(legend, help, responsive, save, status);
   card.append(fieldset);
-  return { card, table, status };
+  return { card, table, save, status };
 }
 
 function commandBody(payload, reason) {

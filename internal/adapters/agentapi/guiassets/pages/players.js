@@ -114,6 +114,15 @@ export function renderPage(container, context) {
   holdColumn.append(holdLabel, holdInput, holdHint);
   holdRow.append(holdColumn);
 
+  const scopeRow = document.createElement("fieldset");
+  scopeRow.className = "mb-3";
+  const scopeLegend = document.createElement("legend");
+  scopeLegend.className = "form-label";
+  scopeLegend.textContent = "Scope";
+  const selectedScope = radioChoice("players-logout-scope-selected", "players-logout-scope", "Selected players", true);
+  const serverScope = radioChoice("players-logout-scope-servers", "players-logout-scope", "Server or global", false);
+  scopeRow.append(scopeLegend, selectedScope.label, serverScope.label);
+
   const selectedRow = document.createElement("div");
   selectedRow.className = "d-flex gap-2 align-items-center mb-2";
   const selectedButton = actionButton("Log out selected players", true, "players-logout-selected");
@@ -121,21 +130,15 @@ export function renderPage(container, context) {
   const selectedResult = resultBox("players-logout-selected-result");
 
   const serverRow = document.createElement("div");
-  serverRow.className = "d-flex gap-2 align-items-start mb-2";
+  serverRow.className = "mb-2";
   const serverHost = document.createElement("div");
-  serverHost.className = "flex-grow-1";
+  serverHost.className = "mb-2";
   serverHost.id = "players-logout-server-filter";
-  const serverButton = actionButton("Log out one server", false, "players-logout-server");
+  const serverButton = actionButton("Log out selected servers", false, "players-logout-server");
   serverRow.append(serverHost, serverButton);
   const serverResult = resultBox("players-logout-server-result");
 
-  const globalRow = document.createElement("div");
-  globalRow.className = "d-flex gap-2 align-items-center mb-2";
-  const globalButton = actionButton("Log out all servers", false, "players-logout-all");
-  globalRow.append(globalButton);
-  const globalResult = resultBox("players-logout-all-result");
-
-  logoutSection.append(logoutTitle, holdRow, selectedRow, selectedResult, serverRow, serverResult, globalRow, globalResult);
+  logoutSection.append(logoutTitle, holdRow, scopeRow, selectedRow, selectedResult, serverRow, serverResult);
 
   container.append(help, refresh, status, overview, filterSection, onlineSection, searchSection, summarySection, logoutSection);
 
@@ -152,9 +155,12 @@ export function renderPage(container, context) {
     summaryRequest: 0,
   };
   const logoutPicker = mountServerPicker(serverHost, {
-    includeGlobal: false,
+    includeGlobal: true,
     multiple: true,
     idPrefix: "players-logout-server",
+    onChange: (value) => {
+      serverButton.textContent = value.global ? "Log out all servers" : "Log out selected servers";
+    },
   });
 
   mountServerPicker(filterHost, {
@@ -192,12 +198,24 @@ export function renderPage(container, context) {
     void logoutSelected(state, holdInput, selectedResult);
   });
   serverButton.addEventListener("click", () => {
+    if (logoutPicker.value().global) {
+      void logoutGlobal(holdInput, serverResult);
+      return;
+    }
     void logoutServer(logoutPicker, holdInput, serverResult);
   });
-  globalButton.addEventListener("click", () => {
-    void logoutGlobal(holdInput, globalResult);
-  });
+  selectedScope.input.addEventListener("change", applyLogoutScope);
+  serverScope.input.addEventListener("change", applyLogoutScope);
 
+  function applyLogoutScope() {
+    const servers = serverScope.input.checked;
+    selectedRow.hidden = servers;
+    selectedResult.hidden = servers;
+    serverRow.hidden = !servers;
+    serverResult.hidden = !servers;
+  }
+
+  applyLogoutScope();
   void loadOverview(onlineCard.value, serverCard.value, status);
   void loadOnline(state, onlineStatus, onlineTable, loadMore, true);
   updateSelectedCount(state);
@@ -589,10 +607,11 @@ async function runLogout(path, payload, reason, semanticKey, hold, prefix) {
     return { ok: false, line: paragraph("status text-danger", prefix + describeReply(reply)) };
   }
   const body = reply.body && typeof reply.body === "object" ? reply.body : {};
-  const revoked = Number.isFinite(Number(body.revoked)) ? String(body.revoked) : "unknown";
+  const result = body.result && typeof body.result === "object" ? body.result : {};
+  const revoked = Number.isFinite(Number(result.revoked)) ? String(result.revoked) : "unknown";
   return {
     ok: true,
-    body,
+    body: result,
     line: paragraph("hint", prefix + "Revoked sessions: " + revoked + ". Requested hold: " + holdText(hold) + "."),
   };
 }
@@ -678,6 +697,22 @@ function labeledInput(container, identifier, label) {
   column.append(element, input);
   container.append(column);
   return input;
+}
+
+function radioChoice(identifier, name, labelText, checked) {
+  const label = document.createElement("label");
+  label.className = "form-check form-check-inline";
+  const input = document.createElement("input");
+  input.type = "radio";
+  input.className = "form-check-input";
+  input.id = identifier;
+  input.name = name;
+  input.checked = checked;
+  const text = document.createElement("span");
+  text.className = "form-check-label";
+  text.textContent = labelText;
+  label.append(input, text);
+  return { label, input };
 }
 
 function resultBox(identifier) {

@@ -7,9 +7,11 @@ import { mountServerPicker } from "./server_picker.js";
 const onlineRead = "/agent/v1/reads/session.online";
 const findRead = "/agent/v1/reads/player.find";
 const pageSize = 50;
+const searchDebounceMilliseconds = 250;
 
 export function openPlayerPicker(options) {
   const settings = options || {};
+  const single = settings.single === true;
   return new Promise((resolve) => {
     let settled = false;
     function settle(value) {
@@ -23,7 +25,10 @@ export function openPlayerPicker(options) {
       title: settings.title || "Players",
       modalId: "player-picker",
       wide: true,
-      onClose: () => settle(null),
+      onClose: () => {
+        cancelPendingSearch();
+        settle(null);
+      },
     });
     const selected = new Map();
     const summary = document.createElement("p");
@@ -45,6 +50,10 @@ export function openPlayerPicker(options) {
       onChange: (value) => {
         serverFilter = value;
         void loadOnline(true);
+        if (!searchPanel.hidden) {
+          cancelPendingSearch();
+          void runSearch();
+        }
       },
     });
 
@@ -84,11 +93,32 @@ export function openPlayerPicker(options) {
     let onlineRequest = 0;
     let searchRequest = 0;
     let searchRows = [];
+    let searchTimer = null;
+
+    function cancelPendingSearch() {
+      if (searchTimer !== null) {
+        clearTimeout(searchTimer);
+        searchTimer = null;
+      }
+    }
+
+    function scheduleSearch() {
+      cancelPendingSearch();
+      searchTimer = setTimeout(() => {
+        searchTimer = null;
+        void runSearch();
+      }, searchDebounceMilliseconds);
+    }
 
     onlineTab.addEventListener("click", () => selectTab(onlineTab, onlinePanel));
     searchTab.addEventListener("click", () => selectTab(searchTab, searchPanel));
     loadMore.addEventListener("click", () => void loadOnline(false));
-    searchButton.addEventListener("click", () => void runSearch());
+    searchButton.addEventListener("click", () => {
+      cancelPendingSearch();
+      void runSearch();
+    });
+    uidInput.addEventListener("input", scheduleSearch);
+    nameInput.addEventListener("input", scheduleSearch);
     uidInput.addEventListener("keydown", submitSearchOnEnter);
     nameInput.addEventListener("keydown", submitSearchOnEnter);
     selectTab(onlineTab, onlinePanel);
@@ -100,6 +130,10 @@ export function openPlayerPicker(options) {
     confirm.addEventListener("click", () => {
       if (selected.size === 0) {
         failure.textContent = "Select at least one player.";
+        return;
+      }
+      if (single && selected.size !== 1) {
+        failure.textContent = "Select one player.";
         return;
       }
       const players = Array.from(selected.values()).sort(comparePlayers);
@@ -119,6 +153,7 @@ export function openPlayerPicker(options) {
     function submitSearchOnEnter(event) {
       if (event.key === "Enter") {
         event.preventDefault();
+        cancelPendingSearch();
         void runSearch();
       }
     }
@@ -135,12 +170,19 @@ export function openPlayerPicker(options) {
     }
 
     function toggleSelection(row, checked) {
+      if (checked && single) {
+        selected.clear();
+      }
       if (checked) {
         selected.set(selectionKey(row), { player_id: row.player_id, name: row.name, server_id: row.server_id });
       } else {
         selected.delete(selectionKey(row));
       }
       updateSummary();
+      if (single) {
+        renderOnline();
+        renderSearch();
+      }
     }
 
     function updateSummary() {
@@ -205,6 +247,8 @@ export function openPlayerPicker(options) {
       const uid = uidInput.value.trim();
       const namePrefix = nameInput.value.trim();
       if (uid === "" && namePrefix === "") {
+        searchRows = [];
+        renderSearch();
         searchStatus.textContent = "Enter an account uid or a name prefix.";
         return;
       }
@@ -271,7 +315,9 @@ export function openPlayerPicker(options) {
       selectAll.type = "checkbox";
       selectAll.className = "form-check-input";
       selectAll.id = selectAllIdentifier;
-      selectAllCell.append(selectAll);
+      if (!single) {
+        selectAllCell.append(selectAll);
+      }
       headRow.append(selectAllCell);
       for (const column of columns) {
         const cell = document.createElement("th");

@@ -6,6 +6,7 @@ import { pictureElement } from "../pictures.js";
 
 const catalogRead = "/agent/v1/reads/catalog.search";
 const pageSize = 60;
+const searchDebounceMilliseconds = 250;
 // The backend's per-line grant cap (operatorgrant.DefaultLineCap,
 // internal/application/operatorgrant/commands.go); a line above it is refused.
 const maxLineAmount = 1000000;
@@ -33,7 +34,10 @@ export function openResourcePicker(options) {
       title: settings.title || "Resources",
       modalId: "resource-picker",
       wide: true,
-      onClose: () => settle(null),
+      onClose: () => {
+        cancelPendingSearch();
+        settle(null);
+      },
     });
     const selected = new Map();
 
@@ -70,16 +74,43 @@ export function openResourcePicker(options) {
     let nextAfter = "";
     let requestTicket = 0;
     let contentRevision = "";
+    let searchTimer = null;
 
+    function cancelPendingSearch() {
+      if (searchTimer !== null) {
+        clearTimeout(searchTimer);
+        searchTimer = null;
+      }
+    }
+
+    function scheduleSearch() {
+      cancelPendingSearch();
+      searchTimer = setTimeout(() => {
+        searchTimer = null;
+        void runSearch(true);
+      }, searchDebounceMilliseconds);
+    }
+
+    searchInput.addEventListener("input", scheduleSearch);
     searchInput.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
         event.preventDefault();
+        cancelPendingSearch();
         void runSearch(true);
       }
     });
-    categorySelect.addEventListener("change", () => void runSearch(true));
-    kindSelect.addEventListener("change", () => void runSearch(true));
-    raritySelect.addEventListener("change", () => void runSearch(true));
+    categorySelect.addEventListener("change", () => {
+      cancelPendingSearch();
+      void runSearch(true);
+    });
+    kindSelect.addEventListener("change", () => {
+      cancelPendingSearch();
+      void runSearch(true);
+    });
+    raritySelect.addEventListener("change", () => {
+      cancelPendingSearch();
+      void runSearch(true);
+    });
     onlyGrantableBox.addEventListener("change", applyGrantableFilter);
     loadMore.addEventListener("click", () => void runSearch(false));
     grid.addEventListener("click", (event) => {

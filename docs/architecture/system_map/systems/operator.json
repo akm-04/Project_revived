@@ -64,7 +64,7 @@
   "ranks": [],
   "row_lock_methods": {
    "logical_servers": [
-    "i4store.RenameServerTx"
+    "i4store.RenameServersTx"
    ],
    "operator_commands": [
     "operatorstore.ClaimTx"

@@ -10,15 +10,15 @@ import (
 )
 
 type fakeServerRenamer struct {
-	result   ServerRename
-	err      error
-	serverID int64
-	name     string
+	result  []ServerRename
+	err     error
+	changes []ServerNameChange
+	calls   int
 }
 
-func (fake *fakeServerRenamer) RenameServerTx(_ context.Context, _ tx.Tx, serverID int64, name string) (ServerRename, error) {
-	fake.serverID = serverID
-	fake.name = name
+func (fake *fakeServerRenamer) RenameServersTx(_ context.Context, _ tx.Tx, changes []ServerNameChange) ([]ServerRename, error) {
+	fake.calls++
+	fake.changes = changes
 	return fake.result, fake.err
 }
 
@@ -28,17 +28,60 @@ func callServerRename(t *testing.T, renamer ServerRenamer, payload string) (any,
 }
 
 func TestServerRenameHandlerRenamesInsideTheTransaction(t *testing.T) {
-	renamer := &fakeServerRenamer{result: ServerRename{ServerID: 2, OldName: "Server 2", NewName: "Sakura"}}
+	renamer := &fakeServerRenamer{result: []ServerRename{{ServerID: 2, OldName: "Server 2", NewName: "Sakura"}}}
 	result, err := callServerRename(t, renamer, `{"server_id":2,"name":" Sakura "}`)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if renamer.serverID != 2 || renamer.name != "Sakura" {
-		t.Fatalf("owner saw %d/%q", renamer.serverID, renamer.name)
+	if len(renamer.changes) != 1 || renamer.changes[0].ServerID != 2 || renamer.changes[0].Name != "Sakura" {
+		t.Fatalf("owner saw %+v", renamer.changes)
 	}
 	rename, ok := result.(ServerRename)
 	if !ok || rename.OldName != "Server 2" || rename.NewName != "Sakura" {
 		t.Fatalf("result = %+v", result)
+	}
+}
+
+func TestServerRenameHandlerRenamesABatch(t *testing.T) {
+	renamer := &fakeServerRenamer{result: []ServerRename{
+		{ServerID: 2, OldName: "Two", NewName: "Sakura"},
+		{ServerID: 5, OldName: "Five", NewName: "Maple"},
+	}}
+	result, err := callServerRename(t, renamer, `{"names":[{"server_id":5,"name":" Maple "},{"server_id":2,"name":"Sakura"}]}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []ServerNameChange{{ServerID: 5, Name: "Maple"}, {ServerID: 2, Name: "Sakura"}}
+	if len(renamer.changes) != len(want) || renamer.changes[0] != want[0] || renamer.changes[1] != want[1] {
+		t.Fatalf("owner saw %+v", renamer.changes)
+	}
+	batch, ok := result.(ServerRenameBatch)
+	if !ok || len(batch.Renames) != 2 || batch.Renames[0].NewName != "Sakura" {
+		t.Fatalf("result = %+v", result)
+	}
+}
+
+func TestServerRenameHandlerRefusesBadBatches(t *testing.T) {
+	cases := map[string]string{
+		"empty names":   `{"names":[]}`,
+		"zero id":       `{"names":[{"server_id":0,"name":"Alpha"}]}`,
+		"bad name":      `{"names":[{"server_id":2,"name":"   "}]}`,
+		"duplicate":     `{"names":[{"server_id":2,"name":"Alpha"},{"server_id":2,"name":"Beta"}]}`,
+		"mixed forms":   `{"server_id":2,"name":"Alpha","names":[{"server_id":2,"name":"Beta"}]}`,
+		"unknown entry": `{"names":[{"server_id":2,"name":"Alpha","extra":1}]}`,
+	}
+	for name, payload := range cases {
+		t.Run(name, func(t *testing.T) {
+			renamer := &fakeServerRenamer{}
+			_, err := callServerRename(t, renamer, payload)
+			var refusal *Refusal
+			if !errors.As(err, &refusal) || refusal.Code != CodePayloadInvalid {
+				t.Fatalf("payload %s: err = %v", payload, err)
+			}
+			if renamer.calls != 0 {
+				t.Fatal("the owner was called for a refused batch")
+			}
+		})
 	}
 }
 
@@ -61,7 +104,7 @@ func TestServerRenameHandlerRefusesBadPayloads(t *testing.T) {
 			if !errors.As(err, &refusal) || refusal.Code != CodePayloadInvalid {
 				t.Fatalf("payload %s: err = %v", payload, err)
 			}
-			if renamer.serverID != 0 {
+			if renamer.calls != 0 {
 				t.Fatal("the owner was called for a refused payload")
 			}
 		})
@@ -76,6 +119,17 @@ func TestServerRenameHandlerMapsAMissingServer(t *testing.T) {
 	}
 }
 
+func TestServerRenameHandlerNamesTheMissingServerInABatch(t *testing.T) {
+	_, err := callServerRename(t, &fakeServerRenamer{err: &ServerNotFoundError{ServerID: 7}}, `{"names":[{"server_id":2,"name":"Alpha"},{"server_id":7,"name":"Beta"}]}`)
+	var refusal *Refusal
+	if !errors.As(err, &refusal) || refusal.Code != CodeServerNotFound {
+		t.Fatalf("err = %v", err)
+	}
+	if !strings.Contains(refusal.Message, "server_id 7") {
+		t.Fatalf("refusal does not name the server: %q", refusal.Message)
+	}
+}
+
 func TestServerModuleDeclaresRename(t *testing.T) {
 	module := ServerModule()
 	index := commandIndex(module.Commands, "server.rename")
@@ -83,11 +137,14 @@ func TestServerModuleDeclaresRename(t *testing.T) {
 		t.Fatalf("server.rename is not declared: %+v", module.Commands)
 	}
 	command := module.Commands[index]
-	if command.Class != ClassLive || len(command.Fields) != 2 {
+	if command.Class != ClassLive || len(command.Fields) != 3 {
 		t.Fatalf("server.rename = %+v", command)
 	}
-	if command.Fields[0].Name != "server_id" || !command.Fields[0].Required || command.Fields[1].Name != "name" || !command.Fields[1].Required {
+	if command.Fields[0].Name != "server_id" || command.Fields[1].Name != "name" {
 		t.Fatalf("server.rename fields = %+v", command.Fields)
+	}
+	if command.Fields[2].Name != "names" || command.Fields[2].Type != FieldArray || command.Fields[2].Required {
+		t.Fatalf("server.rename names field = %+v", command.Fields[2])
 	}
 }
 

@@ -34,9 +34,10 @@ func ServerModule() Module {
 		LogChannel: "server",
 		Screen:     Screen{Tab: "Server", Columns: []string{"server_id", "name", "open", "online_count"}},
 		Commands: []CommandSpec{
-			{Name: "server.rename", Class: ClassLive, Help: "Rename a registered logical server; the client server-select popup and server.list read the new name.", Fields: []Field{
-				NewField("server_id", FieldInt, true, "logical server id").Bounded(1, 999_999_999),
-				NewField("name", FieldString, true, "1 to 16 display characters; a non-ASCII character counts as two"),
+			{Name: "server.rename", Class: ClassLive, Help: "Rename registered logical servers; the client server-select popup and server.list read the new names. Send either server_id+name or names.", Fields: []Field{
+				NewField("server_id", FieldInt, false, "logical server id for the single form").Bounded(1, 999_999_999),
+				NewField("name", FieldString, false, "single form: 1 to 16 display characters; a non-ASCII character counts as two"),
+				NewField("names", FieldArray, false, "batch form: [{server_id, name}], one transaction, all or nothing"),
 			}},
 		},
 		Reads: []Read{

@@ -5495,7 +5495,7 @@
     "*OperatorPlayerTx",
     "*OperatorServersTx",
     "*PlayerNamesTx",
-    "*RenameServerTx"
+    "*RenameServersTx"
    ],
    "store:identitystore": [
     "*ListOnlineSessionsTx",
