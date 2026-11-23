@@ -34,7 +34,14 @@ export function mountServerPicker(container, options) {
   const list = document.createElement("div");
   list.className = "server-list";
   const status = errorParagraph();
-  container.append(list, status);
+  // A page with its own status line passes onError so one refusal is shown
+  // once, in the page's line, instead of twice.
+  const reportError = settings.onError;
+  if (typeof reportError === "function") {
+    container.append(list);
+  } else {
+    container.append(list, status);
+  }
 
   function value() {
     if (global) {
@@ -94,6 +101,9 @@ export function mountServerPicker(container, options) {
       }
     }
     status.textContent = result.error;
+    if (typeof reportError === "function" && result.error !== "") {
+      reportError(result.error);
+    }
     render();
   });
 

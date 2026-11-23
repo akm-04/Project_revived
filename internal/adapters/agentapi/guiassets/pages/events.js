@@ -3,7 +3,7 @@
 import { describeReply, request } from "../transport.js";
 import { confirmAction } from "../components/confirm_action.js";
 import { openDurationPicker } from "../components/duration_picker.js";
-import { formatTime, formatTimeText, pageHeader, setStatus } from "../components/format.js";
+import { actionRow, formatTime, formatTimeText, pageHeader, setStatus } from "../components/format.js";
 import { loadServers, mountServerPicker } from "../components/server_picker.js";
 import { pictureElement } from "../pictures.js";
 
@@ -44,7 +44,8 @@ export function renderPage(container, context) {
   const tableHost = document.createElement("div");
   tableHost.className = "table-responsive";
   tableHost.id = "events-table-host";
-  overview.body.append(serverPickerHost, refreshButton, overviewStatus, groupsHost, tableHost);
+  const overviewActions = actionRow(refreshButton);
+  overview.body.append(serverPickerHost, overviewActions, overviewStatus, groupsHost, tableHost);
 
   const scheduleCard = createCard("Schedule an event", "events-schedule-card");
   const definitionsStatus = paragraph("hint", "Loading deployed event definitions…");
@@ -57,7 +58,7 @@ export function renderPage(container, context) {
   const scheduleButton = actionButton("Schedule", true, "events-schedule");
   const scheduleResult = errorParagraph();
   scheduleResult.id = "events-schedule-result";
-  scheduleCard.body.append(definitionsStatus, definitionsHost, pickScheduleDuration, scheduleDurationSummary, scheduleButton, scheduleResult);
+  scheduleCard.body.append(definitionsStatus, definitionsHost, scheduleDurationSummary, actionRow(pickScheduleDuration, scheduleButton), scheduleResult);
 
   const actionCard = createCard("Change a single-server event", "events-actions-card");
   const occurrenceSelect = createSelect(actionCard.body, "events-action-target", "Occurrence", []);
@@ -66,10 +67,10 @@ export function renderPage(container, context) {
   const permanentButton = actionButton("Make permanent", false, "events-permanent");
   const actionResult = errorParagraph();
   actionResult.id = "events-action-result";
-  const actionRow = document.createElement("div");
-  actionRow.className = "btn-list mb-3";
-  actionRow.append(extendButton, endNowButton, permanentButton);
-  actionCard.body.append(actionRow, actionResult);
+  const occurrenceActions = document.createElement("div");
+  occurrenceActions.className = "action-row";
+  occurrenceActions.append(extendButton, endNowButton, permanentButton);
+  actionCard.body.append(occurrenceActions, actionResult);
 
   container.append(overview.card, scheduleCard.card, actionCard.card);
 
@@ -85,9 +86,6 @@ export function renderPage(container, context) {
 
   async function start() {
     const loaded = await loadServers();
-    if (loaded.error !== "") {
-      setStatus(overviewStatus, loaded.error, "error");
-    }
     if (loaded.servers.length > 0) {
       state.serverID = Number(loaded.servers[0].server_id);
     }
@@ -97,6 +95,7 @@ export function renderPage(container, context) {
       global: true,
       selected: [],
       idPrefix: "events-server",
+      onError: (message) => setStatus(overviewStatus, message, "error"),
       onChange: (value) => {
         state.scope = value.global ? "global" : "server";
         state.serverID = value.server_ids.length === 1 ? value.server_ids[0] : null;
@@ -273,7 +272,7 @@ export function renderPage(container, context) {
     }
 
     const actions = document.createElement("div");
-    actions.className = "btn-list mb-2";
+    actions.className = "action-row mb-2";
     const endButton = actionButton("End now", false, "event-group-end-" + group.id);
     endButton.disabled = group.state !== "RUNNING";
     const permanentButton = actionButton("Make permanent", false, "event-group-permanent-" + group.id);

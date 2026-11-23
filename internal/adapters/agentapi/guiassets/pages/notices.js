@@ -2,7 +2,7 @@
 
 import { describeReply, loadPicture, request } from "../transport.js";
 import { confirmAction } from "../components/confirm_action.js";
-import { pageHeader, setStatus } from "../components/format.js";
+import { actionRow, pageHeader, setStatus } from "../components/format.js";
 import { mountServerPicker } from "../components/server_picker.js";
 
 const readPublicationShow = "publication.show";
@@ -44,7 +44,7 @@ export function renderPage(container, context) {
   liveStatus.id = "notices-status";
   const liveHost = document.createElement("div");
   liveHost.id = "notices-live";
-  liveCard.body.append(serverPickerHost, refreshButton, liveStatus, liveHost);
+  liveCard.body.append(serverPickerHost, actionRow(refreshButton), liveStatus, liveHost);
 
   const announcementCard = createCard("Edit login notice", "notice-announcement-card");
   const announcementTitle = createField(announcementCard.body, "notice-announcement-title", "Title", "text");
@@ -56,12 +56,10 @@ export function renderPage(container, context) {
   announcementPreviewHost.id = "notice-announcement-preview-host";
   const announcementInstall = actionButton("Install login notice", true, "notice-announcement-install");
   const announcementClear = actionButton("Clear login notice", false, "notice-announcement-clear");
-  const announcementActions = document.createElement("div");
-  announcementActions.className = "btn-list mb-3";
-  announcementActions.append(announcementInstall, announcementClear);
+  const announcementActions = actionRow(announcementPreviewButton, announcementClear, announcementInstall);
   const announcementResult = errorParagraph();
   announcementResult.id = "notice-announcement-result";
-  announcementCard.body.append(announcementPreviewButton, announcementPreviewHost, announcementActions, announcementResult);
+  announcementCard.body.append(announcementActions, announcementResult, announcementPreviewHost);
 
   const pictureCard = createCard("Edit lobby picture notice", "notice-picture-card");
   const pictureRows = document.createElement("div");
@@ -72,12 +70,10 @@ export function renderPage(container, context) {
   picturePreviewHost.id = "notice-picture-preview-host";
   const pictureInstall = actionButton("Install pictures", true, "notice-picture-install");
   const pictureClear = actionButton("Clear pictures", false, "notice-picture-clear");
-  const pictureActions = document.createElement("div");
-  pictureActions.className = "btn-list mb-3";
-  pictureActions.append(pictureInstall, pictureClear);
+  const pictureActions = actionRow(pictureAdd, picturePreviewButton, pictureClear, pictureInstall);
   const pictureResult = errorParagraph();
   pictureResult.id = "notice-picture-result";
-  pictureCard.body.append(pictureRows, pictureAdd, picturePreviewButton, picturePreviewHost, pictureActions, pictureResult);
+  pictureCard.body.append(pictureRows, pictureActions, pictureResult, picturePreviewHost);
 
   const boardCard = createCard("Edit Activities board", "notice-board-card");
   const boardRows = document.createElement("div");
@@ -88,12 +84,10 @@ export function renderPage(container, context) {
   boardPreviewHost.id = "notice-board-preview-host";
   const boardInstall = actionButton("Install Activities board", true, "notice-board-install");
   const boardClear = actionButton("Clear Activities board", false, "notice-board-clear");
-  const boardActions = document.createElement("div");
-  boardActions.className = "btn-list mb-3";
-  boardActions.append(boardInstall, boardClear);
+  const boardActions = actionRow(boardAdd, boardPreviewButton, boardClear, boardInstall);
   const boardResult = errorParagraph();
   boardResult.id = "notice-board-result";
-  boardCard.body.append(boardRows, boardAdd, boardPreviewButton, boardPreviewHost, boardActions, boardResult);
+  boardCard.body.append(boardRows, boardActions, boardResult, boardPreviewHost);
 
   container.append(liveCard.card, announcementCard.card, pictureCard.card, boardCard.card);
 
@@ -106,6 +100,7 @@ export function renderPage(container, context) {
     multiple: false,
     global: true,
     idPrefix: "notices-server",
+    onError: (message) => setStatus(liveStatus, message, "error"),
     onChange: (value) => {
       state.serverID = value.global || value.server_ids.length !== 1 ? 0 : value.server_ids[0];
       void loadLive();
