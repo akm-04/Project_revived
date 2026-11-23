@@ -10,6 +10,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -34,6 +35,11 @@ type Resource struct {
 	Class         string
 	Activation    string
 	ItemID        int64
+	// ItemType is item.lua's type column for an item-backed definition, zero
+	// when the generated catalogue carries none.
+	ItemType int64
+	// StackCap is the generated per-stack ceiling, zero when it carries none.
+	StackCap int64
 	// ResourceKey names the scalar/temporal resource (mana, exp, energy, ...);
 	// it is empty for item-backed definitions.
 	ResourceKey string
@@ -51,16 +57,58 @@ type ItemPresentation struct {
 
 // Entry is one exported catalogue row. ID stays the backend definition key the
 // grant command uses; ItemID is the numeric client item id when the definition
-// has one.
+// has one. ItemType, Category and StackCap are the item-backed presentation the
+// picker filters on; a scalar resource carries none of them.
 type Entry struct {
 	ID        string `json:"id"`
 	Kind      string `json:"kind"`
 	Grantable string `json:"grantable"`
 	Reason    string `json:"reason,omitempty"`
 	ItemID    *int64 `json:"item_id"`
+	ItemType  *int64 `json:"item_type,omitempty"`
+	Category  string `json:"category,omitempty"`
+	StackCap  *int64 `json:"stack_cap,omitempty"`
 	Name      string `json:"name"`
 	Icon      string `json:"icon"`
 	Rarity    int64  `json:"rarity,omitempty"`
+}
+
+// Category is one picker bucket: the client item type, its client-derived
+// label and how many catalogue rows it holds.
+type Category struct {
+	ItemType int64  `json:"item_type"`
+	Label    string `json:"label"`
+	Count    int    `json:"count"`
+}
+
+// categoryLabels are the client's own item type constants
+// (tmp/virtualclient/src_64/app/common/enums.lua:508-524), lowercased to plain
+// English. HUNQI is the client's name for a horcrux. A type the client names
+// nowhere is "Other (type N)".
+var categoryLabels = map[int64]string{
+	1:  "Equipment",
+	2:  "Reel",
+	3:  "Soul stone",
+	4:  "Consumables",
+	5:  "Equipment fragment",
+	6:  "Reel fragment",
+	7:  "Pet stone",
+	8:  "Pet equipment",
+	11: "Avatar",
+	12: "Avatar frame",
+	13: "Book",
+	14: "Book fragment",
+	16: "Inscription",
+	18: "Furniture",
+	21: "Element equipment",
+	24: "Horcrux",
+}
+
+func categoryLabel(itemType int64) string {
+	if label, found := categoryLabels[itemType]; found {
+		return label
+	}
+	return "Other (type " + strconv.FormatInt(itemType, 10) + ")"
 }
 
 // Document is the export file and the read source.
@@ -103,8 +151,13 @@ func Build(resources []Resource, items []ItemPresentation, generatedAt time.Time
 			entry.Grantable, entry.Reason = GrantableEnabled, ""
 		}
 		if resource.ItemID > 0 {
-			itemID := resource.ItemID
-			entry.ItemID = &itemID
+			itemID, itemType := resource.ItemID, resource.ItemType
+			entry.ItemID, entry.ItemType = &itemID, &itemType
+			entry.Category = categoryLabel(itemType)
+		}
+		if resource.StackCap > 0 {
+			stackCap := resource.StackCap
+			entry.StackCap = &stackCap
 		}
 		if presentation, found := presentations[resource.ItemID]; found && resource.ItemID > 0 {
 			entry.Name, entry.Icon, entry.Rarity = presentation.Name, presentation.Icon, presentation.Quality
@@ -217,20 +270,46 @@ func parseItemID(id, prefix string) (int64, bool) {
 	return value, value > 0
 }
 
-// SearchFilter is the bounded catalog.search query.
+// SearchFilter is the bounded catalog.search query. Category narrows the page
+// to one client item type.
 type SearchFilter struct {
-	Kind   string
-	Query  string
-	Rarity *int64
-	Limit  int
-	After  string
+	Kind     string
+	Query    string
+	Rarity   *int64
+	Category *int64
+	Limit    int
+	After    string
 }
 
-// SearchPage is one catalog.search reply.
+// SearchPage is one catalog.search reply. Categories carries the whole
+// document's item type buckets and counts, so the picker fills its select from
+// the same round trip.
 type SearchPage struct {
-	Entries         []Entry `json:"entries"`
-	NextAfter       string  `json:"next_after,omitempty"`
-	ContentRevision string  `json:"content_revision"`
+	Entries         []Entry    `json:"entries"`
+	Categories      []Category `json:"categories"`
+	NextAfter       string     `json:"next_after,omitempty"`
+	ContentRevision string     `json:"content_revision"`
+}
+
+// categories lists the document's item-backed buckets by item type, whatever
+// the page filter is; a scalar resource has no item type and no bucket.
+func (d Document) categories() []Category {
+	counts := map[int64]int{}
+	for _, entry := range d.Entries {
+		if entry.ItemType != nil {
+			counts[*entry.ItemType]++
+		}
+	}
+	itemTypes := make([]int64, 0, len(counts))
+	for itemType := range counts {
+		itemTypes = append(itemTypes, itemType)
+	}
+	slices.Sort(itemTypes)
+	categories := make([]Category, 0, len(itemTypes))
+	for _, itemType := range itemTypes {
+		categories = append(categories, Category{ItemType: itemType, Label: categoryLabel(itemType), Count: counts[itemType]})
+	}
+	return categories
 }
 
 // Search pages the document by id, after the last id of the previous page.
@@ -256,6 +335,9 @@ func (d Document) Search(filter SearchFilter) (SearchPage, error) {
 		if filter.Rarity != nil && (entry.Rarity < 1 || entry.Rarity != *filter.Rarity) {
 			continue
 		}
+		if filter.Category != nil && (entry.ItemType == nil || *entry.ItemType != *filter.Category) {
+			continue
+		}
 		if needle != "" && !entry.matches(needle) {
 			continue
 		}
@@ -264,7 +346,7 @@ func (d Document) Search(filter SearchFilter) (SearchPage, error) {
 			break
 		}
 	}
-	page := SearchPage{Entries: matches, ContentRevision: d.ContentRevision}
+	page := SearchPage{Entries: matches, Categories: d.categories(), ContentRevision: d.ContentRevision}
 	if len(matches) > filter.Limit {
 		page.Entries = matches[:filter.Limit]
 		page.NextAfter = page.Entries[len(page.Entries)-1].ID

@@ -49,6 +49,33 @@ func TestAttachmentProjectionUsesSourceVisibleAttachShape(t *testing.T) {
 	}
 }
 
+// The client reads the mailbox icon from the first attachment whose item is a
+// positive number (src_64/app/windows/MailItem.lua:17-27), so the operator's
+// first line must stay at ordinal 0 through the wire projection.
+func TestAttachmentProjectionKeepsTheOperatorFirstLineAtOrdinalZero(t *testing.T) {
+	u, _ := ids.NewUUID()
+	r := Record{MailUUID: u, Recipient: identity.PlayerID(1), Address: Address{Normal, 1}, SourceKind: "mail", SourceKey: "k", CreatedAt: time.Unix(1, 0), Shown: true, Platform: AnyPlatform, CompatibilityPolicyVersion: "p1", StateVersion: 1, Attachments: []Attachment{
+		{Ordinal: 0, Line: grant.Line{Kind: grant.StackItem, ItemID: 20001001, Amount: 1}},
+		{Ordinal: 1, Line: grant.Line{Kind: grant.StackItem, ItemID: 41001, Amount: 80}},
+	}}
+	m, err := r.WireProjection()
+	if err != nil {
+		t.Fatal(err)
+	}
+	attach := m["attach"].([]any)
+	if len(attach) != 2 {
+		t.Fatalf("attach = %#v", attach)
+	}
+	first := attach[0].(map[string]any)
+	if first["item"] != int64(20001001) || first["num"] != int64(1) {
+		t.Fatalf("ordinal 0 = %#v", first)
+	}
+	second := attach[1].(map[string]any)
+	if second["item"] != int64(41001) || second["num"] != int64(80) {
+		t.Fatalf("ordinal 1 = %#v", second)
+	}
+}
+
 func TestReadBasedExpiryIsSetFromReadAt(t *testing.T) {
 	seconds := int64(60)
 	r := Record{ExpireAfterReadSeconds: &seconds}

@@ -213,6 +213,13 @@ func CatalogSearch(document operatorcatalog.Document) Read {
 			}
 			filter.Rarity = &rarity
 		}
+		if rawCategory := values.Get("category"); rawCategory != "" {
+			category, err := strconv.ParseInt(rawCategory, 10, 64)
+			if err != nil || category < 0 {
+				return nil, operator.Refuse(operator.CodeReadInvalid, "category must be a non-negative item type", nil)
+			}
+			filter.Category = &category
+		}
 		if rawLimit := values.Get("limit"); rawLimit != "" {
 			limit, err := strconv.Atoi(rawLimit)
 			if err != nil || limit < 1 || limit > operatorcatalog.MaxSearchLimit {
