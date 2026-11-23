@@ -27,6 +27,11 @@ const (
 	DefaultSearchLimit = 50
 	MaxSearchLimit     = 200
 	maxQueryRunes      = 200
+
+	// consumableItemType is item.lua's type column for consumables and its
+	// subtype column's value 8 is a skin (app/common/tables item data).
+	consumableItemType = 4
+	skinSubType        = 8
 )
 
 // Resource is one backend catalogue row the builder needs.
@@ -53,6 +58,11 @@ type ItemPresentation struct {
 	Icon string
 	// Quality is the item.lua quality column: 0 unset, 1..6 the star rarity.
 	Quality int64
+	// SubType is the item.lua consumable subtype; 8 marks a skin item.
+	SubType int64
+	// SkinHeroName is the girl a skin item unlocks, resolved from the compiled
+	// appearance catalogue; empty for every non-skin row.
+	SkinHeroName string
 }
 
 // Entry is one exported catalogue row. ID stays the backend definition key the
@@ -66,6 +76,7 @@ type Entry struct {
 	Reason    string `json:"reason,omitempty"`
 	ItemID    *int64 `json:"item_id"`
 	ItemType  *int64 `json:"item_type,omitempty"`
+	SubType   *int64 `json:"sub_type,omitempty"`
 	Category  string `json:"category,omitempty"`
 	StackCap  *int64 `json:"stack_cap,omitempty"`
 	Name      string `json:"name"`
@@ -74,9 +85,11 @@ type Entry struct {
 }
 
 // Category is one picker bucket: the client item type, its client-derived
-// label and how many catalogue rows it holds.
+// label and how many catalogue rows it holds. SubType is set on the type-4
+// buckets so the Skin bucket and the remaining Consumables stay separable.
 type Category struct {
 	ItemType int64  `json:"item_type"`
+	SubType  *int64 `json:"sub_type,omitempty"`
 	Label    string `json:"label"`
 	Count    int    `json:"count"`
 }
@@ -104,7 +117,10 @@ var categoryLabels = map[int64]string{
 	24: "Horcrux",
 }
 
-func categoryLabel(itemType int64) string {
+func categoryLabel(itemType, subType int64) string {
+	if itemType == consumableItemType && subType == skinSubType {
+		return "Skin"
+	}
 	if label, found := categoryLabels[itemType]; found {
 		return label
 	}
@@ -153,7 +169,6 @@ func Build(resources []Resource, items []ItemPresentation, generatedAt time.Time
 		if resource.ItemID > 0 {
 			itemID, itemType := resource.ItemID, resource.ItemType
 			entry.ItemID, entry.ItemType = &itemID, &itemType
-			entry.Category = categoryLabel(itemType)
 		}
 		if resource.StackCap > 0 {
 			stackCap := resource.StackCap
@@ -161,8 +176,22 @@ func Build(resources []Resource, items []ItemPresentation, generatedAt time.Time
 		}
 		if presentation, found := presentations[resource.ItemID]; found && resource.ItemID > 0 {
 			entry.Name, entry.Icon, entry.Rarity = presentation.Name, presentation.Icon, presentation.Quality
+			if presentation.SubType > 0 {
+				subType := presentation.SubType
+				entry.SubType = &subType
+			}
+			if presentation.SubType == skinSubType && presentation.SkinHeroName != "" {
+				entry.Name = presentation.Name + " (" + presentation.SkinHeroName + " skin)"
+			}
 		} else if presentation, found := ScalarPresentations[resource.ResourceKey]; found {
 			entry.Name, entry.Icon = presentation.Name, presentation.Icon
+		}
+		if resource.ItemID > 0 {
+			subType := int64(0)
+			if entry.SubType != nil {
+				subType = *entry.SubType
+			}
+			entry.Category = categoryLabel(resource.ItemType, subType)
 		}
 		entries = append(entries, entry)
 	}
@@ -187,6 +216,9 @@ func entriesRevision(entries []Entry) (string, error) {
 // query also matches the numeric client item id exactly.
 func (entry Entry) matches(needle string) bool {
 	if strings.Contains(strings.ToLower(entry.Name), needle) || strings.Contains(strings.ToLower(entry.ID), needle) {
+		return true
+	}
+	if strings.Contains(strings.ToLower(entry.Category), needle) {
 		return true
 	}
 	numeric, ok := parseNumeric(needle)
@@ -271,12 +303,14 @@ func parseItemID(id, prefix string) (int64, bool) {
 }
 
 // SearchFilter is the bounded catalog.search query. Category narrows the page
-// to one client item type.
+// to one client item type; SubType 8 selects skins and SubType 0 the remaining
+// consumables.
 type SearchFilter struct {
 	Kind     string
 	Query    string
 	Rarity   *int64
 	Category *int64
+	SubType  *int64
 	Limit    int
 	After    string
 }
@@ -293,21 +327,49 @@ type SearchPage struct {
 
 // categories lists the document's item-backed buckets by item type, whatever
 // the page filter is; a scalar resource has no item type and no bucket.
+type categoryKey struct {
+	itemType int64
+	subType  int64
+}
+
+func (entry Entry) categoryBucket() (int64, int64) {
+	subType := int64(0)
+	if entry.SubType != nil {
+		subType = *entry.SubType
+	}
+	if *entry.ItemType != consumableItemType || subType != skinSubType {
+		subType = 0
+	}
+	return *entry.ItemType, subType
+}
+
 func (d Document) categories() []Category {
-	counts := map[int64]int{}
+	counts := map[categoryKey]int{}
 	for _, entry := range d.Entries {
-		if entry.ItemType != nil {
-			counts[*entry.ItemType]++
+		if entry.ItemType == nil {
+			continue
 		}
+		itemType, subType := entry.categoryBucket()
+		counts[categoryKey{itemType: itemType, subType: subType}]++
 	}
-	itemTypes := make([]int64, 0, len(counts))
-	for itemType := range counts {
-		itemTypes = append(itemTypes, itemType)
+	keys := make([]categoryKey, 0, len(counts))
+	for key := range counts {
+		keys = append(keys, key)
 	}
-	slices.Sort(itemTypes)
-	categories := make([]Category, 0, len(itemTypes))
-	for _, itemType := range itemTypes {
-		categories = append(categories, Category{ItemType: itemType, Label: categoryLabel(itemType), Count: counts[itemType]})
+	slices.SortFunc(keys, func(left, right categoryKey) int {
+		if left.itemType != right.itemType {
+			return int(left.itemType - right.itemType)
+		}
+		return int(left.subType - right.subType)
+	})
+	categories := make([]Category, 0, len(keys))
+	for _, key := range keys {
+		category := Category{ItemType: key.itemType, Label: categoryLabel(key.itemType, key.subType), Count: counts[key]}
+		if key.itemType == consumableItemType {
+			subType := key.subType
+			category.SubType = &subType
+		}
+		categories = append(categories, category)
 	}
 	return categories
 }
@@ -337,6 +399,21 @@ func (d Document) Search(filter SearchFilter) (SearchPage, error) {
 		}
 		if filter.Category != nil && (entry.ItemType == nil || *entry.ItemType != *filter.Category) {
 			continue
+		}
+		if filter.SubType != nil {
+			subType := int64(0)
+			if entry.SubType != nil {
+				subType = *entry.SubType
+			}
+			// A zero sub_type filter is the remaining consumables, i.e.
+			// everything that is not a skin.
+			if *filter.SubType == 0 {
+				if subType == skinSubType {
+					continue
+				}
+			} else if subType != *filter.SubType {
+				continue
+			}
 		}
 		if needle != "" && !entry.matches(needle) {
 			continue

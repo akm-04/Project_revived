@@ -76,6 +76,8 @@ type ItemPresentation struct {
 	// Quality is item.lua's quality column (0 means unset, 1..6 is the star
 	// rarity the client draws).
 	Quality int64 `json:"quality"`
+	// SubType is item.lua's consumable subtype; 8 is a skin and zero is absent.
+	SubType int64 `json:"sub_type,omitempty"`
 }
 
 type ItemPresentationCatalog struct {
@@ -90,7 +92,7 @@ func (c ItemPresentationCatalog) Validate() error {
 	}
 	last := int64(0)
 	for _, item := range c.Items {
-		if item.ID <= last || item.Name == "" || item.Quality < 0 || item.Quality > 6 {
+		if item.ID <= last || item.Name == "" || item.Quality < 0 || item.Quality > 6 || item.SubType < 0 {
 			return errors.New("builtin content: invalid item presentation row")
 		}
 		last = item.ID
@@ -1167,7 +1169,7 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 	if manifest.CompilerVersion == "i11a-events-gifts" {
 		expectedSources, expectedArtifacts = 598, 61
 	}
-	if manifest.CompilerVersion == "i11a-operator-catalogue" {
+	if manifest.CompilerVersion == "i11a-operator-catalogue" || manifest.CompilerVersion == "i11a-operator-catalogue-skins" {
 		expectedSources, expectedArtifacts = 598, 62
 	}
 	if len(manifest.Sources) != expectedSources {

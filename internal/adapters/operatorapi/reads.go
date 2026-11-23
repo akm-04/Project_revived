@@ -220,6 +220,13 @@ func CatalogSearch(document operatorcatalog.Document) Read {
 			}
 			filter.Category = &category
 		}
+		if rawSubType := values.Get("sub_type"); rawSubType != "" {
+			subType, err := strconv.ParseInt(rawSubType, 10, 64)
+			if err != nil || subType < 0 {
+				return nil, operator.Refuse(operator.CodeReadInvalid, "sub_type must be a non-negative client item subtype", nil)
+			}
+			filter.SubType = &subType
+		}
 		if rawLimit := values.Get("limit"); rawLimit != "" {
 			limit, err := strconv.Atoi(rawLimit)
 			if err != nil || limit < 1 || limit > operatorcatalog.MaxSearchLimit {
