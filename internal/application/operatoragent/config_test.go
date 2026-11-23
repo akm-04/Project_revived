@@ -248,10 +248,12 @@ func TestBackupSettingsDefaultsAndValidation(t *testing.T) {
 	}
 
 	for name, contents := range map[string]string{
-		"zero keep":     `{"listen":"127.0.0.1:8090","backup_keep":0,"backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`,
-		"negative keep": `{"listen":"127.0.0.1:8090","backup_keep":-1,"backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`,
-		"relative path": `{"listen":"127.0.0.1:8090","backup_path":"backups","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`,
-		"unknown keep":  `{"listen":"127.0.0.1:8090","backup_keep":"five","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`,
+		"zero keep":          `{"listen":"127.0.0.1:8090","backup_keep":0,"backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`,
+		"negative keep":      `{"listen":"127.0.0.1:8090","backup_keep":-1,"backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`,
+		"unoffered keep":     `{"listen":"127.0.0.1:8090","backup_keep":7,"backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`,
+		"unoffered schedule": `{"listen":"127.0.0.1:8090","backup_every_hours":5,"backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`,
+		"relative path":      `{"listen":"127.0.0.1:8090","backup_path":"backups","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`,
+		"unknown keep":       `{"listen":"127.0.0.1:8090","backup_keep":"five","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`,
 	} {
 		t.Run(name, func(t *testing.T) {
 			if _, err := LoadConfig(writeAgentConfig(t, contents)); err == nil {

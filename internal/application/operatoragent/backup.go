@@ -88,6 +88,7 @@ type BackupEntry struct {
 type BackupList struct {
 	Directory        string        `json:"directory"`
 	Keep             int           `json:"keep"`
+	Schedule         string        `json:"schedule"`
 	Backups          []BackupEntry `json:"backups"`
 	NewestAgeSeconds *int64        `json:"newest_age_seconds"`
 	// BackendMigration is the deployed backend's applied migration when it is
@@ -119,10 +120,13 @@ type DatabaseTools interface {
 // the database itself: every statement goes through the pg toolchain.
 type BackupService struct {
 	Directory string
-	// Root is the agent root; setting the backup folder persists it in
-	// <root>/agent.json.
-	Root            string
-	Keep            int
+	// Root is the agent root; setting the backup folder, the keep value or the
+	// schedule persists it in <root>/agent.json.
+	Root string
+	Keep int
+	// Schedule is the scheduled automatic snapshot interval; nil is the default
+	// 24h and a non-nil zero turns the schedule off.
+	Schedule        *time.Duration
 	Max             int
 	EnvironmentFile string
 	Tools           DatabaseTools
@@ -156,7 +160,19 @@ type preRestoreRetention struct {
 
 // Settings reports the effective backup settings (P3, B1).
 func (service BackupService) Settings() BackupList {
-	return BackupList{Directory: service.Directory, Keep: service.keep()}
+	return BackupList{Directory: service.Directory, Keep: service.keep(), Schedule: service.scheduleLabel()}
+}
+
+func (service BackupService) scheduleInterval() time.Duration {
+	if service.Schedule == nil {
+		return DefaultBackupEveryHours * time.Hour
+	}
+	return *service.Schedule
+}
+
+func (service BackupService) scheduleLabel() string {
+	label, _ := backupScheduleForHours(int(service.scheduleInterval() / time.Hour))
+	return label
 }
 
 func (service BackupService) keep() int {
@@ -356,13 +372,13 @@ func snapshotRequest(kind, reason, name string, pinned bool) json.RawMessage {
 // mismatch, is shown damaged and is never restored.
 func (service BackupService) List(ctx context.Context) (BackupList, error) {
 	if service.Directory == "" {
-		return BackupList{Directory: "", Keep: service.keep(), Backups: []BackupEntry{}}, nil
+		return BackupList{Directory: "", Keep: service.keep(), Schedule: service.scheduleLabel(), Backups: []BackupEntry{}}, nil
 	}
 	entries, err := service.entries()
 	if err != nil {
 		return BackupList{}, err
 	}
-	list := BackupList{Directory: service.Directory, Keep: service.keep(), Backups: entries}
+	list := BackupList{Directory: service.Directory, Keep: service.keep(), Schedule: service.scheduleLabel(), Backups: entries}
 	if len(entries) > 0 && !entries[0].CreatedAt.IsZero() {
 		age := int64(service.now().Sub(entries[0].CreatedAt).Seconds())
 		if age < 0 {
@@ -421,8 +437,53 @@ func (service BackupService) keepableManifest(id string) (BackupManifest, error)
 	return manifest, nil
 }
 
-// Delete removes one unpinned manual snapshot. Automatic snapshots belong to
-// the prune pool, and a pinned or damaged snapshot is never deleted.
+// BackupDeleteFailure is one refused snapshot of a delete request.
+type BackupDeleteFailure struct {
+	ID        string `json:"id"`
+	ErrorCode string `json:"error_code"`
+	Message   string `json:"message"`
+}
+
+// BackupDeleteResult reports every deletion of one request, so a partial
+// failure still names what was deleted and why the rest stayed.
+type BackupDeleteResult struct {
+	Deleted []string              `json:"deleted"`
+	Failed  []BackupDeleteFailure `json:"failed"`
+}
+
+// DeleteMany deletes each unpinned snapshot and reports a refusal per snapshot
+// instead of stopping the request; a repeated id is deleted once.
+func (service BackupService) DeleteMany(ids []string, reason string) BackupDeleteResult {
+	result := BackupDeleteResult{Deleted: []string{}, Failed: []BackupDeleteFailure{}}
+	seen := map[string]bool{}
+	for _, id := range ids {
+		if seen[id] {
+			continue
+		}
+		seen[id] = true
+		manifest, err := service.Delete(id, reason)
+		if err == nil {
+			result.Deleted = append(result.Deleted, manifest.ID)
+			continue
+		}
+		failure := BackupDeleteFailure{ID: id, Message: err.Error()}
+		var refusal *Refusal
+		var transient *Transient
+		if errors.As(err, &refusal) {
+			failure.ErrorCode = refusal.Code
+			failure.Message = refusal.Message
+		} else if errors.As(err, &transient) {
+			failure.ErrorCode = transient.Code
+			failure.Message = transient.Message
+		}
+		service.log("backup.delete", "delete", "failed", map[string]any{"id": id, "error_code": failure.ErrorCode})
+		result.Failed = append(result.Failed, failure)
+	}
+	return result
+}
+
+// Delete removes one unpinned snapshot. A pinned, damaged or in-use snapshot is
+// never deleted.
 func (service BackupService) Delete(id, reason string) (BackupManifest, error) {
 	manifest, err := service.keepableManifest(id)
 	if err != nil {
@@ -430,9 +491,6 @@ func (service BackupService) Delete(id, reason string) (BackupManifest, error) {
 	}
 	if manifest.Pinned {
 		return BackupManifest{}, Refuse(CodeBackupPinned, "the snapshot is pinned; unpin it before deleting it")
-	}
-	if manifest.Kind != BackupKindManual {
-		return BackupManifest{}, Refuse(CodeBackupDeleteRefused, "only manual snapshots can be deleted; automatic snapshots are pruned")
 	}
 	if service.entry(id).Damaged {
 		return BackupManifest{}, Refuse(CodeBackupDamaged, "a damaged snapshot is never deleted")
@@ -471,6 +529,81 @@ func (service *BackupService) SetPath(path string) (BackupList, error) {
 	service.Directory = config.BackupPath
 	service.log("backup.path", "set", "done", map[string]any{"directory": service.Directory})
 	return service.List(context.Background())
+}
+
+// SetSchedule stores the scheduled automatic snapshot interval (1d, 7d, 15d,
+// 30d or off) in agent.json; the running schedule reads it at the next tick.
+func (service *BackupService) SetSchedule(value string) (BackupList, error) {
+	normalized := strings.ToLower(strings.TrimSpace(value))
+	hours, known := backupScheduleHours[normalized]
+	if !known {
+		return BackupList{}, Refuse(CodeSettingsInvalid, "the schedule must be 1d, 7d, 15d, 30d or off")
+	}
+	if err := service.saveBackupConfig(func(config *Config) { config.BackupEveryHours = &hours }); err != nil {
+		return BackupList{}, err
+	}
+	interval := time.Duration(hours) * time.Hour
+	service.Schedule = &interval
+	service.log("backup.schedule", "set", "done", map[string]any{"schedule": normalized})
+	return service.List(context.Background())
+}
+
+// BackupKeepResult is the backup.keep reply: the new retention and the
+// automatic snapshots a lowering pruned.
+type BackupKeepResult struct {
+	Keep    int      `json:"keep"`
+	Removed []string `json:"removed"`
+}
+
+// SetKeep stores the automatic retention (5, 10, 15 or 30) in agent.json and,
+// when the value is lowered, prunes the excess automatic snapshots at once.
+func (service *BackupService) SetKeep(value int) (BackupKeepResult, error) {
+	if !backupKeepChoices[value] {
+		return BackupKeepResult{}, Refuse(CodeSettingsInvalid, "backup_keep must be 5, 10, 15 or 30")
+	}
+	previous := service.keep()
+	if err := service.saveBackupConfig(func(config *Config) { config.BackupKeep = &value }); err != nil {
+		return BackupKeepResult{}, err
+	}
+	service.Keep = value
+	result := BackupKeepResult{Keep: value, Removed: []string{}}
+	if value >= previous {
+		service.log("backup.keep", "set", "done", map[string]any{"keep": value})
+		return result, nil
+	}
+	if service.Guard != nil {
+		if !service.Guard.TryLock() {
+			return result, Refuse(CodeBackendBusy, "a backend operation is already running")
+		}
+		defer service.Guard.Unlock()
+	}
+	pruned, err := service.prune(context.Background())
+	if err != nil {
+		return result, err
+	}
+	result.Removed = pruned.Removed
+	service.log("backup.keep", "set", "done", map[string]any{"keep": value, "removed": len(pruned.Removed)})
+	return result, nil
+}
+
+// saveBackupConfig applies change to agent.json after validating it and reports
+// a refusal or a write failure.
+func (service *BackupService) saveBackupConfig(change func(config *Config)) error {
+	if service.Root == "" {
+		return Refuse(CodeSettingsUnavailable, "the agent root is not configured")
+	}
+	config, err := ReadConfig(service.Root)
+	if err != nil {
+		return Refuse(CodeSettingsUnavailable, "agent.json is unreadable: "+err.Error())
+	}
+	change(&config)
+	if err := config.Validate(); err != nil {
+		return Refuse(CodeSettingsInvalid, err.Error())
+	}
+	if err := SaveConfig(service.Root, config); err != nil {
+		return Temporarily(CodeFailed, "agent.json cannot be written")
+	}
+	return nil
 }
 
 // Prune keeps the newest backup_keep automatic snapshots: the scheduled, safety,
@@ -1168,10 +1301,11 @@ func newestAutomaticTime(entries []BackupEntry) time.Time {
 }
 
 // RunBackupSchedule takes the scheduled automatic snapshot every interval while
-// the backend runs. Tests check AutomaticBackupDue with an injected clock rather
-// than waiting for a tick.
-func RunBackupSchedule(ctx context.Context, service *BackupService, interval time.Duration) {
-	if service == nil || interval <= 0 {
+// the backend runs. The interval is read at every tick, so a changed schedule
+// applies without an agent restart. Tests check AutomaticBackupDue with an
+// injected clock rather than waiting for a tick.
+func RunBackupSchedule(ctx context.Context, service *BackupService) {
+	if service == nil {
 		return
 	}
 	ticker := time.NewTicker(backupScheduleTick)
@@ -1181,12 +1315,16 @@ func RunBackupSchedule(ctx context.Context, service *BackupService, interval tim
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			service.snapshotScheduled(ctx, interval)
+			service.snapshotScheduled(ctx)
 		}
 	}
 }
 
-func (service BackupService) snapshotScheduled(ctx context.Context, interval time.Duration) {
+func (service BackupService) snapshotScheduled(ctx context.Context) {
+	interval := service.scheduleInterval()
+	if interval <= 0 {
+		return
+	}
 	backendRunning := service.Backend != nil && service.Backend.Status().Running
 	entries, err := service.entries()
 	if err != nil {

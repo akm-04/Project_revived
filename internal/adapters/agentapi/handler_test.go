@@ -702,9 +702,26 @@ func TestBackupRoutesUseTheAgentService(t *testing.T) {
 	if pinWithoutName.Code != http.StatusConflict || refusalCodeOf(t, pinWithoutName) != operatoragent.CodeBodyInvalid {
 		t.Fatalf("pin without name: %d %s", pinWithoutName.Code, pinWithoutName.Body)
 	}
-	deleteWithoutReason := serveAgent(handler, http.MethodPost, "/agent/v1/backup/delete", session, `{"id":"`+snapshotID+`"}`)
+	deleteWithoutReason := serveAgent(handler, http.MethodPost, "/agent/v1/backup/delete", session, `{"ids":["`+snapshotID+`"]}`)
 	if deleteWithoutReason.Code != http.StatusConflict || refusalCodeOf(t, deleteWithoutReason) != operatoragent.CodeBodyInvalid {
 		t.Fatalf("delete without reason: %d %s", deleteWithoutReason.Code, deleteWithoutReason.Body)
+	}
+
+	if _, err := backup.Pin(snapshotID, "keep me"); err != nil {
+		t.Fatal(err)
+	}
+	pinnedDelete := serveAgent(handler, http.MethodPost, "/agent/v1/backup/delete", session, `{"ids":["`+snapshotID+`"],"reason":"forced"}`)
+	if pinnedDelete.Code != http.StatusConflict || !strings.Contains(pinnedDelete.Body.String(), `"error_code":"`+operatoragent.CodeBackupPinned+`"`) {
+		t.Fatalf("delete pinned: %d %s", pinnedDelete.Code, pinnedDelete.Body)
+	}
+
+	badSchedule := serveAgent(handler, http.MethodPost, "/agent/v1/backup/schedule", session, `{"schedule":"2d"}`)
+	if badSchedule.Code != http.StatusConflict || refusalCodeOf(t, badSchedule) != operatoragent.CodeSettingsInvalid {
+		t.Fatalf("bad schedule: %d %s", badSchedule.Code, badSchedule.Body)
+	}
+	badKeep := serveAgent(handler, http.MethodPost, "/agent/v1/backup/keep", session, `{"keep":7}`)
+	if badKeep.Code != http.StatusConflict || refusalCodeOf(t, badKeep) != operatoragent.CodeSettingsInvalid {
+		t.Fatalf("bad keep: %d %s", badKeep.Code, badKeep.Body)
 	}
 
 	wrongMethod := serveAgent(handler, http.MethodGet, "/agent/v1/backup/snapshot", session, "")

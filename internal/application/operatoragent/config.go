@@ -35,7 +35,7 @@ const (
 	maxStopGraceSeconds        = 300
 
 	// DefaultBackupKeep is B1/F1: the last five automatic snapshots are kept
-	// with no operator input; backup_keep below 1 is refused.
+	// with no operator input.
 	DefaultBackupKeep = 5
 	// DefaultBackupMax is the total snapshot cap. A manual snapshot beyond it is
 	// refused until an unpinned manual snapshot is deleted.
@@ -43,8 +43,23 @@ const (
 	// DefaultBackupEveryHours is the scheduled automatic snapshot interval; 0
 	// turns the schedule off.
 	DefaultBackupEveryHours = 24
-	maxBackupEveryHours     = 8760
 )
+
+// backupKeepChoices are the automatic retention values the operator may pick.
+var backupKeepChoices = map[int]bool{5: true, 10: true, 15: true, 30: true}
+
+// backupScheduleHours maps the operator's schedule choice to agent hours.
+var backupScheduleHours = map[string]int{"off": 0, "1d": 24, "7d": 168, "15d": 360, "30d": 720}
+
+// backupScheduleForHours names the stored hours.
+func backupScheduleForHours(hours int) (string, bool) {
+	for label, value := range backupScheduleHours {
+		if value == hours {
+			return label, true
+		}
+	}
+	return "", false
+}
 
 // BackendConfig names the backend binary the agent controls.
 type BackendConfig struct {
@@ -345,11 +360,13 @@ func (config Config) Validate() error {
 	if value := config.Backend.StopGraceSeconds; value != nil && (*value < minStopGraceSeconds || *value > maxStopGraceSeconds) {
 		return fmt.Errorf("%s: backend.stop_grace_seconds %d is outside %d..%d", AgentConfigFileName, *value, minStopGraceSeconds, maxStopGraceSeconds)
 	}
-	if value := config.BackupKeep; value != nil && *value < 1 {
-		return fmt.Errorf("%s: backup_keep %d must be at least 1", AgentConfigFileName, *value)
+	if value := config.BackupKeep; value != nil && !backupKeepChoices[*value] {
+		return fmt.Errorf("%s: backup_keep %d must be 5, 10, 15 or 30", AgentConfigFileName, *value)
 	}
-	if value := config.BackupEveryHours; value != nil && (*value < 0 || *value > maxBackupEveryHours) {
-		return fmt.Errorf("%s: backup_every_hours %d is outside 0..%d", AgentConfigFileName, *value, maxBackupEveryHours)
+	if value := config.BackupEveryHours; value != nil {
+		if _, known := backupScheduleForHours(*value); !known {
+			return fmt.Errorf("%s: backup_every_hours %d must be 0, 24, 168, 360 or 720", AgentConfigFileName, *value)
+		}
 	}
 	if config.BackupPath != "" {
 		if !filepath.IsAbs(config.BackupPath) {

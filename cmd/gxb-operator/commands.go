@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"text/tabwriter"
 	"time"
@@ -226,7 +227,7 @@ func runCommand(root string, args []string) error {
 
 func runBackup(root string, args []string) error {
 	if len(args) == 0 {
-		return errors.New("usage: backup snapshot|list|prune|pin|unpin|delete|path|restore|update-backend")
+		return errors.New("usage: backup snapshot|list|prune|pin|unpin|delete|path|schedule|keep|restore|update-backend")
 	}
 	client, err := newAgentClient(root, true)
 	if err != nil {
@@ -290,14 +291,47 @@ func runBackup(root string, args []string) error {
 		}
 		return printResult(status, body)
 	case "delete":
-		if len(args) < 2 {
-			return errors.New("usage: backup delete <id> --reason <text>")
-		}
-		reason, err := backupReasonFlag(args[2:])
+		ids, reason, err := backupDeleteArguments(args[1:])
 		if err != nil {
 			return err
 		}
-		status, body, err := client.request(http.MethodPost, "/agent/v1/backup/delete", map[string]string{"id": args[1], "reason": reason})
+		status, body, err := client.request(http.MethodPost, "/agent/v1/backup/delete", map[string]any{"ids": ids, "reason": reason})
+		if err != nil {
+			return err
+		}
+		return printResult(status, body)
+	case "schedule":
+		if len(args) > 2 {
+			return errors.New("usage: backup schedule [1d|7d|15d|30d|off]")
+		}
+		if len(args) == 1 {
+			status, body, err := client.request(http.MethodGet, "/agent/v1/backup/schedule", nil)
+			if err != nil {
+				return err
+			}
+			return printResult(status, body)
+		}
+		status, body, err := client.request(http.MethodPost, "/agent/v1/backup/schedule", map[string]string{"schedule": args[1]})
+		if err != nil {
+			return err
+		}
+		return printResult(status, body)
+	case "keep":
+		if len(args) > 2 {
+			return errors.New("usage: backup keep [5|10|15|30]")
+		}
+		if len(args) == 1 {
+			status, body, err := client.request(http.MethodGet, "/agent/v1/backup/keep", nil)
+			if err != nil {
+				return err
+			}
+			return printResult(status, body)
+		}
+		value, err := strconv.Atoi(args[1])
+		if err != nil {
+			return errors.New("the keep value must be 5, 10, 15 or 30")
+		}
+		status, body, err := client.request(http.MethodPost, "/agent/v1/backup/keep", map[string]int{"keep": value})
 		if err != nil {
 			return err
 		}
@@ -357,6 +391,36 @@ func backupNameFlag(args []string) (string, error) {
 		return "", errors.New("--name is required")
 	}
 	return *name, nil
+}
+
+// backupDeleteArguments reads the ids before --reason, because the flag package
+// stops at the first positional argument.
+func backupDeleteArguments(args []string) ([]string, string, error) {
+	ids := []string{}
+	reason := ""
+	for index := 0; index < len(args); index++ {
+		argument := args[index]
+		if argument == "--reason" {
+			if index+1 >= len(args) {
+				return nil, "", errors.New("--reason needs a value")
+			}
+			reason = args[index+1]
+			index++
+			continue
+		}
+		if value, found := strings.CutPrefix(argument, "--reason="); found {
+			reason = value
+			continue
+		}
+		if strings.HasPrefix(argument, "-") {
+			return nil, "", fmt.Errorf("unknown backup delete flag %q", argument)
+		}
+		ids = append(ids, argument)
+	}
+	if len(ids) == 0 || reason == "" {
+		return nil, "", errors.New("usage: backup delete <id>... --reason <text>")
+	}
+	return ids, reason, nil
 }
 
 func backupReasonFlag(args []string) (string, error) {

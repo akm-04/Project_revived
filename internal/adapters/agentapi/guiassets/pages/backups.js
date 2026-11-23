@@ -7,6 +7,7 @@ import { describeReply, request } from "../transport.js";
 
 const operationPollMilliseconds = 1000;
 const noBackupFolderMessage = "No backup folder set. Choose a folder to enable snapshots.";
+const snapshotColumns = ["Restore", "Select", "Snapshot", "Name", "Time", "Size", "Backend", "Migration", "State", "Keep", "Delete"];
 
 // renderPage is the Backups screen: the snapshot overview and table first, the
 // three agent-run actions below. Update backend stays under Advanced.
@@ -15,15 +16,20 @@ export function renderPage(container, context) {
   container.append(pageHeader(context.page.label));
   const folder = buildFolderCard();
   const overview = buildOverview();
+  const settings = buildSettingsCard();
   const list = buildList();
   const snapshot = buildSnapshotAction();
   const restore = buildAction("Restore selected snapshot");
   const prune = buildAction("Prune snapshots");
-  container.append(folder.card, overview.card, list.card, snapshot.card, restore.card, prune.card);
+  container.append(folder.card, overview.card, settings.card, list.card, snapshot.card, restore.card, prune.card);
   restore.button.disabled = true;
 
   let selectedEntry = null;
   let backendMigration = null;
+  let loadedBackups = [];
+  let currentKeep = null;
+  let currentSchedule = "1d";
+  const selectedIDs = new Set();
 
   function selectSnapshot(entry) {
     if (entry.damaged === true) {
@@ -31,6 +37,21 @@ export function renderPage(container, context) {
     }
     selectedEntry = entry;
     restore.button.disabled = false;
+  }
+
+  function toggleSelected(entry, checked) {
+    if (checked) {
+      selectedIDs.add(entry.id);
+    } else {
+      selectedIDs.delete(entry.id);
+    }
+    updateDeleteSelected();
+  }
+
+  function updateDeleteSelected() {
+    list.deleteSelected.disabled = selectedIDs.size === 0;
+    list.deleteSelected.textContent =
+      selectedIDs.size === 0 ? "Delete selected" : "Delete selected (" + selectedIDs.size + ")";
   }
 
   async function loadList() {
@@ -42,7 +63,10 @@ export function renderPage(container, context) {
     }
     if (!reply.ok) {
       fillOverview(overview, null);
-      list.table.replaceChildren(noRowsRow(9, "The snapshot list is unavailable."));
+      for (const table of [list.automatic, list.manual]) {
+        table.replaceChildren(tableHead(snapshotColumns));
+        table.append(noRowsRow(snapshotColumns.length, "The snapshot list is unavailable."));
+      }
       setStatus(list.status, describeReply(reply), "error");
       return;
     }
@@ -58,14 +82,21 @@ export function renderPage(container, context) {
     } else {
       setStatus(folder.status, noBackupFolderMessage, "error");
     }
+    loadedBackups = backups;
     selectedEntry = null;
+    selectedIDs.clear();
+    updateDeleteSelected();
     backendMigration =
       typeof body.backend_migration === "number" && Number.isFinite(body.backend_migration)
         ? body.backend_migration
         : null;
     restore.button.disabled = true;
     fillOverview(overview, body);
-    fillTable(list.table, backups, selectSnapshot, loadList, list.status);
+    fillSettings(settings, body);
+    currentKeep = typeof body.keep === "number" ? body.keep : null;
+    currentSchedule = typeof body.schedule === "string" && body.schedule !== "" ? body.schedule : "1d";
+    const tableContext = { selectSnapshot, toggleSelected, onDelete: deleteSnapshots, onKeepChanged: loadList, status: list.status };
+    fillTables(list, backups, tableContext);
     setStatus(list.status, "Loaded " + backups.length + " snapshot" + (backups.length === 1 ? "." : "s."), "success");
   }
 
@@ -175,10 +206,155 @@ export function renderPage(container, context) {
     await loadList();
   });
 
+  settings.schedule.addEventListener("change", async (event) => {
+    if (event.target.type !== "radio" || !event.target.checked) {
+      return;
+    }
+    const reply = await request("/agent/v1/backup/schedule", { method: "POST", body: { schedule: event.target.value } });
+    if (reply.unauthorized) {
+      return;
+    }
+    if (!reply.ok) {
+      selectRadio(settings.schedule, currentSchedule);
+      setStatus(settings.status, describeReply(reply), "error");
+      return;
+    }
+    setStatus(settings.status, "Scheduled snapshots: " + scheduleLabel(event.target.value) + ".", "success");
+    await loadList();
+  });
+
+  settings.keep.addEventListener("change", async (event) => {
+    if (event.target.type !== "radio" || !event.target.checked) {
+      return;
+    }
+    const value = Number(event.target.value);
+    if (currentKeep !== null && value === currentKeep) {
+      return;
+    }
+    if (currentKeep !== null && value < currentKeep) {
+      const count = automaticPruneCount(loadedBackups, value);
+      const snapshots = count === 1 ? "snapshot" : "snapshots";
+      const confirmation = await confirmAction({
+        title: "Lower automatic retention",
+        summary:
+          "Keep the newest " + value + " automatic snapshots. " +
+          count + " automatic " + snapshots + " beyond that limit will be deleted now; " +
+          "pinned, damaged and in-use snapshots stay. This cannot be undone.",
+        confirmLabel: "Lower and prune",
+      });
+      if (confirmation === null) {
+        selectRadio(settings.keep, currentKeep);
+        return;
+      }
+    }
+    const reply = await request("/agent/v1/backup/keep", { method: "POST", body: { keep: value } });
+    if (reply.unauthorized) {
+      return;
+    }
+    if (!reply.ok) {
+      selectRadio(settings.keep, String(currentKeep));
+      setStatus(settings.status, describeReply(reply), "error");
+      return;
+    }
+    const removed = reply.body && Array.isArray(reply.body.removed) ? reply.body.removed.length : 0;
+    setStatus(
+      settings.status,
+      "Keeping the newest " + value + " automatic snapshots" + (removed > 0 ? "; " + removed + " pruned." : "."),
+      "success",
+    );
+    await loadList();
+  });
+
+  list.deleteSelected.addEventListener("click", () => {
+    const entries = loadedBackups.filter((entry) => selectedIDs.has(entry.id));
+    void deleteSnapshots(entries);
+  });
+
   list.refresh.addEventListener("click", () => {
     void loadList();
   });
+
+  async function deleteSnapshots(entries) {
+    if (entries.length === 0) {
+      setStatus(list.status, "Select a snapshot first.", "error");
+      return;
+    }
+    const labels = entries.map(snapshotLabel);
+    const many = entries.length > 1;
+    const confirmation = await confirmAction({
+      title: many ? "Delete snapshots" : "Delete snapshot",
+      summary:
+        "Delete " + entries.length + " " + (many ? "snapshots" : "snapshot") + ": " +
+        labels.join("; ") + ". This removes each dump and its manifest; it cannot be undone.",
+      confirmLabel: many ? "Delete selected" : "Delete snapshot",
+    });
+    if (confirmation === null) {
+      return;
+    }
+    const reply = await request("/agent/v1/backup/delete", {
+      method: "POST",
+      body: { ids: entries.map((entry) => entry.id), reason: confirmation.reason },
+    });
+    if (reply.unauthorized) {
+      return;
+    }
+    await loadList();
+    showDeleteResult(list.status, reply);
+  }
+
   void loadList();
+}
+
+function showDeleteResult(status, reply) {
+  const body = reply.body && typeof reply.body === "object" ? reply.body : {};
+  const deleted = Array.isArray(body.deleted) ? body.deleted : [];
+  const failed = Array.isArray(body.failed) ? body.failed : [];
+  if (reply.ok) {
+    setStatus(status, "Deleted " + deleted.length + " snapshot" + (deleted.length === 1 ? "." : "s."), "success");
+    return;
+  }
+  if (failed.length === 0) {
+    setStatus(status, describeReply(reply), "error");
+    return;
+  }
+  const refused = failed
+    .map((failure) => presentText(failure.id, "unknown") + " (" + presentText(failure.message, "refused") + ")")
+    .join("; ");
+  const deletedPart = deleted.length === 0 ? "Nothing was deleted" : "Deleted " + deleted.length;
+  setStatus(status, deletedPart + "; refused: " + refused + ".", "error");
+}
+
+function snapshotLabel(entry) {
+  const id = presentText(entry.id, "unknown");
+  const name = presentText(entry.name, "");
+  return name === "" ? id : name + " (" + id + ")";
+}
+
+// scheduleLabel and automaticPruneCount mirror the agent's choices so the
+// confirm dialog states how many snapshots the lowering removes.
+function scheduleLabel(value) {
+  return value === "off" ? "off" : "every " + value;
+}
+
+function automaticPruneCount(backups, keep) {
+  let automaticSeen = 0;
+  let count = 0;
+  backups.forEach((entry, index) => {
+    if (entry.damaged === true || entry.pinned === true || entry.kind === "manual") {
+      return;
+    }
+    automaticSeen += 1;
+    if (index > 0 && automaticSeen > keep) {
+      count += 1;
+    }
+  });
+  return count;
+}
+
+function selectRadio(group, value) {
+  for (const input of group.querySelectorAll("input[type=radio]")) {
+    input.checked = input.value === String(value);
+  }
 }
 
 // buildFolderCard is the configurable snapshot folder. Setting it validates and
@@ -273,6 +449,66 @@ function fillOverview(overview, body) {
   overview.newest.textContent = backups.length === 0 ? "No snapshots yet" : formatAge(body.newest_age_seconds);
 }
 
+function buildSettingsCard() {
+  const card = document.createElement("div");
+  card.className = "card card-body";
+  const heading = document.createElement("h2");
+  heading.className = "card-title";
+  heading.textContent = "Schedule and retention";
+  const hint = document.createElement("p");
+  hint.className = "hint";
+  hint.textContent =
+    "The scheduled automatic snapshot runs while the backend is up. The automatic pool keeps the newest limit; manual backups are never pruned.";
+  const schedule = buildRadioGroup("backup-schedule", "Automatic snapshot every", [
+    ["1d", "1 day"],
+    ["7d", "7 days"],
+    ["15d", "15 days"],
+    ["30d", "30 days"],
+    ["off", "Off"],
+  ]);
+  const keep = buildRadioGroup("backup-keep", "Keep automatic snapshots", [
+    ["5", "5"],
+    ["10", "10"],
+    ["15", "15"],
+    ["30", "30"],
+  ]);
+  const status = document.createElement("p");
+  status.className = "status";
+  status.id = "backup-settings-status";
+  status.setAttribute("role", "status");
+  card.append(heading, hint, schedule.group, keep.group, status);
+  return { card, schedule: schedule.group, keep: keep.group, status };
+}
+
+function buildRadioGroup(name, legendText, options) {
+  const group = document.createElement("fieldset");
+  group.className = "form-fieldset mb-2";
+  const legend = document.createElement("legend");
+  legend.className = "form-label";
+  legend.textContent = legendText;
+  group.append(legend);
+  for (const [value, label] of options) {
+    const wrapper = document.createElement("label");
+    wrapper.className = "form-check form-check-inline";
+    const input = document.createElement("input");
+    input.type = "radio";
+    input.className = "form-check-input";
+    input.name = name;
+    input.value = value;
+    const text = document.createElement("span");
+    text.className = "form-check-label";
+    text.textContent = label;
+    wrapper.append(input, text);
+    group.append(wrapper);
+  }
+  return { group };
+}
+
+function fillSettings(settings, body) {
+  selectRadio(settings.schedule, presentText(body.schedule, "1d"));
+  selectRadio(settings.keep, presentNumber(body.keep, "5"));
+}
+
 function buildList() {
   const card = document.createElement("div");
   card.className = "card card-body";
@@ -286,19 +522,36 @@ function buildList() {
   refresh.className = "btn btn-outline-secondary btn-sm";
   refresh.id = "backup-refresh";
   refresh.textContent = "Refresh";
-  controls.append(refresh);
-  const table = document.createElement("table");
-  table.className = "table table-sm table-vcenter card-table mb-0";
-  table.id = "backup-table";
+  const deleteSelected = document.createElement("button");
+  deleteSelected.type = "button";
+  deleteSelected.className = "btn btn-outline-danger btn-sm";
+  deleteSelected.id = "backup-delete-selected";
+  deleteSelected.textContent = "Delete selected";
+  deleteSelected.disabled = true;
+  controls.append(refresh, deleteSelected);
+  const automatic = buildSection("Automatic snapshots", "backup-table-automatic");
+  const manual = buildSection("Manual backups", "backup-table-manual");
+  const rule = document.createElement("hr");
   const status = document.createElement("p");
   status.className = "status";
   status.id = "backup-list-status";
   status.setAttribute("role", "status");
-  const tableWrap = document.createElement("div");
-  tableWrap.className = "table-responsive";
-  tableWrap.append(table);
-  card.append(heading, controls, tableWrap, status);
-  return { card, table, status, refresh };
+  card.append(heading, controls, automatic.heading, automatic.wrap);
+  card.append(rule, manual.heading, manual.wrap, status);
+  return { card, automatic: automatic.table, manual: manual.table, status, refresh, deleteSelected };
+}
+
+function buildSection(title, tableID) {
+  const heading = document.createElement("h3");
+  heading.className = "card-subtitle mb-2";
+  heading.textContent = title;
+  const table = document.createElement("table");
+  table.className = "table table-sm table-vcenter card-table mb-0";
+  table.id = tableID;
+  const wrap = document.createElement("div");
+  wrap.className = "table-responsive";
+  wrap.append(table);
+  return { heading, wrap, table };
 }
 
 function buildAction(title, controls) {
@@ -353,32 +606,47 @@ function buildSnapshotAction() {
   return action;
 }
 
-function fillTable(table, backups, onSelect, onKeepChanged, status) {
+function fillTables(list, backups, context) {
+  fillTable(list.automatic, backups.filter((entry) => entry && entry.kind !== "manual"), context, "No automatic snapshots yet.");
+  fillTable(list.manual, backups.filter((entry) => entry && entry.kind === "manual"), context, "No manual backups yet.");
+}
+
+function fillTable(table, backups, context, emptyText) {
   table.replaceChildren();
-  table.append(tableHead(["Select", "Snapshot", "Name", "Time", "Size", "Backend", "Migration", "State", "Keep", "Delete"]));
+  table.append(tableHead(snapshotColumns));
   const body = document.createElement("tbody");
   if (backups.length === 0) {
-    body.append(noRowsRow(10, "No snapshots yet."));
+    body.append(noRowsRow(snapshotColumns.length, emptyText));
     table.append(body);
     return;
   }
-  backups.forEach((backup, index) => {
-    const entry = backup && typeof backup === "object" ? backup : {};
+  backups.forEach((rawEntry, index) => {
+    const entry = rawEntry && typeof rawEntry === "object" ? rawEntry : {};
     const row = document.createElement("tr");
-    const damaged = entry.damaged === true;
 
-    const selectCell = document.createElement("td");
+    const restoreCell = document.createElement("td");
     const radio = document.createElement("input");
     radio.type = "radio";
     radio.name = "backup-select";
     radio.className = "form-check-input";
     radio.value = presentText(entry.id, "");
-    radio.id = "backup-select-" + index;
-    radio.disabled = damaged;
-    radio.addEventListener("change", () => onSelect(entry));
-    selectCell.append(radio);
+    radio.id = table.id + "-restore-" + index;
+    radio.disabled = entry.damaged === true;
+    radio.addEventListener("change", () => context.selectSnapshot(entry));
+    restoreCell.append(radio);
+
+    const selectCell = document.createElement("td");
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.className = "form-check-input";
+    checkbox.value = presentText(entry.id, "");
+    checkbox.id = table.id + "-select-" + index;
+    checkbox.disabled = entry.damaged === true || entry.pinned === true;
+    checkbox.addEventListener("change", () => context.toggleSelected(entry, checkbox.checked));
+    selectCell.append(checkbox);
 
     row.append(
+      restoreCell,
       selectCell,
       textCell(presentText(entry.id, "unknown")),
       textCell(presentText(entry.name, "—")),
@@ -387,8 +655,8 @@ function fillTable(table, backups, onSelect, onKeepChanged, status) {
       textCell(presentText(entry.backend_version, "unknown")),
       textCell(presentNumber(entry.migration, "unknown")),
       stateCell(entry),
-      keepCell(entry, onKeepChanged, status),
-      deleteCell(entry, onKeepChanged, status),
+      keepCell(entry, context),
+      deleteCell(entry, context),
     );
     body.append(row);
   });
@@ -397,7 +665,7 @@ function fillTable(table, backups, onSelect, onKeepChanged, status) {
 
 // keepCell pins an unnamed snapshot with the typed name, or unpins a kept one.
 // Both reload the list so the row reflects the stored manifest.
-function keepCell(entry, onKeepChanged, status) {
+function keepCell(entry, context) {
   const cell = document.createElement("td");
   const id = presentText(entry.id, "");
   if (entry.pinned === true) {
@@ -405,7 +673,7 @@ function keepCell(entry, onKeepChanged, status) {
     button.type = "button";
     button.className = "btn btn-outline-secondary btn-sm";
     button.textContent = "Unpin";
-    button.addEventListener("click", () => changeKeep("/agent/v1/backup/unpin", { id }, status, onKeepChanged));
+    button.addEventListener("click", () => changeKeep("/agent/v1/backup/unpin", { id }, context));
     cell.append(button);
     return cell;
   }
@@ -421,64 +689,41 @@ function keepCell(entry, onKeepChanged, status) {
   button.textContent = "Pin";
   button.addEventListener("click", () => {
     if (name.value.trim() === "") {
-      setStatus(status, "A name is required to pin a snapshot.", "error");
+      setStatus(context.status, "A name is required to pin a snapshot.", "error");
       return;
     }
-    void changeKeep("/agent/v1/backup/pin", { id, name: name.value.trim() }, status, onKeepChanged);
+    void changeKeep("/agent/v1/backup/pin", { id, name: name.value.trim() }, context);
   });
   cell.append(name, button);
   return cell;
 }
 
-// deleteCell offers Delete only for an unpinned, undamaged manual snapshot; the
-// agent refuses anything else.
-function deleteCell(entry, onChanged, status) {
+// deleteCell offers Delete for an unpinned, undamaged snapshot; the agent
+// refuses a pinned, damaged or in-use one.
+function deleteCell(entry, context) {
   const cell = document.createElement("td");
-  if (entry.kind !== "manual" || entry.pinned === true || entry.damaged === true) {
+  if (entry.pinned === true || entry.damaged === true) {
     return cell;
   }
   const button = document.createElement("button");
   button.type = "button";
   button.className = "btn btn-outline-danger btn-sm";
   button.textContent = "Delete";
-  button.addEventListener("click", async () => {
-    const confirmation = await confirmAction({
-      title: "Delete snapshot",
-      summary:
-        "Delete manual snapshot \"" + presentText(entry.name, "unnamed") + "\" (" + presentText(entry.id, "unknown") + "). " +
-        "This removes the dump and its manifest; it cannot be undone.",
-      confirmLabel: "Delete snapshot",
-    });
-    if (confirmation === null) {
-      return;
-    }
-    const reply = await request("/agent/v1/backup/delete", {
-      method: "POST",
-      body: { id: entry.id, reason: confirmation.reason },
-    });
-    if (reply.unauthorized) {
-      return;
-    }
-    if (!reply.ok) {
-      setStatus(status, describeReply(reply), "error");
-      return;
-    }
-    await onChanged();
-  });
+  button.addEventListener("click", () => void context.onDelete([entry]));
   cell.append(button);
   return cell;
 }
 
-async function changeKeep(path, body, status, onKeepChanged) {
+async function changeKeep(path, body, context) {
   const reply = await request(path, { method: "POST", body });
   if (reply.unauthorized) {
     return;
   }
   if (!reply.ok) {
-    setStatus(status, describeReply(reply), "error");
+    setStatus(context.status, describeReply(reply), "error");
     return;
   }
-  await onKeepChanged();
+  await context.onKeepChanged();
 }
 
 function tableHead(labels) {

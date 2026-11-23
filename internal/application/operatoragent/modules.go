@@ -118,11 +118,17 @@ func BackupModule() operator.Module {
 			{Name: "backup.unpin", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Return a pinned snapshot to normal pruning.", Fields: []operator.Field{
 				operator.NewField("id", operator.FieldString, true, "snapshot id from backup.list"),
 			}},
-			{Name: "backup.delete", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Delete an unpinned manual snapshot; a pinned, automatic or damaged snapshot is refused.", Fields: []operator.Field{
+			{Name: "backup.delete", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Delete unpinned snapshots; a pinned, damaged or in-use snapshot is refused and a partial failure names each result.", Fields: []operator.Field{
 				operator.NewField("id", operator.FieldString, true, "snapshot id from backup.list"),
 			}},
 			{Name: "backup.path", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Show the snapshot folder, or set it after validating and rescanning it.", Fields: []operator.Field{
 				operator.NewField("path", operator.FieldString, false, "absolute writable folder outside the OTA root"),
+			}},
+			{Name: "backup.schedule", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Show or set the scheduled automatic snapshot interval (1d, 7d, 15d, 30d or off).", Fields: []operator.Field{
+				operator.NewField("schedule", operator.FieldString, false, "1d, 7d, 15d, 30d or off"),
+			}},
+			{Name: "backup.keep", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Show or set the automatic retention (5, 10, 15 or 30); lowering prunes the excess.", Fields: []operator.Field{
+				operator.NewField("keep", operator.FieldInt, false, "5, 10, 15 or 30"),
 			}},
 			{Name: "backup.restore", Class: operator.ClassMaintenance, Route: operator.RouteAgent, Help: "Restore a snapshot with a safety snapshot and a rename swap.", Fields: []operator.Field{
 				operator.NewField("id", operator.FieldString, true, "snapshot id from backup.list"),

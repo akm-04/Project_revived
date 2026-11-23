@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -704,7 +705,7 @@ func TestManualSnapshotRefusesAtTheTotalCap(t *testing.T) {
 	}
 }
 
-func TestDeleteRefusesPinnedAndDamagedAndRemovesAManualSnapshot(t *testing.T) {
+func TestDeleteRefusesPinnedAndDamagedAndRemovesAnySnapshot(t *testing.T) {
 	service, _, _ := newBackupService(t)
 	base := time.Date(2026, 11, 20, 10, 0, 0, 0, time.UTC)
 	manualID := "20260101T000000.000000000Z-manual"
@@ -727,8 +728,11 @@ func TestDeleteRefusesPinnedAndDamagedAndRemovesAManualSnapshot(t *testing.T) {
 
 	safetyID := "20260102T000000.000000000Z-safety"
 	writeSnapshot(t, service.Directory, safetyID, BackupKindSafety, base.Add(time.Minute), "automatic")
-	if _, err := service.Delete(safetyID, "automatic"); !backupRefusalCode(err, CodeBackupDeleteRefused) {
+	if _, err := service.Delete(safetyID, "automatic"); err != nil {
 		t.Fatalf("delete automatic: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(service.Directory, safetyID+backupDumpSuffix)); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("the deleted automatic dump still exists: %v", err)
 	}
 
 	damagedID := "20260103T000000.000000000Z-manual"
@@ -742,6 +746,35 @@ func TestDeleteRefusesPinnedAndDamagedAndRemovesAManualSnapshot(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(service.Directory, damagedID+backupDumpSuffix)); err != nil {
 		t.Fatalf("the damaged dump was deleted: %v", err)
+	}
+}
+
+func TestDeleteManyReportsPartialFailurePerSnapshot(t *testing.T) {
+	service, _, _ := newBackupService(t)
+	base := time.Date(2026, 11, 20, 10, 0, 0, 0, time.UTC)
+	pinnedID := "20260101T000000.000000000Z-manual"
+	firstID := "20260102T000000.000000000Z-manual"
+	secondID := "20260103T000000.000000000Z-safety"
+	writeSnapshot(t, service.Directory, pinnedID, BackupKindManual, base, "pinned")
+	writeSnapshot(t, service.Directory, firstID, BackupKindManual, base.Add(time.Minute), "first")
+	writeSnapshot(t, service.Directory, secondID, BackupKindSafety, base.Add(2*time.Minute), "second")
+	if _, err := service.Pin(pinnedID, "keep me"); err != nil {
+		t.Fatal(err)
+	}
+	result := service.DeleteMany([]string{pinnedID, firstID, secondID, firstID}, "cleanup")
+	if len(result.Deleted) != 2 || result.Deleted[0] != firstID || result.Deleted[1] != secondID {
+		t.Fatalf("deleted = %+v", result.Deleted)
+	}
+	if len(result.Failed) != 1 || result.Failed[0].ID != pinnedID || result.Failed[0].ErrorCode != CodeBackupPinned || result.Failed[0].Message == "" {
+		t.Fatalf("failed = %+v", result.Failed)
+	}
+	for _, id := range []string{firstID, secondID} {
+		if _, err := os.Stat(filepath.Join(service.Directory, id+backupDumpSuffix)); !errors.Is(err, os.ErrNotExist) {
+			t.Fatalf("snapshot %s was not deleted: %v", id, err)
+		}
+	}
+	if _, err := os.Stat(filepath.Join(service.Directory, pinnedID+backupDumpSuffix)); err != nil {
+		t.Fatalf("the pinned snapshot was deleted: %v", err)
 	}
 }
 
@@ -829,6 +862,108 @@ func TestSetBackupPathRefusesAFolderInsideTheOTARoot(t *testing.T) {
 	}
 }
 
+func TestSetScheduleAcceptsEachChoice(t *testing.T) {
+	base := `{"listen":"127.0.0.1:8090","backend":{"operator_addr":"127.0.0.1:8091"}}`
+	for _, testCase := range []struct {
+		value string
+		hours int
+	}{
+		{value: "1d", hours: 24},
+		{value: "7d", hours: 168},
+		{value: "15d", hours: 360},
+		{value: "30d", hours: 720},
+		{value: "off", hours: 0},
+	} {
+		t.Run(testCase.value, func(t *testing.T) {
+			service := newBackupServiceWithConfig(t, base)
+			list, err := service.SetSchedule(testCase.value)
+			if err != nil || list.Schedule != testCase.value {
+				t.Fatalf("set schedule: %+v %v", list, err)
+			}
+			stored, err := LoadConfig(service.Root)
+			if err != nil || stored.BackupEveryHours == nil || *stored.BackupEveryHours != testCase.hours {
+				t.Fatalf("stored schedule = %+v (%v)", stored.BackupEveryHours, err)
+			}
+			if service.scheduleInterval() != time.Duration(testCase.hours)*time.Hour {
+				t.Fatalf("running interval = %v", service.scheduleInterval())
+			}
+		})
+	}
+	service := newBackupServiceWithConfig(t, base)
+	if _, err := service.SetSchedule("2d"); !backupRefusalCode(err, CodeSettingsInvalid) {
+		t.Fatalf("invalid schedule: %v", err)
+	}
+}
+
+func TestSetKeepAcceptsEachChoice(t *testing.T) {
+	base := `{"listen":"127.0.0.1:8090","backend":{"operator_addr":"127.0.0.1:8091"}}`
+	for _, value := range []int{5, 10, 15, 30} {
+		t.Run(strconv.Itoa(value), func(t *testing.T) {
+			service := newBackupServiceWithConfig(t, base)
+			result, err := service.SetKeep(value)
+			if err != nil || result.Keep != value || len(result.Removed) != 0 {
+				t.Fatalf("set keep: %+v %v", result, err)
+			}
+			stored, err := LoadConfig(service.Root)
+			if err != nil || stored.BackupKeepValue() != value {
+				t.Fatalf("stored keep = %d (%v)", stored.BackupKeepValue(), err)
+			}
+			if service.keep() != value {
+				t.Fatalf("running keep = %d", service.keep())
+			}
+		})
+	}
+	service := newBackupServiceWithConfig(t, base)
+	if _, err := service.SetKeep(7); !backupRefusalCode(err, CodeSettingsInvalid) {
+		t.Fatalf("invalid keep: %v", err)
+	}
+}
+
+func TestSetKeepLoweringPrunesTheExcessAutomaticSnapshots(t *testing.T) {
+	service := newBackupServiceWithConfig(t, `{"listen":"127.0.0.1:8090","backup_keep":30,"backend":{"operator_addr":"127.0.0.1:8091"}}`)
+	service.Keep = 30
+	base := time.Date(2026, 11, 20, 10, 0, 0, 0, time.UTC)
+	ids := make([]string, 8)
+	for index := range 8 {
+		ids[index] = "2026010" + string(rune('1'+index)) + "T000000.000000000Z-safety"
+		writeSnapshot(t, service.Directory, ids[index], BackupKindSafety, base.Add(time.Duration(index)*time.Minute), "snapshot-"+ids[index])
+	}
+	result, err := service.SetKeep(5)
+	if err != nil {
+		t.Fatalf("set keep: %v", err)
+	}
+	if result.Keep != 5 || len(result.Removed) != 3 {
+		t.Fatalf("result = %+v", result)
+	}
+	for _, id := range ids[:3] {
+		if _, err := os.Stat(filepath.Join(service.Directory, id+backupDumpSuffix)); !errors.Is(err, os.ErrNotExist) {
+			t.Fatalf("snapshot %s was not pruned: %v", id, err)
+		}
+	}
+	for _, id := range ids[3:] {
+		if _, err := os.Stat(filepath.Join(service.Directory, id+backupDumpSuffix)); err != nil {
+			t.Fatalf("snapshot %s was pruned: %v", id, err)
+		}
+	}
+	stored, err := LoadConfig(service.Root)
+	if err != nil || stored.BackupKeepValue() != 5 {
+		t.Fatalf("stored keep = %d (%v)", stored.BackupKeepValue(), err)
+	}
+}
+
+// newBackupServiceWithConfig is newBackupService with a writable agent.json, so
+// the setting commands have a root to persist into.
+func newBackupServiceWithConfig(t *testing.T, contents string) *BackupService {
+	t.Helper()
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, AgentConfigFileName), []byte(contents), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	service, _, _ := newBackupService(t)
+	service.Root = root
+	return service
+}
+
 func TestAutomaticBackupDue(t *testing.T) {
 	now := time.Date(2026, 11, 23, 12, 0, 0, 0, time.UTC)
 	for name, testCase := range map[string]struct {
@@ -849,6 +984,14 @@ func TestAutomaticBackupDue(t *testing.T) {
 				t.Fatalf("due = %v, want %v", got, testCase.want)
 			}
 		})
+	}
+	for _, interval := range []time.Duration{24 * time.Hour, 7 * 24 * time.Hour, 15 * 24 * time.Hour, 30 * 24 * time.Hour} {
+		if !AutomaticBackupDue(now, now.Add(-interval), interval, true) {
+			t.Fatalf("not due after %v", interval)
+		}
+		if AutomaticBackupDue(now, now.Add(-interval+time.Second), interval, true) {
+			t.Fatalf("due one second before %v", interval)
+		}
 	}
 }
 
