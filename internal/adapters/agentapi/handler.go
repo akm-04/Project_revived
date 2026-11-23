@@ -160,6 +160,23 @@ type backupRestoreRequest struct {
 	Reason string `json:"reason"`
 }
 
+type backupDeleteRequest struct {
+	IDs    []string `json:"ids"`
+	Reason string   `json:"reason"`
+}
+
+type backupPathRequest struct {
+	Path string `json:"path"`
+}
+
+type backupScheduleRequest struct {
+	Schedule string `json:"schedule"`
+}
+
+type backupKeepRequest struct {
+	Keep int `json:"keep"`
+}
+
 // ServeHTTP records one tool log line per API exchange (C5: route, masked
 // params, status, error code, duration) and then dispatches.
 func (handler Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
@@ -633,7 +650,14 @@ func (handler Handler) servePublicURLsSet(writer http.ResponseWriter, body comma
 	// form sends the three flat fields. Both reach the same validation.
 	values := change.PublicURLs
 	if values == nil {
-		values = map[string]string{}
+		// The flat form is a merge: seed the stored roles so one it omits is
+		// not erased by the full replacement SetPublicURLs performs.
+		stored, err := handler.Settings.StoredPublicURLs()
+		if err != nil {
+			handler.writeAgentError(writer, "server.public_urls.set", operatoragent.Refuse(operatoragent.CodeSettingsUnavailable, "agent.json is unreadable: "+err.Error()))
+			return
+		}
+		values = stored
 	}
 	for role, value := range map[string]string{
 		operatoragent.PublicRoleSDK:    change.SDK,
@@ -931,6 +955,75 @@ func (handler Handler) serveBackup(writer http.ResponseWriter, request *http.Req
 		}
 		handler.record("backup.snapshot", "snapshot", "ok", map[string]any{"operation_id": operation.ID})
 		writeJSON(writer, http.StatusOK, operation)
+	case (action == "path" || action == "schedule" || action == "keep") && request.Method == http.MethodGet:
+		writeJSON(writer, http.StatusOK, handler.Backup.Settings())
+	case action == "schedule" && request.Method == http.MethodPost:
+		var body backupScheduleRequest
+		if err := decodeBody(writer, request, maxBodyBytes, &body); err != nil {
+			handler.writeBodyError(writer, err)
+			return
+		}
+		list, err := handler.Backup.SetSchedule(body.Schedule)
+		if err != nil {
+			handler.writeAgentError(writer, "backup.schedule", err)
+			return
+		}
+		handler.record("backup.schedule", "set", "ok", map[string]any{"schedule": list.Schedule})
+		writeJSON(writer, http.StatusOK, list)
+	case action == "keep" && request.Method == http.MethodPost:
+		var body backupKeepRequest
+		if err := decodeBody(writer, request, maxBodyBytes, &body); err != nil {
+			handler.writeBodyError(writer, err)
+			return
+		}
+		result, err := handler.Backup.SetKeep(body.Keep)
+		if err != nil {
+			handler.writeAgentError(writer, "backup.keep", err)
+			return
+		}
+		handler.record("backup.keep", "set", "ok", map[string]any{"keep": result.Keep, "removed": len(result.Removed)})
+		writeJSON(writer, http.StatusOK, result)
+	case action == "path" && request.Method == http.MethodPost:
+		var body backupPathRequest
+		if err := decodeBody(writer, request, maxBodyBytes, &body); err != nil {
+			handler.writeBodyError(writer, err)
+			return
+		}
+		list, err := handler.Backup.SetPath(body.Path)
+		if err != nil {
+			handler.writeAgentError(writer, "backup.path", err)
+			return
+		}
+		handler.record("backup.path", "set", "ok", map[string]any{"directory": list.Directory})
+		writeJSON(writer, http.StatusOK, list)
+	case action == "delete" && request.Method == http.MethodPost:
+		var body backupDeleteRequest
+		if err := decodeBody(writer, request, maxBodyBytes, &body); err != nil {
+			handler.writeBodyError(writer, err)
+			return
+		}
+		if len(body.IDs) == 0 || body.Reason == "" {
+			writeRefusal(writer, http.StatusConflict, operatoragent.CodeBodyInvalid, "ids and reason are required")
+			return
+		}
+		result := handler.Backup.DeleteMany(body.IDs, body.Reason)
+		if len(result.Failed) == 0 {
+			handler.record("backup.delete", "delete", "ok", map[string]any{"deleted": len(result.Deleted)})
+			writeJSON(writer, http.StatusOK, result)
+			return
+		}
+		// A partial failure names every snapshot: what went and what stayed.
+		code := operatoragent.CodeBackupDeleteRefused
+		message := fmt.Sprintf("%d of %d snapshots deleted", len(result.Deleted), len(result.Deleted)+len(result.Failed))
+		if len(result.Failed) == 1 {
+			code = result.Failed[0].ErrorCode
+			message = result.Failed[0].Message
+		}
+		handler.record("backup.delete", "delete", "refused", map[string]any{"deleted": len(result.Deleted), "failed": len(result.Failed)})
+		writeJSON(writer, http.StatusConflict, map[string]any{
+			"error_code": code, "message": message,
+			"deleted": result.Deleted, "failed": result.Failed,
+		})
 	case action == "pin" && request.Method == http.MethodPost:
 		var body backupPinRequest
 		if err := decodeBody(writer, request, maxBodyBytes, &body); err != nil {

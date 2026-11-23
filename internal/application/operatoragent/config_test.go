@@ -243,21 +243,35 @@ func TestBackupSettingsDefaultsAndValidation(t *testing.T) {
 	if config.BackupKeepValue() != DefaultBackupKeep {
 		t.Fatalf("backup_keep default = %d", config.BackupKeepValue())
 	}
-	if config.BackupDirectory(root) != filepath.Join(root, BackupDirectoryName) {
-		t.Fatalf("backup directory = %q", config.BackupDirectory(root))
+	if config.BackupDirectory(root) != "" {
+		t.Fatalf("a fresh install has a backup directory: %q", config.BackupDirectory(root))
 	}
 
 	for name, contents := range map[string]string{
-		"zero keep":     `{"listen":"127.0.0.1:8090","backup_keep":0,"backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`,
-		"negative keep": `{"listen":"127.0.0.1:8090","backup_keep":-1,"backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`,
-		"relative path": `{"listen":"127.0.0.1:8090","backup_path":"backups","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`,
-		"unknown keep":  `{"listen":"127.0.0.1:8090","backup_keep":"five","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`,
+		"zero keep":          `{"listen":"127.0.0.1:8090","backup_keep":0,"backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`,
+		"negative keep":      `{"listen":"127.0.0.1:8090","backup_keep":-1,"backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`,
+		"unoffered keep":     `{"listen":"127.0.0.1:8090","backup_keep":7,"backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`,
+		"unoffered schedule": `{"listen":"127.0.0.1:8090","backup_every_hours":5,"backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`,
+		"relative path":      `{"listen":"127.0.0.1:8090","backup_path":"backups","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`,
+		"unknown keep":       `{"listen":"127.0.0.1:8090","backup_keep":"five","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`,
 	} {
 		t.Run(name, func(t *testing.T) {
 			if _, err := LoadConfig(writeAgentConfig(t, contents)); err == nil {
 				t.Fatal("want a refusal")
 			}
 		})
+	}
+}
+
+func TestBackupDirectoryKeepsAnExistingLegacyFolder(t *testing.T) {
+	root := t.TempDir()
+	legacy := filepath.Join(root, BackupDirectoryName)
+	if err := os.MkdirAll(legacy, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	config := Config{}
+	if config.BackupDirectory(root) != legacy {
+		t.Fatalf("legacy directory = %q", config.BackupDirectory(root))
 	}
 }
 
@@ -421,5 +435,25 @@ func TestLoadConfigToolLogDaysDefaultAndBounds(t *testing.T) {
 	}
 	if config.ToolLogRetentionDays() != 7 || config.DatabaseLog != "/var/log/postgresql/postgresql.log" {
 		t.Fatalf("config = %+v", config)
+	}
+}
+
+// TestBackupPathSymlinkIntoAProtectedTreeIsRefused is the finding-6 regression:
+// pathInside resolves symlinks, so a linked folder cannot hide the OTA root.
+func TestBackupPathSymlinkIntoAProtectedTreeIsRefused(t *testing.T) {
+	otaRoot := t.TempDir()
+	linked := filepath.Join(t.TempDir(), "backups")
+	if err := os.Symlink(otaRoot, linked); err != nil {
+		t.Skipf("symlinks are unsupported here: %v", err)
+	}
+	config := Config{
+		Listen:     "127.0.0.1:8090",
+		OTARoot:    otaRoot,
+		Backend:    BackendConfig{OperatorAddr: "127.0.0.1:8091"},
+		BackupPath: linked,
+	}
+	err := config.Validate()
+	if err == nil || !strings.Contains(err.Error(), "ota_root") {
+		t.Fatalf("a symlink into ota_root was accepted: %v", err)
 	}
 }

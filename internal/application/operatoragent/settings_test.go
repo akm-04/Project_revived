@@ -54,7 +54,7 @@ func TestSettingsValuesReadBothSettingsFiles(t *testing.T) {
 	if values.ServerURL != "https://game.example" || values.ServerURLSource != ServerURLSourceEnvFile || values.ResPath != resPath || values.ApkResPath != apkPath {
 		t.Fatalf("values = %+v", values)
 	}
-	if values.BackendPath == "" || values.EnvFile != envPath || values.BackupPath != filepath.Join(root, BackupDirectoryName) {
+	if values.BackendPath == "" || values.EnvFile != envPath || values.BackupPath != "" {
 		t.Fatalf("agent values = %+v", values)
 	}
 	if values.AppRepackPath != "" || values.ToolchainPath != "" {
@@ -72,12 +72,10 @@ func TestSetAgentWritesValidatedPathsAndKeepsOldOnRefusal(t *testing.T) {
 	root, _ := writeSettingsRoot(t)
 	service := SettingsService{Root: root}
 	appRepack := t.TempDir()
-	backup := filepath.Join(t.TempDir(), "snapshots")
 	toolchain := t.TempDir()
 	newBackend := writeExecutable(t, t.TempDir(), "gxb-api")
 	reply, err := service.SetAgent(AgentSettingsChange{
 		BackendPath:   &newBackend,
-		BackupPath:    &backup,
 		AppRepackPath: &appRepack,
 		ToolchainPath: &toolchain,
 	})
@@ -91,7 +89,7 @@ func TestSetAgentWritesValidatedPathsAndKeepsOldOnRefusal(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if config.Backend.Binary != newBackend || config.BackupPath != backup || config.AppRepackPath != appRepack || config.ToolchainPath != toolchain {
+	if config.Backend.Binary != newBackend || config.AppRepackPath != appRepack || config.ToolchainPath != toolchain {
 		t.Fatalf("config = %+v", config)
 	}
 
@@ -116,18 +114,15 @@ func TestSetAgentWritesValidatedPathsAndKeepsOldOnRefusal(t *testing.T) {
 	}
 
 	empty := ""
-	if _, err := service.SetAgent(AgentSettingsChange{ToolchainPath: &empty, BackupPath: &empty}); err != nil {
+	if _, err := service.SetAgent(AgentSettingsChange{ToolchainPath: &empty}); err != nil {
 		t.Fatal(err)
 	}
 	config, err = LoadConfig(root)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if config.ToolchainPath != "" || config.BackupPath != "" {
+	if config.ToolchainPath != "" {
 		t.Fatalf("cleared paths = %+v", config)
-	}
-	if config.BackupDirectory(root) != filepath.Join(root, BackupDirectoryName) {
-		t.Fatalf("backup default = %q", config.BackupDirectory(root))
 	}
 }
 
@@ -297,5 +292,32 @@ func TestWriteEnvValueAppendsAMissingKey(t *testing.T) {
 	}
 	if len(entries) != 2 || entries[0] != "GXB_PLAIN=1" {
 		t.Fatalf("entries = %v", entries)
+	}
+}
+
+// TestSetPublicURLsValidatesBeforeWritingTheEnvFile is the finding-8
+// regression: a config refused on another field must not leave the new API URL
+// in the backend env file.
+func TestSetPublicURLsValidatesBeforeWritingTheEnvFile(t *testing.T) {
+	root, envPath := writeSettingsRoot(t)
+	config, err := ReadConfig(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	notAFolder := filepath.Join(t.TempDir(), "not-a-folder")
+	if err := os.WriteFile(notAFolder, []byte("x"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	config.BackupPath = notAFolder
+	if err := SaveConfig(root, config); err != nil {
+		t.Fatal(err)
+	}
+	service := SettingsService{Root: root}
+	if _, err := service.SetPublicURLs(map[string]string{PublicRoleAPI: "https://new.example"}); !backupRefusalCode(err, CodeSettingsInvalid) {
+		t.Fatalf("a config invalid on another field was accepted: %v", err)
+	}
+	value, err := ReadEnvValue(envPath, PublicEngineURLKey)
+	if err != nil || value != "" {
+		t.Fatalf("the refused save wrote the env URL: %q (%v)", value, err)
 	}
 }

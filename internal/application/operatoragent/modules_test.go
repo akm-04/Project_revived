@@ -74,7 +74,7 @@ func TestModuleCatalogStillAnswersTheAgentModulesWithoutTheBackend(t *testing.T)
 
 func TestBackupModuleIsRegisteredAsAnAgentModule(t *testing.T) {
 	module := BackupModule()
-	if module.ID != "backup" || module.Planned != "" || len(module.Commands) != 7 {
+	if module.ID != "backup" || module.Planned != "" || len(module.Commands) != 11 {
 		t.Fatalf("module = %+v", module)
 	}
 	for _, command := range module.Commands {

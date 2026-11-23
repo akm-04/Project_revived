@@ -93,6 +93,11 @@ const (
 	CodeBackupRestoreRefused  = "AGENT_BACKUP_RESTORE_REFUSED"
 	CodeBackupToolFailed      = "AGENT_BACKUP_TOOL_FAILED"
 	CodeBackupFailed          = "AGENT_BACKUP_FAILED"
+	CodeBackupPathMissing     = "AGENT_BACKUP_PATH_MISSING"
+	CodeBackupPathInvalid     = "AGENT_BACKUP_PATH_INVALID"
+	CodeBackupPinned          = "AGENT_BACKUP_PINNED"
+	CodeBackupDeleteRefused   = "AGENT_BACKUP_DELETE_REFUSED"
+	CodeBackupCap             = "AGENT_BACKUP_CAP"
 
 	// terminal refusals (G42): the shell exists only while the agent listens on
 	// loopback and only for an authenticated session (G42).

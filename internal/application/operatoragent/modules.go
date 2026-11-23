@@ -48,9 +48,8 @@ func AgentSettingsModule() operator.Module {
 		LogChannel: "agent",
 		Screen:     operator.Screen{Tab: "Settings"},
 		Commands: []operator.CommandSpec{
-			{Name: "agent.settings.set", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Set the agent.json paths; every value is validated and a refused value keeps the old one.", Fields: []operator.Field{
+			{Name: "agent.settings.set", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Set the agent.json paths; every value is validated and a refused value keeps the old one. The backup folder is set on the Backups page.", Fields: []operator.Field{
 				operator.NewField("backend_path", operator.FieldString, false, "absolute path of the gxb-api binary"),
-				operator.NewField("backup_path", operator.FieldString, false, "absolute snapshot folder; empty restores <agent root>/backups"),
 				operator.NewField("app_repack_path", operator.FieldString, false, "absolute app_repack folder for the APK build"),
 				operator.NewField("toolchain_path", operator.FieldString, false, "portable tools folder; empty uses the system PATH"),
 			}},
@@ -110,13 +109,25 @@ func BackupModule() operator.Module {
 				operator.NewField("pin", operator.FieldBool, false, "keep this snapshot: pinned snapshots are never pruned"),
 			}},
 			{Name: "backup.list", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "List snapshots newest first, with the newest age and damage state."},
-			{Name: "backup.prune", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Delete all but the newest backup_keep snapshots; pinned snapshots stay."},
+			{Name: "backup.prune", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Delete all but the newest backup_keep automatic snapshots; manual, pinned, damaged and in-use snapshots stay."},
 			{Name: "backup.pin", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Name a snapshot and keep it out of every prune.", Fields: []operator.Field{
 				operator.NewField("id", operator.FieldString, true, "snapshot id from backup.list"),
 				operator.NewField("name", operator.FieldString, true, "name, 1-80 printable characters"),
 			}},
 			{Name: "backup.unpin", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Return a pinned snapshot to normal pruning.", Fields: []operator.Field{
 				operator.NewField("id", operator.FieldString, true, "snapshot id from backup.list"),
+			}},
+			{Name: "backup.delete", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Delete unpinned snapshots; a pinned, damaged or in-use snapshot is refused and a partial failure names each result.", Fields: []operator.Field{
+				operator.NewField("id", operator.FieldString, true, "snapshot id from backup.list"),
+			}},
+			{Name: "backup.path", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Show the snapshot folder, or set it after validating and rescanning it.", Fields: []operator.Field{
+				operator.NewField("path", operator.FieldString, false, "absolute writable folder outside the OTA root"),
+			}},
+			{Name: "backup.schedule", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Show or set the scheduled automatic snapshot interval (1d, 7d, 15d, 30d or off).", Fields: []operator.Field{
+				operator.NewField("schedule", operator.FieldString, false, "1d, 7d, 15d, 30d or off"),
+			}},
+			{Name: "backup.keep", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Show or set the automatic retention (5, 10, 15 or 30); lowering prunes the excess.", Fields: []operator.Field{
+				operator.NewField("keep", operator.FieldInt, false, "5, 10, 15 or 30"),
 			}},
 			{Name: "backup.restore", Class: operator.ClassMaintenance, Route: operator.RouteAgent, Help: "Restore a snapshot with a safety snapshot and a rename swap.", Fields: []operator.Field{
 				operator.NewField("id", operator.FieldString, true, "snapshot id from backup.list"),

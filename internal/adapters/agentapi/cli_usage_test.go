@@ -67,3 +67,35 @@ func TestCLIUsageReadAnswersTheSameTextAsTheCLI(t *testing.T) {
 		t.Fatalf("commands = %+v", usage.Commands)
 	}
 }
+
+// TestPublicURLsFlatFormKeepsOmittedStoredRoles is the finding-7 regression:
+// the Advanced form sends flat fields, so a role it omits must survive.
+func TestPublicURLsFlatFormKeepsOmittedStoredRoles(t *testing.T) {
+	handler, session, root := settingsHandler(t)
+	config := operatoragent.Config{
+		Listen:  "127.0.0.1:8090",
+		Backend: operatoragent.BackendConfig{Binary: "/bin/x", OperatorAddr: "127.0.0.1:8091"},
+		PublicURLs: operatoragent.PublicURLs{
+			operatoragent.PublicRoleSDK:    "https://old-sdk.example",
+			operatoragent.PublicRoleAPI:    "https://old-api.example",
+			operatoragent.PublicRoleAssets: "https://old-assets.example",
+		},
+	}
+	if err := operatoragent.SaveConfig(root, config); err != nil {
+		t.Fatal(err)
+	}
+	body := `{"reason":"test","semantic_key":"public-3","payload":{"sdk":"https://new-sdk.example"}}`
+	recorder := serveAgent(handler, http.MethodPost, commandPrefix+"server.public_urls.set", session, body)
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, body = %s", recorder.Code, recorder.Body)
+	}
+	stored, err := operatoragent.LoadConfig(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stored.PublicURLs[operatoragent.PublicRoleSDK] != "https://new-sdk.example" ||
+		stored.PublicURLs[operatoragent.PublicRoleAPI] != "https://old-api.example" ||
+		stored.PublicURLs[operatoragent.PublicRoleAssets] != "https://old-assets.example" {
+		t.Fatalf("public urls = %+v", stored.PublicURLs)
+	}
+}

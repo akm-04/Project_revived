@@ -83,7 +83,7 @@ func TestDashboardSummaryFoldsEverySection(t *testing.T) {
 			ResPath:    "/srv/res",
 			BackupPath: "/srv/backups",
 		}},
-		Backups: BackupService{Directory: backups},
+		Backups: &BackupService{Directory: backups},
 		Now:     func() time.Time { return at },
 	}.Summary(context.Background())
 	if !summary.Backend.Running || summary.Backend.PID != 42 {
@@ -126,7 +126,7 @@ func TestDashboardSummaryAnswersWhileTheBackendIsDown(t *testing.T) {
 		Backend:  fakeDashboardBackend{status: BackendStatus{Running: false}},
 		Operator: fakeDashboardOperator{errs: map[string]error{"server.list": errors.New("down")}},
 		Version:  fakeVersionSource{err: errors.New("down")},
-		Backups:  BackupService{Directory: filepath.Join(t.TempDir(), "missing")},
+		Backups:  &BackupService{Directory: filepath.Join(t.TempDir(), "missing")},
 		Now:      func() time.Time { return fixedClock() },
 	}.Summary(context.Background())
 	if summary.API.Reachable {
@@ -155,7 +155,7 @@ func TestDashboardSnapshotAgeSkipsTheDamagedNewestFile(t *testing.T) {
 		t.Fatal(err)
 	}
 	summary := Dashboard{
-		Backups: BackupService{Directory: directory},
+		Backups: &BackupService{Directory: directory},
 		Now:     func() time.Time { return at },
 	}.Summary(context.Background())
 	if summary.DBSnapshot.Status != "ok" || summary.DBSnapshot.AgeSeconds == nil || *summary.DBSnapshot.AgeSeconds != 600 {

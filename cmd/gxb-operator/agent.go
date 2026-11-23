@@ -31,7 +31,11 @@ func runAgent(root string, args []string) error {
 	logsDirectory := filepath.Join(root, operatoragent.LogsDirectoryName)
 	operationsDirectory := filepath.Join(root, operatoragent.OperationsDirectory)
 	backupDirectory := config.BackupDirectory(root)
-	for _, directory := range []string{logsDirectory, operationsDirectory, backupDirectory} {
+	directories := []string{logsDirectory, operationsDirectory}
+	if backupDirectory != "" {
+		directories = append(directories, backupDirectory)
+	}
+	for _, directory := range directories {
 		if err := os.MkdirAll(directory, 0o700); err != nil {
 			return err
 		}
@@ -73,9 +77,12 @@ func runAgent(root string, args []string) error {
 	if toolsErr == nil {
 		tools = backupTools
 	}
+	backupInterval := config.BackupInterval()
 	backup := &operatoragent.BackupService{
 		Directory:           backupDirectory,
+		Root:                root,
 		Keep:                config.BackupKeepValue(),
+		Schedule:            &backupInterval,
 		EnvironmentFile:     config.Backend.EnvFile,
 		Tools:               tools,
 		ToolsError:          toolsErr,
@@ -155,6 +162,7 @@ func runAgent(root string, args []string) error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	go operatoragent.RunLogRetention(ctx, logsDirectory, config.ToolLogRetentionDays(), time.Now, time.Hour)
+	go operatoragent.RunBackupSchedule(ctx, backup)
 	go pings.Run(ctx)
 	toolLog.Write("agent", "start", "ok", map[string]any{"listen": config.Listen})
 	if err := agentapi.Serve(ctx, server, listener, backend); err != nil {

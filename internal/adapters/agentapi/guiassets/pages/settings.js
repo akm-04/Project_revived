@@ -43,7 +43,6 @@ export function renderPage(container, context) {
     const values = reply.body && typeof reply.body === "object" ? reply.body : {};
     state.otaSettings = values.ota_settings && typeof values.ota_settings === "object" ? values.ota_settings : null;
     paths.backendPath.value = presentText(values.backend_path, "");
-    paths.backupPath.value = presentText(values.backup_path, "");
     paths.appRepackPath.value = presentText(values.app_repack_path, "");
     paths.toolchainPath.value = presentText(values.toolchain_path, "");
     paths.mediaPath.value = presentText(values.media_path, "");
@@ -169,7 +168,6 @@ async function savePaths(paths, state, reloadAll) {
   paths.status.replaceChildren();
   const agentPayload = {
     backend_path: paths.backendPath.value.trim(),
-    backup_path: paths.backupPath.value.trim(),
     app_repack_path: paths.appRepackPath.value.trim(),
     toolchain_path: paths.toolchainPath.value.trim(),
   };
@@ -212,7 +210,6 @@ function buildPathsSection() {
   grid.className = "row g-2";
   const fields = {
     backendPath: pathField(grid, "settings-backend-path", "Backend path", "absolute path of the gxb-api binary", "file"),
-    backupPath: pathField(grid, "settings-backup-path", "Backup folder", "empty uses the agent root's backups folder", "folder"),
     appRepackPath: pathField(grid, "settings-app-repack-path", "App repack folder", "absolute app_repack folder for the APK build", "folder"),
     toolchainPath: pathField(grid, "settings-toolchain-path", "Toolchain folder", "empty uses the system PATH", "folder"),
     mediaPath: pathField(grid, "settings-media-path", "Media folder", "set media_path in agent.json to change it", null),
