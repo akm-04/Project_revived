@@ -158,7 +158,7 @@ func (commands Commands) RegisterBuild(ctx context.Context, transaction tx.Tx, c
 		return BuildResult{}, err
 	}
 	if domain.LowersActive(release.Version, active) && !request.Rollback {
-		return BuildResult{}, operator.Refuse(CodeRollbackRequired, "the release number is below the lane's active release; set rollback to register it", map[string]string{"active_version": active.String()})
+		return BuildResult{}, operator.Refuse(CodeRollbackRequired, "the release number is below the lane's active release; set rollback to register it: "+domain.RollbackWarning, map[string]string{"active_version": active.String()})
 	}
 	if err := commands.verifyVolumes(release); err != nil {
 		return BuildResult{}, err

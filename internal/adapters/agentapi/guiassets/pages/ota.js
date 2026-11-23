@@ -9,15 +9,17 @@ const buildPath = "/agent/v1/ota/build";
 const publishPath = "/agent/v1/ota/publish";
 const operationPollMilliseconds = 1000;
 const operationPollLimit = 120;
+const rollbackAcknowledgementText = "I understand clients must clear app data";
+const rollbackWarningText = "installed clients will not step down by themselves: players must clear the app's data or reinstall to take the rolled-back release";
 
 const lanes = [
   { id: "assets", title: "Loud (assets)", action: "assets" },
   { id: "code", title: "Silent (code)", action: "code" },
 ];
 
-// renderPage draws the two lane cards from ota.status (G6, G14). The operator
-// never types a version: Stage builds the lane's next number and the card shows
-// what the backend registered.
+// renderPage draws the two lane cards from ota.status (G6, G14, G23). The
+// operator sees the proposed next version, may type another, and a lower
+// number needs the rollback acknowledgement before Stage runs.
 export function renderPage(container, context) {
   container.replaceChildren();
   const heading = document.createElement("h2");
@@ -25,21 +27,24 @@ export function renderPage(container, context) {
   heading.textContent = "OTA releases";
   const help = document.createElement("p");
   help.className = "module-help";
-  help.textContent = "Stage builds the lane's next version; publish runs the maintenance window.";
+  help.textContent = "Stage builds the version you type, or the lane's next number; publish runs the maintenance window.";
   const refresh = actionButton("Refresh", true, "ota-refresh");
   const status = document.createElement("p");
   status.className = "status";
   status.id = "ota-status";
   status.setAttribute("role", "status");
   const laneRow = document.createElement("div");
-  laneRow.className = "row g-3";
+  laneRow.className = "row row-cols-1 row-cols-md-2 g-3";
   container.append(heading, help, refresh, status, laneRow);
 
   const views = new Map();
   for (const lane of lanes) {
     const view = createLaneCard(lane);
     views.set(lane.id, view);
-    laneRow.append(view.card);
+    const column = document.createElement("div");
+    column.className = "col";
+    column.append(view.card);
+    laneRow.append(column);
   }
   container.append(createReleaseCheck());
   refresh.addEventListener("click", () => {
@@ -50,7 +55,7 @@ export function renderPage(container, context) {
 
 function createLaneCard(lane) {
   const card = document.createElement("section");
-  card.className = "card card-body col-md-6";
+  card.className = "card card-body h-100";
   card.id = "ota-lane-" + lane.id;
   const title = document.createElement("h3");
   title.className = "card-title";
@@ -77,39 +82,122 @@ function createLaneCard(lane) {
     values.set(key, valueCell);
   }
   rows.append(body);
+  const staleWarning = document.createElement("p");
+  staleWarning.className = "status";
+  staleWarning.id = "ota-stale-warning-" + lane.id;
+  staleWarning.hidden = true;
+
+  const versionLabel = document.createElement("label");
+  versionLabel.className = "form-label";
+  versionLabel.htmlFor = "ota-version-" + lane.id;
+  versionLabel.textContent = "Version";
+  const versionInput = document.createElement("input");
+  versionInput.type = "text";
+  versionInput.className = "form-control";
+  versionInput.id = "ota-version-" + lane.id;
+  versionInput.autocomplete = "off";
+  versionInput.placeholder = "1.631.1";
+  const versionHint = document.createElement("p");
+  versionHint.className = "hint mb-1";
+  versionHint.id = "ota-version-hint-" + lane.id;
+  const rollbackWarning = document.createElement("p");
+  rollbackWarning.className = "status";
+  rollbackWarning.id = "ota-rollback-warning-" + lane.id;
+  rollbackWarning.hidden = true;
+  const acknowledgementLabel = document.createElement("label");
+  acknowledgementLabel.className = "form-check mb-2";
+  acknowledgementLabel.id = "ota-rollback-ack-label-" + lane.id;
+  acknowledgementLabel.hidden = true;
+  const acknowledgement = document.createElement("input");
+  acknowledgement.type = "checkbox";
+  acknowledgement.className = "form-check-input";
+  acknowledgement.id = "ota-rollback-ack-" + lane.id;
+  const acknowledgementText = document.createElement("span");
+  acknowledgementText.textContent = rollbackAcknowledgementText;
+  acknowledgementLabel.append(acknowledgement, acknowledgementText);
+
   const actions = document.createElement("div");
-  actions.className = "d-flex gap-2";
-  const stage = actionButton("Stage next build", true, "ota-stage-" + lane.id);
+  actions.className = "d-flex flex-wrap gap-2";
+  const stage = actionButton("Stage build", true, "ota-stage-" + lane.id);
   const publish = actionButton("Publish staged", false, "ota-publish-" + lane.id);
   publish.disabled = true;
   actions.append(stage, publish);
   const log = document.createElement("section");
   log.className = "result";
   log.id = "ota-log-" + lane.id;
-  card.append(title, rows, actions, log);
+  card.append(title, rows, staleWarning, versionLabel, versionInput, versionHint, rollbackWarning, acknowledgementLabel, actions, log);
 
+  let activeVersion = "";
   let stagedVersion = "";
+  let proposedVersion = "";
+  let userEdited = false;
+  let rollbackRequired = false;
+
+  function refreshForm() {
+    const typed = versionInput.value.trim();
+    const classification = classifyVersion(typed, activeVersion);
+    rollbackRequired = classification.kind === "rollback";
+    rollbackWarning.hidden = !rollbackRequired;
+    acknowledgementLabel.hidden = !rollbackRequired;
+    if (!rollbackRequired) {
+      acknowledgement.checked = false;
+    }
+    if (rollbackRequired) {
+      rollbackWarning.textContent = typed + " is below the active " + activeVersion + ". A rollback: " + rollbackWarningText + ".";
+    } else {
+      rollbackWarning.textContent = "";
+    }
+    if (classification.kind === "invalid") {
+      versionHint.textContent = "Use a strict x.y.z number, e.g. " + (proposedVersion || "1.631.1") + ".";
+    } else if (classification.kind === "equal") {
+      versionHint.textContent = typed + " is already the active version.";
+    } else if (typed === "" && proposedVersion === "") {
+      versionHint.textContent = "Enter the lane's first version.";
+    } else if (typed === "") {
+      versionHint.textContent = "Empty stages the proposed next version " + proposedVersion + ".";
+    } else {
+      versionHint.textContent = "The proposed next version is " + (proposedVersion || "unknown") + ".";
+    }
+    stage.disabled = classification.kind === "invalid" || classification.kind === "equal" ||
+      (rollbackRequired && !acknowledgement.checked) ||
+      (typed === "" && proposedVersion === "");
+  }
+
+  versionInput.addEventListener("input", () => {
+    userEdited = true;
+    refreshForm();
+  });
+  acknowledgement.addEventListener("change", refreshForm);
   stage.addEventListener("click", () => {
-    void stageLane(lane, log);
+    void stageLane(lane, versionInput.value.trim(), rollbackRequired, activeVersion, log);
   });
   publish.addEventListener("click", () => {
-    void publishLane(lane, stagedVersion, log);
+    void publishLane(lane, stagedVersion, isStale(stagedVersion, activeVersion), log);
   });
+
   return {
     card,
     values,
     publish,
     setSummary(summary) {
-      const active = summary && summary.active_version ? summary.active_version : "unknown";
-      const staged = summary && summary.built_not_published ? summary.built_not_published : "";
-      const size = summary && summary.built_not_published ? sizeText(summary.size) : "unknown";
-      values.get("active").textContent = active;
-      values.get("published").textContent = dateText(summary && summary.published_at);
-      values.get("staged").textContent = staged === "" ? "none" : staged;
-      values.get("staged_at").textContent = staged === "" ? "unknown" : dateText(summary.built_at);
-      values.get("size").textContent = size;
-      stagedVersion = staged;
-      publish.disabled = staged === "";
+      activeVersion = stringField(summary, "active_version");
+      stagedVersion = stringField(summary, "built_not_published");
+      values.get("active").textContent = activeVersion === "" ? "unknown" : activeVersion;
+      setLocalTime(values.get("published"), summary && summary.published_at);
+      const stale = isStale(stagedVersion, activeVersion);
+      values.get("staged").textContent = stagedVersion === "" ? "none" : stagedVersion + (stale ? " (stale)" : "");
+      setLocalTime(values.get("staged_at"), stagedVersion === "" ? null : summary && summary.built_at);
+      values.get("size").textContent = stagedVersion === "" ? "unknown" : sizeText(summary && summary.size);
+      publish.disabled = stagedVersion === "";
+      staleWarning.hidden = !stale;
+      staleWarning.textContent = stale
+        ? "The staged " + stagedVersion + " is not newer than the active " + activeVersion + ". Publishing it is a rollback: " + rollbackWarningText + "."
+        : "";
+      proposedVersion = proposedNextVersion(activeVersion, stagedVersion);
+      if (!userEdited) {
+        versionInput.value = proposedVersion;
+      }
+      refreshForm();
     },
   };
 }
@@ -134,21 +222,29 @@ async function load(views, status, button) {
   }
 }
 
-async function stageLane(lane, log) {
+async function stageLane(lane, version, rollback, activeVersion, log) {
+  const describedVersion = version === "" ? "the lane's next version" : version;
+  const summary = rollback
+    ? "Build " + describedVersion + ", below the active " + activeVersion + ". A rollback: " + rollbackWarningText + ". It stays BUILT until you publish it; clients are not affected yet."
+    : "Build " + describedVersion + ". It stays BUILT until you publish it; clients are not affected.";
   const confirmed = await confirmAction({
     title: "Stage " + lane.title,
     confirmLabel: "Stage build",
-    summary: "Build and register the lane's next version. It stays BUILT until you publish it; clients are not affected.",
+    summary,
   });
   if (confirmed === null) {
     return;
   }
   log.replaceChildren();
   log.append(paragraph("status", "Building…"));
-  const reply = await request(buildPath, {
-    method: "POST",
-    body: { lane: lane.id, reason: confirmed.reason, semantic_key: confirmed.semantic_key },
-  });
+  const requestBody = { lane: lane.id, reason: confirmed.reason, semantic_key: confirmed.semantic_key };
+  if (version !== "") {
+    requestBody.version = version;
+  }
+  if (rollback) {
+    requestBody.rollback = true;
+  }
+  const reply = await request(buildPath, { method: "POST", body: requestBody });
   if (reply.unauthorized) {
     return;
   }
@@ -182,12 +278,12 @@ async function stageLane(lane, log) {
     log.append(paragraph("status", "The build failed: " + valueText(record.error)));
     return;
   }
-  const version = builtVersion(record);
-  log.append(paragraph("hint", version === "" ? "The backend finished the build." : "The backend registered version " + version + "."));
+  const builtVersion = stagedBuildVersion(record);
+  log.append(paragraph("hint", builtVersion === "" ? "The backend finished the build." : "The backend registered version " + builtVersion + "."));
   log.append(logBox(record));
 }
 
-function builtVersion(operation) {
+function stagedBuildVersion(operation) {
   const result = operation && typeof operation.result === "object" && operation.result !== null ? operation.result : null;
   if (result === null) {
     return "";
@@ -199,16 +295,19 @@ function builtVersion(operation) {
   return release.version;
 }
 
-async function publishLane(lane, version, log) {
+async function publishLane(lane, version, rollback, log) {
   if (version === "") {
     log.replaceChildren();
     log.append(paragraph("status", "There is no staged build to publish."));
     return;
   }
+  const summary = rollback
+    ? "Publishing " + version + " is a rollback below the active version. " + rollbackWarningText + ". The maintenance window logs out every player. Continue?"
+    : "Publishing takes the maintenance window and logs out every player. Continue?";
   const confirmed = await confirmAction({
     title: "Publish " + lane.title + " " + version,
     confirmLabel: "Publish",
-    summary: "Publishing takes the maintenance window and logs out every player. Continue?",
+    summary,
   });
   if (confirmed === null) {
     return;
@@ -257,17 +356,20 @@ function createReleaseCheck() {
   help.className = "module-help";
   help.textContent = "Asks ota.release whether any lane holds this exact version.";
   const row = document.createElement("div");
-  row.className = "row g-2";
-  const column = document.createElement("div");
-  column.className = "col-md-4";
+  row.className = "row g-2 align-items-end";
+  const inputColumn = document.createElement("div");
+  inputColumn.className = "col-12 col-sm-4";
   const input = document.createElement("input");
   input.type = "text";
   input.className = "form-control";
   input.id = "ota-release-version";
   input.placeholder = "1.631.2";
-  column.append(input);
+  inputColumn.append(input);
+  const buttonColumn = document.createElement("div");
+  buttonColumn.className = "col-auto";
   const button = actionButton("Check", true, "ota-release-check");
-  row.append(column, button);
+  buttonColumn.append(button);
+  row.append(inputColumn, buttonColumn);
   const result = document.createElement("p");
   result.className = "hint mt-2";
   result.id = "ota-release-result";
@@ -296,11 +398,98 @@ async function checkRelease(version, result) {
   result.textContent = exists ? "Version " + version + " exists." : "Version " + version + " does not exist.";
 }
 
-function dateText(value) {
-  if (typeof value !== "string" || value === "" || value.startsWith("0001-01-01")) {
-    return "unknown";
+function classifyVersion(text, activeVersion) {
+  if (text === "") {
+    return { kind: "auto" };
   }
-  return value;
+  const version = parseVersion(text);
+  if (version === null) {
+    return { kind: "invalid" };
+  }
+  const active = parseVersion(activeVersion);
+  if (active === null) {
+    return { kind: "forward" };
+  }
+  const order = compareVersions(version, active);
+  if (order < 0) {
+    return { kind: "rollback" };
+  }
+  if (order === 0) {
+    return { kind: "equal" };
+  }
+  return { kind: "forward" };
+}
+
+// parseVersion mirrors the client's strict numeric x.y.z comparison
+// (UpdateScene_64.lua:184-201); anything else cannot be compared.
+function parseVersion(text) {
+  if (typeof text !== "string" || !/^[0-9]+\.[0-9]+\.[0-9]+$/.test(text)) {
+    return null;
+  }
+  const parts = text.split(".").map(Number);
+  if (!parts.every((part) => Number.isSafeInteger(part))) {
+    return null;
+  }
+  return { major: parts[0], minor: parts[1], patch: parts[2] };
+}
+
+function compareVersions(left, right) {
+  if (left.major !== right.major) {
+    return left.major < right.major ? -1 : 1;
+  }
+  if (left.minor !== right.minor) {
+    return left.minor < right.minor ? -1 : 1;
+  }
+  if (left.patch !== right.patch) {
+    return left.patch < right.patch ? -1 : 1;
+  }
+  return 0;
+}
+
+function proposedNextVersion(activeText, stagedText) {
+  const highest = highestVersion(activeText, stagedText);
+  if (highest === null) {
+    return "";
+  }
+  return highest.major + "." + highest.minor + "." + (highest.patch + 1);
+}
+
+function highestVersion(leftText, rightText) {
+  const left = parseVersion(leftText);
+  const right = parseVersion(rightText);
+  if (left === null) {
+    return right;
+  }
+  if (right === null) {
+    return left;
+  }
+  return compareVersions(left, right) >= 0 ? left : right;
+}
+
+function isStale(stagedText, activeText) {
+  const staged = parseVersion(stagedText);
+  const active = parseVersion(activeText);
+  return staged !== null && active !== null && compareVersions(staged, active) <= 0;
+}
+
+function stringField(value, key) {
+  return value && typeof value === "object" && typeof value[key] === "string" ? value[key] : "";
+}
+
+function setLocalTime(cell, value) {
+  if (typeof value !== "string" || value === "" || value.startsWith("0001-01-01")) {
+    cell.textContent = "unknown";
+    cell.removeAttribute("title");
+    return;
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    cell.textContent = "unknown";
+    cell.removeAttribute("title");
+    return;
+  }
+  cell.textContent = date.toLocaleString();
+  cell.title = value + " (UTC)";
 }
 
 function sizeText(size) {

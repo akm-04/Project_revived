@@ -59,6 +59,9 @@ const (
 	// CodeBuildVersionNotNext refuses a supplied version that is not the lane's
 	// next last-component increment (OPERATOR_GUI_V2 G14).
 	CodeBuildVersionNotNext = "AGENT_BUILD_VERSION_NOT_NEXT"
+	// CodeBuildRollbackRequired refuses a number below the lane's active release
+	// until the request acknowledges the rollback (T6, owner answer 5).
+	CodeBuildRollbackRequired = "AGENT_BUILD_ROLLBACK_REQUIRED"
 	// CodeBuildNoBaseline refuses an automatic next version when the lane has no
 	// built or active release to increment.
 	CodeBuildNoBaseline = "AGENT_BUILD_NO_BASELINE"
