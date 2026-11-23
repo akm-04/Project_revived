@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -20,6 +21,7 @@ import (
 type backendRecorder struct {
 	authorization string
 	bodyBytes     int64
+	body          []byte
 }
 
 func newForwardingHandler(t *testing.T) (Handler, *backendRecorder, string) {
@@ -41,6 +43,11 @@ func newForwardingHandler(t *testing.T) (Handler, *backendRecorder, string) {
 	backend := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		recorder.authorization = request.Header.Get("Authorization")
 		recorder.bodyBytes = request.ContentLength
+		body, readErr := io.ReadAll(request.Body)
+		if readErr != nil {
+			t.Errorf("read backend request body: %v", readErr)
+		}
+		recorder.body = body
 		writer.Header().Set("Content-Type", "application/json")
 		if strings.HasPrefix(request.URL.Path, "/operator/v1/commands/") {
 			writer.WriteHeader(http.StatusConflict)
@@ -91,6 +98,39 @@ func TestForwardedCommandPassesBackendRefusal(t *testing.T) {
 	}
 	if backend.authorization != "Bearer backend-token" {
 		t.Fatalf("the backend saw %q", backend.authorization)
+	}
+}
+
+// TestForwardedCommandCarriesTheExpectedRevision proves the envelope field every
+// versioned owner reads reaches the backend when the page names it and stays
+// absent otherwise (I11A_OPERATOR_COMMANDS_V1 ruling 2).
+func TestForwardedCommandCarriesTheExpectedRevision(t *testing.T) {
+	handler, backend, session := newForwardingHandler(t)
+	recorder := serveAgent(handler, http.MethodPost, "/agent/v1/commands/events.end_now", session, `{"reason":"end","semantic_key":"k2","expected_revision":7,"payload":{"occurrence_id":9}}`)
+	if recorder.Code != http.StatusConflict {
+		t.Fatalf("status = %d, body = %s", recorder.Code, recorder.Body)
+	}
+	var forwarded struct {
+		Envelope struct {
+			ExpectedRevision *int64 `json:"expected_revision"`
+		} `json:"envelope"`
+	}
+	if err := json.Unmarshal(backend.body, &forwarded); err != nil {
+		t.Fatalf("backend body = %s (%v)", backend.body, err)
+	}
+	if forwarded.Envelope.ExpectedRevision == nil || *forwarded.Envelope.ExpectedRevision != 7 {
+		t.Fatalf("forwarded revision = %+v", forwarded.Envelope.ExpectedRevision)
+	}
+
+	serveAgent(handler, http.MethodPost, "/agent/v1/commands/mail.send", session, `{"reason":"mail","semantic_key":"k3","payload":{}}`)
+	var withoutRevision struct {
+		Envelope map[string]any `json:"envelope"`
+	}
+	if err := json.Unmarshal(backend.body, &withoutRevision); err != nil {
+		t.Fatalf("backend body = %s (%v)", backend.body, err)
+	}
+	if _, present := withoutRevision.Envelope["expected_revision"]; present {
+		t.Fatalf("a create sent expected_revision: %s", backend.body)
 	}
 }
 
