@@ -738,6 +738,8 @@ label.form-check,
 }
 
 .form-check .form-check-input {
+  /* Tabler sets this from --tblr-border-radius (8px) on the input itself: a round 16px checkbox. */
+  --tblr-form-check-border-radius: 4px;
   width: 1rem;
   height: 1rem;
   flex: none;
