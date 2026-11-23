@@ -17,8 +17,13 @@ import (
 
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
+	"gxb.local/backend/v2/internal/adapters/postgres/identitystore"
 	"gxb.local/backend/v2/internal/adapters/postgres/playerdatastore"
+	appidentity "gxb.local/backend/v2/internal/application/identitylifecycle"
 	"gxb.local/backend/v2/internal/application/playerdata"
+	"gxb.local/backend/v2/internal/foundation/clock"
+	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
 const defaultPlanPath = "docs/data/PLAYER_RESTORE_PLAN.json"
@@ -34,7 +39,7 @@ func main() {
 func run(arguments []string, stdout, stderr io.Writer) int {
 	flags := flag.NewFlagSet("gxb-player-data", flag.ContinueOnError)
 	flags.SetOutput(stderr)
-	mode := flags.String("mode", "plan", "plan|export|restore")
+	mode := flags.String("mode", "plan", "plan|export|restore|sdk-import")
 	planPath := flags.String("plan", defaultPlanPath, "generated player restore plan")
 	player := flags.Int64("player", 0, "player id to export or restore")
 	out := flags.String("out", "", "export output file (default standard output)")
@@ -49,6 +54,8 @@ func run(arguments []string, stdout, stderr io.Writer) int {
 		return export(*planPath, *player, *out, stdout, stderr)
 	case "restore":
 		return restore(*planPath, *in, *player, stdout, stderr)
+	case "sdk-import":
+		return sdkImport(*in, stdout, stderr)
 	default:
 		return report(stderr, refusal{fmt.Sprintf("unknown mode %q", *mode)})
 	}
@@ -207,6 +214,52 @@ func validBlobKey(key string) bool {
 		}
 	}
 	return true
+}
+
+// sdkImport applies the login stand-in's accounts file (G51F F4) through the
+// identity owner and prints counts only.
+func sdkImport(inputPath string, stdout, stderr io.Writer) int {
+	if inputPath == "" {
+		return report(stderr, refusal{"sdk-import requires -in"})
+	}
+	file, err := os.Open(inputPath)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	defer file.Close()
+	input, err := appidentity.DecodeSDKImport(file)
+	if err != nil {
+		return report(stderr, refusal{err.Error()})
+	}
+	dsn := os.Getenv("GXB_POSTGRES_DSN")
+	if dsn == "" {
+		fmt.Fprintln(stderr, "GXB_POSTGRES_DSN required")
+		return 1
+	}
+	ctx := context.Background()
+	pool, err := pg.Open(ctx, dsn, pg.PoolSettings{MaxConns: 2, MaxConnLifetime: time.Hour, MaxConnIdleTime: time.Minute, HealthCheckPeriod: time.Minute})
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	defer pool.Close()
+	importer := appidentity.SDKImporter{Runner: tx.Runner{DB: pool}, Store: identitystore.Store{}, Operations: operation.Factory{Clock: clock.System{}}}
+	result, err := importer.Import(ctx, input)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	raw, err := json.Marshal(result)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	if _, err := stdout.Write(append(raw, '\n')); err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	return 0
 }
 
 func report(stderr io.Writer, err error) int {

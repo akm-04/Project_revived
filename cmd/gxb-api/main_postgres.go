@@ -25,6 +25,7 @@ import (
 	apptopfloor "gxb.local/backend/v2/internal/application/topfloor"
 	domain "gxb.local/backend/v2/internal/domain/otarelease"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -94,6 +95,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/undeliveredstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/worldbossstore"
 	"gxb.local/backend/v2/internal/adapters/publicpresentation"
+	"gxb.local/backend/v2/internal/adapters/sdkapi"
 	"gxb.local/backend/v2/internal/adapters/socialpresentation"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	appachievement "gxb.local/backend/v2/internal/application/achievement"
@@ -1186,6 +1188,9 @@ func main() {
 		mux.Handle("/media/", stockruntime.NoticeMediaGET{Root: cfg.NoticeMediaRoot})
 	}
 	registerOTARoutes(mux, otaServing)
+	if sdkListen := os.Getenv("GXB_SDK_LISTEN"); sdkListen != "" {
+		startSDKListener(ctx, sdkListen, appidentity.SDKService{Runner: runner, Store: identitystore.Store{}, DigestSecret: digestSecret, Operations: operation.Factory{Clock: clock.System{}}})
+	}
 	gameListenerOpen, err := parseGameListener(os.Getenv("GXB_GAME_LISTENER"))
 	if err != nil {
 		log.Fatal(err)
@@ -1206,6 +1211,28 @@ func main() {
 	if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatal(err)
 	}
+}
+
+// startSDKListener binds the product SDK login port on its own listener (G51F
+// F3). It shares the process, pool, secrets and shutdown with the game port.
+func startSDKListener(ctx context.Context, address string, service appidentity.SDKService) {
+	listener, err := net.Listen("tcp", address)
+	if err != nil {
+		log.Fatalf("sdk listener %s: %v", address, err)
+	}
+	server := &http.Server{Handler: sdkapi.Handler{Service: service}, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 20 * time.Second, WriteTimeout: 20 * time.Second, IdleTimeout: 60 * time.Second}
+	go func() {
+		<-ctx.Done()
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		_ = server.Shutdown(shutdownCtx)
+	}()
+	go func() {
+		log.Printf("gxb-api sdk listening on %s", address)
+		if err := server.Serve(listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Printf("sdk listener stopped: %v", err)
+		}
+	}()
 }
 
 // registerOTARoutes always mounts both routes: with no OTA root the Serving

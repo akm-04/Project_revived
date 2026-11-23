@@ -28,6 +28,8 @@ func run(args []string) error {
 		return runAgent(invocation.root, invocation.arguments)
 	case "setup", "login", "logout", "reset-password", "backend", "cmd", "read", "ota", "backup", "op", "modules", "log":
 		return runClientCommand(invocation.root, invocation.command, invocation.arguments)
+	case "sdk-import":
+		return runSDKImport(invocation.root, invocation.arguments)
 	default:
 		usage()
 		return fmt.Errorf("unknown command %q", invocation.command)
@@ -74,6 +76,7 @@ func usage() {
   gxb-operator op status <id>
   gxb-operator modules [--json]
   gxb-operator log tail [-n N]
+  gxb-operator sdk-import <accounts.json>
 `)
 }
 
