@@ -98,9 +98,10 @@ type closedRequest struct {
 }
 
 type commandRequest struct {
-	Reason      string          `json:"reason"`
-	SemanticKey string          `json:"semantic_key"`
-	Payload     json.RawMessage `json:"payload"`
+	Reason           string          `json:"reason"`
+	SemanticKey      string          `json:"semantic_key"`
+	ExpectedRevision *int64          `json:"expected_revision,omitempty"`
+	Payload          json.RawMessage `json:"payload"`
 }
 
 type maintenanceRequest struct {
@@ -366,11 +367,12 @@ func (handler Handler) serveCommand(writer http.ResponseWriter, request *http.Re
 	response, err := handler.Operator.Command(request.Context(), operatoragent.OperatorRequest{
 		Name: name,
 		Envelope: operator.Envelope{
-			Principal:   "root",
-			Role:        operator.RoleRoot,
-			Scope:       "global",
-			Reason:      body.Reason,
-			SemanticKey: body.SemanticKey,
+			Principal:        "root",
+			Role:             operator.RoleRoot,
+			Scope:            "global",
+			Reason:           body.Reason,
+			SemanticKey:      body.SemanticKey,
+			ExpectedRevision: body.ExpectedRevision,
 		},
 		Payload: body.Payload,
 	})

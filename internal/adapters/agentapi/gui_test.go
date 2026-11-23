@@ -497,9 +497,17 @@ func TestGUIComponentsAreEmbeddedAndServed(t *testing.T) {
 func TestGUIPagesAreEmbeddedAndServed(t *testing.T) {
 	handler, _, _ := newForwardingHandler(t)
 	required := []string{
+		"guiassets/pages/backups.js",
 		"guiassets/pages/dashboard.js",
+		"guiassets/pages/events.js",
+		"guiassets/pages/gm.js",
+		"guiassets/pages/logs.js",
+		"guiassets/pages/mail.js",
+		"guiassets/pages/notices.js",
 		"guiassets/pages/ota.js",
 		"guiassets/pages/players.js",
+		"guiassets/pages/rewards.js",
+		"guiassets/pages/server.js",
 	}
 	for _, name := range required {
 		contents, err := guiAssets.ReadFile(name)
@@ -540,7 +548,7 @@ func TestGUIPagesAreEmbeddedAndServed(t *testing.T) {
 		return nil
 	})
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("walk the pages: %v", err)
 	}
 	if served < len(required) {
 		t.Fatalf("served %d page files, want at least %d", served, len(required))
