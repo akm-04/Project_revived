@@ -63,21 +63,15 @@ func TestDashboardSummaryFoldsEverySection(t *testing.T) {
 		"ota.status":  `{"active":{"code":"1.631.2","assets":"1.631.1","catalog":[]},"served":[{"hits":3},{"hits":4}],"misses":[{"hits":2}]}`,
 	}}
 	backups := t.TempDir()
-	snapshot := filepath.Join(backups, "snapshot.dump")
-	if err := os.WriteFile(snapshot, []byte("x"), 0o600); err != nil {
-		t.Fatal(err)
-	}
 	at := fixedClock()
-	if err := os.Chtimes(snapshot, at.Add(-90*time.Second), at.Add(-90*time.Second)); err != nil {
-		t.Fatal(err)
-	}
+	writeSnapshot(t, backups, "20260101T000000.000000000Z-manual", BackupKindManual, at.Add(-90*time.Second), "x")
 	summary := Dashboard{
-		Backend:          backend,
-		Operator:         client,
-		Version:          fakeVersionSource{info: version},
-		PublicURLs:       []string{"https://tunnel", "http://192.168.1.2"},
-		BackupsDirectory: backups,
-		Now:              func() time.Time { return at },
+		Backend:    backend,
+		Operator:   client,
+		Version:    fakeVersionSource{info: version},
+		PublicURLs: []string{"https://tunnel", "http://192.168.1.2"},
+		Backups:    BackupService{Directory: backups},
+		Now:        func() time.Time { return at },
 	}.Summary(context.Background())
 	if !summary.Backend.Running || summary.Backend.PID != 42 {
 		t.Fatalf("backend = %+v", summary.Backend)
@@ -110,11 +104,11 @@ func TestDashboardSummaryFoldsEverySection(t *testing.T) {
 
 func TestDashboardSummaryAnswersWhileTheBackendIsDown(t *testing.T) {
 	summary := Dashboard{
-		Backend:          fakeDashboardBackend{status: BackendStatus{Running: false}},
-		Operator:         fakeDashboardOperator{errs: map[string]error{"server.list": errors.New("down")}},
-		Version:          fakeVersionSource{err: errors.New("down")},
-		BackupsDirectory: filepath.Join(t.TempDir(), "missing"),
-		Now:              func() time.Time { return fixedClock() },
+		Backend:  fakeDashboardBackend{status: BackendStatus{Running: false}},
+		Operator: fakeDashboardOperator{errs: map[string]error{"server.list": errors.New("down")}},
+		Version:  fakeVersionSource{err: errors.New("down")},
+		Backups:  BackupService{Directory: filepath.Join(t.TempDir(), "missing")},
+		Now:      func() time.Time { return fixedClock() },
 	}.Summary(context.Background())
 	if summary.API.Reachable {
 		t.Fatalf("api = %+v", summary.API)
@@ -127,6 +121,26 @@ func TestDashboardSummaryAnswersWhileTheBackendIsDown(t *testing.T) {
 	}
 	if summary.CloudflareMetrics != CloudflareMetricsNotInV2 {
 		t.Fatalf("cloudflare = %q", summary.CloudflareMetrics)
+	}
+}
+
+// TestDashboardSnapshotAgeSkipsTheDamagedNewestFile proves the age comes from
+// the newest VALID manifest, so a partial or tampered dump never counts.
+func TestDashboardSnapshotAgeSkipsTheDamagedNewestFile(t *testing.T) {
+	directory := t.TempDir()
+	at := time.Date(2026, 11, 22, 12, 0, 0, 0, time.UTC)
+	writeSnapshot(t, directory, "20260101T000000.000000000Z-manual", BackupKindManual, at.Add(-10*time.Minute), "old")
+	writeSnapshot(t, directory, "20260102T000000.000000000Z-manual", BackupKindManual, at.Add(-time.Minute), "new")
+	damagedDump := filepath.Join(directory, "20260102T000000.000000000Z-manual"+backupDumpSuffix)
+	if err := os.WriteFile(damagedDump, []byte("tampered"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	summary := Dashboard{
+		Backups: BackupService{Directory: directory},
+		Now:     func() time.Time { return at },
+	}.Summary(context.Background())
+	if summary.DBSnapshot.Status != "ok" || summary.DBSnapshot.AgeSeconds == nil || *summary.DBSnapshot.AgeSeconds != 600 {
+		t.Fatalf("snapshot = %+v", summary.DBSnapshot)
 	}
 }
 

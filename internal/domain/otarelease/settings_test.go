@@ -34,6 +34,19 @@ func TestParseSettingsAcceptsOptionalRecoveredResPath(t *testing.T) {
 	}
 }
 
+func TestParseSettingsAcceptsOptionalApkResPath(t *testing.T) {
+	settings, err := ParseSettings([]byte(`{"lazy_fetch":"auto","res_path":"/srv/res","apk_res_path":"/srv/apk/res"}`))
+	if err != nil || settings.ApkResPath != "/srv/apk/res" {
+		t.Fatalf("settings=%+v err=%v", settings, err)
+	}
+	if got := DefaultSettings(); got.ApkResPath != "" {
+		t.Fatalf("default apk_res_path=%q, want empty", got.ApkResPath)
+	}
+	if _, err := ParseSettings([]byte(`{"lazy_fetch":"auto","res_path":"","apk_res_path":"relative/res"}`)); !errors.Is(err, ErrInvalidSettings) {
+		t.Fatalf("a relative apk_res_path was accepted: %v", err)
+	}
+}
+
 func TestParseSettingsRefusesUnknownFieldAndBadValues(t *testing.T) {
 	for _, input := range []string{
 		`{"lazy_fetch":"auto","res_path":"","extra":1}`,

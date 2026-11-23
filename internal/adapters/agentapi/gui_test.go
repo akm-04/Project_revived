@@ -123,11 +123,11 @@ func writePicture(t *testing.T, directory, relative string) string {
 
 func TestGUIResServesAnImageForASession(t *testing.T) {
 	handler, session := newGUIResHandler(t)
-	resRoot, err := handler.resRoot()
+	roots, err := handler.resRoots()
 	if err != nil {
 		t.Fatal(err)
 	}
-	writePicture(t, resRoot, "res/web/images/item.png")
+	writePicture(t, roots[0], "res/web/images/item.png")
 
 	if recorder := serveAgent(handler, http.MethodGet, "/agent/v1/res/res/web/images/item.png", "", ""); recorder.Code != http.StatusUnauthorized {
 		t.Fatalf("without a session: %d %s", recorder.Code, recorder.Body)
@@ -149,10 +149,11 @@ func TestGUIResServesAnImageForASession(t *testing.T) {
 
 func TestGUIResRefusesEscapesAndNonImages(t *testing.T) {
 	handler, session := newGUIResHandler(t)
-	resRoot, err := handler.resRoot()
+	roots, err := handler.resRoots()
 	if err != nil {
 		t.Fatal(err)
 	}
+	resRoot := roots[0]
 	writePicture(t, resRoot, "res/good.png")
 	writePicture(t, resRoot, "res/notes.txt")
 	outside := t.TempDir()
@@ -185,6 +186,56 @@ func TestGUIResRefusesEscapesAndNonImages(t *testing.T) {
 				t.Fatalf("%s leaked an outside file", testCase.target)
 			}
 		})
+	}
+}
+
+func newGUIResHandlerWithApk(t *testing.T) (Handler, string, string, string) {
+	t.Helper()
+	handler, _, session := newForwardingHandler(t)
+	otaRoot := t.TempDir()
+	resRoot := t.TempDir()
+	apkRoot := t.TempDir()
+	settings, err := json.Marshal(map[string]any{"lazy_fetch": "auto", "res_path": resRoot, "apk_res_path": apkRoot})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(otaRoot, "settings.json"), settings, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	handler.OTARoot = otaRoot
+	return handler, session, resRoot, apkRoot
+}
+
+// TestGUIResFallsBackToApkResPath proves the second root serves icons the OTA
+// res tree does not carry, res_path wins when both have the path, and the
+// symlink escape rule covers the second root too.
+func TestGUIResFallsBackToApkResPath(t *testing.T) {
+	handler, session, resRoot, apkRoot := newGUIResHandlerWithApk(t)
+	writePicture(t, apkRoot, "res/icons/from_apk.png")
+	if err := os.MkdirAll(filepath.Join(resRoot, "res", "icons"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(resRoot, "res", "icons", "both.png"), []byte("res-path"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(apkRoot, "res", "icons", "both.png"), []byte("apk-path"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	outside := writePicture(t, t.TempDir(), "outside.png")
+	if err := os.Symlink(outside, filepath.Join(apkRoot, "res", "icons", "escaped.png")); err != nil {
+		t.Fatal(err)
+	}
+
+	recorder := serveAgent(handler, http.MethodGet, "/agent/v1/res/res/icons/from_apk.png", session, "")
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("apk root fallback: %d %s", recorder.Code, recorder.Body)
+	}
+	recorder = serveAgent(handler, http.MethodGet, "/agent/v1/res/res/icons/both.png", session, "")
+	if recorder.Code != http.StatusOK || recorder.Body.String() != "res-path" {
+		t.Fatalf("res_path must win: %d %q", recorder.Code, recorder.Body)
+	}
+	if recorder = serveAgent(handler, http.MethodGet, "/agent/v1/res/res/icons/escaped.png", session, ""); recorder.Code != http.StatusNotFound {
+		t.Fatalf("apk root symlink out: %d", recorder.Code)
 	}
 }
 
@@ -437,6 +488,62 @@ func TestGUIComponentsAreEmbeddedAndServed(t *testing.T) {
 		if !strings.Contains(tag, "src=") {
 			t.Fatalf("the components page carries an inline script tag: %s", tag)
 		}
+	}
+}
+
+// TestGUIPagesAreEmbeddedAndServed proves every page module is compiled in,
+// reachable under /gui/pages/ with its content type and the strict policy, and
+// exports the renderPage(container, context) entry the shell loads.
+func TestGUIPagesAreEmbeddedAndServed(t *testing.T) {
+	handler, _, _ := newForwardingHandler(t)
+	required := []string{
+		"guiassets/pages/dashboard.js",
+		"guiassets/pages/ota.js",
+		"guiassets/pages/players.js",
+	}
+	for _, name := range required {
+		contents, err := guiAssets.ReadFile(name)
+		if err != nil {
+			t.Fatalf("the GUI no longer embeds %s", name)
+		}
+		if !strings.Contains(string(contents), "export function renderPage(container, context)") {
+			t.Fatalf("%s does not export renderPage(container, context)", name)
+		}
+	}
+	served := 0
+	err := fs.WalkDir(guiAssets, "guiassets/pages", func(name string, entry fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		if entry.IsDir() {
+			return nil
+		}
+		contentType, serveable := guiContentTypes[strings.ToLower(path.Ext(name))]
+		if !serveable {
+			t.Fatalf("%s has no serveable content type", name)
+		}
+		targetPath := "/gui/" + strings.TrimPrefix(name, guiAssetsRoot)
+		recorder := serveAgent(handler, http.MethodGet, targetPath, "", "")
+		if recorder.Code != http.StatusOK {
+			t.Fatalf("%s: status = %d", targetPath, recorder.Code)
+		}
+		if recorder.Header().Get("Content-Security-Policy") != contentSecurityPolicy {
+			t.Fatalf("%s: missing the strict policy", targetPath)
+		}
+		if recorder.Header().Get("Content-Type") != contentType {
+			t.Fatalf("%s: content type = %q", targetPath, recorder.Header().Get("Content-Type"))
+		}
+		if recorder.Body.Len() == 0 {
+			t.Fatalf("%s: empty body", targetPath)
+		}
+		served++
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if served < len(required) {
+		t.Fatalf("served %d page files, want at least %d", served, len(required))
 	}
 }
 

@@ -87,12 +87,12 @@ func runAgent(root string, args []string) error {
 	buildOperation := operatoragent.Build{Config: config, Operator: operator, Operations: operations}
 	moduleCatalog := operatoragent.ModuleCatalog{Backend: operator, Local: []appoperator.Module{operatoragent.ServerModule(), operatoragent.AgentOTAModule(), operatoragent.DashboardModule(), operatoragent.BackupModule(), operatoragent.AgentLogsModule()}}
 	dashboard := operatoragent.Dashboard{
-		Backend:          backend,
-		Operator:         operator,
-		Version:          operator,
-		PublicURLs:       config.PublicURLs,
-		BackupsDirectory: config.BackupDirectory(root),
-		Now:              time.Now,
+		Backend:    backend,
+		Operator:   operator,
+		Version:    operator,
+		PublicURLs: config.PublicURLs,
+		Backups:    backup,
+		Now:        time.Now,
 	}
 	handler := agentapi.Handler{
 		Credentials: operatoragent.NewCredentials(root),

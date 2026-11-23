@@ -47,14 +47,17 @@ const (
 // Settings is <ota_root>/settings.json (I11A_1_PLAN "OTA root and serving
 // inputs"). Later phases add fields in code, never by hand.
 type Settings struct {
-	LazyFetch               LazyFetch `json:"lazy_fetch"`
-	ResPath                 string    `json:"res_path"`
-	RecoveredResPath        string    `json:"recovered_res_path"`
-	DownloadBaseSeconds     int       `json:"download_base_seconds"`
-	DownloadMinKiBPerSecond int       `json:"download_min_kib_per_second"`
-	CacheMaxAgeSeconds      int       `json:"cache_max_age_seconds"`
-	ServingRefreshSeconds   int       `json:"serving_refresh_seconds"`
-	VolumeMB                int       `json:"volume_mb"`
+	LazyFetch LazyFetch `json:"lazy_fetch"`
+	ResPath   string    `json:"res_path"`
+	// ApkResPath is the optional second picture root: the APK res tree that
+	// holds icons the OTA res_path does not ship (the GUI tries it second).
+	ApkResPath              string `json:"apk_res_path"`
+	RecoveredResPath        string `json:"recovered_res_path"`
+	DownloadBaseSeconds     int    `json:"download_base_seconds"`
+	DownloadMinKiBPerSecond int    `json:"download_min_kib_per_second"`
+	CacheMaxAgeSeconds      int    `json:"cache_max_age_seconds"`
+	ServingRefreshSeconds   int    `json:"serving_refresh_seconds"`
+	VolumeMB                int    `json:"volume_mb"`
 }
 
 // DefaultSettings is the value of a missing settings.json and the starting
@@ -63,6 +66,7 @@ func DefaultSettings() Settings {
 	return Settings{
 		LazyFetch:               LazyFetchAuto,
 		ResPath:                 "",
+		ApkResPath:              "",
 		RecoveredResPath:        "",
 		DownloadBaseSeconds:     DefaultDownloadBaseSeconds,
 		DownloadMinKiBPerSecond: DefaultDownloadMinKiBPerSecond,
@@ -104,6 +108,9 @@ func (s Settings) Validate() error {
 	}
 	if s.ResPath != "" && !filepath.IsAbs(s.ResPath) {
 		return fmt.Errorf("%w: res_path %q is not absolute", ErrInvalidSettings, s.ResPath)
+	}
+	if s.ApkResPath != "" && !filepath.IsAbs(s.ApkResPath) {
+		return fmt.Errorf("%w: apk_res_path %q is not absolute", ErrInvalidSettings, s.ApkResPath)
 	}
 	if s.RecoveredResPath != "" && !filepath.IsAbs(s.RecoveredResPath) {
 		return fmt.Errorf("%w: recovered_res_path %q is not absolute", ErrInvalidSettings, s.RecoveredResPath)

@@ -54,6 +54,7 @@ func SettingsFields() []operator.Field {
 	return []operator.Field{
 		operator.NewField("lazy_fetch", operator.FieldString, false, "auto serves /res/ once an ACTIVE assets release exists").WithEnum(string(domain.LazyFetchAuto), string(domain.LazyFetchOn), string(domain.LazyFetchOff)).WithDefault(string(defaults.LazyFetch)),
 		operator.NewField("res_path", operator.FieldString, false, "absolute path of the original client res folder served for assets-lane rows").WithDefault(defaults.ResPath),
+		operator.NewField("apk_res_path", operator.FieldString, false, "absolute path of the APK res tree the operator GUI reads icons from after res_path").WithDefault(defaults.ApkResPath),
 		operator.NewField("recovered_res_path", operator.FieldString, false, "absolute path of the asset-recovery lane folder served for code-lane rows").WithDefault(defaults.RecoveredResPath),
 		operator.NewField("download_base_seconds", operator.FieldInt, false, "base write deadline of one OTA download").Bounded(domain.MinDownloadBaseSeconds, domain.MaxDownloadBaseSeconds).WithDefault(defaults.DownloadBaseSeconds),
 		operator.NewField("download_min_kib_per_second", operator.FieldInt, false, "slowest client rate the deadline budget assumes").Bounded(domain.MinDownloadMinKiBPerSecond, domain.MaxDownloadMinKiBPerSecond).WithDefault(defaults.DownloadMinKiBPerSecond),
