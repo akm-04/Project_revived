@@ -20,6 +20,9 @@ func TestPingPlanResolvesTargetsAndOmitUnknownOnes(t *testing.T) {
 	plan := PingPlan{
 		Config:    Config{Backend: BackendConfig{EnvFile: envPath, OperatorAddr: "127.0.0.1:8091"}},
 		ServerURL: func() (string, string) { return "https://game.example/", ServerURLSourceEnvFile },
+		PublicURLs: func() PublicURLs {
+			return PublicURLs{PublicRoleSDK: "https://sdk.example/", PublicRoleAPI: "https://api.example/", PublicRoleAssets: "https://assets.example/"}
+		},
 		Environment: func(key string) string {
 			return map[string]string{"GXB_HTTP_ADDR": "127.0.0.1:9999", "GXB_REALTIME_ADDR": "127.0.0.1:9000"}[key]
 		},
@@ -33,17 +36,38 @@ func TestPingPlanResolvesTargetsAndOmitUnknownOnes(t *testing.T) {
 		addresses[spec.ID] = spec.Address
 	}
 	want := map[string]string{
-		pingInternetID:    "1.1.1.1:443",
-		pingOperatorID:    "127.0.0.1:8091",
-		pingBackendAPIID:  "127.0.0.1:8080",
-		pingRealtimeID:    "127.0.0.1:9000",
-		pingPublicURLID:   "https://game.example",
-		pingAssetServerID: "https://game.example/res/",
+		pingInternetID:   "1.1.1.1:443",
+		pingOperatorID:   "127.0.0.1:8091",
+		pingBackendAPIID: "127.0.0.1:8080",
+		pingRealtimeID:   "127.0.0.1:9000",
+		pingSDKURLID:     "https://sdk.example",
+		pingAPIURLID:     "https://api.example",
+		pingAssetsURLID:  "https://assets.example",
 	}
 	for id, address := range want {
 		if addresses[id] != address {
 			t.Fatalf("%s = %q, want %q (all: %+v)", id, addresses[id], address, addresses)
 		}
+	}
+}
+
+// The single GXB_PUBLIC_ENGINE_URL stays the game API address when the role
+// map does not name one, so an existing installation keeps its probe.
+func TestPingPlanFallsBackToTheGameURLForTheAPIRole(t *testing.T) {
+	plan := PingPlan{
+		ServerURL:  func() (string, string) { return "https://game.example/", ServerURLSourceEnvFile },
+		PublicURLs: func() PublicURLs { return PublicURLs{} },
+		Environment: func(string) string {
+			return ""
+		},
+	}
+	specs, _ := plan.Specs()
+	addresses := map[string]string{}
+	for _, spec := range specs {
+		addresses[spec.ID] = spec.Address
+	}
+	if addresses[pingAPIURLID] != "https://game.example" {
+		t.Fatalf("api address = %q", addresses[pingAPIURLID])
 	}
 }
 
@@ -60,7 +84,7 @@ func TestPingPlanOmitsEveryTargetWithNoAddress(t *testing.T) {
 	for _, omission := range omissions {
 		reasons[omission.ID] = omission.Reason
 	}
-	for _, id := range []string{pingOperatorID, pingBackendAPIID, pingRealtimeID, pingPublicURLID, pingAssetServerID} {
+	for _, id := range []string{pingOperatorID, pingBackendAPIID, pingRealtimeID, pingSDKURLID, pingAPIURLID, pingAssetsURLID} {
 		if reasons[id] == "" {
 			t.Fatalf("%s has no omission reason (all: %+v)", id, omissions)
 		}

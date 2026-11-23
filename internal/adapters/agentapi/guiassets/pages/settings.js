@@ -8,7 +8,6 @@ const settingsRead = "/agent/v1/reads/agent.settings";
 const serverListRead = "/agent/v1/reads/server.list";
 const agentSettingsCommand = "/agent/v1/commands/agent.settings.set";
 const otaSettingsCommand = "/agent/v1/commands/ota.settings.set";
-const serverURLCommand = "/agent/v1/commands/server.url.set";
 const serverRenameCommand = "/agent/v1/commands/server.rename";
 
 // renderPage is the Settings screen (G22): the paths in agent.json and the OTA
@@ -26,9 +25,8 @@ export function renderPage(container, context) {
   loadStatus.id = "settings-load-status";
   loadStatus.setAttribute("role", "status");
   const paths = buildPathsSection();
-  const serverURL = buildServerURLSection();
   const serverNames = buildServerNamesSection();
-  container.append(heading, help, loadStatus, paths.card, serverURL.card, serverNames.card);
+  container.append(heading, help, loadStatus, paths.card, serverNames.card);
 
   const state = { otaSettings: null, serverNames: [] };
 
@@ -52,10 +50,6 @@ export function renderPage(container, context) {
     paths.resPath.value = presentText(values.res_path, "");
     paths.apkResPath.value = presentText(values.apk_res_path, "");
     paths.recoveredResPath.value = presentText(values.recovered_res_path, "");
-    const url = presentText(values.server_url, "");
-    serverURL.current.textContent = url === "" ? "not set" : url;
-    serverURL.source.textContent = url === "" ? "" : " (" + serverURLSourceText(values.server_url_source) + ")";
-    serverURL.input.value = url;
     paths.save.disabled = state.otaSettings === null;
   }
 
@@ -78,10 +72,6 @@ export function renderPage(container, context) {
       await loadServers();
     });
   });
-  serverURL.save.addEventListener("click", () => {
-    void saveServerURL(serverURL);
-  });
-
   async function saveNames() {
     serverNames.status.replaceChildren();
     const changes = [];
@@ -203,21 +193,6 @@ async function savePaths(paths, state, reloadAll) {
   }
 }
 
-async function saveServerURL(section) {
-  section.status.textContent = "";
-  const reply = await request(serverURLCommand, commandBody({ url: section.input.value.trim() }, "Settings: set the server URL"));
-  if (reply.unauthorized) {
-    return;
-  }
-  if (!reply.ok) {
-    section.status.textContent = describeReply(reply);
-    return;
-  }
-  const body = reply.body && typeof reply.body === "object" ? reply.body : {};
-  section.current.textContent = presentText(body.url, section.input.value.trim());
-  section.status.textContent = presentText(body.message, "The server URL is saved.");
-}
-
 function buildPathsSection() {
   const card = document.createElement("section");
   card.className = "card card-body mb-3";
@@ -303,68 +278,6 @@ async function browsePath(input, label, mode) {
   }
   input.value = chosen;
   input.dispatchEvent(new Event("input", { bubbles: true }));
-}
-
-function buildServerURLSection() {
-  const card = document.createElement("section");
-  card.className = "card card-body mb-3";
-  const fieldset = document.createElement("fieldset");
-  const legend = document.createElement("legend");
-  legend.className = "card-title h3";
-  legend.textContent = "Server URL";
-  const help = document.createElement("p");
-  help.className = "module-help";
-  help.textContent = "The address the client uses after the update check. The backend reads it from GXB_PUBLIC_ENGINE_URL in its env file.";
-  const currentRow = document.createElement("p");
-  currentRow.className = "mb-2";
-  const currentLabel = document.createElement("strong");
-  currentLabel.textContent = "Current: ";
-  const current = document.createElement("span");
-  current.id = "settings-url-current";
-  current.textContent = "unknown";
-  const source = document.createElement("span");
-  source.id = "settings-url-source";
-  source.className = "text-secondary";
-  currentRow.append(currentLabel, current, source);
-  const label = document.createElement("label");
-  label.className = "form-label";
-  label.htmlFor = "settings-url-input";
-  label.textContent = "New URL";
-  const input = document.createElement("input");
-  input.type = "text";
-  input.className = "form-control";
-  input.id = "settings-url-input";
-  input.autocomplete = "off";
-  input.spellcheck = false;
-  input.placeholder = "game.example";
-  const warning = document.createElement("p");
-  warning.className = "hint";
-  warning.id = "settings-url-warning";
-  warning.textContent = "Changing this URL requires rebuilding the APK with the app_repack folder: the APK carries the address that asks the backend for this URL.";
-  const save = document.createElement("button");
-  save.type = "button";
-  save.className = "btn btn-primary mt-2";
-  save.id = "settings-url-save";
-  save.textContent = "Save URL";
-  const status = document.createElement("p");
-  status.className = "status mt-2";
-  status.id = "settings-url-status";
-  status.setAttribute("role", "status");
-  fieldset.append(legend, help, currentRow, label, input, warning, save, status);
-  card.append(fieldset);
-  return { card, current, source, input, save, status };
-}
-
-// serverURLSourceText maps the settings read's server_url_source onto the
-// plain words the review asks for (internal/application/operatoragent/settings.go:23-24).
-function serverURLSourceText(source) {
-  if (source === "env_file") {
-    return "from the backend env file";
-  }
-  if (source === "agent_environment") {
-    return "from the agent environment";
-  }
-  return "source unknown";
 }
 
 function buildServerNamesSection() {

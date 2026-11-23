@@ -3,8 +3,11 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"strings"
+
+	"gxb.local/backend/v2/internal/application/operatoragent"
 )
 
 func main() {
@@ -15,8 +18,12 @@ func main() {
 }
 
 func run(args []string) error {
+	if wantsHelp(args) {
+		fmt.Fprint(os.Stdout, operatoragent.CLIUsageText())
+		return nil
+	}
 	if len(args) == 0 {
-		usage()
+		usage(os.Stderr)
 		return errors.New("a command is required")
 	}
 	invocation, err := parseInvocation(args)
@@ -31,9 +38,30 @@ func run(args []string) error {
 	case "sdk-import":
 		return runSDKImport(invocation.root, invocation.arguments)
 	default:
-		usage()
+		usage(os.Stderr)
 		return fmt.Errorf("unknown command %q", invocation.command)
 	}
+}
+
+// wantsHelp accepts the three spellings the owner asked for, without needing a
+// root. The bare "help" word counts only in command position, so a future
+// command argument named "help" is not stolen.
+func wantsHelp(args []string) bool {
+	for index := 0; index < len(args); index++ {
+		argument := args[index]
+		if argument == "--help" || argument == "-h" {
+			return true
+		}
+		if argument == "--root" {
+			index++
+			continue
+		}
+		if strings.HasPrefix(argument, "--root=") {
+			continue
+		}
+		return argument == "help"
+	}
+	return false
 }
 
 type invocation struct {
@@ -55,29 +83,8 @@ func parseInvocation(args []string) (invocation, error) {
 	return invocation{root: root, command: remaining[0], arguments: remaining[1:]}, nil
 }
 
-func usage() {
-	fmt.Fprint(os.Stderr, `usage:
-  gxb-operator [--root DIR] agent
-  gxb-operator setup
-  gxb-operator login
-  gxb-operator logout
-  gxb-operator reset-password
-  gxb-operator backend start [--closed] | stop | status
-  gxb-operator cmd <module.command> --reason <text> [--key <key>] [json payload]
-  gxb-operator read <module.read> [k=v ...]
-  gxb-operator ota build --lane <code|assets|catalog> --version <v> [--rollback] [--no-wait]
-  gxb-operator ota publish <version> --reason <text> [--key <key>]
-  gxb-operator ota withdraw <version> --reason <text> [--key <key>]
-  gxb-operator backup snapshot [--kind manual|safety|pre-update|pre-delete] --reason <text>
-  gxb-operator backup list
-  gxb-operator backup prune --reason <text>
-  gxb-operator backup restore <id> --reason <text>
-  gxb-operator backup update-backend --reason <text>
-  gxb-operator op status <id>
-  gxb-operator modules [--json]
-  gxb-operator log tail [-n N]
-  gxb-operator sdk-import <accounts.json>
-`)
+func usage(writer io.Writer) {
+	fmt.Fprint(writer, operatoragent.CLIUsageText())
 }
 
 // extractRoot accepts --root before or after the command so the CLI reads like

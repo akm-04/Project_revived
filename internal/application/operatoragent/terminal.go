@@ -188,6 +188,9 @@ func (service *TerminalService) Open(sessionToken, listenAddress string) (Termin
 		lastInput: now,
 		output:    &terminalOutput{},
 	}
+	// The banner reaches the backlog before the pump copies the shell's prompt,
+	// so the page always sees it first.
+	item.output.push([]byte(TerminalBanner()))
 	if service.terminals == nil {
 		service.terminals = map[string]*terminal{}
 	}
@@ -440,6 +443,39 @@ func (service *TerminalService) environment() []string {
 		return service.Environment
 	}
 	return TerminalEnvironment(os.Environ())
+}
+
+// TerminalBanner is the text a new shell receives before its prompt: the CLI
+// hint and the same usage text the CLI prints.
+func TerminalBanner() string {
+	return CLIUsageBanner + "\r\n" + strings.ReplaceAll(CLIUsageText(), "\n", "\r\n")
+}
+
+// TerminalEnvironmentWithCLI makes the operator CLI reachable from the shell:
+// the running binary's folder is first on PATH and GXB_OPERATOR_ROOT names the
+// agent root, so `gxb-operator <command>` works with no --root.
+func TerminalEnvironmentWithCLI(source []string, binaryDirectory, root string) []string {
+	environment := TerminalEnvironment(source)
+	result := make([]string, 0, len(environment)+2)
+	pathValue := ""
+	for _, entry := range environment {
+		name, value, found := strings.Cut(entry, "=")
+		if found && strings.EqualFold(name, "PATH") {
+			pathValue = value
+			continue
+		}
+		result = append(result, entry)
+	}
+	if binaryDirectory != "" {
+		pathValue = binaryDirectory + string(os.PathListSeparator) + pathValue
+	}
+	if pathValue != "" {
+		result = append(result, "PATH="+pathValue)
+	}
+	if root != "" {
+		result = append(result, "GXB_OPERATOR_ROOT="+root)
+	}
+	return result
 }
 
 // TerminalEnvironment removes the secrets the agent can name and makes the

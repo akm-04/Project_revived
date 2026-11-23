@@ -1,7 +1,7 @@
 "use strict";
 
 import { describeReply, request } from "../transport.js";
-import { pageHeader } from "../components/format.js";
+import { navigateButton, pageHeader } from "../components/format.js";
 
 const summaryRead = "/agent/v1/reads/dashboard.summary";
 const pingsRead = "/agent/v1/reads/dashboard.pings";
@@ -212,7 +212,11 @@ function pathsCard(summary) {
     term.textContent = label;
     const description = document.createElement("dd");
     description.className = "col-7 col-md-9 text-break";
-    description.textContent = presentText(value, "not set");
+    if (typeof value === "string" && value !== "") {
+      description.textContent = value;
+    } else {
+      description.append("Not set ", navigateButton("Set on Settings", "settings"));
+    }
     list.append(term, description);
   }
   body.append(title, list);
@@ -224,12 +228,41 @@ function settingsOf(summary) {
   return summary.settings && typeof summary.settings === "object" ? summary.settings : {};
 }
 
+// serverURLText names each public URL by its role, so the operator sees the
+// SDK, game API and assets addresses apart instead of one unlabelled string.
 function serverURLText(summary) {
-  const settings = settingsOf(summary);
-  if (typeof settings.server_url === "string" && settings.server_url !== "") {
-    return settings.server_url;
+  const urls = publicURLsOf(summary);
+  const parts = [];
+  for (const [role, label] of [["sdk", "SDK"], ["api", "Game API"], ["assets", "Assets"]]) {
+    if (urls.get(role)) {
+      parts.push(label + ": " + urls.get(role));
+    }
   }
-  return listText(summary.public_urls);
+  if (parts.length > 0) {
+    return parts.join(", ");
+  }
+  return "Not set";
+}
+
+function publicURLsOf(summary) {
+  const urls = new Map();
+  const values = summary && typeof summary === "object" ? summary.public_urls : null;
+  if (Array.isArray(values)) {
+    if (typeof values[0] === "string" && values[0] !== "") {
+      urls.set("api", values[0]);
+    }
+  } else if (values && typeof values === "object") {
+    for (const [role, value] of Object.entries(values)) {
+      if (typeof value === "string" && value !== "") {
+        urls.set(role, value);
+      }
+    }
+  }
+  const settings = settingsOf(summary);
+  if (!urls.has("api") && typeof settings.server_url === "string" && settings.server_url !== "") {
+    urls.set("api", settings.server_url);
+  }
+  return urls;
 }
 
 // serverURLNote names where the URL came from, so an environment-provided value
@@ -241,6 +274,9 @@ function serverURLNote(summary) {
   }
   if (settings.server_url_source === "agent_environment") {
     return "from the agent's environment; set an env file to change it here";
+  }
+  if (publicURLsOf(summary).size === 0) {
+    return "Set the SDK, Game API and Assets URLs on the Server page.";
   }
   return undefined;
 }
@@ -445,13 +481,6 @@ function presentText(value, fallback) {
   return typeof value === "string" && value !== "" ? value : fallback;
 }
 
-function listText(values) {
-  if (!Array.isArray(values) || values.length === 0) {
-    return "unknown";
-  }
-  return values.join(", ");
-}
-
 function countText(values) {
   return Array.isArray(values) ? String(values.length) : "unknown";
 }
@@ -504,9 +533,13 @@ function laneText(ota, lane) {
     return "unknown";
   }
   if (lane === "catalog") {
-    return Array.isArray(ota.catalog) && ota.catalog.length > 0 ? ota.catalog.join(", ") : "none";
+    return Array.isArray(ota.catalog) && ota.catalog.length > 0 ? ota.catalog.join(", ") : "Nothing published";
   }
-  return valueText(ota[lane]);
+  if (!Object.prototype.hasOwnProperty.call(ota, lane)) {
+    return "unknown";
+  }
+  const value = ota[lane];
+  return typeof value === "string" && value !== "" ? value : "Nothing published";
 }
 
 function assetText(assets) {

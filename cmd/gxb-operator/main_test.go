@@ -1,6 +1,57 @@
 package main
 
-import "testing"
+import (
+	"io"
+	"os"
+	"strings"
+	"testing"
+)
+
+func TestHelpSpellingsPrintUsageToStdoutAndSucceed(t *testing.T) {
+	for _, arguments := range [][]string{{"help"}, {"--help"}, {"-h"}} {
+		t.Run(strings.Join(arguments, " "), func(t *testing.T) {
+			file, err := os.CreateTemp(t.TempDir(), "stdout")
+			if err != nil {
+				t.Fatal(err)
+			}
+			original := os.Stdout
+			os.Stdout = file
+			runErr := run(arguments)
+			os.Stdout = original
+			if runErr != nil {
+				t.Fatalf("run(%v) = %v", arguments, runErr)
+			}
+			if _, err := file.Seek(0, io.SeekStart); err != nil {
+				t.Fatal(err)
+			}
+			output, err := io.ReadAll(file)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !strings.HasPrefix(string(output), "usage:\n") || !strings.Contains(string(output), "gxb-operator setup") {
+				t.Fatalf("stdout = %q", output)
+			}
+		})
+	}
+}
+
+func TestExtractRootFallsBackToTheEnvironment(t *testing.T) {
+	t.Setenv("GXB_OPERATOR_ROOT", "/tmp/from-environment")
+	root, remaining, err := extractRoot([]string{"read", "dashboard.summary"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if root != "/tmp/from-environment" || len(remaining) != 2 {
+		t.Fatalf("root = %q remaining = %v", root, remaining)
+	}
+	root, _, err = extractRoot([]string{"--root", "/tmp/explicit", "agent"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if root != "/tmp/explicit" {
+		t.Fatalf("--root did not win over the environment: %q", root)
+	}
+}
 
 func TestParseInvocationStripsRootBeforeDispatch(t *testing.T) {
 	t.Setenv("GXB_OPERATOR_ROOT", "")

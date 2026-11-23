@@ -39,6 +39,19 @@ export function emptyState(text) {
   return box;
 }
 
+// navigateButton opens another page through the shell's one navigation event;
+// a page never imports the shell directly.
+export function navigateButton(label, pageId) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "btn btn-link btn-sm p-0 align-baseline";
+  button.textContent = label;
+  button.addEventListener("click", () => {
+    document.dispatchEvent(new CustomEvent("gxb:navigate", { detail: pageId }));
+  });
+  return button;
+}
+
 export function pageHeader(text) {
   const header = document.createElement("div");
   header.className = "page-header mb-3";

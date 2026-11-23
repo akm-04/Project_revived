@@ -430,6 +430,10 @@ func (handler Handler) serveCommand(writer http.ResponseWriter, request *http.Re
 		handler.serveServerURLSet(writer, body)
 		return
 	}
+	if name == "server.public_urls.set" {
+		handler.servePublicURLsSet(writer, body)
+		return
+	}
 	response, err := handler.Operator.Command(request.Context(), operatoragent.OperatorRequest{
 		Name: name,
 		Envelope: operator.Envelope{
@@ -475,6 +479,10 @@ func (handler Handler) serveRead(writer http.ResponseWriter, request *http.Reque
 		handler.serveFileList(writer, request)
 		return
 	}
+	if name == "agent.cli.usage" {
+		handler.serveCLIUsage(writer)
+		return
+	}
 	response, err := handler.Operator.Read(request.Context(), name, request.URL.RawQuery)
 	if err != nil {
 		handler.writeAgentError(writer, name, err)
@@ -518,6 +526,14 @@ func (handler Handler) serveAgentSettings(writer http.ResponseWriter) {
 	}
 	handler.record("agent.settings", "read", "ok", nil)
 	writeJSON(writer, http.StatusOK, values)
+}
+
+// serveCLIUsage answers the operator CLI help the Terminal page prints and its
+// Commands panel lists. It is the same text the CLI help command prints.
+func (handler Handler) serveCLIUsage(writer http.ResponseWriter) {
+	usage := operatoragent.CLIHelp()
+	handler.record("agent.cli.usage", "read", "ok", map[string]any{"commands": len(usage.Commands)})
+	writeJSON(writer, http.StatusOK, usage)
 }
 
 // serveFileList answers the path picker's folder listing; it never forwards,
@@ -593,6 +609,47 @@ func (handler Handler) serveServerURLSet(writer http.ResponseWriter, body comman
 		return
 	}
 	handler.record("server.url.set", "settings", "ok", nil)
+	writeJSON(writer, http.StatusOK, reply)
+}
+
+// servePublicURLsSet stores the role-keyed SDK, game API and assets URLs; an
+// unknown role or a non-http(s) value is a 409 refusal.
+func (handler Handler) servePublicURLsSet(writer http.ResponseWriter, body commandRequest) {
+	if handler.Settings == nil {
+		writeRefusal(writer, http.StatusServiceUnavailable, operatoragent.CodeFailed, "the agent settings are not configured")
+		return
+	}
+	var change struct {
+		PublicURLs map[string]string `json:"public_urls"`
+		SDK        string            `json:"sdk"`
+		API        string            `json:"api"`
+		Assets     string            `json:"assets"`
+	}
+	if err := decodeCommandPayload(body.Payload, &change); err != nil {
+		writeRefusal(writer, http.StatusConflict, operatoragent.CodeBodyInvalid, err.Error())
+		return
+	}
+	// The Server page sends the role-keyed map; the registry-driven Advanced
+	// form sends the three flat fields. Both reach the same validation.
+	values := change.PublicURLs
+	if values == nil {
+		values = map[string]string{}
+	}
+	for role, value := range map[string]string{
+		operatoragent.PublicRoleSDK:    change.SDK,
+		operatoragent.PublicRoleAPI:    change.API,
+		operatoragent.PublicRoleAssets: change.Assets,
+	} {
+		if value != "" {
+			values[role] = value
+		}
+	}
+	reply, err := handler.Settings.SetPublicURLs(values)
+	if err != nil {
+		handler.writeAgentError(writer, "server.public_urls.set", err)
+		return
+	}
+	handler.record("server.public_urls.set", "settings", "ok", nil)
 	writeJSON(writer, http.StatusOK, reply)
 }
 

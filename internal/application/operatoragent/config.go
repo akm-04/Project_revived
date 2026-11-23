@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"net/url"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -68,6 +69,75 @@ func (config BackendConfig) StopGrace() time.Duration {
 	return time.Duration(*config.StopGraceSeconds) * time.Second
 }
 
+// The roles public_urls may name: the Cloudflare-style split of the three
+// client-facing addresses.
+const (
+	PublicRoleSDK    = "sdk"
+	PublicRoleAPI    = "api"
+	PublicRoleAssets = "assets"
+)
+
+// PublicURLs is the role-keyed public address map. The old form was a plain
+// list; decoding a list keeps the first entry as the "api" URL, because the one
+// old value was the game address and the list carried no roles. Further list
+// entries have no role to keep and are dropped.
+type PublicURLs map[string]string
+
+// UnmarshalJSON accepts both the role-keyed object and the old list form.
+func (urls *PublicURLs) UnmarshalJSON(data []byte) error {
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 || bytes.Equal(trimmed, []byte("null")) {
+		*urls = nil
+		return nil
+	}
+	if trimmed[0] == '[' {
+		var list []string
+		if err := json.Unmarshal(trimmed, &list); err != nil {
+			return errors.New("public_urls must be an object of role URLs or a list of URLs")
+		}
+		migrated := PublicURLs{}
+		if len(list) > 0 {
+			migrated[PublicRoleAPI] = list[0]
+		}
+		*urls = migrated
+		return nil
+	}
+	var values map[string]string
+	if err := json.Unmarshal(trimmed, &values); err != nil {
+		return errors.New("public_urls must be an object of role URLs or a list of URLs")
+	}
+	*urls = values
+	return nil
+}
+
+// Validate refuses an unknown role and a value that is not an absolute http or
+// https address; an empty value means the role is not set.
+func (urls PublicURLs) Validate() error {
+	for role, raw := range urls {
+		if role != PublicRoleSDK && role != PublicRoleAPI && role != PublicRoleAssets {
+			return fmt.Errorf("public_urls role %q is unknown; use %s, %s or %s", role, PublicRoleSDK, PublicRoleAPI, PublicRoleAssets)
+		}
+		value := strings.TrimSpace(raw)
+		if value == "" {
+			continue
+		}
+		parsed, err := url.Parse(value)
+		if err != nil || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Host == "" {
+			return fmt.Errorf("public_urls %s must be an absolute http or https address", role)
+		}
+	}
+	return nil
+}
+
+// Copy returns a detached copy, so a caller cannot change the config map.
+func (urls PublicURLs) Copy() PublicURLs {
+	copied := make(PublicURLs, len(urls))
+	for role, value := range urls {
+		copied[role] = value
+	}
+	return copied
+}
+
 // Config is agent.json: the agent root folder's configuration. Unknown fields
 // are refused so a typo never silently changes behaviour.
 type Config struct {
@@ -78,9 +148,10 @@ type Config struct {
 	StockCatalog  string            `json:"stock_catalog,omitempty"`
 	ClientTree    string            `json:"client_tree"`
 	Origins       map[string]string `json:"origins"`
-	// PublicURLs are the tunnel and LAN addresses the dashboard shows (S3).
-	// Empty until the operator sets them; the dashboard still renders (F1).
-	PublicURLs []string      `json:"public_urls,omitempty"`
+	// PublicURLs are the client-facing addresses the dashboard and the pings
+	// use, keyed by role (S3). Empty until the operator sets them; the
+	// dashboard still renders (F1).
+	PublicURLs PublicURLs    `json:"public_urls,omitempty"`
 	Backend    BackendConfig `json:"backend"`
 	// ToolLogDays is the age retention of the tool and backend log files (C1);
 	// nil means DefaultToolLogDays.
@@ -278,6 +349,9 @@ func (config Config) Validate() error {
 	}
 	if value := config.ToolLogDays; value != nil && (*value < 1 || *value > maximumToolLogDays) {
 		return fmt.Errorf("%s: tool_log_days %d is outside 1..%d", AgentConfigFileName, *value, maximumToolLogDays)
+	}
+	if err := config.PublicURLs.Validate(); err != nil {
+		return fmt.Errorf("%s: %v", AgentConfigFileName, err)
 	}
 	return nil
 }

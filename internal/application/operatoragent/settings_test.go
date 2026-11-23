@@ -214,6 +214,52 @@ func TestSettingsValuesReportNoServerURLSourceWhenBothAreEmpty(t *testing.T) {
 	}
 }
 
+func TestSetPublicURLsStoresRolesAndWritesTheGameAPIURLToTheEnvFile(t *testing.T) {
+	root, envPath := writeSettingsRoot(t)
+	reply, err := (SettingsService{Root: root}).SetPublicURLs(map[string]string{
+		PublicRoleSDK:    "https://sdk.example",
+		PublicRoleAPI:    "https://api.example",
+		PublicRoleAssets: "https://assets.example",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if reply.Message == "" || reply.Values.PublicURLs[PublicRoleAssets] != "https://assets.example" {
+		t.Fatalf("reply = %+v", reply)
+	}
+	config, err := LoadConfig(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if config.PublicURLs[PublicRoleSDK] != "https://sdk.example" || config.PublicURLs[PublicRoleAPI] != "https://api.example" {
+		t.Fatalf("config = %+v", config.PublicURLs)
+	}
+	value, err := ReadEnvValue(envPath, PublicEngineURLKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if value != "https://api.example" {
+		t.Fatalf("env %s = %q", PublicEngineURLKey, value)
+	}
+
+	before, err := os.ReadFile(filepath.Join(root, AgentConfigFileName))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = (SettingsService{Root: root}).SetPublicURLs(map[string]string{"other": "https://game.example"})
+	var refusal *Refusal
+	if !errors.As(err, &refusal) || refusal.Code != CodeSettingsInvalid {
+		t.Fatalf("unknown role error = %v", err)
+	}
+	after, err := os.ReadFile(filepath.Join(root, AgentConfigFileName))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(before) != string(after) {
+		t.Fatal("a refused role changed agent.json")
+	}
+}
+
 func TestSetServerURLNeedsAConfiguredEnvFile(t *testing.T) {
 	root := t.TempDir()
 	config := `{"listen":"127.0.0.1:8090","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`

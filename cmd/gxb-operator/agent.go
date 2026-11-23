@@ -40,6 +40,9 @@ func runAgent(root string, args []string) error {
 	defer logWriter.Close()
 	toolLog := operatoragent.NewToolLog(logWriter, time.Now)
 	terminalService := operatoragent.NewTerminalService(toolLog, time.Now)
+	if executable, err := os.Executable(); err == nil {
+		terminalService.Environment = operatoragent.TerminalEnvironmentWithCLI(os.Environ(), filepath.Dir(executable), root)
+	}
 	defer terminalService.Shutdown()
 	operations := operatoragent.NewOperations(operationsDirectory, toolLog, time.Now)
 	if err := operations.Recover(); err != nil {
@@ -100,6 +103,13 @@ func runAgent(root string, args []string) error {
 				return "", ""
 			}
 			return values.ServerURL, values.ServerURLSource
+		},
+		PublicURLs: func() operatoragent.PublicURLs {
+			values, err := settings.Values()
+			if err != nil {
+				return config.PublicURLs
+			}
+			return values.PublicURLs
 		},
 	}, time.Now)
 	publicEngineURL, _ := operatoragent.ReadEnvValue(config.Backend.EnvFile, operatoragent.PublicEngineURLKey)

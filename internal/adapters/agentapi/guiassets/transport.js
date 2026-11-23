@@ -46,7 +46,9 @@ export async function request(targetPath, options) {
   try {
     response = await fetch(targetPath, { method: settings.method || "GET", headers, body });
   } catch (error) {
-    return { ok: false, status: 0, body: { error_code: "AGENT_UNREACHABLE", message: String(error) } };
+    // The browser's raw "Failed to fetch" text tells the operator nothing, so
+    // the transport reports the one useful fact itself.
+    return { ok: false, status: 0, body: { error_code: "AGENT_UNREACHABLE", message: "The operator agent is not reachable. Check that gxb-operator agent is running." } };
   }
   const text = await response.text();
   let parsed = null;
@@ -87,6 +89,12 @@ export function describeReply(reply) {
   if (body && typeof body === "object") {
     const code = body.error_code || body.code || "";
     const message = body.message || body.error || "";
+    if (code === "AGENT_BACKEND_UNAVAILABLE" || /backend is not running/i.test(message)) {
+      return "Backend not running";
+    }
+    if (code === "AGENT_UNREACHABLE") {
+      return message;
+    }
     if (code !== "" || message !== "") {
       return "HTTP " + reply.status + (code !== "" ? " " + code : "") + (message !== "" ? ": " + message : "");
     }

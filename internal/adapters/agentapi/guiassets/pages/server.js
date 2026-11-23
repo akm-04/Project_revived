@@ -7,6 +7,8 @@ import { describeReply, request } from "../transport.js";
 const statusRead = "/agent/v1/backend/status";
 const pingsRead = "/agent/v1/reads/dashboard.pings";
 const serversRead = "/agent/v1/reads/server.list";
+const settingsRead = "/agent/v1/reads/agent.settings";
+const publicURLsCommand = "/agent/v1/commands/server.public_urls.set";
 const startPath = "/agent/v1/backend/start";
 const restartPath = "/agent/v1/backend/restart";
 const stopPath = "/agent/v1/backend/stop";
@@ -17,8 +19,9 @@ export function renderPage(container, context) {
   container.replaceChildren();
   container.append(pageHeader(context.page.label));
   const controls = buildControls();
+  const publicURLs = buildPublicURLsSection();
   const list = buildList();
-  container.append(controls.card, list.card);
+  container.append(controls.card, publicURLs.card, list.card);
 
   async function loadStatus() {
     const [statusReply, pingsReply] = await Promise.all([request(statusRead), request(pingsRead)]);
@@ -51,8 +54,52 @@ export function renderPage(container, context) {
     setStatus(list.status, "Loaded " + servers.length + " server" + (servers.length === 1 ? "." : "s."), "success");
   }
 
+  async function loadPublicURLs() {
+    publicURLs.status.textContent = "";
+    const reply = await request(settingsRead);
+    if (reply.unauthorized || !reply.ok) {
+      publicURLs.status.textContent = reply.ok ? "" : describeReply(reply);
+      return;
+    }
+    const values = reply.body && typeof reply.body === "object" ? reply.body : {};
+    const urls = values.public_urls && typeof values.public_urls === "object" ? values.public_urls : {};
+    publicURLs.sdk.value = presentText(urls.sdk, "");
+    publicURLs.api.value = presentText(urls.api, presentText(values.server_url, ""));
+    publicURLs.assets.value = presentText(urls.assets, "");
+  }
+
+  async function savePublicURLs() {
+    publicURLs.status.textContent = "";
+    publicURLs.save.disabled = true;
+    const payload = {
+      sdk: publicURLs.sdk.value.trim(),
+      api: publicURLs.api.value.trim(),
+      assets: publicURLs.assets.value.trim(),
+    };
+    const reply = await request(publicURLsCommand, {
+      method: "POST",
+      body: { reason: "Server: set the public URLs", semantic_key: newSemanticKey(), payload: { public_urls: payload } },
+    });
+    publicURLs.save.disabled = false;
+    if (reply.unauthorized) {
+      return;
+    }
+    if (!reply.ok) {
+      setStatus(publicURLs.status, describeReply(reply), "error");
+      return;
+    }
+    const body = reply.body && typeof reply.body === "object" ? reply.body : {};
+    setStatus(publicURLs.status, presentText(body.message, "The public URLs are saved."), "success");
+    await loadPublicURLs();
+    await loadStatus();
+  }
+
+  publicURLs.save.addEventListener("click", () => {
+    void savePublicURLs();
+  });
+
   async function refresh() {
-    await Promise.all([loadStatus(), loadServers()]);
+    await Promise.all([loadStatus(), loadServers(), loadPublicURLs()]);
   }
 
   async function runAction(action) {
@@ -94,6 +141,63 @@ export function renderPage(container, context) {
   });
 
   void refresh();
+}
+
+// buildPublicURLsSection shows the three client-facing addresses by role
+// instead of one unlabelled field. Each is optional and must be http(s); an
+// unknown role or a malformed value is a 409 refusal from the agent.
+function buildPublicURLsSection() {
+  const card = document.createElement("div");
+  card.className = "card card-body";
+  card.id = "server-public-urls";
+  const heading = document.createElement("h2");
+  heading.className = "card-title";
+  heading.textContent = "Public URLs";
+  const help = document.createElement("p");
+  help.className = "module-help";
+  help.textContent = "The addresses clients use: the SDK endpoint, the game API and the asset server. Each is optional and must be an absolute http or https URL. The game API URL is also written to the backend env file.";
+  const grid = document.createElement("div");
+  grid.className = "row g-2";
+  const sdk = urlField(grid, "server-public-url-sdk", "SDK URL", "sdk.example");
+  const api = urlField(grid, "server-public-url-api", "Game API URL", "api.example");
+  const assets = urlField(grid, "server-public-url-assets", "Assets URL", "assets.example");
+  const save = document.createElement("button");
+  save.type = "button";
+  save.className = "btn btn-primary mt-2";
+  save.id = "server-public-urls-save";
+  save.textContent = "Save URLs";
+  const status = document.createElement("p");
+  status.className = "status mt-2";
+  status.id = "server-public-urls-status";
+  status.setAttribute("role", "status");
+  card.append(heading, help, grid, save, status);
+  return { card, sdk, api, assets, save, status };
+}
+
+function urlField(grid, identifier, labelText, placeholder) {
+  const column = document.createElement("div");
+  column.className = "col-12 col-md-4";
+  const label = document.createElement("label");
+  label.className = "form-label";
+  label.htmlFor = identifier;
+  label.textContent = labelText;
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "form-control";
+  input.id = identifier;
+  input.autocomplete = "off";
+  input.spellcheck = false;
+  input.placeholder = placeholder;
+  column.append(label, input);
+  grid.append(column);
+  return input;
+}
+
+function newSemanticKey() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return "gui-" + Date.now() + "-" + Math.random().toString(16).slice(2);
 }
 
 function buildControls() {
@@ -168,9 +272,14 @@ function serverState(status, pings) {
   } else if (sampleFailed(internet)) {
     reasons.push("internet unreachable");
   }
-  const publicBackend = lastSample(targets, "public_backend");
-  if (publicBackend !== null && sampleFailed(publicBackend)) {
-    reasons.push("public URL unreachable");
+  for (const target of targets) {
+    if (typeof target.id !== "string" || !target.id.startsWith("public_")) {
+      continue;
+    }
+    const sample = lastSample(targets, target.id);
+    if (sample !== null && sampleFailed(sample)) {
+      reasons.push(presentText(target.label, target.id) + " unreachable");
+    }
   }
   if (reasons.length === 0) {
     return { tone: "success", text: "Running", running: true };

@@ -76,10 +76,15 @@ func TestDashboardSummaryFoldsEverySection(t *testing.T) {
 		Backend:    backend,
 		Operator:   client,
 		Version:    fakeVersionSource{info: version},
-		PublicURLs: []string{"https://tunnel", "http://192.168.1.2"},
-		Settings:   fakeSettingsSource{values: AgentSettingsValues{ServerURL: "https://game.example", ResPath: "/srv/res", BackupPath: "/srv/backups"}},
-		Backups:    BackupService{Directory: backups},
-		Now:        func() time.Time { return at },
+		PublicURLs: PublicURLs{PublicRoleSDK: "https://sdk.example"},
+		Settings: fakeSettingsSource{values: AgentSettingsValues{
+			ServerURL:  "https://game.example",
+			PublicURLs: PublicURLs{PublicRoleSDK: "https://sdk.example", PublicRoleAPI: "https://game.example"},
+			ResPath:    "/srv/res",
+			BackupPath: "/srv/backups",
+		}},
+		Backups: BackupService{Directory: backups},
+		Now:     func() time.Time { return at },
 	}.Summary(context.Background())
 	if !summary.Backend.Running || summary.Backend.PID != 42 {
 		t.Fatalf("backend = %+v", summary.Backend)
@@ -111,7 +116,7 @@ func TestDashboardSummaryFoldsEverySection(t *testing.T) {
 	if summary.Settings == nil || summary.Settings.ResPath != "/srv/res" || summary.Settings.BackupPath != "/srv/backups" {
 		t.Fatalf("settings = %+v", summary.Settings)
 	}
-	if len(summary.PublicURLs) != 1 || summary.PublicURLs[0] != "https://game.example" {
+	if summary.PublicURLs[PublicRoleSDK] != "https://sdk.example" || summary.PublicURLs[PublicRoleAPI] != "https://game.example" {
 		t.Fatalf("public urls = %v", summary.PublicURLs)
 	}
 }

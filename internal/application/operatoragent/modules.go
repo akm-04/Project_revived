@@ -28,6 +28,11 @@ func ServerModule() operator.Module {
 			{Name: "server.url.set", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Set the client-facing server URL in the backend env file; the APK must be rebuilt with it.", Fields: []operator.Field{
 				operator.NewField("url", operator.FieldString, true, "absolute http or https address the clients reach"),
 			}},
+			{Name: "server.public_urls.set", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Set the role-keyed public URLs (public_urls.sdk, .api, .assets); the game API URL is also written to the backend env file. Unknown roles are refused.", Fields: []operator.Field{
+				operator.NewField("sdk", operator.FieldString, false, "SDK URL; absolute http or https"),
+				operator.NewField("api", operator.FieldString, false, "game API URL; absolute http or https"),
+				operator.NewField("assets", operator.FieldString, false, "assets URL; absolute http or https"),
+			}},
 		},
 	}
 }
@@ -56,6 +61,7 @@ func AgentSettingsModule() operator.Module {
 				operator.NewField("path", operator.FieldString, false, "absolute folder to list; empty uses the agent root"),
 				operator.NewField("show_files", operator.FieldBool, false, "include files beside the folders"),
 			}},
+			{Name: "agent.cli.usage", Help: "The operator CLI help text and one row per command, the same text the CLI prints."},
 		},
 	}
 }

@@ -289,17 +289,29 @@ svg {
 }
 
 .operator-nav-section + .operator-nav-section {
-  margin-top: 1.4rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--tblr-operator-sidebar-border);
 }
 
+/* Group headings are section labels, not tabs: muted uppercase text with no
+   link, button, hover or pointer affordance. */
 .operator-nav-heading {
   padding: 0.25rem 0.6rem;
   margin-bottom: 0.25rem;
-  color: #9aa1ab;
-  font-size: 0.78rem;
+  color: var(--tblr-secondary-color);
+  font-size: 0.7rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+  cursor: default;
+  user-select: none;
+}
+
+.operator-nav-heading:hover,
+.operator-nav-heading:focus {
+  color: var(--tblr-secondary-color);
+  background: transparent;
 }
 
 .operator-nav-empty {
