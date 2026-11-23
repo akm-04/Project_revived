@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"testing"
 	"time"
 
@@ -184,8 +185,13 @@ func TestRegisterBuildRules(t *testing.T) {
 		t.Fatalf("equal number err=%v", err)
 	}
 	lower := buildPayload(t, "1.631.4", "code", 2000)
-	if _, err := commands.RegisterBuild(ctx, noTx{}, "cmd-lower", lower, at); refusalCode(t, err) != CodeRollbackRequired {
-		t.Fatalf("lower without rollback err=%v", err)
+	_, lowerErr := commands.RegisterBuild(ctx, noTx{}, "cmd-lower", lower, at)
+	if refusalCode(t, lowerErr) != CodeRollbackRequired {
+		t.Fatalf("lower without rollback err=%v", lowerErr)
+	}
+	var lowerRefusal *operator.Refusal
+	if !errors.As(lowerErr, &lowerRefusal) || !strings.Contains(lowerRefusal.Message, "clear the app's data") {
+		t.Fatalf("rollback refusal does not warn about clearing data: %v", lowerErr)
 	}
 	lower.Rollback = true
 	commands.Root = rootWithVolumes(t, lower)

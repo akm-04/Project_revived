@@ -75,26 +75,48 @@ func (status otaStatusReply) highestVersion(lane domain.Lane) (domain.Version, b
 			seen = true
 		}
 	}
-	switch lane {
-	case domain.LaneCode:
-		if status.Active.Code != nil {
-			consider(*status.Active.Code)
-		}
-	case domain.LaneAssets:
-		if status.Active.Assets != nil {
-			consider(*status.Active.Assets)
-		}
-	case domain.LaneCatalog:
-		for _, text := range status.Active.Catalog {
-			consider(text)
-		}
-	}
+	status.eachActive(lane, consider)
 	for _, release := range status.Built {
 		if release.Lane == string(lane) {
 			consider(release.Version)
 		}
 	}
 	return highest, seen
+}
+
+// activeVersion is the lane's highest ACTIVE version; a rollback is measured
+// against it, not against a staged number (T6).
+func (status otaStatusReply) activeVersion(lane domain.Lane) (domain.Version, bool) {
+	highest := domain.Version{}
+	seen := false
+	status.eachActive(lane, func(text string) {
+		parsed, err := domain.ParseVersion(text)
+		if err != nil {
+			return
+		}
+		if !seen || parsed.Compare(highest) > 0 {
+			highest = parsed
+			seen = true
+		}
+	})
+	return highest, seen
+}
+
+func (status otaStatusReply) eachActive(lane domain.Lane, visit func(string)) {
+	switch lane {
+	case domain.LaneCode:
+		if status.Active.Code != nil {
+			visit(*status.Active.Code)
+		}
+	case domain.LaneAssets:
+		if status.Active.Assets != nil {
+			visit(*status.Active.Assets)
+		}
+	case domain.LaneCatalog:
+		for _, text := range status.Active.Catalog {
+			visit(text)
+		}
+	}
 }
 
 // readStatus reads ota.status once for the next-version rule.
@@ -113,9 +135,11 @@ func (build Build) readStatus(ctx context.Context) (otaStatusReply, error) {
 	return status, nil
 }
 
-// resolveBuildVersion applies the G14 rule: only the last component increments
-// over the lane's highest built-or-active version; a rollback names its own
-// lower number. Any other shape is refused.
+// resolveBuildVersion applies G23 (amends G14): an empty version is the lane's
+// next last-component increment over its highest built-or-active release. A
+// typed version keeps the client's x.y.z comparison rule; the active number is
+// refused, and a lower number is a rollback that needs the acknowledgement.
+// Stage never publishes.
 func resolveBuildVersion(status otaStatusReply, lane domain.Lane, requested string, rollback bool) (domain.Version, error) {
 	var supplied domain.Version
 	hasSupplied := requested != ""
@@ -127,20 +151,35 @@ func resolveBuildVersion(status otaStatusReply, lane domain.Lane, requested stri
 		supplied = parsed
 	}
 	highest, exists := status.highestVersion(lane)
-	if rollback {
-		if !hasSupplied {
-			return domain.Version{}, Refuse(CodeBuildVersionInvalid, "a rollback needs the version to step down to")
-		}
-		if exists && supplied.Compare(highest) >= 0 {
-			return domain.Version{}, Refuse(CodeBuildVersionInvalid, "a rollback version must be below the lane's current "+highest.String())
-		}
-		return supplied, nil
+	if rollback && !hasSupplied {
+		return domain.Version{}, Refuse(CodeBuildVersionInvalid, "a rollback needs the version to step down to")
 	}
 	if !hasSupplied {
 		if !exists {
 			return domain.Version{}, Refuse(CodeBuildNoBaseline, "the lane has no built or active release; supply the first version")
 		}
 		return domain.Version{Major: highest.Major, Minor: highest.Minor, Patch: highest.Patch + 1}, nil
+	}
+	active, hasActive := status.activeVersion(lane)
+	if hasActive {
+		switch supplied.Compare(active) {
+		case 0:
+			return domain.Version{}, Refuse(CodeBuildVersionNotNext, "the release number is already active")
+		case -1:
+			if !rollback {
+				return domain.Version{}, Refuse(CodeBuildRollbackRequired, "the release number is below the active "+active.String()+": "+domain.RollbackWarning)
+			}
+			return supplied, nil
+		}
+	}
+	if rollback {
+		if hasActive {
+			return domain.Version{}, Refuse(CodeBuildVersionInvalid, "a rollback version must be below the active "+active.String())
+		}
+		if exists && supplied.Compare(highest) >= 0 {
+			return domain.Version{}, Refuse(CodeBuildVersionInvalid, "a rollback version must be below the lane's current "+highest.String())
+		}
+		return supplied, nil
 	}
 	if exists {
 		next := domain.Version{Major: highest.Major, Minor: highest.Minor, Patch: highest.Patch + 1}
