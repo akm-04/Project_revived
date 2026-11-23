@@ -32,6 +32,7 @@ func DashboardModule() operator.Module {
 		Screen:     operator.Screen{Tab: "Dashboard"},
 		Reads: []operator.Read{
 			{Name: "dashboard.summary", Help: "Backend, servers, events, OTA and asset-front overview."},
+			{Name: "dashboard.pings", Help: "Recent latency samples for the internet, backend ports and public URLs."},
 		},
 	}
 }

@@ -16,6 +16,14 @@ import (
 // as xyd.serverUrl.
 const PublicEngineURLKey = "GXB_PUBLIC_ENGINE_URL"
 
+// The two places the agent can learn the client-facing URL from: the backend
+// env file first, then its own process environment (the backend inherits it
+// when agent.json names no env file).
+const (
+	ServerURLSourceEnvFile          = "env_file"
+	ServerURLSourceAgentEnvironment = "agent_environment"
+)
+
 // SettingsService reads and writes the two operator settings files: agent.json
 // (backend, backup, toolchain and app_repack paths) and the backend env file
 // (the public engine URL). The OTA paths live in settings.json and are changed
@@ -23,11 +31,16 @@ const PublicEngineURLKey = "GXB_PUBLIC_ENGINE_URL"
 type SettingsService struct {
 	Root    string
 	OTARoot string
+	// LookupEnvironment reads the agent process environment; nil means
+	// os.Getenv. Tests set it to prove the fallback without touching the
+	// process environment.
+	LookupEnvironment func(string) string
 }
 
 // AgentSettingsValues is the read the Settings page and the dashboard show.
 type AgentSettingsValues struct {
 	ServerURL        string                    `json:"server_url"`
+	ServerURLSource  string                    `json:"server_url_source"`
 	BackendPath      string                    `json:"backend_path"`
 	EnvFile          string                    `json:"env_file"`
 	ResPath          string                    `json:"res_path"`
@@ -76,12 +89,13 @@ func (service SettingsService) Values() (AgentSettingsValues, error) {
 	if err != nil {
 		return AgentSettingsValues{}, err
 	}
-	serverURL, err := ReadEnvValue(config.Backend.EnvFile, PublicEngineURLKey)
+	serverURL, source, err := service.serverURL(config)
 	if err != nil {
 		return AgentSettingsValues{}, err
 	}
 	return AgentSettingsValues{
 		ServerURL:        serverURL,
+		ServerURLSource:  source,
 		BackendPath:      config.Backend.Binary,
 		EnvFile:          config.Backend.EnvFile,
 		ResPath:          otaSettings.ResPath,
@@ -92,6 +106,32 @@ func (service SettingsService) Values() (AgentSettingsValues, error) {
 		ToolchainPath:    config.ToolchainPath,
 		OTASettings:      otaSettings,
 	}, nil
+}
+
+// serverURL reads the client-facing URL in the backend's own precedence: the
+// env file entry first, then the agent's process environment, which the
+// started backend inherits. The source tells the GUI where the value came from
+// so a read-only environment value is not mistaken for a missing setting.
+func (service SettingsService) serverURL(config Config) (string, string, error) {
+	fromFile, err := ReadEnvValue(config.Backend.EnvFile, PublicEngineURLKey)
+	if err != nil {
+		return "", "", err
+	}
+	if fromFile != "" {
+		return fromFile, ServerURLSourceEnvFile, nil
+	}
+	fromEnvironment := service.environment(PublicEngineURLKey)
+	if fromEnvironment != "" {
+		return fromEnvironment, ServerURLSourceAgentEnvironment, nil
+	}
+	return "", "", nil
+}
+
+func (service SettingsService) environment(key string) string {
+	if service.LookupEnvironment != nil {
+		return service.LookupEnvironment(key)
+	}
+	return os.Getenv(key)
 }
 
 // SetAgent applies the supplied paths to agent.json. Every value is validated
@@ -153,7 +193,7 @@ func (service SettingsService) SetServerURL(raw string) (ServerURLReply, error) 
 		return ServerURLReply{}, Refuse(CodeSettingsUnavailable, "agent.json is unreadable: "+err.Error())
 	}
 	if config.Backend.EnvFile == "" {
-		return ServerURLReply{}, Refuse(CodeSettingsUnavailable, "agent.json names no backend env file")
+		return ServerURLReply{}, Refuse(CodeSettingsUnavailable, "This install has no backend env file, so the agent cannot save the server URL here. Set an env file in agent.json to change it from this page.")
 	}
 	if err := WriteEnvValue(config.Backend.EnvFile, PublicEngineURLKey, normalized); err != nil {
 		return ServerURLReply{}, Refuse(CodeSettingsUnavailable, "the backend env file cannot be written: "+err.Error())

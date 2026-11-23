@@ -87,6 +87,20 @@ func StartBackend(backend BackendControl, tokens *TokenHolder, closed bool) erro
 	return nil
 }
 
+// RestartBackend stops the backend and starts it again; the caller holds the
+// busy guard for the whole pair, so no start, stop or maintenance flow
+// interleaves it. A failure after the stop leaves the backend stopped and the
+// refusal says so.
+func RestartBackend(backend BackendControl, tokens *TokenHolder, closed bool) error {
+	if err := backend.Stop(); err != nil {
+		return err
+	}
+	if err := StartBackend(backend, tokens, closed); err != nil {
+		return Refuse(CodeBackendRestartFailed, "the backend is now stopped: the restart could not start it: "+err.Error())
+	}
+	return nil
+}
+
 // Publish runs stop -> start closed -> status -> publish -> stop -> start open.
 func (maintenance Maintenance) Publish(ctx context.Context, version, reason, semanticKey string) (Operation, error) {
 	return maintenance.run(ctx, "ota.publish", version, reason, semanticKey)

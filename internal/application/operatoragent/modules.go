@@ -20,6 +20,9 @@ func ServerModule() operator.Module {
 			{Name: "server.start", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Start the backend process.", Fields: []operator.Field{
 				operator.NewField("closed", operator.FieldBool, false, "start without binding the game listener"),
 			}},
+			{Name: "server.restart", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Stop the backend process and start it again; a failure after the stop leaves it stopped.", Fields: []operator.Field{
+				operator.NewField("closed", operator.FieldBool, false, "start without binding the game listener"),
+			}},
 			{Name: "server.stop", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Stop the backend process."},
 			{Name: "server.status", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Report whether the backend process is running."},
 			{Name: "server.url.set", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Set the client-facing server URL in the backend env file; the APK must be rebuilt with it.", Fields: []operator.Field{

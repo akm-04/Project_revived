@@ -4,9 +4,19 @@ import { describeReply, request } from "../transport.js";
 import { pageHeader } from "../components/format.js";
 
 const summaryRead = "/agent/v1/reads/dashboard.summary";
+const pingsRead = "/agent/v1/reads/dashboard.pings";
 const refreshChoices = [1, 3, 10, 30, 60];
 const defaultRefreshSeconds = 10;
 const refreshStorageKey = "gxbDashboardRefreshSeconds";
+
+// Inline SVG needs its namespace, which is not an external resource fetch.
+const svgNamespace = "http://www.w3.org/2000/svg";
+const chartWidth = 320;
+const chartHeight = 96;
+const chartLeft = 44;
+const chartRight = 312;
+const chartTop = 12;
+const chartBottom = 76;
 
 // renderPage draws dashboard.summary as overview cards (G7, G20, G21). The
 // refresh choice is kept per browser; a tick is skipped while a request is in
@@ -42,10 +52,13 @@ export function renderPage(container, context) {
   const overview = document.createElement("div");
   overview.className = "row g-2";
   overview.id = "dashboard-overview";
+  const pings = document.createElement("section");
+  pings.className = "mt-3";
+  pings.id = "dashboard-pings";
   const details = document.createElement("section");
   details.className = "mt-3";
   details.id = "dashboard-details";
-  container.append(heading, help, controls, status, overview, details);
+  container.append(heading, help, controls, status, overview, pings, details);
 
   let timer = null;
   let inFlight = false;
@@ -61,7 +74,7 @@ export function renderPage(container, context) {
     inFlight = true;
     refresh.disabled = true;
     try {
-      await load(overview, details, status);
+      await load(overview, pings, details, status);
     } finally {
       inFlight = false;
       refresh.disabled = false;
@@ -97,11 +110,12 @@ export function renderPage(container, context) {
   schedule(readRefreshSeconds());
 }
 
-async function load(overview, details, status) {
-  const reply = await request(summaryRead);
-  if (reply.unauthorized) {
+async function load(overview, pings, details, status) {
+  const [reply, pingsReply] = await Promise.all([request(summaryRead), request(pingsRead)]);
+  if (reply.unauthorized || pingsReply.unauthorized) {
     return;
   }
+  renderPings(pings, pingsReply);
   if (!reply.ok) {
     status.textContent = describeReply(reply);
     return;
@@ -111,7 +125,7 @@ async function load(overview, details, status) {
   const reachable = summary.api && summary.api.reachable === true;
   overview.replaceChildren();
   overview.append(
-    card("Server URL", serverURLText(summary), "dashboard-server-url"),
+    card("Server URL", serverURLText(summary), "dashboard-server-url", serverURLNote(summary)),
     card("Backend version", versionText(summary.version), "dashboard-backend-version"),
     card("Backend", backendText(summary.backend), "dashboard-backend"),
     card("API ping", pingText(summary.api), "dashboard-api-ping"),
@@ -216,6 +230,208 @@ function serverURLText(summary) {
     return settings.server_url;
   }
   return listText(summary.public_urls);
+}
+
+// serverURLNote names where the URL came from, so an environment-provided value
+// is not mistaken for a setting the page can change (G32).
+function serverURLNote(summary) {
+  const settings = settingsOf(summary);
+  if (settings.server_url_source === "env_file") {
+    return "from the backend env file";
+  }
+  if (settings.server_url_source === "agent_environment") {
+    return "from the agent's environment; set an env file to change it here";
+  }
+  return undefined;
+}
+
+function renderPings(section, reply) {
+  section.replaceChildren();
+  const heading = document.createElement("h3");
+  heading.className = "module-title";
+  heading.textContent = "Network";
+  section.append(heading);
+  if (!reply.ok) {
+    const failure = document.createElement("p");
+    failure.className = "status";
+    failure.textContent = "Ping history is unavailable: " + describeReply(reply);
+    section.append(failure);
+    return;
+  }
+  const body = reply.body && typeof reply.body === "object" ? reply.body : {};
+  const targets = Array.isArray(body.targets) ? body.targets : [];
+  if (targets.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "status";
+    empty.textContent = "No network target is configured.";
+    section.append(empty);
+  } else {
+    const grid = document.createElement("div");
+    grid.className = "row g-2";
+    grid.id = "dashboard-ping-cards";
+    for (const target of targets) {
+      grid.append(pingCard(target));
+    }
+    section.append(grid);
+  }
+  const omitted = Array.isArray(body.omitted) ? body.omitted : [];
+  if (omitted.length > 0) {
+    const note = document.createElement("p");
+    note.className = "small text-secondary mt-2 mb-0";
+    note.id = "dashboard-ping-omitted";
+    note.textContent = "Not probed: " + omitted.map(omissionText).join("; ");
+    section.append(note);
+  }
+}
+
+function omissionText(omission) {
+  const entry = omission && typeof omission === "object" ? omission : {};
+  return presentText(entry.id, "unknown") + " (" + presentText(entry.reason, "no reason given") + ")";
+}
+
+function pingCard(target) {
+  const entry = target && typeof target === "object" ? target : {};
+  const samples = Array.isArray(entry.samples) ? entry.samples : [];
+  const column = document.createElement("div");
+  column.className = "col-12 col-lg-6";
+  const body = document.createElement("div");
+  body.className = "card card-body";
+  const title = document.createElement("div");
+  title.className = "text-secondary";
+  title.textContent = presentText(entry.label, presentText(entry.id, "unknown"));
+  const address = document.createElement("div");
+  address.className = "small text-break";
+  address.textContent = presentText(entry.address, "unknown");
+  const chart = pingChart(samples);
+  const summary = document.createElement("div");
+  summary.className = "small mt-1";
+  summary.textContent = pingSummary(samples);
+  body.append(title, address, chart, summary);
+  column.append(body);
+  return column;
+}
+
+// pingChart draws the retained samples as an inline SVG line chart. Successful
+// samples are a polyline; failed ones are dots on the baseline in the danger
+// colour. Colours come from Tabler classes through currentColor, so light and
+// dark themes both work without inline styles (CSP).
+function pingChart(samples) {
+  const svg = svgElement("svg", {
+    viewBox: "0 0 " + chartWidth + " " + chartHeight,
+    class: "w-100",
+    role: "img",
+    "aria-label": "Latency samples over time",
+  });
+  const successful = [];
+  for (const sample of samples) {
+    if (sampleMilliseconds(sample) !== null) {
+      successful.push(sampleMilliseconds(sample));
+    }
+  }
+  const maximum = successful.length > 0 ? Math.max(...successful) : 1;
+  const minimum = successful.length > 0 ? Math.min(...successful) : 0;
+  const scaleMaximum = maximum <= 0 ? 1 : maximum;
+  const span = Math.max(1, samples.length - 1);
+  const xAt = (index) => chartLeft + (index / span) * (chartRight - chartLeft);
+  const yAt = (value) => chartBottom - (Math.min(value, scaleMaximum) / scaleMaximum) * (chartBottom - chartTop);
+
+  svg.append(
+    svgElement("line", {
+      x1: chartLeft, y1: chartBottom, x2: chartRight, y2: chartBottom,
+      class: "text-secondary", stroke: "currentColor", "stroke-width": "1", opacity: "0.4",
+    }),
+    chartLabel(formatMilliseconds(maximum), 0, chartTop + 4, "start"),
+    chartLabel(formatMilliseconds(minimum), 0, chartBottom, "start"),
+  );
+
+  const points = [];
+  for (let index = 0; index < samples.length; index += 1) {
+    const milliseconds = sampleMilliseconds(samples[index]);
+    if (milliseconds === null) {
+      svg.append(svgElement("circle", {
+        cx: xAt(index).toFixed(1), cy: chartBottom, r: "1.8",
+        class: "text-danger", fill: "currentColor",
+      }));
+      continue;
+    }
+    points.push(xAt(index).toFixed(1) + "," + yAt(milliseconds).toFixed(1));
+  }
+  if (points.length > 0) {
+    svg.append(svgElement("polyline", {
+      points: points.join(" "),
+      class: "text-primary", fill: "none", stroke: "currentColor", "stroke-width": "2",
+    }));
+  } else {
+    svg.append(chartLabel("no samples yet", chartLeft, (chartTop + chartBottom) / 2, "start"));
+  }
+  if (samples.length > 0) {
+    svg.append(
+      chartLabel(clockText(samples[0]), chartLeft, chartHeight - 4, "start"),
+      chartLabel(clockText(samples[samples.length - 1]), chartRight, chartHeight - 4, "end"),
+    );
+  }
+  return svg;
+}
+
+function svgElement(name, attributes) {
+  const element = document.createElementNS(svgNamespace, name);
+  for (const [key, value] of Object.entries(attributes || {})) {
+    element.setAttribute(key, value);
+  }
+  return element;
+}
+
+function chartLabel(text, x, y, anchor) {
+  const label = svgElement("text", {
+    x: x, y: y, "text-anchor": anchor, "font-size": "11",
+    class: "text-secondary", fill: "currentColor",
+  });
+  label.textContent = text;
+  return label;
+}
+
+function sampleMilliseconds(sample) {
+  if (!sample || typeof sample !== "object") {
+    return null;
+  }
+  return typeof sample.ms === "number" && Number.isFinite(sample.ms) ? sample.ms : null;
+}
+
+function formatMilliseconds(value) {
+  return Math.round(value) + " ms";
+}
+
+function clockText(sample) {
+  if (!sample || typeof sample.at !== "string") {
+    return "unknown";
+  }
+  const parsed = Date.parse(sample.at);
+  return Number.isNaN(parsed) ? "unknown" : new Date(parsed).toLocaleTimeString();
+}
+
+function pingSummary(samples) {
+  if (samples.length === 0) {
+    return "No samples yet.";
+  }
+  let lost = 0;
+  let total = 0;
+  let sum = 0;
+  let successful = 0;
+  let last = "none";
+  for (const sample of samples) {
+    total += 1;
+    const milliseconds = sampleMilliseconds(sample);
+    if (milliseconds === null) {
+      lost += 1;
+      last = "failed";
+      continue;
+    }
+    successful += 1;
+    sum += milliseconds;
+    last = formatMilliseconds(milliseconds);
+  }
+  const average = successful > 0 ? formatMilliseconds(sum / successful) : "none";
+  return "Last " + last + " · average " + average + " · lost " + lost + " of " + total;
 }
 
 function valueText(value) {

@@ -138,7 +138,7 @@ func runLogout(root string) error {
 
 func runBackend(root string, args []string) error {
 	if len(args) == 0 {
-		return errors.New("usage: backend start [--closed] | stop | status")
+		return errors.New("usage: backend start [--closed] | restart [--closed] | stop | status")
 	}
 	client, err := newAgentClient(root, true)
 	if err != nil {
@@ -153,6 +153,18 @@ func runBackend(root string, args []string) error {
 			return err
 		}
 		status, body, err := client.request(http.MethodPost, "/agent/v1/backend/start", map[string]bool{"closed": *closed})
+		if err != nil {
+			return err
+		}
+		return printResult(status, body)
+	case "restart":
+		flags := flag.NewFlagSet("backend restart", flag.ContinueOnError)
+		flags.SetOutput(os.Stderr)
+		closed := flags.Bool("closed", false, "do not bind the game listener")
+		if err := flags.Parse(args[1:]); err != nil {
+			return err
+		}
+		status, body, err := client.request(http.MethodPost, "/agent/v1/backend/restart", map[string]bool{"closed": *closed})
 		if err != nil {
 			return err
 		}

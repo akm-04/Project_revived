@@ -1,6 +1,7 @@
 package operatoragent
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -43,11 +44,14 @@ func TestSettingsValuesReadBothSettingsFiles(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(otaRoot, "settings.json"), []byte(document), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	values, err := SettingsService{Root: root, OTARoot: otaRoot}.Values()
+	service := SettingsService{Root: root, OTARoot: otaRoot, LookupEnvironment: func(string) string {
+		return "https://environment.example"
+	}}
+	values, err := service.Values()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if values.ServerURL != "https://game.example" || values.ResPath != resPath || values.ApkResPath != apkPath {
+	if values.ServerURL != "https://game.example" || values.ServerURLSource != ServerURLSourceEnvFile || values.ResPath != resPath || values.ApkResPath != apkPath {
 		t.Fatalf("values = %+v", values)
 	}
 	if values.BackendPath == "" || values.EnvFile != envPath || values.BackupPath != filepath.Join(root, BackupDirectoryName) {
@@ -168,14 +172,58 @@ func TestSetServerURLWritesTheEnvFileAndRefusesInvalidValues(t *testing.T) {
 	}
 }
 
+// TestSettingsValuesFallBackToTheAgentEnvironment proves an install that
+// passes env_file "" still shows the URL the backend inherits from the agent
+// process, with its source (G32).
+func TestSettingsValuesFallBackToTheAgentEnvironment(t *testing.T) {
+	root := t.TempDir()
+	config := `{"listen":"127.0.0.1:8090","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`
+	if err := os.WriteFile(filepath.Join(root, AgentConfigFileName), []byte(config), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	service := SettingsService{Root: root, LookupEnvironment: func(key string) string {
+		if key == PublicEngineURLKey {
+			return "https://environment.example"
+		}
+		return ""
+	}}
+	values, err := service.Values()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if values.ServerURL != "https://environment.example" || values.ServerURLSource != ServerURLSourceAgentEnvironment {
+		t.Fatalf("values = %+v", values)
+	}
+}
+
+func TestSettingsValuesReportNoServerURLSourceWhenBothAreEmpty(t *testing.T) {
+	root := t.TempDir()
+	config := `{"listen":"127.0.0.1:8090","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`
+	if err := os.WriteFile(filepath.Join(root, AgentConfigFileName), []byte(config), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	values, err := (SettingsService{Root: root, LookupEnvironment: func(string) string { return "" }}).Values()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if values.ServerURL != "" || values.ServerURLSource != "" {
+		t.Fatalf("values = %+v", values)
+	}
+}
+
 func TestSetServerURLNeedsAConfiguredEnvFile(t *testing.T) {
 	root := t.TempDir()
 	config := `{"listen":"127.0.0.1:8090","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}}`
 	if err := os.WriteFile(filepath.Join(root, AgentConfigFileName), []byte(config), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := (SettingsService{Root: root}).SetServerURL("https://game.example"); err == nil {
-		t.Fatal("a missing env file was accepted")
+	_, err := (SettingsService{Root: root}).SetServerURL("https://game.example")
+	var refusal *Refusal
+	if !errors.As(err, &refusal) || refusal.Code != CodeSettingsUnavailable {
+		t.Fatalf("error = %v", err)
+	}
+	if !strings.Contains(refusal.Message, "no backend env file") || !strings.Contains(refusal.Message, "agent.json") {
+		t.Fatalf("message = %q", refusal.Message)
 	}
 }
 

@@ -25,23 +25,24 @@ import (
 )
 
 const (
-	setupPath         = "/agent/v1/setup"
-	loginPath         = "/agent/v1/login"
-	logoutPath        = "/agent/v1/logout"
-	passwordPath      = "/agent/v1/password"
-	backendStartPath  = "/agent/v1/backend/start"
-	backendStopPath   = "/agent/v1/backend/stop"
-	backendStatusPath = "/agent/v1/backend/status"
-	commandPrefix     = "/agent/v1/commands/"
-	readPrefix        = "/agent/v1/reads/"
-	publishPath       = "/agent/v1/ota/publish"
-	withdrawPath      = "/agent/v1/ota/withdraw"
-	buildPath         = "/agent/v1/ota/build"
-	operationPrefix   = "/agent/v1/ops/"
-	logTailPath       = "/agent/v1/log/tail"
-	modulesPath       = "/agent/v1/modules"
-	resPrefix         = "/agent/v1/res/"
-	backupPrefix      = "/agent/v1/backup/"
+	setupPath          = "/agent/v1/setup"
+	loginPath          = "/agent/v1/login"
+	logoutPath         = "/agent/v1/logout"
+	passwordPath       = "/agent/v1/password"
+	backendStartPath   = "/agent/v1/backend/start"
+	backendStopPath    = "/agent/v1/backend/stop"
+	backendRestartPath = "/agent/v1/backend/restart"
+	backendStatusPath  = "/agent/v1/backend/status"
+	commandPrefix      = "/agent/v1/commands/"
+	readPrefix         = "/agent/v1/reads/"
+	publishPath        = "/agent/v1/ota/publish"
+	withdrawPath       = "/agent/v1/ota/withdraw"
+	buildPath          = "/agent/v1/ota/build"
+	operationPrefix    = "/agent/v1/ops/"
+	logTailPath        = "/agent/v1/log/tail"
+	modulesPath        = "/agent/v1/modules"
+	resPrefix          = "/agent/v1/res/"
+	backupPrefix       = "/agent/v1/backup/"
 
 	maxBodyBytes = 1 << 20
 	// The agent re-marshals a command into a larger envelope, so it accepts
@@ -73,6 +74,8 @@ type Handler struct {
 	// Settings answers the agent.settings read and writes agent.json and the
 	// backend env file locally (G22).
 	Settings *operatoragent.SettingsService
+	// Pings answers the dashboard.pings read from the agent's sampler (G37).
+	Pings *operatoragent.PingSampler
 	// OTARoot holds settings.json, whose res_path the GUI picture route reads.
 	OTARoot string
 	// Listen is the exact host:port the agent listens on; every route refuses
@@ -187,6 +190,8 @@ func (handler Handler) serve(writer http.ResponseWriter, request *http.Request) 
 		handler.serveBackendStart(writer, request)
 	case request.URL.Path == backendStopPath && request.Method == http.MethodPost:
 		handler.serveBackendStop(writer)
+	case request.URL.Path == backendRestartPath && request.Method == http.MethodPost:
+		handler.serveBackendRestart(writer, request)
 	case request.URL.Path == backendStatusPath && request.Method == http.MethodGet:
 		status := handler.Backend.Status()
 		handler.record("backend.status", "status", "ok", status)
@@ -353,6 +358,29 @@ func (handler Handler) serveBackendStop(writer http.ResponseWriter) {
 	writeJSON(writer, http.StatusOK, map[string]string{"state": "stopped"})
 }
 
+// serveBackendRestart stops and starts the backend as one guarded operation
+// (G34). A failure after the stop answers a refusal that says the backend is
+// now stopped.
+func (handler Handler) serveBackendRestart(writer http.ResponseWriter, request *http.Request) {
+	var body closedRequest
+	if err := decodeOptionalBody(writer, request, &body); err != nil {
+		handler.writeBodyError(writer, err)
+		return
+	}
+	if !handler.Guard.TryLock() {
+		handler.writeAgentError(writer, "backend.restart", operatoragent.Refuse(operatoragent.CodeBackendBusy, "a backend operation is already running"))
+		return
+	}
+	defer handler.Guard.Unlock()
+	if err := operatoragent.RestartBackend(handler.Backend, handler.Tokens, body.Closed); err != nil {
+		handler.writeAgentError(writer, "backend.restart", err)
+		return
+	}
+	status := handler.Backend.Status()
+	handler.record("backend.restart", "restart", "ok", status)
+	writeJSON(writer, http.StatusOK, status)
+}
+
 func (handler Handler) serveCommand(writer http.ResponseWriter, request *http.Request, name string) {
 	var body commandRequest
 	if err := decodeBody(writer, request, maxCommandBodyBytes, &body); err != nil {
@@ -404,6 +432,10 @@ func (handler Handler) serveRead(writer http.ResponseWriter, request *http.Reque
 		handler.serveDashboard(writer, request)
 		return
 	}
+	if name == "dashboard.pings" {
+		handler.servePings(writer)
+		return
+	}
 	if name == "logs.tail" || name == "logs.search" {
 		handler.serveLogRead(writer, request, name)
 		return
@@ -427,6 +459,18 @@ func (handler Handler) serveDashboard(writer http.ResponseWriter, request *http.
 	summary := handler.Dashboard.Summary(request.Context())
 	handler.record("dashboard.summary", "read", "ok", map[string]any{"servers": len(summary.Servers), "events": len(summary.Events)})
 	writeJSON(writer, http.StatusOK, summary)
+}
+
+// servePings answers the sampler's in-memory history; the sampler belongs to
+// the agent process, so the read never forwards.
+func (handler Handler) servePings(writer http.ResponseWriter) {
+	if handler.Pings == nil {
+		writeRefusal(writer, http.StatusServiceUnavailable, operatoragent.CodeFailed, "the ping sampler is not configured")
+		return
+	}
+	report := handler.Pings.Read()
+	handler.record("dashboard.pings", "read", "ok", map[string]any{"targets": len(report.Targets)})
+	writeJSON(writer, http.StatusOK, report)
 }
 
 // serveAgentSettings answers the agent's own settings read; agent.json and the
@@ -953,6 +997,7 @@ var exchangeRoutes = []exchangeRoute{
 	{Name: "logout", Method: http.MethodPost, Sample: logoutPath, Match: exactPath(logoutPath)},
 	{Name: "backend.start", Method: http.MethodPost, Sample: backendStartPath, Match: exactPath(backendStartPath)},
 	{Name: "backend.stop", Method: http.MethodPost, Sample: backendStopPath, Match: exactPath(backendStopPath)},
+	{Name: "backend.restart", Method: http.MethodPost, Sample: backendRestartPath, Match: exactPath(backendRestartPath)},
 	{Name: "backend.status", Method: http.MethodGet, Sample: backendStatusPath, Match: exactPath(backendStatusPath)},
 	{Name: "command", Method: http.MethodPost, Sample: commandPrefix + "ota.publish", Match: prefixPath(commandPrefix)},
 	{Name: "read", Method: http.MethodGet, Sample: readPrefix + "player.find", Match: prefixPath(readPrefix)},
