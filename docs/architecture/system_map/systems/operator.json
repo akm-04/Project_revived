@@ -63,11 +63,15 @@
   ],
   "ranks": [],
   "row_lock_methods": {
+   "logical_servers": [
+    "i4store.RenameServerTx"
+   ],
    "operator_commands": [
     "operatorstore.ClaimTx"
    ]
   },
   "row_locks": [
+   "logical_servers",
    "operator_commands"
   ],
   "unresolved_methods": []
@@ -97,6 +101,7 @@
    "players"
   ],
   "written": [
+   "logical_servers",
    "operator_commands"
   ]
  },
@@ -110,7 +115,8 @@
   "unit": [
    "envelope_test.go",
    "inventory_reads_test.go",
-   "module_test.go"
+   "module_test.go",
+   "server_commands_test.go"
   ]
  }
 }

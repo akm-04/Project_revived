@@ -605,7 +605,8 @@ func main() {
 		map[string]operator.ReadHandler{"catalog.search": operatorapi.CatalogSearch(operatorCatalogue)})
 	playerModule := bindModule(operator.PlayerModule(), nil,
 		map[string]operator.ReadHandler{"player.find": operatorapi.PlayerFind(playerReads), "player.summary": operatorapi.PlayerSummary(playerReads)})
-	serverModule := bindModule(operator.ServerModule(), nil,
+	serverModule := bindModule(operator.ServerModule(),
+		map[string]operator.Handler{"server.rename": operator.ServerRenameHandler(i4store.ServerDirectoryReader{})},
 		map[string]operator.ReadHandler{"server.list": operatorapi.ServerList(serverReads)})
 	logoutModule := bindModule(logoutCommands.Module(), nil,
 		map[string]operator.ReadHandler{"session.online": operatorapi.SessionOnline(sessionReads)})

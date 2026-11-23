@@ -24,8 +24,8 @@ func PlayerModule() Module {
 	}
 }
 
-// ServerModule is the backend's server read module (OPERATOR_GUI_V2 design
-// item 1). Its commands are the agent's, merged into this module by id.
+// ServerModule is the backend's server module (OPERATOR_GUI_V2 design item 1,
+// S5). Its process commands are the agent's, merged into this module by id.
 func ServerModule() Module {
 	return Module{
 		ID:         ModServer,
@@ -33,6 +33,12 @@ func ServerModule() Module {
 		Role:       RoleRoot,
 		LogChannel: "server",
 		Screen:     Screen{Tab: "Server", Columns: []string{"server_id", "name", "open", "online_count"}},
+		Commands: []CommandSpec{
+			{Name: "server.rename", Class: ClassLive, Help: "Rename a registered logical server; the client server-select popup and server.list read the new name.", Fields: []Field{
+				NewField("server_id", FieldInt, true, "logical server id").Bounded(1, 999_999_999),
+				NewField("name", FieldString, true, "1 to 16 display characters; a non-ASCII character counts as two"),
+			}},
+		},
 		Reads: []Read{
 			{Name: "server.list", Help: "Registered logical servers with their live session count."},
 		},

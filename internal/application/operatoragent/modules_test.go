@@ -50,8 +50,14 @@ func TestModuleCatalogMergesTheAgentCommandsIntoTheBackendList(t *testing.T) {
 	if !publish || !build || !registerBuild || !settings {
 		t.Fatalf("merged ota commands = %+v", list.Modules[0].Commands)
 	}
-	if list.Modules[2].Commands[0].Route != operator.RouteAgent {
-		t.Fatalf("server commands = %+v", list.Modules[2].Commands)
+	serverRoutes := map[string]string{}
+	for _, command := range list.Modules[2].Commands {
+		serverRoutes[command.Name] = command.Route
+	}
+	for _, name := range []string{"server.start", "server.stop", "server.status", "server.url.set"} {
+		if serverRoutes[name] != operator.RouteAgent {
+			t.Fatalf("server command %q route = %q", name, serverRoutes[name])
+		}
 	}
 }
 

@@ -47,6 +47,11 @@ type DashboardBackups interface {
 	List(context.Context) (BackupList, error)
 }
 
+// SettingsValuesSource answers the agent settings read the dashboard shows.
+type SettingsValuesSource interface {
+	Values() (AgentSettingsValues, error)
+}
+
 // Dashboard composes the agent-side dashboard read. Each backend section is
 // best effort: one failing read leaves its section empty and names the error,
 // so the dashboard still answers while the backend is up but degraded.
@@ -55,6 +60,7 @@ type Dashboard struct {
 	Operator   OperatorClient
 	Version    VersionSource
 	PublicURLs []string
+	Settings   SettingsValuesSource
 	Backups    DashboardBackups
 	Now        func() time.Time
 }
@@ -119,6 +125,7 @@ type DashboardSummary struct {
 	API               DashboardAPIState     `json:"api"`
 	Version           *operator.VersionInfo `json:"version"`
 	PublicURLs        []string              `json:"public_urls"`
+	Settings          *AgentSettingsValues  `json:"settings,omitempty"`
 	Servers           []DashboardServer     `json:"servers"`
 	Events            []DashboardEvent      `json:"events"`
 	OTA               DashboardOTA          `json:"ota"`
@@ -155,6 +162,17 @@ func (dashboard Dashboard) Summary(ctx context.Context) DashboardSummary {
 			summary.API.Reachable = true
 			summary.API.PingMilliseconds = &elapsed
 			summary.Version = &version
+		}
+	}
+	if dashboard.Settings != nil {
+		values, settingsErr := dashboard.Settings.Values()
+		if settingsErr != nil {
+			summary.Errors = append(summary.Errors, "settings: "+settingsErr.Error())
+		} else {
+			summary.Settings = &values
+			if values.ServerURL != "" {
+				summary.PublicURLs = []string{values.ServerURL}
+			}
 		}
 	}
 	if dashboard.Operator != nil && summary.API.Reachable {
