@@ -165,6 +165,10 @@ export function openResourcePicker(options) {
       const category = categorySelect.value;
       if (category !== "") {
         query.set("category", category);
+        const chosen = categorySelect.selectedOptions[0];
+        if (chosen !== undefined && chosen.dataset.subType !== undefined) {
+          query.set("sub_type", chosen.dataset.subType);
+        }
       }
       const kind = kindSelect.value;
       if (kind !== "") {
@@ -221,6 +225,9 @@ export function openResourcePicker(options) {
         }
         const option = document.createElement("option");
         option.value = String(category.item_type);
+        if (typeof category.sub_type === "number") {
+          option.dataset.subType = String(category.sub_type);
+        }
         const label = typeof category.label === "string" && category.label !== "" ? category.label : "Other (type " + category.item_type + ")";
         option.textContent = label + " (" + category.count + ")";
         categorySelect.append(option);
@@ -239,7 +246,12 @@ export function openResourcePicker(options) {
           visible += 1;
         }
       }
-      status.textContent = visible === 0 ? "No resources match." : "Showing " + visible + " resources" + contentRevision;
+      if (visible === 0) {
+        const typed = searchInput.value.trim();
+        status.textContent = typed === "" ? "No items match." : 'No item matches "' + typed + '"';
+        return;
+      }
+      status.textContent = "Showing " + visible + " resources" + contentRevision;
     }
 
     function resourceCard(entry) {

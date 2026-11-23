@@ -624,14 +624,23 @@
       "revision_id": "452d053b66a78451eccd4a423b3c6cb3f0b5c52b57a90f42834cc05c53ee67a7",
       "scope": "item_presentation_catalog.json gains item.lua's quality column as the operator catalogue rarity; every other artifact byte-identical.",
       "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
+    },
+    {
+      "ordinal": 80,
+      "stage": "I11A GUI-G6b2 Catalogue Skins",
+      "compiler_version": "i11a-operator-catalogue-skins",
+      "parser_version": "lua-generated-v18-guild-invite",
+      "revision_id": "85230eb30d47d93453b9145eeee6bdc7d9912f98f7e66ccf25ba0f9a56b48fd8",
+      "scope": "item_presentation_catalog.json gains item.lua's consumable sub_type so subtype-8 skin items are catalogued as Skins; every other artifact byte-identical.",
+      "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
     }
   ],
   "current": {
-    "stage": "I11A-3 Operator Catalogue Rarity",
-    "compiler_version": "i11a-operator-catalogue",
+    "stage": "I11A GUI-G6b2 Catalogue Skins",
+    "compiler_version": "i11a-operator-catalogue-skins",
     "parser_version": "lua-generated-v18-guild-invite",
-    "revision_id": "452d053b66a78451eccd4a423b3c6cb3f0b5c52b57a90f42834cc05c53ee67a7",
-    "scope": "item_presentation_catalog.json gains item.lua's quality column as the operator catalogue rarity; every other artifact byte-identical.",
+    "revision_id": "85230eb30d47d93453b9145eeee6bdc7d9912f98f7e66ccf25ba0f9a56b48fd8",
+    "scope": "item_presentation_catalog.json gains item.lua's consumable sub_type so subtype-8 skin items are catalogued as Skins; every other artifact byte-identical.",
     "status": "WORKING_BRANCH_REGISTRATION_NOT_ACCEPTANCE"
   }
 }

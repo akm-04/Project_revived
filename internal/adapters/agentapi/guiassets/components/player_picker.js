@@ -285,7 +285,12 @@ export function openPlayerPicker(options) {
         level: player.level,
       }));
       const truncated = body.truncated === true ? " Narrow the search to see the rest." : "";
-      searchStatus.textContent = searchRows.length === 0 ? "No players match." : "Matches found." + truncated;
+      if (searchRows.length === 0) {
+        const typed = namePrefix !== "" ? namePrefix : uid;
+        searchStatus.textContent = 'No player matches "' + typed + '"';
+      } else {
+        searchStatus.textContent = "Matches found." + truncated;
+      }
       renderSearch();
     }
 

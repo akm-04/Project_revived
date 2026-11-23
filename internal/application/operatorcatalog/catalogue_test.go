@@ -232,3 +232,90 @@ func TestSearchPagesAndFilters(t *testing.T) {
 		t.Fatal("over-limit search accepted")
 	}
 }
+
+func TestSearchIgnoresLetterCaseInNameAndID(t *testing.T) {
+	document, err := Build([]Resource{
+		{DefinitionKey: "stack_item:50001040", Class: "STACK_ITEM", Activation: "ENABLED_R4", ItemID: 50001040, ItemType: 4},
+		{DefinitionKey: "stack_item:20001001", Class: "STACK_ITEM", Activation: "ENABLED_R4", ItemID: 20001001, ItemType: 1},
+	}, []ItemPresentation{{ID: 50001040, Name: "Annie Doll"}, {ID: 20001001, Name: "Sword"}}, time.Unix(100, 0))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var first []string
+	for _, query := range []string{"ANNIE", "annie", "AnNiE", "aNnIe"} {
+		page, err := document.Search(SearchFilter{Query: query})
+		if err != nil || len(page.Entries) != 1 || page.Entries[0].ID != "stack_item:50001040" {
+			t.Fatalf("query %q = %+v err=%v", query, page, err)
+		}
+		if first == nil {
+			first = []string{page.Entries[0].ID}
+		}
+		if page.Entries[0].ID != first[0] {
+			t.Fatalf("query %q returned %q, want %q", query, page.Entries[0].ID, first[0])
+		}
+	}
+}
+
+func TestSkinItemsUseTheSkinCategoryGirlNameAndSubtypeFilter(t *testing.T) {
+	document, err := Build([]Resource{
+		{DefinitionKey: "stack_item:50001040", Class: "STACK_ITEM", Activation: "ENABLED_R4", ItemID: 50001040, ItemType: 4},
+		{DefinitionKey: "stack_item:50008001", Class: "STACK_ITEM", Activation: "ENABLED_R4", ItemID: 50008001, ItemType: 4},
+		{DefinitionKey: "stack_item:50000001", Class: "STACK_ITEM", Activation: "ENABLED_R4", ItemID: 50000001, ItemType: 4},
+	}, []ItemPresentation{
+		{ID: 50001040, Name: "Stadium Star", SubType: 8, SkinHeroName: "Tennese"},
+		{ID: 50008001, Name: "神秘造型", SubType: 8},
+		{ID: 50000001, Name: "Potion", SubType: 1},
+		{ID: 10001034, Name: "Tennese"},
+	}, time.Unix(100, 0))
+	if err != nil {
+		t.Fatal(err)
+	}
+	named, _ := document.Lookup("stack_item:50001040")
+	if named.Category != "Skin" || named.Name != "Stadium Star (Tennese skin)" {
+		t.Fatalf("named skin = %+v", named)
+	}
+	if named.SubType == nil || *named.SubType != 8 {
+		t.Fatalf("skin subtype = %v", named.SubType)
+	}
+	unnamed, _ := document.Lookup("stack_item:50008001")
+	if unnamed.Category != "Skin" || unnamed.Name != "神秘造型" {
+		t.Fatalf("unnamed skin = %+v", unnamed)
+	}
+	potion, _ := document.Lookup("stack_item:50000001")
+	if potion.Category != "Consumables" || potion.SubType == nil || *potion.SubType != 1 {
+		t.Fatalf("potion = %+v", potion)
+	}
+	byGirl, err := document.Search(SearchFilter{Query: "TENNESE"})
+	if err != nil || len(byGirl.Entries) != 1 || byGirl.Entries[0].ID != "stack_item:50001040" {
+		t.Fatalf("girl name search = %+v err=%v", byGirl, err)
+	}
+	byWord, err := document.Search(SearchFilter{Query: "skin"})
+	if err != nil || len(byWord.Entries) != 2 {
+		t.Fatalf("skin word search = %+v err=%v", byWord, err)
+	}
+	category, skin := int64(4), int64(8)
+	skins, err := document.Search(SearchFilter{Category: &category, SubType: &skin})
+	if err != nil || len(skins.Entries) != 2 {
+		t.Fatalf("skin category = %+v err=%v", skins, err)
+	}
+	remaining := int64(0)
+	consumables, err := document.Search(SearchFilter{Category: &category, SubType: &remaining})
+	if err != nil || len(consumables.Entries) != 1 || consumables.Entries[0].ID != "stack_item:50000001" {
+		t.Fatalf("consumables category = %+v err=%v", consumables, err)
+	}
+	bucketSkin, bucketConsumables := false, false
+	for _, bucket := range skins.Categories {
+		if bucket.ItemType != category || bucket.SubType == nil {
+			continue
+		}
+		if *bucket.SubType == skin && bucket.Label == "Skin" && bucket.Count == 2 {
+			bucketSkin = true
+		}
+		if *bucket.SubType == remaining && bucket.Label == "Consumables" && bucket.Count == 1 {
+			bucketConsumables = true
+		}
+	}
+	if !bucketSkin || !bucketConsumables {
+		t.Fatalf("skin/consumable buckets = %+v", skins.Categories)
+	}
+}

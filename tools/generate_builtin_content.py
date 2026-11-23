@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i11a-operator-catalogue"
+COMPILER_VERSION = "i11a-operator-catalogue-skins"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -1169,7 +1169,12 @@ def build_item_presentation(items: list[dict[str, str]]) -> dict[str, Any]:
             quality = parse_int(row["quality"], label=f"item_presentation[{index}].quality", allow_zero=True, allow_negative=False)
             if quality > 6:
                 raise CompileError("item.lua quality is outside 0..6")
-        rows.append({"id": item_id, "name": row.get("name", ""), "icon": row.get("icon", ""), "quality": quality})
+        presentation = {"id": item_id, "name": row.get("name", ""), "icon": row.get("icon", ""), "quality": quality}
+        if row.get("sub_type", "") != "":
+            sub_type = parse_int(row["sub_type"], label=f"item_presentation[{index}].sub_type", allow_zero=True, allow_negative=False)
+            if sub_type > 0:
+                presentation["sub_type"] = sub_type
+        rows.append(presentation)
     rows.sort(key=lambda r: r["id"])
     if len({r["id"] for r in rows}) != len(rows):
         raise CompileError("item.lua presentation ids are not unique")
