@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GXB operator components</title>
+<link rel="stylesheet" href="/gui/vendor/tabler-1.7.3/tabler.min.css">
+<link rel="stylesheet" href="/gui/app.css">
+<script type="module" src="/gui/components/demo.js"></script>
+</head>
+<body>
+<section id="login-view" class="login" hidden>
+<div class="card card-md">
+<div class="card-body">
+<h1 class="card-title">GXB operator components</h1>
+<form id="login-form">
+<label class="form-label" for="password">Root password</label>
+<input id="password" name="password" type="password" class="form-control" autocomplete="current-password" required>
+<button type="submit" class="btn btn-primary w-100 mt-3">Log in</button>
+</form>
+<p id="login-status" class="status mt-2" role="status"></p>
+<p class="hint">First start: set the password with <code>gxb-operator setup</code>.</p>
+</div>
+</div>
+</section>
+
+<div id="components-view" hidden>
+<header class="navbar navbar-expand-md d-print-none">
+<div class="container-xl">
+<div class="navbar-brand">GXB operator components</div>
+</div>
+</header>
+<div class="page-wrapper">
+<div class="page-body">
+<div class="container-xl">
+<p class="hint">Each section drives one shared component and prints the value it returns as JSON.</p>
+<section class="card card-body mb-3" id="section-server">
+<h2 class="card-title">ServerPicker</h2>
+<p class="module-help">Checkbox list from server.list plus Global (all servers). Returns {global, server_ids}.</p>
+<button id="open-server-picker" type="button" class="btn btn-primary">Open</button>
+<pre id="server-output" class="component-output" aria-live="polite"></pre>
+</section>
+<section class="card card-body mb-3" id="section-player">
+<h2 class="card-title">PlayerPicker</h2>
+<p class="module-help">Online and Search tabs, multi-select. Returns [{player_id, name, server_id}].</p>
+<button id="open-player-picker" type="button" class="btn btn-primary">Open</button>
+<pre id="player-output" class="component-output" aria-live="polite"></pre>
+</section>
+<section class="card card-body mb-3" id="section-resource">
+<h2 class="card-title">ResourcePicker</h2>
+<p class="module-help">Catalogue search with icons and quantity. Returns grant lines [{id, amount}].</p>
+<button id="open-resource-picker" type="button" class="btn btn-primary">Open</button>
+<pre id="resource-output" class="component-output" aria-live="polite"></pre>
+</section>
+<section class="card card-body mb-3" id="section-duration">
+<h2 class="card-title">DurationPicker</h2>
+<p class="module-help">1d/3d/7d/15d/30d presets or a custom local start and end. Returns {start, end} as UTC RFC3339.</p>
+<button id="open-duration-picker" type="button" class="btn btn-primary">Open</button>
+<pre id="duration-output" class="component-output" aria-live="polite"></pre>
+</section>
+<section class="card card-body mb-3" id="section-confirm">
+<h2 class="card-title">ConfirmAction</h2>
+<p class="module-help">Action summary, required reason and a GUI-generated semantic key under Advanced details. Returns {reason, semantic_key}.</p>
+<button id="open-confirm-action" type="button" class="btn btn-primary">Open</button>
+<pre id="confirm-output" class="component-output" aria-live="polite"></pre>
+</section>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>
