@@ -2,21 +2,24 @@
 
 import { confirmAction } from "../components/confirm_action.js";
 import { formatTime, pageHeader, setStatus } from "../components/format.js";
+import { openPathPicker } from "../components/path_picker.js";
 import { describeReply, request } from "../transport.js";
 
 const operationPollMilliseconds = 1000;
+const noBackupFolderMessage = "No backup folder set. Choose a folder to enable snapshots.";
 
 // renderPage is the Backups screen: the snapshot overview and table first, the
 // three agent-run actions below. Update backend stays under Advanced.
 export function renderPage(container, context) {
   container.replaceChildren();
   container.append(pageHeader(context.page.label));
+  const folder = buildFolderCard();
   const overview = buildOverview();
   const list = buildList();
   const snapshot = buildSnapshotAction();
   const restore = buildAction("Restore selected snapshot");
   const prune = buildAction("Prune snapshots");
-  container.append(overview.card, list.card, snapshot.card, restore.card, prune.card);
+  container.append(folder.card, overview.card, list.card, snapshot.card, restore.card, prune.card);
   restore.button.disabled = true;
 
   let selectedEntry = null;
@@ -45,6 +48,16 @@ export function renderPage(container, context) {
     }
     const body = reply.body && typeof reply.body === "object" ? reply.body : {};
     const backups = Array.isArray(body.backups) ? body.backups : [];
+    const hasFolder = typeof body.directory === "string" && body.directory !== "";
+    folder.input.value = hasFolder ? body.directory : "";
+    snapshot.button.disabled = !hasFolder;
+    if (hasFolder) {
+      if (folder.status.textContent === noBackupFolderMessage) {
+        folder.status.textContent = "";
+      }
+    } else {
+      setStatus(folder.status, noBackupFolderMessage, "error");
+    }
     selectedEntry = null;
     backendMigration =
       typeof body.backend_migration === "number" && Number.isFinite(body.backend_migration)
@@ -133,10 +146,79 @@ export function renderPage(container, context) {
     }
   });
 
+  folder.browse.addEventListener("click", async () => {
+    const chosen = await openPathPicker({
+      title: "Backup folder",
+      start: folder.input.value.trim(),
+      mode: "folder",
+    });
+    if (chosen !== null) {
+      folder.input.value = chosen;
+    }
+  });
+
+  folder.save.addEventListener("click", async () => {
+    const path = folder.input.value.trim();
+    if (path === "") {
+      setStatus(folder.status, "Choose a backup folder first.", "error");
+      return;
+    }
+    const reply = await request("/agent/v1/backup/path", { method: "POST", body: { path } });
+    if (reply.unauthorized) {
+      return;
+    }
+    if (!reply.ok) {
+      setStatus(folder.status, describeReply(reply), "error");
+      return;
+    }
+    setStatus(folder.status, "Backup folder set. Snapshots in it are listed.", "success");
+    await loadList();
+  });
+
   list.refresh.addEventListener("click", () => {
     void loadList();
   });
   void loadList();
+}
+
+// buildFolderCard is the configurable snapshot folder. Setting it validates and
+// rescans the folder at once, so an existing snapshots folder needs no restart.
+function buildFolderCard() {
+  const card = document.createElement("div");
+  card.className = "card card-body";
+  const heading = document.createElement("h2");
+  heading.className = "card-title";
+  heading.textContent = "Backup folder";
+  const hint = document.createElement("p");
+  hint.className = "hint";
+  hint.textContent =
+    "Snapshots are written here. Setting a folder validates it and lists the snapshots already in it, with no restart.";
+  const group = document.createElement("div");
+  group.className = "input-group";
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "form-control";
+  input.id = "backup-path";
+  input.autocomplete = "off";
+  input.spellcheck = false;
+  input.placeholder = "absolute folder, for example /srv/gxb/backups";
+  const browse = document.createElement("button");
+  browse.type = "button";
+  browse.className = "btn btn-outline-secondary";
+  browse.id = "backup-path-browse";
+  browse.textContent = "Browse...";
+  const save = document.createElement("button");
+  save.type = "button";
+  save.className = "btn btn-primary";
+  save.id = "backup-path-save";
+  save.textContent = "Set folder";
+  group.append(input, browse, save);
+  const status = document.createElement("p");
+  status.className = "status mt-2";
+  status.id = "backup-path-status";
+  status.setAttribute("role", "status");
+  card.append(heading, hint, group, status);
+  return { card, input, browse, save, status };
 }
 
 function buildOverview() {
@@ -184,7 +266,7 @@ function fillOverview(overview, body) {
   }
   const backups = Array.isArray(body.backups) ? body.backups : [];
   const damaged = backups.filter((backup) => backup && backup.damaged === true).length;
-  overview.directory.textContent = presentText(body.directory, "Not set");
+  overview.directory.textContent = presentText(body.directory, "No backup folder set");
   overview.keep.textContent = presentNumber(body.keep, "unknown");
   overview.count.textContent = String(backups.length);
   overview.damaged.textContent = String(damaged);
@@ -242,13 +324,13 @@ function buildAction(title, controls) {
   return { card, button, status, result };
 }
 
-// buildSnapshotAction adds the G54 name field and the keep (pin) toggle to the
-// plain action card.
+// buildSnapshotAction adds the optional name field and the keep (pin) toggle to
+// the plain action card.
 function buildSnapshotAction() {
   const nameLabel = document.createElement("label");
   nameLabel.className = "form-label";
   nameLabel.htmlFor = "backup-snapshot-name";
-  nameLabel.textContent = "Name (1-80 characters; required to keep)";
+  nameLabel.textContent = "Name (optional, 1-80 characters; required to keep)";
   const name = document.createElement("input");
   name.type = "text";
   name.className = "form-control";
@@ -265,7 +347,7 @@ function buildSnapshotAction() {
   keepText.className = "form-check-label";
   keepText.textContent = "Keep (pin): never pruned";
   keepLabel.append(pin, keepText);
-  const action = buildAction("Snapshot now", [nameLabel, name, keepLabel]);
+  const action = buildAction("Back up now", [nameLabel, name, keepLabel]);
   action.name = name;
   action.pin = pin;
   return action;
@@ -273,10 +355,10 @@ function buildSnapshotAction() {
 
 function fillTable(table, backups, onSelect, onKeepChanged, status) {
   table.replaceChildren();
-  table.append(tableHead(["Select", "Snapshot", "Name", "Time", "Size", "Backend", "Migration", "State", "Keep"]));
+  table.append(tableHead(["Select", "Snapshot", "Name", "Time", "Size", "Backend", "Migration", "State", "Keep", "Delete"]));
   const body = document.createElement("tbody");
   if (backups.length === 0) {
-    body.append(noRowsRow(9, "No snapshots yet."));
+    body.append(noRowsRow(10, "No snapshots yet."));
     table.append(body);
     return;
   }
@@ -306,6 +388,7 @@ function fillTable(table, backups, onSelect, onKeepChanged, status) {
       textCell(presentNumber(entry.migration, "unknown")),
       stateCell(entry),
       keepCell(entry, onKeepChanged, status),
+      deleteCell(entry, onKeepChanged, status),
     );
     body.append(row);
   });
@@ -344,6 +427,45 @@ function keepCell(entry, onKeepChanged, status) {
     void changeKeep("/agent/v1/backup/pin", { id, name: name.value.trim() }, status, onKeepChanged);
   });
   cell.append(name, button);
+  return cell;
+}
+
+// deleteCell offers Delete only for an unpinned, undamaged manual snapshot; the
+// agent refuses anything else.
+function deleteCell(entry, onChanged, status) {
+  const cell = document.createElement("td");
+  if (entry.kind !== "manual" || entry.pinned === true || entry.damaged === true) {
+    return cell;
+  }
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "btn btn-outline-danger btn-sm";
+  button.textContent = "Delete";
+  button.addEventListener("click", async () => {
+    const confirmation = await confirmAction({
+      title: "Delete snapshot",
+      summary:
+        "Delete manual snapshot \"" + presentText(entry.name, "unnamed") + "\" (" + presentText(entry.id, "unknown") + "). " +
+        "This removes the dump and its manifest; it cannot be undone.",
+      confirmLabel: "Delete snapshot",
+    });
+    if (confirmation === null) {
+      return;
+    }
+    const reply = await request("/agent/v1/backup/delete", {
+      method: "POST",
+      body: { id: entry.id, reason: confirmation.reason },
+    });
+    if (reply.unauthorized) {
+      return;
+    }
+    if (!reply.ok) {
+      setStatus(status, describeReply(reply), "error");
+      return;
+    }
+    await onChanged();
+  });
+  cell.append(button);
   return cell;
 }
 

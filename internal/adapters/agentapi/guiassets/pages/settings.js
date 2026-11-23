@@ -212,7 +212,7 @@ function buildPathsSection() {
   grid.className = "row g-2";
   const fields = {
     backendPath: pathField(grid, "settings-backend-path", "Backend path", "absolute path of the gxb-api binary", "file"),
-    backupPath: pathField(grid, "settings-backup-path", "Backup folder", "empty uses the agent root's backups folder", "folder"),
+    backupPath: pathField(grid, "settings-backup-path", "Backup folder", "set it on the Backups page to rescan at once", "folder"),
     appRepackPath: pathField(grid, "settings-app-repack-path", "App repack folder", "absolute app_repack folder for the APK build", "folder"),
     toolchainPath: pathField(grid, "settings-toolchain-path", "Toolchain folder", "empty uses the system PATH", "folder"),
     mediaPath: pathField(grid, "settings-media-path", "Media folder", "set media_path in agent.json to change it", null),

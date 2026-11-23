@@ -243,8 +243,8 @@ func TestBackupSettingsDefaultsAndValidation(t *testing.T) {
 	if config.BackupKeepValue() != DefaultBackupKeep {
 		t.Fatalf("backup_keep default = %d", config.BackupKeepValue())
 	}
-	if config.BackupDirectory(root) != filepath.Join(root, BackupDirectoryName) {
-		t.Fatalf("backup directory = %q", config.BackupDirectory(root))
+	if config.BackupDirectory(root) != "" {
+		t.Fatalf("a fresh install has a backup directory: %q", config.BackupDirectory(root))
 	}
 
 	for name, contents := range map[string]string{
@@ -258,6 +258,18 @@ func TestBackupSettingsDefaultsAndValidation(t *testing.T) {
 				t.Fatal("want a refusal")
 			}
 		})
+	}
+}
+
+func TestBackupDirectoryKeepsAnExistingLegacyFolder(t *testing.T) {
+	root := t.TempDir()
+	legacy := filepath.Join(root, BackupDirectoryName)
+	if err := os.MkdirAll(legacy, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	config := Config{}
+	if config.BackupDirectory(root) != legacy {
+		t.Fatalf("legacy directory = %q", config.BackupDirectory(root))
 	}
 }
 

@@ -46,6 +46,8 @@ var cliCommands = []CLICommand{
 	{Usage: "gxb-operator backup prune --reason <text>", Prefix: "gxb-operator backup ", Summary: "Delete all but the newest kept snapshots."},
 	{Usage: "gxb-operator backup pin <id> --name <text>", Prefix: "gxb-operator backup ", Summary: "Name a snapshot and keep it out of every prune."},
 	{Usage: "gxb-operator backup unpin <id>", Prefix: "gxb-operator backup ", Summary: "Return a pinned snapshot to normal pruning."},
+	{Usage: "gxb-operator backup delete <id> --reason <text>", Prefix: "gxb-operator backup ", Summary: "Delete an unpinned manual snapshot."},
+	{Usage: "gxb-operator backup path [<dir>]", Prefix: "gxb-operator backup ", Summary: "Show or set the snapshot folder; a set rescans it at once."},
 	{Usage: "gxb-operator backup restore <id> --reason <text>", Prefix: "gxb-operator backup ", Summary: "Restore a snapshot."},
 	{Usage: "gxb-operator backup update-backend --reason <text>", Prefix: "gxb-operator backup ", Summary: "Snapshot, stop, swap the binary and start."},
 	{Usage: "gxb-operator op status <id>", Prefix: "gxb-operator op status ", Summary: "Show one long operation."},

@@ -160,6 +160,10 @@ type backupRestoreRequest struct {
 	Reason string `json:"reason"`
 }
 
+type backupPathRequest struct {
+	Path string `json:"path"`
+}
+
 // ServeHTTP records one tool log line per API exchange (C5: route, masked
 // params, status, error code, duration) and then dispatches.
 func (handler Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
@@ -931,6 +935,38 @@ func (handler Handler) serveBackup(writer http.ResponseWriter, request *http.Req
 		}
 		handler.record("backup.snapshot", "snapshot", "ok", map[string]any{"operation_id": operation.ID})
 		writeJSON(writer, http.StatusOK, operation)
+	case action == "path" && request.Method == http.MethodGet:
+		writeJSON(writer, http.StatusOK, handler.Backup.Settings())
+	case action == "path" && request.Method == http.MethodPost:
+		var body backupPathRequest
+		if err := decodeBody(writer, request, maxBodyBytes, &body); err != nil {
+			handler.writeBodyError(writer, err)
+			return
+		}
+		list, err := handler.Backup.SetPath(body.Path)
+		if err != nil {
+			handler.writeAgentError(writer, "backup.path", err)
+			return
+		}
+		handler.record("backup.path", "set", "ok", map[string]any{"directory": list.Directory})
+		writeJSON(writer, http.StatusOK, list)
+	case action == "delete" && request.Method == http.MethodPost:
+		var body backupRestoreRequest
+		if err := decodeBody(writer, request, maxBodyBytes, &body); err != nil {
+			handler.writeBodyError(writer, err)
+			return
+		}
+		if body.ID == "" || body.Reason == "" {
+			writeRefusal(writer, http.StatusConflict, operatoragent.CodeBodyInvalid, "id and reason are required")
+			return
+		}
+		manifest, err := handler.Backup.Delete(body.ID, body.Reason)
+		if err != nil {
+			handler.writeAgentError(writer, "backup.delete", err)
+			return
+		}
+		handler.record("backup.delete", "delete", "ok", map[string]any{"id": manifest.ID})
+		writeJSON(writer, http.StatusOK, manifest)
 	case action == "pin" && request.Method == http.MethodPost:
 		var body backupPinRequest
 		if err := decodeBody(writer, request, maxBodyBytes, &body); err != nil {

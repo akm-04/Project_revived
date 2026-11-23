@@ -653,6 +653,15 @@ func TestBackupRoutesUseTheAgentService(t *testing.T) {
 		t.Fatalf("list: %d %s", listed.Code, listed.Body)
 	}
 
+	folder := serveAgent(handler, http.MethodGet, "/agent/v1/backup/path", session, "")
+	if folder.Code != http.StatusOK || !strings.Contains(folder.Body.String(), `"directory":"`+directory+`"`) {
+		t.Fatalf("path: %d %s", folder.Code, folder.Body)
+	}
+	badPath := serveAgent(handler, http.MethodPost, "/agent/v1/backup/path", session, `{"path":""}`)
+	if badPath.Code != http.StatusConflict || refusalCodeOf(t, badPath) != operatoragent.CodeBackupPathInvalid {
+		t.Fatalf("empty path: %d %s", badPath.Code, badPath.Body)
+	}
+
 	missingReason := serveAgent(handler, http.MethodPost, "/agent/v1/backup/snapshot", session, `{"kind":"manual"}`)
 	if missingReason.Code != http.StatusConflict || refusalCodeOf(t, missingReason) != operatoragent.CodeBodyInvalid {
 		t.Fatalf("missing reason: %d %s", missingReason.Code, missingReason.Body)
@@ -692,6 +701,10 @@ func TestBackupRoutesUseTheAgentService(t *testing.T) {
 	pinWithoutName := serveAgent(handler, http.MethodPost, "/agent/v1/backup/pin", session, `{"id":"`+snapshotID+`"}`)
 	if pinWithoutName.Code != http.StatusConflict || refusalCodeOf(t, pinWithoutName) != operatoragent.CodeBodyInvalid {
 		t.Fatalf("pin without name: %d %s", pinWithoutName.Code, pinWithoutName.Body)
+	}
+	deleteWithoutReason := serveAgent(handler, http.MethodPost, "/agent/v1/backup/delete", session, `{"id":"`+snapshotID+`"}`)
+	if deleteWithoutReason.Code != http.StatusConflict || refusalCodeOf(t, deleteWithoutReason) != operatoragent.CodeBodyInvalid {
+		t.Fatalf("delete without reason: %d %s", deleteWithoutReason.Code, deleteWithoutReason.Body)
 	}
 
 	wrongMethod := serveAgent(handler, http.MethodGet, "/agent/v1/backup/snapshot", session, "")

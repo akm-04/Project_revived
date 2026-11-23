@@ -226,7 +226,7 @@ func runCommand(root string, args []string) error {
 
 func runBackup(root string, args []string) error {
 	if len(args) == 0 {
-		return errors.New("usage: backup snapshot|list|prune|pin|unpin|restore|update-backend")
+		return errors.New("usage: backup snapshot|list|prune|pin|unpin|delete|path|restore|update-backend")
 	}
 	client, err := newAgentClient(root, true)
 	if err != nil {
@@ -285,6 +285,35 @@ func runBackup(root string, args []string) error {
 			return errors.New("usage: backup unpin <id>")
 		}
 		status, body, err := client.request(http.MethodPost, "/agent/v1/backup/unpin", map[string]string{"id": args[1]})
+		if err != nil {
+			return err
+		}
+		return printResult(status, body)
+	case "delete":
+		if len(args) < 2 {
+			return errors.New("usage: backup delete <id> --reason <text>")
+		}
+		reason, err := backupReasonFlag(args[2:])
+		if err != nil {
+			return err
+		}
+		status, body, err := client.request(http.MethodPost, "/agent/v1/backup/delete", map[string]string{"id": args[1], "reason": reason})
+		if err != nil {
+			return err
+		}
+		return printResult(status, body)
+	case "path":
+		if len(args) > 2 {
+			return errors.New("usage: backup path [<dir>]")
+		}
+		if len(args) == 1 {
+			status, body, err := client.request(http.MethodGet, "/agent/v1/backup/path", nil)
+			if err != nil {
+				return err
+			}
+			return printResult(status, body)
+		}
+		status, body, err := client.request(http.MethodPost, "/agent/v1/backup/path", map[string]string{"path": args[1]})
 		if err != nil {
 			return err
 		}

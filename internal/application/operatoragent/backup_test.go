@@ -276,9 +276,9 @@ func TestPruneKeepsNewestKeepAndDamaged(t *testing.T) {
 	base := time.Date(2026, 11, 20, 10, 0, 0, 0, time.UTC)
 	ids := make([]string, 7)
 	for index := range 7 {
-		ids[index] = "2026010" + string(rune('1'+index)) + "T000000.000000000Z-manual"
+		ids[index] = "2026010" + string(rune('1'+index)) + "T000000.000000000Z-safety"
 		content := "snapshot-" + ids[index]
-		manifest := writeSnapshot(t, service.Directory, ids[index], BackupKindManual, base.Add(time.Duration(index)*time.Minute), content)
+		manifest := writeSnapshot(t, service.Directory, ids[index], BackupKindSafety, base.Add(time.Duration(index)*time.Minute), content)
 		if index == 0 {
 			manifest.SHA256 = strings.Repeat("f", 64)
 			if err := writeBackupManifest(filepath.Join(service.Directory, ids[index]+backupManifestSuffix), manifest); err != nil {
@@ -313,8 +313,8 @@ func TestPruneProtectsSnapshotsOfRunningOperations(t *testing.T) {
 	base := time.Date(2026, 11, 20, 10, 0, 0, 0, time.UTC)
 	ids := make([]string, 7)
 	for index := range 7 {
-		ids[index] = "2026010" + string(rune('1'+index)) + "T000000.000000000Z-manual"
-		writeSnapshot(t, service.Directory, ids[index], BackupKindManual, base.Add(time.Duration(index)*time.Minute), "snapshot")
+		ids[index] = "2026010" + string(rune('1'+index)) + "T000000.000000000Z-safety"
+		writeSnapshot(t, service.Directory, ids[index], BackupKindSafety, base.Add(time.Duration(index)*time.Minute), "snapshot")
 	}
 	opsDirectory := service.Operations.Directory
 	if err := os.MkdirAll(opsDirectory, 0o700); err != nil {
@@ -596,8 +596,8 @@ func TestPruneNeverRemovesPinnedSnapshots(t *testing.T) {
 	base := time.Date(2026, 11, 20, 10, 0, 0, 0, time.UTC)
 	ids := make([]string, 6)
 	for index := range 6 {
-		ids[index] = "2026010" + string(rune('1'+index)) + "T000000.000000000Z-manual"
-		writeSnapshot(t, service.Directory, ids[index], BackupKindManual, base.Add(time.Duration(index)*time.Minute), "snapshot-"+ids[index])
+		ids[index] = "2026010" + string(rune('1'+index)) + "T000000.000000000Z-safety"
+		writeSnapshot(t, service.Directory, ids[index], BackupKindSafety, base.Add(time.Duration(index)*time.Minute), "snapshot-"+ids[index])
 	}
 	for _, pinned := range []string{ids[0], ids[2], ids[4]} {
 		if _, err := service.Pin(pinned, "keep "+pinned); err != nil {
@@ -670,4 +670,195 @@ func testVersion() operator.VersionInfo {
 func backupRefusalCode(err error, code string) bool {
 	var refusal *Refusal
 	return errors.As(err, &refusal) && refusal.Code == code
+}
+
+func TestPruneNeverRemovesManualSnapshots(t *testing.T) {
+	service, _, _ := newBackupService(t)
+	service.Keep = 1
+	base := time.Date(2026, 11, 20, 10, 0, 0, 0, time.UTC)
+	for index := range 6 {
+		id := "2026010" + string(rune('1'+index)) + "T000000.000000000Z-manual"
+		writeSnapshot(t, service.Directory, id, BackupKindManual, base.Add(time.Duration(index)*time.Minute), "snapshot-"+id)
+	}
+	result, err := service.prune(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Removed) != 0 {
+		t.Fatalf("manual snapshots were pruned: %+v", result.Removed)
+	}
+}
+
+func TestManualSnapshotRefusesAtTheTotalCap(t *testing.T) {
+	service, _, _ := newBackupService(t)
+	service.Max = 2
+	base := time.Date(2026, 11, 20, 10, 0, 0, 0, time.UTC)
+	for index := range 2 {
+		id := "2026010" + string(rune('1'+index)) + "T000000.000000000Z-manual"
+		writeSnapshot(t, service.Directory, id, BackupKindManual, base.Add(time.Duration(index)*time.Minute), "snapshot-"+id)
+	}
+	if _, err := service.Snapshot(context.Background(), SnapshotOptions{Kind: BackupKindManual, Reason: "cap"}); !backupRefusalCode(err, CodeBackupCap) {
+		t.Fatalf("snapshot at the cap: %v", err)
+	} else if !strings.Contains(err.Error(), "2 snapshots kept; delete or unpin one first") {
+		t.Fatalf("cap message = %v", err)
+	}
+}
+
+func TestDeleteRefusesPinnedAndDamagedAndRemovesAManualSnapshot(t *testing.T) {
+	service, _, _ := newBackupService(t)
+	base := time.Date(2026, 11, 20, 10, 0, 0, 0, time.UTC)
+	manualID := "20260101T000000.000000000Z-manual"
+	writeSnapshot(t, service.Directory, manualID, BackupKindManual, base, "manual")
+	if _, err := service.Pin(manualID, "keep me"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := service.Delete(manualID, "pinned"); !backupRefusalCode(err, CodeBackupPinned) {
+		t.Fatalf("delete pinned: %v", err)
+	}
+	if _, err := service.Unpin(manualID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := service.Delete(manualID, "no longer needed"); err != nil {
+		t.Fatalf("delete manual: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(service.Directory, manualID+backupDumpSuffix)); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("the deleted dump still exists: %v", err)
+	}
+
+	safetyID := "20260102T000000.000000000Z-safety"
+	writeSnapshot(t, service.Directory, safetyID, BackupKindSafety, base.Add(time.Minute), "automatic")
+	if _, err := service.Delete(safetyID, "automatic"); !backupRefusalCode(err, CodeBackupDeleteRefused) {
+		t.Fatalf("delete automatic: %v", err)
+	}
+
+	damagedID := "20260103T000000.000000000Z-manual"
+	damaged := writeSnapshot(t, service.Directory, damagedID, BackupKindManual, base.Add(2*time.Minute), "damaged")
+	damaged.SHA256 = strings.Repeat("f", 64)
+	if err := writeBackupManifest(filepath.Join(service.Directory, damagedID+backupManifestSuffix), damaged); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := service.Delete(damagedID, "damaged"); !backupRefusalCode(err, CodeBackupDamaged) {
+		t.Fatalf("delete damaged: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(service.Directory, damagedID+backupDumpSuffix)); err != nil {
+		t.Fatalf("the damaged dump was deleted: %v", err)
+	}
+}
+
+func TestEmptyBackupPathRefusesSnapshotAndRestore(t *testing.T) {
+	service, _, _ := newBackupService(t)
+	service.Directory = ""
+	if _, err := service.Snapshot(context.Background(), SnapshotOptions{Kind: BackupKindManual, Reason: "no folder"}); !backupRefusalCode(err, CodeBackupPathMissing) {
+		t.Fatalf("snapshot without a folder: %v", err)
+	}
+	if _, err := service.Restore(context.Background(), "20260101T000000.000000000Z-manual", "no folder"); !backupRefusalCode(err, CodeBackupPathMissing) {
+		t.Fatalf("restore without a folder: %v", err)
+	}
+	list, err := service.List(context.Background())
+	if err != nil || list.Directory != "" || len(list.Backups) != 0 {
+		t.Fatalf("list without a folder: %+v %v", list, err)
+	}
+}
+
+func TestForeignDumpIsListedDamagedAndNeverRestoredOrDeleted(t *testing.T) {
+	service, _, _ := newBackupService(t)
+	foreign := filepath.Join(service.Directory, "foreign.dump")
+	if err := os.WriteFile(foreign, []byte("not ours"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	list, err := service.List(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(list.Backups) != 1 || !list.Backups[0].Damaged || list.Backups[0].ID != "foreign" {
+		t.Fatalf("foreign dump list = %+v", list.Backups)
+	}
+	if _, err := service.Delete("foreign", "foreign"); !backupRefusalCode(err, CodeBackupUnknown) {
+		t.Fatalf("delete foreign: %v", err)
+	}
+	if _, err := service.Restore(context.Background(), "foreign", "foreign"); !backupRefusalCode(err, CodeBackupUnknown) {
+		t.Fatalf("restore foreign: %v", err)
+	}
+	if _, err := os.Stat(foreign); err != nil {
+		t.Fatalf("the foreign dump was deleted: %v", err)
+	}
+}
+
+func TestSetBackupPathRescansAndRestores(t *testing.T) {
+	root := t.TempDir()
+	config := `{"listen":"127.0.0.1:8090","backend":{"operator_addr":"127.0.0.1:8091"}}`
+	if err := os.WriteFile(filepath.Join(root, AgentConfigFileName), []byte(config), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	target := t.TempDir()
+	id := "20260101T000000.000000000Z-manual"
+	writeSnapshot(t, target, id, BackupKindManual, time.Date(2026, 11, 20, 10, 0, 0, 0, time.UTC), "existing")
+	service, _, _ := newBackupService(t)
+	service.Directory = ""
+	service.Root = root
+
+	list, err := service.SetPath(target)
+	if err != nil {
+		t.Fatalf("set path: %v", err)
+	}
+	if list.Directory != target || len(list.Backups) != 1 || list.Backups[0].ID != id {
+		t.Fatalf("rescanned list = %+v", list)
+	}
+	stored, err := LoadConfig(root)
+	if err != nil || stored.BackupPath != target {
+		t.Fatalf("stored path = %+v (%v)", stored.BackupPath, err)
+	}
+	operation, err := service.Restore(context.Background(), id, "restore from the configured folder")
+	if err != nil || operation.State != OperationDone {
+		t.Fatalf("restore: %+v %v", operation, err)
+	}
+}
+
+func TestSetBackupPathRefusesAFolderInsideTheOTARoot(t *testing.T) {
+	root := t.TempDir()
+	otaRoot := t.TempDir()
+	config := `{"listen":"127.0.0.1:8090","ota_root":"` + otaRoot + `","backend":{"operator_addr":"127.0.0.1:8091"}}`
+	if err := os.WriteFile(filepath.Join(root, AgentConfigFileName), []byte(config), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	service, _, _ := newBackupService(t)
+	service.Directory = ""
+	service.Root = root
+	if _, err := service.SetPath(filepath.Join(otaRoot, "backups")); !backupRefusalCode(err, CodeBackupPathInvalid) {
+		t.Fatalf("inside ota_root: %v", err)
+	}
+}
+
+func TestAutomaticBackupDue(t *testing.T) {
+	now := time.Date(2026, 11, 23, 12, 0, 0, 0, time.UTC)
+	for name, testCase := range map[string]struct {
+		last    time.Time
+		hours   int
+		running bool
+		want    bool
+	}{
+		"no automatic snapshot": {last: time.Time{}, hours: 24, running: true, want: true},
+		"too soon":              {last: now.Add(-23 * time.Hour), hours: 24, running: true, want: false},
+		"due":                   {last: now.Add(-24 * time.Hour), hours: 24, running: true, want: true},
+		"backend stopped":       {last: now.Add(-48 * time.Hour), hours: 24, running: false, want: false},
+		"schedule off":          {last: now.Add(-48 * time.Hour), hours: 0, running: true, want: false},
+	} {
+		t.Run(name, func(t *testing.T) {
+			got := AutomaticBackupDue(now, testCase.last, time.Duration(testCase.hours)*time.Hour, testCase.running)
+			if got != testCase.want {
+				t.Fatalf("due = %v, want %v", got, testCase.want)
+			}
+		})
+	}
+}
+
+func TestNewestAutomaticTimeIgnoresManualSnapshots(t *testing.T) {
+	newest := time.Date(2026, 11, 20, 10, 0, 0, 0, time.UTC)
+	entries := []BackupEntry{
+		{BackupManifest: BackupManifest{Kind: BackupKindManual, CreatedAt: newest.Add(time.Hour)}},
+		{BackupManifest: BackupManifest{Kind: BackupKindScheduled, CreatedAt: newest}},
+	}
+	if got := newestAutomaticTime(entries); !got.Equal(newest) {
+		t.Fatalf("newest automatic = %v", got)
+	}
 }

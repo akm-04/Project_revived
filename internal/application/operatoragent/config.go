@@ -34,9 +34,16 @@ const (
 	minStopGraceSeconds        = 1
 	maxStopGraceSeconds        = 300
 
-	// DefaultBackupKeep is B1/F1: the last five snapshots are kept with no
-	// operator input; backup_keep below 1 is refused.
+	// DefaultBackupKeep is B1/F1: the last five automatic snapshots are kept
+	// with no operator input; backup_keep below 1 is refused.
 	DefaultBackupKeep = 5
+	// DefaultBackupMax is the total snapshot cap. A manual snapshot beyond it is
+	// refused until an unpinned manual snapshot is deleted.
+	DefaultBackupMax = 50
+	// DefaultBackupEveryHours is the scheduled automatic snapshot interval; 0
+	// turns the schedule off.
+	DefaultBackupEveryHours = 24
+	maxBackupEveryHours     = 8760
 )
 
 // BackendConfig names the backend binary the agent controls.
@@ -159,9 +166,13 @@ type Config struct {
 	// DatabaseLog is the PostgreSQL log file the logs tab reads (C1 c). Empty
 	// means the database source answers ABSENT.
 	DatabaseLog string `json:"database_log,omitempty"`
-	// BackupPath defaults to <agent root>/backups (P3); BackupKeep to 5 (B1).
+	// BackupPath is the snapshot folder; empty means no folder is set unless the
+	// old fixed <agent root>/backups already exists. BackupKeep defaults to 5.
 	BackupPath string `json:"backup_path,omitempty"`
 	BackupKeep *int   `json:"backup_keep,omitempty"`
+	// BackupEveryHours is the scheduled automatic snapshot interval while the
+	// backend runs; nil means DefaultBackupEveryHours and 0 turns it off.
+	BackupEveryHours *int `json:"backup_every_hours,omitempty"`
 	// ToolchainPath is the P2 portable tools folder; unset means the agent's
 	// own PATH (the system-wide P2 choice).
 	ToolchainPath string `json:"toolchain_path,omitempty"`
@@ -171,13 +182,28 @@ type Config struct {
 	MediaPath string `json:"media_path,omitempty"`
 }
 
-// BackupDirectory resolves the snapshot folder: the configured path, else
-// <agent root>/backups (P3).
+// BackupDirectory resolves the snapshot folder: the configured path, else the
+// old fixed <agent root>/backups when that folder already exists, so an
+// existing install keeps it. A fresh install has no folder until one is set.
 func (config Config) BackupDirectory(root string) string {
 	if config.BackupPath != "" {
 		return config.BackupPath
 	}
-	return filepath.Join(root, BackupDirectoryName)
+	legacy := filepath.Join(root, BackupDirectoryName)
+	if info, err := os.Stat(legacy); err == nil && info.IsDir() {
+		return legacy
+	}
+	return ""
+}
+
+// BackupInterval is the scheduled automatic snapshot interval; 0 turns the
+// schedule off.
+func (config Config) BackupInterval() time.Duration {
+	hours := DefaultBackupEveryHours
+	if config.BackupEveryHours != nil {
+		hours = *config.BackupEveryHours
+	}
+	return time.Duration(hours) * time.Hour
 }
 
 // BackupKeepValue resolves the retained snapshot count: the configured value,
@@ -321,6 +347,9 @@ func (config Config) Validate() error {
 	}
 	if value := config.BackupKeep; value != nil && *value < 1 {
 		return fmt.Errorf("%s: backup_keep %d must be at least 1", AgentConfigFileName, *value)
+	}
+	if value := config.BackupEveryHours; value != nil && (*value < 0 || *value > maxBackupEveryHours) {
+		return fmt.Errorf("%s: backup_every_hours %d is outside 0..%d", AgentConfigFileName, *value, maxBackupEveryHours)
 	}
 	if config.BackupPath != "" {
 		if !filepath.IsAbs(config.BackupPath) {

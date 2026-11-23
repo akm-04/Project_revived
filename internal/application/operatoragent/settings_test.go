@@ -54,7 +54,7 @@ func TestSettingsValuesReadBothSettingsFiles(t *testing.T) {
 	if values.ServerURL != "https://game.example" || values.ServerURLSource != ServerURLSourceEnvFile || values.ResPath != resPath || values.ApkResPath != apkPath {
 		t.Fatalf("values = %+v", values)
 	}
-	if values.BackendPath == "" || values.EnvFile != envPath || values.BackupPath != filepath.Join(root, BackupDirectoryName) {
+	if values.BackendPath == "" || values.EnvFile != envPath || values.BackupPath != "" {
 		t.Fatalf("agent values = %+v", values)
 	}
 	if values.AppRepackPath != "" || values.ToolchainPath != "" {
@@ -126,8 +126,8 @@ func TestSetAgentWritesValidatedPathsAndKeepsOldOnRefusal(t *testing.T) {
 	if config.ToolchainPath != "" || config.BackupPath != "" {
 		t.Fatalf("cleared paths = %+v", config)
 	}
-	if config.BackupDirectory(root) != filepath.Join(root, BackupDirectoryName) {
-		t.Fatalf("backup default = %q", config.BackupDirectory(root))
+	if config.BackupDirectory(root) != "" {
+		t.Fatalf("a fresh install has a backup directory: %q", config.BackupDirectory(root))
 	}
 }
 

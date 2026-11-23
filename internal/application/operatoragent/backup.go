@@ -35,6 +35,7 @@ const (
 	BackupKindSafety    = "safety"
 	BackupKindPreUpdate = "pre-update"
 	BackupKindPreDelete = "pre-delete"
+	BackupKindScheduled = "scheduled"
 
 	backupOperator = "root"
 	// backupNameLimit is the G54 snapshot name length in characters.
@@ -46,9 +47,14 @@ var backupKinds = map[string]bool{
 	BackupKindSafety:    true,
 	BackupKindPreUpdate: true,
 	BackupKindPreDelete: true,
+	BackupKindScheduled: true,
 }
 
-var backupIDPattern = regexp.MustCompile(`^[0-9]{8}T[0-9]{6}\.[0-9]{9}Z-(manual|safety|pre-update|pre-delete)$`)
+var backupIDPattern = regexp.MustCompile(`^[0-9]{8}T[0-9]{6}\.[0-9]{9}Z-(manual|safety|pre-update|pre-delete|scheduled)$`)
+
+// backupScheduleTick bounds how often the schedule asks whether a snapshot is
+// due; the interval itself is measured from the newest automatic snapshot.
+const backupScheduleTick = time.Minute
 
 // BackupManifest is <id>.json beside the dump (B2).
 type BackupManifest struct {
@@ -112,8 +118,12 @@ type DatabaseTools interface {
 // BackupService runs the agent-side backup commands (B1-B7). It never opens
 // the database itself: every statement goes through the pg toolchain.
 type BackupService struct {
-	Directory       string
+	Directory string
+	// Root is the agent root; setting the backup folder persists it in
+	// <root>/agent.json.
+	Root            string
 	Keep            int
+	Max             int
 	EnvironmentFile string
 	Tools           DatabaseTools
 	ToolsError      error
@@ -156,6 +166,20 @@ func (service BackupService) keep() int {
 	return service.Keep
 }
 
+func (service BackupService) max() int {
+	if service.Max < 1 {
+		return DefaultBackupMax
+	}
+	return service.Max
+}
+
+func (service BackupService) requireDirectory() error {
+	if service.Directory == "" {
+		return Refuse(CodeBackupPathMissing, "no backup folder is set; set one on the Backups page")
+	}
+	return nil
+}
+
 func (service BackupService) now() time.Time {
 	if service.Now == nil {
 		return time.Now()
@@ -188,6 +212,18 @@ func (service BackupService) Snapshot(ctx context.Context, options SnapshotOptio
 	name, err := normalizeSnapshotName(options.Name, options.Pinned)
 	if err != nil {
 		return Operation{}, err
+	}
+	if err := service.requireDirectory(); err != nil {
+		return Operation{}, err
+	}
+	if options.Kind == BackupKindManual {
+		entries, err := service.entries()
+		if err != nil {
+			return Operation{}, Temporarily(CodeBackupFailed, "the backup folder cannot be read")
+		}
+		if len(entries) >= service.max() {
+			return Operation{}, Refuse(CodeBackupCap, fmt.Sprintf("%d snapshots kept; delete or unpin one first", service.max()))
+		}
 	}
 	if !service.Guard.TryLock() {
 		return Operation{}, Refuse(CodeBackendBusy, "a backend operation is already running")
@@ -224,6 +260,9 @@ func (service BackupService) SnapshotBeforeDestructive(ctx context.Context, reas
 }
 
 func (service BackupService) snapshot(ctx context.Context, kind, reason, name string, pinned bool) (Operation, error) {
+	if err := service.requireDirectory(); err != nil {
+		return Operation{}, err
+	}
 	if err := service.ready(); err != nil {
 		return Operation{}, err
 	}
@@ -316,6 +355,9 @@ func snapshotRequest(kind, reason, name string, pinned bool) json.RawMessage {
 // List answers backup.list (B3). A dump without a manifest, or with a sha
 // mismatch, is shown damaged and is never restored.
 func (service BackupService) List(ctx context.Context) (BackupList, error) {
+	if service.Directory == "" {
+		return BackupList{Directory: "", Keep: service.keep(), Backups: []BackupEntry{}}, nil
+	}
 	entries, err := service.entries()
 	if err != nil {
 		return BackupList{}, err
@@ -379,10 +421,63 @@ func (service BackupService) keepableManifest(id string) (BackupManifest, error)
 	return manifest, nil
 }
 
-// Prune keeps the newest backup_keep snapshots (B4), never deletes the newest,
-// a pinned snapshot, a snapshot an unfinished operation references, or a
-// damaged dump without listing it. It also drops a retained prerestore database
-// once the backend is healthy again.
+// Delete removes one unpinned manual snapshot. Automatic snapshots belong to
+// the prune pool, and a pinned or damaged snapshot is never deleted.
+func (service BackupService) Delete(id, reason string) (BackupManifest, error) {
+	manifest, err := service.keepableManifest(id)
+	if err != nil {
+		return BackupManifest{}, err
+	}
+	if manifest.Pinned {
+		return BackupManifest{}, Refuse(CodeBackupPinned, "the snapshot is pinned; unpin it before deleting it")
+	}
+	if manifest.Kind != BackupKindManual {
+		return BackupManifest{}, Refuse(CodeBackupDeleteRefused, "only manual snapshots can be deleted; automatic snapshots are pruned")
+	}
+	if service.entry(id).Damaged {
+		return BackupManifest{}, Refuse(CodeBackupDamaged, "a damaged snapshot is never deleted")
+	}
+	if strings.Contains(service.runningRequestText(), id) {
+		return BackupManifest{}, Refuse(CodeBackendBusy, "the snapshot is used by a running operation")
+	}
+	if err := service.removeSnapshot(id); err != nil {
+		return BackupManifest{}, Temporarily(CodeBackupFailed, "the snapshot cannot be deleted: "+err.Error())
+	}
+	service.log("backup.delete", "delete", "done", map[string]any{"id": id, "reason": reason})
+	return manifest, nil
+}
+
+// SetPath validates and stores the snapshot folder in agent.json, then rescans
+// it. The running agent uses the new folder at once, with no restart.
+func (service *BackupService) SetPath(path string) (BackupList, error) {
+	trimmed := strings.TrimSpace(path)
+	if trimmed == "" {
+		return BackupList{}, Refuse(CodeBackupPathInvalid, "the backup folder is required")
+	}
+	if service.Root == "" {
+		return BackupList{}, Refuse(CodeBackupPathInvalid, "the agent root is not configured")
+	}
+	config, err := ReadConfig(service.Root)
+	if err != nil {
+		return BackupList{}, Refuse(CodeSettingsUnavailable, "agent.json is unreadable: "+err.Error())
+	}
+	config.BackupPath = trimmed
+	if err := config.Validate(); err != nil {
+		return BackupList{}, Refuse(CodeBackupPathInvalid, err.Error())
+	}
+	if err := SaveConfig(service.Root, config); err != nil {
+		return BackupList{}, Temporarily(CodeFailed, "agent.json cannot be written")
+	}
+	service.Directory = config.BackupPath
+	service.log("backup.path", "set", "done", map[string]any{"directory": service.Directory})
+	return service.List(context.Background())
+}
+
+// Prune keeps the newest backup_keep automatic snapshots: the scheduled, safety,
+// pre-update and pre-delete kinds. Manual snapshots are never pruned. It never
+// deletes the newest snapshot, a pinned snapshot, a snapshot an unfinished
+// operation references, or a damaged dump without listing it. It also drops a
+// retained prerestore database once the backend is healthy again.
 func (service BackupService) Prune(ctx context.Context) (Operation, error) {
 	if !service.Guard.TryLock() {
 		return Operation{}, Refuse(CodeBackendBusy, "a backend operation is already running")
@@ -404,12 +499,18 @@ func (service BackupService) prune(ctx context.Context) (PruneResult, error) {
 	referenced := service.runningRequestText()
 	keep := service.keep()
 	result := PruneResult{Keep: keep, Removed: []string{}, Kept: []string{}, Damaged: []string{}}
+	automaticSeen := 0
 	for index, entry := range entries {
 		protected := index == 0 || entry.Damaged || entry.Pinned || strings.Contains(referenced, entry.ID)
 		if entry.Damaged {
 			result.Damaged = append(result.Damaged, entry.ID)
 		}
-		if protected || index < keep {
+		if entry.Kind == BackupKindManual {
+			result.Kept = append(result.Kept, entry.ID)
+			continue
+		}
+		automaticSeen++
+		if protected || automaticSeen <= keep {
 			result.Kept = append(result.Kept, entry.ID)
 			continue
 		}
@@ -468,6 +569,9 @@ func (service BackupService) runningRequestText() string {
 }
 
 func (service BackupService) entries() ([]BackupEntry, error) {
+	if service.Directory == "" {
+		return []BackupEntry{}, nil
+	}
 	directoryEntries, err := os.ReadDir(service.Directory)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
@@ -483,6 +587,9 @@ func (service BackupService) entries() ([]BackupEntry, error) {
 		}
 		id := strings.TrimSuffix(directoryEntry.Name(), backupDumpSuffix)
 		if !backupIDPattern.MatchString(id) {
+			// A foreign dump is shown as damaged: it is never restored or deleted.
+			seen[id] = true
+			entries = append(entries, BackupEntry{BackupManifest: BackupManifest{ID: id}, Damaged: true, DamagedReason: "the snapshot file name is not recognised"})
 			continue
 		}
 		seen[id] = true
@@ -539,6 +646,9 @@ func (service BackupService) entry(id string) BackupEntry {
 // the original database in place; a failure after it renames back. Every step
 // is journaled (L6).
 func (service BackupService) Restore(ctx context.Context, id, reason string) (Operation, error) {
+	if err := service.requireDirectory(); err != nil {
+		return Operation{}, err
+	}
 	if !service.Guard.TryLock() {
 		return Operation{}, Refuse(CodeBackendBusy, "a backend operation is already running")
 	}
@@ -805,6 +915,9 @@ func (service BackupService) writePreRestoreRetention(database string) error {
 // dropRetainedPreRestore drops the prerestore database only after the backend
 // is running healthy; otherwise it keeps the marker for the next prune.
 func (service BackupService) dropRetainedPreRestore(ctx context.Context) (string, error) {
+	if service.Directory == "" {
+		return "", nil
+	}
 	path := filepath.Join(service.Directory, backupPreRestoreFileName)
 	contents, err := os.ReadFile(path)
 	if err != nil {
@@ -842,6 +955,9 @@ func (service BackupService) dropRetainedPreRestore(ctx context.Context) (string
 // leaves the database in one known state: the original serving (rollback) or
 // the restored database mounted with the prerestore retained.
 func (service BackupService) RecoverRestore(ctx context.Context) error {
+	if service.Directory == "" {
+		return nil
+	}
 	path := filepath.Join(service.Directory, backupStateFileName)
 	contents, err := os.ReadFile(path)
 	if err != nil {
@@ -1026,4 +1142,64 @@ func writeBackupManifest(path string, manifest BackupManifest) error {
 func restoreRequest(id, reason string) json.RawMessage {
 	encoded, _ := json.Marshal(map[string]string{"id": id, "reason": reason})
 	return encoded
+}
+
+// AutomaticBackupDue decides whether the scheduled automatic snapshot runs.
+// interval 0 turns the schedule off, and a stopped backend is never dumped.
+func AutomaticBackupDue(now, last time.Time, interval time.Duration, backendRunning bool) bool {
+	if interval <= 0 || !backendRunning {
+		return false
+	}
+	if last.IsZero() {
+		return true
+	}
+	return !now.Before(last.Add(interval))
+}
+
+// newestAutomaticTime is the age base of the schedule: manual snapshots never
+// satisfy the automatic cadence.
+func newestAutomaticTime(entries []BackupEntry) time.Time {
+	for _, entry := range entries {
+		if entry.Kind != BackupKindManual {
+			return entry.CreatedAt
+		}
+	}
+	return time.Time{}
+}
+
+// RunBackupSchedule takes the scheduled automatic snapshot every interval while
+// the backend runs. Tests check AutomaticBackupDue with an injected clock rather
+// than waiting for a tick.
+func RunBackupSchedule(ctx context.Context, service *BackupService, interval time.Duration) {
+	if service == nil || interval <= 0 {
+		return
+	}
+	ticker := time.NewTicker(backupScheduleTick)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			service.snapshotScheduled(ctx, interval)
+		}
+	}
+}
+
+func (service BackupService) snapshotScheduled(ctx context.Context, interval time.Duration) {
+	backendRunning := service.Backend != nil && service.Backend.Status().Running
+	entries, err := service.entries()
+	if err != nil {
+		service.log("backup.schedule", "list", "failed", map[string]any{"error": err.Error()})
+		return
+	}
+	if !AutomaticBackupDue(service.now(), newestAutomaticTime(entries), interval, backendRunning) {
+		return
+	}
+	operation, err := service.Snapshot(ctx, SnapshotOptions{Kind: BackupKindScheduled, Reason: "scheduled automatic snapshot"})
+	if err != nil {
+		service.log("backup.schedule", "snapshot", "failed", map[string]any{"error": err.Error()})
+		return
+	}
+	service.log("backup.schedule", "snapshot", "done", map[string]any{"operation_id": operation.ID})
 }
