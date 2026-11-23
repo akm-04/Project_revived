@@ -1,7 +1,7 @@
 "use strict";
 
 import { describeReply, request } from "../transport.js";
-import { actionRow, pageHeader } from "../components/format.js";
+import { actionRow, navigateButton, pageHeader } from "../components/format.js";
 import { confirmAction } from "../components/confirm_action.js";
 
 const statusRead = "/agent/v1/reads/ota.status";
@@ -48,11 +48,13 @@ export function renderPage(container, context) {
     column.append(view.card);
     laneRow.append(column);
   }
-  container.append(createReleaseCheck());
+  const buildSettings = createBuildSettingsCard();
+  const activity = createActivityCard();
+  container.append(buildSettings.card, activity.card, createReleaseCheck());
   refresh.addEventListener("click", () => {
-    void load(views, status, refresh);
+    void load(views, status, refresh, buildSettings, activity);
   });
-  void load(views, status, refresh);
+  void load(views, status, refresh, buildSettings, activity);
 }
 
 function createLaneCard(lane) {
@@ -78,7 +80,7 @@ function createLaneCard(lane) {
     labelCell.textContent = label;
     const valueCell = document.createElement("td");
     valueCell.id = "ota-" + lane.id + "-" + key;
-    valueCell.textContent = "unknown";
+    valueCell.textContent = "Loading…";
     row.append(labelCell, valueCell);
     body.append(row);
     values.set(key, valueCell);
@@ -102,6 +104,9 @@ function createLaneCard(lane) {
   const allowedInfo = document.createElement("p");
   allowedInfo.className = "hint mb-1";
   allowedInfo.id = "ota-allowed-" + lane.id;
+  const nextVersionNote = document.createElement("p");
+  nextVersionNote.className = "hint mb-1";
+  nextVersionNote.id = "ota-next-version-note-" + lane.id;
   const versionHint = document.createElement("p");
   versionHint.className = "hint mb-1";
   versionHint.id = "ota-version-hint-" + lane.id;
@@ -134,7 +139,7 @@ function createLaneCard(lane) {
   const log = document.createElement("section");
   log.className = "result";
   log.id = "ota-log-" + lane.id;
-  card.append(title, rows, staleWarning, versionLabel, versionInput, allowedInfo, versionHint, rollbackWarning, acknowledgementLabel, actions, publishWarning, log);
+  card.append(title, rows, staleWarning, versionLabel, versionInput, allowedInfo, nextVersionNote, versionHint, rollbackWarning, acknowledgementLabel, actions, publishWarning, log);
 
   let nextVersion = "";
   let activeVersion = "";
@@ -250,14 +255,18 @@ function createLaneCard(lane) {
     publish,
     setSummary(summary, proposedNextVersion) {
       nextVersion = typeof proposedNextVersion === "string" ? proposedNextVersion : "";
-      activeVersion = stringField(summary, "active_version");
-      stagedVersion = stringField(summary, "built_not_published");
-      values.get("active").textContent = activeVersion === "" ? "unknown" : activeVersion;
-      setLocalTime(values.get("published"), summary && summary.published_at);
+      activeVersion = optionalText(summary, "active_version").value;
+      stagedVersion = optionalText(summary, "built_not_published").value;
+      values.get("active").textContent = activeVersionText(summary);
+      setPublishedTime(values.get("published"), summary);
       const stale = isStale(stagedVersion, activeVersion);
-      values.get("staged").textContent = stagedVersion === "" ? "none" : stagedVersion + (stale ? " (stale)" : "");
-      setLocalTime(values.get("staged_at"), stagedVersion === "" ? null : summary && summary.built_at);
-      values.get("size").textContent = stagedVersion === "" ? "unknown" : sizeText(summary && summary.size);
+      values.get("staged").textContent = stagedVersionText(summary, stale);
+      values.get("staged_at").textContent = stagedVersion === "" ? "Nothing staged" : "";
+      if (stagedVersion !== "") {
+        setLocalTime(values.get("staged_at"), summary && summary.built_at);
+      }
+      values.get("size").textContent = stagedVersion === "" ? "Nothing staged" : sizeText(summary && summary.size);
+      nextVersionNote.textContent = nextVersionNoteText(nextVersion);
       publish.disabled = stagedVersion === "";
       staleWarning.hidden = !stale;
       staleWarning.textContent = stale
@@ -273,7 +282,253 @@ function createLaneCard(lane) {
   };
 }
 
-async function load(views, status, button) {
+// optionalText separates a missing field (unknown) from a present null or
+// empty string (known, nothing published or staged).
+function optionalText(object, key) {
+  if (!object || typeof object !== "object" || !Object.prototype.hasOwnProperty.call(object, key)) {
+    return { known: false, value: "" };
+  }
+  const value = object[key];
+  if (value === null) {
+    return { known: true, value: "" };
+  }
+  if (typeof value === "string") {
+    return { known: true, value };
+  }
+  return { known: false, value: "" };
+}
+
+function activeVersionText(summary) {
+  const active = optionalText(summary, "active_version");
+  if (!active.known) {
+    return "unknown";
+  }
+  return active.value === "" ? "Nothing published (clients use the stock client files)" : active.value;
+}
+
+function setPublishedTime(cell, summary) {
+  const active = optionalText(summary, "active_version");
+  if (active.known && active.value === "") {
+    cell.textContent = "Nothing published";
+    cell.removeAttribute("title");
+    return;
+  }
+  const published = optionalText(summary, "published_at");
+  if (!published.known) {
+    cell.textContent = "unknown";
+    cell.removeAttribute("title");
+    return;
+  }
+  if (published.value === "") {
+    cell.textContent = "Nothing published";
+    cell.removeAttribute("title");
+    return;
+  }
+  setLocalTime(cell, published.value);
+}
+
+function stagedVersionText(summary, stale) {
+  const staged = optionalText(summary, "built_not_published");
+  if (!staged.known) {
+    // The lane summary omits the staged fields when nothing is staged, so a
+    // present lane with no field is a known-empty value, not an unknown one.
+    return summary && typeof summary === "object" ? "Nothing staged" : "unknown";
+  }
+  if (staged.value === "") {
+    return "Nothing staged";
+  }
+  return staged.value + (stale ? " (stale)" : "");
+}
+
+// nextVersionNoteText explains the agent's rule in plain words: the proposed
+// number is the highest built-or-active number of any lane plus one
+// (internal/application/otarelease/status.go:256-272).
+function nextVersionNoteText(nextVersion) {
+  if (nextVersion !== "") {
+    return "The proposed next number is the highest built or active number of any lane plus one.";
+  }
+  return "No release has been built yet, so the agent has no highest number to add one to. Type the first version (" + firstReleaseVersion + ") and choose Stage build; after the first release every stage fills in the next number.";
+}
+
+function createBuildSettingsCard() {
+  const card = document.createElement("section");
+  card.className = "card card-body mt-3";
+  card.id = "ota-build-settings";
+  const title = document.createElement("h3");
+  title.className = "card-title";
+  title.textContent = "Release build settings";
+  const help = document.createElement("p");
+  help.className = "module-help";
+  help.textContent = "The asset folders the assets lane reads. The paths live in the OTA settings on the Settings page.";
+  const list = document.createElement("dl");
+  list.className = "row mb-0";
+  const values = new Map();
+  for (const [key, label] of [
+    ["res_path", "Res path"],
+    ["apk_res_path", "APK res path"],
+    ["recovered_res_path", "Recovered res path"],
+  ]) {
+    const term = document.createElement("dt");
+    term.className = "col-5 col-md-3";
+    term.textContent = label;
+    const description = document.createElement("dd");
+    description.className = "col-7 col-md-9 text-break";
+    description.id = "ota-setting-" + key;
+    list.append(term, description);
+    values.set(key, description);
+  }
+  const status = document.createElement("p");
+  status.className = "status mt-2";
+  status.id = "ota-build-settings-status";
+  status.setAttribute("role", "status");
+  card.append(title, help, list, status);
+  return { card, values, status };
+}
+
+function renderBuildSettings(card, settings) {
+  const present = settings && typeof settings === "object";
+  for (const [key, cell] of card.values) {
+    cell.replaceChildren();
+    if (!present) {
+      cell.textContent = "unknown";
+      continue;
+    }
+    const value = optionalText(settings, key);
+    if (!value.known) {
+      cell.textContent = "unknown";
+      continue;
+    }
+    if (value.value !== "") {
+      cell.textContent = value.value;
+      continue;
+    }
+    cell.append("Not set ", navigateButton("Open Settings", "settings"));
+  }
+  card.status.textContent = present ? "" : "The OTA settings are missing from the reply.";
+}
+
+function createActivityCard() {
+  const card = document.createElement("section");
+  card.className = "card card-body mt-3";
+  card.id = "ota-activity";
+  const title = document.createElement("h3");
+  title.className = "card-title";
+  title.textContent = "Release activity";
+  const body = document.createElement("div");
+  body.id = "ota-activity-body";
+  card.append(title, body);
+  return { card, body };
+}
+
+function renderActivity(card, body) {
+  card.body.replaceChildren();
+  for (const section of activitySections(body)) {
+    card.body.append(activitySection(section));
+  }
+}
+
+function activitySections(body) {
+  return [
+    {
+      title: "Staged builds",
+      field: listField(body, "built"),
+      empty: "No builds are staged yet.",
+      columns: ["Version", "Lane", "Size", "Built"],
+      row: (entry) => [stringField(entry, "version"), stringField(entry, "lane"), sizeText(entry && entry.total_size), timeText(entry && entry.built_at)],
+    },
+    {
+      title: "Publish and withdraw actions",
+      field: listField(body, "activations"),
+      empty: "Nothing has been published or withdrawn yet.",
+      columns: ["Version", "Action", "When"],
+      row: (entry) => [stringField(entry, "version"), stringField(entry, "action"), timeText(entry && entry.at)],
+    },
+    {
+      title: "Served asset requests",
+      field: listField(body, "served"),
+      empty: "No asset requests have been served yet.",
+      columns: ["Path", "Hits"],
+      row: (entry) => [stringField(entry, "path"), presentCount(entry && entry.hits)],
+    },
+    {
+      title: "Missed asset requests",
+      field: listField(body, "misses"),
+      empty: "No asset request has been missed yet.",
+      columns: ["Path", "Hits", "Last seen"],
+      row: (entry) => [stringField(entry, "path"), presentCount(entry && entry.hits), timeText(entry && entry.last_seen)],
+    },
+  ];
+}
+
+function listField(body, key) {
+  if (!body || typeof body !== "object" || !Object.prototype.hasOwnProperty.call(body, key)) {
+    return { known: false, list: [] };
+  }
+  return { known: true, list: Array.isArray(body[key]) ? body[key] : [] };
+}
+
+function activitySection(section) {
+  const block = document.createElement("section");
+  block.className = "mt-3";
+  const title = document.createElement("h4");
+  title.className = "module-title";
+  title.textContent = section.title;
+  block.append(title);
+  if (!section.field.known) {
+    const unknown = document.createElement("p");
+    unknown.className = "status mb-0";
+    unknown.textContent = "unknown";
+    block.append(unknown);
+    return block;
+  }
+  if (section.field.list.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "text-secondary mb-0";
+    empty.textContent = section.empty;
+    block.append(empty);
+    return block;
+  }
+  const table = document.createElement("table");
+  table.className = "table table-sm table-vcenter mb-0";
+  const head = document.createElement("thead");
+  const headRow = document.createElement("tr");
+  for (const label of section.columns) {
+    const cell = document.createElement("th");
+    cell.textContent = label;
+    headRow.append(cell);
+  }
+  head.append(headRow);
+  const tableBody = document.createElement("tbody");
+  for (const entry of section.field.list) {
+    const row = document.createElement("tr");
+    for (const value of section.row(entry && typeof entry === "object" ? entry : {})) {
+      const cell = document.createElement("td");
+      cell.textContent = value;
+      row.append(cell);
+    }
+    tableBody.append(row);
+  }
+  table.append(head, tableBody);
+  const wrap = document.createElement("div");
+  wrap.className = "table-responsive";
+  wrap.append(table);
+  block.append(wrap);
+  return block;
+}
+
+function presentCount(value) {
+  return typeof value === "number" && Number.isFinite(value) ? String(value) : "unknown";
+}
+
+function timeText(value) {
+  if (typeof value !== "string" || value === "" || value.startsWith("0001-01-01")) {
+    return "unknown";
+  }
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "unknown" : date.toLocaleString();
+}
+
+async function load(views, status, button, buildSettings, activity) {
   button.disabled = true;
   const reply = await request(statusRead);
   button.disabled = false;
@@ -292,6 +547,8 @@ async function load(views, status, button) {
     const summary = summaries.find((candidate) => candidate.lane === lane.id);
     views.get(lane.id).setSummary(summary, nextVersion);
   }
+  renderBuildSettings(buildSettings, body.settings);
+  renderActivity(activity, body);
 }
 
 async function stageLane(lane, version, rollback, activeVersion, log) {

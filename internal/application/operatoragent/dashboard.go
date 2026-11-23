@@ -60,7 +60,7 @@ type Dashboard struct {
 	Backend    BackendControl
 	Operator   OperatorClient
 	Version    VersionSource
-	PublicURLs []string
+	PublicURLs PublicURLs
 	Settings   SettingsValuesSource
 	Backups    DashboardBackups
 	Now        func() time.Time
@@ -125,7 +125,7 @@ type DashboardSummary struct {
 	Backend           DashboardBackendState `json:"backend"`
 	API               DashboardAPIState     `json:"api"`
 	Version           *operator.VersionInfo `json:"version"`
-	PublicURLs        []string              `json:"public_urls"`
+	PublicURLs        PublicURLs            `json:"public_urls"`
 	Settings          *AgentSettingsValues  `json:"settings,omitempty"`
 	Servers           []DashboardServer     `json:"servers"`
 	Events            []DashboardEvent      `json:"events"`
@@ -143,7 +143,7 @@ func (dashboard Dashboard) Summary(ctx context.Context) DashboardSummary {
 		now = dashboard.Now
 	}
 	summary := DashboardSummary{
-		PublicURLs:        orEmptyStrings(dashboard.PublicURLs),
+		PublicURLs:        dashboard.PublicURLs.Copy(),
 		Servers:           []DashboardServer{},
 		Events:            []DashboardEvent{},
 		OTA:               DashboardOTA{Catalog: []string{}},
@@ -171,9 +171,7 @@ func (dashboard Dashboard) Summary(ctx context.Context) DashboardSummary {
 			summary.Errors = append(summary.Errors, "settings: "+settingsErr.Error())
 		} else {
 			summary.Settings = &values
-			if values.ServerURL != "" {
-				summary.PublicURLs = []string{values.ServerURL}
-			}
+			summary.PublicURLs = values.PublicURLs.Copy()
 		}
 	}
 	if dashboard.Operator != nil && summary.API.Reachable {

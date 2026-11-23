@@ -5,6 +5,7 @@ import { getToken, request, describeReply } from "../transport.js";
 
 const terminalPrefix = "/agent/v1/terminal/";
 const openPath = terminalPrefix + "open";
+const cliUsageRead = "/agent/v1/reads/agent.cli.usage";
 const fontSizeStorageKey = "gxbOperatorTerminalFontSize";
 const appearanceStorageKey = "gxbOperatorTerminalAppearance";
 const defaultFontSize = 16;
@@ -114,7 +115,8 @@ export function renderPage(container) {
   const dialogStatus = passwordPrompt.status;
   const dialogCancel = passwordPrompt.cancel;
   panel.append(bar, screen, status);
-  container.append(panel, dialog);
+  const commands = buildCommandsPanel(typeCommand);
+  container.append(panel, commands.card, dialog);
 
   function setStatus(text, tone) {
     status.textContent = text;
@@ -201,6 +203,17 @@ export function renderPage(container) {
       return;
     }
     setStatus(describeReply(reply), "error");
+  }
+
+  // typeCommand writes a chosen command prefix at the prompt without Enter, so
+  // the operator can finish the arguments and run it.
+  function typeCommand(prefix) {
+    if (state.terminalID === "" || state.terminal === null) {
+      setStatus("Open the terminal first, then choose a command.", "error");
+      return;
+    }
+    state.terminal.focus();
+    void sendInput(prefix);
   }
 
   function applyFontSize() {
@@ -505,6 +518,67 @@ export function renderPage(container) {
   dialogPassword.value = "";
   dialog.showModal();
   dialogPassword.focus();
+  void loadCommands(commands);
+}
+
+// buildCommandsPanel is the collapsible Commands block. Every row comes from
+// the agent's agent.cli.usage read, so the page carries no command text of its
+// own.
+function buildCommandsPanel(onChoose) {
+  const card = document.createElement("details");
+  card.className = "card card-body mt-3";
+  card.id = "terminal-commands";
+  const title = document.createElement("summary");
+  title.className = "card-title mb-0";
+  title.textContent = "Commands";
+  const hint = document.createElement("p");
+  hint.className = "module-help";
+  hint.textContent = "Choose a command to type it at the prompt; press Enter to run it.";
+  const status = document.createElement("p");
+  status.className = "status";
+  status.id = "terminal-commands-status";
+  status.setAttribute("role", "status");
+  const list = document.createElement("div");
+  list.className = "d-flex flex-column gap-1 mt-2";
+  list.id = "terminal-command-list";
+  card.append(title, hint, list, status);
+  return { card, list, status, onChoose };
+}
+
+async function loadCommands(panel) {
+  const reply = await request(cliUsageRead);
+  if (reply.unauthorized) {
+    return;
+  }
+  if (!reply.ok) {
+    panel.status.textContent = describeReply(reply);
+    return;
+  }
+  const body = reply.body && typeof reply.body === "object" ? reply.body : {};
+  const commands = Array.isArray(body.commands) ? body.commands : [];
+  panel.list.replaceChildren();
+  if (commands.length === 0) {
+    panel.status.textContent = "The agent reported no CLI commands.";
+    return;
+  }
+  for (const command of commands) {
+    const row = document.createElement("button");
+    row.type = "button";
+    row.className = "btn btn-link text-start p-0";
+    const usage = document.createElement("code");
+    usage.textContent = presentText(command.usage, command.prefix);
+    const summary = document.createElement("span");
+    summary.className = "d-block small text-secondary";
+    summary.textContent = presentText(command.summary, "");
+    row.append(usage, summary);
+    row.title = presentText(command.summary, "");
+    row.addEventListener("click", () => panel.onChoose(presentText(command.prefix, "")));
+    panel.list.append(row);
+  }
+}
+
+function presentText(value, fallback) {
+  return typeof value === "string" && value !== "" ? value : fallback;
 }
 
 function buildPasswordDialog() {

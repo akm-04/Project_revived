@@ -43,6 +43,7 @@ type SettingsService struct {
 type AgentSettingsValues struct {
 	ServerURL        string                    `json:"server_url"`
 	ServerURLSource  string                    `json:"server_url_source"`
+	PublicURLs       PublicURLs                `json:"public_urls"`
 	BackendPath      string                    `json:"backend_path"`
 	EnvFile          string                    `json:"env_file"`
 	ResPath          string                    `json:"res_path"`
@@ -96,9 +97,14 @@ func (service SettingsService) Values() (AgentSettingsValues, error) {
 	if err != nil {
 		return AgentSettingsValues{}, err
 	}
+	publicURLs := config.PublicURLs.Copy()
+	if publicURLs[PublicRoleAPI] == "" && serverURL != "" {
+		publicURLs[PublicRoleAPI] = serverURL
+	}
 	return AgentSettingsValues{
 		ServerURL:        serverURL,
 		ServerURLSource:  source,
+		PublicURLs:       publicURLs,
 		BackendPath:      config.Backend.Binary,
 		EnvFile:          config.Backend.EnvFile,
 		ResPath:          otaSettings.ResPath,
@@ -208,6 +214,42 @@ func (service SettingsService) SetServerURL(raw string) (ServerURLReply, error) 
 		APKRebuildRequired: true,
 		Message:            "Restart the backend to apply the URL. The APK must be rebuilt with this URL (app_repack), because the APK carries the address that asks for it.",
 	}, nil
+}
+
+// SetPublicURLs validates and stores the role-keyed public URLs in agent.json.
+// The game API role is also written to the backend env file when one is
+// configured, because that is where the backend reads the client-facing URL.
+func (service SettingsService) SetPublicURLs(values map[string]string) (AgentSettingsReply, error) {
+	updated := PublicURLs{}
+	for role, value := range values {
+		updated[role] = strings.TrimSpace(value)
+	}
+	if err := updated.Validate(); err != nil {
+		return AgentSettingsReply{}, Refuse(CodeSettingsInvalid, err.Error())
+	}
+	config, err := ReadConfig(service.Root)
+	if err != nil {
+		return AgentSettingsReply{}, Refuse(CodeSettingsUnavailable, "agent.json is unreadable: "+err.Error())
+	}
+	apiURL := updated[PublicRoleAPI]
+	if apiURL != "" && config.Backend.EnvFile != "" {
+		if err := WriteEnvValue(config.Backend.EnvFile, PublicEngineURLKey, apiURL); err != nil {
+			return AgentSettingsReply{}, Refuse(CodeSettingsUnavailable, "the backend env file cannot be written: "+err.Error())
+		}
+	}
+	config.PublicURLs = updated
+	if err := config.Validate(); err != nil {
+		return AgentSettingsReply{}, Refuse(CodeSettingsInvalid, err.Error())
+	}
+	if err := SaveConfig(service.Root, config); err != nil {
+		return AgentSettingsReply{}, Temporarily(CodeFailed, "agent.json cannot be written")
+	}
+	message := "The public URLs are saved."
+	if apiURL != "" && config.Backend.EnvFile == "" {
+		message += " There is no backend env file, so the game API URL was not written there."
+	}
+	current, _ := service.Values()
+	return AgentSettingsReply{Values: current, Message: message}, nil
 }
 
 // NormalizePublicEngineURL accepts the absolute http or https address the client

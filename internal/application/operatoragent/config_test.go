@@ -341,6 +341,66 @@ func TestMigrationsDirectoryMustBeADirectory(t *testing.T) {
 	}
 }
 
+func TestPublicURLsAcceptRolesAndMigrateTheOldList(t *testing.T) {
+	base := `"listen":"127.0.0.1:8090","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}`
+	root := writeAgentConfig(t, `{`+base+`,"public_urls":{"sdk":"https://sdk.example","api":"https://api.example","assets":"https://assets.example"}}`)
+	config, err := LoadConfig(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if config.PublicURLs[PublicRoleSDK] != "https://sdk.example" ||
+		config.PublicURLs[PublicRoleAPI] != "https://api.example" ||
+		config.PublicURLs[PublicRoleAssets] != "https://assets.example" {
+		t.Fatalf("public urls = %+v", config.PublicURLs)
+	}
+
+	legacy := writeAgentConfig(t, `{`+base+`,"public_urls":["https://game.example","https://lan.example"]}`)
+	migrated, err := LoadConfig(legacy)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if migrated.PublicURLs[PublicRoleAPI] != "https://game.example" {
+		t.Fatalf("migrated urls = %+v", migrated.PublicURLs)
+	}
+	if len(migrated.PublicURLs) != 1 {
+		t.Fatalf("the old list kept %d roles", len(migrated.PublicURLs))
+	}
+
+	if err := SaveConfig(legacy, migrated); err != nil {
+		t.Fatal(err)
+	}
+	saved, err := os.ReadFile(filepath.Join(legacy, AgentConfigFileName))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(saved), `"public_urls": {`) || !strings.Contains(string(saved), `"api": "https://game.example"`) {
+		t.Fatalf("saved config = %s", saved)
+	}
+}
+
+func TestPublicURLsRefuseAnUnknownRoleAndANonHTTPValue(t *testing.T) {
+	base := `"listen":"127.0.0.1:8090","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"}`
+	for name, contents := range map[string]string{
+		"unknown role": `{` + base + `,"public_urls":{"other":"https://game.example"}}`,
+		"not a URL":    `{` + base + `,"public_urls":{"api":"game.example"}}`,
+		"not http":     `{` + base + `,"public_urls":{"assets":"ftp://assets.example"}}`,
+	} {
+		t.Run(name, func(t *testing.T) {
+			if _, err := LoadConfig(writeAgentConfig(t, contents)); err == nil {
+				t.Fatal("want a refusal")
+			}
+		})
+	}
+	empty := writeAgentConfig(t, `{`+base+`,"public_urls":{"sdk":"","api":"https://game.example","assets":""}}`)
+	config, err := LoadConfig(empty)
+	if err != nil {
+		t.Fatalf("an optional empty role was refused: %v", err)
+	}
+	if config.PublicURLs[PublicRoleSDK] != "" {
+		t.Fatalf("public urls = %+v", config.PublicURLs)
+	}
+}
+
 func TestLoadConfigToolLogDaysDefaultAndBounds(t *testing.T) {
 	root := writeAgentConfig(t, `{"listen":"127.0.0.1:8090","backend":{"operator_addr":"127.0.0.1:8091"}}`)
 	config, err := LoadConfig(root)

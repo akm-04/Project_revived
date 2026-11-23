@@ -26,8 +26,9 @@ const (
 	pingBackendAPIID   = "backend_api"
 	pingOperatorID     = "backend_operator"
 	pingRealtimeID     = "backend_realtime"
-	pingPublicURLID    = "public_backend"
-	pingAssetServerID  = "asset_server"
+	pingSDKURLID       = "public_sdk"
+	pingAPIURLID       = "public_api"
+	pingAssetsURLID    = "public_assets"
 	pingHTTPAddressKey = "GXB_HTTP_ADDR"
 	pingRealtimeKey    = "GXB_REALTIME_ADDR"
 )
@@ -78,6 +79,8 @@ type PingPlan struct {
 	// ServerURL answers the client-facing URL and its source, or empty when
 	// unknown.
 	ServerURL func() (string, string)
+	// PublicURLs answers the role-keyed public URLs, or nil when unknown.
+	PublicURLs func() PublicURLs
 	// Environment reads the agent process environment; nil means os.Getenv.
 	Environment func(string) string
 }
@@ -104,22 +107,40 @@ func (plan PingPlan) Specs() ([]PingTargetSpec, []PingOmission) {
 	addLocalPort(pingBackendAPIID, "Backend API (TCP connect time)", plan.setting(pingHTTPAddressKey), pingHTTPAddressKey)
 	addLocalPort(pingRealtimeID, "Realtime server (TCP connect time)", plan.setting(pingRealtimeKey), pingRealtimeKey)
 
+	var urls PublicURLs
+	if plan.PublicURLs != nil {
+		urls = plan.PublicURLs()
+	}
+	if urls == nil {
+		urls = PublicURLs{}
+	}
 	serverURL := ""
 	if plan.ServerURL != nil {
 		serverURL, _ = plan.ServerURL()
 	}
 	serverURL = strings.TrimRight(strings.TrimSpace(serverURL), "/")
-	if serverURL == "" {
-		omissions = append(omissions,
-			PingOmission{ID: pingPublicURLID, Reason: "the server URL is not set in the backend env file or the agent environment"},
-			PingOmission{ID: pingAssetServerID, Reason: "the client downloads assets from the server URL (/res/), which is not set"},
-		)
-		return specs, omissions
+	// The game API role is the old single server URL when the role itself is
+	// unset, so an installation that only sets GXB_PUBLIC_ENGINE_URL still
+	// probes its client-facing address.
+	if urls[PublicRoleAPI] == "" {
+		urls[PublicRoleAPI] = serverURL
 	}
-	specs = append(specs,
-		httpPingTarget(pingPublicURLID, "Backend through the internet (HTTP)", serverURL, PingPublicTimeout),
-		httpPingTarget(pingAssetServerID, "Asset server (HTTP)", serverURL+"/res/", PingPublicTimeout),
-	)
+	for _, target := range []struct {
+		role  string
+		id    string
+		label string
+	}{
+		{PublicRoleSDK, pingSDKURLID, "SDK URL (HTTP)"},
+		{PublicRoleAPI, pingAPIURLID, "Game API URL (HTTP)"},
+		{PublicRoleAssets, pingAssetsURLID, "Assets URL (HTTP)"},
+	} {
+		address := strings.TrimRight(strings.TrimSpace(urls[target.role]), "/")
+		if address == "" {
+			omissions = append(omissions, PingOmission{ID: target.id, Reason: "the " + target.label + " is not set in agent.json public_urls"})
+			continue
+		}
+		specs = append(specs, httpPingTarget(target.id, target.label, address, PingPublicTimeout))
+	}
 	return specs, omissions
 }
 

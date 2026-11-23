@@ -184,11 +184,11 @@ function fillOverview(overview, body) {
   }
   const backups = Array.isArray(body.backups) ? body.backups : [];
   const damaged = backups.filter((backup) => backup && backup.damaged === true).length;
-  overview.directory.textContent = presentText(body.directory, "unknown");
+  overview.directory.textContent = presentText(body.directory, "Not set");
   overview.keep.textContent = presentNumber(body.keep, "unknown");
   overview.count.textContent = String(backups.length);
   overview.damaged.textContent = String(damaged);
-  overview.newest.textContent = formatAge(body.newest_age_seconds);
+  overview.newest.textContent = backups.length === 0 ? "No snapshots yet" : formatAge(body.newest_age_seconds);
 }
 
 function buildList() {

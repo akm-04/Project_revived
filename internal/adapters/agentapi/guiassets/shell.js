@@ -87,6 +87,7 @@ passwordForm.addEventListener("submit", handlePasswordChange);
 passwordCancel.addEventListener("click", closePasswordModal);
 document.addEventListener("click", closeMenusOutside);
 document.addEventListener("keydown", closeMenusOnEscape);
+document.addEventListener("gxb:navigate", handleNavigate);
 setInterval(pollWhileIdle, statusPollMilliseconds);
 startTheme();
 showServerName();
@@ -326,6 +327,15 @@ function closeMenusOnEscape(event) {
 // Advanced page carries the help text the agent reported.
 function openModuleHelp() {
   selectPage("advanced");
+}
+
+// Pages ask for another page through this one event, so a page never reaches
+// into the shell's state.
+function handleNavigate(event) {
+  const pageId = event.detail;
+  if (pages.some((page) => page.id === pageId)) {
+    selectPage(pageId);
+  }
 }
 
 function selectPage(pageId) {
