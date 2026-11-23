@@ -44,7 +44,7 @@ func TestSettingsValuesReadBothSettingsFiles(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(otaRoot, "settings.json"), []byte(document), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	service := SettingsService{Root: root, OTARoot: otaRoot, LookupEnvironment: func(string) string {
+	service := SettingsService{Root: root, OTARoot: otaRoot, MediaPath: "/srv/pictures", LookupEnvironment: func(string) string {
 		return "https://environment.example"
 	}}
 	values, err := service.Values()
@@ -59,6 +59,9 @@ func TestSettingsValuesReadBothSettingsFiles(t *testing.T) {
 	}
 	if values.AppRepackPath != "" || values.ToolchainPath != "" {
 		t.Fatalf("unset paths = %+v", values)
+	}
+	if values.MediaPath != "/srv/pictures" {
+		t.Fatalf("media path = %q", values.MediaPath)
 	}
 	if values.OTASettings.LazyFetch != "auto" {
 		t.Fatalf("ota settings = %+v", values.OTASettings)

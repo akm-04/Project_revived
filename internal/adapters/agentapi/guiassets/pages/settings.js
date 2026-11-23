@@ -47,6 +47,7 @@ export function renderPage(container, context) {
     paths.backupPath.value = presentText(values.backup_path, "");
     paths.appRepackPath.value = presentText(values.app_repack_path, "");
     paths.toolchainPath.value = presentText(values.toolchain_path, "");
+    paths.mediaPath.value = presentText(values.media_path, "");
     paths.resPath.value = presentText(values.res_path, "");
     paths.apkResPath.value = presentText(values.apk_res_path, "");
     paths.recoveredResPath.value = presentText(values.recovered_res_path, "");
@@ -236,10 +237,12 @@ function buildPathsSection() {
     backupPath: pathField(grid, "settings-backup-path", "Backup folder", "empty uses the agent root's backups folder"),
     appRepackPath: pathField(grid, "settings-app-repack-path", "App repack folder", "absolute app_repack folder for the APK build"),
     toolchainPath: pathField(grid, "settings-toolchain-path", "Toolchain folder", "empty uses the system PATH"),
+    mediaPath: pathField(grid, "settings-media-path", "Media folder", "set media_path in agent.json to change it"),
     resPath: pathField(grid, "settings-res-path", "Res path", "absolute asset folder the OTA server serves"),
     apkResPath: pathField(grid, "settings-apk-res-path", "APK res path", "optional second picture root"),
     recoveredResPath: pathField(grid, "settings-recovered-res-path", "Recovered res path", "absolute asset-recovery folder"),
   };
+  fields.mediaPath.readOnly = true;
   const save = document.createElement("button");
   save.type = "button";
   save.className = "btn btn-primary mt-3";

@@ -28,8 +28,9 @@ func main() {
 	record := os.Getenv("GXB_TEST_RECORD")
 	if record != "" {
 		encoded, _ := json.Marshal(map[string]string{
-			"token":    os.Getenv("GXB_OPERATOR_TOKEN"),
-			"listener": os.Getenv("GXB_GAME_LISTENER"),
+			"token":      os.Getenv("GXB_OPERATOR_TOKEN"),
+			"listener":   os.Getenv("GXB_GAME_LISTENER"),
+			"media_root": os.Getenv("GXB_NOTICE_MEDIA_ROOT"),
 		})
 		_ = os.WriteFile(record, encoded, 0o600)
 	}
@@ -95,8 +96,9 @@ func writeEnvFile(t *testing.T, entries ...string) string {
 }
 
 type childRecord struct {
-	Token    string `json:"token"`
-	Listener string `json:"listener"`
+	Token     string `json:"token"`
+	Listener  string `json:"listener"`
+	MediaRoot string `json:"media_root"`
 }
 
 func readRecord(t *testing.T, path string) childRecord {
@@ -156,6 +158,45 @@ func TestStartWaitsForReadinessAndUsesFreshTokens(t *testing.T) {
 	}
 	if first.Token == second.Token {
 		t.Fatal("the per-start token did not change")
+	}
+	if err := controller.Stop(); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestStartPassesTheNoticeMediaRootUnlessTheEnvFileSetsIt(t *testing.T) {
+	binary := buildFakeBackend(t)
+	options := Options{
+		Binary:          binary,
+		OperatorAddr:    freeAddress(t),
+		OTARoot:         t.TempDir(),
+		LogsDirectory:   t.TempDir(),
+		ReadyTimeout:    10 * time.Second,
+		StopGrace:       2 * time.Second,
+		NoticeMediaRoot: "/srv/pictures",
+	}
+
+	unsetRecord := filepath.Join(t.TempDir(), "record.json")
+	options.EnvFile = writeEnvFile(t, "GXB_TEST_RECORD="+unsetRecord)
+	controller := New(options)
+	if err := controller.Start(false, "token"); err != nil {
+		t.Fatal(err)
+	}
+	if got := readRecord(t, unsetRecord).MediaRoot; got != "/srv/pictures" {
+		t.Fatalf("media root = %q, want the resolved folder", got)
+	}
+	if err := controller.Stop(); err != nil {
+		t.Fatal(err)
+	}
+
+	fromFileRecord := filepath.Join(t.TempDir(), "record.json")
+	options.EnvFile = writeEnvFile(t, "GXB_TEST_RECORD="+fromFileRecord, "GXB_NOTICE_MEDIA_ROOT=/from/env")
+	controller = New(options)
+	if err := controller.Start(false, "token"); err != nil {
+		t.Fatal(err)
+	}
+	if got := readRecord(t, fromFileRecord).MediaRoot; got != "/from/env" {
+		t.Fatalf("media root = %q, want the env file value", got)
 	}
 	if err := controller.Stop(); err != nil {
 		t.Fatal(err)

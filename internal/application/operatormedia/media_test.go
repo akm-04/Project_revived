@@ -96,36 +96,35 @@ func TestStoreWithoutFolderRefuses(t *testing.T) {
 	}
 }
 
-func TestMediaPathReadsTheAgentConfigAndDefaults(t *testing.T) {
+func TestMediaPathPrefersEnvironmentThenConfigThenDefault(t *testing.T) {
 	t.Setenv("GXB_NOTICE_MEDIA_ROOT", "")
 	root := t.TempDir()
-	if err := os.WriteFile(filepath.Join(root, agentConfigName), []byte(`{"media_path":"/var/pictures"}`), 0o600); err != nil {
-		t.Fatal(err)
+	if path := MediaPath(root, "/var/pictures"); path != "/var/pictures" {
+		t.Fatalf("configured path = %q", path)
 	}
-	path, err := MediaPath(root)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if path != "/var/pictures" {
-		t.Fatalf("path = %q", path)
-	}
-	if err := os.WriteFile(filepath.Join(root, agentConfigName), []byte(`{}`), 0o600); err != nil {
-		t.Fatal(err)
-	}
-	path, err = MediaPath(root)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if path != filepath.Join(root, mediaDirectory) {
+	if path := MediaPath(root, ""); path != filepath.Join(root, mediaDirectory) {
 		t.Fatalf("default path = %q", path)
 	}
 	t.Setenv("GXB_NOTICE_MEDIA_ROOT", "/from-environment")
-	path, err = MediaPath(root)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if path != "/from-environment" {
+	if path := MediaPath(root, "/var/pictures"); path != "/from-environment" {
 		t.Fatalf("environment path = %q", path)
+	}
+}
+
+func TestPublicAddressRefusesSharedAndThisNetwork(t *testing.T) {
+	cases := []struct {
+		address string
+		allowed bool
+	}{
+		{"100.64.0.1", false},
+		{"100.127.255.254", false},
+		{"0.1.2.3", false},
+		{"100.128.0.1", true},
+	}
+	for _, testCase := range cases {
+		if got := publicAddress(net.ParseIP(testCase.address)); got != testCase.allowed {
+			t.Fatalf("%s: publicAddress = %v, want %v", testCase.address, got, testCase.allowed)
+		}
 	}
 }
 
