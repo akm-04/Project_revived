@@ -23,13 +23,15 @@ type OnlineSessionFilter struct {
 	Limit    int
 }
 
-// OnlineSession is one live player session from the session owner.
+// OnlineSession is one live player session from the session owner. Online is
+// false for a live session whose device stopped polling.
 type OnlineSession struct {
 	SessionID  string
 	PlayerID   int64
 	ServerID   int64
 	StartedAt  time.Time
 	LastSeenAt time.Time
+	Online     bool
 }
 
 // OnlineSessionRow is one session.online row.
@@ -39,6 +41,7 @@ type OnlineSessionRow struct {
 	ServerID   int64     `json:"server_id"`
 	StartedAt  time.Time `json:"started_at"`
 	LastSeenAt time.Time `json:"last_seen_at"`
+	Online     bool      `json:"online"`
 }
 
 // OnlineSessionPage is the session.online reply, session id ascending.
@@ -120,7 +123,7 @@ func (s SessionReadService) Online(ctx context.Context, filter OnlineSessionFilt
 	for _, row := range rows {
 		page.Sessions = append(page.Sessions, OnlineSessionRow{
 			PlayerID: row.PlayerID, Name: names[row.PlayerID], ServerID: row.ServerID,
-			StartedAt: row.StartedAt.UTC(), LastSeenAt: row.LastSeenAt.UTC(),
+			StartedAt: row.StartedAt.UTC(), LastSeenAt: row.LastSeenAt.UTC(), Online: row.Online,
 		})
 	}
 	return page, nil

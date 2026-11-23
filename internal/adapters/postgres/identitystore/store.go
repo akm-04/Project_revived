@@ -28,6 +28,8 @@ const (
 	revokeSessionCredentials     = `UPDATE account_session_credentials SET revoked_at=$2 WHERE session_id=$1 AND revoked_at IS NULL`
 	revokeGameplayCredentials    = `UPDATE gameplay_context_credentials SET revoked_at=$2 WHERE session_id=$1 AND revoked_at IS NULL`
 	touchSessionActivity         = `UPDATE account_sessions SET last_activity_at=$3 WHERE session_id=$1 AND revoked_at IS NULL AND idle_timeout_seconds IS NOT NULL AND last_activity_at <= $2`
+	listIdleExpiredSessions      = `SELECT COALESCE(array_agg(session_id::text ORDER BY session_id),'{}'::text[]) FROM (SELECT s.session_id FROM account_sessions s WHERE s.revoked_at IS NULL AND s.idle_timeout_seconds IS NOT NULL AND s.last_activity_at + make_interval(secs => s.idle_timeout_seconds::double precision) <= $1 AND s.session_id > $2 ORDER BY s.session_id LIMIT $3) page`
+	revokeIdleExpiredSessions    = `WITH expired AS (UPDATE account_sessions SET revoked_at=$2,revocation_reason=$3,liveness_version=liveness_version+1 WHERE session_id = ANY($1::uuid[]) AND revoked_at IS NULL AND idle_timeout_seconds IS NOT NULL AND last_activity_at + make_interval(secs => idle_timeout_seconds::double precision) <= $2 RETURNING session_id) SELECT COALESCE(jsonb_agg(session_id::text ORDER BY session_id),'[]'::jsonb)::text FROM expired`
 	listLivePlayerSessions       = `SELECT COALESCE(jsonb_agg(session_id::text ORDER BY session_id),'[]'::jsonb)::text FROM (SELECT DISTINCT c.session_id FROM gameplay_contexts c JOIN account_sessions s ON s.session_id=c.session_id WHERE c.player_id=$1 AND s.revoked_at IS NULL AND c.ended_at IS NULL) live`
 	findLivePlayerSessions       = `SELECT COALESCE(array_agg(session_id::text ORDER BY created_at DESC), '{}'::text[]) FROM gameplay_contexts WHERE player_id=$1 AND ended_at IS NULL`
 	findLiveSessionIDsForPlayers = `SELECT COALESCE(array_agg(session_id::text ORDER BY session_id), '{}'::text[]) FROM (SELECT DISTINCT s.session_id FROM gameplay_contexts c JOIN account_sessions s ON s.session_id=c.session_id WHERE c.player_id = ANY($1::bigint[]) AND s.revoked_at IS NULL AND c.ended_at IS NULL) live`
@@ -247,6 +249,54 @@ func (Store) TouchSessionActivityTx(ctx context.Context, t tx.Tx, sid identity.S
 		return false, err
 	}
 	return tag.RowsAffected() == 1, nil
+}
+
+// ListIdleExpiredSessionIDsTx pages unrevoked sessions whose idle timeout has
+// elapsed, in ascending id order after `after`.
+func (Store) ListIdleExpiredSessionIDsTx(ctx context.Context, q tx.Queryer, now time.Time, after identity.SessionID, limit int) ([]identity.SessionID, error) {
+	if q == nil || now.IsZero() || limit <= 0 {
+		return nil, errors.New("idle expiry page requires a queryer, time and positive limit")
+	}
+	var raw []string
+	if err := q.QueryRow(ctx, listIdleExpiredSessions, now.UTC(), after.UUID().String(), limit).Scan(&raw); err != nil {
+		return nil, err
+	}
+	return parseSessionIDs(raw)
+}
+
+// RevokeIdleExpiredSessionsTx revokes the still-expired sessions of one batch
+// and ends their children in the identity revocation order: session, live
+// context, then both credential families. A session touched since the page was
+// read is no longer expired and is left alone.
+func (Store) RevokeIdleExpiredSessionsTx(ctx context.Context, t tx.Tx, sessions []identity.SessionID, now time.Time) (int64, error) {
+	if t == nil || len(sessions) == 0 || now.IsZero() {
+		return 0, errors.New("idle expiry revocation requires a transaction, targets and time")
+	}
+	ids := make([]string, 0, len(sessions))
+	for _, session := range sessions {
+		ids = append(ids, session.UUID().String())
+	}
+	var raw string
+	if err := t.QueryRow(ctx, revokeIdleExpiredSessions, ids, now.UTC(), identity.RevocationReasonIdleExpired).Scan(&raw); err != nil {
+		return 0, err
+	}
+	var revoked []string
+	if err := json.Unmarshal([]byte(raw), &revoked); err != nil {
+		return 0, err
+	}
+	if len(revoked) == 0 {
+		return 0, nil
+	}
+	if _, err := t.Exec(ctx, endContextsSet, revoked, now.UTC(), identity.RevocationReasonIdleExpired); err != nil {
+		return 0, err
+	}
+	if _, err := t.Exec(ctx, revokeSessionCredsSet, revoked, now.UTC()); err != nil {
+		return 0, err
+	}
+	if _, err := t.Exec(ctx, revokeGameplayCredsSet, revoked, now.UTC()); err != nil {
+		return 0, err
+	}
+	return int64(len(revoked)), nil
 }
 
 // FindLiveSessionsByPlayer lists the sessions that still hold a live gameplay

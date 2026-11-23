@@ -30,6 +30,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/guildstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
+	"gxb.local/backend/v2/internal/adapters/postgres/identitystore"
 	"gxb.local/backend/v2/internal/adapters/postgres/leaguestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/librarystore"
 	"gxb.local/backend/v2/internal/adapters/postgres/occultstore"
@@ -62,6 +63,7 @@ import (
 	"gxb.local/backend/v2/internal/application/socialpresence"
 	"gxb.local/backend/v2/internal/application/socialrelation"
 	"gxb.local/backend/v2/internal/application/socialreload"
+	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/config"
 	"gxb.local/backend/v2/internal/foundation/ids"
@@ -77,6 +79,22 @@ func main() {
 	if err := run(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+// pollActivityToucher adapts the identity lifecycle service to the HTTP poll's
+// activity seam.
+type pollActivityToucher struct {
+	service    appidentity.Service
+	operations operation.Factory
+}
+
+func (t pollActivityToucher) TouchActivity(ctx context.Context, sessionID identity.SessionID) error {
+	current, err := t.operations.New(policy.Set{})
+	if err != nil {
+		return err
+	}
+	_, err = t.service.TouchActivity(ctx, sessionID, current)
+	return err
 }
 
 func run() error {
@@ -467,6 +485,15 @@ func run() error {
 			<-reconcileDone
 			<-generalDone
 			return err
+		}
+		pollServer.Activity = pollActivityToucher{
+			service: appidentity.Service{
+				Runner:                tx.Runner{DB: pool},
+				Store:                 identitystore.Store{},
+				IdleExpiryEnabled:     true,
+				ActivityTouchInterval: identity.ActivityTouchCoalesceInterval,
+			},
+			operations: presenceOperations,
 		}
 		httpServer := &http.Server{ReadHeaderTimeout: 5 * time.Second, Handler: pollServer.Handler()}
 		pollDone := make(chan struct{})

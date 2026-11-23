@@ -15,6 +15,7 @@ var (
 const (
 	RevocationReasonOperatorLogout    = "operator_logout"
 	RevocationReasonOperatorLogoutAll = "operator_logout_all"
+	RevocationReasonIdleExpired       = "IDLE_EXPIRED"
 )
 
 func BindPrincipal(existing *ProviderBinding, candidate ProviderBinding) (ProviderBinding, bool, error) {
@@ -49,6 +50,10 @@ type SessionIssue struct {
 }
 
 func NewSessionIssue(session Session, sid, login SessionCredential) (SessionIssue, error) {
+	if session.IdleTimeoutSeconds == nil {
+		idle := DefaultIdleTimeoutSeconds
+		session.IdleTimeoutSeconds = &idle
+	}
 	if session.ID.UUID().IsZero() || session.AccountID.UUID().IsZero() || session.AuthProfile != AuthProductionPair || session.IssuedAt.IsZero() || session.LastActivityAt.IsZero() || session.LivenessVersion < 1 || session.RevokedAt != nil || session.RevocationReason != "" {
 		return SessionIssue{}, errors.New("invalid session")
 	}
