@@ -2,6 +2,7 @@
 
 import { confirmAction } from "../components/confirm_action.js";
 import { formatTimeText, pageHeader, setStatus } from "../components/format.js";
+import { openPlayerPicker } from "../components/player_picker.js";
 import { describeReply, request } from "../transport.js";
 
 const followPollMilliseconds = 2000;
@@ -43,18 +44,31 @@ export function renderPage(container, context) {
   let tailCursor = "";
   let tailTimer = null;
   let tailBusy = false;
+  let tailTicket = 0;
+  let following = false;
 
   function stopFollow() {
+    following = false;
+    tailTicket += 1;
     if (tailTimer !== null) {
       clearInterval(tailTimer);
       tailTimer = null;
     }
   }
 
+  function restartFollow() {
+    if (!following) {
+      return;
+    }
+    stopFollow();
+    startFollow();
+  }
+
   async function runTail(follow) {
     if (tailBusy) {
       return;
     }
+    const ticket = ++tailTicket;
     tailBusy = true;
     tabs.tail.status.textContent = "";
     const query = new URLSearchParams();
@@ -67,6 +81,10 @@ export function renderPage(container, context) {
       query.set("after_cursor", tailCursor);
     }
     const reply = await request("/agent/v1/reads/logs.tail?" + query.toString());
+    if (ticket !== tailTicket) {
+      tailBusy = false;
+      return;
+    }
     tailBusy = false;
     if (reply.unauthorized) {
       stopFollow();
@@ -100,6 +118,7 @@ export function renderPage(container, context) {
     if (tailTimer !== null) {
       return;
     }
+    following = true;
     tailCursor = "";
     tabs.tail.result.textContent = "";
     const poll = () => {
@@ -121,9 +140,11 @@ export function renderPage(container, context) {
   tabs.tail.live.addEventListener("click", startFollow);
   tabs.tail.stop.addEventListener("click", stopFollow);
   tabs.tail.source.addEventListener("change", () => {
-    stopFollow();
     tailCursor = "";
+    restartFollow();
   });
+  tabs.tail.level.addEventListener("change", restartFollow);
+  tabs.tail.limit.addEventListener("change", restartFollow);
 
   tabs.search.run.addEventListener("click", async () => {
     tabs.search.status.textContent = "";
@@ -159,7 +180,10 @@ export function renderPage(container, context) {
     tabs.timeline.status.textContent = "";
     const query = new URLSearchParams();
     query.set("limit", tabs.timeline.limit.value === "" ? "50" : tabs.timeline.limit.value);
-    setIfPresent(query, "player_id", tabs.timeline.playerID.value.trim());
+    const player = tabs.timeline.player();
+    if (player !== null) {
+      query.set("player_id", String(player.player_id));
+    }
     setIfPresent(query, "uid", tabs.timeline.uid.value.trim());
     setIfPresent(query, "from", toRFC3339(tabs.timeline.from.value));
     setIfPresent(query, "to", toRFC3339(tabs.timeline.to.value));
@@ -234,10 +258,11 @@ export function renderPage(container, context) {
       return;
     }
     const body = reply.body && typeof reply.body === "object" ? reply.body : {};
-    const removed = typeof body.removed_files === "number" ? body.removed_files : body.removed;
+    const result = body.result && typeof body.result === "object" ? body.result : body;
+    const removed = typeof result.removed_files === "number" ? result.removed_files : result.removed;
     const count = typeof removed === "number" ? String(removed) : "unknown";
     clear.result.textContent =
-      "Cleared " + count + " from " + presentText(body.source, source) + " (" + presentText(body.scope, scope) + ").\n" +
+      "Cleared " + count + " from " + presentText(result.source, source) + " (" + presentText(result.scope, scope) + ").\n" +
       "reason: " + confirmation.reason + "\nsemantic_key: " + confirmation.semantic_key;
   });
 
@@ -404,7 +429,7 @@ function buildTimelinePanel() {
   const panel = document.createElement("section");
   panel.id = "logs-panel-timeline";
   panel.hidden = true;
-  const playerID = inputControl("logs-timeline-player", "number", "");
+  const player = playerChoiceField("Player", "logs-timeline-player");
   const uid = inputControl("logs-timeline-uid", "text", "");
   const from = inputControl("logs-timeline-from", "datetime-local", "");
   const to = inputControl("logs-timeline-to", "datetime-local", "");
@@ -419,7 +444,7 @@ function buildTimelinePanel() {
   limit.max = "200";
   const cursor = inputControl("logs-timeline-cursor", "text", "");
   const row = formRow([
-    field("Player id", playerID),
+    player.wrapper,
     field("Account uid", uid),
     field("From", from),
     field("To", to),
@@ -433,7 +458,7 @@ function buildTimelinePanel() {
   const status = statusParagraph("logs-timeline-status");
   const result = resultBox("logs-timeline-result");
   panel.append(row, run, status, result);
-  return { panel, playerID, uid, from, to, outcome, level, mid, limit, cursor, run, status, result };
+  return { panel, player: player.player, uid, from, to, outcome, level, mid, limit, cursor, run, status, result };
 }
 
 function buildClear() {
@@ -487,6 +512,43 @@ function inputControl(id, type, value) {
   input.type = type;
   input.value = value;
   return input;
+}
+
+// playerChoiceField is one player target picked from the shared player popup;
+// the read-only input shows the name, id and server and Clear empties it.
+function playerChoiceField(label, id) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "col-md-4 mb-2";
+  const text = document.createElement("label");
+  text.className = "form-label";
+  text.htmlFor = id;
+  text.textContent = label;
+  const display = document.createElement("input");
+  display.className = "form-control";
+  display.id = id;
+  display.type = "text";
+  display.readOnly = true;
+  display.placeholder = "No player chosen";
+  const actions = document.createElement("div");
+  actions.className = "btn-list mt-1";
+  const choose = buttonControl(id + "-choose", "Choose player", "btn btn-sm btn-outline-secondary");
+  const clear = buttonControl(id + "-clear", "Clear", "btn btn-sm btn-outline-secondary");
+  actions.append(choose, clear);
+  wrapper.append(text, display, actions);
+  let player = null;
+  choose.addEventListener("click", async () => {
+    const players = await openPlayerPicker({ title: "Timeline player", single: true });
+    if (players === null || players.length === 0) {
+      return;
+    }
+    player = players[0];
+    display.value = player.name + " (#" + player.player_id + ") on server " + player.server_id;
+  });
+  clear.addEventListener("click", () => {
+    player = null;
+    display.value = "";
+  });
+  return { wrapper, player: () => player };
 }
 
 function buttonControl(id, label, className) {
