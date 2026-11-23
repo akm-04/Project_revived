@@ -284,6 +284,42 @@ func TestToolchainPathMustBeADirectory(t *testing.T) {
 	}
 }
 
+func TestMigrationsDirectoryResolvesConfiguredAndBinaryRelative(t *testing.T) {
+	configured := t.TempDir()
+	config := Config{Backend: BackendConfig{MigrationsDir: configured}}
+	if config.MigrationsDirectory() != configured {
+		t.Fatalf("configured folder = %q", config.MigrationsDirectory())
+	}
+	binaryDirectory := t.TempDir()
+	migrations := filepath.Join(binaryDirectory, "migrations")
+	if err := os.MkdirAll(migrations, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	config = Config{Backend: BackendConfig{Binary: filepath.Join(binaryDirectory, "gxb-api")}}
+	if config.MigrationsDirectory() != migrations {
+		t.Fatalf("binary-relative folder = %q", config.MigrationsDirectory())
+	}
+	if (Config{Backend: BackendConfig{Binary: filepath.Join(t.TempDir(), "gxb-api")}}).MigrationsDirectory() != "" {
+		t.Fatal("a missing migrations folder was not empty")
+	}
+}
+
+func TestMigrationsDirectoryMustBeADirectory(t *testing.T) {
+	notDirectory := filepath.Join(t.TempDir(), "file")
+	if err := os.WriteFile(notDirectory, []byte("x"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	contents := `{"listen":"127.0.0.1:8090","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091","migrations_dir":"` + notDirectory + `"}}`
+	if _, err := LoadConfig(writeAgentConfig(t, contents)); err == nil {
+		t.Fatal("a file migrations_dir was accepted")
+	}
+	directory := t.TempDir()
+	contents = `{"listen":"127.0.0.1:8090","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091","migrations_dir":"` + directory + `"}}`
+	if _, err := LoadConfig(writeAgentConfig(t, contents)); err != nil {
+		t.Fatalf("a directory migrations_dir was refused: %v", err)
+	}
+}
+
 func TestLoadConfigToolLogDaysDefaultAndBounds(t *testing.T) {
 	root := writeAgentConfig(t, `{"listen":"127.0.0.1:8090","backend":{"operator_addr":"127.0.0.1:8091"}}`)
 	config, err := LoadConfig(root)

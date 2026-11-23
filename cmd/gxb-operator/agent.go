@@ -66,18 +66,19 @@ func runAgent(root string, args []string) error {
 		tools = backupTools
 	}
 	backup := &operatoragent.BackupService{
-		Directory:       backupDirectory,
-		Keep:            config.BackupKeepValue(),
-		EnvironmentFile: config.Backend.EnvFile,
-		Tools:           tools,
-		ToolsError:      toolsErr,
-		Operator:        operator,
-		Backend:         backend,
-		Tokens:          tokens,
-		Operations:      operations,
-		Guard:           backendGuard,
-		Log:             toolLog,
-		Now:             time.Now,
+		Directory:           backupDirectory,
+		Keep:                config.BackupKeepValue(),
+		EnvironmentFile:     config.Backend.EnvFile,
+		Tools:               tools,
+		ToolsError:          toolsErr,
+		Operator:            operator,
+		Backend:             backend,
+		Tokens:              tokens,
+		Operations:          operations,
+		Guard:               backendGuard,
+		Log:                 toolLog,
+		Now:                 time.Now,
+		MigrationsDirectory: config.MigrationsDirectory(),
 	}
 	if tools != nil {
 		if err := backup.RecoverRestore(context.Background()); err != nil {

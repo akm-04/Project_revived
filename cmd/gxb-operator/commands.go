@@ -214,7 +214,7 @@ func runCommand(root string, args []string) error {
 
 func runBackup(root string, args []string) error {
 	if len(args) == 0 {
-		return errors.New("usage: backup snapshot|list|prune|restore|update-backend")
+		return errors.New("usage: backup snapshot|list|prune|pin|unpin|restore|update-backend")
 	}
 	client, err := newAgentClient(root, true)
 	if err != nil {
@@ -226,13 +226,15 @@ func runBackup(root string, args []string) error {
 		flags.SetOutput(os.Stderr)
 		kind := flags.String("kind", operatoragent.BackupKindManual, "manual, safety, pre-update or pre-delete")
 		reason := flags.String("reason", "", "why the snapshot is taken")
+		name := flags.String("name", "", "snapshot name, 1-80 printable characters")
+		pin := flags.Bool("pin", false, "keep this snapshot: pinned snapshots are never pruned")
 		if err := flags.Parse(args[1:]); err != nil {
 			return err
 		}
 		if *reason == "" {
 			return errors.New("--reason is required")
 		}
-		status, body, err := client.request(http.MethodPost, "/agent/v1/backup/snapshot", map[string]string{"kind": *kind, "reason": *reason})
+		status, body, err := client.request(http.MethodPost, "/agent/v1/backup/snapshot", map[string]any{"kind": *kind, "reason": *reason, "name": *name, "pin": *pin})
 		if err != nil {
 			return err
 		}
@@ -249,6 +251,28 @@ func runBackup(root string, args []string) error {
 			return err
 		}
 		status, body, err := client.request(http.MethodPost, "/agent/v1/backup/prune", map[string]string{"reason": reason})
+		if err != nil {
+			return err
+		}
+		return printResult(status, body)
+	case "pin":
+		if len(args) < 2 {
+			return errors.New("usage: backup pin <id> --name <text>")
+		}
+		name, err := backupNameFlag(args[2:])
+		if err != nil {
+			return err
+		}
+		status, body, err := client.request(http.MethodPost, "/agent/v1/backup/pin", map[string]string{"id": args[1], "name": name})
+		if err != nil {
+			return err
+		}
+		return printResult(status, body)
+	case "unpin":
+		if len(args) < 2 {
+			return errors.New("usage: backup unpin <id>")
+		}
+		status, body, err := client.request(http.MethodPost, "/agent/v1/backup/unpin", map[string]string{"id": args[1]})
 		if err != nil {
 			return err
 		}
@@ -279,6 +303,19 @@ func runBackup(root string, args []string) error {
 	default:
 		return fmt.Errorf("unknown backup command %q", args[0])
 	}
+}
+
+func backupNameFlag(args []string) (string, error) {
+	flags := flag.NewFlagSet("backup name", flag.ContinueOnError)
+	flags.SetOutput(os.Stderr)
+	name := flags.String("name", "", "snapshot name, 1-80 printable characters")
+	if err := flags.Parse(args); err != nil {
+		return "", err
+	}
+	if *name == "" {
+		return "", errors.New("--name is required")
+	}
+	return *name, nil
 }
 
 func backupReasonFlag(args []string) (string, error) {

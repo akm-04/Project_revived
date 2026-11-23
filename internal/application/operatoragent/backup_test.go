@@ -26,6 +26,8 @@ type fakeTools struct {
 	executeErr  error
 	queryAnswer string
 	queryErr    error
+	migrateErr  error
+	migrateDir  string
 }
 
 func (tools *fakeTools) Dump(_ context.Context, _ string, destination string) error {
@@ -55,6 +57,12 @@ func (tools *fakeTools) Execute(_ context.Context, _ string, statement string) e
 func (tools *fakeTools) Query(context.Context, string, string) (string, error) {
 	tools.calls = append(tools.calls, "query")
 	return tools.queryAnswer, tools.queryErr
+}
+
+func (tools *fakeTools) Migrate(_ context.Context, _ string, directory string) error {
+	tools.calls = append(tools.calls, "migrate")
+	tools.migrateDir = directory
+	return tools.migrateErr
 }
 
 func (tools *fakeTools) executed(substring string) bool {
@@ -157,7 +165,7 @@ func writeSnapshot(t *testing.T, directory, id, kind string, created time.Time, 
 
 func TestSnapshotWritesManifestAndVerifiesTheDump(t *testing.T) {
 	service, tools, _ := newBackupService(t)
-	operation, err := service.Snapshot(context.Background(), BackupKindManual, "nightly")
+	operation, err := service.Snapshot(context.Background(), SnapshotOptions{Kind: BackupKindManual, Reason: "nightly"})
 	if err != nil {
 		t.Fatalf("snapshot: %v", err)
 	}
@@ -203,20 +211,20 @@ func TestSnapshotRefusesMissingToolchainAndDSN(t *testing.T) {
 	service, _, _ := newBackupService(t)
 	service.Tools = nil
 	service.ToolsError = errors.New("pg_dump is missing")
-	if _, err := service.Snapshot(context.Background(), BackupKindManual, "r"); !backupRefusalCode(err, CodeBackupToolsMissing) {
+	if _, err := service.Snapshot(context.Background(), SnapshotOptions{Kind: BackupKindManual, Reason: "r"}); !backupRefusalCode(err, CodeBackupToolsMissing) {
 		t.Fatalf("missing tools: %v", err)
 	}
 
 	service, _, _ = newBackupService(t)
 	t.Setenv(PostgresDSNVariable, "")
-	if _, err := service.Snapshot(context.Background(), BackupKindManual, "r"); !backupRefusalCode(err, CodeBackupDSNMissing) {
+	if _, err := service.Snapshot(context.Background(), SnapshotOptions{Kind: BackupKindManual, Reason: "r"}); !backupRefusalCode(err, CodeBackupDSNMissing) {
 		t.Fatalf("missing DSN: %v", err)
 	}
 }
 
 func TestSnapshotRefusesUnknownKind(t *testing.T) {
 	service, _, _ := newBackupService(t)
-	if _, err := service.Snapshot(context.Background(), "nonsense", "r"); !backupRefusalCode(err, CodeBackupKindInvalid) {
+	if _, err := service.Snapshot(context.Background(), SnapshotOptions{Kind: "nonsense", Reason: "r"}); !backupRefusalCode(err, CodeBackupKindInvalid) {
 		t.Fatalf("unknown kind: %v", err)
 	}
 }
@@ -403,6 +411,8 @@ func TestRestoreRefusesDamagedUnknownAndNewerMigration(t *testing.T) {
 	writeSnapshot(t, service.Directory, id, BackupKindManual, time.Now().UTC(), "content")
 	if _, err := service.Restore(context.Background(), id, "r"); !backupRefusalCode(err, CodeBackupMigrationTooNew) {
 		t.Fatalf("migration: %v", err)
+	} else if !strings.Contains(err.Error(), "183") || !strings.Contains(err.Error(), "100") {
+		t.Fatalf("the refusal does not name both migrations: %v", err)
 	}
 }
 
@@ -511,6 +521,143 @@ func TestDatabaseDSNRoundTrip(t *testing.T) {
 	}
 	if _, err := DatabaseNameFromDSN("host=127.0.0.1"); err == nil || strings.Contains(err.Error(), "127.0.0.1") {
 		t.Fatalf("a DSN without a database leaked: %v", err)
+	}
+}
+
+func TestSnapshotStoresNameAndPin(t *testing.T) {
+	service, _, _ := newBackupService(t)
+	operation, err := service.Snapshot(context.Background(), SnapshotOptions{Kind: BackupKindManual, Reason: "named", Name: "  before awakening  ", Pinned: true})
+	if err != nil || operation.State != OperationDone {
+		t.Fatalf("snapshot: %+v %v", operation, err)
+	}
+	list, err := service.List(context.Background())
+	if err != nil || len(list.Backups) != 1 {
+		t.Fatalf("list: %+v %v", list, err)
+	}
+	entry := list.Backups[0]
+	if entry.Name != "before awakening" || !entry.Pinned {
+		t.Fatalf("entry = %+v", entry)
+	}
+}
+
+func TestSnapshotPinRequiresAName(t *testing.T) {
+	service, _, _ := newBackupService(t)
+	if _, err := service.Snapshot(context.Background(), SnapshotOptions{Kind: BackupKindManual, Reason: "r", Pinned: true}); !backupRefusalCode(err, CodeBackupNameInvalid) {
+		t.Fatalf("pin without a name: %v", err)
+	}
+}
+
+func TestPinAndUnpinRewriteTheManifest(t *testing.T) {
+	service, _, _ := newBackupService(t)
+	id := "20260101T000000.000000000Z-manual"
+	writeSnapshot(t, service.Directory, id, BackupKindManual, time.Date(2026, 11, 20, 10, 0, 0, 0, time.UTC), "content")
+	pinned, err := service.Pin(id, "  baseline  ")
+	if err != nil || !pinned.Pinned || pinned.Name != "baseline" {
+		t.Fatalf("pin = %+v (%v)", pinned, err)
+	}
+	stored, err := readBackupManifest(filepath.Join(service.Directory, id+backupManifestSuffix))
+	if err != nil || !stored.Pinned || stored.Name != "baseline" {
+		t.Fatalf("stored manifest = %+v (%v)", stored, err)
+	}
+	unpinned, err := service.Unpin(id)
+	if err != nil || unpinned.Pinned || unpinned.Name != "baseline" {
+		t.Fatalf("unpin = %+v (%v)", unpinned, err)
+	}
+}
+
+func TestPinRefusesUnknownIDAndInvalidName(t *testing.T) {
+	service, _, _ := newBackupService(t)
+	id := "20260101T000000.000000000Z-manual"
+	writeSnapshot(t, service.Directory, id, BackupKindManual, time.Date(2026, 11, 20, 10, 0, 0, 0, time.UTC), "content")
+	for name, testCase := range map[string]struct {
+		id   string
+		name string
+		code string
+	}{
+		"unknown id":    {id: "20260102T000000.000000000Z-manual", name: "x", code: CodeBackupUnknown},
+		"blank name":    {id: id, name: "   ", code: CodeBackupNameInvalid},
+		"too long":      {id: id, name: strings.Repeat("x", 81), code: CodeBackupNameInvalid},
+		"not printable": {id: id, name: "bad\nname", code: CodeBackupNameInvalid},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if _, err := service.Pin(testCase.id, testCase.name); !backupRefusalCode(err, testCase.code) {
+				t.Fatalf("pin: %v", err)
+			}
+		})
+	}
+	if _, err := service.Unpin("20260102T000000.000000000Z-manual"); !backupRefusalCode(err, CodeBackupUnknown) {
+		t.Fatalf("unpin unknown: %v", err)
+	}
+}
+
+func TestPruneNeverRemovesPinnedSnapshots(t *testing.T) {
+	service, _, _ := newBackupService(t)
+	service.Keep = 1
+	base := time.Date(2026, 11, 20, 10, 0, 0, 0, time.UTC)
+	ids := make([]string, 6)
+	for index := range 6 {
+		ids[index] = "2026010" + string(rune('1'+index)) + "T000000.000000000Z-manual"
+		writeSnapshot(t, service.Directory, ids[index], BackupKindManual, base.Add(time.Duration(index)*time.Minute), "snapshot-"+ids[index])
+	}
+	for _, pinned := range []string{ids[0], ids[2], ids[4]} {
+		if _, err := service.Pin(pinned, "keep "+pinned); err != nil {
+			t.Fatalf("pin %s: %v", pinned, err)
+		}
+	}
+	result, err := service.prune(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, pinned := range []string{ids[0], ids[2], ids[4], ids[5]} {
+		if _, err := os.Stat(filepath.Join(service.Directory, pinned+backupDumpSuffix)); err != nil {
+			t.Fatalf("snapshot %s was removed: %v", pinned, err)
+		}
+	}
+	wantRemoved := map[string]bool{ids[1]: true, ids[3]: true}
+	if len(result.Removed) != 2 {
+		t.Fatalf("removed = %+v", result.Removed)
+	}
+	for _, removed := range result.Removed {
+		if !wantRemoved[removed] {
+			t.Fatalf("removed %q, want only %v", removed, wantRemoved)
+		}
+	}
+}
+
+func TestRestoreMigratesAnOlderSnapshotForward(t *testing.T) {
+	service, tools, process := newBackupService(t)
+	service.MigrationsDirectory = "/tmp/gxb-migrations"
+	id := "20260101T000000.000000000Z-manual"
+	manifest := writeSnapshot(t, service.Directory, id, BackupKindManual, time.Date(2026, 11, 20, 10, 0, 0, 0, time.UTC), "older")
+	manifest.Migration = 182
+	if err := writeBackupManifest(filepath.Join(service.Directory, id+backupManifestSuffix), manifest); err != nil {
+		t.Fatal(err)
+	}
+	operation, err := service.Restore(context.Background(), id, "older snapshot")
+	if err != nil || operation.State != OperationDone {
+		t.Fatalf("restore: %+v %v", operation, err)
+	}
+	if tools.migrateDir != "/tmp/gxb-migrations" {
+		t.Fatalf("migrate folder = %q, calls = %+v", tools.migrateDir, tools.calls)
+	}
+	if !process.running {
+		t.Fatal("the backend was not started again")
+	}
+}
+
+func TestRestoreRefusesAnOlderSnapshotWithoutAMigrationsFolder(t *testing.T) {
+	service, _, process := newBackupService(t)
+	id := "20260101T000000.000000000Z-manual"
+	manifest := writeSnapshot(t, service.Directory, id, BackupKindManual, time.Date(2026, 11, 20, 10, 0, 0, 0, time.UTC), "older")
+	manifest.Migration = 182
+	if err := writeBackupManifest(filepath.Join(service.Directory, id+backupManifestSuffix), manifest); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := service.Restore(context.Background(), id, "older snapshot"); !backupRefusalCode(err, CodeBackupToolsMissing) {
+		t.Fatalf("restore: %v", err)
+	}
+	if process.stops != 0 {
+		t.Fatal("the backend was stopped before the migration check")
 	}
 }
 

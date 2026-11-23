@@ -43,6 +43,9 @@ type BackendConfig struct {
 	Binary       string `json:"binary"`
 	EnvFile      string `json:"env_file"`
 	OperatorAddr string `json:"operator_addr"`
+	// MigrationsDir is the forward-only goose migration folder a restore of an
+	// older snapshot is migrated with; empty resolves beside the binary.
+	MigrationsDir string `json:"migrations_dir,omitempty"`
 	// ReadyTimeoutSeconds and StopGraceSeconds are optional; nil means the
 	// default. A pointer separates a missing field from an explicit 0.
 	ReadyTimeoutSeconds *int `json:"ready_timeout_seconds,omitempty"`
@@ -111,6 +114,30 @@ func (config Config) BackupKeepValue() int {
 		return DefaultBackupKeep
 	}
 	return *config.BackupKeep
+}
+
+// MigrationsDirectory resolves the forward-migration folder: the configured
+// backend.migrations_dir, else <binary folder>/migrations or
+// <binary folder>/../migrations when one exists. Empty means a restore of an
+// older snapshot cannot migrate forward.
+func (config Config) MigrationsDirectory() string {
+	if config.Backend.MigrationsDir != "" {
+		return config.Backend.MigrationsDir
+	}
+	if config.Backend.Binary == "" {
+		return ""
+	}
+	binaryDirectory := filepath.Dir(config.Backend.Binary)
+	candidates := []string{
+		filepath.Join(binaryDirectory, "migrations"),
+		filepath.Join(binaryDirectory, "..", "migrations"),
+	}
+	for _, candidate := range candidates {
+		if info, err := os.Stat(candidate); err == nil && info.IsDir() {
+			return filepath.Clean(candidate)
+		}
+	}
+	return ""
 }
 
 // ToolLogRetentionDays is tool_log_days with the safe default (F1).
@@ -239,6 +266,12 @@ func (config Config) Validate() error {
 		info, err := os.Stat(config.ToolchainPath)
 		if err != nil || !info.IsDir() {
 			return errors.New(AgentConfigFileName + ": toolchain_path is not a readable directory")
+		}
+	}
+	if config.Backend.MigrationsDir != "" {
+		info, err := os.Stat(config.Backend.MigrationsDir)
+		if err != nil || !info.IsDir() {
+			return errors.New(AgentConfigFileName + ": backend.migrations_dir is not a readable directory")
 		}
 	}
 	if value := config.ToolLogDays; value != nil && (*value < 1 || *value > maximumToolLogDays) {

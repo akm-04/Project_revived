@@ -365,12 +365,16 @@ function runAgentRoute(name, payload, reason, semanticKey) {
     case "backup.snapshot":
       return request("/agent/v1/backup/snapshot", {
         method: "POST",
-        body: { kind: payload.kind, reason },
+        body: { kind: payload.kind, name: payload.name, pin: Boolean(payload.pin), reason },
       });
     case "backup.list":
       return request("/agent/v1/backup/list");
     case "backup.prune":
       return request("/agent/v1/backup/prune", { method: "POST", body: { reason } });
+    case "backup.pin":
+      return request("/agent/v1/backup/pin", { method: "POST", body: { id: payload.id, name: payload.name } });
+    case "backup.unpin":
+      return request("/agent/v1/backup/unpin", { method: "POST", body: { id: payload.id } });
     case "backup.restore":
       return request("/agent/v1/backup/restore", { method: "POST", body: { id: payload.id, reason } });
     case "backup.update_backend":

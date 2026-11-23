@@ -13,19 +13,20 @@ export function renderPage(container, context) {
   container.append(pageHeader(context.page.label));
   const overview = buildOverview();
   const list = buildList();
-  const snapshot = buildAction("Snapshot now");
+  const snapshot = buildSnapshotAction();
   const restore = buildAction("Restore selected snapshot");
   const prune = buildAction("Prune snapshots");
   container.append(overview.card, list.card, snapshot.card, restore.card, prune.card);
   restore.button.disabled = true;
 
-  let selectedID = "";
+  let selectedEntry = null;
+  let backendMigration = null;
 
-  function selectSnapshot(id, damaged) {
-    if (damaged) {
+  function selectSnapshot(entry) {
+    if (entry.damaged === true) {
       return;
     }
-    selectedID = id;
+    selectedEntry = entry;
     restore.button.disabled = false;
   }
 
@@ -38,20 +39,30 @@ export function renderPage(container, context) {
     }
     if (!reply.ok) {
       fillOverview(overview, null);
-      list.table.replaceChildren(noRowsRow(6, "The snapshot list is unavailable."));
+      list.table.replaceChildren(noRowsRow(9, "The snapshot list is unavailable."));
       setStatus(list.status, describeReply(reply), "error");
       return;
     }
     const body = reply.body && typeof reply.body === "object" ? reply.body : {};
     const backups = Array.isArray(body.backups) ? body.backups : [];
-    selectedID = "";
+    selectedEntry = null;
+    backendMigration =
+      typeof body.backend_migration === "number" && Number.isFinite(body.backend_migration)
+        ? body.backend_migration
+        : null;
     restore.button.disabled = true;
     fillOverview(overview, body);
-    fillTable(list.table, backups, selectSnapshot);
+    fillTable(list.table, backups, selectSnapshot, loadList, list.status);
     setStatus(list.status, "Loaded " + backups.length + " snapshot" + (backups.length === 1 ? "." : "s."), "success");
   }
 
   snapshot.button.addEventListener("click", async () => {
+    const name = snapshot.name.value.trim();
+    const pin = snapshot.pin.checked;
+    if (pin && name === "") {
+      setStatus(snapshot.status, "A name is required to keep (pin) a snapshot.", "error");
+      return;
+    }
     const confirmation = await confirmAction({
       title: "Snapshot now",
       summary: "Take a database snapshot of the running backend now.",
@@ -62,7 +73,7 @@ export function renderPage(container, context) {
     }
     const reply = await request("/agent/v1/backup/snapshot", {
       method: "POST",
-      body: { kind: "manual", reason: confirmation.reason },
+      body: { kind: "manual", name, pin, reason: confirmation.reason },
     });
     await showOperation(snapshot, reply, confirmation);
     if (reply.ok) {
@@ -71,16 +82,21 @@ export function renderPage(container, context) {
   });
 
   restore.button.addEventListener("click", async () => {
-    if (selectedID === "") {
+    if (selectedEntry === null) {
       setStatus(restore.status, "Select a valid snapshot row first.", "error");
       return;
     }
+    const name = presentText(selectedEntry.name, "unnamed");
     const confirmation = await confirmAction({
       title: "Restore snapshot",
       summary:
+        "Restore snapshot \"" + name + "\" (" + presentText(selectedEntry.id, "unknown") + "). " +
+        "Snapshot migration " + presentNumber(selectedEntry.migration, "unknown") +
+        "; backend migration " + presentNumber(backendMigration, "unknown") + ". " +
         "Restore replaces the current database with the selected snapshot. " +
         "The backend is stopped first and every player connection is lost; " +
-        "it is then started from the restored data. A safety snapshot is taken before the swap.",
+        "an older snapshot is migrated forward to the backend schema, then the backend starts. " +
+        "A safety snapshot is taken before the swap.",
       confirmLabel: "Restore snapshot",
     });
     if (confirmation === null) {
@@ -88,7 +104,7 @@ export function renderPage(container, context) {
     }
     const reply = await request("/agent/v1/backup/restore", {
       method: "POST",
-      body: { id: selectedID, reason: confirmation.reason },
+      body: { id: selectedEntry.id, reason: confirmation.reason },
     });
     await showOperation(restore, reply, confirmation);
     if (reply.ok) {
@@ -203,7 +219,7 @@ function buildList() {
   return { card, table, status, refresh };
 }
 
-function buildAction(title) {
+function buildAction(title, controls) {
   const card = document.createElement("div");
   card.className = "card card-body";
   const heading = document.createElement("h2");
@@ -218,16 +234,49 @@ function buildAction(title) {
   status.setAttribute("role", "status");
   const result = document.createElement("pre");
   result.className = "component-output";
-  card.append(heading, button, status, result);
+  card.append(heading);
+  for (const control of controls || []) {
+    card.append(control);
+  }
+  card.append(button, status, result);
   return { card, button, status, result };
 }
 
-function fillTable(table, backups, onSelect) {
+// buildSnapshotAction adds the G54 name field and the keep (pin) toggle to the
+// plain action card.
+function buildSnapshotAction() {
+  const nameLabel = document.createElement("label");
+  nameLabel.className = "form-label";
+  nameLabel.htmlFor = "backup-snapshot-name";
+  nameLabel.textContent = "Name (1-80 characters; required to keep)";
+  const name = document.createElement("input");
+  name.type = "text";
+  name.className = "form-control";
+  name.id = "backup-snapshot-name";
+  name.maxLength = 80;
+  name.autocomplete = "off";
+  const keepLabel = document.createElement("label");
+  keepLabel.className = "form-check";
+  const pin = document.createElement("input");
+  pin.type = "checkbox";
+  pin.className = "form-check-input";
+  pin.id = "backup-snapshot-pin";
+  const keepText = document.createElement("span");
+  keepText.className = "form-check-label";
+  keepText.textContent = "Keep (pin): never pruned";
+  keepLabel.append(pin, keepText);
+  const action = buildAction("Snapshot now", [nameLabel, name, keepLabel]);
+  action.name = name;
+  action.pin = pin;
+  return action;
+}
+
+function fillTable(table, backups, onSelect, onKeepChanged, status) {
   table.replaceChildren();
-  table.append(tableHead(["Select", "Snapshot", "Time", "Size", "State", "Migration"]));
+  table.append(tableHead(["Select", "Snapshot", "Name", "Time", "Size", "Backend", "Migration", "State", "Keep"]));
   const body = document.createElement("tbody");
   if (backups.length === 0) {
-    body.append(noRowsRow(6, "No snapshots yet."));
+    body.append(noRowsRow(9, "No snapshots yet."));
     table.append(body);
     return;
   }
@@ -244,20 +293,70 @@ function fillTable(table, backups, onSelect) {
     radio.value = presentText(entry.id, "");
     radio.id = "backup-select-" + index;
     radio.disabled = damaged;
-    radio.addEventListener("change", () => onSelect(radio.value, damaged));
+    radio.addEventListener("change", () => onSelect(entry));
     selectCell.append(radio);
 
     row.append(
       selectCell,
       textCell(presentText(entry.id, "unknown")),
+      textCell(presentText(entry.name, "—")),
       textCell(formatTime(entry.created_at)),
       textCell(formatSize(entry.size)),
-      stateCell(entry),
+      textCell(presentText(entry.backend_version, "unknown")),
       textCell(presentNumber(entry.migration, "unknown")),
+      stateCell(entry),
+      keepCell(entry, onKeepChanged, status),
     );
     body.append(row);
   });
   table.append(body);
+}
+
+// keepCell pins an unnamed snapshot with the typed name, or unpins a kept one.
+// Both reload the list so the row reflects the stored manifest.
+function keepCell(entry, onKeepChanged, status) {
+  const cell = document.createElement("td");
+  const id = presentText(entry.id, "");
+  if (entry.pinned === true) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "btn btn-outline-secondary btn-sm";
+    button.textContent = "Unpin";
+    button.addEventListener("click", () => changeKeep("/agent/v1/backup/unpin", { id }, status, onKeepChanged));
+    cell.append(button);
+    return cell;
+  }
+  const name = document.createElement("input");
+  name.type = "text";
+  name.className = "form-control form-control-sm";
+  name.placeholder = "name";
+  name.maxLength = 80;
+  name.autocomplete = "off";
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "btn btn-outline-primary btn-sm";
+  button.textContent = "Pin";
+  button.addEventListener("click", () => {
+    if (name.value.trim() === "") {
+      setStatus(status, "A name is required to pin a snapshot.", "error");
+      return;
+    }
+    void changeKeep("/agent/v1/backup/pin", { id, name: name.value.trim() }, status, onKeepChanged);
+  });
+  cell.append(name, button);
+  return cell;
+}
+
+async function changeKeep(path, body, status, onKeepChanged) {
+  const reply = await request(path, { method: "POST", body });
+  if (reply.unauthorized) {
+    return;
+  }
+  if (!reply.ok) {
+    setStatus(status, describeReply(reply), "error");
+    return;
+  }
+  await onKeepChanged();
 }
 
 function tableHead(labels) {
@@ -289,6 +388,10 @@ function stateCell(entry) {
     if (typeof entry.damaged_reason === "string" && entry.damaged_reason !== "") {
       cell.title = entry.damaged_reason;
     }
+    return cell;
+  }
+  if (entry.pinned === true) {
+    cell.textContent = "pinned";
     return cell;
   }
   cell.textContent = "valid";
