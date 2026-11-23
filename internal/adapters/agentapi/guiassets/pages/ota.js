@@ -134,7 +134,8 @@ function createLaneCard(lane) {
 
   function refreshForm() {
     const typed = versionInput.value.trim();
-    const classification = classifyVersion(typed, activeVersion);
+    const lineVersion = activeVersion === "" ? stagedVersion : activeVersion;
+    const classification = classifyVersion(typed, activeVersion, lineVersion);
     rollbackRequired = classification.kind === "rollback";
     rollbackWarning.hidden = !rollbackRequired;
     acknowledgementLabel.hidden = !rollbackRequired;
@@ -148,6 +149,8 @@ function createLaneCard(lane) {
     }
     if (classification.kind === "invalid") {
       versionHint.textContent = "Use a strict x.y.z number, e.g. " + (proposedVersion || "1.631.1") + ".";
+    } else if (classification.kind === "otherLine") {
+      versionHint.textContent = typed + " is on another version line and is refused: keep " + classification.line + " and change only the last number.";
     } else if (classification.kind === "equal") {
       versionHint.textContent = typed + " is already the active version.";
     } else if (typed === "" && proposedVersion === "") {
@@ -158,6 +161,7 @@ function createLaneCard(lane) {
       versionHint.textContent = "The proposed next version is " + (proposedVersion || "unknown") + ".";
     }
     stage.disabled = classification.kind === "invalid" || classification.kind === "equal" ||
+      classification.kind === "otherLine" ||
       (rollbackRequired && !acknowledgement.checked) ||
       (typed === "" && proposedVersion === "");
   }
@@ -397,13 +401,20 @@ async function checkRelease(version, result) {
   result.textContent = exists ? "Version " + version + " exists." : "Version " + version + " does not exist.";
 }
 
-function classifyVersion(text, activeVersion) {
+// classifyVersion keeps the lane's line (G23): a different major.minor is
+// refused on both the forward and the rollback path, because a client reads a
+// changed line as a new APK.
+function classifyVersion(text, activeVersion, lineVersion) {
   if (text === "") {
     return { kind: "auto" };
   }
   const version = parseVersion(text);
   if (version === null) {
     return { kind: "invalid" };
+  }
+  const line = parseVersion(lineVersion);
+  if (line !== null && (version.major !== line.major || version.minor !== line.minor)) {
+    return { kind: "otherLine", line: line.major + "." + line.minor };
   }
   const active = parseVersion(activeVersion);
   if (active === null) {

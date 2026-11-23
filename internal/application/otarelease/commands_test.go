@@ -58,7 +58,7 @@ func (store *fakeStore) ReleaseTx(_ context.Context, _ tx.Queryer, version strin
 func (store *fakeStore) LockLaneTx(_ context.Context, _ tx.Tx, lane domain.Lane, version string) ([]domain.RawRelease, error) {
 	rows := make([]domain.RawRelease, 0)
 	for _, row := range store.releases {
-		if row.Lane == string(lane) && (row.State == string(domain.StateActive) || row.Version == version) {
+		if row.Lane == string(lane) && (row.State == string(domain.StateActive) || row.State == string(domain.StateBuilt) || row.Version == version) {
 			rows = append(rows, *row)
 		}
 	}
@@ -204,6 +204,46 @@ func TestRegisterBuildRules(t *testing.T) {
 	}
 	if _, err := commands.RegisterBuild(ctx, noTx{}, "cmd-bad", domain.BuildRequest{Version: "1.631.6"}, at); refusalCode(t, err) != CodePayloadInvalid {
 		t.Fatalf("bad row err=%v", err)
+	}
+}
+
+func TestRegisterBuildKeepsTheLaneLine(t *testing.T) {
+	ctx := context.Background()
+	at := time.Unix(1000, 0).UTC()
+	first := buildPayload(t, "1.631.5", "code", 2000)
+	sameLine := buildPayload(t, "1.631.6", "code", 2000)
+	sameLineRollback := buildPayload(t, "1.631.0", "code", 2000)
+	sameLineRollback.Rollback = true
+	crossLineRollback := buildPayload(t, "1.600.5", "code", 2000)
+	crossLineRollback.Rollback = true
+	crossLineForward := buildPayload(t, "1.632.1", "code", 2000)
+	store := newFakeStore()
+	commands := Commands{Store: store, Root: rootWithVolumes(t, first, sameLine, sameLineRollback)}
+	if _, err := commands.RegisterBuild(ctx, noTx{}, "cmd-first", first, at); err != nil {
+		t.Fatal(err)
+	}
+	// Nothing is active: the highest BUILT release names the line.
+	for _, request := range []domain.BuildRequest{crossLineRollback, crossLineForward} {
+		_, err := commands.RegisterBuild(ctx, noTx{}, "cmd-cross", request, at)
+		var refusal *operator.Refusal
+		if !errors.As(err, &refusal) || refusal.Code != CodeBuildVersionNotNext || !strings.Contains(refusal.Message, "keep 1.631 and change only the last number") {
+			t.Fatalf("%s without an active release: %v", request.Version, err)
+		}
+	}
+	if _, err := commands.RegisterBuild(ctx, noTx{}, "cmd-same-line", sameLine, at); err != nil {
+		t.Fatalf("same-line forward refused: %v", err)
+	}
+	store.releases["1.631.5"].State = string(domain.StateActive)
+	for _, request := range []domain.BuildRequest{crossLineRollback, crossLineForward} {
+		_, err := commands.RegisterBuild(ctx, noTx{}, "cmd-cross-active", request, at)
+		var refusal *operator.Refusal
+		if !errors.As(err, &refusal) || refusal.Code != CodeBuildVersionNotNext {
+			t.Fatalf("%s beside the active release: %v", request.Version, err)
+		}
+	}
+	result, err := commands.RegisterBuild(ctx, noTx{}, "cmd-same-line-rollback", sameLineRollback, at)
+	if err != nil || !result.Rollback || result.Warning != domain.RollbackWarning {
+		t.Fatalf("same-line rollback=%+v err=%v", result, err)
 	}
 }
 

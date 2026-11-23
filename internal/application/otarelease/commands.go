@@ -19,12 +19,16 @@ const (
 	CodePayloadInvalid   = "OTA_PAYLOAD_INVALID"
 	CodeVersionExists    = "OTA_VERSION_EXISTS"
 	CodeRollbackRequired = "OTA_ROLLBACK_REQUIRED"
-	CodeVolumeMissing    = "OTA_VOLUME_MISSING"
-	CodeReleaseUnknown   = "OTA_RELEASE_UNKNOWN"
-	CodeStateInvalid     = "OTA_STATE_INVALID"
-	CodeRevisionRequired = "OTA_REVISION_REQUIRED"
-	CodeRootUnavailable  = "OTA_ROOT_UNAVAILABLE"
-	CodeActiveLimit      = "OTA_ACTIVE_LIMIT"
+	// CodeBuildVersionNotNext refuses a version on another major.minor line than
+	// the lane's active release (or the highest built one when nothing is
+	// active): a changed line reads as a new APK to the client (G23).
+	CodeBuildVersionNotNext = "OTA_BUILD_VERSION_NOT_NEXT"
+	CodeVolumeMissing       = "OTA_VOLUME_MISSING"
+	CodeReleaseUnknown      = "OTA_RELEASE_UNKNOWN"
+	CodeStateInvalid        = "OTA_STATE_INVALID"
+	CodeRevisionRequired    = "OTA_REVISION_REQUIRED"
+	CodeRootUnavailable     = "OTA_ROOT_UNAVAILABLE"
+	CodeActiveLimit         = "OTA_ACTIVE_LIMIT"
 )
 
 // maxActiveCatalogReleases keeps one ACTIVE read at 16 rows: one code, one
@@ -153,9 +157,16 @@ func (commands Commands) RegisterBuild(ctx context.Context, transaction tx.Tx, c
 	if err != nil {
 		return BuildResult{}, err
 	}
-	active, err := activeVersion(rows)
+	active, highestBuilt, err := laneVersions(rows)
 	if err != nil {
 		return BuildResult{}, err
+	}
+	line := active
+	if line == nil {
+		line = highestBuilt
+	}
+	if line != nil && !release.Version.SameLine(*line) {
+		return BuildResult{}, operator.Refuse(CodeBuildVersionNotNext, fmt.Sprintf("keep %d.%d and change only the last number", line.Major, line.Minor), nil)
 	}
 	if domain.LowersActive(release.Version, active) && !request.Rollback {
 		return BuildResult{}, operator.Refuse(CodeRollbackRequired, "the release number is below the lane's active release; set rollback to register it: "+domain.RollbackWarning, map[string]string{"active_version": active.String()})
@@ -307,19 +318,26 @@ func (commands Commands) verifyVolumes(release domain.Release) error {
 	return nil
 }
 
-func activeVersion(rows []domain.RawRelease) (*domain.Version, error) {
-	var active *domain.Version
+// laneVersions returns the lane's highest ACTIVE version and its highest BUILT
+// one. The active version decides a rollback; when nothing is active the
+// highest built version names the line a new build must keep (G23).
+func laneVersions(rows []domain.RawRelease) (*domain.Version, *domain.Version, error) {
+	var active, highestBuilt *domain.Version
 	for _, row := range rows {
-		if row.State != string(domain.StateActive) {
-			continue
-		}
 		version, err := domain.ParseVersion(row.Version)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
-		if active == nil || version.Compare(*active) > 0 {
-			active = &version
+		switch row.State {
+		case string(domain.StateActive):
+			if active == nil || version.Compare(*active) > 0 {
+				active = &version
+			}
+		case string(domain.StateBuilt):
+			if highestBuilt == nil || version.Compare(*highestBuilt) > 0 {
+				highestBuilt = &version
+			}
 		}
 	}
-	return active, nil
+	return active, highestBuilt, nil
 }
