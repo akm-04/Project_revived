@@ -97,7 +97,8 @@
    "commands_test.go",
    "mail_test.go",
    "module_test.go",
-   "redeem_test.go"
+   "redeem_test.go",
+   "reset_commands_test.go"
   ]
  }
 }

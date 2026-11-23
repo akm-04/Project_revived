@@ -85,6 +85,9 @@
    "missioninputs": [
     "*ReadTx"
    ],
+   "operatorgrant": [
+    "*ResetOperatorCampaignDaily"
+   ],
    "workplace": [
     "*ReadTx"
    ]
@@ -626,6 +629,9 @@
     "*AdvanceDailyTx",
     "*LockBuyTx",
     "*ReadBuyTx"
+   ],
+   "operatorgrant": [
+    "*ResetOperatorDailyBuys"
    ]
   },
   "dailyreset": {},
@@ -1180,7 +1186,8 @@
     "*SettleAwakeningCampaignTx",
     "*SettleGrantTx",
     "*SnapshotTx",
-    "*TemporalBalanceTx"
+    "*TemporalBalanceTx",
+    "Validate"
    ],
    "championsleague": [
     "*DeliverLeagueTitleNoticeTx",
@@ -1302,7 +1309,8 @@
     "*SnapshotTx"
    ],
    "dailyconsume": [
-    "*DebitMaterialCostTx"
+    "*DebitMaterialCostTx",
+    "Validate"
    ],
    "directorysync": [
     "*ReadCanonicalDirectoryTx"
@@ -1527,6 +1535,8 @@
     "*AdminSendMailTx",
     "*OperatorCreateRedeemTx",
     "*OperatorDisableRedeemTx",
+    "*ResetOperatorOccultTickets",
+    "*ResetOperatorSkillPoints",
     "IsPermanentGrantRefusal"
    ],
    "petcampaign": [
@@ -2896,7 +2906,8 @@
     "*SettleAwakeningCampaignTx",
     "*SettleGrantTx",
     "*SnapshotTx",
-    "*TemporalBalanceTx"
+    "*TemporalBalanceTx",
+    "Validate"
    ],
    "interface:campaign.Heroes": [
     "*ListHeroesTx",
@@ -3675,7 +3686,12 @@
   },
   "dailyconsume": {
    "i5": [
-    "*DebitMaterialCostTx"
+    "*DebitMaterialCostTx",
+    "Validate"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
    ]
   },
   "dailyreset": {
@@ -5536,6 +5552,12 @@
    ]
   },
   "operatorgrant": {
+   "campaign": [
+    "*ResetOperatorCampaignDaily"
+   ],
+   "dailyconsume": [
+    "*ResetOperatorDailyBuys"
+   ],
    "i5": [
     "*AdminGrant",
     "*AdminGrantTx",
@@ -5543,6 +5565,8 @@
     "*AdminSendMailTx",
     "*OperatorCreateRedeemTx",
     "*OperatorDisableRedeemTx",
+    "*ResetOperatorOccultTickets",
+    "*ResetOperatorSkillPoints",
     "IsPermanentGrantRefusal"
    ],
    "operator": [

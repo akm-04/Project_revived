@@ -603,7 +603,9 @@ func main() {
 		map[string]operator.ReadHandler{"events.list": operatorapi.EventsList(eventService)})
 	catalogModule := bindModule(operatorcatalog.Module(), nil,
 		map[string]operator.ReadHandler{"catalog.search": operatorapi.CatalogSearch(operatorCatalogue)})
-	playerModule := bindModule(operator.PlayerModule(), nil,
+	resetCommands := operatorgrant.ResetCommands{Store: operatorstore.Store{}, Directory: i4store.PlayerDirectoryReader{}}
+	playerModule := bindModule(operator.MergeModules([]operator.Module{operator.PlayerModule()}, []operator.Module{resetCommands.Module()})[0],
+		resetCommands.Handlers(),
 		map[string]operator.ReadHandler{"player.find": operatorapi.PlayerFind(playerReads), "player.summary": operatorapi.PlayerSummary(playerReads)})
 	serverModule := bindModule(operator.ServerModule(),
 		map[string]operator.Handler{"server.rename": operator.ServerRenameHandler(i4store.ServerDirectoryReader{})},
@@ -637,7 +639,9 @@ func main() {
 	eventJobs := appevents.Jobs{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: eventstore.Store{}, Coverage: otaServing, Hooks: eventHooks, Clock: clock.System{}, DefaultCycle: defaultCycle, Servers: i4store.PlayerRootLocker{}, Players: i4store.EventPlayerSource{}, Mail: appi5.SettlementMail{Store: i5db}, Content: contentDB, ClaimGrant: appevents.ChoiceGrant{HeroContent: contentDB, Heroes: heroSvc, Fragments: contentDB, Grants: i5svc, HeroWire: heroproj.StockHero}, Directory: i4store.ServerDirectoryReader{}}
 	startEventsJobs(ctx, pool, eventJobs)
 	startOperator(ctx, runner, registry.Handlers(), registry.Reads(), registry.Modules(), operatorVersionReply, otaAfterCommit{Root: cfg.OTARoot, ReconcileSettings: otaSettingsSync.Reconcile, Serving: otaServing})
-	startOperatorBulkJob(ctx, pool, operatorgrant.Applier{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: operatorstore.Store{}, Grants: i5svc, Mail: i5svc, Catalogue: operatorCatalogue, LineCap: grantLineCap})
+	dailyCounterReset := dailyconsume.Service{Store: dailyconsumestore.Store{}, Runner: runner, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}}
+	campaignCounterReset := appcampaign.Mode{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}, Store: campaignstore.Store{}, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}}
+	startOperatorBulkJob(ctx, pool, operatorgrant.Applier{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: operatorstore.Store{}, Grants: i5svc, Mail: i5svc, DailyBuys: dailyCounterReset, CampaignDaily: campaignCounterReset, OccultTickets: i5svc, SkillPoints: i5svc, Catalogue: operatorCatalogue, LineCap: grantLineCap})
 	clientLogs, journal := startClientLog(ctx, pool, authority, cfg.ClientLogURL, retentionPolicies.RetentionDays, txMetrics, mux, handlerConcurrency("GXB_CLIENT_LOG_MAX_CONCURRENT", 4, poolConnections))
 	dailyReset := dailyreset.Service{Markers: dailyresetstore.Store{Queryer: pool}, Counters: itemsEnergy.Counters}
 	boot := stockruntime.BootstrapDispatcher{Bootstrap: bootstrap, Tracker: tracker, LogURLs: clientLogs, DailyReset: dailyReset}
