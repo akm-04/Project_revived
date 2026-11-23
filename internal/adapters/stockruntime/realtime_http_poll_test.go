@@ -526,3 +526,33 @@ func TestHTTPPollRejectsUnknownSessionAndOversizedRequest(t *testing.T) {
 		t.Fatalf("oversized request status=%d", response.Code)
 	}
 }
+
+type recordingActivity struct {
+	sessions chan identity.SessionID
+}
+
+func (r *recordingActivity) TouchActivity(_ context.Context, sessionID identity.SessionID) error {
+	r.sessions <- sessionID
+	return nil
+}
+
+func TestHTTPPollTouchesTheAdmittedIdentitySession(t *testing.T) {
+	server, err := NewHTTPPollServer(t.Context(), newRealtimeTestServer(t), 5*time.Second, time.Second)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer server.Close()
+	activity := &recordingActivity{sessions: make(chan identity.SessionID, 8)}
+	server.Activity = activity
+	loginSocket(t, server.Handler(), "alpha", "world", 1)
+
+	want := realtimeTestActor(t, "1", 100001).SessionID
+	select {
+	case got := <-activity.sessions:
+		if got != want {
+			t.Fatalf("touched session = %s, want %s", got.UUID(), want.UUID())
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("accepted poll did not touch the identity session")
+	}
+}

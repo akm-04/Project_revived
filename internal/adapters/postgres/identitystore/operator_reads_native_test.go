@@ -192,3 +192,70 @@ func TestOnlineSessionReadsNative(t *testing.T) {
 		t.Fatalf("revoked session still counted: %v", counts)
 	}
 }
+
+func TestPresenceWindowMarksQuietSessionsOfflineNative(t *testing.T) {
+	pool := onlinePool(t)
+	ctx := context.Background()
+	now := time.Now().UTC().Truncate(time.Microsecond)
+	const presenceServer = onlineServer + 2
+	activeAccount, activeSession, activeContext := newUUID(t), newUUID(t), newUUID(t)
+	quietAccount, quietSession, quietContext := newUUID(t), newUUID(t), newUUID(t)
+	activePlayer := int64(presenceServer*100000 + 1)
+	quietPlayer := int64(presenceServer*100000 + 2)
+	cleanup := []struct {
+		sql  string
+		args []any
+	}{
+		{`DELETE FROM gameplay_contexts WHERE logical_server_id=$1`, []any{presenceServer}},
+		{`DELETE FROM account_sessions WHERE account_id IN (SELECT account_id FROM players WHERE logical_server_id=$1)`, []any{presenceServer}},
+		{`DELETE FROM players WHERE logical_server_id=$1`, []any{presenceServer}},
+		{`DELETE FROM logical_servers WHERE logical_server_id=$1`, []any{presenceServer}},
+	}
+	for _, statement := range cleanup {
+		if _, err := pool.Raw().Exec(ctx, statement.sql, statement.args...); err != nil {
+			t.Fatal(err)
+		}
+	}
+	statements := []struct {
+		sql  string
+		args []any
+	}{
+		{`INSERT INTO logical_servers(logical_server_id,name,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,created_at) VALUES($1,'Presence',true,true,true,$2,$3,$4)`, []any{presenceServer, presenceServer*100000 + 25001, (presenceServer+1)*100000 - 1, now}},
+		{`INSERT INTO accounts(account_id,account_uid,status,created_at) VALUES($1::uuid,$2,'ACTIVE',$3)`, []any{activeAccount, "presence-a-" + activeAccount, now}},
+		{`INSERT INTO accounts(account_id,account_uid,status,created_at) VALUES($1::uuid,$2,'ACTIVE',$3)`, []any{quietAccount, "presence-q-" + quietAccount, now}},
+		{`INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version) VALUES($1,$2::uuid,$3,$4,'presence')`, []any{activePlayer, activeAccount, presenceServer, now}},
+		{`INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version) VALUES($1,$2::uuid,$3,$4,'presence')`, []any{quietPlayer, quietAccount, presenceServer, now}},
+		{`INSERT INTO account_sessions(session_id,account_id,auth_profile,issued_at,idle_timeout_seconds,last_activity_at,liveness_version) VALUES($1::uuid,$2::uuid,'stock',$3,86400,$4,1)`, []any{activeSession, activeAccount, now, now.Add(-60 * time.Second)}},
+		{`INSERT INTO account_sessions(session_id,account_id,auth_profile,issued_at,idle_timeout_seconds,last_activity_at,liveness_version) VALUES($1::uuid,$2::uuid,'stock',$3,86400,$4,1)`, []any{quietSession, quietAccount, now, now.Add(-120 * time.Second)}},
+		{`INSERT INTO gameplay_contexts(context_id,session_id,account_id,logical_server_id,player_id,context_generation,created_at,liveness_version) VALUES($1::uuid,$2::uuid,$3::uuid,$4,$5,1,$6,1)`, []any{activeContext, activeSession, activeAccount, presenceServer, activePlayer, now}},
+		{`INSERT INTO gameplay_contexts(context_id,session_id,account_id,logical_server_id,player_id,context_generation,created_at,liveness_version) VALUES($1::uuid,$2::uuid,$3::uuid,$4,$5,1,$6,1)`, []any{quietContext, quietSession, quietAccount, presenceServer, quietPlayer, now}},
+	}
+	for _, statement := range statements {
+		if _, err := pool.Raw().Exec(ctx, statement.sql, statement.args...); err != nil {
+			t.Fatal(err)
+		}
+	}
+	store := identitystore.Store{}
+	counts, err := store.OnlineCountsByServerTx(ctx, pool)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if counts[presenceServer] != 1 {
+		t.Fatalf("online count = %d, want 1 (60 s touch online, 120 s touch offline)", counts[presenceServer])
+	}
+	server := int64(presenceServer)
+	rows, err := store.ListOnlineSessionsTx(ctx, pool, operator.OnlineSessionFilter{ServerID: &server, Limit: 10})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rows) != 2 {
+		t.Fatalf("rows = %+v", rows)
+	}
+	onlineByPlayer := map[int64]bool{}
+	for _, row := range rows {
+		onlineByPlayer[row.PlayerID] = row.Online
+	}
+	if !onlineByPlayer[activePlayer] || onlineByPlayer[quietPlayer] {
+		t.Fatalf("online flags = %v, want active %d online and quiet %d offline", onlineByPlayer, activePlayer, quietPlayer)
+	}
+}

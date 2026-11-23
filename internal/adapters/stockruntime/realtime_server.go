@@ -10,6 +10,7 @@ import (
 
 	app "gxb.local/backend/v2/internal/application/realtimeauth"
 	"gxb.local/backend/v2/internal/application/socialpresence"
+	"gxb.local/backend/v2/internal/domain/identity"
 	domainrt "gxb.local/backend/v2/internal/domain/realtimeauth"
 	"gxb.local/backend/v2/internal/foundation/ids"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -240,6 +241,9 @@ func (s RealtimeServer) serve(ctx context.Context, cfg limits.Config, policy Rea
 					roleKey = string(admission.Domain.Role)
 					copyAdmission := admission
 					admitted = &copyAdmission
+					if recorder, ok := source.(interface{ SessionAdmitted(identity.ActorContext) }); ok {
+						recorder.SessionAdmitted(admission.Domain.Actor)
+					}
 					lastClientActivity = now
 					nextLiveness = now.Add(policy.LivenessInterval)
 					if s.Registry != nil {

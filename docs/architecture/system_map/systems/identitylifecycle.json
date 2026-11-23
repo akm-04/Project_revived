@@ -80,6 +80,7 @@
   ],
   "scenarios_naming": [],
   "unit": [
+   "idleexpiry_test.go",
    "logout_test.go",
    "module_test.go",
    "service_test.go"

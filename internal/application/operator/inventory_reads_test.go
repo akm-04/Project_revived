@@ -104,7 +104,7 @@ func (fake *fakePlayerNames) PlayerNamesTx(_ context.Context, _ tx.Queryer, ids 
 func TestOnlineSessionsPageByNameAndCursor(t *testing.T) {
 	at := time.Date(2026, 11, 22, 12, 0, 0, 0, time.UTC)
 	sessions := &fakeOnlineSessions{rows: []OnlineSession{
-		{SessionID: "00000000-0000-0000-0000-000000000001", PlayerID: 10, ServerID: 1, StartedAt: at, LastSeenAt: at.Add(time.Minute)},
+		{SessionID: "00000000-0000-0000-0000-000000000001", PlayerID: 10, ServerID: 1, StartedAt: at, LastSeenAt: at.Add(time.Minute), Online: true},
 		{SessionID: "00000000-0000-0000-0000-000000000002", PlayerID: 11, ServerID: 1, StartedAt: at, LastSeenAt: at},
 		{SessionID: "00000000-0000-0000-0000-000000000003", PlayerID: 12, ServerID: 2, StartedAt: at, LastSeenAt: at},
 	}}
@@ -119,6 +119,9 @@ func TestOnlineSessionsPageByNameAndCursor(t *testing.T) {
 	}
 	if page.NextAfter != "00000000-0000-0000-0000-000000000002" {
 		t.Fatalf("next_after = %q", page.NextAfter)
+	}
+	if !page.Sessions[0].Online || page.Sessions[1].Online {
+		t.Fatalf("online flags = %+v", page.Sessions)
 	}
 	if len(names.asked) != 3 {
 		t.Fatalf("names asked for %v", names.asked)

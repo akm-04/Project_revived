@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"log"
 	"net"
 	"net/http"
 	"net/url"
@@ -16,6 +17,7 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
+	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/protocol/limits"
 	wireRT "gxb.local/backend/v2/internal/protocol/realtime"
 )
@@ -25,10 +27,18 @@ const (
 	DefaultHTTPPollIdleTimeout = 30 * time.Second
 	DefaultHTTPPollHoldTimeout = 20 * time.Second
 
+	pollActivityTouchTimeout = 5 * time.Second
+
 	maxPollSocketsPerSession = 8
 	maxPollSocketTagBytes    = 64
 	maxPollClientSequences   = 256
 )
+
+// ActivityToucher records one accepted poll for the identity session behind the
+// socket. A failure is logged and never fails the poll.
+type ActivityToucher interface {
+	TouchActivity(context.Context, identity.SessionID) error
+}
 
 var (
 	ErrHTTPPollSessionFull  = errors.New("realtime HTTP poll session limit reached")
@@ -57,10 +67,19 @@ type pollFrameSource struct {
 	activity    time.Time
 	pending     *pollBatch
 	holds       int
+	onAdmission func(identity.ActorContext)
 }
 
 func newPollFrameSource(idleTimeout time.Duration) *pollFrameSource {
 	return &pollFrameSource{incoming: make(chan *pollBatch), idleTimeout: idleTimeout, activity: time.Now()}
+}
+
+// SessionAdmitted reports the actor an authenticated socket resolved to, so the
+// owning poll session can touch the identity session on later polls.
+func (s *pollFrameSource) SessionAdmitted(actor identity.ActorContext) {
+	if s.onAdmission != nil {
+		s.onAdmission(actor)
+	}
 }
 
 func (s *pollFrameSource) SetReadDeadline(deadline time.Time) error {
@@ -183,6 +202,7 @@ type httpPollSession struct {
 	waiter        *pollWaiter
 	lastRequest   time.Time
 	expiry        *time.Timer
+	identitySID   identity.SessionID
 
 	sendMutex    sync.Mutex
 	applied      map[uint64]struct{}
@@ -195,6 +215,7 @@ type HTTPPollServer struct {
 	policy      RealtimePolicy
 	idleTimeout time.Duration
 	holdTimeout time.Duration
+	Activity    ActivityToucher
 	context     context.Context
 	cancel      context.CancelFunc
 	mutex       sync.Mutex
@@ -315,6 +336,7 @@ func (s *HTTPPollServer) handlePoll(w http.ResponseWriter, request *http.Request
 			return
 		}
 	}
+	s.touchActivity(session)
 	if !poll.Hold {
 		session.touchSources(now)
 		writePollReply(w, session.id, nil)
@@ -494,6 +516,37 @@ func (session *httpPollSession) touchRequest(at time.Time) {
 		session.expiry.Reset(session.server.idleTimeout)
 	}
 	session.mutex.Unlock()
+}
+
+func (session *httpPollSession) recordAdmission(actor identity.ActorContext) {
+	session.mutex.Lock()
+	session.identitySID = actor.SessionID
+	session.mutex.Unlock()
+}
+
+func (session *httpPollSession) admittedSession() (identity.SessionID, bool) {
+	session.mutex.Lock()
+	defer session.mutex.Unlock()
+	return session.identitySID, !session.identitySID.UUID().IsZero()
+}
+
+// touchActivity runs after the reply is decided and off the request goroutine,
+// so a slow database write never delays a poll.
+func (s *HTTPPollServer) touchActivity(session *httpPollSession) {
+	if s.Activity == nil {
+		return
+	}
+	sessionID, ok := session.admittedSession()
+	if !ok {
+		return
+	}
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), pollActivityTouchTimeout)
+		defer cancel()
+		if err := s.Activity.TouchActivity(ctx, sessionID); err != nil {
+			log.Printf("realtime HTTP poll activity touch failed: %v", err)
+		}
+	}()
 }
 
 func (session *httpPollSession) touchSources(at time.Time) {
@@ -711,6 +764,7 @@ func (session *httpPollSession) socketFor(tag string) (*pollSocketState, bool) {
 	}
 	ctx, cancel := context.WithCancel(session.ctx)
 	socket := &pollSocketState{tag: tag, source: newPollFrameSource(session.server.idleTimeout), cancel: cancel, done: make(chan struct{})}
+	socket.source.onAdmission = session.recordAdmission
 	session.sockets[tag] = socket
 	session.socketWait.Add(1)
 	session.mutex.Unlock()

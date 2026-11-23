@@ -23,6 +23,39 @@ func TestProviderBindingIsIdempotentButNeverCrossMerges(t *testing.T) {
 		t.Fatalf("%v", e)
 	}
 }
+func TestNewSessionIssueDefaultsTheIdleTimeout(t *testing.T) {
+	now := time.Unix(100, 0).UTC()
+	s := Session{ID: sid(2), AccountID: aid(1), AuthProfile: AuthProductionPair, IssuedAt: now, LastActivityAt: now, LivenessVersion: 1}
+	sidCredential := SessionCredential{ID: crid(4), SessionID: s.ID, Kind: CredentialSID, Digest: CredentialDigest{1}, IssuedAt: now}
+	loginCredential := SessionCredential{ID: crid(5), SessionID: s.ID, Kind: CredentialLoginToken, Digest: CredentialDigest{2}, IssuedAt: now}
+	issue, e := NewSessionIssue(s, sidCredential, loginCredential)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if issue.Session.IdleTimeoutSeconds == nil || *issue.Session.IdleTimeoutSeconds != DefaultIdleTimeoutSeconds {
+		t.Fatalf("idle timeout = %v, want %d", issue.Session.IdleTimeoutSeconds, DefaultIdleTimeoutSeconds)
+	}
+	explicit := int64(60)
+	s.IdleTimeoutSeconds = &explicit
+	issue, e = NewSessionIssue(s, sidCredential, loginCredential)
+	if e != nil || issue.Session.IdleTimeoutSeconds == nil || *issue.Session.IdleTimeoutSeconds != explicit {
+		t.Fatalf("explicit idle timeout overwritten: %v %v", issue.Session.IdleTimeoutSeconds, e)
+	}
+}
+
+func TestAuthenticatePairRefusesAnIdleExpiredSession(t *testing.T) {
+	now := time.Unix(100000, 0).UTC()
+	account := Account{ID: aid(1), UID: AccountUID("idle-account"), Status: AccountActive}
+	idle := int64(3600)
+	session := Session{ID: sid(2), AccountID: account.ID, AuthProfile: AuthProductionPair, IssuedAt: now.Add(-2 * time.Hour), IdleTimeoutSeconds: &idle, LastActivityAt: now.Add(-2 * time.Hour), LivenessVersion: 1}
+	digest := CredentialDigest{1}
+	sidCredential := SessionCredential{ID: crid(3), SessionID: session.ID, Kind: CredentialSID, Digest: digest, IssuedAt: session.IssuedAt}
+	loginCredential := SessionCredential{ID: crid(4), SessionID: session.ID, Kind: CredentialLoginToken, Digest: digest, IssuedAt: session.IssuedAt}
+	if _, err := AuthenticatePair(account, session, sidCredential, loginCredential, digest, digest, now); err == nil {
+		t.Fatal("SID/login pair accepted a session idle past its timeout")
+	}
+}
+
 func TestRevocationDurablyEndsChildren(t *testing.T) {
 	now := time.Unix(100, 0).UTC()
 	s := Session{ID: sid(2), AccountID: aid(1), AuthProfile: AuthProductionPair, IssuedAt: time.Unix(10, 0).UTC(), LastActivityAt: time.Unix(10, 0).UTC(), LivenessVersion: 1}
