@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"net/url"
-	"os"
 	"strconv"
 	"time"
 
@@ -42,16 +41,22 @@ type VersionSource interface {
 	Version(context.Context) (operator.VersionInfo, error)
 }
 
+// DashboardBackups is the backup module's list port: the snapshot age comes
+// from a validated manifest, never from a file's mtime.
+type DashboardBackups interface {
+	List(context.Context) (BackupList, error)
+}
+
 // Dashboard composes the agent-side dashboard read. Each backend section is
 // best effort: one failing read leaves its section empty and names the error,
 // so the dashboard still answers while the backend is up but degraded.
 type Dashboard struct {
-	Backend          BackendControl
-	Operator         OperatorClient
-	Version          VersionSource
-	PublicURLs       []string
-	BackupsDirectory string
-	Now              func() time.Time
+	Backend    BackendControl
+	Operator   OperatorClient
+	Version    VersionSource
+	PublicURLs []string
+	Backups    DashboardBackups
+	Now        func() time.Time
 }
 
 // DashboardBackendState is the process-control half.
@@ -157,7 +162,7 @@ func (dashboard Dashboard) Summary(ctx context.Context) DashboardSummary {
 		summary.Events = dashboard.events(ctx, summary.Servers)
 		dashboard.otaAndAssets(ctx, &summary)
 	}
-	summary.DBSnapshot = snapshotAge(dashboard.BackupsDirectory, now())
+	summary.DBSnapshot = snapshotAge(ctx, dashboard.Backups, now())
 	return summary
 }
 
@@ -258,35 +263,30 @@ func readPage[T any](client OperatorClient, ctx context.Context, name, query str
 	return page, nil
 }
 
-func snapshotAge(directory string, now time.Time) DashboardSnapshot {
-	if directory == "" {
+// snapshotAge reads the backup list and takes the newest entry whose manifest
+// and dump both verify, so a damaged or partial file never counts.
+func snapshotAge(ctx context.Context, backups DashboardBackups, now time.Time) DashboardSnapshot {
+	if backups == nil {
 		return DashboardSnapshot{Status: "backup module not built"}
 	}
-	entries, err := os.ReadDir(directory)
+	list, err := backups.List(ctx)
 	if err != nil {
+		return DashboardSnapshot{Status: "backup list unavailable"}
+	}
+	if len(list.Backups) == 0 {
 		return DashboardSnapshot{Status: "no snapshots"}
 	}
-	var newest time.Time
-	for _, entry := range entries {
-		if entry.IsDir() {
+	for _, entry := range list.Backups {
+		if entry.Damaged || entry.CreatedAt.IsZero() {
 			continue
 		}
-		info, infoErr := entry.Info()
-		if infoErr != nil {
-			continue
+		age := int64(now.Sub(entry.CreatedAt).Seconds())
+		if age < 0 {
+			age = 0
 		}
-		if info.ModTime().After(newest) {
-			newest = info.ModTime()
-		}
+		return DashboardSnapshot{AgeSeconds: &age, Status: "ok"}
 	}
-	if newest.IsZero() {
-		return DashboardSnapshot{Status: "no snapshots"}
-	}
-	age := int64(now.Sub(newest).Seconds())
-	if age < 0 {
-		age = 0
-	}
-	return DashboardSnapshot{AgeSeconds: &age, Status: "ok"}
+	return DashboardSnapshot{Status: "no valid snapshots"}
 }
 
 func utcTime(value *time.Time) *time.Time {

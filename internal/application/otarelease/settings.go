@@ -57,6 +57,9 @@ func (f SettingsFile) Load() (domain.Settings, error) {
 	if settings.ResPath != "" && !readableDirectory(settings.ResPath) {
 		log.Printf("ota settings res_path %s is not a readable folder", settings.ResPath)
 	}
+	if settings.ApkResPath != "" && !readableDirectory(settings.ApkResPath) {
+		log.Printf("ota settings apk_res_path %s is not a readable folder", settings.ApkResPath)
+	}
 	if settings.RecoveredResPath != "" && !readableDirectory(settings.RecoveredResPath) {
 		log.Printf("ota settings recovered_res_path %s is not a readable folder", settings.RecoveredResPath)
 	}
@@ -160,7 +163,7 @@ func SettingsSetHandler(file SettingsFile, live *SettingsValue, store SettingsSt
 		decoder := json.NewDecoder(bytes.NewReader(command.Payload))
 		decoder.DisallowUnknownFields()
 		if err := decoder.Decode(&next); err != nil {
-			return nil, operator.Refuse(operator.CodePayloadInvalid, "the payload must be {lazy_fetch, res_path, recovered_res_path, download_base_seconds, download_min_kib_per_second, cache_max_age_seconds, serving_refresh_seconds, volume_mb}", nil)
+			return nil, operator.Refuse(operator.CodePayloadInvalid, "the payload must be {lazy_fetch, res_path, apk_res_path, recovered_res_path, download_base_seconds, download_min_kib_per_second, cache_max_age_seconds, serving_refresh_seconds, volume_mb}", nil)
 		}
 		var trailing any
 		if err := decoder.Decode(&trailing); !errors.Is(err, io.EOF) {
@@ -171,6 +174,9 @@ func SettingsSetHandler(file SettingsFile, live *SettingsValue, store SettingsSt
 		}
 		if next.ResPath != "" && !readableDirectory(next.ResPath) {
 			return nil, operator.Refuse(operator.CodePayloadInvalid, fmt.Sprintf("res_path %q is not a readable folder", next.ResPath), nil)
+		}
+		if next.ApkResPath != "" && !readableDirectory(next.ApkResPath) {
+			return nil, operator.Refuse(operator.CodePayloadInvalid, fmt.Sprintf("apk_res_path %q is not a readable folder", next.ApkResPath), nil)
 		}
 		if next.RecoveredResPath != "" && !readableDirectory(next.RecoveredResPath) {
 			return nil, operator.Refuse(operator.CodePayloadInvalid, fmt.Sprintf("recovered_res_path %q is not a readable folder", next.RecoveredResPath), nil)

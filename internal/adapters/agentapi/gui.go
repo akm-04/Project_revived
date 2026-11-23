@@ -114,18 +114,29 @@ func (handler Handler) serveRes(writer http.ResponseWriter, request *http.Reques
 		writeRefusal(writer, http.StatusBadRequest, operatoragent.CodeBodyInvalid, "the res path is not a relative file path")
 		return
 	}
-	root, err := handler.resRoot()
+	roots, err := handler.resRoots()
 	if err != nil {
 		writeRefusal(writer, http.StatusNotFound, operatoragent.CodeNotFound, "the res folder is not configured")
 		return
 	}
-	resolved, err := filepath.EvalSymlinks(filepath.Join(root, relative))
-	if err != nil || !withinResRoot(resolved, root) {
+	resolved := ""
+	for _, root := range roots {
+		candidate, resolveErr := filepath.EvalSymlinks(filepath.Join(root, relative))
+		if resolveErr != nil || !withinResRoot(candidate, root) {
+			continue
+		}
+		info, statErr := os.Stat(candidate)
+		if statErr == nil && info.Mode().IsRegular() {
+			resolved = candidate
+			break
+		}
+	}
+	if resolved == "" {
 		writeRefusal(writer, http.StatusNotFound, operatoragent.CodeNotFound, "no such picture")
 		return
 	}
 	info, err := os.Stat(resolved)
-	if err != nil || !info.Mode().IsRegular() {
+	if err != nil {
 		writeRefusal(writer, http.StatusNotFound, operatoragent.CodeNotFound, "no such picture")
 		return
 	}
@@ -145,17 +156,29 @@ func (handler Handler) serveRes(writer http.ResponseWriter, request *http.Reques
 	http.ServeContent(writer, request, info.Name(), info.ModTime(), file)
 }
 
-// resRoot resolves the res_path of the OTA settings. It is read per request so
-// an ota.settings.set change applies without restarting the agent.
-func (handler Handler) resRoot() (string, error) {
+// resRoots resolves the picture roots in lookup order: res_path first, then the
+// optional apk_res_path that holds icons living only in the APK res tree. Both
+// are read per request so an ota.settings.set change applies without a restart.
+func (handler Handler) resRoots() ([]string, error) {
 	settings, err := otarelease.SettingsFile{Root: handler.OTARoot}.Load()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	if settings.ResPath == "" {
-		return "", errors.New("settings.json has no res_path")
+	roots := make([]string, 0, 2)
+	for _, configured := range []string{settings.ResPath, settings.ApkResPath} {
+		if configured == "" {
+			continue
+		}
+		resolved, resolveErr := filepath.EvalSymlinks(configured)
+		if resolveErr != nil {
+			continue
+		}
+		roots = append(roots, resolved)
 	}
-	return filepath.EvalSymlinks(settings.ResPath)
+	if len(roots) == 0 {
+		return nil, errors.New("settings.json has no res_path")
+	}
+	return roots, nil
 }
 
 // cleanResPath accepts only a relative path whose segments never name ".."; it
