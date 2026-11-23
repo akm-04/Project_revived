@@ -1,6 +1,7 @@
 "use strict";
 
 import { describeReply, request } from "../transport.js";
+import { pageHeader } from "../components/format.js";
 
 const settingsRead = "/agent/v1/reads/agent.settings";
 const serverListRead = "/agent/v1/reads/server.list";
@@ -13,11 +14,9 @@ const serverRenameCommand = "/agent/v1/commands/server.rename";
 // settings, the client-facing server URL, and the server names the client
 // server-select popup reads. Every value is validated by its owner; a refused
 // value keeps the old one.
-export function renderPage(container) {
+export function renderPage(container, context) {
   container.replaceChildren();
-  const heading = document.createElement("h2");
-  heading.className = "module-title";
-  heading.textContent = "Settings";
+  const heading = pageHeader(context.page.label);
   const help = document.createElement("p");
   help.className = "module-help";
   help.textContent = "The paths the operator tool and the backend read, the address the clients use, and the server names the client server-select popup shows.";

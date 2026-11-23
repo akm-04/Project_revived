@@ -1,6 +1,7 @@
 "use strict";
 
 import { describeReply, request } from "../transport.js";
+import { pageHeader } from "../components/format.js";
 import { confirmAction } from "../components/confirm_action.js";
 
 const statusRead = "/agent/v1/reads/ota.status";
@@ -22,9 +23,7 @@ const lanes = [
 // number needs the rollback acknowledgement before Stage runs.
 export function renderPage(container, context) {
   container.replaceChildren();
-  const heading = document.createElement("h2");
-  heading.className = "module-title";
-  heading.textContent = "OTA releases";
+  const heading = pageHeader(context.page.label);
   const help = document.createElement("p");
   help.className = "module-help";
   help.textContent = "Stage builds the version you type, or the lane's next number; publish runs the maintenance window.";

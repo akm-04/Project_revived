@@ -1,6 +1,7 @@
 "use strict";
 
 import { describeReply, request } from "../transport.js";
+import { pageHeader } from "../components/format.js";
 
 const summaryRead = "/agent/v1/reads/dashboard.summary";
 const refreshChoices = [1, 3, 10, 30, 60];
@@ -12,9 +13,7 @@ const refreshStorageKey = "gxbDashboardRefreshSeconds";
 // flight, and the timer stops once the page is left.
 export function renderPage(container, context) {
   container.replaceChildren();
-  const heading = document.createElement("h2");
-  heading.className = "module-title";
-  heading.textContent = "Dashboard";
+  const heading = pageHeader(context.page.label);
   const help = document.createElement("p");
   help.className = "module-help";
   help.textContent = "Server URL, backend version, configured paths, servers, events, OTA lanes and lazy asset downloads at a glance.";
