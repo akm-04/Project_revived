@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GXB operator</title>
+<title>GXB Operator</title>
 <link rel="stylesheet" href="/gui/vendor/tabler-1.7.3/tabler.min.css">
 <link rel="stylesheet" href="/gui/app.css">
 <script src="/gui/vendor/tabler-1.7.3/tabler.min.js" defer></script>
@@ -11,57 +11,81 @@
 </head>
 <body>
 <section id="login-view" class="login">
-<div class="card card-md">
+<div class="login-layout">
+<div class="card login-card">
 <div class="card-body">
-<h1 class="card-title">GXB operator</h1>
+<h1 class="card-title login-title">GXB Operator</h1>
+<p class="hint">Log in with your operator password.</p>
 <form id="login-form">
-<label class="form-label" for="password">Root password</label>
+<label class="form-label" for="password">Password</label>
+<div class="input-group">
 <input id="password" name="password" type="password" class="form-control" autocomplete="current-password" required>
+<button id="password-visibility" type="button" class="btn btn-outline-secondary" aria-label="Show password" aria-pressed="false">
+<svg class="password-eye" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"></path>
+<circle cx="12" cy="12" r="2.6"></circle>
+</svg>
+</button>
+</div>
 <button type="submit" class="btn btn-primary w-100 mt-3">Log in</button>
 </form>
 <p id="login-status" class="status mt-2" role="status"></p>
-<p class="hint">First start: set the password with <code>gxb-operator setup</code>.</p>
+<p class="hint mb-0">First start: set the password with <code>gxb-operator setup</code>.</p>
 </div>
+<div class="card-footer login-footer">Server: <span id="login-server">unknown</span></div>
+</div>
+<div class="login-wordmark" aria-hidden="true"><span>GXB</span><span>Operator</span></div>
 </div>
 </section>
 
 <div id="app-view" hidden>
-<header class="navbar navbar-expand-md d-print-none">
-<div class="container-xl">
-<div class="navbar-brand">GXB operator</div>
-<div class="navbar-nav flex-row ms-auto align-items-center gap-2">
-<span id="backend-state" class="nav-link" role="status"></span>
-<div id="account-menu" class="dropdown">
-<button id="account-button" type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" aria-haspopup="menu" aria-expanded="false">Account</button>
-<div id="account-dropdown" class="dropdown-menu dropdown-menu-end" role="menu" hidden>
-<button id="change-password-button" type="button" class="dropdown-item" role="menuitem">Change password</button>
-<button id="logout-button" type="button" class="dropdown-item" role="menuitem">Log out</button>
-<div class="dropdown-divider"></div>
-<fieldset class="px-3 py-2" role="group" aria-label="Theme">
-<legend class="form-label mb-2">Theme</legend>
+<header class="operator-topbar" data-bs-theme="dark">
+<button id="sidebar-toggle" type="button" class="navbar-toggler operator-menu-button" data-bs-toggle="collapse" data-bs-target="#operator-menu" aria-controls="operator-menu" aria-expanded="false" aria-label="Toggle navigation">
+<span class="navbar-toggler-icon"></span>
+</button>
+<div class="operator-identity">
+<span class="operator-user">operator@</span>
+<strong id="operator-host">unknown</strong>
+</div>
+<div class="operator-actions">
+<span id="backend-state" class="operator-backend-state" role="status"></span>
+<div id="theme-menu" class="dropdown">
+<button id="theme-button" type="button" class="btn btn-ghost btn-sm dropdown-toggle" aria-haspopup="menu" aria-expanded="false">Theme</button>
+<div id="theme-dropdown" class="dropdown-menu dropdown-menu-end" role="menu" hidden>
+<fieldset class="theme-choices" role="group" aria-label="Theme">
+<legend class="operator-menu-heading">Theme</legend>
 <label class="form-check"><input class="form-check-input" type="radio" name="theme-choice" value="auto"><span class="form-check-label">Auto (system)</span></label>
 <label class="form-check"><input class="form-check-input" type="radio" name="theme-choice" value="light"><span class="form-check-label">Light</span></label>
 <label class="form-check"><input class="form-check-input" type="radio" name="theme-choice" value="dark"><span class="form-check-label">Dark</span></label>
 </fieldset>
 </div>
 </div>
+<button id="help-button" type="button" class="btn btn-ghost btn-sm">Help</button>
+<div id="account-menu" class="dropdown">
+<button id="account-button" type="button" class="btn btn-ghost btn-sm dropdown-toggle" aria-haspopup="menu" aria-expanded="false">Session</button>
+<div id="account-dropdown" class="dropdown-menu dropdown-menu-end" role="menu" hidden>
+<button id="change-password-button" type="button" class="dropdown-item" role="menuitem">Change password</button>
+<button id="logout-button" type="button" class="dropdown-item" role="menuitem">Log out</button>
+</div>
 </div>
 </div>
 </header>
-<div class="page-wrapper">
-<div class="page-body">
-<div class="container-xl">
-<div class="row g-3">
-<aside class="col-md-3 col-lg-2">
+<div class="operator-shell">
+<aside id="operator-sidebar" class="navbar navbar-vertical navbar-dark operator-sidebar" data-bs-theme="dark">
+<div id="operator-menu" class="collapse operator-menu">
+<div class="operator-search">
+<label class="visually-hidden" for="nav-search">Search</label>
+<input id="nav-search" type="search" class="form-control" placeholder="Search" autocomplete="off">
+</div>
 <nav id="nav" class="nav nav-pills flex-column" aria-label="Sections"></nav>
+</div>
 </aside>
-<main class="col-md-9 col-lg-10">
+<main class="operator-main">
+<div class="operator-panel">
 <p id="backend-error" class="status" role="status"></p>
 <div id="page-view"></div>
+</div>
 </main>
-</div>
-</div>
-</div>
 </div>
 </div>
 
