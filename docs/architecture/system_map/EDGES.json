@@ -1890,6 +1890,7 @@
    ]
   },
   "operatorgrant": {},
+  "operatormedia": {},
   "otabuild": {
    "operatoragent": [
     "Build",
@@ -5562,6 +5563,7 @@
     "*ServerPlayerIDsTx"
    ]
   },
+  "operatormedia": {},
   "otabuild": {},
   "otarelease": {
    "operator": [
@@ -6922,6 +6924,7 @@
   "operatoragent": [],
   "operatorcatalog": [],
   "operatorgrant": [],
+  "operatormedia": [],
   "otabuild": [],
   "otarelease": [
    "cmd/gxb-api/main_postgres.go"

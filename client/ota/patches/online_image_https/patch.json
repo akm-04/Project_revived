@@ -1,0 +1,8 @@
+{
+  "target": "app/common/ui/OnlineImageSprite.lua",
+  "stock_sha256": "bc330465fbf17f95038da72e260e949d0a5f468a6f78e067d2c411f4125d0933",
+  "kind": "replace_exact",
+  "anchor": "\t\t\tif string.sub(var_2_0, 1, 7) ~= \"http://\" then\n\t\t\t\tvar_2_0 = \"http://\" .. var_2_0\n\t\t\tend\n",
+  "insert": "overlay.lua",
+  "origin": "G40: the client prefixed http:// to https:// URLs because it only checked the http prefix; the file downloader already fetches over the https tunnel"
+}

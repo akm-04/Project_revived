@@ -254,12 +254,16 @@ func realStockExpected(t *testing.T) map[string]string {
 	lazyManager := replaceOnce(t, readStock("lazyFileManager.lua"),
 		"\t\targ_1_0.changeCount = 0\n\tend,",
 		normalizeNewlines(lazyManagerOverlay))
+	onlineImage := replaceOnce(t, readStock("app/common/ui/OnlineImageSprite.lua"),
+		"\t\t\tif string.sub(var_2_0, 1, 7) ~= \"http://\" then\n\t\t\t\tvar_2_0 = \"http://\" .. var_2_0\n\t\t\tend\n",
+		"\t\t\tif string.sub(var_2_0, 1, 7) ~= \"http://\" and string.sub(var_2_0, 1, 8) ~= \"https://\" then\n\t\t\t\tvar_2_0 = \"http://\" .. var_2_0\n\t\t\tend\n")
 	return map[string]string{
 		"app/windows/SocialSystemWindow.lua":    social,
 		"app/windows/MainSceneBottomWindow.lua": bottom,
 		"app/model/SelfPlayer.lua":              selfPlayer,
 		"app/common/network/Backend.lua":        expectedBackendOutput(t, readStock("app/common/network/Backend.lua")),
 		"lazyFileManager.lua":                   lazyManager,
+		"app/common/ui/OnlineImageSprite.lua":   onlineImage,
 	}
 }
 

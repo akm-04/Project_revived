@@ -1,6 +1,6 @@
 "use strict";
 
-import { describeReply, request } from "../transport.js";
+import { describeReply, loadPicture, request } from "../transport.js";
 import { confirmAction } from "../components/confirm_action.js";
 import { pageHeader, setStatus } from "../components/format.js";
 import { mountServerPicker } from "../components/server_picker.js";
@@ -8,13 +8,23 @@ import { mountServerPicker } from "../components/server_picker.js";
 const readPublicationShow = "publication.show";
 const commandInstall = "publication.install";
 const commandClear = "publication.clear";
+const mediaImportCommand = "/agent/v1/media/import_url";
+const mediaUploadCommand = "/agent/v1/media/upload";
+const mediaListRead = "/agent/v1/media/list";
+const mediaFilePrefix = "/agent/v1/media/file/";
 const families = [
   { id: "announcement", label: "Login notice" },
   { id: "picture", label: "Lobby picture notice" },
   { id: "board", label: "Activities board" },
 ];
 const maximumWireID = 9007199254740991;
-const imageURLPrefix = "http" + "://";
+// The GUI scripts must stay free of absolute external URLs (G27), so the two
+// accepted schemes are assembled here.
+const insecureImageURLPrefix = "http" + "://";
+const secureImageURLPrefix = "https" + "://";
+const acceptedSchemes = insecureImageURLPrefix + " or " + secureImageURLPrefix;
+const hostedMediaPattern = /^[0-9a-f]{16}\.(png|jpg)$/;
+const hostedMediaMarker = "/media/";
 
 // Notices (G13): the client's three publication families, the set each one
 // selects now (publication.show), and install/clear with the family fields the
@@ -39,7 +49,8 @@ export function renderPage(container, context) {
   const announcementCard = createCard("Edit login notice", "notice-announcement-card");
   const announcementTitle = createField(announcementCard.body, "notice-announcement-title", "Title", "text");
   const announcementContents = createField(announcementCard.body, "notice-announcement-contents", "Contents (one entry per line)", "textarea");
-  const announcementURL = createField(announcementCard.body, "notice-announcement-url", "Image URL (" + imageURLPrefix + "..., optional)", "text");
+  const announcementURL = createField(announcementCard.body, "notice-announcement-url", "Image URL (" + acceptedSchemes + "..., or choose a hosted picture)", "text");
+  attachMediaChooser(announcementURL);
   const announcementPreviewButton = actionButton("Preview", false, "notice-announcement-preview");
   const announcementPreviewHost = document.createElement("div");
   announcementPreviewHost.id = "notice-announcement-preview-host";
@@ -337,8 +348,8 @@ export function renderPage(container, context) {
 
   function announcementPayload() {
     const url = announcementURL.value.trim();
-    if (url !== "" && !url.startsWith(imageURLPrefix)) {
-      return { error: "The image URL must start with " + imageURLPrefix + " or stay empty." };
+    if (!validImageURL(url)) {
+      return { error: "The image URL must start with " + acceptedSchemes + ", or stay empty." };
     }
     const contents = announcementContents.value.split("\n").map((line) => line.trim()).filter((line) => line !== "");
     const announcement = { title: announcementTitle.value, contents };
@@ -359,7 +370,7 @@ export function renderPage(container, context) {
       const pic = rowFieldValue(row, "pic");
       const smallPic = rowFieldValue(row, "small_pic");
       if (!validImageURL(pic) || !validImageURL(smallPic)) {
-        return { error: "Picture URLs must start with " + imageURLPrefix + " or stay empty." };
+        return { error: "Picture URLs must start with " + acceptedSchemes + ", or stay empty." };
       }
       pictures.push({ weight, pic, small_pic: smallPic });
     }
@@ -384,7 +395,7 @@ export function renderPage(container, context) {
       seen.add(id);
       const imageURL = rowFieldValue(row, "img_url");
       if (!validImageURL(imageURL)) {
-        return { error: "Board image URLs must start with " + imageURLPrefix + " or stay empty." };
+        return { error: "Board image URLs must start with " + acceptedSchemes + ", or stay empty." };
       }
       entries.push({
         id,
@@ -404,8 +415,8 @@ export function renderPage(container, context) {
     const row = document.createElement("div");
     row.className = "border rounded p-2 mb-2 notice-picture-row";
     createRowField(row, "Weight", "weight", "number");
-    createRowField(row, "Picture URL (" + imageURLPrefix + "...)", "pic", "text");
-    createRowField(row, "Small picture URL (empty for the stock default)", "small_pic", "text");
+    attachMediaChooser(createRowField(row, "Picture URL (" + acceptedSchemes + "..., or choose a hosted picture)", "pic", "text"));
+    attachMediaChooser(createRowField(row, "Small picture URL (empty for the stock default)", "small_pic", "text"));
     const remove = actionButton("Remove picture", false, "");
     remove.addEventListener("click", () => row.remove());
     row.append(remove);
@@ -419,7 +430,7 @@ export function renderPage(container, context) {
     createRowField(row, "Title", "title", "text");
     createRowField(row, "Start date (as the client table shows it; format UNKNOWN)", "start_date", "text");
     createRowField(row, "Content", "content", "textarea");
-    createRowField(row, "Image URL (" + imageURLPrefix + "..., optional)", "img_url", "text");
+    attachMediaChooser(createRowField(row, "Image URL (" + acceptedSchemes + "..., optional)", "img_url", "text"));
     const remove = actionButton("Remove entry", false, "");
     remove.addEventListener("click", () => row.remove());
     row.append(remove);
@@ -450,6 +461,7 @@ export function renderPage(container, context) {
     input.dataset.field = fieldName;
     wrapper.append(label, input);
     row.append(wrapper);
+    return input;
   }
 
   function rowFieldValue(row, fieldName) {
@@ -459,8 +471,225 @@ export function renderPage(container, context) {
 }
 
 function validImageURL(url) {
-  return url === "" || url.startsWith(imageURLPrefix);
+  return url === "" || url.startsWith(insecureImageURLPrefix) || url.startsWith(secureImageURLPrefix);
 }
+
+function hostedMediaName(url) {
+  const index = url.lastIndexOf(hostedMediaMarker);
+  if (index < 0) {
+    return null;
+  }
+  const name = url.slice(index + hostedMediaMarker.length);
+  return hostedMediaPattern.test(name) ? name : null;
+}
+
+// attachMediaChooser gives one picture field the three G41 sources and a
+// preview of a hosted picture through the agent (the GUI CSP is self-only, so
+// an external image is never loaded).
+function attachMediaChooser(input) {
+  const wrapper = input.parentElement;
+  if (wrapper === null) {
+    return;
+  }
+  const chooser = document.createElement("div");
+  chooser.className = "media-chooser mt-2";
+  const modeLabel = document.createElement("label");
+  modeLabel.className = "form-label";
+  modeLabel.textContent = "Picture source";
+  const mode = document.createElement("select");
+  mode.className = "form-select form-select-sm mb-2";
+  modeLabel.append(mode);
+  for (const [value, label] of [["url", "Use a URL"], ["download", "Download to our server"], ["upload", "Upload file"]]) {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = label;
+    mode.append(option);
+  }
+  const downloadRow = document.createElement("div");
+  downloadRow.className = "d-flex gap-2 mb-2";
+  const downloadInput = document.createElement("input");
+  downloadInput.type = "text";
+  downloadInput.className = "form-control form-control-sm";
+  downloadInput.placeholder = acceptedSchemes + " picture URL";
+  downloadInput.setAttribute("aria-label", "Picture URL to download to our server");
+  const downloadButton = actionButton("Download", false, "");
+  downloadRow.append(downloadInput, downloadButton);
+  const uploadRow = document.createElement("div");
+  uploadRow.className = "mb-2";
+  const uploadInput = document.createElement("input");
+  uploadInput.type = "file";
+  uploadInput.accept = "image/png,image/jpeg";
+  uploadInput.className = "form-control form-control-sm";
+  uploadInput.setAttribute("aria-label", "Picture file to upload");
+  uploadRow.append(uploadInput);
+  const hostedButton = actionButton("Choose hosted picture", false, "");
+  const status = errorParagraph();
+  status.classList.add("mt-2");
+  const previewHost = document.createElement("div");
+  previewHost.className = "mt-2";
+  const dialog = hostedDialog(applyHosted);
+  chooser.append(modeLabel, downloadRow, uploadRow, hostedButton, status, previewHost, dialog.element);
+  wrapper.append(chooser);
+
+  function applyMode() {
+    downloadRow.hidden = mode.value !== "download";
+    uploadRow.hidden = mode.value !== "upload";
+  }
+  mode.addEventListener("change", applyMode);
+  applyMode();
+  input.addEventListener("change", () => showPreview());
+  hostedButton.addEventListener("click", () => {
+    dialog.element.showModal();
+    void dialog.load();
+  });
+  downloadButton.addEventListener("click", () => void importURL(downloadInput.value.trim()));
+  uploadInput.addEventListener("change", () => {
+    const file = uploadInput.files && uploadInput.files[0];
+    if (file !== undefined) {
+      void uploadFile(file);
+    }
+  });
+
+  function applyHosted(stored) {
+    const url = typeof stored.url === "string" ? stored.url : "";
+    if (url === "") {
+      setStatus(status, "Set the server URL in Settings before using hosted pictures.", "error");
+      return;
+    }
+    input.value = url;
+    setStatus(status, "Stored as " + (typeof stored.name === "string" ? stored.name : "unknown") + ".", "success");
+    showPreview();
+    dialog.element.close();
+  }
+
+  async function importURL(source) {
+    status.textContent = "";
+    if (!validImageURL(source)) {
+      setStatus(status, "Enter a picture URL using " + acceptedSchemes + ".", "error");
+      return;
+    }
+    downloadButton.disabled = true;
+    const reply = await request(mediaImportCommand, { method: "POST", body: { url: source } });
+    downloadButton.disabled = false;
+    if (reply.unauthorized) {
+      return;
+    }
+    if (!reply.ok) {
+      setStatus(status, describeReply(reply), "error");
+      return;
+    }
+    applyHosted(reply.body && typeof reply.body === "object" ? reply.body : {});
+  }
+
+  async function uploadFile(file) {
+    status.textContent = "";
+    let encoded = "";
+    try {
+      encoded = await readBase64(file);
+    } catch (error) {
+      setStatus(status, String(error), "error");
+      return;
+    }
+    const reply = await request(mediaUploadCommand, { method: "POST", body: { data_base64: encoded } });
+    if (reply.unauthorized) {
+      return;
+    }
+    if (!reply.ok) {
+      setStatus(status, describeReply(reply), "error");
+      return;
+    }
+    applyHosted(reply.body && typeof reply.body === "object" ? reply.body : {});
+  }
+
+  function showPreview() {
+    previewHost.replaceChildren();
+    const url = input.value.trim();
+    if (url === "") {
+      return;
+    }
+    const name = hostedMediaName(url);
+    if (name === null) {
+      previewHost.append(paragraph("hint mb-0", "External picture; the GUI does not load external images."));
+      return;
+    }
+    const image = document.createElement("img");
+    image.className = "picture";
+    image.alt = "preview of " + name;
+    loadPicture(mediaFilePrefix + encodeURIComponent(name)).then((objectURL) => {
+      if (objectURL === null) {
+        setStatus(status, "The stored picture is not readable.", "error");
+        return;
+      }
+      image.src = objectURL;
+    });
+    previewHost.append(image);
+  }
+}
+
+function readBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = String(reader.result);
+      const comma = result.indexOf(",");
+      resolve(comma >= 0 ? result.slice(comma + 1) : result);
+    };
+    reader.onerror = () => reject(new Error("the file cannot be read"));
+    reader.readAsDataURL(file);
+  });
+}
+
+// hostedDialog lists the pictures stored on our server for the picker.
+function hostedDialog(onChoose) {
+  const element = document.createElement("dialog");
+  const heading = document.createElement("h2");
+  heading.className = "card-title";
+  heading.textContent = "Hosted pictures";
+  const status = errorParagraph();
+  const list = document.createElement("div");
+  list.className = "media-list";
+  const closeButton = actionButton("Close", false, "");
+  closeButton.addEventListener("click", () => element.close());
+  element.append(heading, status, list, closeButton);
+  async function load() {
+    status.textContent = "";
+    list.replaceChildren();
+    const reply = await request(mediaListRead);
+    if (reply.unauthorized) {
+      element.close();
+      return;
+    }
+    if (!reply.ok) {
+      setStatus(status, describeReply(reply), "error");
+      return;
+    }
+    const body = reply.body && typeof reply.body === "object" ? reply.body : {};
+    const items = Array.isArray(body.items) ? body.items : [];
+    if (items.length === 0) {
+      list.append(paragraph("hint mb-0", "No pictures are stored on the server yet."));
+      return;
+    }
+    for (const item of items) {
+      if (item === null || typeof item !== "object") {
+        continue;
+      }
+      const button = actionButton(typeof item.name === "string" ? item.name : "picture", false, "");
+      const image = document.createElement("img");
+      image.className = "picture";
+      image.alt = "";
+      loadPicture(mediaFilePrefix + encodeURIComponent(String(item.name))).then((objectURL) => {
+        if (objectURL !== null) {
+          image.src = objectURL;
+        }
+      });
+      button.prepend(image);
+      button.addEventListener("click", () => onChoose(item));
+      list.append(button);
+    }
+  }
+  return { element, load };
+}
+
 
 function announcementView(announcement) {
   const view = document.createElement("div");
