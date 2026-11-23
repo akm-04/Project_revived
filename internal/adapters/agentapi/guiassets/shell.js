@@ -13,22 +13,25 @@ import { renderAdvanced } from "./advanced.js";
 const statusPollMilliseconds = 15000;
 const themeStorageKey = "gxbOperatorTheme";
 const themeChoices = ["auto", "light", "dark"];
+const defaultThemeChoice = "dark";
 const systemDark = window.matchMedia("(prefers-color-scheme: dark)");
 
+const navigationGroups = ["Game", "Server", "Tools"];
+
 const pages = [
-  { id: "dashboard", label: "Dashboard" },
-  { id: "ota", label: "OTA" },
-  { id: "events", label: "Events" },
-  { id: "notices", label: "Notices" },
-  { id: "players", label: "Players" },
-  { id: "mail", label: "Mail" },
-  { id: "rewards", label: "Rewards & Redeem" },
-  { id: "gm", label: "GM" },
-  { id: "server", label: "Server" },
-  { id: "backups", label: "Backups" },
-  { id: "logs", label: "Logs" },
-  { id: "settings", label: "Settings" },
-  { id: "advanced", label: "Advanced" },
+  { id: "dashboard", label: "Dashboard", group: "Game" },
+  { id: "events", label: "Events", group: "Game" },
+  { id: "notices", label: "Notices", group: "Game" },
+  { id: "players", label: "Players", group: "Game" },
+  { id: "mail", label: "Mail", group: "Game" },
+  { id: "rewards", label: "Rewards & Redeem", group: "Game" },
+  { id: "gm", label: "GM", group: "Game" },
+  { id: "server", label: "Server", group: "Server" },
+  { id: "ota", label: "OTA", group: "Server" },
+  { id: "backups", label: "Backups", group: "Server" },
+  { id: "logs", label: "Logs", group: "Server" },
+  { id: "settings", label: "Settings", group: "Server" },
+  { id: "advanced", label: "Advanced", group: "Tools" },
 ];
 
 const state = {
@@ -36,17 +39,29 @@ const state = {
   backendError: "",
   activePage: "dashboard",
   entered: false,
+  searchQuery: "",
+  terminalChecked: false,
 };
 
 const loginView = document.getElementById("login-view");
 const appView = document.getElementById("app-view");
 const loginForm = document.getElementById("login-form");
 const passwordInput = document.getElementById("password");
+const passwordVisibility = document.getElementById("password-visibility");
 const loginStatus = document.getElementById("login-status");
+const loginServer = document.getElementById("login-server");
+const operatorHost = document.getElementById("operator-host");
 const navView = document.getElementById("nav");
+const navSearch = document.getElementById("nav-search");
+const sidebarToggle = document.getElementById("sidebar-toggle");
 const pageView = document.getElementById("page-view");
 const backendState = document.getElementById("backend-state");
 const backendError = document.getElementById("backend-error");
+const themeMenu = document.getElementById("theme-menu");
+const themeButton = document.getElementById("theme-button");
+const themeDropdown = document.getElementById("theme-dropdown");
+const helpButton = document.getElementById("help-button");
+const accountMenu = document.getElementById("account-menu");
 const accountButton = document.getElementById("account-button");
 const accountDropdown = document.getElementById("account-dropdown");
 const changePasswordButton = document.getElementById("change-password-button");
@@ -61,13 +76,20 @@ const passwordCancel = document.getElementById("password-cancel");
 
 setUnauthorizedHandler(handleExpiredSession);
 loginForm.addEventListener("submit", handleLogin);
+passwordVisibility.addEventListener("click", togglePasswordVisibility);
+navSearch.addEventListener("input", handleSearch);
 logoutButton.addEventListener("click", handleLogout);
 accountButton.addEventListener("click", toggleAccountMenu);
+themeButton.addEventListener("click", toggleThemeMenu);
+helpButton.addEventListener("click", openModuleHelp);
 changePasswordButton.addEventListener("click", openPasswordModal);
 passwordForm.addEventListener("submit", handlePasswordChange);
 passwordCancel.addEventListener("click", closePasswordModal);
+document.addEventListener("click", closeMenusOutside);
+document.addEventListener("keydown", closeMenusOnEscape);
 setInterval(pollWhileIdle, statusPollMilliseconds);
 startTheme();
+showServerName();
 
 if (getToken() === "") {
   showLogin();
@@ -79,7 +101,7 @@ if (getToken() === "") {
 // stay intact underneath (G16).
 function showLogin() {
   closeAccountMenu();
-  closePasswordModal();
+  closeThemeMenu();
   loginView.hidden = false;
 }
 
@@ -88,7 +110,22 @@ function showApplication() {
   appView.hidden = false;
 }
 
-// G24: light, dark or auto (the system preference), kept per browser. The
+// The top-left block reads operator@host, like the reference console. The
+// host is the address the browser reached the agent on.
+function showServerName() {
+  const host = window.location.hostname === "" ? "unknown" : window.location.hostname;
+  operatorHost.textContent = host;
+  loginServer.textContent = host;
+}
+
+function togglePasswordVisibility() {
+  const visible = passwordInput.type === "text";
+  passwordInput.type = visible ? "password" : "text";
+  passwordVisibility.setAttribute("aria-pressed", visible ? "false" : "true");
+  passwordVisibility.setAttribute("aria-label", visible ? "Show password" : "Hide password");
+}
+
+// G43: dark is the default look; light and auto stay selectable (G24). The
 // choice drives Tabler's data-bs-theme on the root element.
 function startTheme() {
   const choice = readThemeChoice();
@@ -101,6 +138,7 @@ function startTheme() {
       }
       saveThemeChoice(radio.value);
       applyTheme(radio.value);
+      closeThemeMenu();
     });
   }
   systemDark.addEventListener("change", () => {
@@ -113,9 +151,9 @@ function startTheme() {
 function readThemeChoice() {
   try {
     const stored = localStorage.getItem(themeStorageKey);
-    return themeChoices.includes(stored) ? stored : "auto";
+    return themeChoices.includes(stored) ? stored : defaultThemeChoice;
   } catch (error) {
-    return "auto";
+    return defaultThemeChoice;
   }
 }
 
@@ -176,12 +214,14 @@ function resetApplication() {
   state.modules = [];
   state.backendError = "";
   state.activePage = "dashboard";
+  state.searchQuery = "";
+  navSearch.value = "";
   navView.replaceChildren();
   pageView.replaceChildren();
-  document.title = "GXB operator";
+  document.title = "GXB Operator";
   backendError.textContent = "";
   backendState.textContent = "";
-  backendState.className = "nav-link";
+  backendState.className = "operator-backend-state";
 }
 
 // enterApplication loads the registry. A first entry renders the dashboard; a
@@ -201,6 +241,7 @@ async function enterApplication() {
   state.modules = Array.isArray(body.modules) ? body.modules : [];
   state.backendError = body.backend_error || "";
   showApplication();
+  await detectTerminalPage();
   if (!state.entered) {
     state.entered = true;
     state.activePage = "dashboard";
@@ -210,6 +251,25 @@ async function enterApplication() {
     renderNav();
   }
   await loadBackendState();
+}
+
+// G7b adds pages/terminal.js; until that module exists the menu entry stays
+// hidden, because the shell cannot render a page its import cannot load.
+async function detectTerminalPage() {
+  if (state.terminalChecked) {
+    return;
+  }
+  state.terminalChecked = true;
+  try {
+    const view = await import("./pages/terminal.js");
+    if (typeof view.renderPage !== "function") {
+      return;
+    }
+    const settingsIndex = pages.findIndex((page) => page.id === "settings");
+    pages.splice(settingsIndex, 0, { id: "terminal", label: "Terminal", group: "Server" });
+  } catch (error) {
+    return;
+  }
 }
 
 function pollWhileIdle() {
@@ -227,17 +287,23 @@ async function loadBackendState() {
   const status = reply.body && typeof reply.body === "object" ? reply.body : null;
   if (!reply.ok || status === null) {
     backendState.textContent = "Backend: unknown";
-    backendState.className = "nav-link text-secondary";
+    backendState.className = "operator-backend-state text-secondary";
     return;
   }
   const running = status.running === true;
   const processDetail = running && status.pid ? " (pid " + status.pid + ")" : "";
   backendState.textContent = "Backend: " + (running ? "running" + processDetail : "stopped");
-  backendState.className = "nav-link " + (running ? "text-success" : "text-danger");
+  backendState.className = "operator-backend-state " + (running ? "text-success" : "text-danger");
+}
+
+function handleSearch(event) {
+  state.searchQuery = event.target.value.trim().toLowerCase();
+  renderNav();
 }
 
 function toggleAccountMenu() {
   const open = accountDropdown.hidden;
+  closeThemeMenu();
   accountDropdown.hidden = !open;
   accountButton.setAttribute("aria-expanded", open ? "true" : "false");
 }
@@ -245,6 +311,55 @@ function toggleAccountMenu() {
 function closeAccountMenu() {
   accountDropdown.hidden = true;
   accountButton.setAttribute("aria-expanded", "false");
+}
+
+function toggleThemeMenu() {
+  const open = themeDropdown.hidden;
+  closeAccountMenu();
+  themeDropdown.hidden = !open;
+  themeButton.setAttribute("aria-expanded", open ? "true" : "false");
+}
+
+function closeThemeMenu() {
+  themeDropdown.hidden = true;
+  themeButton.setAttribute("aria-expanded", "false");
+}
+
+function closeMenusOutside(event) {
+  if (!themeMenu.contains(event.target)) {
+    closeThemeMenu();
+  }
+  if (!accountMenu.contains(event.target)) {
+    closeAccountMenu();
+  }
+}
+
+function closeMenusOnEscape(event) {
+  if (event.key !== "Escape") {
+    return;
+  }
+  closeThemeMenu();
+  closeAccountMenu();
+}
+
+// Help points at the registry-driven module help: every command and read on the
+// Advanced page carries the help text the agent reported.
+function openModuleHelp() {
+  selectPage("advanced");
+}
+
+function selectPage(pageId) {
+  state.activePage = pageId;
+  closeSidebarOnPhone();
+  renderNav();
+  renderPage();
+}
+
+function closeSidebarOnPhone() {
+  if (window.matchMedia("(max-width: 767.98px)").matches) {
+    document.getElementById("operator-menu").classList.remove("show");
+    sidebarToggle.setAttribute("aria-expanded", "false");
+  }
 }
 
 function openPasswordModal() {
@@ -285,20 +400,50 @@ async function handlePasswordChange(event) {
   loginStatus.textContent = "Password changed; log in again.";
 }
 
+// The menu groups Game, Server and Tools; the search box filters the entries as
+// the operator types and hides a section that has no match.
 function renderNav() {
   navView.replaceChildren();
-  for (const page of pages) {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "nav-link text-start" + (page.id === state.activePage ? " active" : "");
-    button.textContent = page.label;
-    button.addEventListener("click", () => {
-      state.activePage = page.id;
-      renderNav();
-      renderPage();
-    });
-    navView.append(button);
+  let matches = 0;
+  for (const groupName of navigationGroups) {
+    const groupEntries = pages.filter((page) => page.group === groupName && navEntryMatches(page));
+    if (groupEntries.length === 0) {
+      continue;
+    }
+    const section = document.createElement("div");
+    section.className = "operator-nav-section";
+    const heading = document.createElement("div");
+    heading.className = "operator-nav-heading";
+    heading.textContent = groupName;
+    section.append(heading);
+    for (const page of groupEntries) {
+      section.append(navEntry(page));
+      matches += 1;
+    }
+    navView.append(section);
   }
+  if (matches === 0) {
+    const empty = document.createElement("p");
+    empty.className = "operator-nav-empty";
+    empty.textContent = "No matching pages.";
+    navView.append(empty);
+  }
+}
+
+function navEntryMatches(page) {
+  return state.searchQuery === "" || page.label.toLowerCase().includes(state.searchQuery);
+}
+
+function navEntry(page) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "nav-link text-start" + (page.id === state.activePage ? " active" : "");
+  button.textContent = page.label;
+  if (page.id === state.activePage) {
+    button.setAttribute("aria-current", "page");
+  }
+  button.addEventListener("click", () => selectPage(page.id));
+  return button;
 }
 
 let renderSequence = 0;
@@ -312,7 +457,7 @@ async function renderPage() {
   pageView.replaceChildren();
   backendError.textContent = state.backendError;
   const page = pages.find((candidate) => candidate.id === state.activePage) || pages[0];
-  document.title = page.label + " · GXB operator";
+  document.title = page.label + " · GXB Operator";
   if (page.id === "advanced") {
     renderAdvanced(pageView, state.modules);
     return;
