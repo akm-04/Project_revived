@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"sync"
 
@@ -96,6 +97,12 @@ func RestartBackend(backend BackendControl, tokens *TokenHolder, closed bool) er
 		return err
 	}
 	if err := StartBackend(backend, tokens, closed); err != nil {
+		// The release guard's refusal names the remedy; keep its code so a GUI
+		// restart reports "publish an assets release" and not a generic failure.
+		var refusal *Refusal
+		if errors.As(err, &refusal) && refusal.Code == CodeBackendNoAssetsRelease {
+			return Refuse(refusal.Code, "the backend is now stopped: "+refusal.Message)
+		}
 		return Refuse(CodeBackendRestartFailed, "the backend is now stopped: the restart could not start it: "+err.Error())
 	}
 	return nil

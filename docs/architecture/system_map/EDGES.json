@@ -5665,21 +5665,12 @@
     "WithEnum"
    ],
    "store:otastore": [
-    "*ActivateTx",
-    "*ActiveRevisionTx",
+    "*ExportStateTx",
     "*FlushTx",
-    "*InsertActivationTx",
-    "*InsertBuildTx",
-    "*LockLaneTx",
     "*LockSettingsTx",
+    "*ReadLedgerTx",
     "*ReadSettingsTx",
-    "*ReadStatusTx",
-    "*ReleaseStatusTx",
-    "*ReleaseTx",
-    "*ReuseBuildTx",
-    "*SaveSettingsTx",
-    "*SupersedeLaneTx",
-    "*WithdrawTx"
+    "*SaveSettingsTx"
    ]
   },
   "petcampaign": {

@@ -502,14 +502,31 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-	otaRelease := appotarelease.Service{
-		Runner:          runner,
-		Store:           otastore.Store{},
-		Operations:      operation.Factory{Clock: clock.System{}},
-		PublicEngineURL: cfg.PublicEngineURL,
-	}
 	if cfg.OTARoot != "" && !filepath.IsAbs(cfg.OTARoot) {
 		log.Fatalf("GXB_OTA_ROOT must be an absolute path, got %q", cfg.OTARoot)
+	}
+	otaReleaseState := appotarelease.NewStateFile(cfg.OTARoot)
+	if cfg.OTARoot != "" {
+		if _, err := otaReleaseState.Seed(ctx, runner, otastore.Store{}); err != nil {
+			log.Fatalf("OTA release state: import the database rows into %s: %v", otaReleaseState.Path(), err)
+		}
+	}
+	// The stock client hangs without the assets bootstrap, so an open start is
+	// refused until one is published; starting closed stays allowed for the
+	// maintenance window that publishes it.
+	gameListenerOpen, err := parseGameListener(os.Getenv("GXB_GAME_LISTENER"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	if refuseOpenWithoutAssets(gameListenerOpen, otaReleaseState) {
+		log.Print("refusing to open: no ACTIVE assets release is published; start closed, publish an assets release, then open")
+		os.Exit(appotarelease.NoAssetsExitCode)
+	}
+	otaRelease := appotarelease.Service{
+		Runner:          runner,
+		Store:           otaReleaseState,
+		Operations:      operation.Factory{Clock: clock.System{}},
+		PublicEngineURL: cfg.PublicEngineURL,
 	}
 	otaSettingsFile := appotarelease.SettingsFile{Root: cfg.OTARoot}
 	otaSettingsValue := appotarelease.NewSettingsValue(domain.DefaultSettings())
@@ -546,9 +563,9 @@ func main() {
 	}
 	energyDispatcher := stockruntime.ItemsEnergyDispatcher{Authority: authority, Service: itemsEnergy.Service}
 	mux := http.NewServeMux()
-	otaCommands := appotarelease.Commands{Store: otastore.Store{}, Root: cfg.OTARoot}
-	otaStatus := appotarelease.StatusService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: otastore.Store{}, Live: otaSettingsValue}
-	otaReleaseLookup := appotarelease.ReleaseLookup{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: otastore.Store{}}
+	otaCommands := appotarelease.Commands{Store: otaReleaseState, Root: cfg.OTARoot}
+	otaStatus := appotarelease.StatusService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: otaReleaseState, Ledger: otastore.Store{}, Live: otaSettingsValue}
+	otaReleaseLookup := appotarelease.ReleaseLookup{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: otaReleaseState}
 	operatorAudit := operator.AuditService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Reader: operatorstore.Store{}}
 	backendVersion, gitCommit := buildIdentity()
 	operatorCatalogue, err := opcatalogsource.Load(time.Now().UTC())
@@ -1205,10 +1222,6 @@ func main() {
 	registerOTARoutes(mux, otaServing)
 	if sdkListen := os.Getenv("GXB_SDK_LISTEN"); sdkListen != "" {
 		startSDKListener(ctx, sdkListen, appidentity.SDKService{Runner: runner, Store: identitystore.Store{}, DigestSecret: digestSecret, Operations: operation.Factory{Clock: clock.System{}}})
-	}
-	gameListenerOpen, err := parseGameListener(os.Getenv("GXB_GAME_LISTENER"))
-	if err != nil {
-		log.Fatal(err)
 	}
 	srv := &http.Server{Addr: cfg.HTTPAddr, Handler: mux, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: limits.StockMultipartHTTPTimeout + 5*time.Second, WriteTimeout: limits.StockMultipartHTTPTimeout + 5*time.Second, IdleTimeout: 60 * time.Second}
 	go func() {

@@ -30,6 +30,19 @@ type StatusStore interface {
 	ReadStatusTx(context.Context, tx.Queryer) (StatusSnapshot, error)
 }
 
+// LedgerStatus is the serving telemetry ota.status reports. The counters and
+// asset misses are database tables, so the read belongs to the Postgres
+// adapter, not to the application layer.
+type LedgerStatus struct {
+	Served []ServedCounter
+	Misses []AssetMiss
+}
+
+// LedgerReader reads the serving counters and misses in the status transaction.
+type LedgerReader interface {
+	ReadLedgerTx(context.Context, tx.Queryer, int, int) (LedgerStatus, error)
+}
+
 // StatusSnapshot is the bounded raw read; Status folds the active lanes.
 type StatusSnapshot struct {
 	Revision    int64              `json:"revision"`
@@ -128,6 +141,7 @@ type StatusService struct {
 	Runner     tx.Runner
 	Operations operation.Factory
 	Store      StatusStore
+	Ledger     LedgerReader
 	Live       *SettingsValue
 }
 
@@ -142,10 +156,19 @@ func (s StatusService) Status(ctx context.Context) (Status, error) {
 	var snapshot StatusSnapshot
 	_, err = s.Runner.Run(ctx, current, ReadProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, scope tx.Scope) error {
 		loaded, readErr := s.Store.ReadStatusTx(ctx, scope.Tx)
-		if readErr == nil {
-			snapshot = loaded
+		if readErr != nil {
+			return readErr
 		}
-		return readErr
+		if s.Ledger != nil {
+			ledger, ledgerErr := s.Ledger.ReadLedgerTx(ctx, scope.Tx, StatusServedLimit+1, StatusMissesLimit+1)
+			if ledgerErr != nil {
+				return ledgerErr
+			}
+			loaded.Served = ledger.Served
+			loaded.Misses = ledger.Misses
+		}
+		snapshot = loaded
+		return nil
 	})
 	if err != nil {
 		return Status{}, err

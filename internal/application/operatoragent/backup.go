@@ -658,6 +658,20 @@ func (service BackupService) Restore(ctx context.Context, id, reason string) (Op
 		}},
 		{Name: "start backend and wait", Run: func(ctx context.Context) (any, error) {
 			if err := StartBackend(service.Backend, service.Tokens, false); err != nil {
+				if refusal, ok := noAssetsRefusal(err); ok {
+					// The restored data is good; only the open start is refused.
+					// Complete the restore with the backend closed and the
+					// guard's remedy instead of rolling the restore back.
+					if retentionErr := service.writePreRestoreRetention(preRestoreDatabase); retentionErr != nil {
+						return nil, retentionErr
+					}
+					_ = os.Remove(statePath)
+					service.log("backup.restore", "backend", "closed", map[string]any{"code": refusal.Code, "message": refusal.Message})
+					return map[string]any{
+						"database": database, "safety_snapshot": safety.ID, "backend": "closed",
+						"error_code": refusal.Code, "action": "start closed, publish an assets release, then open",
+					}, nil
+				}
 				if rollbackErr := service.rollbackSwap(ctx, adminDSN, database, preRestoreDatabase, stamp); rollbackErr != nil {
 					return nil, Temporarily(CodeBackupRestoreRefused, "the restored database did not start and the rollback failed; an agent restart finishes recovery")
 				}
@@ -690,7 +704,26 @@ func (service BackupService) rollbackSwap(ctx context.Context, adminDSN, databas
 }
 
 func (service BackupService) startOriginal() error {
-	return StartBackend(service.Backend, service.Tokens, false)
+	err := StartBackend(service.Backend, service.Tokens, false)
+	if err == nil {
+		return nil
+	}
+	if refusal, ok := noAssetsRefusal(err); ok {
+		// The original data is intact; only the open start is refused. Leave
+		// the backend closed, the guard's own remedy, instead of stopped.
+		service.log("backup", "start", "closed", map[string]any{"code": refusal.Code, "message": refusal.Message})
+		return StartBackend(service.Backend, service.Tokens, true)
+	}
+	return err
+}
+
+// noAssetsRefusal reports whether an open start hit the release guard.
+func noAssetsRefusal(err error) (*Refusal, bool) {
+	var refusal *Refusal
+	if errors.As(err, &refusal) && refusal.Code == CodeBackendNoAssetsRelease {
+		return refusal, true
+	}
+	return nil, false
 }
 
 func (service BackupService) renameDatabase(ctx context.Context, adminDSN, from, to string) error {
