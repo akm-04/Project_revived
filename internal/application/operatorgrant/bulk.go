@@ -32,6 +32,10 @@ type Applier struct {
 	Store         BulkStore
 	Grants        GrantOwner
 	Mail          MailOwner
+	DailyBuys     DailyBuysResetOwner
+	CampaignDaily CampaignDailyResetOwner
+	OccultTickets OccultTicketsResetOwner
+	SkillPoints   SkillPointsResetOwner
 	Catalogue     operatorcatalog.Document
 	LineCap       int64
 	PolicyVersion string
@@ -180,8 +184,54 @@ func (applier Applier) recipientAction(target BulkTarget, admin appi5.AdminOpera
 			return err
 		}
 		return apply, func(err error) bool { return errors.Is(err, errMailExpired) }, nil
+	case CommandResetCounters:
+		var payload resetCountersPayload
+		if err := decodePayload(target.Payload, &payload); err != nil {
+			return nil, nil, err
+		}
+		counters, err := validateResetCounters(payload.Counters)
+		if err != nil {
+			return nil, nil, err
+		}
+		apply := func(ctx context.Context, op operation.Context, playerID identity.PlayerID, key string) error {
+			for _, counter := range counters {
+				counterKey := key + ":" + counter
+				if err := applier.resetCounter(ctx, op, admin, playerID, counterKey, counter); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+		return apply, appi5.IsPermanentGrantRefusal, nil
 	default:
 		return nil, nil, errors.New("unsupported operator bulk command")
+	}
+}
+
+func (applier Applier) resetCounter(ctx context.Context, op operation.Context, admin appi5.AdminOperator, playerID identity.PlayerID, key, counter string) error {
+	switch counter {
+	case CounterDailyBuys:
+		if applier.DailyBuys == nil {
+			return errors.New("operator bulk daily buys owner unavailable")
+		}
+		return applier.DailyBuys.ResetOperatorDailyBuys(ctx, admin, playerID, key, op)
+	case CounterCampaignDaily:
+		if applier.CampaignDaily == nil {
+			return errors.New("operator bulk campaign daily owner unavailable")
+		}
+		return applier.CampaignDaily.ResetOperatorCampaignDaily(ctx, admin, playerID, key, op)
+	case CounterOccultTickets:
+		if applier.OccultTickets == nil {
+			return errors.New("operator bulk occult tickets owner unavailable")
+		}
+		return applier.OccultTickets.ResetOperatorOccultTickets(ctx, admin, playerID, key, op)
+	case CounterSkillPoints:
+		if applier.SkillPoints == nil {
+			return errors.New("operator bulk skill points owner unavailable")
+		}
+		return applier.SkillPoints.ResetOperatorSkillPoints(ctx, admin, playerID, key, op)
+	default:
+		return errors.New("unsupported reset counter")
 	}
 }
 

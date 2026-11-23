@@ -13,6 +13,7 @@ import (
 	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/domain/modes"
 	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/receipt"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -26,8 +27,11 @@ type Store interface {
 	SaveTx(context.Context, tx.Tx, identity.PlayerID, Counts, time.Time) error
 }
 type Service struct {
-	Store Store
-	Costs i5.TxMaterialCostDebiter
+	Store       Store
+	Costs       i5.TxMaterialCostDebiter
+	Runner      tx.Runner
+	Receipts    receipt.Store
+	ReceiptRead receipt.Reader
 }
 
 func (s Service) ReadTx(c context.Context, q tx.Queryer, p identity.PlayerID, day int64) (map[int64]int64, error) {

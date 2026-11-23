@@ -946,7 +946,7 @@
   },
   {
    "callees": 14,
-   "callers": 4,
+   "callers": 5,
    "mids": 11,
    "name": "campaign",
    "path": "internal/application/campaign",
@@ -1071,8 +1071,8 @@
    "tables": 3
   },
   {
-   "callees": 1,
-   "callers": 4,
+   "callees": 2,
+   "callers": 5,
    "mids": 0,
    "name": "dailyconsume",
    "path": "internal/application/dailyconsume",
@@ -1440,7 +1440,7 @@
    "tables": 0
   },
   {
-   "callees": 4,
+   "callees": 6,
    "callers": 0,
    "mids": 0,
    "name": "operatorgrant",

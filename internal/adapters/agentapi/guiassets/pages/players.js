@@ -3,6 +3,7 @@
 import { describeReply, request } from "../transport.js";
 import { confirmAction } from "../components/confirm_action.js";
 import { formatTime, pageHeader, setStatus } from "../components/format.js";
+import { openPlayerPicker } from "../components/player_picker.js";
 import { mountServerPicker } from "../components/server_picker.js";
 
 const onlineRead = "/agent/v1/reads/session.online";
@@ -140,7 +141,9 @@ export function renderPage(container, context) {
 
   logoutSection.append(logoutTitle, holdRow, scopeRow, selectedRow, selectedResult, serverRow, serverResult);
 
-  container.append(help, refresh, status, overview, filterSection, onlineSection, searchSection, summarySection, logoutSection);
+  const resetSection = buildResetCounters();
+
+  container.append(help, refresh, status, overview, filterSection, onlineSection, searchSection, summarySection, logoutSection, resetSection);
 
   const state = {
     serverFilter: { global: true, server_ids: [] },
@@ -749,4 +752,309 @@ function actionButton(label, primary, identifier) {
     button.id = identifier;
   }
   return button;
+}
+
+const resetCounterChoices = [
+  { name: "daily_buys", label: "Daily buys (stamina, gold, skill points, trials)", available: true },
+  { name: "campaign_daily", label: "Campaign daily raids and elite resets", available: true },
+  { name: "top_floor", label: "Top-floor ticket buys", available: false },
+  { name: "one_on_one", label: "One-on-one ticket buys", available: false },
+  { name: "world_boss", label: "World boss buys", available: false },
+  { name: "illusion", label: "Illusion buys", available: false },
+  { name: "dorm_glue", label: "Dorm glue buys", available: false },
+  { name: "arena_daily", label: "Arena daily fights", available: false },
+  { name: "summon_free", label: "Free summons", available: false },
+  { name: "occult_tickets", label: "Sorcery War tickets", available: true },
+  { name: "skill_points", label: "Skill points", available: true },
+];
+const unbuiltResetFeatures = ["Incubus buys", "Treasure team SP", "Worship", "Crusade", "Soul box", "Goblin", "Black market"];
+const resetBulkPollMilliseconds = 1500;
+const resetBulkPollAttempts = 20;
+
+function buildResetCounters() {
+  const sectionElement = section("card card-body mt-3");
+  const title = document.createElement("h3");
+  title.className = "card-title";
+  title.textContent = "Reset counters";
+  const help = paragraph("module-help", "Sets the chosen counters back to the start of the current period for selected players, one server or every player. Players see the new counts after relog or reopening the window.");
+
+  const countersFieldset = document.createElement("fieldset");
+  countersFieldset.className = "mb-3";
+  const countersLegend = document.createElement("legend");
+  countersLegend.className = "form-label";
+  countersLegend.textContent = "Counters";
+  const selectAllLabel = document.createElement("label");
+  selectAllLabel.className = "form-check form-check-inline";
+  const selectAll = document.createElement("input");
+  selectAll.type = "checkbox";
+  selectAll.className = "form-check-input";
+  selectAll.id = "reset-counters-select-all";
+  const selectAllText = document.createElement("span");
+  selectAllText.className = "form-check-label";
+  selectAllText.textContent = "Select all";
+  selectAllLabel.append(selectAll, selectAllText);
+  countersFieldset.append(countersLegend, selectAllLabel);
+
+  const checkboxes = [];
+  for (const choice of resetCounterChoices) {
+    const label = document.createElement("label");
+    label.className = "form-check";
+    const box = document.createElement("input");
+    box.type = "checkbox";
+    box.className = "form-check-input";
+    box.id = "reset-counter-" + choice.name;
+    box.disabled = !choice.available;
+    const text = document.createElement("span");
+    text.className = "form-check-label";
+    text.textContent = choice.available ? choice.label : choice.label + " (coming soon)";
+    label.append(box, text);
+    countersFieldset.append(label);
+    if (choice.available) {
+      checkboxes.push({ name: choice.name, label: choice.label, box });
+    }
+  }
+  const unbuilt = paragraph("hint", "Not available (feature not built): " + unbuiltResetFeatures.join(", ") + ".");
+
+  const targetCard = document.createElement("div");
+  targetCard.className = "mb-3";
+  const modeSelect = createResetSelect(targetCard, "reset-target-mode", "Target", [
+    { value: "players", label: "Selected players" },
+    { value: "servers", label: "Servers or global" },
+  ]);
+  const playersSection = document.createElement("div");
+  const pickPlayers = document.createElement("button");
+  pickPlayers.type = "button";
+  pickPlayers.className = "btn btn-outline-secondary";
+  pickPlayers.id = "reset-pick-players";
+  pickPlayers.textContent = "Choose players";
+  const playersSummary = paragraph("hint", "No players selected.");
+  playersSummary.id = "reset-players-selected";
+  const playersRow = document.createElement("div");
+  playersRow.className = "d-flex gap-2 align-items-center";
+  playersRow.append(pickPlayers, playersSummary);
+  playersSection.append(playersRow);
+  const serversSection = document.createElement("div");
+  serversSection.hidden = true;
+  const serverPickerHost = document.createElement("div");
+  serverPickerHost.id = "reset-server-picker";
+  serversSection.append(serverPickerHost);
+  targetCard.append(playersSection, serversSection);
+
+  const submitButton = document.createElement("button");
+  submitButton.type = "button";
+  submitButton.className = "btn btn-primary";
+  submitButton.id = "reset-submit";
+  submitButton.textContent = "Reset counters";
+  const result = document.createElement("p");
+  result.className = "status";
+  result.id = "reset-result";
+  result.setAttribute("role", "status");
+
+  sectionElement.append(title, help, countersFieldset, unbuilt, targetCard, submitButton, result);
+
+  const state = { players: [], serverPicker: null };
+
+  selectAll.addEventListener("change", () => {
+    for (const entry of checkboxes) {
+      entry.box.checked = selectAll.checked;
+    }
+  });
+  modeSelect.addEventListener("change", () => {
+    const servers = modeSelect.value === "servers";
+    playersSection.hidden = servers;
+    serversSection.hidden = !servers;
+    if (servers) {
+      ensureServerPicker();
+    }
+  });
+  pickPlayers.addEventListener("click", async () => {
+    const players = await openPlayerPicker({ title: "Reset counter recipients" });
+    if (players === null) {
+      return;
+    }
+    state.players = players;
+    playersSummary.textContent = players.length + " player(s) selected.";
+  });
+  submitButton.addEventListener("click", () => {
+    void submitReset();
+  });
+
+  function ensureServerPicker() {
+    if (state.serverPicker !== null) {
+      return;
+    }
+    state.serverPicker = mountServerPicker(serverPickerHost, {
+      includeGlobal: true,
+      multiple: true,
+      idPrefix: "reset-server",
+    });
+  }
+
+  function selectedCounters() {
+    return checkboxes.filter((entry) => entry.box.checked);
+  }
+
+  function collectTargets() {
+    if (modeSelect.value === "players") {
+      if (state.players.length === 0) {
+        return { error: "Select at least one player." };
+      }
+      return {
+        kind: "players",
+        label: state.players.length + " player(s)",
+        entries: [{
+          label: state.players.length + " player(s)",
+          target: { player_ids: state.players.map((player) => player.player_id) },
+        }],
+      };
+    }
+    if (state.serverPicker === null) {
+      return { error: "The server list has not loaded yet." };
+    }
+    const value = state.serverPicker.value();
+    if (value.global) {
+      return { kind: "servers", label: "every player (global)", entries: [{ label: "global", target: { global: true } }] };
+    }
+    if (value.server_ids.length === 0) {
+      return { error: "Select at least one server or Global." };
+    }
+    return {
+      kind: "servers",
+      label: "server(s) " + value.server_ids.map((serverID) => "#" + serverID).join(", "),
+      entries: value.server_ids.map((serverID) => ({
+        label: "server #" + serverID,
+        target: { server_id: serverID },
+      })),
+    };
+  }
+
+  async function submitReset() {
+    result.textContent = "";
+    const counters = selectedCounters();
+    if (counters.length === 0) {
+      setStatus(result, "Select at least one counter.", "error");
+      return;
+    }
+    const targets = collectTargets();
+    if (targets.error) {
+      setStatus(result, targets.error, "error");
+      return;
+    }
+    const confirmation = await confirmAction({
+      title: "Reset counters",
+      summary: "Reset " + describeCounterLabels(counters) + " for " + targets.label + ".",
+      confirmLabel: "Reset counters",
+    });
+    if (confirmation === null) {
+      return;
+    }
+    submitButton.disabled = true;
+    const outcomes = [];
+    let allApplied = true;
+    for (let index = 0; index < targets.entries.length; index += 1) {
+      const entry = targets.entries[index];
+      const semanticKey = targets.entries.length === 1
+        ? confirmation.semantic_key
+        : confirmation.semantic_key + "-" + index;
+      const reply = await request("/agent/v1/commands/player.reset_counters", {
+        method: "POST",
+        body: {
+          reason: confirmation.reason,
+          semantic_key: semanticKey,
+          payload: { target: entry.target, counters: counters.map((counter) => counter.name) },
+        },
+      });
+      if (reply.unauthorized) {
+        submitButton.disabled = false;
+        return;
+      }
+      if (!reply.ok) {
+        allApplied = false;
+      }
+      outcomes.push(entry.label + ": " + describeResetReply(reply));
+      const bulkKey = reply.ok ? bulkSemanticKey(reply) : "";
+      if (bulkKey !== "") {
+        outcomes.push(entry.label + " progress: " + awaitBulkProgress(bulkKey));
+      }
+    }
+    submitButton.disabled = false;
+    setStatus(
+      result,
+      (targets.entries.length > 1 ? "One command per selected server.\n" : "") +
+        outcomes.join("\n") +
+        "\nreason: " + confirmation.reason +
+        "\nPlayers see the new counts after relog or reopening the window.",
+      allApplied ? "success" : "error",
+    );
+  }
+
+  return sectionElement;
+}
+
+function describeCounterLabels(counters) {
+  return counters.map((counter) => counter.label).join(", ");
+}
+
+function describeResetReply(reply) {
+  if (!reply.ok) {
+    return describeReply(reply);
+  }
+  const body = reply.body && typeof reply.body === "object" ? reply.body : {};
+  const result = body.result && typeof body.result === "object" ? body.result : {};
+  const parts = ["state " + (typeof body.state === "string" && body.state !== "" ? body.state : "unknown")];
+  if (Number.isInteger(result.player_count)) {
+    parts.push(result.player_count + " recipient(s)");
+  }
+  return parts.join(", ");
+}
+
+function bulkSemanticKey(reply) {
+  const body = reply.body && typeof reply.body === "object" ? reply.body : {};
+  const result = body.result && typeof body.result === "object" ? body.result : {};
+  return typeof result.semantic_key === "string" ? result.semantic_key : "";
+}
+
+async function awaitBulkProgress(semanticKey) {
+  for (let attempt = 0; attempt < resetBulkPollAttempts; attempt += 1) {
+    const reply = await request("/agent/v1/reads/operator.bulk.show?semantic_key=" + encodeURIComponent(semanticKey));
+    if (reply.unauthorized || !reply.ok) {
+      return "progress unavailable";
+    }
+    const body = reply.body && typeof reply.body === "object" ? reply.body : {};
+    const state = typeof body.state === "string" && body.state !== "" ? body.state : "unknown";
+    const text = "state " + state +
+      ", processed " + presentCounter(body.processed) + " of " + presentCounter(body.player_count) +
+      ", applied " + presentCounter(body.applied) +
+      ", refused " + presentCounter(body.refused);
+    if (state === "DONE" || state === "FAILED") {
+      return typeof body.last_error === "string" && body.last_error !== "" ? text + " (" + body.last_error + ")" : text;
+    }
+    await new Promise((resolve) => setTimeout(resolve, resetBulkPollMilliseconds));
+  }
+  return "still pending";
+}
+
+function presentCounter(value) {
+  return Number.isInteger(value) ? String(value) : "unknown";
+}
+
+function createResetSelect(parent, identifier, label, options) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "mb-3";
+  const labelElement = document.createElement("label");
+  labelElement.className = "form-label";
+  labelElement.htmlFor = identifier;
+  labelElement.textContent = label;
+  const select = document.createElement("select");
+  select.className = "form-select";
+  select.id = identifier;
+  for (const option of options) {
+    const element = document.createElement("option");
+    element.value = option.value;
+    element.textContent = option.label;
+    select.append(element);
+  }
+  wrapper.append(labelElement, select);
+  parent.append(wrapper);
+  return select;
 }

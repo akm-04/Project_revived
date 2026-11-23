@@ -24,6 +24,23 @@ func (commands Commands) Module() operator.Module {
 	}
 }
 
+// Module is the reset-counters command part of the player module. The merged
+// module keeps Players' read-only screen; the command is added by id "player".
+func (commands ResetCommands) Module() operator.Module {
+	return operator.Module{
+		ID:         "player",
+		Title:      "Players",
+		Role:       operator.RoleRoot,
+		LogChannel: "player",
+		Commands: []operator.CommandSpec{
+			{Name: CommandResetCounters, Class: operator.ClassLive, Help: "Reset named per-player counters for selected players, one server or every player.", Fields: []operator.Field{
+				operator.NewField("target", operator.FieldObject, true, "exactly one of player_ids, server_id or global"),
+				operator.NewField("counters", operator.FieldArray, true, "one or more counter names from the operator vocabulary"),
+			}, Handler: commands.resetHandler},
+		},
+	}
+}
+
 // Module is the mail module (I11A_OPERATOR_COMMANDS_V1 M1/M11): GM mail with a
 // fixed or read-based expiry, inline or as a bulk job like grant.items.
 func (commands MailCommands) Module() operator.Module {

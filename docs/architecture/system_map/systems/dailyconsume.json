@@ -19,7 +19,12 @@
   "reads": []
  },
  "locks": {
-  "profiles": [],
+  "profiles": [
+   {
+    "lock_timeout_ms": 5000,
+    "name": "operator-reset-daily-buys"
+   }
+  ],
   "ranks": [],
   "row_lock_methods": {
    "daily_consumption_players": [
@@ -37,15 +42,18 @@
  "name": "dailyconsume",
  "pushes": [],
  "stores": [
-  "internal/adapters/postgres/dailyconsumestore"
+  "internal/adapters/postgres/dailyconsumestore",
+  "internal/adapters/postgres/kernelstore"
  ],
  "tables": {
   "owned": [],
   "read": [
-   "daily_consumption_players"
+   "daily_consumption_players",
+   "gxb_operation_receipts"
   ],
   "written": [
-   "daily_consumption_players"
+   "daily_consumption_players",
+   "gxb_operation_receipts"
   ]
  },
  "tests": {
