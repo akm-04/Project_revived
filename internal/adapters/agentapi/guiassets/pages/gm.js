@@ -10,7 +10,8 @@ const catcherAllowListFieldPattern = /allow|list|uid|player/i;
 // renderPage is the GM screen: the question inbox from gm.list, the answer to
 // one selected message and the catcher-mode switch. The route and the payload
 // field names come from the module list, because the GM owner is declared but
-// its payload shape is not fixed in this tree (UNKNOWN stays UNKNOWN).
+// its payload shape is not fixed in this tree (UNKNOWN stays UNKNOWN). A module
+// the registry marks planned is not called (fail closed).
 export function renderPage(container, context) {
   container.replaceChildren();
   const gmModule = findModule(context.modules, "gm");
@@ -22,6 +23,14 @@ export function renderPage(container, context) {
 
   async function loadInbox() {
     inbox.status.textContent = "";
+    if (gmModule !== null && gmModule.planned) {
+      inbox.entries = [];
+      inbox.selectedIndex = -1;
+      fillInbox(inbox, []);
+      overview.count.textContent = "unknown";
+      inbox.status.textContent = "The GM module is planned, not callable yet: " + gmModule.planned;
+      return;
+    }
     const read = gmModule ? findRead(gmModule, "gm.list") : null;
     const command = gmModule ? findCommand(gmModule, "gm.list") : null;
     let reply;
@@ -337,7 +346,10 @@ function buildAnswer(gmModule, inbox) {
   const command = gmModule ? findCommand(gmModule, "gm.answer") : null;
   const fields = declaredFields(command);
   const answerField = fieldMatching(fields, answerFieldPattern);
-  if (command === null) {
+  const planned = gmModule !== null && Boolean(gmModule.planned);
+  if (planned) {
+    hint.textContent = "The GM module is planned, not callable yet: " + gmModule.planned;
+  } else if (command === null) {
     hint.textContent = "gm.answer is not declared by this agent's module list.";
   } else if (fields.length === 0) {
     hint.textContent = "gm.answer declares no payload fields in this build, so the answer shape is UNKNOWN and cannot be sent from this page.";
@@ -346,14 +358,19 @@ function buildAnswer(gmModule, inbox) {
   } else {
     hint.textContent = "The typed answer fills the declared field '" + answerField.name + "'; matching fields of the selected message are sent with it.";
   }
-  const answer = { card, selected, text, hint, button, status, result, command, answerField };
-  button.disabled = command === null || answerField === null;
+  const answer = { card, selected, text, hint, button, status, result, command, answerField, planned };
+  button.disabled = planned || command === null || answerField === null;
   text.addEventListener("input", () => refreshAnswerButton(inbox, answer));
   return answer;
 }
 
 function refreshAnswerButton(inbox, answer) {
-  const ready = answer.command !== null && answer.answerField !== null && selectedEntry(inbox) !== null && answer.text.value.trim() !== "";
+  const ready =
+    !answer.planned &&
+    answer.command !== null &&
+    answer.answerField !== null &&
+    selectedEntry(inbox) !== null &&
+    answer.text.value.trim() !== "";
   answer.button.disabled = !ready;
 }
 
@@ -419,7 +436,10 @@ function buildCatcher(gmModule) {
   const fields = declaredFields(command);
   const modeField = fieldMatching(fields, catcherModeFieldPattern);
   const allowField = fieldMatching(fields, catcherAllowListFieldPattern);
-  if (command === null) {
+  const planned = gmModule !== null && Boolean(gmModule.planned);
+  if (planned) {
+    hint.textContent = "The GM module is planned, not callable yet: " + gmModule.planned;
+  } else if (command === null) {
     hint.textContent = "gm.catcher_mode is not declared by this agent's module list.";
   } else if (fields.length === 0) {
     hint.textContent = "gm.catcher_mode declares no payload fields in this build, so the mode shape is UNKNOWN and cannot be sent from this page.";
@@ -428,7 +448,7 @@ function buildCatcher(gmModule) {
   } else {
     hint.textContent = "The selected mode fills the declared field '" + modeField.name + "'" + (allowField === null ? "." : "; the allow-list fills '" + allowField.name + "' in allow-list mode.");
   }
-  button.disabled = command === null || modeField === null;
+  button.disabled = planned || command === null || modeField === null;
   return { card, mode, allowList, button, status, result, command, modeField, allowField };
 }
 
