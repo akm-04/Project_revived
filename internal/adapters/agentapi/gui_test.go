@@ -396,12 +396,17 @@ func TestEmbeddedGUIRefersOnlyToAgentEndpoints(t *testing.T) {
 
 // TestGUIVendoredAssetsAreEmbeddedAndServed proves every vendored stylesheet and
 // script is compiled in, reachable at its /gui/ path and carries the strict
-// policy.
+// policy. A vendored file may be referenced by the page or by a page module
+// that loads it on demand.
 func TestGUIVendoredAssetsAreEmbeddedAndServed(t *testing.T) {
 	handler, _, _ := newForwardingHandler(t)
 	index, err := guiAssets.ReadFile("guiassets/index.html")
 	if err != nil {
 		t.Fatal(err)
+	}
+	references := string(index)
+	for _, script := range guiScriptFiles(t) {
+		references += script
 	}
 	served := 0
 	err = fs.WalkDir(guiAssets, "guiassets/vendor", func(name string, entry fs.DirEntry, err error) error {
@@ -416,8 +421,8 @@ func TestGUIVendoredAssetsAreEmbeddedAndServed(t *testing.T) {
 			return nil
 		}
 		targetPath := "/gui/" + strings.TrimPrefix(name, guiAssetsRoot)
-		if !strings.Contains(string(index), targetPath) {
-			t.Fatalf("index does not reference the vendored file %s", targetPath)
+		if !strings.Contains(references, targetPath) {
+			t.Fatalf("no GUI page or module references the vendored file %s", targetPath)
 		}
 		recorder := serveAgent(handler, http.MethodGet, targetPath, "", "")
 		if recorder.Code != http.StatusOK {
@@ -623,10 +628,26 @@ func TestGUIIndexReferencesOnlySameOriginAssets(t *testing.T) {
 			t.Fatalf("the page carries an inline script tag: %s", tag)
 		}
 	}
-	if strings.Contains(contentSecurityPolicy, "unsafe-inline") {
+	if strings.Contains(scriptDirective(contentSecurityPolicy), "unsafe-inline") {
 		t.Fatal("the GUI policy allows inline script")
+	}
+	if !strings.Contains(contentSecurityPolicy, "style-src 'self' 'unsafe-inline'") {
+		t.Fatalf("the GUI policy lost the xterm style exception: %s", contentSecurityPolicy)
 	}
 	if !strings.Contains(contentSecurityPolicy, "script-src 'self'") {
 		t.Fatalf("the GUI policy is not self-only for scripts: %s", contentSecurityPolicy)
 	}
+}
+
+// scriptDirective returns the script-src directive of a policy string.
+func scriptDirective(policy string) string {
+	start := strings.Index(policy, "script-src")
+	if start < 0 {
+		return ""
+	}
+	directive := policy[start:]
+	if end := strings.Index(directive, ";"); end >= 0 {
+		directive = directive[:end]
+	}
+	return directive
 }

@@ -39,6 +39,8 @@ func runAgent(root string, args []string) error {
 	logWriter := operatoragent.NewDatedLogWriter(logsDirectory, operatoragent.ToolLogPrefix, time.Now)
 	defer logWriter.Close()
 	toolLog := operatoragent.NewToolLog(logWriter, time.Now)
+	terminalService := operatoragent.NewTerminalService(toolLog, time.Now)
+	defer terminalService.Shutdown()
 	operations := operatoragent.NewOperations(operationsDirectory, toolLog, time.Now)
 	if err := operations.Recover(); err != nil {
 		return err
@@ -134,6 +136,7 @@ func runAgent(root string, args []string) error {
 		OTARoot:     config.OTARoot,
 		Listen:      config.Listen,
 		Guard:       backendGuard,
+		Terminal:    terminalService,
 	}
 	listener, err := net.Listen("tcp", config.Listen)
 	if err != nil {

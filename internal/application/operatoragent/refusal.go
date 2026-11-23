@@ -85,6 +85,15 @@ const (
 	CodeBackupRestoreRefused  = "AGENT_BACKUP_RESTORE_REFUSED"
 	CodeBackupToolFailed      = "AGENT_BACKUP_TOOL_FAILED"
 	CodeBackupFailed          = "AGENT_BACKUP_FAILED"
+
+	// terminal refusals (G42): the shell exists only while the agent listens on
+	// loopback and only for an authenticated session (G42).
+	CodeTerminalDisabled    = "AGENT_TERMINAL_DISABLED"
+	CodeTerminalLimit       = "AGENT_TERMINAL_LIMIT"
+	CodeTerminalExists      = "AGENT_TERMINAL_EXISTS"
+	CodeTerminalUnknown     = "AGENT_TERMINAL_UNKNOWN"
+	CodeTerminalUnsupported = "AGENT_TERMINAL_UNSUPPORTED"
+	CodeTerminalStartFailed = "AGENT_TERMINAL_START_FAILED"
 )
 
 // Refusal is a permanent agent refusal: the agent API answers 409 with Code.

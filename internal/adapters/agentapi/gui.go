@@ -21,7 +21,10 @@ var guiAssets embed.FS
 
 const guiAssetsRoot = "guiassets/"
 
-const contentSecurityPolicy = "default-src 'self'; script-src 'self'; style-src 'self'; " +
+// contentSecurityPolicy keeps scripts self-only. xterm.js injects its renderer
+// stylesheets and style attributes, so style-src alone allows inline styles;
+// no other directive does.
+const contentSecurityPolicy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; " +
 	"img-src 'self' blob: data:; connect-src 'self'; object-src 'none'; base-uri 'none'; " +
 	"frame-ancestors 'none'; form-action 'self'"
 

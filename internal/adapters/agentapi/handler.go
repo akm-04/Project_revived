@@ -44,6 +44,8 @@ const (
 	modulesPath        = "/agent/v1/modules"
 	resPrefix          = "/agent/v1/res/"
 	backupPrefix       = "/agent/v1/backup/"
+	terminalOpenPath   = "/agent/v1/terminal/open"
+	terminalPrefix     = "/agent/v1/terminal/"
 
 	maxBodyBytes = 1 << 20
 	// The agent re-marshals a command into a larger envelope, so it accepts
@@ -87,6 +89,8 @@ type Handler struct {
 	Listen string
 	// Guard serializes every backend lifecycle action across routes.
 	Guard *operatoragent.BackendGuard
+	// Terminal runs the operator's shells (G42); nil disables the feature.
+	Terminal *operatoragent.TerminalService
 }
 
 type sessionReply struct {
@@ -233,6 +237,10 @@ func (handler Handler) serve(writer http.ResponseWriter, request *http.Request) 
 		handler.serveMedia(writer, request)
 	case strings.HasPrefix(request.URL.Path, backupPrefix):
 		handler.serveBackup(writer, request, strings.TrimPrefix(request.URL.Path, backupPrefix))
+	case request.URL.Path == terminalOpenPath && request.Method == http.MethodPost:
+		handler.serveTerminalOpen(writer, request)
+	case strings.HasPrefix(request.URL.Path, terminalPrefix):
+		handler.serveTerminalRoute(writer, request, strings.TrimPrefix(request.URL.Path, terminalPrefix))
 	default:
 		writeRefusal(writer, http.StatusNotFound, operatoragent.CodeNotFound, "no such agent route")
 	}
@@ -1072,7 +1080,12 @@ var exchangeRoutes = []exchangeRoute{
 	{Name: "media.upload", Method: http.MethodPost, Sample: mediaUploadPath, Match: exactPath(mediaUploadPath)},
 	{Name: "media.list", Method: http.MethodGet, Sample: mediaListPath, Match: exactPath(mediaListPath)},
 	{Name: "media.file", Method: http.MethodGet, Sample: mediaFilePrefix + "0123456789abcdef.png", Match: prefixPath(mediaFilePrefix)},
+	{Name: "terminal.open", Method: http.MethodPost, Sample: terminalOpenPath, Match: exactPath(terminalOpenPath)},
+	{Name: "terminal", Method: http.MethodGet, Sample: terminalPrefix + terminalSampleID + "/stream", Match: prefixPath(terminalPrefix)},
+	{Name: "terminal", Method: http.MethodPost, Sample: terminalPrefix + terminalSampleID + "/input", Match: prefixPath(terminalPrefix)},
 }
+
+const terminalSampleID = "0000000000000000000000000000000000000000000000000000000000000000"
 
 // exchangeRouteName names the exchange for the tool log.
 func exchangeRouteName(method, path string) string {
@@ -1113,6 +1126,13 @@ func (recorder *exchangeRecorder) Write(data []byte) (int, error) {
 	return recorder.ResponseWriter.Write(data)
 }
 
+// Flush streams a terminal event at once; the recorder still sees the status.
+func (recorder *exchangeRecorder) Flush() {
+	if flusher, ok := recorder.ResponseWriter.(http.Flusher); ok {
+		flusher.Flush()
+	}
+}
+
 // bodyCapture records the first bytes of a POST body as the route reads them,
 // so the tool log gets masked params without buffering the whole command cap.
 type bodyCapture struct {
@@ -1146,11 +1166,20 @@ func (reader teeReadCloser) Close() error { return reader.closer.Close() }
 // upload carries bytes, not log parameters, and is skipped for the same reason.
 var credentialPaths = map[string]bool{setupPath: true, loginPath: true, passwordPath: true, mediaUploadPath: true}
 
+// sensitiveBodyPath names the POST bodies that must never reach the tool log:
+// the credential routes and the terminal password and keystrokes.
+func sensitiveBodyPath(path string) bool {
+	if credentialPaths[path] {
+		return true
+	}
+	return path == terminalOpenPath || (strings.HasPrefix(path, terminalPrefix) && strings.HasSuffix(path, "/input"))
+}
+
 // startBodyCapture tees a POST body into the bounded capture. The route still
 // sees every byte and every size cap still applies.
 func startBodyCapture(request *http.Request) *bodyCapture {
 	capture := &bodyCapture{}
-	if request.Method == http.MethodPost && request.Body != nil && !credentialPaths[request.URL.Path] {
+	if request.Method == http.MethodPost && request.Body != nil && !sensitiveBodyPath(request.URL.Path) {
 		request.Body = teeReadCloser{Reader: io.TeeReader(request.Body, capture), closer: request.Body}
 	}
 	return capture
