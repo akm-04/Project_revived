@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"sort"
 	"strings"
 	"time"
 
@@ -17,36 +18,68 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-// SDKImportInput is the stand-in's accounts file (G51F F4): accounts, logins
-// with their password records copied as-is, and device bindings.
+// SDKImportInput is the stand-in's accounts file (G51F F4) after decoding:
+// accounts, logins with their password records copied as-is, and device
+// bindings. The file itself is the map-shaped document that sdk.py writes.
 type SDKImportInput struct {
-	Accounts []SDKImportAccount `json:"accounts"`
-	Logins   []SDKImportLogin   `json:"logins"`
-	Devices  []SDKImportDevice  `json:"devices"`
+	Accounts []SDKImportAccount
+	Logins   []SDKImportLogin
+	Devices  []SDKImportDevice
+	// UnresolvedLogins counts logins rows whose uid has no account or whose
+	// account has no password record; the import reports them as conflicts.
+	UnresolvedLogins int
+}
+
+const sdkImportVersion = 1
+
+// sdkImportFile mirrors the stand-in's on-disk document: a version plus three
+// maps keyed by uid, normalized login and device id.
+type sdkImportFile struct {
+	Version  int                             `json:"version"`
+	Accounts map[string]sdkImportFileAccount `json:"accounts"`
+	Logins   map[string]string               `json:"logins"`
+	Devices  map[string]string               `json:"devices"`
+}
+
+type sdkImportFileAccount struct {
+	UID         string             `json:"uid"`
+	Login       string             `json:"login"`
+	Username    string             `json:"username"`
+	AccountType string             `json:"account_type"`
+	CreatedAt   int64              `json:"created_at"`
+	Password    *sdkImportPassword `json:"password"`
+	Session     json.RawMessage    `json:"session"`
+}
+
+type sdkImportPassword struct {
+	Algorithm  string `json:"algorithm"`
+	Iterations int    `json:"iterations"`
+	Salt       string `json:"salt"`
+	Hash       string `json:"hash"`
 }
 
 type SDKImportAccount struct {
-	UID      string    `json:"uid"`
-	Type     string    `json:"type"`
-	Username string    `json:"username"`
-	Created  time.Time `json:"created"`
+	UID      string
+	Type     string
+	Username string
+	Created  time.Time
 }
 
 type SDKImportLogin struct {
-	Normalized        string    `json:"normalized"`
-	Display           string    `json:"display"`
-	AccountUID        string    `json:"account_uid"`
-	Algorithm         string    `json:"algorithm"`
-	Iterations        int       `json:"iterations"`
-	Salt              string    `json:"salt"`
-	Hash              string    `json:"hash"`
-	Created           time.Time `json:"created"`
-	PasswordChangedAt time.Time `json:"password_changed_at"`
+	Normalized        string
+	Display           string
+	AccountUID        string
+	Algorithm         string
+	Iterations        int
+	Salt              string
+	Hash              string
+	Created           time.Time
+	PasswordChangedAt time.Time
 }
 
 type SDKImportDevice struct {
-	DeviceID   string `json:"device_id"`
-	AccountUID string `json:"account_uid"`
+	DeviceID   string
+	AccountUID string
 }
 
 // SDKImportResult is the counts-only output; it never carries a name, secret
@@ -64,16 +97,75 @@ type SDKImportResult struct {
 // DecodeSDKImport reads and validates the file. A malformed record refuses the
 // whole import before any write.
 func DecodeSDKImport(reader io.Reader) (SDKImportInput, error) {
-	var input SDKImportInput
+	var file sdkImportFile
 	decoder := json.NewDecoder(reader)
 	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(&input); err != nil {
+	if err := decoder.Decode(&file); err != nil {
 		return SDKImportInput{}, fmt.Errorf("sdk import file: %w", err)
+	}
+	if file.Version != sdkImportVersion {
+		return SDKImportInput{}, fmt.Errorf("sdk import file: unsupported version %d", file.Version)
+	}
+	input, err := file.toImportInput()
+	if err != nil {
+		return SDKImportInput{}, err
 	}
 	if err := input.validate(); err != nil {
 		return SDKImportInput{}, err
 	}
 	return input, nil
+}
+
+// toImportInput turns the stand-in's maps into records. A logins row whose uid
+// has no account, or whose account has no password record, is skipped and
+// counted; the import reports it as a conflict.
+func (file sdkImportFile) toImportInput() (SDKImportInput, error) {
+	var input SDKImportInput
+	for _, uid := range sortedSDKImportKeys(file.Accounts) {
+		account := file.Accounts[uid]
+		if account.UID != uid {
+			return SDKImportInput{}, fmt.Errorf("sdk import file: account key %q holds uid %q", uid, account.UID)
+		}
+		input.Accounts = append(input.Accounts, SDKImportAccount{
+			UID:      account.UID,
+			Type:     account.AccountType,
+			Username: account.Username,
+			Created:  time.Unix(account.CreatedAt, 0).UTC(),
+		})
+	}
+	for _, normalized := range sortedSDKImportKeys(file.Logins) {
+		accountUID := file.Logins[normalized]
+		account, found := file.Accounts[accountUID]
+		if !found || account.Password == nil {
+			input.UnresolvedLogins++
+			continue
+		}
+		created := time.Unix(account.CreatedAt, 0).UTC()
+		input.Logins = append(input.Logins, SDKImportLogin{
+			Normalized:        normalized,
+			Display:           account.Login,
+			AccountUID:        accountUID,
+			Algorithm:         account.Password.Algorithm,
+			Iterations:        account.Password.Iterations,
+			Salt:              account.Password.Salt,
+			Hash:              account.Password.Hash,
+			Created:           created,
+			PasswordChangedAt: created,
+		})
+	}
+	for _, deviceID := range sortedSDKImportKeys(file.Devices) {
+		input.Devices = append(input.Devices, SDKImportDevice{DeviceID: deviceID, AccountUID: file.Devices[deviceID]})
+	}
+	return input, nil
+}
+
+func sortedSDKImportKeys[Value any](values map[string]Value) []string {
+	keys := make([]string, 0, len(values))
+	for key := range values {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	return keys
 }
 
 func (input SDKImportInput) validate() error {
@@ -160,7 +252,7 @@ func (importer SDKImporter) Import(ctx context.Context, input SDKImportInput) (S
 	}
 	var out SDKImportResult
 	_, err = importer.Runner.Run(ctx, op, DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true}, nil, func(txctx context.Context, scope tx.Scope) error {
-		out = SDKImportResult{}
+		out = SDKImportResult{Conflicts: input.UnresolvedLogins}
 		for _, imported := range input.Accounts {
 			if err := importer.importAccount(txctx, scope.Tx, imported, op.StartedAt, &out); err != nil {
 				return err

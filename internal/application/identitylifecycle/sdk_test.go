@@ -180,6 +180,12 @@ func sharesSDKSubstring(left, right string, length int) bool {
 	return false
 }
 
+const (
+	sdkImportNormalUID  = "11111111-1111-4111-8111-111111111111"
+	sdkImportGuestUID   = "22222222-2222-4222-8222-222222222222"
+	sdkImportMissingUID = "33333333-3333-4333-8333-333333333333"
+)
+
 func sdkImportJSON(t *testing.T) string {
 	t.Helper()
 	_, _, salt, hash, err := HashSDKPassword("secret-1")
@@ -187,17 +193,29 @@ func sdkImportJSON(t *testing.T) string {
 		t.Fatal(err)
 	}
 	return `{
-  "accounts": [
-    {"uid": "11111111-1111-4111-8111-111111111111", "type": "normal", "username": "player-one"},
-    {"uid": "22222222-2222-4222-8222-222222222222", "type": "guest", "username": "guest-22222222"}
-  ],
-  "logins": [
-    {"normalized": "player-one", "display": "Player-One", "account_uid": "11111111-1111-4111-8111-111111111111",
-     "algorithm": "pbkdf2-sha256", "iterations": 200000, "salt": "` + salt + `", "hash": "` + hash + `"}
-  ],
-  "devices": [
-    {"device_id": "device-1", "account_uid": "22222222-2222-4222-8222-222222222222"}
-  ]
+  "version": 1,
+  "accounts": {
+    "` + sdkImportNormalUID + `": {
+      "uid": "` + sdkImportNormalUID + `",
+      "login": "player-one",
+      "username": "player-one",
+      "account_type": "normal",
+      "created_at": 1760000000,
+      "password": {"algorithm": "pbkdf2-sha256", "iterations": 200000, "salt": "` + salt + `", "hash": "` + hash + `"},
+      "session": {"session_id": "00000000-0000-4000-8000-000000000000", "sid": "pl-sid-1", "token": "pl-login-1"}
+    },
+    "` + sdkImportGuestUID + `": {
+      "uid": "` + sdkImportGuestUID + `",
+      "login": null,
+      "username": "guest-22222222",
+      "account_type": "guest",
+      "created_at": 1760000001,
+      "password": null,
+      "session": null
+    }
+  },
+  "logins": {"player-one": "` + sdkImportNormalUID + `"},
+  "devices": {"device-1": "` + sdkImportGuestUID + `"}
 }`
 }
 
@@ -206,21 +224,52 @@ func TestDecodeSDKImportAcceptsTheStandInShape(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(input.Accounts) != 2 || len(input.Logins) != 1 || len(input.Devices) != 1 {
+	if len(input.Accounts) != 2 || len(input.Logins) != 1 || len(input.Devices) != 1 || input.UnresolvedLogins != 0 {
 		t.Fatalf("decoded = %+v", input)
+	}
+	if input.Accounts[0].Type != SDKAccountKindNormal || input.Accounts[1].Type != SDKAccountKindGuest {
+		t.Fatalf("account kinds = %+v", input.Accounts)
+	}
+	if input.Accounts[0].Created.Unix() != 1760000000 {
+		t.Fatalf("account created = %v, want unix 1760000000", input.Accounts[0].Created)
+	}
+	if input.Logins[0].Display != "player-one" || input.Logins[0].AccountUID != sdkImportNormalUID {
+		t.Fatalf("login = %+v", input.Logins[0])
+	}
+	if input.Logins[0].Created.Unix() != 1760000000 || !input.Logins[0].PasswordChangedAt.Equal(input.Logins[0].Created) {
+		t.Fatalf("login times = %+v", input.Logins[0])
+	}
+	if input.Devices[0].DeviceID != "device-1" || input.Devices[0].AccountUID != sdkImportGuestUID {
+		t.Fatalf("device = %+v", input.Devices[0])
+	}
+}
+
+func TestDecodeSDKImportSkipsLoginsWithoutAnAccountOrPassword(t *testing.T) {
+	valid := sdkImportJSON(t)
+	document := strings.Replace(valid, `"logins": {"player-one": "`+sdkImportNormalUID+`"}`,
+		`"logins": {"guest-login": "`+sdkImportGuestUID+`", "missing-login": "`+sdkImportMissingUID+`", "player-one": "`+sdkImportNormalUID+`"}`, 1)
+	input, err := DecodeSDKImport(strings.NewReader(document))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(input.Logins) != 1 || input.UnresolvedLogins != 2 {
+		t.Fatalf("decoded = %+v, want one login and two unresolved", input)
 	}
 }
 
 func TestDecodeSDKImportRefusesBrokenRecords(t *testing.T) {
 	valid := sdkImportJSON(t)
 	cases := map[string]string{
-		"unknown field": strings.Replace(valid, `"type": "normal",`, `"type": "normal", "extra": 1,`, 1),
-		"bad uid":       strings.Replace(valid, `"11111111-1111-4111-8111-111111111111"`, `"not-a-uuid"`, 1),
-		"bad type":      strings.Replace(valid, `"type": "normal"`, `"type": "system"`, 1),
-		"blank name":    strings.Replace(valid, `"username": "player-one"`, `"username": " "`, 1),
-		"bad algorithm": strings.Replace(valid, `"pbkdf2-sha256"`, `"sha1"`, 1),
-		"bad salt":      strings.Replace(valid, `"salt": "`, `"salt": "zz`, 1),
-		"bad device":    strings.Replace(valid, `"device-1"`, `""`, 1),
+		"unknown field":   strings.Replace(valid, `"account_type": "normal",`, `"account_type": "normal", "extra": 1,`, 1),
+		"bad uid":         strings.ReplaceAll(valid, sdkImportNormalUID, "not-a-uuid"),
+		"mismatched key":  strings.Replace(valid, `"`+sdkImportNormalUID+`": {`, `"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa": {`, 1),
+		"bad type":        strings.Replace(valid, `"account_type": "normal"`, `"account_type": "system"`, 1),
+		"blank name":      strings.Replace(valid, `"username": "player-one"`, `"username": " "`, 1),
+		"bad algorithm":   strings.Replace(valid, `"pbkdf2-sha256"`, `"sha1"`, 1),
+		"bad salt":        strings.Replace(valid, `"salt": "`, `"salt": "zz`, 1),
+		"bad device":      strings.Replace(valid, `"device-1"`, `""`, 1),
+		"bad version":     strings.Replace(valid, `"version": 1`, `"version": 2`, 1),
+		"missing version": strings.Replace(valid, `"version": 1,`, ``, 1),
 	}
 	for name, body := range cases {
 		t.Run(name, func(t *testing.T) {
@@ -420,15 +469,11 @@ func TestSDKPasswordVerificationRunsOutsideTheTransaction(t *testing.T) {
 	})
 }
 
-func TestDecodeSDKImportRefusesDuplicateLoginsAndDevices(t *testing.T) {
+func TestDecodeSDKImportRefusesDuplicateNormalizedLogins(t *testing.T) {
 	valid := sdkImportJSON(t)
-	loginLine := `{"normalized": "player-one", "display": "Player-One", "account_uid": "11111111-1111-4111-8111-111111111111", "algorithm": "pbkdf2-sha256", "iterations": 200000, "salt": "00000000000000000000000000000000", "hash": "0000000000000000000000000000000000000000000000000000000000000000"}`
-	duplicateLogin := strings.Replace(valid, `"logins": [`, `"logins": [`+loginLine+`,`, 1)
-	if _, err := DecodeSDKImport(strings.NewReader(duplicateLogin)); err == nil {
+	duplicate := strings.Replace(valid, `"logins": {"player-one": "`+sdkImportNormalUID+`"}`,
+		`"logins": {"player-one": "`+sdkImportNormalUID+`", "Player-One": "`+sdkImportNormalUID+`"}`, 1)
+	if _, err := DecodeSDKImport(strings.NewReader(duplicate)); err == nil {
 		t.Fatal("a duplicate normalized login was accepted")
-	}
-	duplicateDevice := strings.Replace(valid, `"devices": [`, `"devices": [{"device_id": "device-1", "account_uid": "22222222-2222-4222-8222-222222222222"},`, 1)
-	if _, err := DecodeSDKImport(strings.NewReader(duplicateDevice)); err == nil {
-		t.Fatal("a duplicate device was accepted")
 	}
 }
