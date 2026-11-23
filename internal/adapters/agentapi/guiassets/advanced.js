@@ -1,6 +1,7 @@
 "use strict";
 
-import { loadPicture, request } from "./transport.js";
+import { request } from "./transport.js";
+import { pictureElement } from "./pictures.js";
 
 const operationPollMilliseconds = 1000;
 
@@ -447,7 +448,7 @@ function buildTable(rows) {
       const cell = document.createElement("td");
       const value = row[column];
       if (column === "icon" && typeof value === "string" && value !== "") {
-        cell.append(pictureCell(value));
+        cell.append(pictureElement(value));
       } else if (value !== null && typeof value === "object") {
         cell.textContent = JSON.stringify(value);
       } else {
@@ -459,28 +460,6 @@ function buildTable(rows) {
   }
   table.append(head, body);
   return table;
-}
-
-function pictureCell(iconPath) {
-  const wrapper = document.createElement("span");
-  const placeholder = document.createElement("span");
-  placeholder.className = "placeholder";
-  placeholder.textContent = "?";
-  const image = document.createElement("img");
-  image.className = "picture";
-  image.alt = iconPath;
-  image.hidden = true;
-  wrapper.append(placeholder, image);
-  const targetPath = "/agent/v1/res/" + iconPath.split("/").map(encodeURIComponent).join("/");
-  loadPicture(targetPath).then((objectURL) => {
-    if (objectURL === null) {
-      return;
-    }
-    image.src = objectURL;
-    image.hidden = false;
-    placeholder.hidden = true;
-  });
-  return wrapper;
 }
 
 function newSemanticKey() {

@@ -187,3 +187,89 @@ th {
   border-radius: 6px;
   color: #5a6475;
 }
+
+.component-output {
+  margin-top: 12px;
+  min-height: 44px;
+  padding: 12px;
+  border-radius: 6px;
+  background: #111827;
+  color: #e5e7eb;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+
+.server-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.form-check-input {
+  width: auto;
+}
+
+.player-table-scroll {
+  max-height: 320px;
+  overflow: auto;
+}
+
+.duration-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.resource-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+.resource-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid #d8dce4;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.resource-card.selected {
+  border-color: #206bc4;
+  box-shadow: 0 0 0 1px #206bc4;
+}
+
+.resource-card.fail-closed {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.resource-card .resource-name {
+  font-weight: 600;
+}
+
+.resource-card .resource-meta {
+  color: #5a6475;
+  font-size: 0.8rem;
+}
+
+.resource-card input[type="number"] {
+  width: 100%;
+}
+
+.confirm-advanced {
+  margin: 12px 0;
+}
+
+.confirm-advanced code {
+  word-break: break-all;
+}

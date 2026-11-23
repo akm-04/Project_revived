@@ -347,6 +347,99 @@ func TestGUIVendoredAssetsAreEmbeddedAndServed(t *testing.T) {
 	}
 }
 
+// TestGUIComponentsAreEmbeddedAndServed proves the shared components and their
+// test page are compiled in, reachable under /gui/ and carry the strict policy.
+func TestGUIComponentsAreEmbeddedAndServed(t *testing.T) {
+	handler, _, _ := newForwardingHandler(t)
+	required := []string{
+		"guiassets/components.html",
+		"guiassets/components/confirm_action.js",
+		"guiassets/components/demo.js",
+		"guiassets/components/duration_picker.js",
+		"guiassets/components/modal.js",
+		"guiassets/components/player_picker.js",
+		"guiassets/components/resource_picker.js",
+		"guiassets/components/server_picker.js",
+	}
+	for _, name := range required {
+		if _, err := guiAssets.ReadFile(name); err != nil {
+			t.Fatalf("the GUI no longer embeds %s", name)
+		}
+	}
+	served := 0
+	err := fs.WalkDir(guiAssets, "guiassets/components", func(name string, entry fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		if entry.IsDir() {
+			return nil
+		}
+		contentType, serveable := guiContentTypes[strings.ToLower(path.Ext(name))]
+		if !serveable {
+			t.Fatalf("%s has no serveable content type", name)
+		}
+		targetPath := "/gui/" + strings.TrimPrefix(name, guiAssetsRoot)
+		recorder := serveAgent(handler, http.MethodGet, targetPath, "", "")
+		if recorder.Code != http.StatusOK {
+			t.Fatalf("%s: status = %d", targetPath, recorder.Code)
+		}
+		if recorder.Header().Get("Content-Security-Policy") != contentSecurityPolicy {
+			t.Fatalf("%s: missing the strict policy", targetPath)
+		}
+		if recorder.Header().Get("Content-Type") != contentType {
+			t.Fatalf("%s: content type = %q", targetPath, recorder.Header().Get("Content-Type"))
+		}
+		if recorder.Body.Len() == 0 {
+			t.Fatalf("%s: empty body", targetPath)
+		}
+		served++
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if served < len(required)-1 {
+		t.Fatalf("served %d component files, want at least %d", served, len(required)-1)
+	}
+
+	recorder := serveAgent(handler, http.MethodGet, "/gui/components.html", "", "")
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("components page: status = %d", recorder.Code)
+	}
+	if recorder.Header().Get("Content-Security-Policy") != contentSecurityPolicy {
+		t.Fatalf("components page: missing the strict policy")
+	}
+	if recorder.Header().Get("Content-Type") != "text/html; charset=utf-8" {
+		t.Fatalf("components page: content type = %q", recorder.Header().Get("Content-Type"))
+	}
+	page := recorder.Body.String()
+	for _, reference := range []string{"/gui/app.css", "/gui/components/demo.js", "/gui/vendor/tabler-1.7.3/tabler.min.css"} {
+		if !strings.Contains(page, reference) {
+			t.Fatalf("components page does not reference %s", reference)
+		}
+	}
+	for _, identifier := range []string{
+		`id="components-view"`, `id="login-form"`,
+		`id="open-server-picker"`, `id="server-output"`,
+		`id="open-player-picker"`, `id="player-output"`,
+		`id="open-resource-picker"`, `id="resource-output"`,
+		`id="open-duration-picker"`, `id="duration-output"`,
+		`id="open-confirm-action"`, `id="confirm-output"`,
+	} {
+		if !strings.Contains(page, identifier) {
+			t.Fatalf("components page lacks %s", identifier)
+		}
+	}
+	if len(regexp.MustCompile(`<script[^>]*>`).FindAllString(page, -1)) == 0 {
+		t.Fatal("the components page carries no script")
+	}
+	for _, tag := range regexp.MustCompile(`<script[^>]*>`).FindAllString(page, -1) {
+		if !strings.Contains(tag, "src=") {
+			t.Fatalf("the components page carries an inline script tag: %s", tag)
+		}
+	}
+}
+
 // TestGUIIndexReferencesOnlySameOriginAssets keeps the page free of a CDN and
 // of inline script, so the CSP stays self-only.
 func TestGUIIndexReferencesOnlySameOriginAssets(t *testing.T) {
