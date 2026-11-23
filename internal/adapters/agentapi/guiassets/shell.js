@@ -24,6 +24,7 @@ const pages = [
   { id: "server", label: "Server" },
   { id: "backups", label: "Backups" },
   { id: "logs", label: "Logs" },
+  { id: "settings", label: "Settings" },
   { id: "advanced", label: "Advanced" },
 ];
 
