@@ -91,7 +91,8 @@ func TestI11AG6b2MailedSkinItemUnlocksTheGirlEntitlement(t *testing.T) {
 	if entitlement == nil {
 		t.Fatalf("skin entitlement = %+v", entitlements)
 	}
-	if remaining := time.Until(*entitlement); remaining < 71*time.Hour || remaining > 73*time.Hour {
+	threeDays := time.Now().Add(72 * time.Hour)
+	if entitlement.Before(threeDays.Add(-time.Hour)) || entitlement.After(threeDays.Add(time.Hour)) {
 		t.Fatalf("skin expiry = %s, want the item's three days", *entitlement)
 	}
 }
