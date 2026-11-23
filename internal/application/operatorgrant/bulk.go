@@ -34,6 +34,13 @@ type Applier struct {
 	Mail          MailOwner
 	DailyBuys     DailyBuysResetOwner
 	CampaignDaily CampaignDailyResetOwner
+	TopFloor      TopFloorResetOwner
+	OneOnOne      OneOnOneResetOwner
+	WorldBoss     WorldBossResetOwner
+	Illusion      IllusionResetOwner
+	DormGlue      DormGlueResetOwner
+	ArenaDaily    ArenaDailyResetOwner
+	SummonFree    SummonFreeResetOwner
 	OccultTickets OccultTicketsResetOwner
 	SkillPoints   SkillPointsResetOwner
 	Catalogue     operatorcatalog.Document
@@ -220,6 +227,41 @@ func (applier Applier) resetCounter(ctx context.Context, op operation.Context, a
 			return errors.New("operator bulk campaign daily owner unavailable")
 		}
 		return applier.CampaignDaily.ResetOperatorCampaignDaily(ctx, admin, playerID, key, op)
+	case CounterTopFloor:
+		if applier.TopFloor == nil {
+			return errors.New("operator bulk top floor owner unavailable")
+		}
+		return applier.TopFloor.ResetOperatorTopFloor(ctx, admin, playerID, key, op)
+	case CounterOneOnOne:
+		if applier.OneOnOne == nil {
+			return errors.New("operator bulk one on one owner unavailable")
+		}
+		return applier.OneOnOne.ResetOperatorOneOnOne(ctx, admin, playerID, key, op)
+	case CounterWorldBoss:
+		if applier.WorldBoss == nil {
+			return errors.New("operator bulk world boss owner unavailable")
+		}
+		return applier.WorldBoss.ResetOperatorWorldBoss(ctx, admin, playerID, key, op)
+	case CounterIllusion:
+		if applier.Illusion == nil {
+			return errors.New("operator bulk illusion owner unavailable")
+		}
+		return applier.Illusion.ResetOperatorIllusion(ctx, admin, playerID, key, op)
+	case CounterDormGlue:
+		if applier.DormGlue == nil {
+			return errors.New("operator bulk dorm glue owner unavailable")
+		}
+		return applier.DormGlue.ResetOperatorDormGlue(ctx, admin, playerID, key, op)
+	case CounterArenaDaily:
+		if applier.ArenaDaily == nil {
+			return errors.New("operator bulk arena daily owner unavailable")
+		}
+		return applier.ArenaDaily.ResetOperatorArenaDaily(ctx, admin, playerID, key, op)
+	case CounterSummonFree:
+		if applier.SummonFree == nil {
+			return errors.New("operator bulk summon free owner unavailable")
+		}
+		return applier.SummonFree.ResetOperatorSummonFree(ctx, admin, playerID, key, op)
 	case CounterOccultTickets:
 		if applier.OccultTickets == nil {
 			return errors.New("operator bulk occult tickets owner unavailable")

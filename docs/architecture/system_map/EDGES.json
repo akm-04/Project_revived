@@ -45,6 +45,9 @@
    "herorecommend": [
     "*HeroRecommendSourceTx"
    ],
+   "operatorgrant": [
+    "*ResetOperatorArenaDaily"
+   ],
    "playerdisplay": [
     "*ReadCatalogDisplayOriginsTx"
    ],
@@ -644,6 +647,9 @@
   "dormhouse": {
    "achievement": [
     "*VillaCountTx"
+   ],
+   "operatorgrant": [
+    "*ResetOperatorDormGlue"
    ],
    "playerdisplay": [
     "*TitleProgressTx"
@@ -1333,7 +1339,8 @@
     "*PrepareGluePurchaseTx",
     "*PrepareMaterialDebitTx",
     "*PrepareMaterialExchangeTx",
-    "*ReadDormPlayerStateTx"
+    "*ReadDormPlayerStateTx",
+    "Validate"
    ],
    "elementequipment": [
     "*ApplyMaterialDebitTx",
@@ -1438,7 +1445,8 @@
     "*PrepareTx",
     "*ReadFunctionEligibilityTx",
     "*RecordTx",
-    "*SnapshotTx"
+    "*SnapshotTx",
+    "Validate"
    ],
    "inscription": [
     "*ApplyInscriptionValueTx",
@@ -1523,7 +1531,8 @@
     "*ReadDisplayEntitlementsTx",
     "*RecordTx",
     "*SnapshotTx",
-    "LockFrameStackOwnershipTx"
+    "LockFrameStackOwnershipTx",
+    "Validate"
    ],
    "operator": [
     "*OperatorWalletTx"
@@ -1643,7 +1652,8 @@
     "*PrepareTx",
     "*RecordTx",
     "*SettleGrantTx",
-    "*SnapshotTx"
+    "*SnapshotTx",
+    "Validate"
    ],
    "topfloor": [
     "*DebitMaterialCostTx",
@@ -1654,7 +1664,8 @@
     "*ReadFunctionEligibilityTx",
     "*RecordTx",
     "*SnapshotTx",
-    "LockFrameStackOwnershipTx"
+    "LockFrameStackOwnershipTx",
+    "Validate"
    ],
    "workplace": [
     "*DebitTemporalTx",
@@ -1670,13 +1681,17 @@
     "*DebitMaterialCostTx",
     "*DeliverTx",
     "*FenceActorTx",
-    "*SnapshotTx"
+    "*SnapshotTx",
+    "Validate"
    ]
   },
   "identitylifecycle": {},
   "illusion": {
    "herorecommend": [
     "*HeroRecommendSourceTx"
+   ],
+   "operatorgrant": [
+    "*ResetOperatorIllusion"
    ]
   },
   "inscription": {
@@ -1825,6 +1840,9 @@
   "oneonone": {
    "herorecommend": [
     "*HeroRecommendSourceTx"
+   ],
+   "operatorgrant": [
+    "*ResetOperatorOneOnOne"
    ],
    "playerdisplay": [
     "*ReadCatalogDisplayOriginsTx"
@@ -2428,7 +2446,11 @@
     "*CoherentHeroInputsTx"
    ]
   },
-  "summon": {},
+  "summon": {
+   "operatorgrant": [
+    "*ResetOperatorSummonFree"
+   ]
+  },
   "topfloor": {
    "herorecommend": [
     "*HeroRecommendSourceTx"
@@ -2438,6 +2460,9 @@
    ],
    "memoir": [
     "*MarchCandidatesTx"
+   ],
+   "operatorgrant": [
+    "*ResetOperatorTopFloor"
    ],
    "publicprofile": [
     "*PublicHistoryTx"
@@ -2509,6 +2534,9 @@
   "worldboss": {
    "activitydirectory": [
     "*Project"
+   ],
+   "operatorgrant": [
+    "*ResetOperatorWorldBoss"
    ]
   }
  },
@@ -3777,7 +3805,8 @@
     "*PrepareGluePurchaseTx",
     "*PrepareMaterialDebitTx",
     "*PrepareMaterialExchangeTx",
-    "*ReadDormPlayerStateTx"
+    "*ReadDormPlayerStateTx",
+    "Validate"
    ],
    "interface:dormhouse.BackfillHeroPort": [
     "*ListHeroRootPlayerIDsTx",
@@ -4936,7 +4965,8 @@
     "*PrepareTx",
     "*ReadFunctionEligibilityTx",
     "*RecordTx",
-    "*SnapshotTx"
+    "*SnapshotTx",
+    "Validate"
    ],
    "interface:illusion.Heroes": [
     "*OverlayMID1"
@@ -4975,6 +5005,7 @@
     "*ProfileTx"
    ],
    "store:kernelstore": [
+    "*FindTx",
     "*PutTx"
    ],
    "workplace": [
@@ -5489,7 +5520,8 @@
     "*ReadDisplayEntitlementsTx",
     "*RecordTx",
     "*SnapshotTx",
-    "LockFrameStackOwnershipTx"
+    "LockFrameStackOwnershipTx",
+    "Validate"
    ],
    "interface:oneonone.Roster": [
     "*OverlayMID1"
@@ -5509,6 +5541,7 @@
     "*ProfileTx"
    ],
    "store:kernelstore": [
+    "*FindTx",
     "*PutTx"
    ],
    "workplace": [
@@ -5555,11 +5588,17 @@
    ]
   },
   "operatorgrant": {
+   "arena": [
+    "*ResetOperatorArenaDaily"
+   ],
    "campaign": [
     "*ResetOperatorCampaignDaily"
    ],
    "dailyconsume": [
     "*ResetOperatorDailyBuys"
+   ],
+   "dormhouse": [
+    "*ResetOperatorDormGlue"
    ],
    "i5": [
     "*AdminGrant",
@@ -5571,6 +5610,12 @@
     "*ResetOperatorOccultTickets",
     "*ResetOperatorSkillPoints",
     "IsPermanentGrantRefusal"
+   ],
+   "illusion": [
+    "*ResetOperatorIllusion"
+   ],
+   "oneonone": [
+    "*ResetOperatorOneOnOne"
    ],
    "operator": [
     "*InsertBulkTx",
@@ -5588,6 +5633,15 @@
    "store:i4store": [
     "*AllPlayerIDsTx",
     "*ServerPlayerIDsTx"
+   ],
+   "summon": [
+    "*ResetOperatorSummonFree"
+   ],
+   "topfloor": [
+    "*ResetOperatorTopFloor"
+   ],
+   "worldboss": [
+    "*ResetOperatorWorldBoss"
    ]
   },
   "operatormedia": {},
@@ -6597,7 +6651,8 @@
     "*PrepareTx",
     "*RecordTx",
     "*SettleGrantTx",
-    "*SnapshotTx"
+    "*SnapshotTx",
+    "Validate"
    ],
    "store:contentstore": [
     "*ActiveRevision",
@@ -6642,7 +6697,8 @@
     "*ReadFunctionEligibilityTx",
     "*RecordTx",
     "*SnapshotTx",
-    "LockFrameStackOwnershipTx"
+    "LockFrameStackOwnershipTx",
+    "Validate"
    ],
    "interface:topfloor.OwnedHeroReader": [
     "*ListHeroesTx"
@@ -6767,7 +6823,8 @@
     "*DebitMaterialCostTx",
     "*DeliverTx",
     "*FenceActorTx",
-    "*SnapshotTx"
+    "*SnapshotTx",
+    "Validate"
    ],
    "interface:worldboss.Heroes": [
     "*OverlayMID1"
@@ -6791,6 +6848,7 @@
     "*ProfileTx"
    ],
    "store:kernelstore": [
+    "*FindTx",
     "*PutTx"
    ]
   }

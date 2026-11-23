@@ -901,7 +901,7 @@
   },
   {
    "callees": 16,
-   "callers": 3,
+   "callers": 4,
    "mids": 39,
    "name": "arena",
    "path": "internal/application/arena",
@@ -1108,7 +1108,7 @@
   },
   {
    "callees": 13,
-   "callers": 3,
+   "callers": 4,
    "mids": 19,
    "name": "dormhouse",
    "path": "internal/application/dormhouse",
@@ -1315,7 +1315,7 @@
   },
   {
    "callees": 18,
-   "callers": 1,
+   "callers": 2,
    "mids": 17,
    "name": "illusion",
    "path": "internal/application/illusion",
@@ -1405,7 +1405,7 @@
   },
   {
    "callees": 13,
-   "callers": 3,
+   "callers": 4,
    "mids": 10,
    "name": "oneonone",
    "path": "internal/application/oneonone",
@@ -1440,7 +1440,7 @@
    "tables": 0
   },
   {
-   "callees": 6,
+   "callees": 13,
    "callers": 0,
    "mids": 0,
    "name": "operatorgrant",
@@ -1747,7 +1747,7 @@
   },
   {
    "callees": 7,
-   "callers": 0,
+   "callers": 1,
    "mids": 5,
    "name": "summon",
    "path": "internal/application/summon",
@@ -1756,7 +1756,7 @@
   },
   {
    "callees": 16,
-   "callers": 5,
+   "callers": 6,
    "mids": 23,
    "name": "topfloor",
    "path": "internal/application/topfloor",
@@ -1774,7 +1774,7 @@
   },
   {
    "callees": 12,
-   "callers": 1,
+   "callers": 2,
    "mids": 5,
    "name": "worldboss",
    "path": "internal/application/worldboss",

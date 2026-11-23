@@ -67,6 +67,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/identitystore"
+	"gxb.local/backend/v2/internal/adapters/postgres/illusionstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/inscriptionstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/libraryforumstore"
@@ -91,6 +92,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/socialrelationstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/spiritstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/summonstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/topfloorstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/undeliveredstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/worldbossstore"
 	"gxb.local/backend/v2/internal/adapters/publicpresentation"
@@ -641,7 +643,16 @@ func main() {
 	startOperator(ctx, runner, registry.Handlers(), registry.Reads(), registry.Modules(), operatorVersionReply, otaAfterCommit{Root: cfg.OTARoot, ReconcileSettings: otaSettingsSync.Reconcile, Serving: otaServing})
 	dailyCounterReset := dailyconsume.Service{Store: dailyconsumestore.Store{}, Runner: runner, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}}
 	campaignCounterReset := appcampaign.Mode{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}, Store: campaignstore.Store{}, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}}
-	startOperatorBulkJob(ctx, pool, operatorgrant.Applier{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: operatorstore.Store{}, Grants: i5svc, Mail: i5svc, DailyBuys: dailyCounterReset, CampaignDaily: campaignCounterReset, OccultTickets: i5svc, SkillPoints: i5svc, Catalogue: operatorCatalogue, LineCap: grantLineCap})
+	resetTimed := appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}
+	resetReceiptRead := kernelstore.Reader{Queryer: pool}
+	topFloorCounterReset := apptopfloor.Service{Timed: resetTimed, Store: topfloorstore.Store{}, Content: contentDB, Receipts: receipts, ReceiptRead: resetReceiptRead}
+	oneOnOneCounterReset := apponeonone.Service{Timed: resetTimed, Store: oneononestore.Store{}, Content: contentDB, Receipts: receipts, ReceiptRead: resetReceiptRead}
+	worldBossCounterReset := appworldboss.Mode{Timed: resetTimed, Store: worldbossstore.Store{}, Receipts: receipts, ReceiptRead: resetReceiptRead}
+	illusionCounterReset := appillusion.Mode{Timed: resetTimed, Store: illusionstore.Store{}, Receipts: receipts, ReceiptRead: resetReceiptRead}
+	dormGlueCounterReset := appdorm.Service{Timed: resetTimed, GluePurchases: dormstore.Store{}, Receipts: receipts, ReceiptRead: resetReceiptRead}
+	arenaCounterReset := apparena.Service{Timed: resetTimed, Store: arenastore.Store{}, Content: contentDB, Receipts: receipts, ReceiptRead: resetReceiptRead}
+	summonCounterReset := appsummon.Mode{Timed: resetTimed, Store: summonstore.Store{}, Content: contentDB, Receipts: receipts, ReceiptRead: resetReceiptRead}
+	startOperatorBulkJob(ctx, pool, operatorgrant.Applier{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: operatorstore.Store{}, Grants: i5svc, Mail: i5svc, DailyBuys: dailyCounterReset, CampaignDaily: campaignCounterReset, TopFloor: topFloorCounterReset, OneOnOne: oneOnOneCounterReset, WorldBoss: worldBossCounterReset, Illusion: illusionCounterReset, DormGlue: dormGlueCounterReset, ArenaDaily: arenaCounterReset, SummonFree: summonCounterReset, OccultTickets: i5svc, SkillPoints: i5svc, Catalogue: operatorCatalogue, LineCap: grantLineCap})
 	clientLogs, journal := startClientLog(ctx, pool, authority, cfg.ClientLogURL, retentionPolicies.RetentionDays, txMetrics, mux, handlerConcurrency("GXB_CLIENT_LOG_MAX_CONCURRENT", 4, poolConnections))
 	dailyReset := dailyreset.Service{Markers: dailyresetstore.Store{Queryer: pool}, Counters: itemsEnergy.Counters}
 	boot := stockruntime.BootstrapDispatcher{Bootstrap: bootstrap, Tracker: tracker, LogURLs: clientLogs, DailyReset: dailyReset}

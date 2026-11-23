@@ -15,6 +15,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/operatorstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/worldbossstore"
 	app "gxb.local/backend/v2/internal/application/campaign"
 	"gxb.local/backend/v2/internal/application/dailyconsume"
 	gen "gxb.local/backend/v2/internal/application/generation"
@@ -349,16 +350,18 @@ func TestI11A_M12ABulkResetOverThreePlayersNative(t *testing.T) {
 	for _, player := range players {
 		m12aSeedDailyCounts(t, p, int64(player), at, dailyconsume.Counts{dailyconsume.CounterBuyEnergy: {Period: day, Used: 1}})
 		m12aUpsertScalar(t, p, int64(player), "occult_ticket", 0, at)
+		exec(t, p, `INSERT INTO worldboss_players(player_id,logical_server_id,challenged_day,day,attempts,bought,swept_day,best_hit,best_hit_at,updated_at) VALUES($1,1,0,$2,0,3,0,0,0,$3)`, int64(player), day, at)
 	}
 
 	raw, err := json.Marshal(map[string]any{
 		"target":   map[string]any{"player_ids": []int64{int64(players[0]), int64(players[1]), int64(players[2])}},
-		"counters": []string{operatorgrant.CounterDailyBuys, operatorgrant.CounterOccultTickets},
+		"counters": []string{operatorgrant.CounterDailyBuys, operatorgrant.CounterOccultTickets, operatorgrant.CounterWorldBoss},
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	command, err := operator.NewCommand(operatorgrant.CommandResetCounters, operator.Envelope{Principal: "m12a-native", Role: operator.RoleRoot, Scope: "global", Reason: "M12a bulk reset", SemanticKey: "m12a-bulk-1"}, raw)
+	bulkKey := "m12a-bulk-" + uuid().String()
+	command, err := operator.NewCommand(operatorgrant.CommandResetCounters, operator.Envelope{Principal: "m12a-native", Role: operator.RoleRoot, Scope: "global", Reason: "M12a bulk reset", SemanticKey: bulkKey}, raw)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -377,6 +380,7 @@ func TestI11A_M12ABulkResetOverThreePlayersNative(t *testing.T) {
 		Store:         operatorstore.Store{},
 		DailyBuys:     m12aDailyService(p),
 		OccultTickets: m12aI5Service(p),
+		WorldBoss:     m12bWorldBossService(p),
 	}
 	finished, err := applier.ApplyPending(ctx)
 	if err != nil {
@@ -385,7 +389,7 @@ func TestI11A_M12ABulkResetOverThreePlayersNative(t *testing.T) {
 	if finished != 1 {
 		t.Fatalf("finished targets = %d", finished)
 	}
-	target, err := (operatorstore.Store{}).ReadBulkTx(ctx, p, "m12a-bulk-1")
+	target, err := (operatorstore.Store{}).ReadBulkTx(ctx, p, bulkKey)
 	if err != nil || target == nil {
 		t.Fatalf("bulk target: %v", err)
 	}
@@ -403,6 +407,13 @@ func TestI11A_M12ABulkResetOverThreePlayersNative(t *testing.T) {
 		}
 		if tickets.Tickets != 2 {
 			t.Fatalf("player %d occult tickets = %d", player, tickets.Tickets)
+		}
+		bought, _, err := (worldbossstore.Store{}).ReadPlayerTx(ctx, p, player)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if bought.Bought != 0 || bought.Attempts != 5 {
+			t.Fatalf("player %d world boss = %+v", player, bought)
 		}
 	}
 }

@@ -755,17 +755,17 @@ function actionButton(label, primary, identifier) {
 }
 
 const resetCounterChoices = [
-  { name: "daily_buys", label: "Daily buys (stamina, gold, skill points, trials)", available: true },
-  { name: "campaign_daily", label: "Campaign daily raids and elite resets", available: true },
-  { name: "top_floor", label: "Top-floor ticket buys", available: false },
-  { name: "one_on_one", label: "One-on-one ticket buys", available: false },
-  { name: "world_boss", label: "World boss buys", available: false },
-  { name: "illusion", label: "Illusion buys", available: false },
-  { name: "dorm_glue", label: "Dorm glue buys", available: false },
-  { name: "arena_daily", label: "Arena daily fights", available: false },
-  { name: "summon_free", label: "Free summons", available: false },
-  { name: "occult_tickets", label: "Sorcery War tickets", available: true },
-  { name: "skill_points", label: "Skill points", available: true },
+  { name: "daily_buys", label: "Daily buys (stamina, gold, skill points, trials)" },
+  { name: "campaign_daily", label: "Campaign daily raids and elite resets" },
+  { name: "top_floor", label: "Top-floor ticket buys" },
+  { name: "one_on_one", label: "One-on-one ticket buys" },
+  { name: "world_boss", label: "World boss buys" },
+  { name: "illusion", label: "Illusion buys" },
+  { name: "dorm_glue", label: "Dorm glue buys" },
+  { name: "arena_daily", label: "Arena daily fights" },
+  { name: "summon_free", label: "Free summons" },
+  { name: "occult_tickets", label: "Sorcery War tickets" },
+  { name: "skill_points", label: "Skill points" },
 ];
 const unbuiltResetFeatures = ["Incubus buys", "Treasure team SP", "Worship", "Crusade", "Soul box", "Goblin", "Black market"];
 const resetBulkPollMilliseconds = 1500;
@@ -803,15 +803,12 @@ function buildResetCounters() {
     box.type = "checkbox";
     box.className = "form-check-input";
     box.id = "reset-counter-" + choice.name;
-    box.disabled = !choice.available;
     const text = document.createElement("span");
     text.className = "form-check-label";
-    text.textContent = choice.available ? choice.label : choice.label + " (coming soon)";
+    text.textContent = choice.label;
     label.append(box, text);
     countersFieldset.append(label);
-    if (choice.available) {
-      checkboxes.push({ name: choice.name, label: choice.label, box });
-    }
+    checkboxes.push({ name: choice.name, label: choice.label, box });
   }
   const unbuilt = paragraph("hint", "Not available (feature not built): " + unbuiltResetFeatures.join(", ") + ".");
 
