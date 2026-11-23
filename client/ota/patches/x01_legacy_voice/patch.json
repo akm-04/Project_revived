@@ -1,0 +1,9 @@
+{
+  "target": "app/common/tables/HeroTable.lua",
+  "stock_sha256": "5293207486e52a8dad959b48ea0c90680a335e9144c362d5e9b342b9fd6cef60",
+  "kind": "insert_before_final_return",
+  "anchor": "return var_0_2",
+  "insert": "overlay.lua",
+  "substitutions": {},
+  "origin": "x01-sound legacy voice toggle, 2026-11-23, owner-approved design; redirects hero voice paths to sound/legacy2018/ when cc.UserDefault gxb_legacy_voice is on"
+}

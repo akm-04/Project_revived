@@ -1,0 +1,9 @@
+{
+  "target": "app/windows/SwitchItem.lua",
+  "stock_sha256": "f2267637840195814d7e526d80f4159ade02ebd6edca1048aa976434ae6c5a30",
+  "kind": "insert_before_final_return",
+  "anchor": "return var_0_0",
+  "insert": "overlay_settings.lua",
+  "substitutions": {},
+  "origin": "x01-sound legacy voice toggle, 2026-11-23; adds a 2018-voice switch cloned from the auto-standby row"
+}
