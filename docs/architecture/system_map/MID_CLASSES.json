@@ -28812,7 +28812,7 @@
    "isolation": [
     {
      "file": "internal/adapters/stockruntime/activity_dispatcher.go",
-     "line": 82,
+     "line": 83,
      "value": "repeatable_read"
     }
    ],
@@ -28820,7 +28820,7 @@
    "read_only": [
     {
      "file": "internal/adapters/stockruntime/activity_dispatcher.go",
-     "line": 82,
+     "line": 83,
      "value": "true"
     }
    ],
@@ -28828,7 +28828,7 @@
    "retry": [
     {
      "file": "internal/adapters/stockruntime/activity_dispatcher.go",
-     "line": 82,
+     "line": 83,
      "value": "1"
     }
    ],
@@ -28839,7 +28839,7 @@
      "file": "internal/adapters/stockruntime/activity_dispatcher.go",
      "function": "ActivityDispatcher.list",
      "isolation": "repeatable_read",
-     "line": 82,
+     "line": 83,
      "read_only": "true",
      "retry": "1"
     }
@@ -29383,7 +29383,7 @@
    "isolation": [
     {
      "file": "internal/adapters/stockruntime/activity_dispatcher.go",
-     "line": 101,
+     "line": 102,
      "value": "repeatable_read"
     }
    ],
@@ -29391,7 +29391,7 @@
    "read_only": [
     {
      "file": "internal/adapters/stockruntime/activity_dispatcher.go",
-     "line": 101,
+     "line": 102,
      "value": "true"
     }
    ],
@@ -29399,7 +29399,7 @@
    "retry": [
     {
      "file": "internal/adapters/stockruntime/activity_dispatcher.go",
-     "line": 101,
+     "line": 102,
      "value": "1"
     }
    ],
@@ -29410,7 +29410,7 @@
      "file": "internal/adapters/stockruntime/activity_dispatcher.go",
      "function": "ActivityDispatcher.lookup",
      "isolation": "repeatable_read",
-     "line": 101,
+     "line": 102,
      "read_only": "true",
      "retry": "1"
     }

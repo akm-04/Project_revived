@@ -45,8 +45,14 @@ func TestActivityMID234UnknownFailsClosedWithoutSentinel(t *testing.T) {
 	r, _ := appactivity.NewRegistry(nil, nil)
 	d := ActivityDispatcher{Authority: httpAuthority{actorForHTTP(t)}, Service: appactivity.Runtime{Directory: appactivity.Directory{Registry: r}}}
 	got := d.Dispatch(context.Background(), activityReq(234, map[string]any{"activity_id": int64(1032)}, time.Unix(10, 0).UTC()))
-	if got.HTTPStatus == 200 || got.Body["table_id"] != nil {
+	if got.HTTPStatus != 409 || got.Body["table_id"] != nil {
 		t.Fatalf("fabricated sentinel: %+v", got)
+	}
+	if got.Body["error_code"] != unprovenRefusalCode {
+		t.Fatalf("error_code=%#v", got.Body["error_code"])
+	}
+	if got.Cause == nil || got.Cause.Error() != "activity 1032 is not in the directory" {
+		t.Fatalf("cause=%v", got.Cause)
 	}
 }
 
