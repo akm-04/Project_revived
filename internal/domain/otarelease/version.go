@@ -40,6 +40,12 @@ func (v Version) String() string {
 	return fmt.Sprintf("%d.%d.%d", v.Major, v.Minor, v.Patch)
 }
 
+// SameLine reports whether both versions keep the client's major.minor line;
+// a changed major.minor reads as a new APK, not an OTA (G23).
+func (v Version) SameLine(other Version) bool {
+	return v.Major == other.Major && v.Minor == other.Minor
+}
+
 // Compare orders versions numerically like the client's compareVersion
 // (UpdateScene_64.lua:184-201), so 1.631.10 sorts above 1.631.9.
 func (v Version) Compare(other Version) int {

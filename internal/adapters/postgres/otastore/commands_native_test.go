@@ -230,6 +230,61 @@ func TestOTACommandLifecycleThroughRealStore(t *testing.T) {
 	}
 }
 
+// l3RefusalCode asserts a refused outcome and returns its stable code.
+func l3RefusalCode(t *testing.T, outcome operator.Outcome) string {
+	t.Helper()
+	if outcome.State != operator.StateRefused {
+		t.Fatalf("outcome = %s %s, want a refusal", outcome.State, outcome.Result)
+	}
+	var refusal operator.Refusal
+	if err := json.Unmarshal(outcome.Result, &refusal); err != nil {
+		t.Fatal(err)
+	}
+	return refusal.Code
+}
+
+// TestRegisterBuildKeepsTheLaneLineThroughTheRealStore proves G23 on the direct
+// backend register path: the lane's line is the active release's major.minor,
+// else the highest BUILT one, forward and rollback alike.
+func TestRegisterBuildKeepsTheLaneLineThroughTheRealStore(t *testing.T) {
+	pool := l3Pool(t)
+	versions := []string{"9.340.0", "9.340.1", "9.340.2", "9.341.1", "9.339.9"}
+	resetL3Releases(t, pool, versions)
+	first := l3BuildRequest(t, "9.340.1", "code")
+	sameLineForward := l3BuildRequest(t, "9.340.2", "code")
+	crossLineForward := l3BuildRequest(t, "9.341.1", "code")
+	crossLineRollback := l3BuildRequest(t, "9.339.9", "code")
+	crossLineRollback.Rollback = true
+	sameLineRollback := l3BuildRequest(t, "9.340.0", "code")
+	sameLineRollback.Rollback = true
+	bus := l3Bus(pool, l3Root(t, first, sameLineForward, crossLineForward, crossLineRollback, sameLineRollback))
+
+	if outcome := l3Execute(t, bus, l3Command(t, "ota.register_build", nil, first)); outcome.State != operator.StateApplied {
+		t.Fatalf("register first: %s %s", outcome.State, outcome.Result)
+	}
+	if code := l3RefusalCode(t, l3Execute(t, bus, l3Command(t, "ota.register_build", nil, crossLineForward))); code != appota.CodeBuildVersionNotNext {
+		t.Fatalf("cross-line forward without an active release: %s", code)
+	}
+	if outcome := l3Execute(t, bus, l3Command(t, "ota.register_build", nil, sameLineForward)); outcome.State != operator.StateApplied {
+		t.Fatalf("same-line forward: %s %s", outcome.State, outcome.Result)
+	}
+	revision := l3Revision(t, pool)
+	if outcome := l3Execute(t, bus, l3Command(t, "ota.publish", &revision, map[string]string{"version": "9.340.1"})); outcome.State != operator.StateApplied {
+		t.Fatalf("publish first: %s %s", outcome.State, outcome.Result)
+	}
+	if code := l3RefusalCode(t, l3Execute(t, bus, l3Command(t, "ota.register_build", nil, crossLineRollback))); code != appota.CodeBuildVersionNotNext {
+		t.Fatalf("cross-line rollback beside the active release: %s", code)
+	}
+	rollback := l3Execute(t, bus, l3Command(t, "ota.register_build", nil, sameLineRollback))
+	if rollback.State != operator.StateApplied {
+		t.Fatalf("same-line rollback: %s %s", rollback.State, rollback.Result)
+	}
+	var result appota.BuildResult
+	if err := json.Unmarshal(rollback.Result, &result); err != nil || !result.Rollback || result.Warning == "" {
+		t.Fatalf("rollback result=%s err=%v", rollback.Result, err)
+	}
+}
+
 func TestPublishNeedsTheGlobalRevisionAcrossACatalogPublish(t *testing.T) {
 	pool := l3Pool(t)
 	versions := []string{"9.320.1", "9.320.2", "9.320.3"}

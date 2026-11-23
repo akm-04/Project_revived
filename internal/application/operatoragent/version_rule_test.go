@@ -44,6 +44,53 @@ func TestResolveBuildVersionIncrementsOnlyTheLastComponent(t *testing.T) {
 	}
 }
 
+func TestResolveBuildVersionKeepsTheLaneLineOnEveryPath(t *testing.T) {
+	activeLine := "1.631.7"
+	withActive := otaStatusReply{}
+	withActive.Active.Code = &activeLine
+	for _, acknowledgement := range []bool{false, true} {
+		for _, other := range []string{"1.600.5", "1.632.1", "2.631.1"} {
+			_, err := resolveBuildVersion(withActive, domain.LaneCode, other, acknowledgement)
+			var refusal *Refusal
+			if !errors.As(err, &refusal) || refusal.Code != CodeBuildVersionNotNext {
+				t.Fatalf("active %s, typed %s acknowledgement=%t: %v", activeLine, other, acknowledgement, err)
+			}
+			if !strings.Contains(refusal.Message, "keep 1.631 and change only the last number") {
+				t.Fatalf("refusal does not name the line: %q", refusal.Message)
+			}
+		}
+	}
+	noActive := statusWith("", "1.631.3")
+	for _, acknowledgement := range []bool{false, true} {
+		for _, other := range []string{"1.600.1", "1.632.1"} {
+			_, err := resolveBuildVersion(noActive, domain.LaneCode, other, acknowledgement)
+			var refusal *Refusal
+			if !errors.As(err, &refusal) || refusal.Code != CodeBuildVersionNotNext {
+				t.Fatalf("built line, typed %s acknowledgement=%t: %v", other, acknowledgement, err)
+			}
+		}
+	}
+	if version, err := resolveBuildVersion(withActive, domain.LaneCode, "1.631.1", true); err != nil || version.String() != "1.631.1" {
+		t.Fatalf("same-line rollback = %v err=%v", version, err)
+	}
+	if version, err := resolveBuildVersion(withActive, domain.LaneCode, "1.631.20", false); err != nil || version.String() != "1.631.20" {
+		t.Fatalf("same-line forward = %v err=%v", version, err)
+	}
+}
+
+func TestResolveBuildVersionRefusesTheLastIntegerOverflow(t *testing.T) {
+	status := statusWith("", "1.631.9223372036854775807")
+	_, err := resolveBuildVersion(status, domain.LaneCode, "", false)
+	var refusal *Refusal
+	if !errors.As(err, &refusal) || refusal.Code != CodeBuildVersionInvalid {
+		t.Fatalf("auto-next at the maximum integer: %v", err)
+	}
+	version, err := resolveBuildVersion(status, domain.LaneCode, "1.631.9223372036854775807", false)
+	if err != nil || version.String() != "1.631.9223372036854775807" {
+		t.Fatalf("typed maximum = %v err=%v", version, err)
+	}
+}
+
 func TestResolveBuildVersionUsesActiveAndBuiltReleases(t *testing.T) {
 	status := statusWith("1.631.3")
 	version, err := resolveBuildVersion(status, domain.LaneCode, "", false)

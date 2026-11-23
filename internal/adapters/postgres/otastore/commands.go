@@ -57,12 +57,13 @@ const lockLane = `SELECT COALESCE(jsonb_agg(jsonb_build_object(
 FROM (
 	SELECT version,lane,state,package_files,total_size,md5,sha256
 	FROM ota_releases
-	WHERE lane=$1 AND (state='ACTIVE' OR version=$2)
+	WHERE lane=$1 AND (state IN ('ACTIVE','BUILT') OR version=$2)
 	ORDER BY version FOR UPDATE
 ) locked`
 
-// LockLaneTx locks the lane's ACTIVE rows and the target version row, ordered
-// by version (the plan's lock order after the bus row).
+// LockLaneTx locks the lane's ACTIVE and BUILT rows and the target version row,
+// ordered by version (the plan's lock order after the bus row). The BUILT rows
+// carry the lane's line when nothing is active (G23).
 func (Store) LockLaneTx(ctx context.Context, transaction tx.Tx, lane otarelease.Lane, version string) ([]otarelease.RawRelease, error) {
 	if transaction == nil || lane == "" || version == "" {
 		return nil, errInvalid

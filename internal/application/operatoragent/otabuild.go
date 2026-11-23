@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"net/url"
 	"path/filepath"
 
@@ -137,9 +138,10 @@ func (build Build) readStatus(ctx context.Context) (otaStatusReply, error) {
 
 // resolveBuildVersion applies G23 (amends G14): an empty version is the lane's
 // next last-component increment over its highest built-or-active release. A
-// typed version keeps the client's x.y.z comparison rule; the active number is
-// refused, and a lower number is a rollback that needs the acknowledgement.
-// Stage never publishes.
+// typed version keeps the client's x.y.z comparison rule and the lane's
+// major.minor on every path, forward or rollback; the active number is refused,
+// and a lower number is a rollback that needs the acknowledgement. Stage never
+// publishes.
 func resolveBuildVersion(status otaStatusReply, lane domain.Lane, requested string, rollback bool) (domain.Version, error) {
 	var supplied domain.Version
 	hasSupplied := requested != ""
@@ -151,6 +153,18 @@ func resolveBuildVersion(status otaStatusReply, lane domain.Lane, requested stri
 		supplied = parsed
 	}
 	highest, exists := status.highestVersion(lane)
+	active, hasActive := status.activeVersion(lane)
+	if hasSupplied && exists {
+		// G23: the lane's line is the active release's x.y, else the highest
+		// built one; a changed line reads as a new APK to the client.
+		line := highest
+		if hasActive {
+			line = active
+		}
+		if !supplied.SameLine(line) {
+			return domain.Version{}, Refuse(CodeBuildVersionNotNext, fmt.Sprintf("keep %d.%d and change only the last number", line.Major, line.Minor))
+		}
+	}
 	if rollback && !hasSupplied {
 		return domain.Version{}, Refuse(CodeBuildVersionInvalid, "a rollback needs the version to step down to")
 	}
@@ -158,9 +172,11 @@ func resolveBuildVersion(status otaStatusReply, lane domain.Lane, requested stri
 		if !exists {
 			return domain.Version{}, Refuse(CodeBuildNoBaseline, "the lane has no built or active release; supply the first version")
 		}
+		if highest.Patch == math.MaxInt64 {
+			return domain.Version{}, Refuse(CodeBuildVersionInvalid, "the lane's last number is at the maximum integer; supply a version by hand")
+		}
 		return domain.Version{Major: highest.Major, Minor: highest.Minor, Patch: highest.Patch + 1}, nil
 	}
-	active, hasActive := status.activeVersion(lane)
 	if hasActive {
 		switch supplied.Compare(active) {
 		case 0:
@@ -180,11 +196,6 @@ func resolveBuildVersion(status otaStatusReply, lane domain.Lane, requested stri
 			return domain.Version{}, Refuse(CodeBuildVersionInvalid, "a rollback version must be below the lane's current "+highest.String())
 		}
 		return supplied, nil
-	}
-	// G23: any higher last component is allowed; the first two stay, because a
-	// changed major.minor reads as a new APK to the client, not an OTA.
-	if exists && (supplied.Major != highest.Major || supplied.Minor != highest.Minor) {
-		return domain.Version{}, Refuse(CodeBuildVersionNotNext, fmt.Sprintf("keep %d.%d and change only the last number", highest.Major, highest.Minor))
 	}
 	return supplied, nil
 }
