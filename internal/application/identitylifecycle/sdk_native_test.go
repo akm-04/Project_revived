@@ -151,15 +151,25 @@ func TestSDKLoginIssuesIndependentSessionCredentials(t *testing.T) {
 func TestSDKImportCountsPasswordRecordsOutsideTheIterationBounds(t *testing.T) {
 	pool := sdkTestPool(t)
 	ctx := context.Background()
-	uid := newSDKTestUUID(t)
+	highUID, lowUID := newSDKTestUUID(t), newSDKTestUUID(t)
+	first, err := ids.NewUUID()
+	if err != nil {
+		t.Fatal(err)
+	}
+	highLogin, lowLogin := "iter-high-"+first.String(), "iter-low-"+first.String()
 	document := fmt.Sprintf(`{
-  "accounts": [{"uid": %q, "type": "normal", "username": "iter-one"}],
-  "logins": [
-    {"normalized": "iter-high", "display": "iter-high", "account_uid": %q, "algorithm": "pbkdf2-sha256", "iterations": %d, "salt": "00000000000000000000000000000000", "hash": "0000000000000000000000000000000000000000000000000000000000000000"},
-    {"normalized": "iter-low", "display": "iter-low", "account_uid": %q, "algorithm": "pbkdf2-sha256", "iterations": %d, "salt": "00000000000000000000000000000000", "hash": "0000000000000000000000000000000000000000000000000000000000000000"}
-  ],
-  "devices": []
-}`, uid, uid, appidentity.SDKPasswordMaximumIterations+1, uid, appidentity.SDKPasswordMinimumIterations-1)
+  "version": 1,
+  "accounts": {
+    %q: {"uid": %q, "login": %q, "username": %q, "account_type": "normal", "created_at": 1760000000,
+      "password": {"algorithm": "pbkdf2-sha256", "iterations": %d, "salt": "00000000000000000000000000000000", "hash": "0000000000000000000000000000000000000000000000000000000000000000"}, "session": null},
+    %q: {"uid": %q, "login": %q, "username": %q, "account_type": "normal", "created_at": 1760000000,
+      "password": {"algorithm": "pbkdf2-sha256", "iterations": %d, "salt": "00000000000000000000000000000000", "hash": "0000000000000000000000000000000000000000000000000000000000000000"}, "session": null}
+  },
+  "logins": {%q: %q, %q: %q},
+  "devices": {}
+}`, highUID, highUID, highLogin, highLogin, appidentity.SDKPasswordMaximumIterations+1,
+		lowUID, lowUID, lowLogin, lowLogin, appidentity.SDKPasswordMinimumIterations-1,
+		highLogin, highUID, lowLogin, lowUID)
 	input, err := appidentity.DecodeSDKImport(strings.NewReader(document))
 	if err != nil {
 		t.Fatalf("an out-of-range iteration record refused the whole import: %v", err)
@@ -169,8 +179,47 @@ func TestSDKImportCountsPasswordRecordsOutsideTheIterationBounds(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if result.AccountsImported != 1 || result.LoginsImported != 0 || result.Conflicts != 2 {
+	if result.AccountsImported != 2 || result.LoginsImported != 0 || result.Conflicts != 2 {
 		t.Fatalf("import = %+v, want two iteration conflicts", result)
+	}
+}
+
+func TestSDKImportCountsLoginsWithoutAnAccountOrPassword(t *testing.T) {
+	pool := sdkTestPool(t)
+	ctx := context.Background()
+	normalUID, guestUID, missingUID := newSDKTestUUID(t), newSDKTestUUID(t), newSDKTestUUID(t)
+	first, err := ids.NewUUID()
+	if err != nil {
+		t.Fatal(err)
+	}
+	normalLogin := "import-normal-" + first.String()
+	_, _, salt, hash, err := appidentity.HashSDKPassword("secret-1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	document := fmt.Sprintf(`{
+  "version": 1,
+  "accounts": {
+    %q: {"uid": %q, "login": %q, "username": %q, "account_type": "normal", "created_at": 1760000000,
+      "password": {"algorithm": "pbkdf2-sha256", "iterations": 200000, "salt": %q, "hash": %q}, "session": null},
+    %q: {"uid": %q, "login": null, "username": %q, "account_type": "guest", "created_at": 1760000001,
+      "password": null, "session": null}
+  },
+  "logins": {%q: %q, %q: %q, %q: %q},
+  "devices": {}
+}`, normalUID, normalUID, normalLogin, normalLogin, salt, hash, guestUID, guestUID, "guest-"+guestUID[:8],
+		normalLogin, normalUID, "guest-login-"+first.String(), guestUID, "missing-login-"+first.String(), missingUID)
+	input, err := appidentity.DecodeSDKImport(strings.NewReader(document))
+	if err != nil {
+		t.Fatal(err)
+	}
+	importer := appidentity.SDKImporter{Runner: tx.Runner{DB: pool}, Store: identitystore.Store{}, Operations: operation.Factory{Clock: clock.System{}}}
+	result, err := importer.Import(ctx, input)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.AccountsImported != 2 || result.LoginsImported != 1 || result.Conflicts != 2 {
+		t.Fatalf("import = %+v, want two unresolved logins", result)
 	}
 }
 
@@ -323,13 +372,11 @@ func TestSDKAnonymousByCookieDeviceAndNewGuest(t *testing.T) {
 }
 
 type sdkImportFixture struct {
-	document      string
-	normal1       string
-	password1     string
-	guest         string
-	guestLogin    string
-	guestPassword string
-	device        string
+	document  string
+	normal1   string
+	password1 string
+	guest     string
+	device    string
 }
 
 func buildSDKImportFixture(t *testing.T) sdkImportFixture {
@@ -339,7 +386,7 @@ func buildSDKImportFixture(t *testing.T) sdkImportFixture {
 	if err != nil {
 		t.Fatal(err)
 	}
-	password1, password2, guestPassword := "import-one-"+first.String(), "import-two-"+first.String(), "import-guest-"+first.String()
+	password1, password2 := "import-one-"+first.String(), "import-two-"+first.String()
 	_, _, salt1, hash1, err := appidentity.HashSDKPassword(password1)
 	if err != nil {
 		t.Fatal(err)
@@ -348,34 +395,28 @@ func buildSDKImportFixture(t *testing.T) sdkImportFixture {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, _, salt3, hash3, err := appidentity.HashSDKPassword(guestPassword)
-	if err != nil {
-		t.Fatal(err)
-	}
 	device := "device-" + newSDKTestUUID(t)
 	normal1 := "import-" + first.String() + "-one"
 	normal2 := "import-" + first.String() + "-two"
-	guestLogin := "import-" + first.String() + "-guest"
 	document := fmt.Sprintf(`{
-  "accounts": [
-    {"uid": %q, "type": "normal", "username": %q},
-    {"uid": %q, "type": "normal", "username": %q},
-    {"uid": %q, "type": "guest", "username": %q}
-  ],
-  "logins": [
-    {"normalized": %q, "display": %q, "account_uid": %q, "algorithm": "pbkdf2-sha256", "iterations": 200000, "salt": %q, "hash": %q},
-    {"normalized": %q, "display": %q, "account_uid": %q, "algorithm": "pbkdf2-sha256", "iterations": 200000, "salt": %q, "hash": %q},
-    {"normalized": %q, "display": %q, "account_uid": %q, "algorithm": "pbkdf2-sha256", "iterations": 200000, "salt": %q, "hash": %q}
-  ],
-  "devices": [
-    {"device_id": %q, "account_uid": %q}
-  ]
-}`, account1, "import-one", account2, "import-two", guest, "guest-"+guest[:8],
-		appidentity.NormalizeSDKLogin(normal1), normal1, account1, salt1, hash1,
-		appidentity.NormalizeSDKLogin(normal2), normal2, account2, salt2, hash2,
-		appidentity.NormalizeSDKLogin(guestLogin), guestLogin, guest, salt3, hash3,
+  "version": 1,
+  "accounts": {
+    %q: {"uid": %q, "login": %q, "username": %q, "account_type": "normal", "created_at": 1760000000,
+      "password": {"algorithm": "pbkdf2-sha256", "iterations": 200000, "salt": %q, "hash": %q}, "session": null},
+    %q: {"uid": %q, "login": %q, "username": %q, "account_type": "normal", "created_at": 1760000000,
+      "password": {"algorithm": "pbkdf2-sha256", "iterations": 200000, "salt": %q, "hash": %q}, "session": null},
+    %q: {"uid": %q, "login": null, "username": %q, "account_type": "guest", "created_at": 1760000001,
+      "password": null, "session": null}
+  },
+  "logins": {%q: %q, %q: %q},
+  "devices": {%q: %q}
+}`, account1, account1, normal1, normal1, salt1, hash1,
+		account2, account2, normal2, normal2, salt2, hash2,
+		guest, guest, "guest-"+guest[:8],
+		appidentity.NormalizeSDKLogin(normal1), account1,
+		appidentity.NormalizeSDKLogin(normal2), account2,
 		device, guest)
-	return sdkImportFixture{document: document, normal1: normal1, password1: password1, guest: guest, guestLogin: guestLogin, guestPassword: guestPassword, device: device}
+	return sdkImportFixture{document: document, normal1: normal1, password1: password1, guest: guest, device: device}
 }
 
 func TestSDKImportIsIdempotentAndVerifiesTheImportedPassword(t *testing.T) {
@@ -392,7 +433,7 @@ func TestSDKImportIsIdempotentAndVerifiesTheImportedPassword(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if first.AccountsImported != 3 || first.LoginsImported != 3 || first.DevicesImported != 1 || first.Conflicts != 0 {
+	if first.AccountsImported != 3 || first.LoginsImported != 2 || first.DevicesImported != 1 || first.Conflicts != 0 {
 		t.Fatalf("first import = %+v", first)
 	}
 	second, err := importer.Import(ctx, input)
@@ -400,7 +441,7 @@ func TestSDKImportIsIdempotentAndVerifiesTheImportedPassword(t *testing.T) {
 		t.Fatal(err)
 	}
 	if second.AccountsImported != 0 || second.LoginsImported != 0 || second.DevicesImported != 0 ||
-		second.AccountsSkipped != 3 || second.LoginsSkipped != 3 || second.DevicesSkipped != 1 || second.Conflicts != 0 {
+		second.AccountsSkipped != 3 || second.LoginsSkipped != 2 || second.DevicesSkipped != 1 || second.Conflicts != 0 {
 		t.Fatalf("second import = %+v", second)
 	}
 	session, err := service.Login(ctx, appidentity.SDKLoginRequest{Login: fixture.normal1, Password: fixture.password1})
@@ -422,9 +463,5 @@ func TestSDKImportIsIdempotentAndVerifiesTheImportedPassword(t *testing.T) {
 	}
 	if guest.UID != fixture.guest {
 		t.Fatalf("imported device account = %q, want %q", guest.UID, fixture.guest)
-	}
-	// The guest account has a stored login record, but a guest never logs in.
-	if _, err := service.Login(ctx, appidentity.SDKLoginRequest{Login: fixture.guestLogin, Password: fixture.guestPassword}); !errors.Is(err, appidentity.ErrSDKInvalidAccount) {
-		t.Fatalf("guest login err = %v", err)
 	}
 }
