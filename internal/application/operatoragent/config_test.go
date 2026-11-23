@@ -53,6 +53,27 @@ func TestLoadConfigAcceptsLoopback(t *testing.T) {
 	}
 }
 
+func TestConfigMediaPathRoundTrip(t *testing.T) {
+	root := writeAgentConfig(t, `{"listen":"127.0.0.1:8090","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"},"media_path":"/srv/pictures"}`)
+	config, err := LoadConfig(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if config.MediaPath != "/srv/pictures" {
+		t.Fatalf("media_path = %q", config.MediaPath)
+	}
+	if err := SaveConfig(root, config); err != nil {
+		t.Fatal(err)
+	}
+	reloaded, err := LoadConfig(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if reloaded.MediaPath != "/srv/pictures" {
+		t.Fatalf("reloaded media_path = %q", reloaded.MediaPath)
+	}
+}
+
 func TestLoadConfigStockSource(t *testing.T) {
 	root := t.TempDir()
 	clientTree := filepath.Join(root, "client")

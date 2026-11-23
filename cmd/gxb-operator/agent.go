@@ -46,14 +46,16 @@ func runAgent(root string, args []string) error {
 		return err
 	}
 	tokens := &operatoragent.TokenHolder{}
+	mediaPath := operatormedia.MediaPath(root, config.MediaPath)
 	backend := processcontrol.New(processcontrol.Options{
-		Binary:        config.Backend.Binary,
-		EnvFile:       config.Backend.EnvFile,
-		OperatorAddr:  config.Backend.OperatorAddr,
-		OTARoot:       config.OTARoot,
-		LogsDirectory: logsDirectory,
-		ReadyTimeout:  config.Backend.ReadyTimeout(),
-		StopGrace:     config.Backend.StopGrace(),
+		Binary:          config.Backend.Binary,
+		EnvFile:         config.Backend.EnvFile,
+		OperatorAddr:    config.Backend.OperatorAddr,
+		OTARoot:         config.OTARoot,
+		LogsDirectory:   logsDirectory,
+		ReadyTimeout:    config.Backend.ReadyTimeout(),
+		StopGrace:       config.Backend.StopGrace(),
+		NoticeMediaRoot: mediaPath,
 	})
 	operator := operatorclient.New(config.Backend.OperatorAddr, tokens)
 	logService := &operatoragent.LogService{
@@ -89,7 +91,7 @@ func runAgent(root string, args []string) error {
 		}
 	}
 	buildOperation := operatoragent.Build{Config: config, Operator: operator, Operations: operations}
-	settings := &operatoragent.SettingsService{Root: root, OTARoot: config.OTARoot}
+	settings := &operatoragent.SettingsService{Root: root, OTARoot: config.OTARoot, MediaPath: mediaPath}
 	pings := operatoragent.NewPingSampler(operatoragent.PingPlan{
 		Config: config,
 		ServerURL: func() (string, string) {
@@ -100,10 +102,6 @@ func runAgent(root string, args []string) error {
 			return values.ServerURL, values.ServerURLSource
 		},
 	}, time.Now)
-	mediaPath, err := operatormedia.MediaPath(root)
-	if err != nil {
-		return err
-	}
 	publicEngineURL, _ := operatoragent.ReadEnvValue(config.Backend.EnvFile, operatoragent.PublicEngineURLKey)
 	media := &operatormedia.Service{MediaPath: mediaPath, PublicEngineURL: publicEngineURL}
 	moduleCatalog := operatoragent.ModuleCatalog{Backend: operator, Local: []appoperator.Module{operatoragent.ServerModule(), operatoragent.AgentOTAModule(), operatoragent.AgentSettingsModule(), operatoragent.DashboardModule(), operatoragent.BackupModule(), operatoragent.AgentLogsModule()}}

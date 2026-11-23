@@ -8,9 +8,7 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -30,7 +28,6 @@ const (
 	fetchTimeout    = 15 * time.Second
 	maxRedirects    = 3
 	mediaDirectory  = "media"
-	agentConfigName = "agent.json"
 )
 
 const (
@@ -82,28 +79,17 @@ type StoredItem struct {
 	Bytes int64  `json:"bytes"`
 }
 
-// MediaPath reads media_path from <root>/agent.json. The GXB_NOTICE_MEDIA_ROOT
-// environment variable wins, so the agent and the backend it starts share one
-// folder without a config change. The field is read tolerantly so the agent
-// works before the strict Config gains it; an unset value means <root>/media.
-func MediaPath(root string) (string, error) {
-	if configured := strings.TrimSpace(os.Getenv("GXB_NOTICE_MEDIA_ROOT")); configured != "" {
-		return configured, nil
+// MediaPath resolves the notice picture folder: the agent process's
+// GXB_NOTICE_MEDIA_ROOT, then the configured agent.json media_path, then
+// <root>/media.
+func MediaPath(root, configured string) string {
+	if fromEnvironment := strings.TrimSpace(os.Getenv("GXB_NOTICE_MEDIA_ROOT")); fromEnvironment != "" {
+		return fromEnvironment
 	}
-	contents, err := os.ReadFile(filepath.Join(root, agentConfigName))
-	if err != nil {
-		return "", fmt.Errorf("read %s: %w", agentConfigName, err)
+	if configured = strings.TrimSpace(configured); configured != "" {
+		return configured
 	}
-	var document struct {
-		MediaPath string `json:"media_path"`
-	}
-	if err := json.Unmarshal(contents, &document); err != nil {
-		return "", fmt.Errorf("%s: %w", agentConfigName, err)
-	}
-	if document.MediaPath != "" {
-		return document.MediaPath, nil
-	}
-	return filepath.Join(root, mediaDirectory), nil
+	return filepath.Join(root, mediaDirectory)
 }
 
 // ImportURL downloads one http or https picture and stores it.
@@ -333,10 +319,31 @@ func checkRedirect(request *http.Request, via []*http.Request) error {
 	return nil
 }
 
+// nonPublicAddressRanges holds ranges net.IP's Is* helpers do not cover:
+// 100.64.0.0/10 is the shared address space (Tailscale and carrier NAT) and
+// 0.0.0.0/8 is this network.
+var nonPublicAddressRanges = []*net.IPNet{
+	mustParseCIDR("100.64.0.0/10"),
+	mustParseCIDR("0.0.0.0/8"),
+}
+
+func mustParseCIDR(raw string) *net.IPNet {
+	_, network, err := net.ParseCIDR(raw)
+	if err != nil {
+		panic("invalid address range " + raw)
+	}
+	return network
+}
+
 // publicAddress is false for every address an operator must not be steered to.
 func publicAddress(address net.IP) bool {
 	if address == nil {
 		return false
+	}
+	for _, network := range nonPublicAddressRanges {
+		if network.Contains(address) {
+			return false
+		}
 	}
 	return !address.IsLoopback() &&
 		!address.IsPrivate() &&

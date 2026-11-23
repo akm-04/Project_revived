@@ -22,6 +22,8 @@ const (
 	defaultStopGrace    = 15 * time.Second
 	readinessInterval   = 50 * time.Millisecond
 	readinessTimeout    = time.Second
+
+	noticeMediaRootKey = "GXB_NOTICE_MEDIA_ROOT"
 )
 
 // Options are the process-control settings taken from agent.json.
@@ -35,6 +37,9 @@ type Options struct {
 	LogsDirectory string
 	ReadyTimeout  time.Duration
 	StopGrace     time.Duration
+	// NoticeMediaRoot is the resolved G41 media folder; it becomes
+	// GXB_NOTICE_MEDIA_ROOT unless the env file already sets that key.
+	NoticeMediaRoot string
 }
 
 // Controller owns the single backend child.
@@ -147,7 +152,35 @@ func (controller *Controller) environment(closed bool, token string) ([]string, 
 	if controller.options.OTARoot != "" {
 		environment = append(environment, "GXB_OTA_ROOT="+controller.options.OTARoot)
 	}
+	environment = appendNoticeMediaRoot(environment, entries, controller.options.NoticeMediaRoot)
 	return appendListener(environment, closed), nil
+}
+
+// appendNoticeMediaRoot sets exactly one GXB_NOTICE_MEDIA_ROOT: the env file
+// value when it sets the key, else the resolved folder. Inherited and env-file
+// duplicates are dropped so the child reads the value chosen here.
+func appendNoticeMediaRoot(environment, envFileEntries []string, resolved string) []string {
+	value, found := "", false
+	for _, entry := range envFileEntries {
+		if configured, isSet := strings.CutPrefix(entry, noticeMediaRootKey+"="); isSet {
+			value, found = configured, true
+			break
+		}
+	}
+	if !found {
+		value = resolved
+	}
+	filtered := make([]string, 0, len(environment)+1)
+	for _, entry := range environment {
+		if strings.HasPrefix(entry, noticeMediaRootKey+"=") {
+			continue
+		}
+		filtered = append(filtered, entry)
+	}
+	if !found && value == "" {
+		return filtered
+	}
+	return append(filtered, noticeMediaRootKey+"="+value)
 }
 
 // appendListener drops every inherited or env-file GXB_GAME_LISTENER entry and

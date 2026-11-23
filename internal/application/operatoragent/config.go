@@ -96,6 +96,8 @@ type Config struct {
 	ToolchainPath string `json:"toolchain_path,omitempty"`
 	// AppRepackPath is the S3b APK build folder (app_repack).
 	AppRepackPath string `json:"app_repack_path,omitempty"`
+	// MediaPath is the G41 notice picture folder; empty means <agent root>/media.
+	MediaPath string `json:"media_path,omitempty"`
 }
 
 // BackupDirectory resolves the snapshot folder: the configured path, else

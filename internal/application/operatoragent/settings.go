@@ -35,6 +35,8 @@ type SettingsService struct {
 	// os.Getenv. Tests set it to prove the fallback without touching the
 	// process environment.
 	LookupEnvironment func(string) string
+	// MediaPath is the resolved G41 notice picture folder the agent serves.
+	MediaPath string
 }
 
 // AgentSettingsValues is the read the Settings page and the dashboard show.
@@ -49,6 +51,7 @@ type AgentSettingsValues struct {
 	BackupPath       string                    `json:"backup_path"`
 	AppRepackPath    string                    `json:"app_repack_path"`
 	ToolchainPath    string                    `json:"toolchain_path"`
+	MediaPath        string                    `json:"media_path"`
 	OTASettings      domainotarelease.Settings `json:"ota_settings"`
 }
 
@@ -104,6 +107,7 @@ func (service SettingsService) Values() (AgentSettingsValues, error) {
 		BackupPath:       config.BackupDirectory(service.Root),
 		AppRepackPath:    config.AppRepackPath,
 		ToolchainPath:    config.ToolchainPath,
+		MediaPath:        service.MediaPath,
 		OTASettings:      otaSettings,
 	}, nil
 }
