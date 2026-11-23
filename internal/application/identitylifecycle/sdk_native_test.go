@@ -216,6 +216,57 @@ func TestSDKConcurrentDoubleRegisterKeepsOneAccount(t *testing.T) {
 	}
 }
 
+type sdkPasswordSwapStore struct {
+	identitystore.Store
+	swap func(context.Context)
+	once sync.Once
+}
+
+func (store *sdkPasswordSwapStore) FindSDKLoginTx(ctx context.Context, query tx.Queryer, normalized string) (*appidentity.SDKLoginRecord, error) {
+	record, err := store.Store.FindSDKLoginTx(ctx, query, normalized)
+	if err != nil || record == nil {
+		return record, err
+	}
+	store.once.Do(func() { store.swap(ctx) })
+	return record, nil
+}
+
+// TestSDKLoginRefusesWhenThePasswordChangesBetweenReadAndIssue changes the
+// stored password while the first read transaction is still open; the issuing
+// transaction re-reads a different salt and hash and must refuse.
+func TestSDKLoginRefusesWhenThePasswordChangesBetweenReadAndIssue(t *testing.T) {
+	pool := sdkTestPool(t)
+	ctx := context.Background()
+	login := newSDKTestLogin(t)
+	normalized := appidentity.NormalizeSDKLogin(login)
+	if _, err := sdkTestService(pool).Register(ctx, appidentity.SDKRegisterRequest{Login: login, Password: "secret-1", Repassword: "secret-1"}); err != nil {
+		t.Fatal(err)
+	}
+	_, _, salt, hash, err := appidentity.HashSDKPassword("changed-1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	store := &sdkPasswordSwapStore{swap: func(swapCtx context.Context) {
+		if _, err := pool.Raw().Exec(swapCtx, `UPDATE sdk_logins SET password_salt=$2, password_hash=$3, password_changed_at=now() WHERE login_normalized=$1`, normalized, salt, hash); err != nil {
+			t.Errorf("swap the stored password: %v", err)
+		}
+	}}
+	service := appidentity.SDKService{Runner: tx.Runner{DB: pool}, Store: store, DigestSecret: sdkDigestSecret, Operations: operation.Factory{Clock: clock.System{}}}
+	if _, err := service.Login(ctx, appidentity.SDKLoginRequest{Login: login, Password: "secret-1"}); !errors.Is(err, appidentity.ErrSDKInvalidAccount) {
+		t.Fatalf("login after the password changed err = %v, want invalid account", err)
+	}
+	var sessions int
+	if err := pool.QueryRow(ctx, `SELECT count(*) FROM account_sessions WHERE account_id=(SELECT account_id FROM sdk_logins WHERE login_normalized=$1)`, normalized).Scan(&sessions); err != nil {
+		t.Fatal(err)
+	}
+	if sessions != 0 {
+		t.Fatalf("a session was issued from the stale password record: %d", sessions)
+	}
+	if _, err := service.Login(ctx, appidentity.SDKLoginRequest{Login: login, Password: "changed-1"}); err != nil {
+		t.Fatalf("the changed password was refused: %v", err)
+	}
+}
+
 func TestSDKAnonymousByCookieDeviceAndNewGuest(t *testing.T) {
 	pool := sdkTestPool(t)
 	ctx := context.Background()

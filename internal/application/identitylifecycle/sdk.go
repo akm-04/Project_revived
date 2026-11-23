@@ -251,17 +251,19 @@ func (service SDKService) Register(ctx context.Context, request SDKRegisterReque
 		return SDKRegisterResult{}, err
 	}
 	var out SDKRegisterResult
+	var existing *SDKLoginRecord
 	register := func(insert bool) tx.Body {
 		return func(txctx context.Context, scope tx.Scope) error {
-			if !insert {
-				return service.registerExisting(txctx, scope.Tx, normalized, login, request.Password, &out)
-			}
-			existing, err := service.Store.FindSDKLoginTx(txctx, scope.Tx, normalized)
+			found, err := service.Store.FindSDKLoginTx(txctx, scope.Tx, normalized)
 			if err != nil {
 				return err
 			}
-			if existing != nil {
-				return sdkRegisterExistingRecord(txctx, existing, login, request.Password, &out)
+			if found != nil {
+				existing = found
+				return nil
+			}
+			if !insert {
+				return ErrSDKInvalidRegistration
 			}
 			account := SDKAccountRecord{ID: accountID, UID: accountID.UUID().String(), Kind: SDKAccountKindNormal, Username: login, Active: true, CreatedAt: op.StartedAt}
 			if err := service.Store.InsertSDKAccountTx(txctx, scope.Tx, account); err != nil {
@@ -281,39 +283,33 @@ func (service SDKService) Register(ctx context.Context, request SDKRegisterReque
 	}
 	_, err = service.Runner.Run(ctx, op, DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true}, nil, register(true))
 	if errors.Is(err, errSDKLoginRace) {
+		existing = nil
 		_, err = service.Runner.Run(ctx, op, DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true}, nil, register(false))
 	}
 	if err != nil {
 		return SDKRegisterResult{}, err
 	}
+	if existing != nil {
+		// The read is committed; derive outside it so a slow derivation never
+		// holds a pooled connection.
+		return sdkRegisterExistingRecord(ctx, existing, login, request.Password)
+	}
 	return out, nil
 }
 
-func (service SDKService) registerExisting(ctx context.Context, query tx.Queryer, normalized, login, password string, out *SDKRegisterResult) error {
-	existing, err := service.Store.FindSDKLoginTx(ctx, query, normalized)
-	if err != nil {
-		return err
-	}
-	if existing == nil {
-		return ErrSDKInvalidRegistration
-	}
-	return sdkRegisterExistingRecord(ctx, existing, login, password, out)
-}
-
 // sdkRegisterExistingRecord answers the existing-login branch without writing.
-func sdkRegisterExistingRecord(ctx context.Context, existing *SDKLoginRecord, login, password string, out *SDKRegisterResult) error {
+func sdkRegisterExistingRecord(ctx context.Context, existing *SDKLoginRecord, login, password string) (SDKRegisterResult, error) {
 	if !existing.Account.Active {
-		return ErrSDKAccountExists
+		return SDKRegisterResult{}, ErrSDKAccountExists
 	}
 	valid, err := verifySDKPasswordBounded(ctx, existing.Algorithm, existing.Iterations, existing.SaltHex, existing.HashHex, password)
 	if err != nil {
-		return err
+		return SDKRegisterResult{}, err
 	}
 	if !valid {
-		return ErrSDKAccountExists
+		return SDKRegisterResult{}, ErrSDKAccountExists
 	}
-	*out = SDKRegisterResult{UID: existing.Account.UID, LoginEmail: login}
-	return nil
+	return SDKRegisterResult{UID: existing.Account.UID, LoginEmail: login}, nil
 }
 
 // Login verifies a normal login and issues one new session.
@@ -330,23 +326,44 @@ func (service SDKService) Login(ctx context.Context, request SDKLoginRequest) (S
 	if err != nil {
 		return SDKIdentity{}, err
 	}
+	// The record is read in a short transaction, the password is derived with no
+	// transaction open (a login burst must not hold the pool), and the session is
+	// issued in a second transaction only if the verified record is unchanged.
+	var read *SDKLoginRecord
+	_, err = service.Runner.Run(ctx, op, DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true}, nil, func(txctx context.Context, scope tx.Scope) error {
+		existing, err := service.Store.FindSDKLoginTx(txctx, scope.Tx, normalized)
+		if err != nil {
+			return err
+		}
+		read = existing
+		return nil
+	})
+	if err != nil {
+		return SDKIdentity{}, err
+	}
+	if read == nil || !read.Account.Active || read.Account.Kind != SDKAccountKindNormal {
+		if err := burnSDKPasswordDerivation(ctx); err != nil {
+			return SDKIdentity{}, err
+		}
+		return SDKIdentity{}, ErrSDKInvalidAccount
+	}
+	valid, err := verifySDKPasswordBounded(ctx, read.Algorithm, read.Iterations, read.SaltHex, read.HashHex, request.Password)
+	if err != nil {
+		return SDKIdentity{}, err
+	}
+	if !valid {
+		return SDKIdentity{}, ErrSDKInvalidAccount
+	}
+
 	var out SDKIdentity
 	_, err = service.Runner.Run(ctx, op, DefaultProfile(), tx.Options{Isolation: tx.ReadCommitted}, tx.RetryPolicy{MaxAttempts: 3, RetryDefiniteAbort: true}, nil, func(txctx context.Context, scope tx.Scope) error {
 		existing, err := service.Store.FindSDKLoginTx(txctx, scope.Tx, normalized)
 		if err != nil {
 			return err
 		}
-		if existing == nil || !existing.Account.Active || existing.Account.Kind != SDKAccountKindNormal {
-			if err := burnSDKPasswordDerivation(txctx); err != nil {
-				return err
-			}
-			return ErrSDKInvalidAccount
-		}
-		valid, err := verifySDKPasswordBounded(txctx, existing.Algorithm, existing.Iterations, existing.SaltHex, existing.HashHex, request.Password)
-		if err != nil {
-			return err
-		}
-		if !valid {
+		// shortcut: the re-read is not FOR UPDATE, so a password change between this read and the session insert is not fenced; upgrade when a password-change command exists and takes the account lock.
+		if existing == nil || !existing.Account.Active || existing.Account.Kind != SDKAccountKindNormal ||
+			existing.SaltHex != read.SaltHex || existing.HashHex != read.HashHex {
 			return ErrSDKInvalidAccount
 		}
 		session, err := service.issueSession(txctx, scope.Tx, existing.Account, op.StartedAt)

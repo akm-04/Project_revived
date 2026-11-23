@@ -5,11 +5,18 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"strings"
 	"testing"
 	"time"
 
 	"golang.org/x/crypto/pbkdf2"
+
+	"gxb.local/backend/v2/internal/domain/identity"
+	"gxb.local/backend/v2/internal/foundation/clock"
+	"gxb.local/backend/v2/internal/foundation/ids"
+	"gxb.local/backend/v2/internal/foundation/operation"
+	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
 func TestNormalizeSDKLoginTrimsAndCaseFolds(t *testing.T) {
@@ -222,6 +229,195 @@ func TestDecodeSDKImportRefusesBrokenRecords(t *testing.T) {
 			}
 		})
 	}
+}
+
+// sdkSlotHold parks every derivation slot so a test can tell whether the
+// derivation blocked on a slot while a transaction was still open.
+type sdkSlotHold struct {
+	held int
+}
+
+func (hold *sdkSlotHold) holdAll() {
+	for hold.held < SDKPasswordDerivationSlots {
+		sdkPasswordDerivations <- struct{}{}
+		hold.held++
+	}
+}
+
+func (hold *sdkSlotHold) releaseAll() {
+	for hold.held > 0 {
+		<-sdkPasswordDerivations
+		hold.held--
+	}
+}
+
+type sdkProbeBeginner struct {
+	commits chan struct{}
+}
+
+func (beginner sdkProbeBeginner) Begin(context.Context, tx.Options) (tx.Tx, error) {
+	return sdkProbeTx{commits: beginner.commits}, nil
+}
+
+type sdkProbeTx struct {
+	commits chan struct{}
+}
+
+func (sdkProbeTx) QueryRow(context.Context, string, ...any) tx.Row { return sdkProbeRow{} }
+func (sdkProbeTx) Exec(context.Context, string, ...any) (tx.CommandTag, error) {
+	return sdkProbeTag{}, nil
+}
+func (transaction sdkProbeTx) Commit(context.Context) error {
+	transaction.commits <- struct{}{}
+	return nil
+}
+func (sdkProbeTx) Rollback(context.Context) error { return nil }
+
+type sdkProbeRow struct{}
+
+func (sdkProbeRow) Scan(...any) error { return errors.New("unused probe row") }
+
+type sdkProbeTag struct{}
+
+func (sdkProbeTag) RowsAffected() int64 { return 1 }
+
+type sdkProbeStore struct {
+	login *SDKLoginRecord
+	hold  *sdkSlotHold
+	reads int
+}
+
+func (store *sdkProbeStore) FindSDKLoginTx(context.Context, tx.Queryer, string) (*SDKLoginRecord, error) {
+	store.reads++
+	if store.reads == 1 && store.hold != nil {
+		store.hold.holdAll()
+	}
+	return store.login, nil
+}
+
+func (store *sdkProbeStore) InsertSessionTx(context.Context, tx.Tx, identity.Session) error {
+	return nil
+}
+
+func (store *sdkProbeStore) InsertSessionCredentialTx(context.Context, tx.Tx, identity.SessionCredential) error {
+	return nil
+}
+
+func (sdkProbeStore) InsertSDKAccountTx(context.Context, tx.Tx, SDKAccountRecord) error {
+	return errors.New("unused probe account insert")
+}
+
+func (sdkProbeStore) InsertSDKAccountIfAbsentTx(context.Context, tx.Tx, SDKAccountRecord) (bool, error) {
+	return false, errors.New("unused probe account insert")
+}
+
+func (sdkProbeStore) FindSDKAccountByUIDTx(context.Context, tx.Queryer, string) (*SDKAccountRecord, error) {
+	return nil, errors.New("unused probe account lookup")
+}
+
+func (sdkProbeStore) InsertSDKLoginTx(context.Context, tx.Tx, SDKLoginRecord) (bool, error) {
+	return false, errors.New("unused probe login insert")
+}
+
+func (sdkProbeStore) FindSDKAccountByDeviceTx(context.Context, tx.Queryer, string) (*SDKAccountRecord, error) {
+	return nil, errors.New("unused probe device lookup")
+}
+
+func (sdkProbeStore) InsertSDKDeviceTx(context.Context, tx.Tx, string, identity.AccountID) (bool, error) {
+	return false, errors.New("unused probe device insert")
+}
+
+func (sdkProbeStore) FindLiveSDKAccountBySIDDigestTx(context.Context, tx.Queryer, identity.CredentialDigest, time.Time) (*SDKAccountRecord, error) {
+	return nil, errors.New("unused probe sid lookup")
+}
+
+func sdkProbeRecord(t *testing.T) *SDKLoginRecord {
+	t.Helper()
+	accountUUID, err := ids.NewUUID()
+	if err != nil {
+		t.Fatal(err)
+	}
+	accountID, err := identity.AccountIDFrom(accountUUID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	algorithm, iterations, salt, hash, err := HashSDKPassword("secret-1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	return &SDKLoginRecord{
+		Normalized: "player-one",
+		Display:    "player-one",
+		Account:    SDKAccountRecord{ID: accountID, UID: accountUUID.String(), Kind: SDKAccountKindNormal, Username: "player-one", Active: true},
+		Algorithm:  algorithm,
+		Iterations: iterations,
+		SaltHex:    salt,
+		HashHex:    hash,
+	}
+}
+
+// TestSDKPasswordVerificationRunsOutsideTheTransaction parks every derivation
+// slot inside the first read. The read transaction must commit anyway, which is
+// only possible when the derivation is not started under it.
+func TestSDKPasswordVerificationRunsOutsideTheTransaction(t *testing.T) {
+	record := sdkProbeRecord(t)
+
+	run := func(t *testing.T, call func(SDKService) error) {
+		t.Helper()
+		hold := &sdkSlotHold{}
+		t.Cleanup(hold.releaseAll)
+		commits := make(chan struct{}, 8)
+		service := SDKService{
+			Runner:       tx.Runner{DB: sdkProbeBeginner{commits: commits}},
+			Store:        &sdkProbeStore{login: record, hold: hold},
+			DigestSecret: []byte("0123456789abcdef"),
+			Operations:   operation.Factory{Clock: clock.System{}},
+		}
+		done := make(chan error, 1)
+		go func() { done <- call(service) }()
+		select {
+		case <-commits:
+		case <-time.After(5 * time.Second):
+			hold.releaseAll()
+			<-done
+			t.Fatal("the read transaction did not commit before the password derivation")
+		}
+		select {
+		case err := <-done:
+			t.Fatalf("the call finished while every derivation slot was held: %v", err)
+		case <-time.After(50 * time.Millisecond):
+		}
+		hold.releaseAll()
+		if err := <-done; err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	t.Run("login", func(t *testing.T) {
+		run(t, func(service SDKService) error {
+			issued, err := service.Login(context.Background(), SDKLoginRequest{Login: "player-one", Password: "secret-1"})
+			if err != nil {
+				return err
+			}
+			if issued.UID != record.Account.UID {
+				return fmt.Errorf("issued uid %q, want %q", issued.UID, record.Account.UID)
+			}
+			return nil
+		})
+	})
+
+	t.Run("register existing login", func(t *testing.T) {
+		run(t, func(service SDKService) error {
+			result, err := service.Register(context.Background(), SDKRegisterRequest{Login: "player-one", Password: "secret-1", Repassword: "secret-1"})
+			if err != nil {
+				return err
+			}
+			if result.UID != record.Account.UID {
+				return fmt.Errorf("existing uid %q, want %q", result.UID, record.Account.UID)
+			}
+			return nil
+		})
+	})
 }
 
 func TestDecodeSDKImportRefusesDuplicateLoginsAndDevices(t *testing.T) {
