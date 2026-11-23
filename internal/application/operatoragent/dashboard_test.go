@@ -52,6 +52,13 @@ func (client fakeDashboardOperator) Read(_ context.Context, name, _ string) (Bac
 	return BackendResponse{Status: 200, Body: []byte(body)}, nil
 }
 
+type fakeSettingsSource struct {
+	values AgentSettingsValues
+	err    error
+}
+
+func (fake fakeSettingsSource) Values() (AgentSettingsValues, error) { return fake.values, fake.err }
+
 func fixedClock() time.Time { return time.Unix(10_000, 0).UTC() }
 
 func TestDashboardSummaryFoldsEverySection(t *testing.T) {
@@ -70,6 +77,7 @@ func TestDashboardSummaryFoldsEverySection(t *testing.T) {
 		Operator:   client,
 		Version:    fakeVersionSource{info: version},
 		PublicURLs: []string{"https://tunnel", "http://192.168.1.2"},
+		Settings:   fakeSettingsSource{values: AgentSettingsValues{ServerURL: "https://game.example", ResPath: "/srv/res", BackupPath: "/srv/backups"}},
 		Backups:    BackupService{Directory: backups},
 		Now:        func() time.Time { return at },
 	}.Summary(context.Background())
@@ -99,6 +107,12 @@ func TestDashboardSummaryFoldsEverySection(t *testing.T) {
 	}
 	if summary.CloudflareMetrics != CloudflareMetricsNotInV2 {
 		t.Fatalf("cloudflare = %q", summary.CloudflareMetrics)
+	}
+	if summary.Settings == nil || summary.Settings.ResPath != "/srv/res" || summary.Settings.BackupPath != "/srv/backups" {
+		t.Fatalf("settings = %+v", summary.Settings)
+	}
+	if len(summary.PublicURLs) != 1 || summary.PublicURLs[0] != "https://game.example" {
+		t.Fatalf("public urls = %v", summary.PublicURLs)
 	}
 }
 

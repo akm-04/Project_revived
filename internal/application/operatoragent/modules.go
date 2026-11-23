@@ -22,6 +22,33 @@ func ServerModule() operator.Module {
 			}},
 			{Name: "server.stop", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Stop the backend process."},
 			{Name: "server.status", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Report whether the backend process is running."},
+			{Name: "server.url.set", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Set the client-facing server URL in the backend env file; the APK must be rebuilt with it.", Fields: []operator.Field{
+				operator.NewField("url", operator.FieldString, true, "absolute http or https address the clients reach"),
+			}},
+		},
+	}
+}
+
+// AgentSettingsModule is the agent's own settings module (G22): the paths in
+// agent.json and the backend URL in its env file. The OTA paths stay in the ota
+// module and are changed through ota.settings.set.
+func AgentSettingsModule() operator.Module {
+	return operator.Module{
+		ID:         "agent",
+		Title:      "Agent settings",
+		Role:       operator.RoleRoot,
+		LogChannel: "agent",
+		Screen:     operator.Screen{Tab: "Settings"},
+		Commands: []operator.CommandSpec{
+			{Name: "agent.settings.set", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Set the agent.json paths; every value is validated and a refused value keeps the old one.", Fields: []operator.Field{
+				operator.NewField("backend_path", operator.FieldString, false, "absolute path of the gxb-api binary"),
+				operator.NewField("backup_path", operator.FieldString, false, "absolute snapshot folder; empty restores <agent root>/backups"),
+				operator.NewField("app_repack_path", operator.FieldString, false, "absolute app_repack folder for the APK build"),
+				operator.NewField("toolchain_path", operator.FieldString, false, "portable tools folder; empty uses the system PATH"),
+			}},
+		},
+		Reads: []operator.Read{
+			{Name: "agent.settings", Help: "Current agent paths, the backend URL and the OTA settings."},
 		},
 	}
 }

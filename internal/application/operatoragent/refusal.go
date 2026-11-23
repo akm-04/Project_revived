@@ -20,6 +20,11 @@ const (
 	CodeBackendBusy        = "AGENT_BACKEND_BUSY"
 	CodeFailed             = "AGENT_FAILED"
 
+	// operator settings refusals (G22): a refused value keeps the old one (F1).
+	CodeSettingsInvalid     = "AGENT_SETTINGS_INVALID"
+	CodeSettingsUnavailable = "AGENT_SETTINGS_UNAVAILABLE"
+	CodeServerURLInvalid    = "AGENT_SERVER_URL_INVALID"
+
 	// log console refusals (C1-C4).
 	CodeLogSourceInvalid      = "AGENT_LOG_SOURCE_INVALID"
 	CodeLogLevelInvalid       = "AGENT_LOG_LEVEL_INVALID"

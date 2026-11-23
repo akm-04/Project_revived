@@ -70,6 +70,9 @@ type Handler struct {
 	// Logs answers the local log sources and the logs.clear command; the client
 	// source is forwarded to the backend read.
 	Logs *operatoragent.LogService
+	// Settings answers the agent.settings read and writes agent.json and the
+	// backend env file locally (G22).
+	Settings *operatoragent.SettingsService
 	// OTARoot holds settings.json, whose res_path the GUI picture route reads.
 	OTARoot string
 	// Listen is the exact host:port the agent listens on; every route refuses
@@ -364,6 +367,14 @@ func (handler Handler) serveCommand(writer http.ResponseWriter, request *http.Re
 		handler.serveLogsClear(writer, request, body)
 		return
 	}
+	if name == "agent.settings.set" {
+		handler.serveAgentSettingsSet(writer, body)
+		return
+	}
+	if name == "server.url.set" {
+		handler.serveServerURLSet(writer, body)
+		return
+	}
 	response, err := handler.Operator.Command(request.Context(), operatoragent.OperatorRequest{
 		Name: name,
 		Envelope: operator.Envelope{
@@ -397,6 +408,10 @@ func (handler Handler) serveRead(writer http.ResponseWriter, request *http.Reque
 		handler.serveLogRead(writer, request, name)
 		return
 	}
+	if name == "agent.settings" {
+		handler.serveAgentSettings(writer)
+		return
+	}
 	response, err := handler.Operator.Read(request.Context(), name, request.URL.RawQuery)
 	if err != nil {
 		handler.writeAgentError(writer, name, err)
@@ -412,6 +427,79 @@ func (handler Handler) serveDashboard(writer http.ResponseWriter, request *http.
 	summary := handler.Dashboard.Summary(request.Context())
 	handler.record("dashboard.summary", "read", "ok", map[string]any{"servers": len(summary.Servers), "events": len(summary.Events)})
 	writeJSON(writer, http.StatusOK, summary)
+}
+
+// serveAgentSettings answers the agent's own settings read; agent.json and the
+// backend env file belong to the agent, so the read never forwards.
+func (handler Handler) serveAgentSettings(writer http.ResponseWriter) {
+	if handler.Settings == nil {
+		writeRefusal(writer, http.StatusServiceUnavailable, operatoragent.CodeFailed, "the agent settings are not configured")
+		return
+	}
+	values, err := handler.Settings.Values()
+	if err != nil {
+		handler.writeAgentError(writer, "agent.settings", err)
+		return
+	}
+	handler.record("agent.settings", "read", "ok", nil)
+	writeJSON(writer, http.StatusOK, values)
+}
+
+// serveAgentSettingsSet writes the agent.json paths; a refused value keeps the
+// old file (F1).
+func (handler Handler) serveAgentSettingsSet(writer http.ResponseWriter, body commandRequest) {
+	if handler.Settings == nil {
+		writeRefusal(writer, http.StatusServiceUnavailable, operatoragent.CodeFailed, "the agent settings are not configured")
+		return
+	}
+	var change operatoragent.AgentSettingsChange
+	if err := decodeCommandPayload(body.Payload, &change); err != nil {
+		writeRefusal(writer, http.StatusConflict, operatoragent.CodeBodyInvalid, err.Error())
+		return
+	}
+	reply, err := handler.Settings.SetAgent(change)
+	if err != nil {
+		handler.writeAgentError(writer, "agent.settings.set", err)
+		return
+	}
+	handler.record("agent.settings.set", "settings", "ok", nil)
+	writeJSON(writer, http.StatusOK, reply)
+}
+
+// serveServerURLSet writes the public engine URL into the backend env file.
+func (handler Handler) serveServerURLSet(writer http.ResponseWriter, body commandRequest) {
+	if handler.Settings == nil {
+		writeRefusal(writer, http.StatusServiceUnavailable, operatoragent.CodeFailed, "the agent settings are not configured")
+		return
+	}
+	var change struct {
+		URL string `json:"url"`
+	}
+	if err := decodeCommandPayload(body.Payload, &change); err != nil {
+		writeRefusal(writer, http.StatusConflict, operatoragent.CodeBodyInvalid, err.Error())
+		return
+	}
+	reply, err := handler.Settings.SetServerURL(change.URL)
+	if err != nil {
+		handler.writeAgentError(writer, "server.url.set", err)
+		return
+	}
+	handler.record("server.url.set", "settings", "ok", nil)
+	writeJSON(writer, http.StatusOK, reply)
+}
+
+// decodeCommandPayload decodes one typed local command payload strictly, so a
+// typo never silently changes a setting.
+func decodeCommandPayload(payload json.RawMessage, target any) error {
+	if len(payload) == 0 {
+		return errors.New("the payload is required")
+	}
+	decoder := json.NewDecoder(bytes.NewReader(payload))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(target); err != nil {
+		return errors.New("the payload does not match the command")
+	}
+	return endOfBody(decoder)
 }
 
 func (handler Handler) serveMaintenance(writer http.ResponseWriter, request *http.Request, publish bool) {

@@ -8,6 +8,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -90,6 +91,8 @@ type Config struct {
 	// ToolchainPath is the P2 portable tools folder; unset means the agent's
 	// own PATH (the system-wide P2 choice).
 	ToolchainPath string `json:"toolchain_path,omitempty"`
+	// AppRepackPath is the S3b APK build folder (app_repack).
+	AppRepackPath string `json:"app_repack_path,omitempty"`
 }
 
 // BackupDirectory resolves the snapshot folder: the configured path, else
@@ -120,6 +123,19 @@ func (config Config) ToolLogRetentionDays() int {
 
 // LoadConfig reads and validates <root>/agent.json.
 func LoadConfig(root string) (Config, error) {
+	config, err := ReadConfig(root)
+	if err != nil {
+		return Config{}, err
+	}
+	if err := config.Validate(); err != nil {
+		return Config{}, err
+	}
+	return config, nil
+}
+
+// ReadConfig reads <root>/agent.json without validating it, so the operator GUI
+// can still show a setting whose folder has gone away (F1).
+func ReadConfig(root string) (Config, error) {
 	path := root + string(os.PathSeparator) + AgentConfigFileName
 	contents, err := os.ReadFile(path)
 	if err != nil {
@@ -134,10 +150,38 @@ func LoadConfig(root string) (Config, error) {
 	if err := jsonbody.EnsureEndOfFile(decoder); err != nil {
 		return Config{}, fmt.Errorf("%s: %w", AgentConfigFileName, err)
 	}
-	if err := config.Validate(); err != nil {
-		return Config{}, err
-	}
 	return config, nil
+}
+
+// SaveConfig replaces <root>/agent.json atomically. The caller validates first;
+// a refused value never reaches this function, so the old file stays.
+func SaveConfig(root string, config Config) error {
+	data, err := json.MarshalIndent(config, "", "  ")
+	if err != nil {
+		return err
+	}
+	temporary, err := os.CreateTemp(root, ".agent-*.json")
+	if err != nil {
+		return fmt.Errorf("write %s: %w", AgentConfigFileName, err)
+	}
+	temporaryName := temporary.Name()
+	cleanup := func() {
+		_ = temporary.Close()
+		_ = os.Remove(temporaryName)
+	}
+	if _, err := temporary.Write(append(data, '\n')); err != nil {
+		cleanup()
+		return err
+	}
+	if err := temporary.Close(); err != nil {
+		_ = os.Remove(temporaryName)
+		return err
+	}
+	if err := os.Rename(temporaryName, filepath.Join(root, AgentConfigFileName)); err != nil {
+		_ = os.Remove(temporaryName)
+		return err
+	}
+	return nil
 }
 
 // Validate enforces the loopback-only rule (I11A_ARCHITECTURE_V1 section 6).
@@ -254,6 +298,101 @@ func isLoopbackAddress(address string) bool {
 	}
 	ip := net.ParseIP(host)
 	return ip != nil && ip.IsLoopback()
+}
+
+// ValidateBackendBinary is the P1 check of the backend path the agent starts:
+// an absolute path to a regular, executable file.
+func ValidateBackendBinary(path string) error {
+	if path == "" {
+		return errors.New("the backend path is required")
+	}
+	if !filepath.IsAbs(path) {
+		return errors.New("the backend path must be absolute")
+	}
+	info, err := os.Stat(path)
+	if err != nil {
+		return errors.New("the backend path does not exist")
+	}
+	if !info.Mode().IsRegular() {
+		return errors.New("the backend path is not a file")
+	}
+	if runtime.GOOS != "windows" && info.Mode()&0o111 == 0 {
+		return errors.New("the backend path is not executable")
+	}
+	return nil
+}
+
+// ReadEnvValue returns the value of one key in the backend env file; a missing
+// file or key is the empty value, so an unset setting never breaks the GUI (F1).
+func ReadEnvValue(path, key string) (string, error) {
+	if path == "" {
+		return "", nil
+	}
+	entries, err := ReadEnvFile(path)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return "", nil
+		}
+		return "", err
+	}
+	prefix := key + "="
+	for _, entry := range entries {
+		if value, found := strings.CutPrefix(entry, prefix); found {
+			return value, nil
+		}
+	}
+	return "", nil
+}
+
+// WriteEnvValue replaces one key in the backend env file and keeps every other
+// line and comment; the file is written atomically so a reader never sees a
+// half-written environment.
+func WriteEnvValue(path, key, value string) error {
+	if path == "" {
+		return errors.New("the backend env file is not configured")
+	}
+	contents, err := os.ReadFile(path)
+	if err != nil {
+		return fmt.Errorf("read env_file: %w", err)
+	}
+	prefix := key + "="
+	lines := strings.Split(strings.ReplaceAll(string(contents), "\r\n", "\n"), "\n")
+	replaced := false
+	for index, line := range lines {
+		if strings.HasPrefix(strings.TrimSpace(line), prefix) {
+			lines[index] = prefix + value
+			replaced = true
+			break
+		}
+	}
+	if !replaced {
+		if len(lines) > 0 && lines[len(lines)-1] == "" {
+			lines = lines[:len(lines)-1]
+		}
+		lines = append(lines, prefix+value, "")
+	}
+	temporary, err := os.CreateTemp(filepath.Dir(path), ".env-*")
+	if err != nil {
+		return err
+	}
+	temporaryName := temporary.Name()
+	cleanup := func() {
+		_ = temporary.Close()
+		_ = os.Remove(temporaryName)
+	}
+	if _, err := temporary.Write([]byte(strings.Join(lines, "\n"))); err != nil {
+		cleanup()
+		return err
+	}
+	if err := temporary.Close(); err != nil {
+		_ = os.Remove(temporaryName)
+		return err
+	}
+	if err := os.Rename(temporaryName, path); err != nil {
+		_ = os.Remove(temporaryName)
+		return err
+	}
+	return nil
 }
 
 // ReadEnvFile returns the KEY=VALUE lines of the backend env file. Comments

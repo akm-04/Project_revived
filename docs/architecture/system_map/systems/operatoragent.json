@@ -43,6 +43,7 @@
    "otabuild_test.go",
    "password_test.go",
    "sessions_test.go",
+   "settings_test.go",
    "toollog_test.go",
    "version_rule_test.go"
   ]

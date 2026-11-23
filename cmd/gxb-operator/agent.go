@@ -85,12 +85,14 @@ func runAgent(root string, args []string) error {
 		}
 	}
 	buildOperation := operatoragent.Build{Config: config, Operator: operator, Operations: operations}
-	moduleCatalog := operatoragent.ModuleCatalog{Backend: operator, Local: []appoperator.Module{operatoragent.ServerModule(), operatoragent.AgentOTAModule(), operatoragent.DashboardModule(), operatoragent.BackupModule(), operatoragent.AgentLogsModule()}}
+	settings := &operatoragent.SettingsService{Root: root, OTARoot: config.OTARoot}
+	moduleCatalog := operatoragent.ModuleCatalog{Backend: operator, Local: []appoperator.Module{operatoragent.ServerModule(), operatoragent.AgentOTAModule(), operatoragent.AgentSettingsModule(), operatoragent.DashboardModule(), operatoragent.BackupModule(), operatoragent.AgentLogsModule()}}
 	dashboard := operatoragent.Dashboard{
 		Backend:    backend,
 		Operator:   operator,
 		Version:    operator,
 		PublicURLs: config.PublicURLs,
+		Settings:   settings,
 		Backups:    backup,
 		Now:        time.Now,
 	}
@@ -108,6 +110,7 @@ func runAgent(root string, args []string) error {
 		Dashboard:   dashboard,
 		ToolLog:     toolLog,
 		Logs:        logService,
+		Settings:    settings,
 		OTARoot:     config.OTARoot,
 		Listen:      config.Listen,
 		Guard:       backendGuard,

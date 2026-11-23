@@ -508,6 +508,7 @@ func TestGUIPagesAreEmbeddedAndServed(t *testing.T) {
 		"guiassets/pages/players.js",
 		"guiassets/pages/rewards.js",
 		"guiassets/pages/server.js",
+		"guiassets/pages/settings.js",
 	}
 	for _, name := range required {
 		contents, err := guiAssets.ReadFile(name)
