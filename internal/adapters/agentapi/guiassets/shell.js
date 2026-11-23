@@ -251,7 +251,14 @@ function renderNav() {
   }
 }
 
-function renderPage() {
+let renderSequence = 0;
+
+// Each page lives in pages/<id>.js and exports renderPage(container, context);
+// a page without a file yet keeps the placeholder, so page leaves never edit
+// this file.
+async function renderPage() {
+  renderSequence += 1;
+  const sequence = renderSequence;
   pageView.replaceChildren();
   backendError.textContent = state.backendError;
   const page = pages.find((candidate) => candidate.id === state.activePage) || pages[0];
@@ -259,7 +266,17 @@ function renderPage() {
     renderAdvanced(pageView, state.modules);
     return;
   }
-  pageView.append(placeholderCard(page.label));
+  const view = await loadPageView(page.id);
+  if (sequence !== renderSequence) {
+    return;
+  }
+  const content = document.createElement("div");
+  pageView.append(content);
+  if (view) {
+    view.renderPage(content, { modules: state.modules, page });
+  } else {
+    content.append(placeholderCard(page.label));
+  }
   const modules = modulesForPage(page);
   if (modules.length === 0) {
     return;
@@ -279,6 +296,15 @@ function renderPage() {
   }
   details.append(body);
   pageView.append(details);
+}
+
+async function loadPageView(pageId) {
+  try {
+    const view = await import(`./pages/${pageId}.js`);
+    return typeof view.renderPage === "function" ? view : null;
+  } catch (error) {
+    return null;
+  }
 }
 
 function modulesForPage(page) {
