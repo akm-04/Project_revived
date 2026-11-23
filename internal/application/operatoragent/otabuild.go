@@ -181,11 +181,10 @@ func resolveBuildVersion(status otaStatusReply, lane domain.Lane, requested stri
 		}
 		return supplied, nil
 	}
-	if exists {
-		next := domain.Version{Major: highest.Major, Minor: highest.Minor, Patch: highest.Patch + 1}
-		if supplied.Compare(next) != 0 {
-			return domain.Version{}, Refuse(CodeBuildVersionNotNext, "the next version is "+next.String())
-		}
+	// G23: any higher last component is allowed; the first two stay, because a
+	// changed major.minor reads as a new APK to the client, not an OTA.
+	if exists && (supplied.Major != highest.Major || supplied.Minor != highest.Minor) {
+		return domain.Version{}, Refuse(CodeBuildVersionNotNext, fmt.Sprintf("keep %d.%d and change only the last number", highest.Major, highest.Minor))
 	}
 	return supplied, nil
 }

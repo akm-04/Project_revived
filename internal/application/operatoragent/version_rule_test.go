@@ -32,11 +32,14 @@ func TestResolveBuildVersionIncrementsOnlyTheLastComponent(t *testing.T) {
 	if _, err := resolveBuildVersion(status, domain.LaneCode, "1.631.4", false); err != nil {
 		t.Fatalf("the computed next was refused: %v", err)
 	}
-	for _, skipped := range []string{"1.634.2", "2.631.2", "1.631.5"} {
-		_, err := resolveBuildVersion(status, domain.LaneCode, skipped, false)
+	if version, err := resolveBuildVersion(status, domain.LaneCode, "1.631.20", false); err != nil || version.String() != "1.631.20" {
+		t.Fatalf("a typed jump ahead = %v err=%v", version, err)
+	}
+	for _, otherLine := range []string{"1.634.2", "2.631.2"} {
+		_, err := resolveBuildVersion(status, domain.LaneCode, otherLine, false)
 		var refusal *Refusal
 		if !errors.As(err, &refusal) || refusal.Code != CodeBuildVersionNotNext {
-			t.Fatalf("%s was accepted or refused with %v", skipped, err)
+			t.Fatalf("%s was accepted or refused with %v", otherLine, err)
 		}
 	}
 }
