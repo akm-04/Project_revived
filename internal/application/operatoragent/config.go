@@ -300,10 +300,6 @@ func isLoopbackAddress(address string) bool {
 	return ip != nil && ip.IsLoopback()
 }
 
-// ReadEnvFile returns the KEY=VALUE lines of the backend env file. Comments
-// (lines whose first non-space character is '#') and blank lines are skipped;
-// the first '=' separates the key from a value that may itself contain '='.
-// Error text never quotes the line, because a line can hold a secret.
 // ValidateBackendBinary is the P1 check of the backend path the agent starts:
 // an absolute path to a regular, executable file.
 func ValidateBackendBinary(path string) error {
@@ -399,6 +395,10 @@ func WriteEnvValue(path, key, value string) error {
 	return nil
 }
 
+// ReadEnvFile returns the KEY=VALUE lines of the backend env file. Comments
+// (lines whose first non-space character is '#') and blank lines are skipped;
+// the first '=' separates the key from a value that may itself contain '='.
+// Error text never quotes the line, because a line can hold a secret.
 func ReadEnvFile(path string) ([]string, error) {
 	contents, err := os.ReadFile(path)
 	if err != nil {
