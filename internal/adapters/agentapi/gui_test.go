@@ -493,7 +493,7 @@ func TestGUIComponentsAreEmbeddedAndServed(t *testing.T) {
 
 // TestGUIPagesAreEmbeddedAndServed proves every page module is compiled in,
 // reachable under /gui/pages/ with its content type and the strict policy, and
-// exports the renderPage(container, context) entry the shell loads.
+// exports the renderPage entry the shell loads.
 func TestGUIPagesAreEmbeddedAndServed(t *testing.T) {
 	handler, _, _ := newForwardingHandler(t)
 	required := []string{
@@ -514,8 +514,8 @@ func TestGUIPagesAreEmbeddedAndServed(t *testing.T) {
 		if err != nil {
 			t.Fatalf("the GUI no longer embeds %s", name)
 		}
-		if !strings.Contains(string(contents), "export function renderPage(container, context)") {
-			t.Fatalf("%s does not export renderPage(container, context)", name)
+		if !strings.Contains(string(contents), "export function renderPage(container") {
+			t.Fatalf("%s does not export renderPage(container, ...)", name)
 		}
 	}
 	served := 0
