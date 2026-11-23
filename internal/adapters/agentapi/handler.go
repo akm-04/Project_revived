@@ -77,6 +77,8 @@ type Handler struct {
 	// Settings answers the agent.settings read and writes agent.json and the
 	// backend env file locally (G22).
 	Settings *operatoragent.SettingsService
+	// Files lists local folders and files for the GUI path picker (G7h).
+	Files *operatoragent.FileBrowser
 	// Pings answers the dashboard.pings read from the agent's sampler (G37).
 	Pings *operatoragent.PingSampler
 	// Media stores notice pictures on this machine and answers their public URL
@@ -469,6 +471,10 @@ func (handler Handler) serveRead(writer http.ResponseWriter, request *http.Reque
 		handler.serveAgentSettings(writer)
 		return
 	}
+	if name == "agent.fs.list" {
+		handler.serveFileList(writer, request)
+		return
+	}
 	response, err := handler.Operator.Read(request.Context(), name, request.URL.RawQuery)
 	if err != nil {
 		handler.writeAgentError(writer, name, err)
@@ -512,6 +518,39 @@ func (handler Handler) serveAgentSettings(writer http.ResponseWriter) {
 	}
 	handler.record("agent.settings", "read", "ok", nil)
 	writeJSON(writer, http.StatusOK, values)
+}
+
+// serveFileList answers the path picker's folder listing; it never forwards,
+// because only the agent's own machine has the folders the GUI shows (G7h).
+func (handler Handler) serveFileList(writer http.ResponseWriter, request *http.Request) {
+	if handler.Files == nil {
+		writeRefusal(writer, http.StatusServiceUnavailable, operatoragent.CodeFailed, "the file browser is not configured")
+		return
+	}
+	values := request.URL.Query()
+	showFiles, err := parseShowFiles(values.Get("show_files"))
+	if err != nil {
+		handler.writeAgentError(writer, "agent.fs.list", err)
+		return
+	}
+	listing, err := handler.Files.List(operatoragent.FileListRequest{Path: values.Get("path"), ShowFiles: showFiles})
+	if err != nil {
+		handler.writeAgentError(writer, "agent.fs.list", err)
+		return
+	}
+	handler.record("agent.fs.list", "read", "ok", map[string]any{"entries": len(listing.Entries)})
+	writeJSON(writer, http.StatusOK, listing)
+}
+
+func parseShowFiles(text string) (bool, error) {
+	if text == "" {
+		return false, nil
+	}
+	value, err := strconv.ParseBool(text)
+	if err != nil {
+		return false, operatoragent.Refuse(operatoragent.CodeBodyInvalid, "show_files must be true or false")
+	}
+	return value, nil
 }
 
 // serveAgentSettingsSet writes the agent.json paths; a refused value keeps the

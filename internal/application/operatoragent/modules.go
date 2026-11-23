@@ -52,6 +52,10 @@ func AgentSettingsModule() operator.Module {
 		},
 		Reads: []operator.Read{
 			{Name: "agent.settings", Help: "Current agent paths, the backend URL and the OTA settings."},
+			{Name: "agent.fs.list", Help: "List the folders, and with show_files the files, of one folder for the path picker; names only.", Fields: []operator.Field{
+				operator.NewField("path", operator.FieldString, false, "absolute folder to list; empty uses the agent root"),
+				operator.NewField("show_files", operator.FieldBool, false, "include files beside the folders"),
+			}},
 		},
 	}
 }

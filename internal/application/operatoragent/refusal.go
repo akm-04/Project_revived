@@ -26,6 +26,11 @@ const (
 	CodeSettingsUnavailable = "AGENT_SETTINGS_UNAVAILABLE"
 	CodeServerURLInvalid    = "AGENT_SERVER_URL_INVALID"
 
+	// file browser refusals (G7h): the path picker lists names only, so a
+	// missing, unreadable or non-folder path is a permanent refusal.
+	CodePathUnreadable = "AGENT_PATH_UNREADABLE"
+	CodePathNotFolder  = "AGENT_PATH_NOT_FOLDER"
+
 	// log console refusals (C1-C4).
 	CodeLogSourceInvalid      = "AGENT_LOG_SOURCE_INVALID"
 	CodeLogLevelInvalid       = "AGENT_LOG_LEVEL_INVALID"
