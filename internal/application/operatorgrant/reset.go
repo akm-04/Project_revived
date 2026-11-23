@@ -51,15 +51,6 @@ var resetCounterOrder = []string{
 	CounterSkillPoints,
 }
 
-// resetCounterAvailable is the M12a set; the rest of the vocabulary is refused
-// "not available yet" until M12b adds its owners.
-var resetCounterAvailable = map[string]bool{
-	CounterDailyBuys:     true,
-	CounterCampaignDaily: true,
-	CounterOccultTickets: true,
-	CounterSkillPoints:   true,
-}
-
 type resetCountersPayload struct {
 	Target   targetPayload `json:"target"`
 	Counters []string      `json:"counters"`
@@ -84,6 +75,41 @@ type OccultTicketsResetOwner interface {
 // SkillPointsResetOwner sets the player's skill points to the privilege cap.
 type SkillPointsResetOwner interface {
 	ResetOperatorSkillPoints(context.Context, appi5.AdminOperator, identity.PlayerID, string, operation.Context) error
+}
+
+// TopFloorResetOwner restarts the player's Top Floor ticket period.
+type TopFloorResetOwner interface {
+	ResetOperatorTopFloor(context.Context, appi5.AdminOperator, identity.PlayerID, string, operation.Context) error
+}
+
+// OneOnOneResetOwner restarts the player's 1 on 1 try period.
+type OneOnOneResetOwner interface {
+	ResetOperatorOneOnOne(context.Context, appi5.AdminOperator, identity.PlayerID, string, operation.Context) error
+}
+
+// WorldBossResetOwner restarts the player's world-boss period.
+type WorldBossResetOwner interface {
+	ResetOperatorWorldBoss(context.Context, appi5.AdminOperator, identity.PlayerID, string, operation.Context) error
+}
+
+// IllusionResetOwner restarts the player's Illusion period.
+type IllusionResetOwner interface {
+	ResetOperatorIllusion(context.Context, appi5.AdminOperator, identity.PlayerID, string, operation.Context) error
+}
+
+// DormGlueResetOwner restarts the player's dorm glue-purchase day.
+type DormGlueResetOwner interface {
+	ResetOperatorDormGlue(context.Context, appi5.AdminOperator, identity.PlayerID, string, operation.Context) error
+}
+
+// ArenaDailyResetOwner restarts the player's Arena fight day.
+type ArenaDailyResetOwner interface {
+	ResetOperatorArenaDaily(context.Context, appi5.AdminOperator, identity.PlayerID, string, operation.Context) error
+}
+
+// SummonFreeResetOwner restarts the player's free Vending period.
+type SummonFreeResetOwner interface {
+	ResetOperatorSummonFree(context.Context, appi5.AdminOperator, identity.PlayerID, string, operation.Context) error
 }
 
 // ResetCommands applies player.reset_counters on the operator bus.
@@ -134,8 +160,8 @@ func (commands ResetCommands) resetHandler(ctx context.Context, scope tx.Scope, 
 	return GrantResult{Bulk: true, SemanticKey: target.SemanticKey, PlayerCount: target.PlayerCount, State: StatePending}, nil
 }
 
-// validateResetCounters refuses an empty, duplicated, unknown or not-yet
-// available name and answers the accepted names in the R1 table order.
+// validateResetCounters refuses an empty, duplicated or unknown name and
+// answers the accepted names in the R1 table order.
 func validateResetCounters(names []string) ([]string, error) {
 	if len(names) == 0 {
 		return nil, operator.Refuse(CodeResetCounters, "counters must list at least one name", nil)
@@ -147,10 +173,7 @@ func validateResetCounters(names []string) ([]string, error) {
 			return nil, operator.Refuse(CodeResetCounters, "a counter name appears twice", map[string]string{"counter": name})
 		}
 		seen[name] = struct{}{}
-		if _, known := resetCounterAvailable[name]; !known {
-			if isKnownResetCounter(name) {
-				return nil, operator.Refuse(CodeResetCounters, "not available yet", map[string]string{"counter": name})
-			}
+		if !slices.Contains(resetCounterOrder, name) {
 			return nil, operator.Refuse(CodeResetCounters, "unknown counter name", map[string]string{"counter": name})
 		}
 		requested[name] = struct{}{}
@@ -162,8 +185,4 @@ func validateResetCounters(names []string) ([]string, error) {
 		}
 	}
 	return out, nil
-}
-
-func isKnownResetCounter(name string) bool {
-	return slices.Contains(resetCounterOrder, name)
 }

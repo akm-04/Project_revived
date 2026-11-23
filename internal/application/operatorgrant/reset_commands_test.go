@@ -21,7 +21,6 @@ func TestValidateResetCountersRefusesBadVocabulary(t *testing.T) {
 		{"empty", nil, "counters must list at least one name"},
 		{"duplicate", []string{CounterDailyBuys, CounterDailyBuys}, "a counter name appears twice"},
 		{"unknown", []string{"not_a_counter"}, "unknown counter name"},
-		{"not yet", []string{CounterTopFloor}, "not available yet"},
 	}
 	for _, testCase := range cases {
 		t.Run(testCase.name, func(t *testing.T) {
@@ -37,6 +36,23 @@ func TestValidateResetCountersRefusesBadVocabulary(t *testing.T) {
 		t.Fatal(err)
 	}
 	want := []string{CounterDailyBuys, CounterCampaignDaily, CounterOccultTickets, CounterSkillPoints}
+	if len(order) != len(want) {
+		t.Fatalf("order = %v", order)
+	}
+	for index := range want {
+		if order[index] != want[index] {
+			t.Fatalf("order = %v, want %v", order, want)
+		}
+	}
+}
+
+func TestValidateResetCountersAcceptsTheWholeM12bVocabulary(t *testing.T) {
+	names := []string{CounterSummonFree, CounterArenaDaily, CounterDormGlue, CounterIllusion, CounterWorldBoss, CounterOneOnOne, CounterTopFloor}
+	order, err := validateResetCounters(names)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []string{CounterTopFloor, CounterOneOnOne, CounterWorldBoss, CounterIllusion, CounterDormGlue, CounterArenaDaily, CounterSummonFree}
 	if len(order) != len(want) {
 		t.Fatalf("order = %v", order)
 	}
@@ -75,7 +91,7 @@ func TestResetCountersHandlerFreezesOneBulkTarget(t *testing.T) {
 func TestResetCountersHandlerRefusesInvalidPayloadBeforeStoring(t *testing.T) {
 	store := &fakeStore{}
 	commands := ResetCommands{Store: store, Directory: fakeRecipients{}}
-	for _, counters := range [][]string{{}, {CounterTopFloor}, {"unknown"}, {CounterDailyBuys, CounterDailyBuys}} {
+	for _, counters := range [][]string{{}, {"unknown"}, {CounterDailyBuys, CounterDailyBuys}} {
 		payload := map[string]any{"target": map[string]any{"player_ids": []int64{1}}, "counters": counters}
 		_, err := commands.resetHandler(context.Background(), testScope(), testResetCommand(t, "reset-bad", payload))
 		var refusal *operator.Refusal
@@ -133,10 +149,45 @@ func (f *fakeResetOwner) ResetOperatorSkillPoints(_ context.Context, _ appi5.Adm
 	return nil
 }
 
+func (f *fakeResetOwner) ResetOperatorTopFloor(_ context.Context, _ appi5.AdminOperator, _ identity.PlayerID, key string, _ operation.Context) error {
+	f.calls = append(f.calls, CounterTopFloor+":"+key)
+	return nil
+}
+
+func (f *fakeResetOwner) ResetOperatorOneOnOne(_ context.Context, _ appi5.AdminOperator, _ identity.PlayerID, key string, _ operation.Context) error {
+	f.calls = append(f.calls, CounterOneOnOne+":"+key)
+	return nil
+}
+
+func (f *fakeResetOwner) ResetOperatorWorldBoss(_ context.Context, _ appi5.AdminOperator, _ identity.PlayerID, key string, _ operation.Context) error {
+	f.calls = append(f.calls, CounterWorldBoss+":"+key)
+	return nil
+}
+
+func (f *fakeResetOwner) ResetOperatorIllusion(_ context.Context, _ appi5.AdminOperator, _ identity.PlayerID, key string, _ operation.Context) error {
+	f.calls = append(f.calls, CounterIllusion+":"+key)
+	return nil
+}
+
+func (f *fakeResetOwner) ResetOperatorDormGlue(_ context.Context, _ appi5.AdminOperator, _ identity.PlayerID, key string, _ operation.Context) error {
+	f.calls = append(f.calls, CounterDormGlue+":"+key)
+	return nil
+}
+
+func (f *fakeResetOwner) ResetOperatorArenaDaily(_ context.Context, _ appi5.AdminOperator, _ identity.PlayerID, key string, _ operation.Context) error {
+	f.calls = append(f.calls, CounterArenaDaily+":"+key)
+	return nil
+}
+
+func (f *fakeResetOwner) ResetOperatorSummonFree(_ context.Context, _ appi5.AdminOperator, _ identity.PlayerID, key string, _ operation.Context) error {
+	f.calls = append(f.calls, CounterSummonFree+":"+key)
+	return nil
+}
+
 func TestResetCountersRecipientActionRunsTheRequestedOwnersInTableOrder(t *testing.T) {
 	owner := &fakeResetOwner{}
-	applier := Applier{DailyBuys: owner, CampaignDaily: owner, OccultTickets: owner, SkillPoints: owner}
-	payload := map[string]any{"counters": []string{CounterSkillPoints, CounterOccultTickets, CounterDailyBuys}}
+	applier := Applier{DailyBuys: owner, CampaignDaily: owner, TopFloor: owner, OneOnOne: owner, WorldBoss: owner, Illusion: owner, DormGlue: owner, ArenaDaily: owner, SummonFree: owner, OccultTickets: owner, SkillPoints: owner}
+	payload := map[string]any{"counters": []string{CounterSkillPoints, CounterSummonFree, CounterArenaDaily, CounterTopFloor, CounterOccultTickets, CounterDailyBuys}}
 	raw, err := json.Marshal(payload)
 	if err != nil {
 		t.Fatal(err)
@@ -150,6 +201,9 @@ func TestResetCountersRecipientActionRunsTheRequestedOwnersInTableOrder(t *testi
 	}
 	want := []string{
 		CounterDailyBuys + ":target-key:7:daily_buys",
+		CounterTopFloor + ":target-key:7:top_floor",
+		CounterArenaDaily + ":target-key:7:arena_daily",
+		CounterSummonFree + ":target-key:7:summon_free",
 		CounterOccultTickets + ":target-key:7:occult_tickets",
 		CounterSkillPoints + ":target-key:7:skill_points",
 	}
@@ -163,12 +217,12 @@ func TestResetCountersRecipientActionRunsTheRequestedOwnersInTableOrder(t *testi
 	}
 }
 
-func TestResetCountersRecipientActionRefusesNotYetNames(t *testing.T) {
+func TestResetCountersRecipientActionRefusesUnknownNames(t *testing.T) {
 	owner := &fakeResetOwner{}
-	applier := Applier{DailyBuys: owner, CampaignDaily: owner, OccultTickets: owner, SkillPoints: owner}
-	raw, _ := json.Marshal(map[string]any{"counters": []string{CounterArenaDaily}})
+	applier := Applier{DailyBuys: owner, ArenaDaily: owner}
+	raw, _ := json.Marshal(map[string]any{"counters": []string{"not_a_counter"}})
 	if _, _, err := applier.recipientAction(BulkTarget{ModuleCommand: CommandResetCounters, Payload: raw}, appi5.AdminOperator{}); err == nil {
-		t.Fatal("a not-yet counter name was accepted")
+		t.Fatal("an unknown counter name was accepted")
 	}
 }
 
