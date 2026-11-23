@@ -21,6 +21,7 @@ import (
 
 	"gxb.local/backend/v2/internal/application/operator"
 	"gxb.local/backend/v2/internal/application/operatoragent"
+	"gxb.local/backend/v2/internal/application/operatormedia"
 	"gxb.local/backend/v2/internal/foundation/jsonbody"
 )
 
@@ -73,6 +74,9 @@ type Handler struct {
 	// Settings answers the agent.settings read and writes agent.json and the
 	// backend env file locally (G22).
 	Settings *operatoragent.SettingsService
+	// Media stores notice pictures on this machine and answers their public URL
+	// (G41).
+	Media *operatormedia.Service
 	// OTARoot holds settings.json, whose res_path the GUI picture route reads.
 	OTARoot string
 	// Listen is the exact host:port the agent listens on; every route refuses
@@ -209,6 +213,8 @@ func (handler Handler) serve(writer http.ResponseWriter, request *http.Request) 
 		handler.serveModules(writer, request)
 	case strings.HasPrefix(request.URL.Path, resPrefix) && request.Method == http.MethodGet:
 		handler.serveRes(writer, request)
+	case strings.HasPrefix(request.URL.Path, mediaPrefix):
+		handler.serveMedia(writer, request)
 	case strings.HasPrefix(request.URL.Path, backupPrefix):
 		handler.serveBackup(writer, request, strings.TrimPrefix(request.URL.Path, backupPrefix))
 	default:
@@ -962,6 +968,10 @@ var exchangeRoutes = []exchangeRoute{
 	{Name: "operation", Method: http.MethodGet, Sample: operationPrefix + "0123456789abcdef0123456789abcdef", Match: prefixPath(operationPrefix)},
 	{Name: "log.tail", Method: http.MethodGet, Sample: logTailPath, Match: exactPath(logTailPath)},
 	{Name: "modules", Method: http.MethodGet, Sample: modulesPath, Match: exactPath(modulesPath)},
+	{Name: "media.import_url", Method: http.MethodPost, Sample: mediaImportPath, Match: exactPath(mediaImportPath)},
+	{Name: "media.upload", Method: http.MethodPost, Sample: mediaUploadPath, Match: exactPath(mediaUploadPath)},
+	{Name: "media.list", Method: http.MethodGet, Sample: mediaListPath, Match: exactPath(mediaListPath)},
+	{Name: "media.file", Method: http.MethodGet, Sample: mediaFilePrefix + "0123456789abcdef.png", Match: prefixPath(mediaFilePrefix)},
 }
 
 // exchangeRouteName names the exchange for the tool log.
@@ -1032,8 +1042,9 @@ type teeReadCloser struct {
 func (reader teeReadCloser) Close() error { return reader.closer.Close() }
 
 // credentialPaths carry passwords under field names the key masking cannot
-// know (current, new), so their bodies never reach the tool log.
-var credentialPaths = map[string]bool{setupPath: true, loginPath: true, passwordPath: true}
+// know (current, new), so their bodies never reach the tool log. The picture
+// upload carries bytes, not log parameters, and is skipped for the same reason.
+var credentialPaths = map[string]bool{setupPath: true, loginPath: true, passwordPath: true, mediaUploadPath: true}
 
 // startBodyCapture tees a POST body into the bounded capture. The route still
 // sees every byte and every size cap still applies.

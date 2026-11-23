@@ -87,6 +87,10 @@ func sampleBody(route exchangeRoute) string {
 		return `{}`
 	case "backend.start", "logout":
 		return `{}`
+	case "media.import_url":
+		return `{"url":""}`
+	case "media.upload":
+		return `{"data_base64":""}`
 	default:
 		return ""
 	}

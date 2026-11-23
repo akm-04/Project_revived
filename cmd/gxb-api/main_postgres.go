@@ -1182,6 +1182,9 @@ func main() {
 	if mediaHandler != nil {
 		mux.Handle("/profile-media/", mediaHandler)
 	}
+	if cfg.NoticeMediaRoot != "" {
+		mux.Handle("/media/", stockruntime.NoticeMediaGET{Root: cfg.NoticeMediaRoot})
+	}
 	registerOTARoutes(mux, otaServing)
 	gameListenerOpen, err := parseGameListener(os.Getenv("GXB_GAME_LISTENER"))
 	if err != nil {

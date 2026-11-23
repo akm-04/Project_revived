@@ -1449,6 +1449,15 @@
   },
   {
    "callees": 0,
+   "callers": 0,
+   "mids": 0,
+   "name": "operatormedia",
+   "path": "internal/application/operatormedia",
+   "purpose": "stores operator notice pictures on this machine and hands out the backend's public /media/ URL for them (G41)",
+   "tables": 0
+  },
+  {
+   "callees": 0,
    "callers": 1,
    "mids": 0,
    "name": "otabuild",

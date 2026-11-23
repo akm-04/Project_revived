@@ -17,6 +17,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/processcontrol"
 	appoperator "gxb.local/backend/v2/internal/application/operator"
 	"gxb.local/backend/v2/internal/application/operatoragent"
+	"gxb.local/backend/v2/internal/application/operatormedia"
 )
 
 func runAgent(root string, args []string) error {
@@ -86,6 +87,12 @@ func runAgent(root string, args []string) error {
 	}
 	buildOperation := operatoragent.Build{Config: config, Operator: operator, Operations: operations}
 	settings := &operatoragent.SettingsService{Root: root, OTARoot: config.OTARoot}
+	mediaPath, err := operatormedia.MediaPath(root)
+	if err != nil {
+		return err
+	}
+	publicEngineURL, _ := operatoragent.ReadEnvValue(config.Backend.EnvFile, operatoragent.PublicEngineURLKey)
+	media := &operatormedia.Service{MediaPath: mediaPath, PublicEngineURL: publicEngineURL}
 	moduleCatalog := operatoragent.ModuleCatalog{Backend: operator, Local: []appoperator.Module{operatoragent.ServerModule(), operatoragent.AgentOTAModule(), operatoragent.AgentSettingsModule(), operatoragent.DashboardModule(), operatoragent.BackupModule(), operatoragent.AgentLogsModule()}}
 	dashboard := operatoragent.Dashboard{
 		Backend:    backend,
@@ -111,6 +118,7 @@ func runAgent(root string, args []string) error {
 		ToolLog:     toolLog,
 		Logs:        logService,
 		Settings:    settings,
+		Media:       media,
 		OTARoot:     config.OTARoot,
 		Listen:      config.Listen,
 		Guard:       backendGuard,
