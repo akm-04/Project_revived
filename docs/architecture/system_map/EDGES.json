@@ -3226,6 +3226,7 @@
    ],
    "store:kernelstore": [
     "*Find",
+    "*FindLatestTx",
     "*FindTx",
     "*PutTx"
    ],

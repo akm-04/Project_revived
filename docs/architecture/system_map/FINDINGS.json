@@ -8471,7 +8471,7 @@
  "soft_refusals": [
   {
    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-   "line": 394,
+   "line": 395,
    "code": 30001,
    "kind": "stock_code"
   },

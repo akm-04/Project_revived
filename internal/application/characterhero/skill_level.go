@@ -30,6 +30,15 @@ import (
 const HeroSkillLevelPolicyID = "I9_SKILL_LEVEL_PRIVATE_POLICY_V1"
 const heroSkillLevelReceiptSchema = "gxb.character-hero.skill-level.v1"
 
+// heroSkillLevelDuplicateWindow bounds the stock client's duplicate tick-send.
+// HeroMainWindow keeps firing MID 39 while a reply is in flight
+// (HeroMainWindow.lua:3065-3081 sends twice in one exhausted-points call and the
+// fast repeat runs every skill_speed_up = 0.03 s, misc.lua), so byte-identical
+// requests reach the server after the one that committed. A late identical
+// request (the journal's legitimate repeat case was 6 s and 69 s apart) is a new
+// intent and is never replayed.
+const heroSkillLevelDuplicateWindow = 2 * time.Second
+
 var ErrHeroSkillLevelRequest = errors.New("character hero: invalid skill level request")
 var ErrHeroSkillLevelProof = errors.New("character hero: invalid skill level proof")
 var ErrHeroSkillLevelStaleTime = errors.New("character hero: stale skill level decision time")
@@ -134,8 +143,68 @@ type HeroSkillLevelService struct {
 	DiscountBasisPoints int64
 }
 
+// heroSkillLevelLatestReceipts is the optional read the kernel receipt store
+// already provides. It is optional so the many in-memory receipt fakes keep
+// their two-method surface; production always installs kernelstore.Store.
+type heroSkillLevelLatestReceipts interface {
+	FindLatestTx(context.Context, tx.Queryer, receipt.LatestIdentity) (receipt.Receipt, bool, error)
+}
+
 func heroSkillLevelReceiptID(actor identity.ActorContext, op operation.Context, family string) receipt.Identity {
-	return receipt.Identity{OwnerKind: "player", OwnerKey: strconv.FormatInt(int64(actor.PlayerID), 10), Domain: "character-hero", Operation: family, SemanticKey: op.ID.String()}
+	return receipt.Identity{OwnerKind: "player", OwnerKey: strconv.FormatInt(int64(actor.PlayerID), 10), Domain: "character-hero", Operation: family, SemanticKey: heroSkillLevelSemanticKey(family, op)}
+}
+
+// heroSkillLevelSemanticKey keeps the family as the key prefix so the family's
+// latest committed answer is reachable through receipt.Store.FindLatestTx.
+func heroSkillLevelSemanticKey(family string, op operation.Context) string {
+	return family + "/" + op.ID.String()
+}
+
+// replayDuplicateTx answers the stock client's in-flight duplicate send with the
+// committed answer it already produced. The settlement stays at-most-once: the
+// duplicate commits nothing and writes no receipt/fact, and it replays only
+// when the request is byte-equivalent (same normalized changes fingerprint), the
+// hero still holds exactly the stored answer, and the two arrived within the
+// duplicate window. Every other unsuccessful plan is refused as before (C2/C11).
+func (s HeroSkillLevelService) replayDuplicateTx(ctx context.Context, q tx.Queryer, actor identity.ActorContext, partner int64, family string, changes []HeroSkillLevelChange, op operation.Context, committed [6]int64) (HeroSkillLevelResult, bool, error) {
+	// Only the stock bulk route has the tick-send duplicate. MID 53 is sent once
+	// per tap with the button disabled until the reply, so a second identical
+	// single-skill request is a real new intent and must still apply.
+	if family != "set_all_skill_level" {
+		return HeroSkillLevelResult{}, false, nil
+	}
+	latest, ok := s.Receipts.(heroSkillLevelLatestReceipts)
+	if !ok {
+		return HeroSkillLevelResult{}, false, nil
+	}
+	fingerprint, err := heroSkillLevelFingerprint(partner, family, changes)
+	if err != nil {
+		return HeroSkillLevelResult{}, false, err
+	}
+	stored, found, err := latest.FindLatestTx(ctx, q, receipt.LatestIdentity{
+		OwnerKind: "player", OwnerKey: strconv.FormatInt(int64(actor.PlayerID), 10),
+		Domain: "character-hero", Operation: family, SemanticKeyPrefix: family + "/",
+	})
+	if err != nil || !found {
+		return HeroSkillLevelResult{}, false, err
+	}
+	gap := op.StartedAt.Sub(stored.OperationStartedAt)
+	if gap < 0 || gap > heroSkillLevelDuplicateWindow {
+		return HeroSkillLevelResult{}, false, nil
+	}
+	if stored.OperationClass != "I9_HERO_SKILL_LEVEL" || stored.ResultSchema != heroSkillLevelReceiptSchema || stored.RequestFingerprint != fingerprint || stored.ActorAccountUID != string(actor.AccountUID) || stored.PolicyVersion != HeroSkillLevelPolicyID {
+		return HeroSkillLevelResult{}, false, nil
+	}
+	var result HeroSkillLevelResult
+	decoder := json.NewDecoder(bytes.NewReader(stored.ResultPayload))
+	decoder.DisallowUnknownFields()
+	if decoder.Decode(&result) != nil {
+		return HeroSkillLevelResult{}, false, nil
+	}
+	if !result.Success || result.Schema != heroSkillLevelReceiptSchema || result.Family != family || result.PlayerID != int64(actor.PlayerID) || result.PartnerID != partner || result.SkillLevels != committed {
+		return HeroSkillLevelResult{}, false, nil
+	}
+	return result, true, nil
 }
 
 func heroSkillLevelFingerprint(partner int64, family string, changes []HeroSkillLevelChange) ([32]byte, error) {
@@ -377,6 +446,12 @@ func (s HeroSkillLevelService) change(ctx context.Context, actor identity.ActorC
 		}
 		if kind != character.NormalHero && kind != character.SuperHero {
 			return ErrHeroSkillLevelRequest
+		}
+		if replay, replayed, err := s.replayDuplicateTx(ctx, scope.Tx, actor, partner, family, changes, op, hero.RawSkills.Levels); err != nil {
+			return err
+		} else if replayed {
+			result = replay
+			return nil
 		}
 		bookCap, err := s.Books.LockHeroSkillCapTx(ctx, scope.Tx, actor.PlayerID, revision, at, ref)
 		if err != nil {
