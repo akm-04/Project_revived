@@ -1,12 +1,14 @@
 "use strict";
 
 import { confirmAction } from "../components/confirm_action.js";
+import { pageHeader, setStatus } from "../components/format.js";
 import { describeReply, request } from "../transport.js";
 
 // renderPage is the Server screen: the process status card, the registered
 // server.list table, then Start and Stop through ConfirmAction.
-export function renderPage(container) {
+export function renderPage(container, context) {
   container.replaceChildren();
+  container.append(pageHeader(context.page.label));
   const overview = buildOverview();
   const list = buildList();
   const start = buildAction("Start backend");
@@ -21,7 +23,7 @@ export function renderPage(container) {
     }
     if (!reply.ok) {
       fillStatus(overview, null);
-      overview.status.textContent = describeReply(reply);
+      setStatus(overview.status, describeReply(reply), "error");
       return;
     }
     fillStatus(overview, reply.body);
@@ -36,14 +38,14 @@ export function renderPage(container) {
     if (!reply.ok) {
       fillServers(overview, []);
       list.table.replaceChildren(noRowsRow(4, "The server list is unavailable."));
-      list.status.textContent = describeReply(reply);
+      setStatus(list.status, describeReply(reply), "error");
       return;
     }
     const body = reply.body && typeof reply.body === "object" ? reply.body : {};
     const servers = Array.isArray(body.servers) ? body.servers : [];
     fillServers(overview, servers);
     fillTable(list.table, servers);
-    list.status.textContent = "Loaded " + servers.length + " server" + (servers.length === 1 ? "." : "s.");
+    setStatus(list.status, "Loaded " + servers.length + " server" + (servers.length === 1 ? "." : "s."), "success");
   }
 
   async function refresh() {
@@ -152,7 +154,7 @@ function buildList() {
   heading.className = "card-title";
   heading.textContent = "Registered servers";
   const controls = document.createElement("div");
-  controls.className = "d-flex gap-2 mb-2";
+  controls.className = "btn-list mb-2";
   const refresh = document.createElement("button");
   refresh.type = "button";
   refresh.className = "btn btn-outline-secondary btn-sm";
@@ -160,12 +162,16 @@ function buildList() {
   refresh.textContent = "Refresh";
   controls.append(refresh);
   const table = document.createElement("table");
+  table.className = "table table-sm table-vcenter card-table mb-0";
   table.id = "server-table";
   const status = document.createElement("p");
   status.className = "status";
   status.id = "server-list-status";
   status.setAttribute("role", "status");
-  card.append(heading, controls, table, status);
+  const tableWrap = document.createElement("div");
+  tableWrap.className = "table-responsive";
+  tableWrap.append(table);
+  card.append(heading, controls, tableWrap, status);
   return { card, table, status, refresh };
 }
 
@@ -240,7 +246,7 @@ function showReply(box, reply, confirmation) {
     return;
   }
   if (!reply.ok) {
-    box.status.textContent = describeReply(reply);
+    setStatus(box.status, describeReply(reply), "error");
     return;
   }
   const lines = ["HTTP " + reply.status, "reason: " + confirmation.reason, "semantic_key: " + confirmation.semantic_key];

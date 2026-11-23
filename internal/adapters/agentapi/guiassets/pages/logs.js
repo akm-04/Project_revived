@@ -1,6 +1,7 @@
 "use strict";
 
 import { confirmAction } from "../components/confirm_action.js";
+import { formatTimeText, pageHeader, setStatus } from "../components/format.js";
 import { describeReply, request } from "../transport.js";
 
 const followPollMilliseconds = 2000;
@@ -31,8 +32,9 @@ const journalOutcomes = [
 
 // renderPage is the Logs screen: an overview of the tool log, the Tail, Search
 // and Timeline reads, and the attributed Clear command.
-export function renderPage(container) {
+export function renderPage(container, context) {
   container.replaceChildren();
+  container.append(pageHeader(context.page.label));
   const overview = buildOverview();
   const tabs = buildTabs();
   const clear = buildClear();
@@ -72,14 +74,14 @@ export function renderPage(container) {
     }
     if (!reply.ok) {
       stopFollow();
-      tabs.tail.status.textContent = describeReply(reply);
+      setStatus(tabs.tail.status, describeReply(reply), "error");
       return;
     }
     const body = reply.body && typeof reply.body === "object" ? reply.body : {};
     if (body.absent === true) {
       stopFollow();
       tabs.tail.result.textContent = "";
-      tabs.tail.status.textContent = "The source is unavailable: " + presentText(body.reason, "unknown reason");
+      setStatus(tabs.tail.status, "The source is unavailable: " + presentText(body.reason, "unknown reason"), "error");
       return;
     }
     if (typeof body.next_cursor === "string" && body.next_cursor !== "") {
@@ -140,13 +142,13 @@ export function renderPage(container) {
     }
     if (!reply.ok) {
       tabs.search.result.textContent = "";
-      tabs.search.status.textContent = describeReply(reply);
+      setStatus(tabs.search.status, describeReply(reply), "error");
       return;
     }
     const body = reply.body && typeof reply.body === "object" ? reply.body : {};
     if (body.absent === true) {
       tabs.search.result.textContent = "";
-      tabs.search.status.textContent = "The source is unavailable: " + presentText(body.reason, "unknown reason");
+      setStatus(tabs.search.status, "The source is unavailable: " + presentText(body.reason, "unknown reason"), "error");
       return;
     }
     const entries = Array.isArray(body.entries) ? body.entries : [];
@@ -171,7 +173,7 @@ export function renderPage(container) {
     }
     if (!reply.ok) {
       tabs.timeline.result.textContent = "";
-      tabs.timeline.status.textContent = describeReply(reply);
+      setStatus(tabs.timeline.status, describeReply(reply), "error");
       return;
     }
     const body = reply.body && typeof reply.body === "object" ? reply.body : {};
@@ -190,7 +192,7 @@ export function renderPage(container) {
     const payload = { source, scope };
     if (scope === "player") {
       if (clear.player.value.trim() === "") {
-        clear.status.textContent = "A player id or name is required for the player scope.";
+        setStatus(clear.status, "A player id or name is required for the player scope.", "error");
         return;
       }
       payload.player = clear.player.value.trim();
@@ -198,13 +200,13 @@ export function renderPage(container) {
     if (scope === "older_than") {
       const boundary = toRFC3339(clear.olderThan.value);
       if (boundary === "") {
-        clear.status.textContent = "A time is required for the older_than scope.";
+        setStatus(clear.status, "A time is required for the older_than scope.", "error");
         return;
       }
       payload.older_than = boundary;
     }
     if (scope === "player" && source !== "client") {
-      clear.status.textContent = "The backend log has no player attribution; the player scope applies to the client journal.";
+      setStatus(clear.status, "The backend log has no player attribution; the player scope applies to the client journal.", "error");
       return;
     }
     const confirmation = await confirmAction({
@@ -228,7 +230,7 @@ export function renderPage(container) {
       return;
     }
     if (!reply.ok) {
-      clear.status.textContent = describeReply(reply);
+      setStatus(clear.status, describeReply(reply), "error");
       return;
     }
     const body = reply.body && typeof reply.body === "object" ? reply.body : {};
@@ -278,7 +280,7 @@ async function loadOverview(overview) {
   }
   if (!reply.ok) {
     overview.state.textContent = "unknown";
-    overview.status.textContent = describeReply(reply);
+    setStatus(overview.status, describeReply(reply), "error");
     return;
   }
   const body = reply.body && typeof reply.body === "object" ? reply.body : {};
@@ -292,7 +294,9 @@ async function loadOverview(overview) {
     return;
   }
   const newest = lines[lines.length - 1];
-  overview.state.textContent = lines.length + " newest lines; last " + presentText(newest.at, "time unknown") + " " + presentText(newest.level, "info");
+  overview.state.textContent = lines.length + " newest lines; last " +
+    (typeof newest.at === "string" && newest.at !== "" ? formatTimeText(newest.at) : "time unknown") + " " +
+    presentText(newest.level, "info");
 }
 
 function overviewRow(list, label, valueID) {
@@ -361,7 +365,7 @@ function buildTailPanel() {
   const live = buttonControl("logs-tail-live", "Start live", "btn btn-outline-secondary");
   const stop = buttonControl("logs-tail-stop", "Stop", "btn btn-outline-secondary");
   const controls = document.createElement("div");
-  controls.className = "d-flex gap-2 mb-2";
+  controls.className = "btn-list mb-2";
   controls.append(run, live, stop);
   const status = statusParagraph("logs-tail-status");
   const result = resultBox("logs-tail-result");
@@ -547,7 +551,7 @@ function describeTailLine(line) {
   if (line === null || typeof line !== "object") {
     return String(line);
   }
-  const at = presentText(line.at, "");
+  const at = typeof line.at === "string" && line.at !== "" ? formatTimeText(line.at) : "";
   const level = presentText(line.level, "info");
   const prefix = at === "" ? level : at + " " + level;
   return prefix + " " + presentText(line.text, "");
@@ -572,7 +576,7 @@ function describeTimelineEntry(entry) {
 
 function describeJournalEntry(entry) {
   const parts = [
-    presentText(entry.received_at, "time unknown"),
+    typeof entry.received_at === "string" && entry.received_at !== "" ? formatTimeText(entry.received_at) : "time unknown",
     presentText(entry.outcome, "outcome unknown"),
     "player=" + presentNumber(entry.player_id, "unknown"),
     "mid=" + presentNumber(entry.mid, "unknown"),

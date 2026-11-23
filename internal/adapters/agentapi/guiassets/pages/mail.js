@@ -3,6 +3,7 @@
 import { describeReply, request } from "../transport.js";
 import { confirmAction } from "../components/confirm_action.js";
 import { openDurationPicker } from "../components/duration_picker.js";
+import { formatTimeText, pageHeader, setStatus } from "../components/format.js";
 import { openPlayerPicker } from "../components/player_picker.js";
 import { openResourcePicker } from "../components/resource_picker.js";
 import { mountServerPicker } from "../components/server_picker.js";
@@ -16,6 +17,7 @@ const secondsPerDay = 86400;
 // (internal/application/operatorgrant/mail.go:53-66).
 export function renderPage(container, context) {
   container.replaceChildren();
+  container.append(pageHeader(context.page.label));
   container.setAttribute("aria-label", context.page.label);
 
   const state = {
@@ -161,7 +163,7 @@ export function renderPage(container, context) {
       return;
     }
     state.expiry = duration.end;
-    fixedSummary.textContent = "Expires at " + duration.end + ".";
+    fixedSummary.textContent = "Expires at " + formatTimeText(duration.end) + ".";
     updateOverview();
   }
 
@@ -212,21 +214,21 @@ export function renderPage(container, context) {
   async function sendMail() {
     sendResult.textContent = "";
     if (titleInput.value.trim() === "") {
-      sendResult.textContent = "Enter a mail title.";
+      setStatus(sendResult, "Enter a mail title.", "error");
       return;
     }
     if (bodyInput.value.trim() === "") {
-      sendResult.textContent = "Enter a mail body.";
+      setStatus(sendResult, "Enter a mail body.", "error");
       return;
     }
     const expire = currentExpire();
     if (expire.error) {
-      sendResult.textContent = expire.error;
+      setStatus(sendResult, expire.error, "error");
       return;
     }
     const targets = collectTargets();
     if (targets.error) {
-      sendResult.textContent = targets.error;
+      setStatus(sendResult, targets.error, "error");
       return;
     }
     const confirmation = await confirmAction({
@@ -241,6 +243,7 @@ export function renderPage(container, context) {
     }
     sendButton.disabled = true;
     const outcomes = [];
+    let allApplied = true;
     for (let index = 0; index < targets.entries.length; index += 1) {
       const entry = targets.entries[index];
       const payload = {
@@ -267,11 +270,18 @@ export function renderPage(container, context) {
         sendButton.disabled = false;
         return;
       }
+      if (!reply.ok) {
+        allApplied = false;
+      }
       outcomes.push(entry.label + ": " + describeMailReply(reply));
     }
     sendButton.disabled = false;
-    sendResult.textContent = (targets.entries.length > 1 ? "One command per selected server.\n" : "") +
-      outcomes.join("\n") + "\nreason: " + confirmation.reason;
+    setStatus(
+      sendResult,
+      (targets.entries.length > 1 ? "One command per selected server.\n" : "") +
+        outcomes.join("\n") + "\nreason: " + confirmation.reason,
+      allApplied ? "success" : "error",
+    );
   }
 
   function collectTargets() {
@@ -307,7 +317,7 @@ export function renderPage(container, context) {
 
 function describeExpire(expire) {
   if (expire.fixed !== undefined) {
-    return "fixed at " + expire.fixed;
+    return "fixed at " + formatTimeText(expire.fixed);
   }
   if (expire.after_read !== undefined) {
     return expire.after_read / secondsPerDay + " day(s) after opening";

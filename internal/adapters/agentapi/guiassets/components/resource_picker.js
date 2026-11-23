@@ -7,6 +7,11 @@ import { pictureElement } from "../pictures.js";
 const catalogRead = "/agent/v1/reads/catalog.search";
 const pageSize = 60;
 const kindOptions = ["STACK_ITEM", "SCALAR_CURRENCY", "PLAYER_EXP", "TEMPORAL", "SPECIALIZED_DOMAIN", "PARTNER_ENTITY"];
+const grantReasonTexts = {
+  SPECIALIZED_DOMAIN: "not grantable yet: needs its own grant rules",
+  OWNER_REQUIRED: "needs owner approval",
+  FAIL_CLOSED: "not grantable yet: its content is not activated",
+};
 
 // openResourcePicker returns catalogue grant lines in the exact {id, amount}
 // shape grant.items, mail.send attachments and redeem.create take.
@@ -35,6 +40,17 @@ export function openResourcePicker(options) {
     const kindSelect = labeledSelect(fields, "resource-kind", "Kind", kindOptions);
     const raritySelect = labeledSelect(fields, "resource-rarity", "Rarity", ["1", "2", "3", "4", "5", "6"]);
     fields.append(searchButtonCell(actionButton("Search", true, "resource-search-button")));
+    const onlyGrantable = document.createElement("label");
+    onlyGrantable.className = "form-check mb-2";
+    const onlyGrantableBox = document.createElement("input");
+    onlyGrantableBox.type = "checkbox";
+    onlyGrantableBox.className = "form-check-input";
+    onlyGrantableBox.id = "resource-only-grantable";
+    onlyGrantableBox.checked = true;
+    const onlyGrantableText = document.createElement("span");
+    onlyGrantableText.className = "form-check-label";
+    onlyGrantableText.textContent = "Only grantable";
+    onlyGrantable.append(onlyGrantableBox, onlyGrantableText);
 
     const status = textParagraph("");
     status.id = "resource-status";
@@ -45,10 +61,11 @@ export function openResourcePicker(options) {
     loadMore.hidden = true;
     const summary = textParagraph("0 selected");
     const failure = errorParagraph();
-    dialog.body.append(fields, status, grid, loadMore, summary, failure);
+    dialog.body.append(fields, onlyGrantable, status, grid, loadMore, summary, failure);
 
     let nextAfter = "";
     let requestTicket = 0;
+    let contentRevision = "";
 
     searchInput.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
@@ -58,6 +75,7 @@ export function openResourcePicker(options) {
     });
     kindSelect.addEventListener("change", () => void runSearch(true));
     raritySelect.addEventListener("change", () => void runSearch(true));
+    onlyGrantableBox.addEventListener("change", applyGrantableFilter);
     loadMore.addEventListener("click", () => void runSearch(false));
     grid.addEventListener("click", (event) => {
       const card = event.target.closest(".resource-card");
@@ -141,11 +159,21 @@ export function openResourcePicker(options) {
       for (const entry of entries) {
         grid.append(resourceCard(entry));
       }
-      const revision = typeof body.content_revision === "string" && body.content_revision !== "" ? " · content " + body.content_revision.slice(0, 12) : "";
-      status.textContent = entries.length === 0 ? "No resources match." : "";
-      if (entries.length > 0) {
-        status.textContent = "Showing " + grid.childElementCount + " resources" + revision;
+      contentRevision = typeof body.content_revision === "string" && body.content_revision !== "" ? " · content " + body.content_revision.slice(0, 12) : "";
+      applyGrantableFilter();
+    }
+
+    function applyGrantableFilter() {
+      const only = onlyGrantableBox.checked;
+      let visible = 0;
+      for (const card of grid.querySelectorAll(".resource-card")) {
+        const allowed = !only || card.dataset.grantable === "yes";
+        card.hidden = !allowed;
+        if (allowed) {
+          visible += 1;
+        }
       }
+      status.textContent = visible === 0 ? "No resources match." : "Showing " + visible + " resources" + contentRevision;
     }
 
     function resourceCard(entry) {
@@ -153,9 +181,10 @@ export function openResourcePicker(options) {
       card.className = "resource-card";
       card.dataset.id = entry.id;
       const enabled = entry.grantable === "ENABLED";
+      card.dataset.grantable = enabled ? "yes" : "no";
       if (!enabled) {
         card.classList.add("fail-closed");
-        card.title = entry.reason || "This resource cannot be granted.";
+        card.title = describeGrantReason(entry.reason);
       }
       const header = document.createElement("div");
       header.className = "d-flex align-items-center justify-content-between";
@@ -187,10 +216,10 @@ export function openResourcePicker(options) {
         }
       });
       card.append(header, name, meta, amount);
-      if (!enabled && entry.reason) {
+      if (!enabled) {
         const reason = document.createElement("div");
         reason.className = "resource-meta text-danger";
-        reason.textContent = entry.reason;
+        reason.textContent = describeGrantReason(entry.reason);
         card.append(reason);
       }
       return card;
@@ -269,4 +298,14 @@ function textParagraph(text) {
   element.className = "module-help";
   element.textContent = text;
   return element;
+}
+
+// The catalogue sends a class or activation code (SPECIALIZED_DOMAIN,
+// OWNER_REQUIRED, FAIL_CLOSED); the picker spells out what it means (G25).
+function describeGrantReason(code) {
+  if (typeof code !== "string" || code === "") {
+    return "not grantable yet";
+  }
+  const text = Object.prototype.hasOwnProperty.call(grantReasonTexts, code) ? grantReasonTexts[code] : "not grantable yet";
+  return text + " (" + code + ")";
 }

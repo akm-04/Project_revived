@@ -53,7 +53,7 @@ export function mountServerPicker(container, options) {
   function render() {
     list.replaceChildren();
     if (includeGlobal) {
-      list.append(checkboxRow(identifierPrefix + "-global", "Global (all servers)", global, false, (checked) => {
+      list.append(checkboxRow(identifierPrefix + "-global", labelText("Global (all servers)"), global, false, (checked) => {
         global = checked;
         if (global) {
           selected.clear();
@@ -64,9 +64,7 @@ export function mountServerPicker(container, options) {
     }
     for (const server of servers) {
       const serverID = Number(server.server_id);
-      const state = server.open ? "" : " (closed)";
-      const label = "#" + serverID + " " + server.name + state + " — " + server.online_count + " online";
-      list.append(checkboxRow(identifierPrefix + "-" + serverID, label, selected.has(serverID), global, (checked) => {
+      list.append(checkboxRow(identifierPrefix + "-" + serverID, serverLabel(server, serverID), selected.has(serverID), global, (checked) => {
         if (checked) {
           if (!multiple) {
             selected.clear();
@@ -103,7 +101,7 @@ export function mountServerPicker(container, options) {
   return { value, ready: () => loaded };
 }
 
-function checkboxRow(identifier, label, checked, disabled, onChange) {
+function checkboxRow(identifier, content, checked, disabled, onChange) {
   const row = document.createElement("label");
   row.className = "form-check";
   const box = document.createElement("input");
@@ -113,11 +111,44 @@ function checkboxRow(identifier, label, checked, disabled, onChange) {
   box.checked = checked;
   box.disabled = disabled;
   box.addEventListener("change", () => onChange(box.checked));
-  const text = document.createElement("span");
-  text.className = "form-check-label";
-  text.textContent = label;
-  row.append(box, text);
+  row.append(box, content);
   return row;
+}
+
+// The server name stays on one line; the online count is a muted badge so a
+// narrow column never wraps the label (G24).
+function serverLabel(server, serverID) {
+  const wrap = document.createElement("span");
+  wrap.className = "form-check-label d-flex align-items-center gap-2 flex-wrap";
+  const name = document.createElement("span");
+  name.className = "server-name";
+  name.textContent = "#" + serverID + " " + presentName(server.name);
+  const online = document.createElement("span");
+  online.className = "badge bg-secondary-lt text-secondary";
+  online.textContent = presentNumber(server.online_count) + " online";
+  wrap.append(name, online);
+  if (server.open === false) {
+    const closed = document.createElement("span");
+    closed.className = "badge bg-warning-lt text-warning";
+    closed.textContent = "closed";
+    wrap.append(closed);
+  }
+  return wrap;
+}
+
+function labelText(text) {
+  const element = document.createElement("span");
+  element.className = "form-check-label server-name";
+  element.textContent = text;
+  return element;
+}
+
+function presentName(value) {
+  return typeof value === "string" && value !== "" ? value : "unknown";
+}
+
+function presentNumber(value) {
+  return typeof value === "number" && Number.isFinite(value) ? String(value) : "unknown";
 }
 
 function textParagraph(text) {

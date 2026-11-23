@@ -3,6 +3,7 @@
 import { describeReply, request } from "../transport.js";
 import { confirmAction } from "../components/confirm_action.js";
 import { openDurationPicker } from "../components/duration_picker.js";
+import { formatTime, formatTimeText, pageHeader, setStatus } from "../components/format.js";
 import { loadServers, mountServerPicker } from "../components/server_picker.js";
 import { pictureElement } from "../pictures.js";
 
@@ -19,12 +20,14 @@ const eventsListLimit = 200;
 // the occurrences' lifecycle actions, and the schedule action.
 export function renderPage(container, context) {
   container.replaceChildren();
+  container.append(pageHeader(context.page.label));
   container.setAttribute("aria-label", context.page.label);
 
   const state = {
     serverID: null,
     occurrences: [],
     definitions: [],
+    names: new Map(),
     scheduleDuration: null,
   };
 
@@ -35,6 +38,7 @@ export function renderPage(container, context) {
   const overviewStatus = errorParagraph();
   overviewStatus.id = "events-status";
   const tableHost = document.createElement("div");
+  tableHost.className = "table-responsive";
   tableHost.id = "events-table-host";
   overview.body.append(serverPickerHost, refreshButton, overviewStatus, tableHost);
 
@@ -59,7 +63,7 @@ export function renderPage(container, context) {
   const actionResult = errorParagraph();
   actionResult.id = "events-action-result";
   const actionRow = document.createElement("div");
-  actionRow.className = "d-flex flex-wrap gap-2 mb-3";
+  actionRow.className = "btn-list mb-3";
   actionRow.append(extendButton, endNowButton, permanentButton);
   actionCard.body.append(actionRow, actionResult);
 
@@ -78,7 +82,7 @@ export function renderPage(container, context) {
   async function start() {
     const loaded = await loadServers();
     if (loaded.error !== "") {
-      overviewStatus.textContent = loaded.error;
+      setStatus(overviewStatus, loaded.error, "error");
     }
     if (loaded.servers.length > 0) {
       state.serverID = Number(loaded.servers[0].server_id);
@@ -111,7 +115,7 @@ export function renderPage(container, context) {
       readOccurrences(state.serverID, "SCHEDULED"),
     ]);
     if (running.error !== "" || scheduled.error !== "") {
-      overviewStatus.textContent = running.error !== "" ? running.error : scheduled.error;
+      setStatus(overviewStatus, running.error !== "" ? running.error : scheduled.error, "error");
       state.occurrences = [];
       renderOccurrences();
       return;
@@ -148,7 +152,7 @@ export function renderPage(container, context) {
     for (const occurrence of state.occurrences) {
       const option = document.createElement("option");
       option.value = String(occurrence.id);
-      option.textContent = "#" + occurrence.id + " · activity " + occurrence.activity_id + " · " + occurrence.state;
+      option.textContent = "#" + occurrence.id + " · " + activityLabel(occurrence.activity_id) + " · " + occurrence.state;
       occurrenceSelect.append(option);
     }
     if (state.occurrences.length === 0) {
@@ -156,7 +160,7 @@ export function renderPage(container, context) {
       return;
     }
     const table = document.createElement("table");
-    table.className = "table table-sm table-vcenter mb-0";
+    table.className = "table table-sm table-vcenter card-table mb-0";
     const head = document.createElement("thead");
     const headRow = document.createElement("tr");
     for (const label of ["banner", "activity", "state", "starts", "ends", "claim until"]) {
@@ -170,24 +174,32 @@ export function renderPage(container, context) {
       const row = document.createElement("tr");
       const banner = document.createElement("td");
       banner.append(pictureElement(activityBannerPath(occurrence.activity_id)));
-      const values = [
-        String(occurrence.activity_id),
-        occurrence.state,
-        String(occurrence.starts_at),
-        occurrence.ends_at === null || occurrence.ends_at === undefined ? "permanent" : String(occurrence.ends_at),
-        occurrence.claim_until === null || occurrence.claim_until === undefined ? "none" : String(occurrence.claim_until),
-      ];
-      row.append(banner);
-      for (const value of values) {
-        const cell = document.createElement("td");
-        cell.textContent = value;
-        row.append(cell);
-      }
+      const activity = document.createElement("td");
+      activity.textContent = activityLabel(occurrence.activity_id);
+      const stateCell = document.createElement("td");
+      stateCell.textContent = occurrence.state;
+      row.append(
+        banner,
+        activity,
+        stateCell,
+        timeCell(occurrence.starts_at, "unknown"),
+        timeCell(occurrence.ends_at, "permanent"),
+        timeCell(occurrence.claim_until, "none"),
+      );
       body.append(row);
     }
     table.append(head, body);
     tableHost.append(table);
     updateActionAvailability();
+  }
+
+  // events.definition.list carries the activity name (DefinitionSummary.Name,
+  // internal/application/events/commands.go:173); events.list itself has only
+  // the activity id, so the name shows when a deployed definition gives one.
+  function activityLabel(activityID) {
+    const identifier = String(activityID);
+    const name = state.names.get(identifier);
+    return name === undefined ? identifier : identifier + " · " + name;
   }
 
   async function loadDefinitions() {
@@ -205,13 +217,20 @@ export function renderPage(container, context) {
       return;
     }
     if (!reply.ok) {
-      definitionsStatus.textContent = describeReply(reply);
+      setStatus(definitionsStatus, describeReply(reply), "error");
       return;
     }
     const result = commandResult(reply);
     state.definitions = Array.isArray(result.definitions) ? result.definitions : [];
+    state.names.clear();
+    for (const definition of state.definitions) {
+      if (typeof definition.name === "string" && definition.name !== "") {
+        state.names.set(String(definition.activity_id), definition.name);
+      }
+    }
     if (state.definitions.length === 0) {
       definitionsStatus.textContent = "No event definitions are deployed; deploy one under Advanced.";
+      renderOccurrences();
       return;
     }
     definitionsStatus.textContent = "Tick the events to schedule on the selected server.";
@@ -231,6 +250,7 @@ export function renderPage(container, context) {
       row.append(box, text);
       definitionsHost.append(row);
     }
+    renderOccurrences();
   }
 
   async function chooseScheduleDuration() {
@@ -239,34 +259,34 @@ export function renderPage(container, context) {
       return;
     }
     state.scheduleDuration = duration;
-    scheduleDurationSummary.textContent = "From " + duration.start + " to " + duration.end + ".";
+    scheduleDurationSummary.textContent = "From " + formatTimeText(duration.start) + " to " + formatTimeText(duration.end) + ".";
   }
 
   async function scheduleEvents() {
     scheduleResult.textContent = "";
     if (state.serverID === null) {
-      scheduleResult.textContent = "Select a server first.";
+      setStatus(scheduleResult, "Select a server first.", "error");
       return;
     }
     if (state.scheduleDuration === null) {
-      scheduleResult.textContent = "Choose a duration first.";
+      setStatus(scheduleResult, "Choose a duration first.", "error");
       return;
     }
     const duration = durationText(state.scheduleDuration);
     if (duration.error) {
-      scheduleResult.textContent = duration.error;
+      setStatus(scheduleResult, duration.error, "error");
       return;
     }
     const ticked = Array.from(definitionsHost.querySelectorAll("input[type=checkbox]:checked"));
     if (ticked.length === 0) {
-      scheduleResult.textContent = "Tick at least one event.";
+      setStatus(scheduleResult, "Tick at least one event.", "error");
       return;
     }
     const activityIDs = ticked.map((box) => Number(box.id.slice("event-definition-".length)));
     const confirmation = await confirmAction({
       title: "Schedule events",
       summary: "Schedule activity " + activityIDs.join(", ") + " on server #" + state.serverID +
-        " from " + state.scheduleDuration.start + " for " + duration.text + ".",
+        " from " + formatTimeText(state.scheduleDuration.start) + " for " + duration.text + ".",
       confirmLabel: "Schedule",
     });
     if (confirmation === null) {
@@ -302,7 +322,7 @@ export function renderPage(container, context) {
       outcomes.push("activity " + activityIDs[index] + ": " + describeOccurrenceReply(reply));
     }
     scheduleButton.disabled = false;
-    scheduleResult.textContent = outcomes.join("\n") + "\nreason: " + confirmation.reason;
+    setStatus(scheduleResult, outcomes.join("\n") + "\nreason: " + confirmation.reason, allApplied ? "success" : "error");
     if (allApplied) {
       await refreshEvents();
     }
@@ -326,7 +346,7 @@ export function renderPage(container, context) {
     actionResult.textContent = "";
     const occurrence = selectedOccurrence();
     if (occurrence === null) {
-      actionResult.textContent = "Select an occurrence first.";
+      setStatus(actionResult, "Select an occurrence first.", "error");
       return;
     }
     const duration = await openDurationPicker({ title: "Extend by" });
@@ -335,7 +355,7 @@ export function renderPage(container, context) {
     }
     const text = durationText(duration);
     if (text.error) {
-      actionResult.textContent = text.error;
+      setStatus(actionResult, text.error, "error");
       return;
     }
     const confirmation = await confirmAction({
@@ -353,7 +373,7 @@ export function renderPage(container, context) {
     actionResult.textContent = "";
     const occurrence = selectedOccurrence();
     if (occurrence === null) {
-      actionResult.textContent = "Select an occurrence first.";
+      setStatus(actionResult, "Select an occurrence first.", "error");
       return;
     }
     const confirmation = await confirmAction({
@@ -371,7 +391,7 @@ export function renderPage(container, context) {
     actionResult.textContent = "";
     const occurrence = selectedOccurrence();
     if (occurrence === null) {
-      actionResult.textContent = "Select an occurrence first.";
+      setStatus(actionResult, "Select an occurrence first.", "error");
       return;
     }
     const confirmation = await confirmAction({
@@ -398,7 +418,7 @@ export function renderPage(container, context) {
     if (reply.unauthorized) {
       return;
     }
-    actionResult.textContent = label + ": " + describeOccurrenceReply(reply) + "\nreason: " + confirmation.reason;
+    setStatus(actionResult, label + ": " + describeOccurrenceReply(reply) + "\nreason: " + confirmation.reason, reply.ok ? "success" : "error");
     if (reply.ok) {
       await refreshEvents();
     }
@@ -409,6 +429,16 @@ export function renderPage(container, context) {
 // every row (data/tables/activity.lua); /agent/v1/res serves it.
 function activityBannerPath(activityID) {
   return "images/activities/" + activityID + ".png";
+}
+
+function timeCell(value, fallback) {
+  const cell = document.createElement("td");
+  if (value === null || value === undefined) {
+    cell.textContent = fallback;
+    return cell;
+  }
+  cell.append(formatTime(value));
+  return cell;
 }
 
 // durationText maps the picker's span onto the duration strings the events

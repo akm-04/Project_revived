@@ -2,6 +2,7 @@
 
 import { describeReply, request } from "../transport.js";
 import { confirmAction } from "../components/confirm_action.js";
+import { formatTime, pageHeader, setStatus } from "../components/format.js";
 import { mountServerPicker } from "../components/server_picker.js";
 
 const onlineRead = "/agent/v1/reads/session.online";
@@ -17,9 +18,7 @@ const pageSize = 50;
 // logout scopes with the backend's hold default (G11).
 export function renderPage(container, context) {
   container.replaceChildren();
-  const heading = document.createElement("h2");
-  heading.className = "module-title";
-  heading.textContent = "Players";
+  container.append(pageHeader(context.page.label));
   const help = document.createElement("p");
   help.className = "module-help";
   help.textContent = "Live sessions, player search and logout by player, server or all servers.";
@@ -54,7 +53,7 @@ export function renderPage(container, context) {
   const onlineStatus = paragraph("module-help", "Loading live sessions…");
   onlineStatus.id = "players-online-status";
   const onlineTable = document.createElement("div");
-  onlineTable.className = "player-table-scroll";
+  onlineTable.className = "player-table-scroll table-responsive";
   onlineTable.id = "players-online-table";
   const loadMore = actionButton("Load more", false, "players-online-more");
   loadMore.hidden = true;
@@ -69,12 +68,15 @@ export function renderPage(container, context) {
   const uidInput = labeledInput(searchFields, "players-search-uid", "Account uid");
   const nameInput = labeledInput(searchFields, "players-search-name", "Name prefix");
   const searchButton = actionButton("Search", true, "players-search-button");
+  const searchActions = document.createElement("div");
+  searchActions.className = "btn-list mb-2";
+  searchActions.append(searchButton);
   const searchStatus = paragraph("module-help", "");
   searchStatus.id = "players-search-status";
   const searchTable = document.createElement("div");
-  searchTable.className = "player-table-scroll";
+  searchTable.className = "player-table-scroll table-responsive";
   searchTable.id = "players-search-table";
-  searchSection.append(searchTitle, searchFields, searchButton, searchStatus, searchTable);
+  searchSection.append(searchTitle, searchFields, searchActions, searchStatus, searchTable);
 
   const summarySection = section("card card-body mt-3");
   const summaryTitle = document.createElement("h3");
@@ -135,7 +137,7 @@ export function renderPage(container, context) {
 
   logoutSection.append(logoutTitle, holdRow, selectedRow, selectedResult, serverRow, serverResult, globalRow, globalResult);
 
-  container.append(heading, help, refresh, status, overview, filterSection, onlineSection, searchSection, summarySection, logoutSection);
+  container.append(help, refresh, status, overview, filterSection, onlineSection, searchSection, summarySection, logoutSection);
 
   const state = {
     serverFilter: { global: true, server_ids: [] },
@@ -225,7 +227,7 @@ async function loadOverview(onlineValue, serverValue, status) {
   if (!reply.ok) {
     onlineValue.textContent = "unknown";
     serverValue.textContent = "unknown";
-    status.textContent = describeReply(reply);
+    setStatus(status, describeReply(reply), "error");
     return;
   }
   const body = reply.body && typeof reply.body === "object" ? reply.body : {};
@@ -262,7 +264,7 @@ async function loadOnline(state, onlineStatus, onlineTable, loadMore, reset) {
     return;
   }
   if (!reply.ok) {
-    onlineStatus.textContent = describeReply(reply);
+    setStatus(onlineStatus, describeReply(reply), "error");
     return;
   }
   const body = reply.body && typeof reply.body === "object" ? reply.body : {};
@@ -283,8 +285,8 @@ function renderOnline(state, onlineTable) {
     { label: "Player", text: (row) => valueText(row.name) + " (#" + valueText(row.player_id) + ")" },
     { label: "Server", text: (row) => valueText(row.server_id) },
     { label: "Session length", text: (row) => formatDuration(durationFrom(row.started_at)) },
-    { label: "Started", text: (row) => localTime(row.started_at) },
-    { label: "Last seen", text: (row) => localTime(row.last_seen_at) },
+    { label: "Started", text: (row) => formatTime(row.started_at) },
+    { label: "Last seen", text: (row) => formatTime(row.last_seen_at) },
   ];
   onlineTable.append(createRowTable(state, state.onlineRows, columns, "players-online-select-all"));
 }
@@ -294,7 +296,7 @@ async function runSearch(uidInput, nameInput, state, searchStatus, searchTable) 
   const uid = uidInput.value.trim();
   const namePrefix = nameInput.value.trim();
   if (uid === "" && namePrefix === "") {
-    searchStatus.textContent = "Enter an account uid or a name prefix.";
+    setStatus(searchStatus, "Enter an account uid or a name prefix.", "error");
     return;
   }
   searchStatus.textContent = "Searching…";
@@ -318,7 +320,7 @@ async function runSearch(uidInput, nameInput, state, searchStatus, searchTable) 
     return;
   }
   if (!reply.ok) {
-    searchStatus.textContent = describeReply(reply);
+    setStatus(searchStatus, describeReply(reply), "error");
     return;
   }
   const body = reply.body && typeof reply.body === "object" ? reply.body : {};
@@ -348,7 +350,7 @@ async function runSearch(uidInput, nameInput, state, searchStatus, searchTable) 
 
 function createRowTable(state, rows, columns, selectAllIdentifier) {
   const table = document.createElement("table");
-  table.className = "table table-sm table-vcenter mb-0";
+  table.className = "table table-sm table-vcenter card-table mb-0";
   const head = document.createElement("thead");
   const headRow = document.createElement("tr");
   const selectCell = document.createElement("th");
@@ -388,7 +390,12 @@ function createRowTable(state, rows, columns, selectAllIdentifier) {
     tableRow.append(checkCell);
     for (const column of columns) {
       const cell = document.createElement("td");
-      cell.textContent = column.text(row);
+      const rendered = column.text(row);
+      if (rendered instanceof Node) {
+        cell.append(rendered);
+      } else {
+        cell.textContent = rendered;
+      }
       tableRow.append(cell);
     }
     tableRow.addEventListener("click", (event) => {
@@ -436,15 +443,14 @@ async function loadSummary(playerID, state) {
     return;
   }
   if (!reply.ok) {
-    state.summaryStatus.textContent = describeReply(reply);
+    setStatus(state.summaryStatus, describeReply(reply), "error");
     return;
   }
   const player = reply.body && typeof reply.body === "object" ? reply.body : {};
   state.summaryStatus.textContent = "";
-  const table = document.createElement("table");
-  table.className = "table table-sm";
-  table.id = "players-summary-table";
-  const body = document.createElement("tbody");
+  const list = document.createElement("dl");
+  list.className = "row mb-0";
+  list.id = "players-summary-table";
   for (const [label, value] of [
     ["Player", player.name],
     ["Player id", player.player_id],
@@ -457,27 +463,30 @@ async function loadSummary(playerID, state) {
     ["Created", player.created_at],
     ["Last login", player.last_login],
   ]) {
-    const row = document.createElement("tr");
-    const labelCell = document.createElement("th");
-    labelCell.textContent = label;
-    const valueCell = document.createElement("td");
-    valueCell.textContent = valueText(value);
-    row.append(labelCell, valueCell);
-    body.append(row);
+    const term = document.createElement("dt");
+    term.className = "col-sm-4 text-secondary";
+    term.textContent = label;
+    const valueCell = document.createElement("dd");
+    valueCell.className = "col-sm-8";
+    if ((label === "Created" || label === "Last login") && typeof value === "string") {
+      valueCell.append(formatTime(value));
+    } else {
+      valueCell.textContent = valueText(value);
+    }
+    list.append(term, valueCell);
   }
-  table.append(body);
-  state.summaryHost.append(table);
+  state.summaryHost.append(list);
 }
 
 async function logoutSelected(state, holdInput, result) {
   const players = Array.from(state.selected.values());
   if (players.length === 0) {
-    result.replaceChildren(paragraph("status", "Select at least one player first."));
+    result.replaceChildren(paragraph("status text-danger", "Select at least one player first."));
     return;
   }
   const hold = parseHoldSeconds(holdInput);
   if (holdInput.value.trim() !== "" && hold === null) {
-    result.replaceChildren(paragraph("status", "Hold seconds must be a whole number of seconds."));
+    result.replaceChildren(paragraph("status text-danger", "Hold seconds must be a whole number of seconds."));
     return;
   }
   const playerIDs = players.map((player) => Number(player.player_id));
@@ -499,12 +508,12 @@ async function logoutSelected(state, holdInput, result) {
 async function logoutServer(picker, holdInput, result) {
   const value = picker.value();
   if (value.global || value.server_ids.length === 0) {
-    result.replaceChildren(paragraph("status", "Select at least one server first."));
+    result.replaceChildren(paragraph("status text-danger", "Select at least one server first."));
     return;
   }
   const hold = parseHoldSeconds(holdInput);
   if (holdInput.value.trim() !== "" && hold === null) {
-    result.replaceChildren(paragraph("status", "Hold seconds must be a whole number of seconds."));
+    result.replaceChildren(paragraph("status text-danger", "Hold seconds must be a whole number of seconds."));
     return;
   }
   const serverIDs = value.server_ids;
@@ -538,7 +547,7 @@ async function logoutServer(picker, holdInput, result) {
 async function logoutGlobal(holdInput, result) {
   const hold = parseHoldSeconds(holdInput);
   if (holdInput.value.trim() !== "" && hold === null) {
-    result.replaceChildren(paragraph("status", "Hold seconds must be a whole number of seconds."));
+    result.replaceChildren(paragraph("status text-danger", "Hold seconds must be a whole number of seconds."));
     return;
   }
   const confirmed = await confirmAction({
@@ -577,7 +586,7 @@ async function runLogout(path, payload, reason, semanticKey, hold, prefix) {
     return null;
   }
   if (!reply.ok) {
-    return { ok: false, line: paragraph("status", prefix + describeReply(reply)) };
+    return { ok: false, line: paragraph("status text-danger", prefix + describeReply(reply)) };
   }
   const body = reply.body && typeof reply.body === "object" ? reply.body : {};
   const revoked = Number.isFinite(Number(body.revoked)) ? String(body.revoked) : "unknown";
@@ -646,14 +655,6 @@ function formatDuration(seconds) {
     return hours + "h " + String(minutes).padStart(2, "0") + "m";
   }
   return minutes + "m " + String(seconds % 60).padStart(2, "0") + "s";
-}
-
-function localTime(value) {
-  const parsed = Date.parse(value);
-  if (Number.isNaN(parsed)) {
-    return "unknown";
-  }
-  return new Date(parsed).toLocaleString();
 }
 
 function valueText(value) {

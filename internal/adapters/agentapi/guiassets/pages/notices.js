@@ -2,6 +2,7 @@
 
 import { describeReply, request } from "../transport.js";
 import { confirmAction } from "../components/confirm_action.js";
+import { pageHeader, setStatus } from "../components/format.js";
 import { mountServerPicker } from "../components/server_picker.js";
 
 const readPublicationShow = "publication.show";
@@ -20,6 +21,7 @@ const imageURLPrefix = "http" + "://";
 // publication module declares (internal/application/publication/operator.go:79-90).
 export function renderPage(container, context) {
   container.replaceChildren();
+  container.append(pageHeader(context.page.label));
   container.setAttribute("aria-label", context.page.label);
 
   const state = { serverID: 0, live: [] };
@@ -43,9 +45,12 @@ export function renderPage(container, context) {
   announcementPreviewHost.id = "notice-announcement-preview-host";
   const announcementInstall = actionButton("Install login notice", true, "notice-announcement-install");
   const announcementClear = actionButton("Clear login notice", false, "notice-announcement-clear");
+  const announcementActions = document.createElement("div");
+  announcementActions.className = "btn-list mb-3";
+  announcementActions.append(announcementInstall, announcementClear);
   const announcementResult = errorParagraph();
   announcementResult.id = "notice-announcement-result";
-  announcementCard.body.append(announcementPreviewButton, announcementPreviewHost, announcementInstall, announcementClear, announcementResult);
+  announcementCard.body.append(announcementPreviewButton, announcementPreviewHost, announcementActions, announcementResult);
 
   const pictureCard = createCard("Edit lobby picture notice", "notice-picture-card");
   const pictureRows = document.createElement("div");
@@ -56,9 +61,12 @@ export function renderPage(container, context) {
   picturePreviewHost.id = "notice-picture-preview-host";
   const pictureInstall = actionButton("Install pictures", true, "notice-picture-install");
   const pictureClear = actionButton("Clear pictures", false, "notice-picture-clear");
+  const pictureActions = document.createElement("div");
+  pictureActions.className = "btn-list mb-3";
+  pictureActions.append(pictureInstall, pictureClear);
   const pictureResult = errorParagraph();
   pictureResult.id = "notice-picture-result";
-  pictureCard.body.append(pictureRows, pictureAdd, picturePreviewButton, picturePreviewHost, pictureInstall, pictureClear, pictureResult);
+  pictureCard.body.append(pictureRows, pictureAdd, picturePreviewButton, picturePreviewHost, pictureActions, pictureResult);
 
   const boardCard = createCard("Edit Activities board", "notice-board-card");
   const boardRows = document.createElement("div");
@@ -69,9 +77,12 @@ export function renderPage(container, context) {
   boardPreviewHost.id = "notice-board-preview-host";
   const boardInstall = actionButton("Install Activities board", true, "notice-board-install");
   const boardClear = actionButton("Clear Activities board", false, "notice-board-clear");
+  const boardActions = document.createElement("div");
+  boardActions.className = "btn-list mb-3";
+  boardActions.append(boardInstall, boardClear);
   const boardResult = errorParagraph();
   boardResult.id = "notice-board-result";
-  boardCard.body.append(boardRows, boardAdd, boardPreviewButton, boardPreviewHost, boardInstall, boardClear, boardResult);
+  boardCard.body.append(boardRows, boardAdd, boardPreviewButton, boardPreviewHost, boardActions, boardResult);
 
   container.append(liveCard.card, announcementCard.card, pictureCard.card, boardCard.card);
 
@@ -112,7 +123,7 @@ export function renderPage(container, context) {
       return;
     }
     if (!reply.ok) {
-      liveStatus.textContent = describeReply(reply);
+      setStatus(liveStatus, describeReply(reply), "error");
       state.live = [];
       renderLive();
       return;
@@ -167,7 +178,7 @@ export function renderPage(container, context) {
     announcementPreviewHost.replaceChildren();
     const announcement = announcementPayload();
     if (announcement.error) {
-      announcementPreviewHost.append(paragraph("status", announcement.error));
+      announcementPreviewHost.append(paragraph("status text-danger", announcement.error));
       return;
     }
     announcementPreviewHost.append(announcementView(announcement.value));
@@ -177,7 +188,7 @@ export function renderPage(container, context) {
     picturePreviewHost.replaceChildren();
     const pictures = picturePayload();
     if (pictures.error) {
-      picturePreviewHost.append(paragraph("status", pictures.error));
+      picturePreviewHost.append(paragraph("status text-danger", pictures.error));
       return;
     }
     for (const picture of pictures.value) {
@@ -190,7 +201,7 @@ export function renderPage(container, context) {
     boardPreviewHost.replaceChildren();
     const board = boardPayload();
     if (board.error) {
-      boardPreviewHost.append(paragraph("status", board.error));
+      boardPreviewHost.append(paragraph("status text-danger", board.error));
       return;
     }
     for (const entry of board.value) {
@@ -204,6 +215,7 @@ export function renderPage(container, context) {
     const announcement = announcementPayload();
     if (announcement.error) {
       announcementResult.textContent = announcement.error;
+      announcementResult.classList.add("text-danger");
       return;
     }
     const confirmation = await confirmAction({
@@ -225,6 +237,7 @@ export function renderPage(container, context) {
     const pictures = picturePayload();
     if (pictures.error) {
       pictureResult.textContent = pictures.error;
+      pictureResult.classList.add("text-danger");
       return;
     }
     const confirmation = await confirmAction({
@@ -247,6 +260,7 @@ export function renderPage(container, context) {
     const board = boardPayload();
     if (board.error) {
       boardResult.textContent = board.error;
+      boardResult.classList.add("text-danger");
       return;
     }
     const confirmation = await confirmAction({
@@ -311,7 +325,7 @@ export function renderPage(container, context) {
     if (reply.unauthorized) {
       return;
     }
-    resultBox.textContent = describePublicationReply(reply) + "\nreason: " + confirmation.reason;
+    setStatus(resultBox, describePublicationReply(reply) + "\nreason: " + confirmation.reason, reply.ok ? "success" : "error");
     if (reply.ok) {
       await loadLive();
     }

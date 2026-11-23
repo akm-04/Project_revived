@@ -1,6 +1,7 @@
 "use strict";
 
 import { request } from "./transport.js";
+import { pageHeader } from "./components/format.js";
 import { pictureElement } from "./pictures.js";
 
 const operationPollMilliseconds = 1000;
@@ -10,6 +11,7 @@ const operationPollMilliseconds = 1000;
 // unchanged from the single-file GUI).
 export function renderAdvanced(container, modules) {
   container.replaceChildren();
+  container.append(pageHeader("Advanced"));
   if (modules.length === 0) {
     container.append(paragraph("module-help", "This agent reported no modules."));
     return;
@@ -288,7 +290,7 @@ async function runCommand(command, controls, reasonInput, output, button) {
     errors.push("A reason is required.");
   }
   if (errors.length > 0) {
-    output.append(paragraph("status", errors.join("\n")));
+    output.append(paragraph("status text-danger", errors.join("\n")));
     return;
   }
   const maintenanceClass = command.class === "maintenance";
@@ -318,7 +320,7 @@ async function runRead(read, controls, output, button) {
   output.replaceChildren();
   const { payload, errors } = collectValues(controls);
   if (errors.length > 0) {
-    output.append(paragraph("status", errors.join("\n")));
+    output.append(paragraph("status text-danger", errors.join("\n")));
     return;
   }
   const query = new URLSearchParams();
@@ -424,7 +426,10 @@ function findRows(body) {
 }
 
 function buildTable(rows) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "table-responsive";
   const table = document.createElement("table");
+  table.className = "table table-sm table-vcenter mb-0";
   const columns = [];
   for (const row of rows) {
     for (const key of Object.keys(row)) {
@@ -459,7 +464,8 @@ function buildTable(rows) {
     body.append(tableRow);
   }
   table.append(head, body);
-  return table;
+  wrapper.append(table);
+  return wrapper;
 }
 
 function newSemanticKey() {
