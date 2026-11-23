@@ -55,6 +55,14 @@ func lazyRefreshPackage(recoveredResPath, sidecarPath string, catalogBaseline st
 	if err != nil {
 		return nil, nil, nil, report, err
 	}
+	extras, err := readExtraCatalogue(root)
+	if err != nil {
+		return nil, nil, nil, report, err
+	}
+	rows, sidecar, err = appendExtraRows(rows, sidecar, extras)
+	if err != nil {
+		return nil, nil, nil, report, err
+	}
 	lazyMap, summary, err := buildLazyMap(rows, supplied)
 	if err != nil {
 		return nil, nil, nil, report, err
