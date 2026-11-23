@@ -246,6 +246,10 @@ func TestUploadSDKLogsAndUnknownPaths(t *testing.T) {
 	if upload.Code != http.StatusOK || !strings.Contains(upload.Body.String(), `"error_code":0`) {
 		t.Fatalf("upload reply = %d %s", upload.Code, upload.Body.String())
 	}
+	stockPath := serve(t, service, http.MethodPost, "/server/mobile_api_new/", `{"mid":"65305","payload":{}}`, nil)
+	if stockPath.Code != http.StatusOK {
+		t.Fatalf("stock client trailing-slash path = %d", stockPath.Code)
+	}
 	missing := serve(t, service, http.MethodPost, "/somewhere/else", "", nil)
 	if missing.Code != http.StatusNotFound || missing.Body.Len() != 0 {
 		t.Fatalf("unknown path = %d %q", missing.Code, missing.Body.String())

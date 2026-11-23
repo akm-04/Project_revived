@@ -38,7 +38,8 @@ type Handler struct {
 }
 
 func (handler Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
-	switch request.URL.Path {
+	// The stock client posts to "server/mobile_api_new/" with a trailing slash.
+	switch strings.TrimRight(request.URL.Path, "/") {
 	case "/server/mobile_api_new":
 		handler.serve(writer, request)
 	case "/home_api/upload_sdk_logs":
