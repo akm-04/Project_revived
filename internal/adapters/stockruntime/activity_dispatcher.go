@@ -2,6 +2,7 @@ package stockruntime
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	appactivity "gxb.local/backend/v2/internal/application/activitydirectory"
@@ -62,7 +63,7 @@ func (d ActivityDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 			return failureFromRows(nil, err)
 		}
 		if !ok {
-			return failureReply(refusal(unprovenRefusalCode))
+			return failureReply(refusalWithCause(unprovenRefusalCode, fmt.Errorf("activity %d is not in the directory", id)))
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: activityproj.Row(row)}
 	default:

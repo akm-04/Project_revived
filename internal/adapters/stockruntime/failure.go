@@ -94,6 +94,12 @@ func refusalWithBody(code int64, body map[string]any) *classifiedFailure {
 	return &classifiedFailure{class: failureRefusal, code: code, extra: body}
 }
 
+// refusalWithCause names the refused input in the request journal without
+// changing the client body, so a missing row can be identified from evidence.
+func refusalWithCause(code int64, cause error) *classifiedFailure {
+	return &classifiedFailure{class: failureRefusal, code: code, cause: cause}
+}
+
 func unavailable(cause error) *classifiedFailure {
 	return &classifiedFailure{class: failureUnavailable, cause: cause}
 }

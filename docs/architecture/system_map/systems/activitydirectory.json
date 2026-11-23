@@ -70,7 +70,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/activity_dispatcher.go",
-    "line": 33
+    "line": 34
    },
    "mid": 229,
    "name": "ACTIVITIES"
@@ -78,7 +78,7 @@
   {
    "handler": {
     "file": "internal/adapters/stockruntime/activity_dispatcher.go",
-    "line": 33
+    "line": 34
    },
    "mid": 234,
    "name": "LOAD_SINGLE_ACTIVITY"
