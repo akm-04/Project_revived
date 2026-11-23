@@ -3,7 +3,7 @@
 import { describeReply, request } from "../transport.js";
 import { confirmAction } from "../components/confirm_action.js";
 import { openDurationPicker } from "../components/duration_picker.js";
-import { formatTimeText, pageHeader, setStatus } from "../components/format.js";
+import { actionRow, formatTimeText, pageHeader, setStatus } from "../components/format.js";
 import { openPlayerPicker } from "../components/player_picker.js";
 import { openResourcePicker } from "../components/resource_picker.js";
 import { mountServerPicker } from "../components/server_picker.js";
@@ -89,7 +89,7 @@ export function renderPage(container, context) {
   const sendButton = actionButton("Send mail", true, "mail-send");
   const sendResult = errorParagraph();
   sendResult.id = "mail-result";
-  sendCard.body.append(sendButton, sendResult);
+  sendCard.body.append(actionRow(sendButton), sendResult);
 
   container.append(overview.card, targetCard.card, contentCard.card, attachmentCard.card, expiryCard.card, sendCard.card);
 

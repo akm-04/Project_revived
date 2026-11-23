@@ -3,7 +3,7 @@
 import { describeReply, request } from "../transport.js";
 import { confirmAction } from "../components/confirm_action.js";
 import { openDurationPicker } from "../components/duration_picker.js";
-import { emptyState, formatTime, formatTimeText, pageHeader, setStatus } from "../components/format.js";
+import { actionRow, emptyState, formatTime, formatTimeText, pageHeader, setStatus } from "../components/format.js";
 import { openPlayerPicker } from "../components/player_picker.js";
 import { openResourcePicker } from "../components/resource_picker.js";
 
@@ -34,7 +34,7 @@ export function renderPage(container, context) {
   const codesHost = document.createElement("div");
   codesHost.className = "table-responsive";
   codesHost.id = "redeem-list";
-  codesCard.body.append(refreshCodes, codesStatus, codesHost);
+  codesCard.body.append(actionRow(refreshCodes), codesStatus, codesHost);
 
   const grantCard = createCard("Grant", "grant-card");
   const pickGrantPlayers = actionButton("Choose players", false, "grant-pick-players");

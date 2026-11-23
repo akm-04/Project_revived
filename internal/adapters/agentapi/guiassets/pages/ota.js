@@ -1,7 +1,7 @@
 "use strict";
 
 import { describeReply, request } from "../transport.js";
-import { pageHeader } from "../components/format.js";
+import { actionRow, pageHeader } from "../components/format.js";
 import { confirmAction } from "../components/confirm_action.js";
 
 const statusRead = "/agent/v1/reads/ota.status";
@@ -37,7 +37,7 @@ export function renderPage(container, context) {
   status.setAttribute("role", "status");
   const laneRow = document.createElement("div");
   laneRow.className = "row row-cols-1 row-cols-md-2 g-3";
-  container.append(heading, help, refresh, status, laneRow);
+  container.append(heading, help, actionRow(refresh), status, laneRow);
 
   const views = new Map();
   for (const lane of lanes) {

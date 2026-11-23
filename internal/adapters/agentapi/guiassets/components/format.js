@@ -48,3 +48,12 @@ export function pageHeader(text) {
   header.append(title);
   return header;
 }
+
+// actionRow groups a card's buttons in one wrapping flex row; the primary
+// action is passed last.
+export function actionRow(...controls) {
+  const row = document.createElement("div");
+  row.className = "action-row";
+  row.append(...controls);
+  return row;
+}

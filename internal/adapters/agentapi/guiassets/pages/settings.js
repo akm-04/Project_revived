@@ -51,8 +51,10 @@ export function renderPage(container, context) {
     paths.resPath.value = presentText(values.res_path, "");
     paths.apkResPath.value = presentText(values.apk_res_path, "");
     paths.recoveredResPath.value = presentText(values.recovered_res_path, "");
-    serverURL.current.textContent = presentText(values.server_url, "not set");
-    serverURL.input.value = presentText(values.server_url, "");
+    const url = presentText(values.server_url, "");
+    serverURL.current.textContent = url === "" ? "not set" : url;
+    serverURL.source.textContent = url === "" ? "" : " (" + serverURLSourceText(values.server_url_source) + ")";
+    serverURL.input.value = url;
     paths.save.disabled = state.otaSettings === null;
   }
 
@@ -295,7 +297,10 @@ function buildServerURLSection() {
   const current = document.createElement("span");
   current.id = "settings-url-current";
   current.textContent = "unknown";
-  currentRow.append(currentLabel, current);
+  const source = document.createElement("span");
+  source.id = "settings-url-source";
+  source.className = "text-secondary";
+  currentRow.append(currentLabel, current, source);
   const label = document.createElement("label");
   label.className = "form-label";
   label.htmlFor = "settings-url-input";
@@ -322,7 +327,19 @@ function buildServerURLSection() {
   status.setAttribute("role", "status");
   fieldset.append(legend, help, currentRow, label, input, warning, save, status);
   card.append(fieldset);
-  return { card, current, input, save, status };
+  return { card, current, source, input, save, status };
+}
+
+// serverURLSourceText maps the settings read's server_url_source onto the
+// plain words the review asks for (internal/application/operatoragent/settings.go:23-24).
+function serverURLSourceText(source) {
+  if (source === "env_file") {
+    return "from the backend env file";
+  }
+  if (source === "agent_environment") {
+    return "from the agent environment";
+  }
+  return "source unknown";
 }
 
 function buildServerNamesSection() {

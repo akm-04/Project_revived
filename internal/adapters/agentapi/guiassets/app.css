@@ -719,3 +719,62 @@ textarea:not(.form-control) {
 .confirm-advanced code {
   word-break: break-all;
 }
+
+/* ---------------------------------------------------------------------------
+   G7g: one consistent layout for every page. Check rows, action rows and bare
+   card buttons use these shared rules, so no page needs its own spacing. */
+
+/* Tabler sizes a check row to its content, then pulls the input out with a
+   two-class rule; win both with a specific rule of our own. */
+label.form-check,
+.form-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  width: 100%;
+  min-width: 0;
+  margin: 0 0 0.5rem;
+  padding-inline-start: 0;
+}
+
+.form-check .form-check-input {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+  float: none;
+  margin: 0;
+}
+
+/* An unticked box keeps a visible outline on the dark card. */
+.form-check .form-check-input:not(:checked) {
+  background-color: var(--tblr-bg-surface);
+  border-color: color-mix(in oklab, var(--tblr-body-color) 42%, transparent);
+}
+
+.form-check .form-check-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+}
+
+/* One action row: a wrapping flex row with a gap. The primary button is last
+   in the DOM, so it reads last on every page. */
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+/* A bare button directly inside a card body keeps its natural width instead of
+   stretching to the card. */
+.card-body > .btn {
+  align-self: flex-start;
+}
+
+@media (max-width: 767.98px) {
+  .action-row > .btn {
+    flex: 1 1 auto;
+  }
+}
