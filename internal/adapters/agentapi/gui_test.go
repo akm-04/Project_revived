@@ -440,6 +440,58 @@ func TestGUIComponentsAreEmbeddedAndServed(t *testing.T) {
 	}
 }
 
+// TestGUIPagesAreEmbeddedAndServed proves every page module under
+// guiassets/pages is compiled in, exports renderPage, is reachable at its /gui/
+// path and carries the strict policy.
+func TestGUIPagesAreEmbeddedAndServed(t *testing.T) {
+	handler, _, _ := newForwardingHandler(t)
+	required := []string{"backups.js", "gm.js", "logs.js", "server.js"}
+	for _, name := range required {
+		contents, err := guiAssets.ReadFile("guiassets/pages/" + name)
+		if err != nil {
+			t.Fatalf("the GUI no longer embeds guiassets/pages/%s", name)
+		}
+		if !strings.Contains(string(contents), "export function renderPage") {
+			t.Fatalf("guiassets/pages/%s does not export renderPage", name)
+		}
+	}
+	served := 0
+	err := fs.WalkDir(guiAssets, "guiassets/pages", func(name string, entry fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		if entry.IsDir() {
+			return nil
+		}
+		contentType, serveable := guiContentTypes[strings.ToLower(path.Ext(name))]
+		if !serveable {
+			t.Fatalf("%s has no serveable content type", name)
+		}
+		targetPath := "/gui/" + strings.TrimPrefix(name, guiAssetsRoot)
+		recorder := serveAgent(handler, http.MethodGet, targetPath, "", "")
+		if recorder.Code != http.StatusOK {
+			t.Fatalf("%s: status = %d", targetPath, recorder.Code)
+		}
+		if recorder.Header().Get("Content-Security-Policy") != contentSecurityPolicy {
+			t.Fatalf("%s: missing the strict policy", targetPath)
+		}
+		if recorder.Header().Get("Content-Type") != contentType {
+			t.Fatalf("%s: content type = %q", targetPath, recorder.Header().Get("Content-Type"))
+		}
+		if recorder.Body.Len() == 0 {
+			t.Fatalf("%s: empty body", targetPath)
+		}
+		served++
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if served < len(required) {
+		t.Fatalf("served %d page files, want at least %d", served, len(required))
+	}
+}
+
 // TestGUIIndexReferencesOnlySameOriginAssets keeps the page free of a CDN and
 // of inline script, so the CSP stays self-only.
 func TestGUIIndexReferencesOnlySameOriginAssets(t *testing.T) {
