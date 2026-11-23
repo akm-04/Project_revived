@@ -30,6 +30,18 @@ const (
 	SDKPasswordIterations = 200000
 	SDKPasswordSaltBytes  = 16
 	SDKPasswordHashBytes  = 32
+
+	// A stored record outside this range is refused instead of spending its
+	// iteration count.
+	SDKPasswordMinimumIterations = 10000
+	SDKPasswordMaximumIterations = 1000000
+
+	// Each raw session credential is its own 32 random bytes.
+	SDKSessionSecretBytes = 32
+
+	// Unauthenticated register/login issue at most this many concurrent PBKDF2
+	// derivations per process.
+	SDKPasswordDerivationSlots = 4
 )
 
 var (
@@ -39,6 +51,9 @@ var (
 
 	errSDKLoginRace  = errors.New("sdk register lost the login insert race")
 	errSDKDeviceRace = errors.New("sdk anonymous lost the device insert race")
+
+	sdkPasswordDerivations = make(chan struct{}, SDKPasswordDerivationSlots)
+	sdkDummyPasswordSalt   = [SDKPasswordSaltBytes]byte{'g', 'x', 'b', '-', 's', 'd', 'k', '-', 'd', 'u', 'm', 'm', 'y', '-', 'v', '1'}
 )
 
 // SDKAccountRecord is the account row as the SDK paths read it.
@@ -157,7 +172,7 @@ func HashSDKPassword(password string) (string, int, string, string, error) {
 // VerifySDKPassword derives with the stored iteration count and compares in
 // constant time. A record of another algorithm or a malformed value fails.
 func VerifySDKPassword(algorithm string, iterations int, saltHex, hashHex, password string) bool {
-	if algorithm != SDKPasswordAlgorithm || iterations <= 0 {
+	if algorithm != SDKPasswordAlgorithm || !sdkPasswordIterationsAcceptable(iterations) {
 		return false
 	}
 	salt, err := hex.DecodeString(saltHex)
@@ -172,6 +187,40 @@ func VerifySDKPassword(algorithm string, iterations int, saltHex, hashHex, passw
 	return subtle.ConstantTimeCompare(got, want) == 1
 }
 
+func sdkPasswordIterationsAcceptable(iterations int) bool {
+	return iterations >= SDKPasswordMinimumIterations && iterations <= SDKPasswordMaximumIterations
+}
+
+func acquireSDKPasswordDerivation(ctx context.Context) (func(), error) {
+	select {
+	case sdkPasswordDerivations <- struct{}{}:
+		return func() { <-sdkPasswordDerivations }, nil
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
+}
+
+func verifySDKPasswordBounded(ctx context.Context, algorithm string, iterations int, saltHex, hashHex, password string) (bool, error) {
+	release, err := acquireSDKPasswordDerivation(ctx)
+	if err != nil {
+		return false, err
+	}
+	defer release()
+	return VerifySDKPassword(algorithm, iterations, saltHex, hashHex, password), nil
+}
+
+// burnSDKPasswordDerivation spends one derivation on a refused login so the
+// response time does not tell whether the account exists.
+func burnSDKPasswordDerivation(ctx context.Context) error {
+	release, err := acquireSDKPasswordDerivation(ctx)
+	if err != nil {
+		return err
+	}
+	defer release()
+	pbkdf2.Key([]byte("sdk-dummy-password"), sdkDummyPasswordSalt[:], SDKPasswordIterations, SDKPasswordHashBytes, sha256.New)
+	return nil
+}
+
 // Register creates a normal login, or answers the existing login branch. A
 // concurrent insert of the same key makes the loser re-enter the existing
 // branch in a fresh transaction, so the PK decides and no account is orphaned.
@@ -184,7 +233,12 @@ func (service SDKService) Register(ctx context.Context, request SDKRegisterReque
 		return SDKRegisterResult{}, ErrSDKInvalidRegistration
 	}
 	normalized := NormalizeSDKLogin(login)
+	release, err := acquireSDKPasswordDerivation(ctx)
+	if err != nil {
+		return SDKRegisterResult{}, err
+	}
 	password, err := newSDKPasswordRecord(request.Password)
+	release()
 	if err != nil {
 		return SDKRegisterResult{}, err
 	}
@@ -207,7 +261,7 @@ func (service SDKService) Register(ctx context.Context, request SDKRegisterReque
 				return err
 			}
 			if existing != nil {
-				return sdkRegisterExistingRecord(existing, login, request.Password, &out)
+				return sdkRegisterExistingRecord(txctx, existing, login, request.Password, &out)
 			}
 			account := SDKAccountRecord{ID: accountID, UID: accountID.UUID().String(), Kind: SDKAccountKindNormal, Username: login, Active: true, CreatedAt: op.StartedAt}
 			if err := service.Store.InsertSDKAccountTx(txctx, scope.Tx, account); err != nil {
@@ -243,15 +297,19 @@ func (service SDKService) registerExisting(ctx context.Context, query tx.Queryer
 	if existing == nil {
 		return ErrSDKInvalidRegistration
 	}
-	return sdkRegisterExistingRecord(existing, login, password, out)
+	return sdkRegisterExistingRecord(ctx, existing, login, password, out)
 }
 
 // sdkRegisterExistingRecord answers the existing-login branch without writing.
-func sdkRegisterExistingRecord(existing *SDKLoginRecord, login, password string, out *SDKRegisterResult) error {
+func sdkRegisterExistingRecord(ctx context.Context, existing *SDKLoginRecord, login, password string, out *SDKRegisterResult) error {
 	if !existing.Account.Active {
 		return ErrSDKAccountExists
 	}
-	if !VerifySDKPassword(existing.Algorithm, existing.Iterations, existing.SaltHex, existing.HashHex, password) {
+	valid, err := verifySDKPasswordBounded(ctx, existing.Algorithm, existing.Iterations, existing.SaltHex, existing.HashHex, password)
+	if err != nil {
+		return err
+	}
+	if !valid {
 		return ErrSDKAccountExists
 	}
 	*out = SDKRegisterResult{UID: existing.Account.UID, LoginEmail: login}
@@ -279,9 +337,16 @@ func (service SDKService) Login(ctx context.Context, request SDKLoginRequest) (S
 			return err
 		}
 		if existing == nil || !existing.Account.Active || existing.Account.Kind != SDKAccountKindNormal {
+			if err := burnSDKPasswordDerivation(txctx); err != nil {
+				return err
+			}
 			return ErrSDKInvalidAccount
 		}
-		if !VerifySDKPassword(existing.Algorithm, existing.Iterations, existing.SaltHex, existing.HashHex, request.Password) {
+		valid, err := verifySDKPasswordBounded(txctx, existing.Algorithm, existing.Iterations, existing.SaltHex, existing.HashHex, request.Password)
+		if err != nil {
+			return err
+		}
+		if !valid {
 			return ErrSDKInvalidAccount
 		}
 		session, err := service.issueSession(txctx, scope.Tx, existing.Account, op.StartedAt)
@@ -398,7 +463,10 @@ func (service SDKService) issueSession(ctx context.Context, transaction tx.Tx, a
 	if err != nil {
 		return sdkRawSession{}, err
 	}
-	raw := sdkRawSession{SID: "sdk-sid-" + sessionUUID.String(), Token: "sdk-login-" + sessionUUID.String()}
+	raw, err := newSDKRawSession()
+	if err != nil {
+		return sdkRawSession{}, err
+	}
 	session := identity.Session{ID: sessionID, AccountID: account.ID, AuthProfile: identity.AuthProductionPair, IssuedAt: at, LastActivityAt: at, LivenessVersion: 1}
 	sid, err := newSDKCredential(service.DigestSecret, "sid", raw.SID, sessionID, at)
 	if err != nil {
@@ -422,6 +490,28 @@ func (service SDKService) issueSession(ctx context.Context, transaction tx.Tx, a
 		return sdkRawSession{}, err
 	}
 	return raw, nil
+}
+
+// newSDKRawSession makes two independent random credentials: the SID is sent
+// as a cookie, so nothing about it may reveal the login token.
+func newSDKRawSession() (sdkRawSession, error) {
+	sid, err := newSDKSessionSecret("sdk-sid-")
+	if err != nil {
+		return sdkRawSession{}, err
+	}
+	token, err := newSDKSessionSecret("sdk-login-")
+	if err != nil {
+		return sdkRawSession{}, err
+	}
+	return sdkRawSession{SID: sid, Token: token}, nil
+}
+
+func newSDKSessionSecret(prefix string) (string, error) {
+	value := make([]byte, SDKSessionSecretBytes)
+	if _, err := rand.Read(value); err != nil {
+		return "", err
+	}
+	return prefix + hex.EncodeToString(value), nil
 }
 
 func newSDKCredential(secret []byte, label, raw string, session identity.SessionID, at time.Time) (identity.SessionCredential, error) {

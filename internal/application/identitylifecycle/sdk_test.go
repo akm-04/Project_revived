@@ -1,10 +1,13 @@
 package identitylifecycle
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"strings"
 	"testing"
+	"time"
 
 	"golang.org/x/crypto/pbkdf2"
 )
@@ -57,6 +60,117 @@ func TestHashSDKPasswordMatchesThePythonRecordLayout(t *testing.T) {
 	if VerifySDKPassword(algorithm, iterations, saltHex, "zz", "password-1") {
 		t.Fatal("a malformed hash was accepted")
 	}
+}
+
+func TestVerifySDKPasswordRefusesIterationsOutsideBounds(t *testing.T) {
+	_, _, salt, hash, err := HashSDKPassword("password-1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if VerifySDKPassword(SDKPasswordAlgorithm, SDKPasswordMinimumIterations-1, salt, hash, "password-1") {
+		t.Fatal("a record below the iteration floor was accepted")
+	}
+	if VerifySDKPassword(SDKPasswordAlgorithm, SDKPasswordMaximumIterations+1, salt, hash, "password-1") {
+		t.Fatal("a record above the iteration ceiling was accepted")
+	}
+}
+
+func TestAcquireSDKPasswordDerivationRespectsContext(t *testing.T) {
+	releases := make([]func(), 0, SDKPasswordDerivationSlots)
+	defer func() {
+		for _, release := range releases {
+			release()
+		}
+	}()
+	for index := 0; index < SDKPasswordDerivationSlots; index++ {
+		release, err := acquireSDKPasswordDerivation(context.Background())
+		if err != nil {
+			t.Fatal(err)
+		}
+		releases = append(releases, release)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if _, err := acquireSDKPasswordDerivation(ctx); !errors.Is(err, context.Canceled) {
+		t.Fatalf("canceled acquire err = %v, want context canceled", err)
+	}
+}
+
+func TestSDKPasswordDerivationBoundHolds(t *testing.T) {
+	releases := make([]func(), 0, SDKPasswordDerivationSlots)
+	defer func() {
+		for _, release := range releases {
+			release()
+		}
+	}()
+	for index := 0; index < SDKPasswordDerivationSlots; index++ {
+		release, err := acquireSDKPasswordDerivation(context.Background())
+		if err != nil {
+			t.Fatal(err)
+		}
+		releases = append(releases, release)
+	}
+	acquired := make(chan struct{})
+	go func() {
+		release, err := acquireSDKPasswordDerivation(context.Background())
+		if err != nil {
+			t.Errorf("waiting derivation: %v", err)
+			close(acquired)
+			return
+		}
+		release()
+		close(acquired)
+	}()
+	select {
+	case <-acquired:
+		t.Fatal("a derivation beyond the bound ran while every slot was held")
+	case <-time.After(50 * time.Millisecond):
+	}
+	release := releases[0]
+	releases = releases[1:]
+	release()
+	select {
+	case <-acquired:
+	case <-time.After(time.Second):
+		t.Fatal("the waiting derivation did not run after a slot was freed")
+	}
+}
+
+func TestSDKSessionSecretsAreIndependent(t *testing.T) {
+	first, err := newSDKRawSession()
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := newSDKRawSession()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if first.SID == second.SID || first.Token == second.Token {
+		t.Fatal("two sessions reused one credential")
+	}
+	if !strings.HasPrefix(first.SID, "sdk-sid-") || !strings.HasPrefix(first.Token, "sdk-login-") {
+		t.Fatalf("raw session = %+v", first)
+	}
+	sidSecret := strings.TrimPrefix(first.SID, "sdk-sid-")
+	tokenSecret := strings.TrimPrefix(first.Token, "sdk-login-")
+	if len(sidSecret) != 2*SDKSessionSecretBytes || len(tokenSecret) != 2*SDKSessionSecretBytes {
+		t.Fatalf("secret lengths = %d %d", len(sidSecret), len(tokenSecret))
+	}
+	if strings.Contains(first.SID, tokenSecret) || strings.Contains(first.Token, sidSecret) {
+		t.Fatal("the login token is derivable from the SID")
+	}
+	if sharesSDKSubstring(sidSecret, tokenSecret, 8) {
+		t.Fatal("the SID and token share a substring")
+	}
+}
+
+func sharesSDKSubstring(left, right string, length int) bool {
+	for start := 0; start+length <= len(left); start++ {
+		if strings.Contains(right, left[start:start+length]) {
+			return true
+		}
+	}
+	return false
 }
 
 func sdkImportJSON(t *testing.T) string {

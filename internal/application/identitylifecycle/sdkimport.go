@@ -97,8 +97,8 @@ func (input SDKImportInput) validate() error {
 		if _, err := ids.ParseUUID(login.AccountUID); err != nil {
 			return fmt.Errorf("logins[%d]: account_uid is not a uuid", index)
 		}
-		if login.Algorithm != SDKPasswordAlgorithm || login.Iterations <= 0 {
-			return fmt.Errorf("logins[%d]: unsupported password algorithm or iteration count", index)
+		if login.Algorithm != SDKPasswordAlgorithm {
+			return fmt.Errorf("logins[%d]: unsupported password algorithm", index)
 		}
 		if _, err := hex.DecodeString(login.Salt); err != nil {
 			return fmt.Errorf("logins[%d]: salt is not hex", index)
@@ -215,6 +215,10 @@ func (importer SDKImporter) importAccount(ctx context.Context, transaction tx.Tx
 }
 
 func (importer SDKImporter) importLogin(ctx context.Context, transaction tx.Tx, imported SDKImportLogin, at time.Time, out *SDKImportResult) error {
+	if !sdkPasswordIterationsAcceptable(imported.Iterations) {
+		out.Conflicts++
+		return nil
+	}
 	account, err := importer.Store.FindSDKAccountByUIDTx(ctx, transaction, imported.AccountUID)
 	if err != nil {
 		return err

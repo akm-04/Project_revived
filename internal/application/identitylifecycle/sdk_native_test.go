@@ -122,6 +122,58 @@ func TestSDKRegisterLoginAndTheGameAcceptsTheSession(t *testing.T) {
 	}
 }
 
+func TestSDKLoginIssuesIndependentSessionCredentials(t *testing.T) {
+	pool := sdkTestPool(t)
+	ctx := context.Background()
+	service := sdkTestService(pool)
+	login := newSDKTestLogin(t)
+	if _, err := service.Register(ctx, appidentity.SDKRegisterRequest{Login: login, Password: "secret-1", Repassword: "secret-1"}); err != nil {
+		t.Fatal(err)
+	}
+	first, err := service.Login(ctx, appidentity.SDKLoginRequest{Login: login, Password: "secret-1"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := service.Login(ctx, appidentity.SDKLoginRequest{Login: login, Password: "secret-1"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if first.SID == second.SID || first.Token == second.Token {
+		t.Fatal("two logins reused one session credential")
+	}
+	sidSecret := strings.TrimPrefix(first.SID, "sdk-sid-")
+	tokenSecret := strings.TrimPrefix(first.Token, "sdk-login-")
+	if strings.Contains(first.SID, tokenSecret) || strings.Contains(first.Token, sidSecret) {
+		t.Fatal("the login token is derivable from the SID")
+	}
+}
+
+func TestSDKImportCountsPasswordRecordsOutsideTheIterationBounds(t *testing.T) {
+	pool := sdkTestPool(t)
+	ctx := context.Background()
+	uid := newSDKTestUUID(t)
+	document := fmt.Sprintf(`{
+  "accounts": [{"uid": %q, "type": "normal", "username": "iter-one"}],
+  "logins": [
+    {"normalized": "iter-high", "display": "iter-high", "account_uid": %q, "algorithm": "pbkdf2-sha256", "iterations": %d, "salt": "00000000000000000000000000000000", "hash": "0000000000000000000000000000000000000000000000000000000000000000"},
+    {"normalized": "iter-low", "display": "iter-low", "account_uid": %q, "algorithm": "pbkdf2-sha256", "iterations": %d, "salt": "00000000000000000000000000000000", "hash": "0000000000000000000000000000000000000000000000000000000000000000"}
+  ],
+  "devices": []
+}`, uid, uid, appidentity.SDKPasswordMaximumIterations+1, uid, appidentity.SDKPasswordMinimumIterations-1)
+	input, err := appidentity.DecodeSDKImport(strings.NewReader(document))
+	if err != nil {
+		t.Fatalf("an out-of-range iteration record refused the whole import: %v", err)
+	}
+	importer := appidentity.SDKImporter{Runner: tx.Runner{DB: pool}, Store: identitystore.Store{}, Operations: operation.Factory{Clock: clock.System{}}}
+	result, err := importer.Import(ctx, input)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.AccountsImported != 1 || result.LoginsImported != 0 || result.Conflicts != 2 {
+		t.Fatalf("import = %+v, want two iteration conflicts", result)
+	}
+}
+
 func TestSDKConcurrentDoubleRegisterKeepsOneAccount(t *testing.T) {
 	pool := sdkTestPool(t)
 	ctx := context.Background()
