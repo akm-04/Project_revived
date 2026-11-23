@@ -5,6 +5,7 @@
 package processcontrol
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -15,6 +16,7 @@ import (
 	"time"
 
 	"gxb.local/backend/v2/internal/application/operatoragent"
+	appotarelease "gxb.local/backend/v2/internal/application/otarelease"
 )
 
 const (
@@ -207,6 +209,10 @@ func (controller *Controller) waitUntilReady(child *childProcess, token string) 
 	defer ticker.Stop()
 	for {
 		if exited, waitErr := child.state(); exited {
+			var exitError *exec.ExitError
+			if errors.As(waitErr, &exitError) && exitError.ExitCode() == appotarelease.NoAssetsExitCode {
+				return operatoragent.Refuse(operatoragent.CodeBackendNoAssetsRelease, "the backend refused to open: no ACTIVE assets release is published; start closed, publish an assets release, then open")
+			}
 			return fmt.Errorf("the backend exited before it was ready: %v", waitErr)
 		}
 		if controller.versionAnswers(token) {

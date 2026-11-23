@@ -17,7 +17,6 @@ import (
 	"gxb.local/backend/v2/internal/adapters/operatorapi"
 	pg "gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/operatorstore"
-	"gxb.local/backend/v2/internal/adapters/postgres/otastore"
 	"gxb.local/backend/v2/internal/application/operator"
 	appota "gxb.local/backend/v2/internal/application/otarelease"
 	"gxb.local/backend/v2/internal/domain/otarelease"
@@ -120,9 +119,10 @@ func newKey(t *testing.T) string {
 
 func nativeHandler(t *testing.T, pool *pg.Pool, root string) operatorapi.Handler {
 	t.Helper()
-	bus := operator.Bus{Runner: tx.Runner{DB: pool}, Clock: clock.System{}, Store: operatorstore.Store{}, Handlers: appota.Commands{Store: otastore.Store{}, Root: root}.Handlers()}
+	state := appota.NewStateFile(root)
+	bus := operator.Bus{Runner: tx.Runner{DB: pool}, Clock: clock.System{}, Store: operatorstore.Store{}, Handlers: appota.Commands{Store: state, Root: root}.Handlers()}
 	reads := map[string]operatorapi.Read{
-		"ota.status":          operatorapi.OTAStatus(appota.StatusService{Runner: tx.Runner{DB: pool}, Operations: operation.Factory{Clock: clock.System{}}, Store: otastore.Store{}}),
+		"ota.status":          operatorapi.OTAStatus(appota.StatusService{Runner: tx.Runner{DB: pool}, Operations: operation.Factory{Clock: clock.System{}}, Store: state}),
 		"operator.audit.list": operatorapi.AuditList(operator.AuditService{Runner: tx.Runner{DB: pool}, Operations: operation.Factory{Clock: clock.System{}}, Reader: operatorstore.Store{}}),
 	}
 	return operatorapi.Handler{Bus: bus, Token: "secret", Reads: reads}
@@ -131,8 +131,8 @@ func nativeHandler(t *testing.T, pool *pg.Pool, root string) operatorapi.Handler
 func TestPublishReplayMakesOneActivationAndKeyReuseIsRefused(t *testing.T) {
 	pool := nativePool(t)
 	const version = "9.310.1"
-	resetNativeRelease(t, pool, version)
-	handler := nativeHandler(t, pool, nativeRoot(t, version))
+	root := nativeRoot(t, version)
+	handler := nativeHandler(t, pool, root)
 
 	registered := nativePost(t, handler, "ota.register_build", nativeBody(t, nativeEnvelope{Principal: "root", Role: "root", Scope: "global", Reason: "native", SemanticKey: newKey(t)}, nativeBuild(version)))
 	if registered.Code != http.StatusOK {
@@ -140,9 +140,6 @@ func TestPublishReplayMakesOneActivationAndKeyReuseIsRefused(t *testing.T) {
 	}
 
 	var revision int64
-	if err := pool.QueryRow(context.Background(), `SELECT COALESCE(max(id),0) FROM ota_activations`).Scan(&revision); err != nil {
-		t.Fatal(err)
-	}
 	envelope := nativeEnvelope{Principal: "root", Role: "root", Scope: "global", Reason: "native publish", SemanticKey: newKey(t), ExpectedRevision: &revision}
 	body := nativeBody(t, envelope, map[string]string{"version": version})
 	first := nativePost(t, handler, "ota.publish", body)
@@ -170,9 +167,15 @@ func TestPublishReplayMakesOneActivationAndKeyReuseIsRefused(t *testing.T) {
 	if err := json.Unmarshal(firstReply.Result, &activation); err != nil || activation.ActivationID == 0 {
 		t.Fatalf("publish activation=%s err=%v", firstReply.Result, err)
 	}
-	var activations int
-	if err := pool.QueryRow(context.Background(), `SELECT count(*) FROM ota_activations WHERE version=$1`, version).Scan(&activations); err != nil {
+	document, err := appota.NewStateFile(root).Load()
+	if err != nil {
 		t.Fatal(err)
+	}
+	activations := 0
+	for _, activation := range document.Activations {
+		if activation.Version == version {
+			activations++
+		}
 	}
 	if activations != 1 {
 		t.Fatalf("activation rows = %d", activations)
@@ -218,21 +221,6 @@ func TestPublishReplayMakesOneActivationAndKeyReuseIsRefused(t *testing.T) {
 	if !codeLane {
 		t.Fatalf("the code lane summary is missing from %s", status.Body)
 	}
-}
-
-func resetNativeRelease(t *testing.T, pool *pg.Pool, version string) {
-	t.Helper()
-	remove := func() {
-		ctx := context.Background()
-		if _, err := pool.Raw().Exec(ctx, `DELETE FROM ota_activations WHERE version=$1`, version); err != nil {
-			t.Fatal(err)
-		}
-		if _, err := pool.Raw().Exec(ctx, `DELETE FROM ota_releases WHERE version=$1`, version); err != nil {
-			t.Fatal(err)
-		}
-	}
-	remove()
-	t.Cleanup(remove)
 }
 
 func TestAuditReadPagesNewestFirstWithCursor(t *testing.T) {

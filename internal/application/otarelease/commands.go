@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"gxb.local/backend/v2/internal/application/operator"
@@ -106,15 +107,40 @@ func (commands Commands) Handlers() map[string]operator.Handler {
 	}
 }
 
+// commandMutex serializes the OTA commands: the release record is one file, and
+// a publish rewrites it in several store calls that must not interleave.
+var commandMutex sync.Mutex
+
 func (commands Commands) registerBuildHandler(ctx context.Context, scope tx.Scope, command operator.Command) (any, error) {
+	commandMutex.Lock()
+	defer commandMutex.Unlock()
+	if applied, found, err := replayApplied(commands.Store, command.Envelope.SemanticKey); err != nil {
+		return nil, err
+	} else if found {
+		return applied, nil
+	}
 	var request domain.BuildRequest
 	if err := decodePayload(command.Payload, &request); err != nil {
 		return nil, operator.Refuse(CodePayloadInvalid, err.Error(), nil)
 	}
-	return commands.RegisterBuild(ctx, scope.Tx, command.Envelope.SemanticKey, request, scope.Operation.StartedAt)
+	result, err := commands.RegisterBuild(ctx, scope.Tx, command.Envelope.SemanticKey, request, scope.Operation.StartedAt)
+	if err != nil {
+		return nil, err
+	}
+	if err := recordApplied(commands.Store, command.Envelope.SemanticKey, result); err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 func (commands Commands) publishHandler(ctx context.Context, scope tx.Scope, command operator.Command) (any, error) {
+	commandMutex.Lock()
+	defer commandMutex.Unlock()
+	if applied, found, err := replayApplied(commands.Store, command.Envelope.SemanticKey); err != nil {
+		return nil, err
+	} else if found {
+		return applied, nil
+	}
 	var request releasePayload
 	if err := decodePayload(command.Payload, &request); err != nil {
 		return nil, operator.Refuse(CodePayloadInvalid, err.Error(), nil)
@@ -123,10 +149,20 @@ func (commands Commands) publishHandler(ctx context.Context, scope tx.Scope, com
 	if err != nil {
 		return nil, err
 	}
+	if err := recordApplied(commands.Store, command.Envelope.SemanticKey, activation); err != nil {
+		return nil, err
+	}
 	return activation, nil
 }
 
 func (commands Commands) withdrawHandler(ctx context.Context, scope tx.Scope, command operator.Command) (any, error) {
+	commandMutex.Lock()
+	defer commandMutex.Unlock()
+	if applied, found, err := replayApplied(commands.Store, command.Envelope.SemanticKey); err != nil {
+		return nil, err
+	} else if found {
+		return applied, nil
+	}
 	var request releasePayload
 	if err := decodePayload(command.Payload, &request); err != nil {
 		return nil, operator.Refuse(CodePayloadInvalid, err.Error(), nil)
@@ -135,7 +171,33 @@ func (commands Commands) withdrawHandler(ctx context.Context, scope tx.Scope, co
 	if err != nil {
 		return nil, err
 	}
+	if err := recordApplied(commands.Store, command.Envelope.SemanticKey, activation); err != nil {
+		return nil, err
+	}
 	return activation, nil
+}
+
+// appliedCommandStore is implemented by StateFile: the bus retries a body on a
+// serializable abort, and the release file must not apply that body twice.
+type appliedCommandStore interface {
+	AppliedResult(string) (json.RawMessage, bool, error)
+	RecordApplied(string, any) error
+}
+
+func replayApplied(store CommandStore, commandKey string) (json.RawMessage, bool, error) {
+	applied, ok := store.(appliedCommandStore)
+	if !ok {
+		return nil, false, nil
+	}
+	return applied.AppliedResult(commandKey)
+}
+
+func recordApplied(store CommandStore, commandKey string, result any) error {
+	applied, ok := store.(appliedCommandStore)
+	if !ok {
+		return nil
+	}
+	return applied.RecordApplied(commandKey, result)
 }
 
 func decodePayload(payload json.RawMessage, target any) error {

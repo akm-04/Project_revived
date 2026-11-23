@@ -12,6 +12,10 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
+// Store owns the ota_settings row and the one-time release export. The release
+// and activation rows themselves live in the OTA root's releases.json.
+type Store struct{}
+
 const (
 	seedSettings = `INSERT INTO ota_settings (settings, revision, updated_at) VALUES ($1::jsonb, 0, $2) ON CONFLICT (singleton) DO NOTHING`
 	lockSettings = `SELECT settings::text, revision FROM ota_settings WHERE singleton FOR UPDATE`

@@ -221,15 +221,11 @@
   ],
   "ranks": [],
   "row_lock_methods": {
-   "ota_releases": [
-    "otastore.LockLaneTx"
-   ],
    "ota_settings": [
     "otastore.LockSettingsTx"
    ]
   },
   "row_locks": [
-   "ota_releases",
    "ota_settings"
   ],
   "unresolved_methods": []
@@ -282,10 +278,8 @@
    "ota_settings"
   ],
   "written": [
-   "ota_activations",
    "ota_asset_misses",
    "ota_asset_served_daily",
-   "ota_releases",
    "ota_settings"
   ]
  },
@@ -299,6 +293,7 @@
    "module_test.go",
    "serving_test.go",
    "settings_test.go",
+   "statefile_test.go",
    "status_test.go"
   ]
  }

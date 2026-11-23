@@ -2,14 +2,19 @@ package processcontrol
 
 import (
 	"encoding/json"
+	"errors"
 	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
 	"time"
+
+	"gxb.local/backend/v2/internal/application/operatoragent"
+	appotarelease "gxb.local/backend/v2/internal/application/otarelease"
 )
 
 const fakeBackendSource = `package main
@@ -37,8 +42,8 @@ func main() {
 	if os.Getenv("GXB_TEST_PRINT") == "1" {
 		fmt.Println("backend-line")
 	}
-	if os.Getenv("GXB_TEST_EXIT_EARLY") == "1" {
-		os.Exit(3)
+	if code, err := strconv.Atoi(os.Getenv("GXB_TEST_EXIT_EARLY")); err == nil && code > 0 {
+		os.Exit(code)
 	}
 	if milliseconds, err := strconv.Atoi(os.Getenv("GXB_TEST_DELAY_MS")); err == nil && milliseconds > 0 {
 		time.Sleep(time.Duration(milliseconds) * time.Millisecond)
@@ -213,6 +218,21 @@ func TestStartReportsEarlyExit(t *testing.T) {
 	}
 	if controller.Status().Running {
 		t.Fatal("a child that exited must not report running")
+	}
+}
+
+// TestStartReportsTheNoAssetsRefusal proves the backend's guard reaches the
+// agent as a permanent 409 refusal, not as a generic start failure.
+func TestStartReportsTheNoAssetsRefusal(t *testing.T) {
+	binary := buildFakeBackend(t)
+	controller := newController(t, binary, writeEnvFile(t, "GXB_TEST_EXIT_EARLY="+strconv.Itoa(appotarelease.NoAssetsExitCode)), freeAddress(t))
+	err := controller.Start(false, "token")
+	var refusal *operatoragent.Refusal
+	if !errors.As(err, &refusal) || refusal.Code != operatoragent.CodeBackendNoAssetsRelease {
+		t.Fatalf("want the no-assets refusal, got %v", err)
+	}
+	if controller.Status().Running {
+		t.Fatal("a refused child must not report running")
 	}
 }
 

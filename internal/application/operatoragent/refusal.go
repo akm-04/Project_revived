@@ -19,7 +19,10 @@ const (
 	CodeBackendRunning       = "AGENT_BACKEND_RUNNING"
 	CodeBackendBusy          = "AGENT_BACKEND_BUSY"
 	CodeBackendRestartFailed = "AGENT_BACKEND_RESTART_FAILED"
-	CodeFailed               = "AGENT_FAILED"
+	// CodeBackendNoAssetsRelease refuses an open start while no ACTIVE assets
+	// release is published; a closed start stays allowed.
+	CodeBackendNoAssetsRelease = "AGENT_BACKEND_NO_ASSETS_RELEASE"
+	CodeFailed                 = "AGENT_FAILED"
 
 	// operator settings refusals (G22): a refused value keeps the old one (F1).
 	CodeSettingsInvalid     = "AGENT_SETTINGS_INVALID"
