@@ -312,3 +312,41 @@ function var_0_2.getSingleVoiceInfo(gxbVoiceSelf, gxbVoiceId, gxbVoiceIndex)
 
 	return gxbLegacyVoiceMap(sound), dialog, duration
 end
+
+-- chosenSound and summonSound are played straight through audio.playSound by the team-select windows (campaign,
+-- arena, champions league, peak, occult, pet): they never pass through playHeroSound, so the file has to be on disk or
+-- the tap is silent. Hand back the legacy take only when the device holds it, otherwise play the stock line for this
+-- tap and queue the legacy file for the next one.
+local function gxbLegacyVoiceMapPlayable(path)
+	local legacy = gxbLegacyVoiceMap(path)
+
+	if legacy == path then
+		return path
+	end
+
+	if cc.FileUtils:getInstance():isFileExist(legacy) then
+		return legacy
+	end
+
+	local download = xyd.AssetDownload and xyd.AssetDownload.get and xyd.AssetDownload.get()
+
+	if download and download.downloadResByPath then
+		download:downloadResByPath(legacy, function()
+			return
+		end)
+	end
+
+	return path
+end
+
+local gxbChosenSound = var_0_2.chosenSound
+
+function var_0_2.chosenSound(gxbVoiceSelf, gxbVoiceId)
+	return gxbLegacyVoiceMapPlayable(gxbChosenSound(gxbVoiceSelf, gxbVoiceId))
+end
+
+local gxbSummonSound = var_0_2.summonSound
+
+function var_0_2.summonSound(gxbVoiceSelf, gxbVoiceId)
+	return gxbLegacyVoiceMapPlayable(gxbSummonSound(gxbVoiceSelf, gxbVoiceId))
+end
