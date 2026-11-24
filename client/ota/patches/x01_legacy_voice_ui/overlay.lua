@@ -77,6 +77,11 @@ function var_0_0.layout(gxbSwitchSelf)
 		cc.UserDefault:getInstance():setBoolForKey(GXB_LEGACY_VOICE_KEY, nextState)
 		cc.UserDefault:getInstance():flush()
 		gxbLegacyToggleTexts(button, nextState)
+
+		if nextState and xyd.gxbLegacyVoiceWarm then
+			xyd.gxbLegacyVoiceWarm()
+		end
+
 		audio.playSound("sound/button.ogg", false)
 	end)
 
