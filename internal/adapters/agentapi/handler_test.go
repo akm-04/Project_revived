@@ -449,28 +449,28 @@ func TestBuildRouteRefusesWhileAnotherRuns(t *testing.T) {
 	}
 }
 
-type blockingBackend struct {
-	stopped chan struct{}
+// blockingOperator holds the maintenance flow open inside its first read, so a
+// backend start can be attempted while the guard is taken.
+type blockingOperator struct {
+	entered chan struct{}
 	release chan struct{}
 	once    sync.Once
 }
 
-func newBlockingBackend() *blockingBackend {
-	return &blockingBackend{stopped: make(chan struct{}), release: make(chan struct{})}
-}
-
-func (backend *blockingBackend) Start(bool, string) error { return nil }
-
-func (backend *blockingBackend) Stop() error {
-	backend.once.Do(func() {
-		close(backend.stopped)
-		<-backend.release
+func (operator *blockingOperator) Read(context.Context, string, string) (operatoragent.BackendResponse, error) {
+	operator.once.Do(func() {
+		close(operator.entered)
+		<-operator.release
 	})
-	return nil
+	return operatoragent.BackendResponse{Status: http.StatusOK, Body: []byte(`{"revision":1}`)}, nil
 }
 
-func (backend *blockingBackend) Status() operatoragent.BackendStatus {
-	return operatoragent.BackendStatus{}
+func (*blockingOperator) Command(context.Context, operatoragent.OperatorRequest) (operatoragent.BackendResponse, error) {
+	return operatoragent.BackendResponse{Status: http.StatusOK, Body: []byte(`{}`)}, nil
+}
+
+func (*blockingOperator) Version(context.Context) (operator.VersionInfo, error) {
+	return operator.VersionInfo{Migration: 1}, nil
 }
 
 type staticOperator struct{}
@@ -502,15 +502,15 @@ func TestBackendStartRefusedWhileMaintenanceRuns(t *testing.T) {
 		t.Fatal(err)
 	}
 	guard := &operatoragent.BackendGuard{}
-	backend := newBlockingBackend()
 	tokens := &operatoragent.TokenHolder{}
 	operations := operatoragent.NewOperations(t.TempDir(), nil, time.Now)
-	maintenance := operatoragent.Maintenance{Backend: backend, Operator: staticOperator{}, Tokens: tokens, Operations: operations, Guard: guard}
+	blocking := &blockingOperator{entered: make(chan struct{}), release: make(chan struct{})}
+	maintenance := operatoragent.Maintenance{Operator: blocking, Operations: operations, Guard: guard}
 	handler := Handler{
 		Credentials: credentials,
 		Sessions:    sessions,
-		Backend:     backend,
-		Operator:    staticOperator{},
+		Backend:     coverageBackend{},
+		Operator:    blocking,
 		Tokens:      tokens,
 		Maintenance: maintenance,
 		Operations:  operations,
@@ -524,7 +524,7 @@ func TestBackendStartRefusedWhileMaintenanceRuns(t *testing.T) {
 		finished <- runErr
 	}()
 	select {
-	case <-backend.stopped:
+	case <-blocking.entered:
 	case <-time.After(5 * time.Second):
 		t.Fatal("the maintenance flow did not start")
 	}
@@ -541,7 +541,7 @@ func TestBackendStartRefusedWhileMaintenanceRuns(t *testing.T) {
 		t.Fatalf("code = %q, want %q", refusal.Code, operatoragent.CodeBackendBusy)
 	}
 
-	close(backend.release)
+	close(blocking.release)
 	select {
 	case runErr := <-finished:
 		if runErr != nil {

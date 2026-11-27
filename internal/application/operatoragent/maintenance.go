@@ -62,9 +62,10 @@ type OperatorClient interface {
 	Version(context.Context) (operator.VersionInfo, error)
 }
 
-// Maintenance is the OTA publish/withdraw flow of I11A_OTA_RELEASE_V1 ruling
-// 13: stop the game listener, apply the command, reopen. A failure leaves the
-// backend closed and names the failed step in the operation record.
+// Maintenance is the OTA publish/withdraw flow. Publish activates the release
+// in process and then forces every player to log in again (owner ruling Q4);
+// withdraw keeps the maintenance window of I11A_OTA_RELEASE_V1 ruling 13. A
+// failure names the failed step in the operation record.
 type Maintenance struct {
 	Backend    BackendControl
 	Operator   OperatorClient
@@ -108,29 +109,35 @@ func RestartBackend(backend BackendControl, tokens *TokenHolder, closed bool) er
 	return nil
 }
 
-// Publish runs stop -> start closed -> status -> publish -> stop -> start open.
+// Publish activates the release in process; the ota.publish reply returns only
+// after serving refreshed, then session.logout_all forces the relog. It never
+// stops or restarts the backend.
 func (maintenance Maintenance) Publish(ctx context.Context, version, reason, semanticKey string) (Operation, error) {
-	return maintenance.run(ctx, "ota.publish", version, reason, semanticKey)
+	return maintenance.run(ctx, "ota.publish", version, reason, semanticKey, false)
 }
 
-// Withdraw runs the same maintenance window for ota.withdraw.
+// Withdraw is not covered by owner ruling Q4 and keeps the maintenance window.
 func (maintenance Maintenance) Withdraw(ctx context.Context, version, reason, semanticKey string) (Operation, error) {
-	return maintenance.run(ctx, "ota.withdraw", version, reason, semanticKey)
+	return maintenance.run(ctx, "ota.withdraw", version, reason, semanticKey, true)
 }
 
-func (maintenance Maintenance) run(ctx context.Context, command, version, reason, semanticKey string) (Operation, error) {
+func (maintenance Maintenance) run(ctx context.Context, command, version, reason, semanticKey string, maintenanceWindow bool) (Operation, error) {
 	if !maintenance.Guard.TryLock() {
 		return Operation{}, Refuse(CodeBackendBusy, "a backend operation is already running")
 	}
 	defer maintenance.Guard.Unlock()
 
 	var revision int64
-	steps := []Step{
-		{Name: "stop backend", Run: func(context.Context) (any, error) { return nil, maintenance.Backend.Stop() }},
-		{Name: "start backend closed", Run: func(context.Context) (any, error) {
-			return nil, StartBackend(maintenance.Backend, maintenance.Tokens, true)
-		}},
-		{Name: "read active revision", Run: func(ctx context.Context) (any, error) {
+	steps := make([]Step, 0, 7)
+	if maintenanceWindow {
+		steps = append(steps,
+			Step{Name: "stop backend", Run: func(context.Context) (any, error) { return nil, maintenance.Backend.Stop() }},
+			Step{Name: "start backend closed", Run: func(context.Context) (any, error) {
+				return nil, StartBackend(maintenance.Backend, maintenance.Tokens, true)
+			}})
+	}
+	steps = append(steps,
+		Step{Name: "read active revision", Run: func(ctx context.Context) (any, error) {
 			response, err := maintenance.Operator.Read(ctx, "ota.status", "")
 			if err != nil {
 				return nil, err
@@ -147,7 +154,7 @@ func (maintenance Maintenance) run(ctx context.Context, command, version, reason
 			revision = status.Revision
 			return map[string]any{"revision": revision}, nil
 		}},
-		{Name: command, Run: func(ctx context.Context) (any, error) {
+		Step{Name: command, Run: func(ctx context.Context) (any, error) {
 			payload, err := json.Marshal(map[string]string{"version": version})
 			if err != nil {
 				return nil, err
@@ -172,13 +179,15 @@ func (maintenance Maintenance) run(ctx context.Context, command, version, reason
 			}
 			return json.RawMessage(response.Body), nil
 		}},
-		{Name: "session.logout_all", Run: func(ctx context.Context) (any, error) {
+		Step{Name: "session.logout_all", Run: func(ctx context.Context) (any, error) {
 			return maintenance.logoutAll(ctx, command, version, semanticKey)
-		}},
-		{Name: "stop backend", Run: func(context.Context) (any, error) { return nil, maintenance.Backend.Stop() }},
-		{Name: "start backend open", Run: func(context.Context) (any, error) {
-			return nil, StartBackend(maintenance.Backend, maintenance.Tokens, false)
-		}},
+		}})
+	if maintenanceWindow {
+		steps = append(steps,
+			Step{Name: "stop backend", Run: func(context.Context) (any, error) { return nil, maintenance.Backend.Stop() }},
+			Step{Name: "start backend open", Run: func(context.Context) (any, error) {
+				return nil, StartBackend(maintenance.Backend, maintenance.Tokens, false)
+			}})
 	}
 	return maintenance.Operations.Run(ctx, "maintenance."+command, steps)
 }

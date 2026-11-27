@@ -14,7 +14,7 @@ const versionCheckDebounceMilliseconds = 250;
 const firstReleaseVersion = "1.631.1";
 const rollbackAcknowledgementText = "I understand clients must clear app data";
 const rollbackWarningText = "installed clients will not step down by themselves: players must clear the app's data or reinstall to take the rolled-back release";
-const publishWarningText = "Publish runs the maintenance window: the game closes, every player is logged out, the release goes live, the game reopens.";
+const publishWarningText = "Publish keeps the server running and logs every player out, so they update on their next login.";
 
 const lanes = [
   { id: "assets", title: "Loud (assets)", action: "assets" },
@@ -29,7 +29,7 @@ export function renderPage(container, context) {
   const heading = pageHeader(context.page.label);
   const help = document.createElement("p");
   help.className = "module-help";
-  help.textContent = "Stage builds the version you type, or the lane's next number; publish runs the maintenance window.";
+  help.textContent = "Stage builds the version you type, or the lane's next number; publish keeps the server running and logs every player out.";
   const refresh = actionButton("Refresh", true, "ota-refresh");
   const status = document.createElement("p");
   status.className = "status";
@@ -649,8 +649,8 @@ async function publishLane(lane, version, rollback, log) {
     return;
   }
   const summary = rollback
-    ? "Publishing " + version + " is a rollback below the active version. " + rollbackWarningText + ". The maintenance window logs out every player. Continue?"
-    : "Publishing takes the maintenance window and logs out every player. Continue?";
+    ? "Publishing " + version + " is a rollback below the active version. " + rollbackWarningText + ". The server keeps running and every player is logged out so they update on next login. Continue?"
+    : "Publishing keeps the server running and logs out every player so they update on next login. Continue?";
   const confirmed = await confirmAction({
     title: "Publish " + lane.title + " " + version,
     confirmLabel: "Publish",
@@ -674,7 +674,7 @@ async function publishLane(lane, version, rollback, log) {
     return;
   }
   const operation = reply.body && typeof reply.body === "object" ? reply.body : {};
-  log.append(paragraph("hint", operation.state === "DONE" ? "Published " + version + "." : "The maintenance window is running."));
+  log.append(paragraph("hint", operation.state === "DONE" ? "Published " + version + "." : "The publish is running."));
   log.append(logBox(operation));
 }
 
