@@ -11,7 +11,9 @@ import (
 	"gxb.local/backend/v2/internal/application/operatoragent"
 )
 
-const terminalHeartbeat = 15 * time.Second
+// terminalHeartbeat is the stream keepalive and session recheck interval; a
+// test may shorten it.
+var terminalHeartbeat = 15 * time.Second
 
 const (
 	terminalMinimumColumns = 1
@@ -158,7 +160,8 @@ func (handler Handler) serveTerminalStream(writer http.ResponseWriter, request *
 		writeRefusal(writer, http.StatusServiceUnavailable, operatoragent.CodeFailed, "the terminal is not configured")
 		return
 	}
-	attachment, err := handler.Terminal.Attach(bearer(request), id)
+	token := bearer(request)
+	attachment, err := handler.Terminal.Attach(token, id)
 	if err != nil {
 		handler.writeAgentError(writer, "terminal.stream", err)
 		return
@@ -181,6 +184,10 @@ func (handler Handler) serveTerminalStream(writer http.ResponseWriter, request *
 		case <-attachment.Done():
 			return
 		case <-heartbeat.C:
+			if !handler.authorized(token) {
+				_ = handler.Terminal.Close(token, id)
+				return
+			}
 			if _, err := io.WriteString(writer, ": keepalive\n\n"); err != nil {
 				return
 			}

@@ -114,6 +114,44 @@ func TestTerminalCloseIsIdempotent(t *testing.T) {
 	}
 }
 
+func TestTerminalCloseSessionEndsOnlyItsOwnersTerminal(t *testing.T) {
+	service, output := newCatTerminalService(t, 0)
+	first, err := service.Open("session-a", "127.0.0.1:8090")
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := service.Open("session-b", "127.0.0.1:8090")
+	if err != nil {
+		t.Fatal(err)
+	}
+	service.CloseSession("session-a", "logout")
+	if _, err := service.Attach("session-a", first.TerminalID); err == nil {
+		t.Fatal("the logged-out session's terminal survived")
+	}
+	if err := service.WriteInput("session-b", second.TerminalID, []byte("still here\n")); err != nil {
+		t.Fatalf("another session's terminal was closed: %v", err)
+	}
+	if service.ActiveCount() != 1 {
+		t.Fatalf("terminals = %d", service.ActiveCount())
+	}
+	if !strings.Contains(output.String(), `"reason":"logout"`) {
+		t.Fatalf("the close reason was not logged: %s", output.String())
+	}
+}
+
+func TestTerminalCloseAllEndsEveryTerminal(t *testing.T) {
+	service, _ := newCatTerminalService(t, 0)
+	for _, token := range []string{"session-a", "session-b"} {
+		if _, err := service.Open(token, "127.0.0.1:8090"); err != nil {
+			t.Fatal(err)
+		}
+	}
+	service.CloseAll("password changed")
+	if service.ActiveCount() != 0 {
+		t.Fatalf("terminals = %d", service.ActiveCount())
+	}
+}
+
 func TestTerminalIsOnePerSessionAndAtMostThree(t *testing.T) {
 	service, _ := newCatTerminalService(t, 0)
 	first, err := service.Open("session-a", "127.0.0.1:8090")

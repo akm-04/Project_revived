@@ -220,6 +220,9 @@ func (handler Handler) serve(writer http.ResponseWriter, request *http.Request) 
 	switch {
 	case request.URL.Path == logoutPath && request.Method == http.MethodPost:
 		handler.Sessions.Logout(token)
+		if handler.Terminal != nil {
+			handler.Terminal.CloseSession(token, "logout")
+		}
 		handler.record("logout", "session", "ok", nil)
 		writeJSON(writer, http.StatusOK, map[string]string{"state": "logged out"})
 	case request.URL.Path == passwordPath && request.Method == http.MethodPost:
@@ -334,11 +337,7 @@ func (handler Handler) serveLogin(writer http.ResponseWriter, request *http.Requ
 		handler.writeBodyError(writer, err)
 		return
 	}
-	if err := handler.Credentials.Verify(body.Password); err != nil {
-		handler.writeAgentError(writer, "login", err)
-		return
-	}
-	generation, err := handler.Credentials.Generation()
+	generation, err := handler.Credentials.VerifyAndGeneration(body.Password)
 	if err != nil {
 		handler.writeAgentError(writer, "login", err)
 		return
@@ -363,6 +362,9 @@ func (handler Handler) servePasswordChange(writer http.ResponseWriter, request *
 	if err := handler.Credentials.ChangePassword(body.Current, body.New); err != nil {
 		handler.writeAgentError(writer, "account.password", err)
 		return
+	}
+	if handler.Terminal != nil {
+		handler.Terminal.CloseAll("password changed")
 	}
 	handler.record("account", "password changed", "ok", nil)
 	writeJSON(writer, http.StatusOK, map[string]string{"state": "password changed"})
