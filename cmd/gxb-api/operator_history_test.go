@@ -37,6 +37,7 @@ func TestPostCommitExecutorMirrorsOnlyAppliedOTAActivations(t *testing.T) {
 		{"replayed publish", "ota.publish", operator.Outcome{State: operator.StateApplied, Result: activation, Replayed: true}, false},
 		{"refused publish", "ota.publish", operator.Outcome{State: operator.StateRefused, Result: refusal}, false},
 		{"another command", "ota.register_build", operator.Outcome{State: operator.StateApplied, Result: activation}, false},
+		{"settings write their own file", "ota.settings.set", operator.Outcome{State: operator.StateApplied, Result: json.RawMessage(`{"new":{"lazy_fetch":"off"}}`)}, false},
 	}
 	for _, testCase := range cases {
 		t.Run(testCase.name, func(t *testing.T) {
@@ -60,49 +61,18 @@ func TestPostCommitExecutorMirrorsOnlyAppliedOTAActivations(t *testing.T) {
 	}
 }
 
-func TestPostCommitExecutorReconcilesSettingsAfterEveryAppliedCommand(t *testing.T) {
-	change := json.RawMessage(`{"old":{"lazy_fetch":"auto","res_path":""},"new":{"lazy_fetch":"off","res_path":""},"revision":1}`)
-	cases := []struct {
-		name    string
-		outcome operator.Outcome
-		runs    int
-	}{
-		{"applied", operator.Outcome{State: operator.StateApplied, Result: change}, 1},
-		// A replay is how a committed change whose copy failed gets applied.
-		{"replayed", operator.Outcome{State: operator.StateApplied, Result: change, Replayed: true}, 1},
-		{"refused", operator.Outcome{State: operator.StateRefused, Result: json.RawMessage(`{"error_code":"PAYLOAD_INVALID"}`)}, 0},
-	}
-	for _, testCase := range cases {
-		t.Run(testCase.name, func(t *testing.T) {
-			runs := 0
-			reconcile := func(context.Context) error { runs++; return nil }
-			executor := postCommitExecutor{Next: fixedExecutor{outcome: testCase.outcome}, OTA: otaAfterCommit{Root: t.TempDir(), ReconcileSettings: reconcile}}
-			if _, err := executor.Execute(context.Background(), operator.Command{ModuleCommand: "ota.settings.set"}); err != nil {
-				t.Fatal(err)
-			}
-			if runs != testCase.runs {
-				t.Fatalf("reconcile runs=%d want %d", runs, testCase.runs)
-			}
-		})
-	}
-}
-
-func TestPostCommitExecutorReportsAFailedSettingsCopy(t *testing.T) {
+// S1 item 1: settings.json is written by the command handler; post-commit only
+// records the history row, and its failure is logged rather than returned.
+func TestPostCommitExecutorRecordsSettingsAndLogsAFailure(t *testing.T) {
 	executor := postCommitExecutor{
 		Next: fixedExecutor{outcome: operator.Outcome{State: operator.StateApplied, Result: json.RawMessage(`{}`)}},
-		OTA:  otaAfterCommit{ReconcileSettings: func(context.Context) error { return errors.New("disk full") }},
+		OTA: otaAfterCommit{
+			Root:           t.TempDir(),
+			RecordSettings: func(context.Context, string) error { return errors.New("database restored") },
+		},
 	}
-	if _, err := executor.Execute(context.Background(), operator.Command{ModuleCommand: "ota.settings.set"}); err == nil {
-		t.Fatal("a failed settings copy must not report success")
-	}
-}
-
-func TestPostCommitExecutorReportsAMissingSettingsSync(t *testing.T) {
-	executor := postCommitExecutor{
-		Next: fixedExecutor{outcome: operator.Outcome{State: operator.StateApplied, Result: json.RawMessage(`{}`)}},
-	}
-	if _, err := executor.Execute(context.Background(), operator.Command{ModuleCommand: "ota.settings.set"}); err == nil {
-		t.Fatal("a committed settings command without a sync must not report success")
+	if _, err := executor.Execute(context.Background(), operator.Command{ModuleCommand: "ota.settings.set", Envelope: operator.Envelope{SemanticKey: "key"}}); err != nil {
+		t.Fatalf("a failed settings audit row must be a warning, not an error: %v", err)
 	}
 }
 

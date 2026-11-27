@@ -2,6 +2,7 @@ package otarelease
 
 import (
 	"context"
+	"log"
 	"math"
 	"slices"
 	"time"
@@ -79,6 +80,9 @@ type Status struct {
 	// Settings are the effective live values, including a field a client or an
 	// operator sees without restarting the API (L4h).
 	Settings domain.Settings `json:"settings"`
+	// SettingsInvalid reports a settings.json this boot could not use; the
+	// backend serves the defaults and never rewrites the file (S1 item 1).
+	SettingsInvalid bool `json:"settings_invalid"`
 }
 
 // LaneSummary is one OTA lane's overview (OPERATOR_GUI_V2 design item 5):
@@ -145,40 +149,46 @@ type StatusService struct {
 	Live       *SettingsValue
 }
 
+// Status reads the release file without a database transaction; the serving
+// ledger is telemetry, so a database fault logs and leaves those lists empty.
 func (s StatusService) Status(ctx context.Context) (Status, error) {
-	if s.Store == nil || s.Runner.DB == nil {
+	if s.Store == nil {
 		return Status{}, ErrUnavailable
 	}
-	current, err := s.Operations.New(policy.Set{})
+	snapshot, err := s.Store.ReadStatusTx(ctx, nil)
 	if err != nil {
 		return Status{}, err
 	}
-	var snapshot StatusSnapshot
-	_, err = s.Runner.Run(ctx, current, ReadProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, scope tx.Scope) error {
-		loaded, readErr := s.Store.ReadStatusTx(ctx, scope.Tx)
-		if readErr != nil {
-			return readErr
+	if s.Ledger != nil && s.Runner.DB != nil {
+		ledger, ledgerErr := s.readLedger(ctx)
+		if ledgerErr != nil {
+			log.Printf("ota status ledger: %v", ledgerErr)
+		} else {
+			snapshot.Served = ledger.Served
+			snapshot.Misses = ledger.Misses
 		}
-		if s.Ledger != nil {
-			ledger, ledgerErr := s.Ledger.ReadLedgerTx(ctx, scope.Tx, StatusServedLimit+1, StatusMissesLimit+1)
-			if ledgerErr != nil {
-				return ledgerErr
-			}
-			loaded.Served = ledger.Served
-			loaded.Misses = ledger.Misses
-		}
-		snapshot = loaded
-		return nil
-	})
-	if err != nil {
-		return Status{}, err
 	}
 	status, err := foldStatus(snapshot)
 	if err != nil {
 		return Status{}, err
 	}
 	status.Settings = s.Live.Get()
+	status.SettingsInvalid = s.Live.Invalid()
 	return status, nil
+}
+
+func (s StatusService) readLedger(ctx context.Context) (LedgerStatus, error) {
+	current, err := s.Operations.New(policy.Set{})
+	if err != nil {
+		return LedgerStatus{}, err
+	}
+	var ledger LedgerStatus
+	_, err = s.Runner.Run(ctx, current, ReadProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, scope tx.Scope) error {
+		loaded, readErr := s.Ledger.ReadLedgerTx(ctx, scope.Tx, StatusServedLimit+1, StatusMissesLimit+1)
+		ledger = loaded
+		return readErr
+	})
+	return ledger, err
 }
 
 func foldStatus(snapshot StatusSnapshot) (Status, error) {

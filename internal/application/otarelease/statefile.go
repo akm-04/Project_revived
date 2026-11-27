@@ -159,23 +159,15 @@ func (f *StateFile) Save(document StateDocument) error {
 	return writeFileAtomically(f.Path(), data)
 }
 
-// Seed imports the database rows once, when the release file does not exist
-// yet or holds nothing, and leaves a populated file untouched afterwards. A
-// database restore therefore never rewrites the live OTA.
+// Seed imports the database rows once, only when the release file is absent.
+// An existing file, even an empty one, is the authority and is never replaced,
+// so a database restore never rewrites the live OTA (S1 item 2).
 func (f *StateFile) Seed(ctx context.Context, runner tx.Runner, exporter StateExporter) (bool, error) {
 	if f == nil || f.Root == "" || exporter == nil || runner.DB == nil {
 		return false, nil
 	}
-	exists := false
 	if _, err := os.Stat(f.Path()); err == nil {
-		exists = true
-		current, err := f.Load()
-		if err != nil {
-			return false, err
-		}
-		if !emptyState(current) {
-			return false, nil
-		}
+		return false, nil
 	} else if !errors.Is(err, os.ErrNotExist) {
 		return false, err
 	}
@@ -194,16 +186,13 @@ func (f *StateFile) Seed(ctx context.Context, runner tx.Runner, exporter StateEx
 	if err != nil {
 		return false, err
 	}
-	if !exists {
-		// Another process seeding the same root wins the link; its newer file
-		// is left alone.
-		data, err := encodedState(document)
-		if err != nil {
-			return false, err
-		}
-		return writeFileExclusively(f.Path(), data)
+	// Another process seeding the same root wins the link; its newer file is
+	// left alone.
+	data, err := encodedState(document)
+	if err != nil {
+		return false, err
 	}
-	return true, f.Save(document)
+	return writeFileExclusively(f.Path(), data)
 }
 
 func encodedState(document StateDocument) ([]byte, error) {
@@ -213,10 +202,6 @@ func encodedState(document StateDocument) ([]byte, error) {
 		return nil, err
 	}
 	return append(data, '\n'), nil
-}
-
-func emptyState(document StateDocument) bool {
-	return len(document.Releases) == 0 && len(document.Activations) == 0 && len(document.Applied) == 0
 }
 
 // HasActiveAssets reports whether any ACTIVE assets release is published.

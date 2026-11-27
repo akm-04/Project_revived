@@ -5,6 +5,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -354,5 +355,27 @@ func TestPreloginDiscoveryAdvertisesResOnlyWhenLazyFetchIsEffective(t *testing.T
 	response = discovery(withAssets.serving.ResDownloadURL)
 	if response.HTTPStatus != 200 || response.Body["res_download_url"] != "" {
 		t.Fatalf("off response=%+v", response.Body)
+	}
+}
+
+// S1 item 3: an unloadable release set is "no update" for /updates and a 404
+// for /res, never a 503 the client retries forever.
+func TestOTAHandlersAnswerNoUpdateWhenServingCannotLoad(t *testing.T) {
+	serving := &appotarelease.Serving{
+		Load:     func(context.Context) ([]domain.RawRelease, error) { return nil, errors.New("corrupt releases.json") },
+		Root:     t.TempDir(),
+		Settings: appotarelease.NewSettingsValue(domain.DefaultSettings()),
+	}
+	updates := OTAUpdatesGET{Serving: serving}
+	recorder := httptest.NewRecorder()
+	updates.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/updates/assets/"+otaVolumeName("1.631.1"), nil))
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("/updates status=%d want 404", recorder.Code)
+	}
+	res := OTAResGET{Serving: serving}
+	recorder = httptest.NewRecorder()
+	res.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/res/a.png."+otaMD5([]byte("asset")), nil))
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("/res status=%d want 404", recorder.Code)
 	}
 }

@@ -23,13 +23,11 @@ import (
 	"gxb.local/backend/v2/internal/application/operatorgrant"
 	"gxb.local/backend/v2/internal/application/playerdisplay"
 	apptopfloor "gxb.local/backend/v2/internal/application/topfloor"
-	domain "gxb.local/backend/v2/internal/domain/otarelease"
 	"log"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"strconv"
 	"syscall"
 	"time"
@@ -502,15 +500,11 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-	if cfg.OTARoot != "" && !filepath.IsAbs(cfg.OTARoot) {
-		log.Fatalf("GXB_OTA_ROOT must be an absolute path, got %q", cfg.OTARoot)
+	otaState, err := prepareOTAFiles(ctx, cfg.OTARoot, cfg.PublicEngineURL, runner)
+	if err != nil {
+		log.Fatalf("%v", err)
 	}
-	otaReleaseState := appotarelease.NewStateFile(cfg.OTARoot)
-	if cfg.OTARoot != "" {
-		if _, err := otaReleaseState.Seed(ctx, runner, otastore.Store{}); err != nil {
-			log.Fatalf("OTA release state: import the database rows into %s: %v", otaReleaseState.Path(), err)
-		}
-	}
+	otaReleaseState := otaState.State
 	// The stock client hangs without the assets bootstrap, so an open start is
 	// refused until one is published; starting closed stays allowed for the
 	// maintenance window that publishes it.
@@ -522,42 +516,23 @@ func main() {
 		log.Print("refusing to open: no ACTIVE assets release is published; start closed, publish an assets release, then open")
 		os.Exit(appotarelease.NoAssetsExitCode)
 	}
-	otaRelease := appotarelease.Service{
-		Runner:          runner,
-		Store:           otaReleaseState,
-		Operations:      operation.Factory{Clock: clock.System{}},
-		PublicEngineURL: cfg.PublicEngineURL,
-	}
-	otaSettingsFile := appotarelease.SettingsFile{Root: cfg.OTARoot}
-	otaSettingsValue := appotarelease.NewSettingsValue(domain.DefaultSettings())
-	otaSettingsSync := &appotarelease.SettingsSync{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: otastore.Store{}, File: otaSettingsFile, Live: otaSettingsValue}
-	if cfg.OTARoot != "" {
-		usable, err := otaSettingsSync.Start(ctx)
-		if err != nil {
-			log.Fatalf("OTA settings: copy the committed settings to settings.json: %v", err)
-		}
-		if !usable {
-			log.Fatalf("OTA settings: %s is invalid and no committed ota_settings row exists; fix the file or send ota.settings.set", otaSettingsFile.Path())
-		}
-	}
+	otaSettingsFile := otaState.File
+	otaSettingsValue := otaState.Settings
 	otaLedger := appotarelease.NewLedger(runner, operation.Factory{Clock: clock.System{}}, otastore.LedgerStore{})
 	go otaLedger.Run(ctx, 30*time.Second)
 	otaServing := &appotarelease.Serving{
-		Load:            otaRelease.ActiveRows,
+		Load:            otaState.Release.ActiveRows,
 		Root:            cfg.OTARoot,
 		Settings:        otaSettingsValue,
 		PublicEngineURL: cfg.PublicEngineURL,
 		Ledger:          otaLedger,
 	}
-	if err := otaRelease.StartupCheck(ctx, cfg.OTARoot); err != nil {
-		log.Fatalf("OTA startup: %v", err)
-	}
 	if cfg.OTARoot != "" {
 		if err := otaServing.Refresh(ctx); err != nil {
-			log.Fatalf("OTA serving: %v", err)
+			log.Printf("OTA serving: no release set loaded at boot: %v", err)
 		}
 	}
-	prelogin := stockruntime.PreloginDispatcher{PublicEngineURL: cfg.PublicEngineURL, Tracker: tracker, Updates: otaRelease, ResourceDownloadURL: otaServing.ResDownloadURL}
+	prelogin := stockruntime.PreloginDispatcher{PublicEngineURL: cfg.PublicEngineURL, Tracker: tracker, Updates: otaState.Release, ResourceDownloadURL: otaServing.ResDownloadURL}
 	for _, mid := range []uint16{2, 2864, 20480} {
 		mustRegister(mid, prelogin)
 	}
@@ -565,7 +540,7 @@ func main() {
 	mux := http.NewServeMux()
 	otaCommands := appotarelease.Commands{Store: otaReleaseState, Root: cfg.OTARoot}
 	otaStatus := appotarelease.StatusService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: otaReleaseState, Ledger: otastore.Store{}, Live: otaSettingsValue}
-	otaReleaseLookup := appotarelease.ReleaseLookup{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: otaReleaseState}
+	otaReleaseLookup := appotarelease.ReleaseLookup{Store: otaReleaseState}
 	operatorAudit := operator.AuditService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Reader: operatorstore.Store{}}
 	backendVersion, gitCommit := buildIdentity()
 	operatorCatalogue, err := opcatalogsource.Load(time.Now().UTC())
@@ -618,7 +593,7 @@ func main() {
 	}
 	eventService := appevents.Service{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: eventstore.Store{}, Clock: clock.System{}, Servers: i4store.ServerDirectoryReader{}}
 	otaModule := bindModule(otaCommands.Module(),
-		map[string]operator.Handler{"ota.settings.set": appotarelease.SettingsSetHandler(otaSettingsFile, otaSettingsValue, otastore.Store{})},
+		map[string]operator.Handler{"ota.settings.set": appotarelease.SettingsSetHandler(otaSettingsFile, otaSettingsValue)},
 		map[string]operator.ReadHandler{"ota.status": operatorapi.OTAStatus(otaStatus), "ota.release": operatorapi.OTARelease(otaReleaseLookup)})
 	eventsModule := bindModule(eventCommands.Module(), nil,
 		map[string]operator.ReadHandler{"events.list": operatorapi.EventsList(eventService)})
@@ -660,7 +635,7 @@ func main() {
 	}
 	eventJobs := appevents.Jobs{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: eventstore.Store{}, Coverage: otaServing, Hooks: eventHooks, Clock: clock.System{}, DefaultCycle: defaultCycle, Servers: i4store.PlayerRootLocker{}, Players: i4store.EventPlayerSource{}, Mail: appi5.SettlementMail{Store: i5db}, Content: contentDB, ClaimGrant: appevents.ChoiceGrant{HeroContent: contentDB, Heroes: heroSvc, Fragments: contentDB, Grants: i5svc, HeroWire: heroproj.StockHero}, Directory: i4store.ServerDirectoryReader{}}
 	startEventsJobs(ctx, pool, eventJobs)
-	startOperator(ctx, runner, registry.Handlers(), registry.Reads(), registry.Modules(), operatorVersionReply, otaAfterCommit{Root: cfg.OTARoot, ReconcileSettings: otaSettingsSync.Reconcile, Serving: otaServing})
+	startOperator(ctx, runner, registry.Handlers(), registry.Reads(), registry.Modules(), operatorVersionReply, otaAfterCommit{Root: cfg.OTARoot, RecordSettings: otaState.SettingsSync.Record, Serving: otaServing})
 	dailyCounterReset := dailyconsume.Service{Store: dailyconsumestore.Store{}, Runner: runner, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}}
 	campaignCounterReset := appcampaign.Mode{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}, Store: campaignstore.Store{}, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}}
 	resetTimed := appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}

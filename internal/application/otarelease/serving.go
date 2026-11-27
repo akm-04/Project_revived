@@ -264,7 +264,10 @@ func (s *Serving) OpenVolume(ctx context.Context, laneText, name string) (io.Rea
 	}
 	snapshot, err := s.current(ctx)
 	if err != nil {
-		return nil, time.Time{}, false, err
+		// An unloadable release set is "no update": the client must not be told
+		// the server is busy and retry forever (S1 item 3).
+		log.Printf("ota updates: no servable release set: %v", err)
+		return nil, time.Time{}, false, nil
 	}
 	if _, servable := snapshot.volumes[lane][name]; !servable {
 		return nil, time.Time{}, false, nil
@@ -288,7 +291,8 @@ func (s *Serving) OpenResource(ctx context.Context, asset string) (io.ReadSeekCl
 	expectedMD5 := requestMD5(asset)
 	snapshot, err := s.current(ctx)
 	if err != nil {
-		return nil, time.Time{}, "", false, err
+		log.Printf("ota res: no servable release set: %v", err)
+		return nil, time.Time{}, "", false, nil
 	}
 	candidates := snapshot.resources[asset]
 	if len(candidates) == 0 {

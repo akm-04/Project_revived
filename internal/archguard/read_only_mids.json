@@ -28,7 +28,7 @@
   {"mid": 1873, "function": "Service.CasualView", "file": "internal/application/arena/tournament_view.go"},
   {"mid": 67, "function": "Service.HeroPieces", "file": "internal/application/characterhero/progression.go"},
   {"mid": 81, "function": "Service.BackpackSnapshot", "file": "internal/application/spirit/backpack.go"},
-  {"mid": 2, "function": "Service.activeRows", "file": "internal/application/otarelease/service.go"},
+  {"mid": 2, "function": "Service.activeRows", "file": "internal/application/otarelease/service.go", "file_only": true},
   {"mid": 192, "function": "DiscoveryDispatcher.Dispatch", "file": "internal/adapters/stockruntime/http_dispatchers.go"},
   {"mid": 229, "function": "ActivityDispatcher.list", "file": "internal/adapters/stockruntime/activity_dispatcher.go"},
   {"mid": 234, "function": "ActivityDispatcher.lookup", "file": "internal/adapters/stockruntime/activity_dispatcher.go"},

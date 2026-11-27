@@ -64,8 +64,8 @@ func (d PreloginDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 }
 
 // versionCheck is the MID 2 scheduler reply of I11A_OTA_RELEASE_V1 ruling 4.
-// It is the first MID 2 check at each boot, so a database fault must surface
-// as a fault rather than as a no-update reply.
+// It reads releases.json only; an unreadable release file surfaces as a fault
+// rather than as a fake no-update reply.
 func (d PreloginDispatcher) versionCheck(ctx context.Context, req httpedge.DispatchRequest) httpedge.Response {
 	noUpdate := httpedge.Response{HTTPStatus: http.StatusOK, Body: map[string]any{
 		"is_appstore": int64(0), "is_inapp": int64(0), "is_review": int64(0), "need_restart": int64(0),
