@@ -3,8 +3,10 @@
 #   outputs/gxb-backend-v2-<version>-p<G>-<head7>-frozen-candidate.zip   clean `git archive HEAD` tree, no history
 #   outputs/gxb-backend-v2-<version>-p<G>-<head7>-working-with-git.zip   the same tree plus the whole .git (all branches and history)
 # each with a .sha256. Uncommitted and untracked files are never packaged. Both unzip to backend/.
+# A second argument also writes a release folder a Windows operator can take: bin/ with the five server binaries
+# (no gxb-operator), migrations/ and BACKEND_COMMIT. Export GOOS/GOARCH to cross-build it.
 # ops/state.py --write then points the inputs/backend symlinks at the newest pair.
-# Usage: ops/package_backend.sh <generation>
+# Usage: ops/package_backend.sh <generation> [release-directory]
 set -euo pipefail
 generation=$1
 root=$(cd "$(dirname "$0")/.." && pwd)
@@ -24,3 +26,22 @@ for kind in frozen-candidate working-with-git; do
 done
 rm -rf "$staging"
 echo "BACKEND_PACKAGED outputs/$name-{frozen-candidate,working-with-git}.zip"
+
+release=${2:-}
+if [ -n "$release" ]; then
+  release=$(realpath -m "$release")
+  [ "$release" != "/" ] || { echo "refusing to write a release folder at /" >&2; exit 1; }
+  rm -rf "$release" && mkdir -p "$release/bin"
+  (
+    . "$root/ops/testing/goenv.sh"
+    cd "$backend"
+    suffix=""
+    [ "$(go env GOOS)" != windows ] || suffix=.exe
+    for binary in gxb-api gxb-combat-worker gxb-worker gxb-realtime gxb-player-data; do
+      go build -tags postgres,river -o "$release/bin/$binary$suffix" "./cmd/$binary"
+    done
+  )
+  cp -a "$backend/migrations" "$release/migrations"
+  git -C "$backend" rev-parse HEAD > "$release/BACKEND_COMMIT"
+  echo "BACKEND_RELEASE $release"
+fi

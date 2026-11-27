@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Cumulative work checkpoint archive bound to a sealed PassMap base (v1 or v2 layout).
 
-  create:  --base <authority> --base-archive <zip> --root label=<dir> ... --rules-file PROJECT_AGENT_RULES.md --output <zip>
+  create:  --base <authority> --base-archive <zip> --root label=<dir> ... --rules-file RULES.md [--rules-file work/RULINGS.md] --output <zip>
   restore: --base <restored authority> --restore <checkpoint.zip> --destination <new dir>
 
 A work file whose bytes already exist in the base HOT or COLD is stored as a reference; every other file is stored once by
@@ -60,13 +60,13 @@ def work_files(roots):
 def create(base, archive, roots, output, rules):
     if output.exists():
         raise ValueError('output exists')
-    if not rules.is_file():
+    if not rules or not all(path.is_file() for path in rules):
         raise ValueError('canonical rules file required')
     identity = dict(base_identity(base), archive=dict(filename=archive.name, sha256=sha(archive), bytes=archive.stat().st_size,
                                                       role='REQUIRED_EXTERNAL_RETAINED_SEALED_BASE'))
     index = base_index(base)
     files, objects = [], {}
-    for name, path in [*work_files(roots), ('PROJECT_AGENT_RULES.md', rules)]:
+    for name, path in [*work_files(roots), *((path.name, path) for path in rules)]:
         digest = sha(path)
         row = dict(path=name, sha256=digest, bytes=path.stat().st_size, mode=path.stat().st_mode & 0o777)
         reference = index.get(digest)
@@ -140,7 +140,7 @@ if __name__ == '__main__':
     parser.add_argument('--base-archive', type=Path)
     parser.add_argument('--root', action='append', default=[])
     parser.add_argument('--output', type=Path)
-    parser.add_argument('--rules-file', type=Path)
+    parser.add_argument('--rules-file', type=Path, action='append')
     parser.add_argument('--restore', type=Path)
     parser.add_argument('--destination', type=Path)
     arguments = parser.parse_args()

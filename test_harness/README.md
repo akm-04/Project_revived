@@ -1,11 +1,13 @@
 # V2 real-client test harness
 
 Temporary test tool: a real Android client plays against the v2 backend. Not product code and not the W2 operator tool. It builds
-the backend into its own directory, runs its own PostgreSQL cluster, and serves the SDK and lazy assets the real APK needs.
+the backend into its own directory, runs its own PostgreSQL cluster and the SDK the real APK needs; updates and lazy assets come from the backend OTA.
 
-Runs as the user service `gxb-test-harness` while the laptop is on. Stop it during strict gates and heavy tests:
-`systemctl --user stop gxb-test-harness`, then `start`. After each PassMap seal `ops/harness_deploy.sh [commit]` replaces the
-backend, wipes the database and reseeds players and bots; it keeps `runtime/state/secrets.json`, `psk/` and `logs/`.
+Runs as the user service `gxb-test-harness` while the laptop is on. Leave it running during strict gates and heavy
+tests (D524, `ops/TESTING_GUIDE.md:36`): the latency section waits for load and CPU temperature to settle by itself;
+stop it only to move the laptop. After each PassMap seal `ops/harness_deploy.sh [commit]` upgrades the backend in
+place: forward migrations on the existing database, keeping `runtime/state/`, the phone accounts and the OTA releases.
+`HARNESS_DEPLOY_WIPE=1` takes the old wipe-and-reseed path instead.
 
 ## Maintainer quick start (new lead: read this first)
 
@@ -13,7 +15,7 @@ backend, wipes the database and reseeds players and bots; it keeps `runtime/stat
 |---|---|
 | Is it up? which commit? | `systemctl --user is-active gxb-test-harness`; `.toolchain/bin/python3 -I -B test_harness/harness.py status` |
 | Deploy a backend | `bash ops/harness_deploy.sh <branch or commit>`, default canonical HEAD. Takes 1-2 min |
-| Stop or start | `systemctl --user stop gxb-test-harness`, `start`. Stop it during a strict gate or a VC suite |
+| Stop or start | `systemctl --user stop gxb-test-harness`, `start`; only to move the laptop, leave it running during strict gates (D524) |
 | What the user just did | `.toolchain/bin/python3 -I -B test_harness/helpers.py report --hours 2`, add `--timeline` |
 | Why a MID failed | `helpers.py fight-report <login>`, or the journal: `sys.path.insert(0,'test_harness'); import import_legacy; import_legacy.query_text(sql)`, table `request_journal` (`error_code` is bigint; `raw_envelope` is null on most rows, so never filter on it) |
 | Service logs | `test_harness/runtime/logs/gxb-api.log`; `harness.py logs gxb-api -f` |
@@ -21,7 +23,7 @@ backend, wipes the database and reseeds players and bots; it keeps `runtime/stat
 | APK for phones | `test_harness/apk/gxb-v2-playtest.apk`; rebuild only when the client patch changes: `bash test_harness/build_apk.sh`. Changing the backend or the laptop's IP needs no rebuild |
 | Public URLs | `https://gxbv2sdk.shares.zrok.io`, `https://gxbv2engine.shares.zrok.io`; names are tracked in `start_zrok.sh` on workshop v2 |
 
-**What a deploy does:** archives logs, stops all services, wipes the backend copy and the database, builds the given commit, migrates, imports the preserved players and bots, starts. Logins and passwords keep working; guilds and everything played since the last deploy are gone, so tell the user before deploying. `ops/seal_passmap.sh` runs it after each seal; a failure there does not fail the seal.
+**What a deploy does:** archives logs, snapshots the live database, stops all services, replaces the backend copy with the given commit, runs `harness.py upgrade` (forward goose migrations on the existing database, then the idempotent content deploy and publication preparation) and starts. Accounts, passwords, guilds, played progress and the OTA releases survive. `HARNESS_DEPLOY_WIPE=1` instead wipes the database and reseeds stand-in players and bots with `seed.sh`; that loses the owner's phone (product SDK) accounts (recovery: `ops/reimport_legacy_players.py`, or `backup restore` of the pre-redeploy snapshot). `ops/seal_passmap.sh` runs it after each seal; a failure there does not fail the seal.
 
 **A commit can be deployed from any worktree branch:** all branches share the canonical repository. If the branch's newest work is not committed it is not deployed.
 
@@ -32,7 +34,7 @@ backend, wipes the database and reseeds players and bots; it keeps `runtime/stat
 **Rebuild from nothing** (only `test_harness/` code from workshop v2 survives):
 1. Copy `test_harness/` and `ops/harness_deploy.sh` back from workshop v2.
 2. Restore `preserve/` from the `preserve` folder inside `inputs/Supplimental_Materials/Operator-Backend-Harnesses/v1_frozen_backend-operator_harness_with-legacy-data.zip`. Extract it as untrusted data and never run anything from it.
-3. Tools: `inputs/tools/gxb-backend-v2-e2e-tools-r4-go1.27.3-linux-amd64.zip` into `tmp/tools_r4_accept/`. Assets: the tree at `tmp/virtualclient/update-tree`, built from the assets tarball in Supplimental_Materials, `ops/TESTING_GUIDE.md` line 38.
+3. Tools: `inputs/tools/gxb-backend-v2-e2e-tools-r4-go1.27.3-linux-amd64.zip` into `tmp/tools_r4_accept/`. Assets: built and published by the backend OTA (`gxb-operator ota build`, below) from the asset lane's res folder.
 4. Service: `~/.config/systemd/user/gxb-test-harness.service`, oneshot with `RemainAfterExit=yes`, `KillMode=none`, `TimeoutStartSec=600`, `ExecStart` = `<root>/.toolchain/bin/python3 -I -B <root>/test_harness/harness.py up`, `ExecStop` the same with `down`, `WantedBy=default.target`. Then `systemctl --user daemon-reload`, `enable --now`.
 5. `bash ops/harness_deploy.sh`, then `harness.py status`, then `selfcheck.py`.
 6. `bash test_harness/build_apk.sh` needs `inputs/client_baseline/base.apk`. Firewall (user runs it): `sudo firewall-cmd --permanent --add-port=18954/tcp`.
@@ -58,7 +60,6 @@ Runtime home defaults to `test_harness/runtime`. Environment:
 - `PLAYTEST_BIND` - bind address of the SDK and asset front (default 127.0.0.1).
 - `PLAYTEST_ENGINE_ORIGIN` - public engine origin (default `https://gxbv2engine.shares.zrok.io`).
 - `PLAYTEST_LAN_HOST` - realtime public host; default is the source address of `ip -4 route get 1.1.1.1`.
-- `PLAYTEST_ASSET_TREE` - lazy asset tree (default `tmp/virtualclient/update-tree`).
 
 The media root is `$PLAYTEST_HOME/media` (mode 700, as the blob store requires). Its public origin is the
 engine origin when that is a literal `http://` origin; otherwise it falls back to
@@ -72,6 +73,7 @@ resets. They are never the virtual-client fixture values.
 Run with the bundled Python:
 
 ```
+.toolchain/bin/python3 -I -B test_harness/harness.py upgrade /path/to/backend
 .toolchain/bin/python3 -I -B test_harness/harness.py reset /path/to/backend
 .toolchain/bin/python3 -I -B test_harness/harness.py up
 .toolchain/bin/python3 -I -B test_harness/harness.py status
@@ -80,10 +82,16 @@ Run with the bundled Python:
 .toolchain/bin/python3 -I -B test_harness/selfcheck.py
 ```
 
-- `reset` stops everything, builds gxb-api, gxb-combat-worker, gxb-worker and gxb-realtime
-  (`-tags postgres,river`) into `bin.new` and swaps only on success, starts the cluster, recreates
+- `upgrade` stops everything, builds the six binaries (`-tags postgres,river`) into `bin.new` and swaps only on
+  success, starts the cluster, applies pending goose migrations to the existing `gxb_playtest`, then runs the steps
+  that are idempotent on a populated server (content deploy, publication preparation, as `ops/testing/fresh_db.sh`),
+  and records the backend tree and commit in `state/backend.json`. It keeps every existing row, the SDK accounts,
+  `runtime/ota_root` and `runtime/agent`. It does not start services.
+- `reset` stops everything, builds and swaps the same binaries, starts the cluster, drops and recreates
   `gxb_playtest` (goose, content deploy, publication preparation as `ops/testing/fresh_db.sh`), clears the
-  SDK accounts and records the backend tree and commit in `state/backend.json`. It does not start services.
+  SDK accounts and records the backend tree and commit in `state/backend.json`. It keeps `runtime/ota_root` and
+  `runtime/agent` (the OTA release state is file-only since S1, independent of the database) and does not start
+  services.
 - `up` starts the cluster, the five services and the two tunnels as detached processes with logs in `logs/` and pids in
   `run/`; it refuses a port held by another process and waits for `/health/live`.
 - `down` stops them by recorded pid after checking `/proc/<pid>/cmdline`, then stops the cluster.
@@ -91,11 +99,22 @@ Run with the bundled Python:
 
 ## Asset front
 
-`GET|HEAD /res/<basename>.<md5>` streams the file from the asset tree. The index is keyed by
-`<basename>.<md5>`, cached in `state/asset_index.json`, and rebuilt when the tree file count or total size
-changes. A miss or a wrong md5 is a 404, one log line, and one append to `state/missing_assets.txt`.
-Everything else is forwarded unchanged to gxb-api; the only rewrite is an object reply whose
-`res_download_url` is empty (MID 20480), which becomes `<engine origin>/res/`.
+A proxy with no files of its own. `/engine/updates/...` and `/engine/res/...` (the URLs gxb-api mints from
+`GXB_PUBLIC_ENGINE_URL`) are streamed from gxb-api's root `/updates/` and `/res/`, Range included; `/realtime/poll`
+goes to realtime; everything else is forwarded to gxb-api. The MID 20480 reply gets the launch id in `url` and, when
+the backend set one, in `res_download_url` (empty = the OTA's lazy fetch is off). Missing `/res` files are recorded
+by the backend (`gxb-operator read ota.status`, `misses`).
+
+## Backend OTA (operator agent)
+
+The `gxb-agent` service is `gxb-operator --root runtime/agent agent`; it starts and stops gxb-api itself, as in
+production. `up` runs the root setup once (password in `runtime/state/operator_password`, never in git) and a CLI
+login. Operate it with `runtime/bin/gxb-operator --root runtime/agent ...`:
+`cmd ota.settings.set --reason R '{"lazy_fetch":"auto","res_path":"<asset lane res folder>"}'`,
+`ota build --lane assets|code --version V [--lazy-refresh]`, `ota publish V --reason R` (in process: no stop and no
+closed/open restart; after the release is active it runs `session.logout_all`, so every player logs in again and passes
+the OTA check, the forced relog of owner Q4, `work/i11/stages/I11A_CONTROL_CORE/OPERATOR_SAFETY_DESIGN.md:85-87`),
+`read ota.status`. The OTA root is `runtime/ota_root`; `upgrade` and `reset` keep it.
 
 ## SDK
 
@@ -113,14 +132,11 @@ as the stock client observes the server directory before creating or selecting i
 
 - `UpdateScene.lua:153-168` sends MID 20480 to the packaged center URL (rewritten to the engine origin) as a
   form `payload`, then stores `res_download_url` in `xyd.resDownloadUrl`.
-- MID 2 is answered with no update (`is_appstore`, `is_inapp`, `is_review`, `need_restart` all 0), so
-  `UpdateScene.lua:518` calls `startGame_()` and never requests an update package.
+- MID 2 is answered by the backend OTA: no update while nothing is published, else the published release's volumes.
 - Lazy entries come from the client's local `version.json` (`UpdateScene.lua:394-403`); the APK ships
   `assets/src_64/version.json`. `AssetDownload.lua:46-50` reads the same file and
   `AssetDownload.lua:1194` builds `<resDownloadUrl><basename>.<md5>`. Nothing else is needed in the
-  URL, so the front's exact basename+md5 lookup matches it.
-- The served tree holds the `res/` files; `version.json` also lists `src_32`/`src_64` Lua entries that are
-  already packaged in the APK and are not in the tree, so those requests (if any) are honest 404s.
+  URL, so the backend's basename+md5 lookup matches it.
 
 ## Bots
 
@@ -167,12 +183,12 @@ user's own session notes.
 
 ## Logs per device
 
-Each game launch gets its own session id. The asset front puts it in the two MID 20480 reply URLs (`/s/<id>/engine`, `/res/<id>/`), so
+Each game launch gets its own session id. The asset front puts it in the two MID 20480 reply URLs (`/s/<id>/engine`, `/s/<id>/engine/res/`), so
 the client carries it in every later request with no APK change. Same public IP on one Wi-Fi does not matter.
 
 | Where | What | Survives redeploy |
 |---|---|---|
-| `logs/sessions/<id>.jsonl` | launch (user agent, forwarded IP); each asset (file, bytes, ms, delivered or aborted, 404); each request (status, ms, bytes, body SHA-256) | yes |
+| `logs/sessions/<id>.jsonl` | launch (user agent, forwarded IP); each OTA file, update volume or res (path, bytes, ms, delivered or aborted, 404); each request (status, ms, bytes, body SHA-256) | yes |
 | `logs/sdk.jsonl` | each SDK call, password fields removed | yes |
 | database `request_journal`, `client_log_*` | per account: MID, outcome, server latency, cause; the client's own error logs. ROUTINE journal rows last 7 days | archived |
 | `logs/archive/<UTC time>/` | journal, client logs and service logs, saved by `ops/harness_deploy.sh` before the wipe, or by `helpers.py archive` | yes |
@@ -187,11 +203,8 @@ event with the gap before it; a fight's length is the gap between its start and 
   A changed laptop IP needs a harness restart, no APK rebuild. On mobile data the game works without chat and live notices.
 - Champion's first load for a 123-girl account with 20 ranked bots takes about 8 s (client timeout 20-30 s); a repeat load 0.2 s.
 
-- MID 2 remains no-update; there is no delta/update-package server.
-- The served tree holds 25,420 of the 29,931 lazy `res/` files named by `version.json`; the other 4,511
-  (for example some `res/web/images/maps/map_avatar/` entries) are absent from the supplied tree along with
-  `version.json` entries that are `force=1`/`md5=0` and therefore not lazy at all.
-- The asset tree does not cover every `version.json` entry; missing ones are recorded in
-  `state/missing_assets.txt`.
+- The 1.631.1 assets release holds 25,420 of the 29,931 lazy `res/` files; the other 4,511 stay lazy and
+  404 until the asset lane recovers them (then a silent `ota build --lane code --lazy-refresh`).
 - The SDK keeps one session per account, as planned for playtesting; it is not a production SDK.
-- Do not run this beside the emulator or a strict gate: the laptop runs realtime and PostgreSQL here.
+- Do not run the emulator beside this harness: both compete for the laptop's CPU. A strict gate is fine (D524; its
+  latency section waits for load and temperature).

@@ -1106,7 +1106,8 @@ class SealCheckTests(unittest.TestCase):
         contract_registry.set_integration(stage.directory, stage.tree)
         git(stage.tree, "-c", "user.name=t", "-c", "user.email=t@t", "merge", "-q", "--no-ff", "--no-verify", "--no-edit", "a")
 
-    def seal(self, stage):
+    def seal(self, stage, ledger=False):
+        """`ledger` False keeps the obligations ledger out of the way of the other seal rules."""
         root = stage.base / "root"
         if not root.exists():
             (root / "work/authority_p798").mkdir(parents=True)
@@ -1119,7 +1120,9 @@ class SealCheckTests(unittest.TestCase):
         with patch.object(contract_manifest, "registry_for", return_value=stage.directory), \
              patch.object(contract_manifest, "ROOT", root), patch.object(contract_registry, "ROOT", root), \
              patch.object(state, "facts", return_value=facts), patch.object(state, "BACKEND", stage.tree), \
-             contextlib.redirect_stdout(printed):
+             contextlib.redirect_stdout(printed), contextlib.ExitStack() as stack:
+            if not ledger:
+                stack.enter_context(patch.object(contract_manifest, "sealed_obligations", return_value=[]))
             status = contract_manifest.seal_check()
         return status, printed.getvalue().strip()
 
@@ -1128,6 +1131,29 @@ class SealCheckTests(unittest.TestCase):
             stage = Stage(pathlib.Path(temporary))
             self.bypassed_merge(stage, {"internal/application/shop/buy.go": "package shop\n"})
             self.assertEqual(self.seal(stage), (0, "exported: \nSEAL_CONTRACT_CHECK PASS"))
+
+    def test_the_obligations_ledger_gates_the_seal(self):
+        """CONTROL_PLANE_OBLIGATIONS_V1 ruling 3: a missing ledger or a row due at this stage that is not DONE refuses."""
+        with tempfile.TemporaryDirectory() as temporary:
+            stage = Stage(pathlib.Path(temporary))
+            self.bypassed_merge(stage, {"internal/application/shop/buy.go": "package shop\n"})
+            status, printed = self.seal(stage, ledger=True)
+            self.assertEqual(status, 1)
+            self.assertIn("OBLIGATIONS_MISSING", printed)
+            ledger = stage.base / "CONTROL_PLANE_OBLIGATIONS_V1.md"
+            ledger.write_text("| CPO-01 | shop | COMMAND | prices | I9-11 | OPEN | D476 |\n"
+                              "| CPO-02 | shop | COMMAND | pools | OWNER_KNOB | OPEN | OPS |\n")
+            contract_registry.add(stage.directory, ledger, "CONTROL_PLANE_OBLIGATIONS_V1", "obligations", "IN_FORCE", [])
+            contract_registry.bind(stage.directory, "CONTROL_PLANE_OBLIGATIONS_V1", [contract_registry.GLOBAL], "every system")
+            status, printed = self.seal(stage, ledger=True)
+            self.assertEqual(status, 1)
+            self.assertIn("OBLIGATION_DUE CPO-01", printed)
+            self.assertNotIn("CPO-02", printed)
+            ledger.write_text(ledger.read_text().replace("| I9-11 | OPEN |", "| I9-11 | DONE |"))
+            contract_registry.add(stage.directory, ledger, "CONTROL_PLANE_OBLIGATIONS_V1", "obligations", "IN_FORCE", [])
+            stage.dispatch(["shop"])  # a contract newly bound to shop needs a manifest task that carried it
+            final = self.seal(stage, ledger=True)
+            self.assertEqual(final[0], 0, final[1])
 
     def test_an_unaudited_bypassed_merge_is_refused(self):
         with tempfile.TemporaryDirectory() as temporary:

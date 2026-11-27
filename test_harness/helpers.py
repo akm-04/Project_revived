@@ -380,6 +380,10 @@ def command_archive(arguments):
         (target / f"{table}.jsonl").write_text(rows + "\n", encoding="utf-8")
     service_logs = import_legacy.PLAYTEST_HOME / "logs"
     shutil.copytree(service_logs, target / "service_logs", ignore=shutil.ignore_patterns("postgres.log"))
+    for name in ("logs", "ops"):
+        agent_files = import_legacy.PLAYTEST_HOME / "agent" / name
+        if agent_files.is_dir():
+            shutil.copytree(agent_files, target / f"agent_{name}")
     print(f"archived to {target}")
     return 0
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Temporary v2 real-client playtest harness: build, reset, start and stop its own stack."""
+"""Temporary v2 real-client playtest harness: build, upgrade, reset, start and stop its own stack."""
 
 import json
 import os
@@ -27,11 +27,6 @@ PLAYTEST_BIND = os.environ.get("PLAYTEST_BIND", "127.0.0.1")
 ENGINE_ORIGIN = os.environ.get(
     "PLAYTEST_ENGINE_ORIGIN", "https://gxbv2engine.shares.zrok.io"
 ).rstrip("/")
-ASSET_TREE = Path(
-    os.environ.get(
-        "PLAYTEST_ASSET_TREE", WORKSPACE / "tmp" / "virtualclient" / "update-tree"
-    )
-)
 
 API_HOST = "127.0.0.1"
 API_PORT = int(os.environ.get("PLAYTEST_API_PORT", "18953"))
@@ -44,11 +39,12 @@ POSTGRES_PORT = int(os.environ.get("PLAYTEST_POSTGRES_PORT", "18957"))
 API_ADDRESS = f"{API_HOST}:{API_PORT}"
 REALTIME_ADDRESS = f"{REALTIME_HOST}:{REALTIME_PORT}"
 DATABASE_NAME = os.environ.get("PLAYTEST_DATABASE_NAME", "gxb_playtest")
-BINARY_NAMES = ("gxb-api", "gxb-combat-worker", "gxb-worker", "gxb-realtime")
+BINARY_NAMES = ("gxb-api", "gxb-operator", "gxb-combat-worker", "gxb-worker", "gxb-realtime", "gxb-player-data")
 LOG_LINE_COUNT = 50
 API_START_TIMEOUT_SECONDS = 60
 ASSET_INDEX_TIMEOUT_SECONDS = 300
-STOP_TIMEOUT_SECONDS = 10
+# The agent stops gxb-api (5 s shutdown) before it exits itself.
+STOP_TIMEOUT_SECONDS = 20
 
 STATE_DIRECTORY = PLAYTEST_HOME / "state"
 LOG_DIRECTORY = PLAYTEST_HOME / "logs"
@@ -57,11 +53,27 @@ BINARY_DIRECTORY = PLAYTEST_HOME / "bin"
 NEW_BINARY_DIRECTORY = PLAYTEST_HOME / "bin.new"
 OLD_BINARY_DIRECTORY = PLAYTEST_HOME / "bin.old"
 MEDIA_DIRECTORY = PLAYTEST_HOME / "media"
+# The backend OTA root (GXB_OTA_ROOT); gxb-api serves /updates and /res from it and the asset front streams them.
+OTA_ROOT_DIRECTORY = PLAYTEST_HOME / "ota_root"
+# Pictures shipped inside the APK; up restores this setting when an older OTA root lacks it.
+APK_RES_DIRECTORY = WORKSPACE / "tmp" / "virtualclient" / "apk" / "res"
+# The operator agent owns gxb-api, as in production: it starts it with the per-start operator token.
+AGENT_DIRECTORY = PLAYTEST_HOME / "agent"
+AGENT_LISTEN = f"127.0.0.1:{os.environ.get('PLAYTEST_AGENT_PORT', '18960')}"
+OPERATOR_ADDRESS = f"127.0.0.1:{os.environ.get('PLAYTEST_OPERATOR_PORT', '18961')}"
+STOCK_BASELINE = WORKSPACE / "inputs" / "Recovered_assets" / "New_Client" / "APK_1.631.0"
+# Decompiled stock Lua (read as data, never run): OTA patch pins hash this text, not the per-ABI APK bytecode.
+STOCK_SOURCE = WORKSPACE / "inputs" / "Recovered_assets" / "New_Client" / "Decompiled_Lua" / "src_64"
 POSTGRES_DATA_DIRECTORY = PLAYTEST_HOME / "pg"
 POSTGRES_LOG = LOG_DIRECTORY / "postgres.log"
 SECRETS_PATH = STATE_DIRECTORY / "secrets.json"
+OPERATOR_PASSWORD_PATH = STATE_DIRECTORY / "operator_password"
 BACKEND_STATE_PATH = STATE_DIRECTORY / "backend.json"
 ACCOUNTS_PATH = STATE_DIRECTORY / "accounts.json"
+# The retired Python SDK stand-in's logins, kept read-only and imported into the backend once (G51F F6).
+STANDIN_ACCOUNTS_PATH = STATE_DIRECTORY / "accounts.standin-backup.json"
+SDK_IMPORTED_MARKER = STATE_DIRECTORY / "sdk_import.done"
+BASELINE_SNAPSHOT_MARKER = STATE_DIRECTORY / "baseline_snapshot.done"
 
 DATABASE_DSN = (
     f"postgres://postgres@/{DATABASE_NAME}"
@@ -119,6 +131,8 @@ def ensure_layout():
         LOG_DIRECTORY,
         RUN_DIRECTORY,
         MEDIA_DIRECTORY,
+        OTA_ROOT_DIRECTORY,
+        AGENT_DIRECTORY,
     ):
         directory.mkdir(parents=True, exist_ok=True)
     os.chmod(STATE_DIRECTORY, 0o700)
@@ -185,6 +199,7 @@ def api_environment(secrets_value):
         {
             "GXB_POSTGRES_DSN": DATABASE_DSN,
             "GXB_HTTP_ADDR": API_ADDRESS,
+            "GXB_SDK_LISTEN": f"{PLAYTEST_BIND}:{SDK_PORT}",
             "GXB_PUBLIC_ENGINE_URL": f"{ENGINE_ORIGIN}/engine",
             "GXB_CLIENT_LOG_URL": f"{ENGINE_ORIGIN}/client-log",
             "GXB_REALTIME_PUBLIC_HOST": LAN_HOST,
@@ -194,6 +209,7 @@ def api_environment(secrets_value):
             "GXB_REDEEM_DIGEST_SECRET": secrets_value["redeem_digest_secret"],
             "GXB_DERIVATION_KEY_ID": secrets_value["derivation_key_id"],
             "GXB_PROFILE_MEDIA_ROOT": str(MEDIA_DIRECTORY),
+            "GXB_OTA_ROOT": str(OTA_ROOT_DIRECTORY),
             "GXB_PROFILE_MEDIA_PUBLIC_ORIGIN": media_public_origin(),
             "GXB_COMBAT_ENTROPY_KEYS": secrets_value["combat_entropy_keys"],
             "GXB_COMBAT_ENTROPY_KEY_CURRENT": secrets_value[
@@ -222,23 +238,10 @@ def worker_environment():
     return child_environment({"GXB_POSTGRES_DSN": DATABASE_DSN})
 
 
-def sdk_environment(secrets_value):
-    return child_environment(
-        {
-            "PLAYTEST_HOME": str(PLAYTEST_HOME),
-            "PLAYTEST_TOOLS": str(PLAYTEST_TOOLS),
-            "PLAYTEST_BIND": PLAYTEST_BIND,
-            "GXB_POSTGRES_DSN": DATABASE_DSN,
-            "GXB_CREDENTIAL_DIGEST_SECRET": secrets_value["credential_digest_secret"],
-        }
-    )
-
-
 def asset_front_environment():
     return child_environment(
         {
             "PLAYTEST_HOME": str(PLAYTEST_HOME),
-            "PLAYTEST_ASSET_TREE": str(ASSET_TREE),
             "PLAYTEST_BIND": PLAYTEST_BIND,
             "PLAYTEST_ENGINE_ORIGIN": ENGINE_ORIGIN,
             "PLAYTEST_REALTIME_HTTP_PORT": str(REALTIME_HTTP_PORT),
@@ -260,6 +263,9 @@ def service_command(service):
         return share, str(RUN_DIRECTORY)
     if service["kind"] == "binary":
         return [str(BINARY_DIRECTORY / service["name"])], str(BINARY_DIRECTORY)
+    if service["kind"] == "agent":
+        command = [str(BINARY_DIRECTORY / "gxb-operator"), "--root", str(AGENT_DIRECTORY), "agent"]
+        return command, str(BINARY_DIRECTORY)
     script = Path(__file__).resolve().parent / service["script"]
     return [sys.executable, "-I", "-B", "-u", str(script)], str(script.parent)
 
@@ -267,21 +273,19 @@ def service_command(service):
 def service_environment(name, secrets_value):
     if name.startswith("zrok-"):
         return child_environment({})
-    if name == "gxb-api":
+    if name == "gxb-agent":
         return api_environment(secrets_value)
     if name == "gxb-realtime":
         return realtime_environment(secrets_value)
     if name == "gxb-worker":
         return worker_environment()
-    if name == "gxb-sdk":
-        return sdk_environment(secrets_value)
     return asset_front_environment()
 
 
 SERVICES = (
     {
-        "name": "gxb-api",
-        "kind": "binary",
+        "name": "gxb-agent",
+        "kind": "agent",
         "port": API_PORT,
         "listen_host": API_HOST,
     },
@@ -296,13 +300,6 @@ SERVICES = (
         "kind": "binary",
         "port": REALTIME_PORT,
         "listen_host": "127.0.0.1",
-    },
-    {
-        "name": "gxb-sdk",
-        "kind": "python",
-        "script": "sdk.py",
-        "port": SDK_PORT,
-        "listen_host": PLAYTEST_BIND,
     },
     {
         "name": "gxb-asset-front",
@@ -331,10 +328,9 @@ SERVICES = (
 SERVICE_NAMES = tuple(service["name"] for service in SERVICES)
 
 EXPECTED_COMMANDLINE = {
-    "gxb-api": "gxb-api",
+    "gxb-agent": "gxb-operator",
     "gxb-worker": "gxb-worker",
     "gxb-realtime": "gxb-realtime",
-    "gxb-sdk": "sdk.py",
     "gxb-asset-front": "asset_front.py",
     "zrok-gxbv2sdk": "public:gxbv2sdk",
     "zrok-gxbv2engine": "public:gxbv2engine",
@@ -543,36 +539,8 @@ def build_binaries(tree):
     shutil.rmtree(OLD_BINARY_DIRECTORY, ignore_errors=True)
 
 
-def prepare_database(tree):
-    subprocess.run(
-        [
-            tool_path("dropdb"),
-            "--force",
-            "-h",
-            str(POSTGRES_DATA_DIRECTORY),
-            "-p",
-            str(POSTGRES_PORT),
-            "-U",
-            "postgres",
-            "--if-exists",
-            DATABASE_NAME,
-        ],
-        stdin=subprocess.DEVNULL,
-        check=True,
-    )
-    subprocess.run(
-        [
-            tool_path("createdb"),
-            "-h",
-            str(POSTGRES_DATA_DIRECTORY),
-            "-p",
-            str(POSTGRES_PORT),
-            "-U",
-            "postgres",
-            DATABASE_NAME,
-        ],
-        check=True,
-    )
+def migrate_database(tree):
+    """Migrate forward and run the deploy steps that are idempotent on a populated database."""
     environment = go_environment()
     run_checked(
         [
@@ -619,6 +587,39 @@ def prepare_database(tree):
     )
 
 
+def prepare_database(tree):
+    subprocess.run(
+        [
+            tool_path("dropdb"),
+            "--force",
+            "-h",
+            str(POSTGRES_DATA_DIRECTORY),
+            "-p",
+            str(POSTGRES_PORT),
+            "-U",
+            "postgres",
+            "--if-exists",
+            DATABASE_NAME,
+        ],
+        stdin=subprocess.DEVNULL,
+        check=True,
+    )
+    subprocess.run(
+        [
+            tool_path("createdb"),
+            "-h",
+            str(POSTGRES_DATA_DIRECTORY),
+            "-p",
+            str(POSTGRES_PORT),
+            "-U",
+            "postgres",
+            DATABASE_NAME,
+        ],
+        check=True,
+    )
+    migrate_database(tree)
+
+
 def command_reset(arguments):
     if len(arguments) != 1:
         raise SystemExit("usage: harness.py reset <backend tree>")
@@ -630,7 +631,9 @@ def command_reset(arguments):
     build_binaries(tree)
     start_cluster()
     prepare_database(tree)
-    ACCOUNTS_PATH.unlink(missing_ok=True)
+    preserve_standin_accounts()
+    SDK_IMPORTED_MARKER.unlink(missing_ok=True)
+    BASELINE_SNAPSHOT_MARKER.unlink(missing_ok=True)
     head = (tree / "BACKEND_COMMIT").read_text(encoding="utf-8").strip()
     write_json_atomic(
         BACKEND_STATE_PATH,
@@ -639,6 +642,104 @@ def command_reset(arguments):
     print(f"reset: built {', '.join(BINARY_NAMES)} into {BINARY_DIRECTORY}")
     print(f"reset: database {DATABASE_NAME} migrated, deployed and prepared")
     print(f"reset: backend {head} at {tree}")
+
+
+def command_upgrade(arguments):
+    if len(arguments) != 1:
+        raise SystemExit("usage: harness.py upgrade <backend tree>")
+    tree = Path(arguments[0]).resolve()
+    if not (tree / "go.mod").is_file() or not (tree / "BACKEND_COMMIT").is_file():
+        raise SystemExit(f"not a deployed backend tree (go.mod and BACKEND_COMMIT): {tree}")
+    ensure_layout()
+    command_down()
+    build_binaries(tree)
+    start_cluster()
+    migrate_database(tree)
+    head = (tree / "BACKEND_COMMIT").read_text(encoding="utf-8").strip()
+    write_json_atomic(
+        BACKEND_STATE_PATH,
+        {"tree": str(tree), "commit": head, "database": DATABASE_NAME},
+    )
+    print(f"upgrade: built {', '.join(BINARY_NAMES)} into {BINARY_DIRECTORY}")
+    print(f"upgrade: database {DATABASE_NAME} migrated forward and deployed, existing rows kept")
+    print(f"upgrade: backend {head} at {tree}")
+
+
+def write_agent_config():
+    tree = backend_state().get("tree")
+    if not tree:
+        raise SystemExit("up: no deployed backend tree; run reset or upgrade first")
+    config = {
+        "listen": AGENT_LISTEN,
+        "ota_root": str(OTA_ROOT_DIRECTORY),
+        "stock_baseline": str(STOCK_BASELINE),
+        "stock_source": str(STOCK_SOURCE),
+        "client_tree": str(Path(tree) / "client" / "ota"),
+        # PATH resolves the system pg_dump 16, which refuses the bundled PostgreSQL 18 server.
+        "toolchain_path": str(PLAYTEST_TOOLS),
+        "origins": {},
+        "backend": {
+            "binary": str(BINARY_DIRECTORY / "gxb-api"),
+            "env_file": "",
+            "operator_addr": OPERATOR_ADDRESS,
+            "migrations_dir": str(Path(tree) / "migrations"),
+        },
+    }
+    write_json_atomic(AGENT_DIRECTORY / "agent.json", config, 0o600)
+
+
+def operator_password():
+    if not OPERATOR_PASSWORD_PATH.exists():
+        descriptor = os.open(OPERATOR_PASSWORD_PATH, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+            handle.write(secrets.token_urlsafe(24) + "\n")
+    return OPERATOR_PASSWORD_PATH.read_text(encoding="utf-8").strip()
+
+
+def run_operator(arguments, typed_lines=(), environment=None):
+    command = [str(BINARY_DIRECTORY / "gxb-operator"), "--root", str(AGENT_DIRECTORY), *arguments]
+    result = subprocess.run(
+        command,
+        input="".join(f"{line}\n" for line in typed_lines),
+        capture_output=True,
+        text=True,
+        check=False,
+        env=environment,
+    )
+    if result.returncode != 0:
+        raise SystemExit(f"up: gxb-operator {arguments[0]} failed: {result.stderr.strip() or result.stdout.strip()}")
+
+
+def start_backend_through_agent():
+    """Root setup once, a fresh CLI session, then backend start unless gxb-api already listens."""
+    host, port = AGENT_LISTEN.rsplit(":", 1)
+    wait_for_port(host, int(port), API_START_TIMEOUT_SECONDS)
+    password = operator_password()
+    if not (AGENT_DIRECTORY / "root.passwd").exists():
+        run_operator(["setup"], (password, password))
+    run_operator(["login"], (password,))
+    if not port_open(API_HOST, API_PORT):
+        run_operator(["backend", "start"])
+
+
+def preserve_standin_accounts():
+    """Keep the stand-in's login file as the read-only import source; never overwrite an earlier copy."""
+    if ACCOUNTS_PATH.exists() and not STANDIN_ACCOUNTS_PATH.exists():
+        ACCOUNTS_PATH.rename(STANDIN_ACCOUNTS_PATH)
+        STANDIN_ACCOUNTS_PATH.chmod(0o400)
+    ACCOUNTS_PATH.unlink(missing_ok=True)
+
+
+def import_logins_and_pin_baseline():
+    """Once per reset: import the stand-in logins into the backend, then pin the v1 import baseline snapshot."""
+    if STANDIN_ACCOUNTS_PATH.exists() and not SDK_IMPORTED_MARKER.exists():
+        run_operator(["sdk-import", str(STANDIN_ACCOUNTS_PATH)], environment=worker_environment())
+        SDK_IMPORTED_MARKER.touch()
+        print("up: stand-in SDK logins imported")
+    if not BASELINE_SNAPSHOT_MARKER.exists():
+        run_operator(["backup", "snapshot", "--name", "v1 import baseline", "--pin", "--reason", "harness reset baseline"])
+        BASELINE_SNAPSHOT_MARKER.touch()
+        print("up: pinned snapshot 'v1 import baseline' taken")
 
 
 def wait_for_api():
@@ -686,13 +787,30 @@ def command_up():
             raise SystemExit(
                 f"up: port {service['port']} for {name} is held by another process"
             )
+        if service["kind"] == "agent":
+            write_agent_config()
         start_service(service, secrets_value)
         print(f"up: {name} started")
+    start_backend_through_agent()
+    restore_apk_res_path()
     if not wait_for_api():
         raise SystemExit("up: gxb-api did not answer MID 20480")
+    import_logins_and_pin_baseline()
     wait_for_port(PLAYTEST_BIND, ASSET_FRONT_PORT, ASSET_INDEX_TIMEOUT_SECONDS)
     wait_for_port(PLAYTEST_BIND, SDK_PORT, API_START_TIMEOUT_SECONDS)
     print(f"up: gxb-api answering on {API_ADDRESS}, lan host {LAN_HOST}")
+
+
+def restore_apk_res_path():
+    settings_path = OTA_ROOT_DIRECTORY / "settings.json"
+    if not settings_path.exists() or not APK_RES_DIRECTORY.is_dir():
+        return
+    settings = json.loads(settings_path.read_text(encoding="utf-8"))
+    if settings.get("apk_res_path"):
+        return
+    settings["apk_res_path"] = str(APK_RES_DIRECTORY)
+    write_json_atomic(settings_path, settings)
+    print(f"up: apk_res_path set to {APK_RES_DIRECTORY}")
 
 
 def command_down():
@@ -746,14 +864,29 @@ def command_logs(arguments):
                 return
 
 
+def command_snapshot(arguments):
+    """Unpinned snapshot of the live database before a planned wipe; skipped when the agent is not running."""
+    reason = " ".join(arguments) or "harness redeploy"
+    host, port = AGENT_LISTEN.rsplit(":", 1)
+    if not port_open(host, int(port)):
+        print("snapshot: agent not running, nothing taken", file=sys.stderr)
+        return
+    run_operator(["login"], (operator_password(),))
+    run_operator(["backup", "snapshot", "--name", "pre-redeploy", "--reason", reason])
+    print("snapshot: pre-redeploy snapshot taken")
+
+
 def main(arguments):
     if len(arguments) < 1:
         raise SystemExit(
-            "usage: harness.py reset <backend tree> | up | down | status | logs <service> [-f]"
+            "usage: harness.py reset <backend tree> | upgrade <backend tree> | up | down | status | snapshot [reason] | logs <service> [-f]"
         )
     command = arguments[0]
     if command == "reset":
         command_reset(arguments[1:])
+        return
+    if command == "upgrade":
+        command_upgrade(arguments[1:])
         return
     if command == "up":
         command_up()
@@ -766,6 +899,9 @@ def main(arguments):
         return
     if command == "logs":
         command_logs(arguments[1:])
+        return
+    if command == "snapshot":
+        command_snapshot(arguments[1:])
         return
     raise SystemExit(f"unknown command {command}")
 

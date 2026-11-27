@@ -31,7 +31,7 @@ Both run DeepSeek Flash with cached sessions and resume. Same 8B client review, 
 Default OpenCode for volume, because the $10 plan carries $100 a month of Flash usage. Peak hours double its Flash price too, so the queue waits out peak on both. Use `--route fallback` if OpenCode fails or its allowance runs out. The two found different faults, so a high-risk review is worth running on both.
 
 ## Contract registry, manifests and merge check (user, 2026-11-10)
-The rules are in PROJECT_AGENT_RULES.md, section PORTABLE CONTRACT REGISTRY AND CONTRACT MANIFESTS. The working loop:
+The rules are in ops/CONTRACT_RULES.md. The working loop:
 - Stage start: `ops/contract_registry.py open <stage>` (once). It copies every contract document with its sha256 and inherits the lead's system and path bindings from the previous registry. Once the integration worktree exists, record it with `contract_registry.py integration <stage> <worktree> --base-commit <canonical HEAD>`; from then on its merge hooks refuse a merge that fails the check. Then run `ops/contract_manifest.py coverage` and work down `REGISTRY/COVERAGE.md`: bind each unresolved contract with `contract_registry.py bind <stage> <id> --system <name> ... | --kind <kind> ... | --global | --no-code --reason ...`. Define a kind once with `contract_registry.py kind <stage> <kind> --system <name> ... --reason ...` when many contracts reach the same set of systems.
 - During the stage: register a new or amended contract with `add` the moment it is decided, not at close (an amendment re-adds the same id; every version stays under `documents/<id>/`, content-addressed). A ruling that changes a contract is registered with `add <stage> <file> --id <ID> --title <T> --kind ruling --amends <CONTRACT_ID>[:<clause>]`; `amend <stage> <ID> --amends ...` replaces that list. Run `check <stage> --tree <worktree> ...` whenever you want the drift picture: it flags an altered copy, an UNREGISTERED contract document (JSON with a contract or policy id, or anything in the stage's `contracts/`), a DIVERGED one, a live contract whose text claims "every mode"/"all shops" scope but has no binding (SCOPE_ALARM), a ruling amending an unregistered id, and a `WARNING AMENDED_OLDER` contract the lead must re-add. A `WARNING` line does not fail the check; the rest do. `COVERAGE.md` lists scope contracts with the number of systems they reach.
 - Every prompt: the first lines are `Contract-Systems: <system>, ...` (system names from the tree's system map; `none - <why>` for work that touches no system, such as research on assets) and `Contract-Tree: <worktree>` (default: the canonical backend). A system the task creates is `<name> (new)`; add `Contract-Ids: <id>, ...` for the contracts it is built on, which the map cannot place before the system exists (the lookup adds the rest). The queue refuses a prompt without it (`CONTRACT_HEADER_MISSING`, `CONTRACT_SYSTEM_UNKNOWN`, `CONTRACT_REGISTRY_NOT_OPEN` in the error file). Name every system the task may change; the merge check catches a system the leaf changed but the header left out. Look up what a system brings with `contract_manifest.py system <name> --tree <worktree>`.
@@ -117,3 +117,39 @@ Evidence comparison: work/i9/stages/I9-10/evidence/lead_onboarding/FLEET_BATCHIN
 ## Lead-owned prerequisites must advance (user correction, 2026-11-05)
 
 After adjudicating a worker, implement the highest-priority actionable lead prerequisite or release a ready dependent batch. A reserved idle slot is not progress. Do not replace transaction/contract/composition work with repeated research, status checks or checkpoints. Make authorized decisions, write production code, verify focused regressions, then delegate the coherent remaining work. Keep independent review and mandatory qualification; use the existing completion callback. A concrete unresolved protected decision may pause only its affected path.
+
+## OpenCode one-shot (ops/opencode_dispatch.py)
+
+A second, simpler dispatch path: one prompt file, one native `opencode run` (CLI v2.4.2 at
+`/home/akm/.opencode/bin/opencode`). No queue, slots, sessions, contract manifest or compliance check. Use it for
+self-contained tooling or research where the caller already owns the prompt and reads the result itself; the queue
+(`ops/fleet_queue.py`) remains the path for contract-bound product work.
+
+```sh
+.toolchain/bin/python3 -B ops/opencode_dispatch.py \
+  --model <provider/model> --cwd <dir> [--label <text>] [--timeout 3600] \
+  [--out <dir>] [--background] [--allow-free] [--ignore-peak] <name>.prompt
+.toolchain/bin/python3 -B ops/opencode_dispatch.py --status <name> [--out <dir>]
+```
+
+- The prompt file is sent as the message with `ops/FLEET_RULES_WORKER.md` prepended, exactly as a fresh queue
+  session receives it. The model is `--model` in `provider/model` form (see `opencode models`); `--cwd` is required
+  and must be inside the workspace.
+- Output lands beside the prompt (or in `--out`): `<name>.result.md` is the final assistant message,
+  `<name>.events.jsonl` the raw `--format json` events, and on failure `<name>.error.json` with `error_code`
+  `TIMEOUT`, `EXIT_NONZERO`, `NO_RESULT` or `MODEL_REFUSED`. Exit 0 only on success, 1 on task failure, 2 on a usage
+  error (missing prompt, missing `--cwd`, cwd outside the workspace).
+- `--timeout` is wall-clock (default 3600 s); on expiry the whole process group is killed.
+- `--background` detaches, writes `<name>.pid` and returns at once. `--status <name>` reports `running`, `done` or
+  `failed` from the pid/result/error files.
+- Model policy is enforced in code: ids containing `contributor` are always refused (they train on prompts); ids
+  ending in `-free` require `--allow-free` and print that free tiers may log prompts; a DeepSeek model is refused
+  during peak hours (01:00-04:00 and 06:00-10:00 UTC, Monday-Friday) unless `--ignore-peak`. Peak time comes from the
+  `Date` header of a HEAD request to `https://api.deepseek.com`; if that is unavailable the system clock is used with
+  a warning, because it may be forwarded.
+- This path does not check `Contract-Systems`, build or verify a contract manifest, resume a session, rotate context
+  or run `Post-Check`. Those stay with `ops/fleet_queue.py`.
+
+Regression tests: `cd ops && ../.toolchain/bin/python3 -B -m unittest test_opencode_dispatch`.
+
+OpenAI models (`openai/gpt-6.x-*` in `opencode models`) draw on the owner's ChatGPT/Codex usage window, which Sol shares. Use them only for hard review or design work, or while DeepSeek is at peak. Never use them for volume work. Owner note, 2026-11-27: OpenCode's event-driven completion avoids the shell-polling waste seen under the official Codex CLI.

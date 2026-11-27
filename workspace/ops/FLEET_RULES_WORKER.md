@@ -1,6 +1,6 @@
 # Rules for every worker session
 
-The queue sends this file at the start of every fresh session. It is the worker's digest of AGENTS.md (`PROJECT_AGENT_RULES.md`). If they conflict, AGENTS.md and the lead's decisions in your task win; report the conflict. You do not need to open AGENTS.md unless your task names a section.
+The queue sends this file at the start of every fresh session. It is the worker's digest of RULES.md (AGENTS.md links there) and work/RULINGS.md. If they conflict, RULES.md and the lead's decisions in your task win; report the conflict. You do not need to open RULES.md unless your task names it.
 
 The project rebuilds the server of Girls X Battle 1 (not GXB2) as a Go modular monolith. The stock Lua client is not changed, so the server has to fit what that client actually reads.
 

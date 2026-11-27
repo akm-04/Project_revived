@@ -1,7 +1,7 @@
 """Cumulative, restore-tested working checkpoint of the current phase workspace (any phase; nothing hard-coded).
 
   checkpoint.py <rNN-slug>
-  checkpoint.py <tag> --lane <name>  a side lane from ops/state.py LANES (audit, asset-recovery): packs that lane's
+  checkpoint.py <tag> --lane <name>  a side lane from ops/state.py LANES (audit, asset-recovery, asset-experimental): packs that lane's
                                      workspace into checkpoints/active/<NODE>, record work/LATEST_<NODE>_CHECKPOINT.json;
                                      the phase checkpoint is untouched
   checkpoint.py <aNN-slug> --audit   same as --lane audit (the independent auditor's lane)
@@ -114,7 +114,7 @@ if __name__ == '__main__':
     args = [sys.executable, tool, '--base', base, '--base-archive', sealed_zip]
     for name, path in roots.items():
         args += ['--root', f'{name}={path}']
-    verification = run(args + ['--rules-file', W / 'PROJECT_AGENT_RULES.md', '--output', out])
+    verification = run(args + ['--rules-file', W / 'RULES.md', '--rules-file', W / 'work/RULINGS.md', '--output', out])
     restored = staging.parent / (tag + '-restored')
     verification.update(restore=run([sys.executable, tool, '--base', base, '--restore', out, '--destination', restored]),
                         checkpoint_id=tag, base_pass=f"{sealed_generation}.0",

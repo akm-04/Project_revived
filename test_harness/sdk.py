@@ -134,6 +134,43 @@ def sql_literal(value):
     return "'" + str(value).replace("'", "''") + "'"
 
 
+def run_psql(script):
+    command = [
+        str(PLAYTEST_TOOLS / "psql"),
+        "-X",
+        "-q",
+        "-A",
+        "-t",
+        "-v",
+        "ON_ERROR_STOP=1",
+        "-h",
+        POSTGRES_HOST,
+        "-p",
+        str(POSTGRES_PORT),
+        "-U",
+        "postgres",
+        "-d",
+        DATABASE_NAME,
+        "-f",
+        "-",
+    ]
+    return subprocess.run(command, input=script, text=True, capture_output=True, check=False)
+
+
+def session_revoked(session_id):
+    # The backend revokes sessions (operator logout_all after an OTA publish); a
+    # revoked or missing session must be replaced, or the client loops on 20003.
+    result = run_psql(
+        "SELECT count(*) FROM account_sessions WHERE session_id="
+        f"{sql_literal(session_id)}::uuid AND revoked_at IS NULL"
+        " AND (absolute_expires_at IS NULL OR absolute_expires_at > clock_timestamp());\n"
+    )
+    if result.returncode != 0:
+        log(f"sdk session check failed: {result.stderr.strip()[:300]}")
+        return False
+    return result.stdout.strip() == "0"
+
+
 def issue_database_session(account_uid, session_id, sid, token):
     sid_digest = credential_digest(DIGEST_SECRET, "sid", sid)
     token_digest = credential_digest(DIGEST_SECRET, "login_token", token)
@@ -154,30 +191,7 @@ def issue_database_session(account_uid, session_id, sid, token):
             f"{sql_literal(kind)},decode({sql_literal(digest)},'hex'),clock_timestamp());"
         )
     statements.append("COMMIT;")
-    command = [
-        str(PLAYTEST_TOOLS / "psql"),
-        "-X",
-        "-q",
-        "-v",
-        "ON_ERROR_STOP=1",
-        "-h",
-        POSTGRES_HOST,
-        "-p",
-        str(POSTGRES_PORT),
-        "-U",
-        "postgres",
-        "-d",
-        DATABASE_NAME,
-        "-f",
-        "-",
-    ]
-    result = subprocess.run(
-        command,
-        input="\n".join(statements) + "\n",
-        text=True,
-        capture_output=True,
-        check=False,
-    )
+    result = run_psql("\n".join(statements) + "\n")
     if result.returncode != 0:
         log(f"sdk session insert failed: {result.stderr.strip()[:300]}")
         return False
@@ -185,8 +199,11 @@ def issue_database_session(account_uid, session_id, sid, token):
 
 
 def ensure_session(accounts, account):
-    if account.get("session"):
+    session = account.get("session")
+    if session and not session_revoked(session["session_id"]):
         return True
+    if session:
+        log(f"sdk session replaced, revoked uid={account['uid']}")
     session_id = str(uuid.uuid4())
     sid = "pl-sid-" + uuid.uuid4().hex
     token = "pl-login-" + uuid.uuid4().hex

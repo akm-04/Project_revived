@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Self-check for a running playtest instance: MID20480, one asset, SDK login and MID1."""
+"""Self-check for a running playtest instance: MID20480, one backend OTA res file, SDK login and MID1."""
 
 import argparse
 import hashlib
@@ -25,16 +25,11 @@ PLAYTEST_BIND = os.environ.get("PLAYTEST_BIND", "127.0.0.1")
 ENGINE_ORIGIN = os.environ.get(
     "PLAYTEST_ENGINE_ORIGIN", "https://gxbv2engine.shares.zrok.io"
 ).rstrip("/")
-ASSET_TREE = Path(
-    os.environ.get(
-        "PLAYTEST_ASSET_TREE", WORKSPACE / "tmp" / "virtualclient" / "update-tree"
-    )
-)
 FRONT_BASE = f"http://{PLAYTEST_BIND}:{int(os.environ.get('PLAYTEST_FRONT_PORT', '18956'))}"
 SDK_BASE = f"http://{PLAYTEST_BIND}:18955"
 DATABASE_NAME = "gxb_playtest"
 POSTGRES_PORT = 18957
-MISSING_ASSETS_PATH = PLAYTEST_HOME / "state" / "missing_assets.txt"
+OTA_ASSETS_DIRECTORY = PLAYTEST_HOME / "ota_root" / "updates" / "assets"
 
 
 def post_form(url, payload):
@@ -108,62 +103,33 @@ def check_prelogin():
         },
     )
     reply = json.loads(body)
-    expected = f"{ENGINE_ORIGIN}/res/"
-    if not str(reply.get("res_download_url")).startswith(expected):
+    res_url = reply.get("res_download_url")
+    # Empty = the backend OTA's lazy fetch is off (no assets release yet); otherwise the front adds the launch id.
+    if res_url and not (res_url.startswith(f"{ENGINE_ORIGIN}/s/") and res_url.endswith("/engine/res/")):
         raise AssertionError(
-            f"MID20480 res_download_url is {reply.get('res_download_url')!r}, expected {expected!r}"
+            f"MID20480 res_download_url is {res_url!r}, expected '' or {ENGINE_ORIGIN}/s/<launch>/engine/res/"
         )
-    print(f"check 1 ok: MID20480 res_download_url={expected}")
-
-
-def pick_asset():
-    for directory, _, names in os.walk(ASSET_TREE):
-        for name in sorted(names):
-            path = Path(directory) / name
-            if path.is_file():
-                return path
-    raise AssertionError(f"no files under {ASSET_TREE}")
-
-
-def file_md5(path):
-    digest = hashlib.md5()
-    with open(path, "rb") as handle:
-        for block in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
-
-
-def count_missing(key):
-    try:
-        return MISSING_ASSETS_PATH.read_text(encoding="utf-8").splitlines().count(key)
-    except FileNotFoundError:
-        return 0
+    print(f"check 1 ok: MID20480 res_download_url={res_url!r}")
 
 
 def check_asset():
-    path = pick_asset()
-    digest = file_md5(path)
-    status, body = fetch(f"{FRONT_BASE}/res/{path.name}.{digest}")
-    if status != 200:
-        raise AssertionError(f"asset fetch status {status}")
-    if body != path.read_bytes():
-        raise AssertionError(f"asset bytes differ for {path.name}")
-    wrong = uuid.uuid4().hex
-    missing_key = f"{path.name}.{wrong}"
-    before = count_missing(missing_key)
+    sidecars = sorted(OTA_ASSETS_DIRECTORY.glob("*.res.json"), key=lambda path: path.stat().st_mtime)
+    if not sidecars:
+        print("check 2 skipped: no backend OTA assets release built yet")
+        return
+    entry = json.loads(sidecars[-1].read_text(encoding="utf-8"))["entries"][0]
+    name = Path(entry["path"]).name
+    status, body = fetch(f"{FRONT_BASE}/engine/res/{name}.{entry['md5']}")
+    if status != 200 or hashlib.md5(body).hexdigest() != entry["md5"]:
+        raise AssertionError(f"res {name} gave {status} or a wrong md5")
     try:
-        fetch(f"{FRONT_BASE}/res/{missing_key}")
+        fetch(f"{FRONT_BASE}/engine/res/{name}.{uuid.uuid4().hex}")
     except urllib.error.HTTPError as error:
         if error.code != 404:
             raise AssertionError(f"wrong md5 gave {error.code}, expected 404")
     else:
         raise AssertionError("wrong md5 did not give 404")
-    after = count_missing(missing_key)
-    if after != before + 1:
-        raise AssertionError(
-            f"missing asset recorded {after - before} times, expected once"
-        )
-    print(f"check 2 ok: {path.name} served with matching bytes, wrong md5 gave 404")
+    print(f"check 2 ok: {name} served through the front by the backend OTA, wrong md5 gave 404")
 
 
 def check_login_and_mid1():

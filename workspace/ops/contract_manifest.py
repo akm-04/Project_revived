@@ -25,7 +25,8 @@ on a binding row must cite a non-test file changed between the manifest's `base_
   contract_manifest.py merge-hook                     the backend's merge hooks: merge-check a merge commit in the
                                                       stage's integration worktree (other worktrees pass)
   contract_manifest.py seal-check                     ops/seal_passmap.sh: registry check, merge-check of the canonical
-                                                      backend since the stage's base commit, then export
+                                                      backend since the stage's base commit, the control-plane
+                                                      obligations due at this step or stage, then export
   contract_manifest.py record-verdicts FILE --by POOL [--reviewed]
                                                       file audit verdicts (a JSON list) in REGISTRY/verdicts.json,
                                                       each pinned to the contract's current sha256, the integration
@@ -83,6 +84,10 @@ LIVE_STATUSES_EXCLUDED = ("SUPERSEDED",)
 AUDIT_VERDICTS = ("UPHELD", "UPHELD_UNTESTED", "PARTIAL", "VIOLATED", "NOT_IMPLEMENTED", "SUPERSEDED", "NOT_APPLICABLE", "UNKNOWN")
 CITING_VERDICTS = ("UPHELD", "UPHELD_UNTESTED", "PARTIAL", "VIOLATED")
 BREACH_VERDICTS = ("PARTIAL", "VIOLATED")
+# CONTROL_PLANE_OBLIGATIONS_V1 rulings 3-4: a seal waits while a row due at the sealing step or stage is not DONE.
+OBLIGATIONS_ID = "CONTROL_PLANE_OBLIGATIONS_V1"
+OBLIGATION_DUE_RE = re.compile(r"^(?:I\d+[A-Z]?(?:\.\d+)?(?:-\d+)?|OWNER_KNOB)$")
+OBLIGATION_STATUSES = ("OPEN", "PARTIAL", "DONE")
 VERDICT_SEVERITY = ("VIOLATED", "PARTIAL", "NOT_IMPLEMENTED", "UNKNOWN", "UPHELD_UNTESTED", "UPHELD", "SUPERSEDED", "NOT_APPLICABLE")
 
 
@@ -411,12 +416,23 @@ def compliance_rows(answer):
     return rows
 
 
+def transcript_records(transcript):
+    # A transcript can end in a partly written line (a worker cut off mid-write); skip lines that do not parse.
+    for line in transcript.read_text(encoding="utf-8", errors="replace").splitlines():
+        try:
+            record = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(record, dict):
+            yield record
+
+
 def tool_inputs(transcript):
     if not transcript or not transcript.is_file():
         return ""
     texts = []
-    for line in transcript.read_text(encoding="utf-8").splitlines():
-        content = (json.loads(line).get("message") or {}).get("content")
+    for record in transcript_records(transcript):
+        content = (record.get("message") or {}).get("content")
         for item in content if isinstance(content, list) else []:
             if isinstance(item, dict) and item.get("type") == "tool_use":
                 texts.append(json.dumps(item.get("input")))
@@ -428,8 +444,8 @@ def read_documents(transcript):
     if not transcript or not transcript.is_file():
         return set()
     paths = set()
-    for line in transcript.read_text(encoding="utf-8").splitlines():
-        content = (json.loads(line).get("message") or {}).get("content")
+    for record in transcript_records(transcript):
+        content = (record.get("message") or {}).get("content")
         for item in content if isinstance(content, list) else []:
             if isinstance(item, dict) and item.get("type") == "tool_use" and item.get("name") == "Read":
                 path = (item.get("input") or {}).get("file_path")
@@ -715,7 +731,7 @@ def merge_check(directory, tree, base, head, phase_name, absorbing=True, merged_
         authors = author_pools(tree, base, head, systems[name], *merged_into)
         if UNKNOWN_POOL in authors:
             problems.append(f"AUTHOR_UNKNOWN {name}: a commit touching it carries no pool trailer or the generic `{GENERIC_TRAILER}` "
-                            "trailer, which names no pool; amend it to the writer's trailer (PROJECT_AGENT_RULES.md commit trailers)")
+                            "trailer, which names no pool; amend it to the writer's trailer (ops/FLEET_RULES_WORKER.md commit trailers)")
         independent = [row for row in covering if row["status"] == "PASS" and row.get("pool") and row["pool"] not in authors]
         if not independent:
             problems.append(f"INDEPENDENT_AUDIT {name}: written by {', '.join(sorted(authors)) or 'unknown'}; no passing manifest task "
@@ -790,6 +806,19 @@ def coverage(directory, tree):
 
 
 def self_check():
+    ledger = ("| CPO-01 | operator | COMMAND | bus | I11A-1 | DONE | OPS |\n"
+              "| CPO-02 | otarelease | OTA | serving | I11A-1 | PARTIAL | OTA |\n"
+              "| CPO-03 | events | COMMAND | cycle | I11A-2 | OPEN | EV |\n"
+              "| CPO-04 | shop | COMMAND | pools | OWNER_KNOB | OPEN | OPS |\n"
+              "| CPO-05 | shop | COMMAND | event shops | I10.5 | OPEN | V2 |\n")
+    at_one = dict(stage="I11A_CONTROL_CORE", step="I11A_1_OTA")
+    assert [problem.split()[1] for problem in obligation_problems(ledger, at_one)] == ["CPO-02:"]
+    assert obligation_problems(ledger, dict(stage="I11A_CONTROL_CORE", step="I11A_2_EVENTS"))[0].startswith("OBLIGATION_DUE CPO-03")
+    assert [problem.split()[1] for problem in obligation_problems(ledger, dict(stage="I10_5_SEASONAL", step="I10_5_A"))] == ["CPO-05:"]
+    assert obligation_problems(ledger, dict(stage="I11_REST", step="I11_X")) == []
+    assert obligation_due("I9-11", dict(stage="I9-11")) and not obligation_due("I9-1", dict(stage="I9-11"))
+    assert obligation_problems(ledger.replace("I11A-2", "soon"), at_one)[-1].startswith("OBLIGATION_MALFORMED CPO-03")
+    assert obligation_problems("no table", at_one)[0].startswith("OBLIGATIONS_EMPTY")
     assert task_header("Contract-Systems: march, arena\nContract-Tree: /x\nbody") == (["arena", "march"], None, pathlib.Path("/x"))
     assert task_header("Contract-Systems: none - asset inventory only\n") == ([], "asset inventory only", None)
     assert task_header("no header")[0] is None
@@ -1075,6 +1104,46 @@ def breaches(directory):
             if finding["verdict"] in BREACH_VERDICTS]
 
 
+def obligation_rows(text):
+    """The `| CPO-NN | systems | surface | obligation | due | status | source |` rows of the obligations ledger."""
+    rows = []
+    for line in text.splitlines():
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if line.startswith("| CPO-") and len(cells) == 7:
+            rows.append(dict(id=cells[0], due=cells[4], status=cells[5]))
+    return rows
+
+
+def obligation_due(due, frontier):
+    """A due label (I11A-1, I10.5) names the sealing step or stage when one of them is the label or starts with it."""
+    def normal(name):
+        return name.replace("-", "_").replace(".", "_")
+    label = normal(due)
+    names = [normal(frontier.get(key) or "") for key in ("stage", "step")]
+    return any(name == label or name.startswith(label + "_") for name in names)
+
+
+def obligation_problems(text, frontier):
+    rows = obligation_rows(text)
+    if not rows:
+        return [f"OBLIGATIONS_EMPTY {OBLIGATIONS_ID}: no CPO rows parsed; the ledger table lost its shape"]
+    problems = []
+    for row in rows:
+        if not OBLIGATION_DUE_RE.match(row["due"]) or row["status"] not in OBLIGATION_STATUSES:
+            problems.append(f"OBLIGATION_MALFORMED {row['id']}: due {row['due']!r}, status {row['status']!r}")
+        elif row["status"] != "DONE" and row["due"] != "OWNER_KNOB" and obligation_due(row["due"], frontier):
+            problems.append(f"OBLIGATION_DUE {row['id']}: due {row['due']} at this seal and still {row['status']}; "
+                            "finish it, or move its due label by a lead amendment with a reason")
+    return problems
+
+
+def sealed_obligations(directory, frontier):
+    entry = contract_registry.load(directory)["contracts"].get(OBLIGATIONS_ID)
+    if entry is None:
+        return [f"OBLIGATIONS_MISSING {OBLIGATIONS_ID}: the frontier registry does not carry the obligations ledger"]
+    return obligation_problems((directory / entry["document"]).read_text(encoding="utf-8"), frontier)
+
+
 def seal_check(stage_start=False):
     """Run by ops/seal_passmap.sh before the sync: the frontier stage's registry checks clean against its folder and
     the canonical backend, everything the canonical backend changed since the stage began passes the merge check, and
@@ -1098,6 +1167,7 @@ def seal_check(stage_start=False):
         (phase_directory / "stages" / state.facts()["frontier"]["stage"] / "contracts", contract_registry.stage_contract_identifier),
         (state.BACKEND / "docs" / phase_directory.name, contract_registry.contract_identifier)])
     problems += contract_registry.sweep(directory, contract_registry.sweep_roots(directory, state.BACKEND))
+    problems += sealed_obligations(directory, state.facts()["frontier"])
     blocking, notes = apply_waivers(contract_registry.load_waivers(directory), breaches(directory))
     problems += blocking
     if not registry.get("base_commit"):

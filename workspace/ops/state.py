@@ -41,7 +41,8 @@ BACKEND_INPUTS = W / 'inputs/backend'
 BACKEND_ARCHIVE = r'gxb-backend-v2-.+-p(\d+)-[0-9a-f]{7}-(?:frozen-candidate|working-with-git)\.zip'
 BEGIN, END = '<!-- ops/state.py:begin -->', '<!-- ops/state.py:end -->'
 # Side lanes run beside the I-phases with their own workspace, record and checkpoint folder (ops/checkpoint.py --lane).
-LANES = {'audit': ('AUDIT', 'work/audit'), 'asset-recovery': ('ASSET_RECOVERY', 'work/asset_recovery')}
+LANES = {'audit': ('AUDIT', 'work/audit'), 'asset-recovery': ('ASSET_RECOVERY', 'work/asset_recovery'),
+         'asset-experimental': ('ASSET_EXPERIMENTAL', 'work/asset_experimental')}
 
 
 def generation_of(path, pattern):
