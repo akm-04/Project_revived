@@ -388,6 +388,10 @@ func (importer SDKImporter) importDevice(ctx context.Context, transaction tx.Tx,
 		out.Conflicts++
 		return nil
 	}
+	if account.Kind != SDKAccountKindGuest {
+		out.Conflicts++
+		return nil
+	}
 	inserted, err := importer.Store.InsertSDKDeviceTx(ctx, transaction, imported.DeviceID, account.ID)
 	if err != nil {
 		return err

@@ -410,6 +410,9 @@ func (service SDKService) Anonymous(ctx context.Context, request SDKAnonymousReq
 			if err != nil {
 				return err
 			}
+			if account != nil && account.Kind != SDKAccountKindGuest {
+				return ErrSDKInvalidAccount
+			}
 			if account != nil {
 				return service.anonymousIdentity(txctx, scope.Tx, *account, &out, op.StartedAt)
 			}

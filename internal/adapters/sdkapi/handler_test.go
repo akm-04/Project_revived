@@ -293,12 +293,12 @@ func TestTelemetryLogsTheAllowListedFieldsOnly(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	Handler{Service: service}.ServeHTTP(recorder, request)
 	line := captured.String()
-	for _, expected := range []string{"mid=65281", "SDK-Agent/1.0", "203.0.113.7", "player@example.com", "device-1", "android", "14", "1.2.3", "request-uid"} {
+	for _, expected := range []string{"mid=65281", "SDK-Agent/1.0", "203.0.113.7", "player@example.com", `device_id_digest="03204de92e11"`, "android", "14", "1.2.3", "request-uid"} {
 		if !strings.Contains(line, expected) {
 			t.Fatalf("log line %q lacks %q", line, expected)
 		}
 	}
-	for _, forbidden := range []string{"secret-password", "sid-secret", "token-secret"} {
+	for _, forbidden := range []string{"secret-password", "sid-secret", "token-secret", "device-1"} {
 		if strings.Contains(line, forbidden) {
 			t.Fatalf("log line %q carries %q", line, forbidden)
 		}
