@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -130,7 +131,99 @@ func testCommand(t *testing.T, key string, payload any) operator.Command {
 }
 
 func testScope() tx.Scope {
-	return tx.Scope{Operation: operation.Context{StartedAt: time.Unix(500, 0)}}
+	return tx.Scope{Tx: fakeTransaction{}, Operation: operation.Context{StartedAt: time.Unix(500, 0)}}
+}
+
+// savepointJournal records one recipient's settled lines; a savepoint rollback
+// restores the journal to its snapshot, the way PostgreSQL undoes the writes.
+type savepointJournal struct {
+	entries map[int64][]grant.Line
+}
+
+func (journal *savepointJournal) add(player int64, lines []grant.Line) {
+	journal.entries[player] = append(journal.entries[player], lines...)
+}
+
+func (journal *savepointJournal) snapshot() map[int64][]grant.Line {
+	copied := make(map[int64][]grant.Line, len(journal.entries))
+	for player, lines := range journal.entries {
+		copied[player] = append([]grant.Line(nil), lines...)
+	}
+	return copied
+}
+
+type savepointTransaction struct {
+	journal *savepointJournal
+	saved   map[string]map[int64][]grant.Line
+}
+
+func (transaction *savepointTransaction) QueryRow(context.Context, string, ...any) tx.Row {
+	return fakeRow{}
+}
+
+func (transaction *savepointTransaction) Exec(_ context.Context, statement string, _ ...any) (tx.CommandTag, error) {
+	switch {
+	case strings.HasPrefix(statement, "SAVEPOINT "):
+		if transaction.saved == nil {
+			transaction.saved = map[string]map[int64][]grant.Line{}
+		}
+		transaction.saved[strings.TrimPrefix(statement, "SAVEPOINT ")] = transaction.journal.snapshot()
+	case strings.HasPrefix(statement, "ROLLBACK TO SAVEPOINT "):
+		name := strings.TrimPrefix(statement, "ROLLBACK TO SAVEPOINT ")
+		if saved, ok := transaction.saved[name]; ok {
+			transaction.journal.entries = saved
+		}
+	case strings.HasPrefix(statement, "RELEASE SAVEPOINT "):
+		delete(transaction.saved, strings.TrimPrefix(statement, "RELEASE SAVEPOINT "))
+	}
+	return fakeTag(0), nil
+}
+
+func (transaction *savepointTransaction) Commit(context.Context) error   { return nil }
+func (transaction *savepointTransaction) Rollback(context.Context) error { return nil }
+
+// partialRefusalGrants settles the first line of the refused recipient and
+// then fails the rest, so that recipient has an earlier line to undo.
+type partialRefusalGrants struct {
+	journal *savepointJournal
+	refused int64
+}
+
+func (owner *partialRefusalGrants) AdminGrantTx(_ context.Context, _ tx.Tx, _ appi5.AdminOperator, player identity.PlayerID, _ string, _ string, lines []grant.Line, _ operation.Context) (appi5.GrantResult, error) {
+	if int64(player) == owner.refused {
+		owner.journal.add(int64(player), lines[:1])
+		return appi5.GrantResult{}, economy.ErrStackCapacity
+	}
+	owner.journal.add(int64(player), lines)
+	return appi5.GrantResult{}, nil
+}
+
+func (owner *partialRefusalGrants) AdminGrant(ctx context.Context, admin appi5.AdminOperator, player identity.PlayerID, key, policy string, lines []grant.Line, current operation.Context) (appi5.GrantResult, error) {
+	return owner.AdminGrantTx(ctx, nil, admin, player, key, policy, lines, current)
+}
+
+func TestGrantItemsInlineRollsBackARefusedRecipientsEarlierLines(t *testing.T) {
+	journal := &savepointJournal{entries: map[int64][]grant.Line{}}
+	commands := Commands{Catalogue: testCatalogue(t), Store: &fakeStore{}, Grants: &partialRefusalGrants{journal: journal, refused: 1}, LineCap: 10}
+	payload := map[string]any{
+		"target": map[string]any{"player_ids": []int64{1, 2}},
+		"lines":  []map[string]any{{"id": "stack_item:50001010", "amount": 1}},
+	}
+	scope := tx.Scope{Tx: &savepointTransaction{journal: journal}, Operation: operation.Context{StartedAt: time.Unix(500, 0)}}
+	outcome, err := commands.grantHandler(context.Background(), scope, testCommand(t, "grant-inline-refused-recipient", payload))
+	if err != nil {
+		t.Fatal(err)
+	}
+	result := outcome.(GrantResult)
+	if result.Applied != 1 || result.Refused != 1 || len(result.Failures) != 1 || result.Failures[0].PlayerID != 1 {
+		t.Fatalf("result = %+v", result)
+	}
+	if kept := journal.entries[1]; len(kept) != 0 {
+		t.Fatalf("refused recipient kept %d earlier lines: %+v", len(kept), kept)
+	}
+	if got := journal.entries[2]; len(got) != 1 {
+		t.Fatalf("valid recipient lines = %+v", got)
+	}
 }
 
 func TestGrantItemsInlineAppliesEachRecipientOnceWithItsOwnKey(t *testing.T) {
@@ -310,6 +403,71 @@ func testApplier(t *testing.T, store BulkStore, grants GrantOwner) Applier {
 
 func grantPayloadFor(ids []int64) map[string]any {
 	return map[string]any{"target": map[string]any{"player_ids": ids}, "lines": []map[string]any{{"id": "stack_item:50001010", "amount": 1}}}
+}
+
+// cancelAfterGrants cancels the worker context after the owner returns, so the
+// coordinator observes cancellation after a definitive recipient result.
+type cancelAfterGrants struct {
+	fakeGrants
+	cancel context.CancelFunc
+	refuse error
+}
+
+func (owner *cancelAfterGrants) AdminGrant(ctx context.Context, admin appi5.AdminOperator, player identity.PlayerID, key, policy string, lines []grant.Line, current operation.Context) (appi5.GrantResult, error) {
+	var result appi5.GrantResult
+	var err error
+	if owner.refuse != nil {
+		err = owner.refuse
+	} else {
+		result, err = owner.fakeGrants.AdminGrant(ctx, admin, player, key, policy, lines, current)
+	}
+	if owner.cancel != nil {
+		owner.cancel()
+		owner.cancel = nil
+	}
+	return result, err
+}
+
+func TestApplyPendingCancellationAfterSuccessCountsEachRecipientOnce(t *testing.T) {
+	ids := []int64{11}
+	target := testBulkTarget(t, "bulk-cancel-applied", ids, grantPayloadFor(ids))
+	store := &fakeStore{rows: map[string]BulkTarget{target.SemanticKey: target}}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	owner := &cancelAfterGrants{cancel: cancel}
+	applier := testApplier(t, store, owner)
+
+	if _, err := applier.ApplyPending(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := applier.ApplyPending(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	final := store.rows[target.SemanticKey]
+	if final.Applied+final.Refused != final.Processed || final.Processed != len(ids) || final.Applied != len(ids) || len(owner.effects) != len(ids) {
+		t.Fatalf("recipient counted twice: processed=%d applied=%d refused=%d effects=%d", final.Processed, final.Applied, final.Refused, len(owner.effects))
+	}
+}
+
+func TestApplyPendingCancellationAfterPermanentRefusalCountsEachRecipientOnce(t *testing.T) {
+	ids := []int64{11}
+	target := testBulkTarget(t, "bulk-cancel-refused", ids, grantPayloadFor(ids))
+	store := &fakeStore{rows: map[string]BulkTarget{target.SemanticKey: target}}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	owner := &cancelAfterGrants{cancel: cancel, refuse: economy.ErrUnknownResource}
+	applier := testApplier(t, store, owner)
+
+	if _, err := applier.ApplyPending(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := applier.ApplyPending(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	final := store.rows[target.SemanticKey]
+	if final.Applied+final.Refused != final.Processed || final.Processed != len(ids) || final.Refused != len(ids) || final.State != StateDone {
+		t.Fatalf("refused recipient counted twice: processed=%d applied=%d refused=%d state=%s", final.Processed, final.Applied, final.Refused, final.State)
+	}
 }
 
 func TestApplyPendingResumesATransientRecipientAtTheSameCursor(t *testing.T) {
