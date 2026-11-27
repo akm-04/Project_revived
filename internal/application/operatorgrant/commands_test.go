@@ -312,6 +312,71 @@ func grantPayloadFor(ids []int64) map[string]any {
 	return map[string]any{"target": map[string]any{"player_ids": ids}, "lines": []map[string]any{{"id": "stack_item:50001010", "amount": 1}}}
 }
 
+// cancelAfterGrants cancels the worker context after the owner returns, so the
+// coordinator observes cancellation after a definitive recipient result.
+type cancelAfterGrants struct {
+	fakeGrants
+	cancel context.CancelFunc
+	refuse error
+}
+
+func (owner *cancelAfterGrants) AdminGrant(ctx context.Context, admin appi5.AdminOperator, player identity.PlayerID, key, policy string, lines []grant.Line, current operation.Context) (appi5.GrantResult, error) {
+	var result appi5.GrantResult
+	var err error
+	if owner.refuse != nil {
+		err = owner.refuse
+	} else {
+		result, err = owner.fakeGrants.AdminGrant(ctx, admin, player, key, policy, lines, current)
+	}
+	if owner.cancel != nil {
+		owner.cancel()
+		owner.cancel = nil
+	}
+	return result, err
+}
+
+func TestApplyPendingCancellationAfterSuccessCountsEachRecipientOnce(t *testing.T) {
+	ids := []int64{11}
+	target := testBulkTarget(t, "bulk-cancel-applied", ids, grantPayloadFor(ids))
+	store := &fakeStore{rows: map[string]BulkTarget{target.SemanticKey: target}}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	owner := &cancelAfterGrants{cancel: cancel}
+	applier := testApplier(t, store, owner)
+
+	if _, err := applier.ApplyPending(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := applier.ApplyPending(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	final := store.rows[target.SemanticKey]
+	if final.Applied+final.Refused != final.Processed || final.Processed != len(ids) || final.Applied != len(ids) || len(owner.effects) != len(ids) {
+		t.Fatalf("recipient counted twice: processed=%d applied=%d refused=%d effects=%d", final.Processed, final.Applied, final.Refused, len(owner.effects))
+	}
+}
+
+func TestApplyPendingCancellationAfterPermanentRefusalCountsEachRecipientOnce(t *testing.T) {
+	ids := []int64{11}
+	target := testBulkTarget(t, "bulk-cancel-refused", ids, grantPayloadFor(ids))
+	store := &fakeStore{rows: map[string]BulkTarget{target.SemanticKey: target}}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	owner := &cancelAfterGrants{cancel: cancel, refuse: economy.ErrUnknownResource}
+	applier := testApplier(t, store, owner)
+
+	if _, err := applier.ApplyPending(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := applier.ApplyPending(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	final := store.rows[target.SemanticKey]
+	if final.Applied+final.Refused != final.Processed || final.Processed != len(ids) || final.Refused != len(ids) || final.State != StateDone {
+		t.Fatalf("refused recipient counted twice: processed=%d applied=%d refused=%d state=%s", final.Processed, final.Applied, final.Refused, final.State)
+	}
+}
+
 func TestApplyPendingResumesATransientRecipientAtTheSameCursor(t *testing.T) {
 	ids := []int64{11, 22, 33}
 	store := &fakeStore{rows: map[string]BulkTarget{"bulk-transient": testBulkTarget(t, "bulk-transient", ids, grantPayloadFor(ids))}}

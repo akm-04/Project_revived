@@ -129,7 +129,9 @@ func (applier Applier) applyOne(ctx context.Context, target BulkTarget) (bool, e
 				applied++
 			}
 			if ctx.Err() != nil {
-				return false, applier.save(context.WithoutCancel(ctx), target.SemanticKey, cursor, applied, refused, StatePending, "", "")
+				// The owner result is definitive, so the next run resumes after this
+				// recipient; only a transient fault retries the same cursor.
+				return false, applier.save(context.WithoutCancel(ctx), target.SemanticKey, cursor+1, applied, refused, StatePending, "", "")
 			}
 		}
 		state := StatePending
