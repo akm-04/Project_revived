@@ -36,6 +36,14 @@ const (
 	CodeRollbackBelowAssets = "OTA_ROLLBACK_BELOW_ASSETS"
 )
 
+// The OTA module command names. A receipt names the command that wrote it, so a
+// semantic key reused by another command is refused (A-213).
+const (
+	commandRegisterBuild = "ota.register_build"
+	commandPublish       = "ota.publish"
+	commandWithdraw      = "ota.withdraw"
+)
+
 // maxActiveCatalogReleases keeps one ACTIVE read at 16 rows: one code, one
 // assets and at most this many catalog releases (OTA_AMENDMENTS OA-1).
 const maxActiveCatalogReleases = 14
@@ -63,8 +71,8 @@ type CommandStore interface {
 // from BeginCommand until one of them.
 type CommandTransaction interface {
 	CommandStore
-	AppliedResult(string) (json.RawMessage, bool, error)
-	RecordApplied(string, any) error
+	AppliedResult(commandKey, moduleCommand, payloadSHA256 string) (json.RawMessage, bool, error)
+	RecordApplied(commandKey, moduleCommand, payloadSHA256 string, result any) error
 	Commit() error
 	Rollback()
 }
@@ -119,9 +127,9 @@ type releasePayload struct {
 // Handlers registers the three OTA commands on the operator bus.
 func (commands Commands) Handlers() map[string]operator.Handler {
 	return map[string]operator.Handler{
-		"ota.register_build": commands.registerBuildHandler,
-		"ota.publish":        commands.publishHandler,
-		"ota.withdraw":       commands.withdrawHandler,
+		commandRegisterBuild: commands.registerBuildHandler,
+		commandPublish:       commands.publishHandler,
+		commandWithdraw:      commands.withdrawHandler,
 	}
 }
 
@@ -163,7 +171,7 @@ func (commands Commands) registerBuildHandler(ctx context.Context, scope tx.Scop
 	commandMutex.Lock()
 	defer commandMutex.Unlock()
 	return commands.runCommand(func(scoped Commands) (any, error) {
-		if applied, found, err := replayApplied(scoped.Store, command.Envelope.SemanticKey); err != nil {
+		if applied, found, err := replayApplied(scoped.Store, command.Envelope.SemanticKey, commandRegisterBuild, command.PayloadSHA256); err != nil {
 			return nil, err
 		} else if found {
 			return applied, nil
@@ -176,7 +184,7 @@ func (commands Commands) registerBuildHandler(ctx context.Context, scope tx.Scop
 		if err != nil {
 			return nil, err
 		}
-		if err := recordApplied(scoped.Store, command.Envelope.SemanticKey, result); err != nil {
+		if err := recordApplied(scoped.Store, command.Envelope.SemanticKey, commandRegisterBuild, command.PayloadSHA256, result); err != nil {
 			return nil, err
 		}
 		return result, nil
@@ -187,7 +195,7 @@ func (commands Commands) publishHandler(ctx context.Context, scope tx.Scope, com
 	commandMutex.Lock()
 	defer commandMutex.Unlock()
 	return commands.runCommand(func(scoped Commands) (any, error) {
-		if applied, found, err := replayApplied(scoped.Store, command.Envelope.SemanticKey); err != nil {
+		if applied, found, err := replayApplied(scoped.Store, command.Envelope.SemanticKey, commandPublish, command.PayloadSHA256); err != nil {
 			return nil, err
 		} else if found {
 			return applied, nil
@@ -200,7 +208,7 @@ func (commands Commands) publishHandler(ctx context.Context, scope tx.Scope, com
 		if err != nil {
 			return nil, err
 		}
-		if err := recordApplied(scoped.Store, command.Envelope.SemanticKey, activation); err != nil {
+		if err := recordApplied(scoped.Store, command.Envelope.SemanticKey, commandPublish, command.PayloadSHA256, activation); err != nil {
 			return nil, err
 		}
 		return activation, nil
@@ -211,7 +219,7 @@ func (commands Commands) withdrawHandler(ctx context.Context, scope tx.Scope, co
 	commandMutex.Lock()
 	defer commandMutex.Unlock()
 	return commands.runCommand(func(scoped Commands) (any, error) {
-		if applied, found, err := replayApplied(scoped.Store, command.Envelope.SemanticKey); err != nil {
+		if applied, found, err := replayApplied(scoped.Store, command.Envelope.SemanticKey, commandWithdraw, command.PayloadSHA256); err != nil {
 			return nil, err
 		} else if found {
 			return applied, nil
@@ -224,7 +232,7 @@ func (commands Commands) withdrawHandler(ctx context.Context, scope tx.Scope, co
 		if err != nil {
 			return nil, err
 		}
-		if err := recordApplied(scoped.Store, command.Envelope.SemanticKey, activation); err != nil {
+		if err := recordApplied(scoped.Store, command.Envelope.SemanticKey, commandWithdraw, command.PayloadSHA256, activation); err != nil {
 			return nil, err
 		}
 		return activation, nil
@@ -234,24 +242,24 @@ func (commands Commands) withdrawHandler(ctx context.Context, scope tx.Scope, co
 // appliedCommandStore is implemented by StateFile: the bus retries a body on a
 // serializable abort, and the release file must not apply that body twice.
 type appliedCommandStore interface {
-	AppliedResult(string) (json.RawMessage, bool, error)
-	RecordApplied(string, any) error
+	AppliedResult(commandKey, moduleCommand, payloadSHA256 string) (json.RawMessage, bool, error)
+	RecordApplied(commandKey, moduleCommand, payloadSHA256 string, result any) error
 }
 
-func replayApplied(store CommandStore, commandKey string) (json.RawMessage, bool, error) {
+func replayApplied(store CommandStore, commandKey, moduleCommand, payloadSHA256 string) (json.RawMessage, bool, error) {
 	applied, ok := store.(appliedCommandStore)
 	if !ok {
 		return nil, false, nil
 	}
-	return applied.AppliedResult(commandKey)
+	return applied.AppliedResult(commandKey, moduleCommand, payloadSHA256)
 }
 
-func recordApplied(store CommandStore, commandKey string, result any) error {
+func recordApplied(store CommandStore, commandKey, moduleCommand, payloadSHA256 string, result any) error {
 	applied, ok := store.(appliedCommandStore)
 	if !ok {
 		return nil
 	}
-	return applied.RecordApplied(commandKey, result)
+	return applied.RecordApplied(commandKey, moduleCommand, payloadSHA256, result)
 }
 
 func decodePayload(payload json.RawMessage, target any) error {
