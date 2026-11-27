@@ -104,6 +104,15 @@ svg {
   border-radius: var(--tblr-border-radius-pill);
 }
 
+/* A disabled control must read as disabled. Tabler sets pointer-events: none,
+   which hides the not-allowed cursor, so restore it here. */
+.btn:disabled,
+.btn.disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: auto;
+}
+
 .badge,
 .command-class {
   border-radius: var(--tblr-border-radius-pill);

@@ -131,7 +131,11 @@ function createLaneCard(lane) {
   const stage = actionButton("Stage build", true, "ota-stage-" + lane.id);
   const publish = actionButton("Publish staged", false, "ota-publish-" + lane.id);
   publish.disabled = true;
-  actions.append(stage, publish);
+  const publishHint = document.createElement("span");
+  publishHint.className = "hint align-self-center";
+  publishHint.id = "ota-publish-hint-" + lane.id;
+  publishHint.textContent = "Stage a build first";
+  actions.append(stage, publish, publishHint);
   const publishWarning = document.createElement("p");
   publishWarning.className = "status mt-2";
   publishWarning.id = "ota-publish-warning-" + lane.id;
@@ -150,6 +154,16 @@ function createLaneCard(lane) {
   let checkTimer = null;
   let checkedVersion = "";
   let usedRelease = null;
+
+  // refreshPublish makes the publish state obvious: an active warning button
+  // with no hint, or a disabled secondary button with the reason beside it.
+  function refreshPublish() {
+    const allowed = stagedVersion !== "";
+    publish.disabled = !allowed;
+    publish.className = "btn " + (allowed ? "btn-warning" : "btn-secondary");
+    publishHint.hidden = allowed;
+    publishHint.textContent = allowed ? "" : "Stage a build first";
+  }
 
   function refreshForm() {
     const typed = versionInput.value.trim();
@@ -267,7 +281,7 @@ function createLaneCard(lane) {
       }
       values.get("size").textContent = stagedVersion === "" ? "Nothing staged" : sizeText(summary && summary.size);
       nextVersionNote.textContent = nextVersionNoteText(nextVersion);
-      publish.disabled = stagedVersion === "";
+      refreshPublish();
       staleWarning.hidden = !stale;
       staleWarning.textContent = stale
         ? "The staged " + stagedVersion + " is not newer than the active " + activeVersion + ". Publishing it is a rollback: " + rollbackWarningText + "."
