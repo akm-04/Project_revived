@@ -90,6 +90,10 @@ func (operations *Operations) Recover() error {
 		}
 		operation.State = OperationFailed
 		operation.Error = "agent restarted"
+		if last := len(operation.Steps) - 1; last >= 0 && operation.Steps[last].State == OperationRunning {
+			operation.Steps[last].State = OperationFailed
+			operation.FailedStep = operation.Steps[last].Name
+		}
 		if writeErr := operations.write(operation); writeErr != nil {
 			return writeErr
 		}
