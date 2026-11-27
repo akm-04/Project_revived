@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"gxb.local/backend/v2/internal/domain/identity"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
@@ -70,6 +71,64 @@ func TestSDKImportBackfillsLegacyAccountDefaults(t *testing.T) {
 				t.Fatalf("import = %+v backfills=%d, want no conflict and one backfill", result, store.backfills)
 			}
 		})
+	}
+}
+
+// sdkDeviceImportStore answers the account lookup and counts device inserts.
+type sdkDeviceImportStore struct {
+	sdkProbeStore
+	account       SDKAccountRecord
+	deviceInserts int
+}
+
+func (store *sdkDeviceImportStore) FindSDKAccountByUIDTx(context.Context, tx.Queryer, string) (*SDKAccountRecord, error) {
+	return &store.account, nil
+}
+
+func (store *sdkDeviceImportStore) InsertSDKDeviceTx(context.Context, tx.Tx, string, identity.AccountID) (bool, error) {
+	store.deviceInserts++
+	return true, nil
+}
+
+func (*sdkDeviceImportStore) BackfillSDKAccountMetadataTx(context.Context, tx.Tx, SDKAccountRecord) error {
+	return nil
+}
+
+func runSDKDeviceImport(t *testing.T, kind string) (*sdkDeviceImportStore, SDKImportResult) {
+	t.Helper()
+	accountID, err := newSDKAccountID()
+	if err != nil {
+		t.Fatal(err)
+	}
+	account := SDKAccountRecord{ID: accountID, UID: accountID.UUID().String(), Kind: kind, Username: "imported", Active: true, CreatedAt: time.Now()}
+	store := &sdkDeviceImportStore{account: account}
+	importer := SDKImporter{
+		Runner:     tx.Runner{DB: sdkProbeBeginner{commits: make(chan struct{}, 8)}},
+		Store:      store,
+		Operations: operation.Factory{Clock: clock.System{}},
+	}
+	result, err := importer.Import(context.Background(), SDKImportInput{
+		Devices: []SDKImportDevice{{DeviceID: "import-device", AccountUID: account.UID}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return store, result
+}
+
+// TestSDKImportRefusesADeviceBindingForAPasswordAccount is A-207: the same
+// guest-only rule applies to imported device bindings.
+func TestSDKImportRefusesADeviceBindingForAPasswordAccount(t *testing.T) {
+	store, result := runSDKDeviceImport(t, SDKAccountKindNormal)
+	if result.Conflicts != 1 || result.DevicesImported != 0 || store.deviceInserts != 0 {
+		t.Fatalf("import = %+v inserts=%d, want a conflict and no binding", result, store.deviceInserts)
+	}
+}
+
+func TestSDKImportKeepsADeviceBindingForAGuest(t *testing.T) {
+	store, result := runSDKDeviceImport(t, SDKAccountKindGuest)
+	if result.DevicesImported != 1 || result.Conflicts != 0 || store.deviceInserts != 1 {
+		t.Fatalf("import = %+v inserts=%d, want one guest binding", result, store.deviceInserts)
 	}
 }
 

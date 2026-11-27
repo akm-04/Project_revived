@@ -5,6 +5,8 @@ package sdkapi
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -221,6 +223,16 @@ func stringField(payload map[string]any, key string) string {
 	return value
 }
 
+// shortDeviceIDDigest keeps the telemetry correlatable without logging the
+// device identifier that now stands in for a recovery secret.
+func shortDeviceIDDigest(deviceID string) string {
+	if deviceID == "" {
+		return ""
+	}
+	digest := sha256.Sum256([]byte(deviceID))
+	return hex.EncodeToString(digest[:6])
+}
+
 // logRequest is the SDK telemetry event: mid, user agent and proxy address plus
 // the allow-listed identity fields. Passwords, cookies and tokens never enter it.
 func logRequest(mid string, request *http.Request, payload map[string]any) {
@@ -234,7 +246,7 @@ func logRequest(mid string, request *http.Request, payload map[string]any) {
 	add("x_forwarded_for", request.Header.Get("X-Forwarded-For"))
 	add("login_email", stringField(payload, "login_email"))
 	add("uid", stringField(payload, "uid"))
-	add("device_id", stringField(payload, "device_id"))
+	add("device_id_digest", shortDeviceIDDigest(stringField(payload, "device_id")))
 	add("device_type", stringField(payload, "device_type"))
 	add("os_version", stringField(payload, "os_version"))
 	add("sdk_version", stringField(payload, "sdk_version"))

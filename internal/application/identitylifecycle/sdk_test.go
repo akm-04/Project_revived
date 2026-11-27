@@ -469,6 +469,94 @@ func TestSDKPasswordVerificationRunsOutsideTheTransaction(t *testing.T) {
 	})
 }
 
+// sdkDeviceAuthenticationStore answers the device and live-cookie lookups of
+// the anonymous recovery regression.
+type sdkDeviceAuthenticationStore struct {
+	sdkProbeStore
+	deviceAccount *SDKAccountRecord
+	cookieAccount *SDKAccountRecord
+	deviceLookups int
+	issued        int
+}
+
+func (store *sdkDeviceAuthenticationStore) FindSDKAccountByDeviceTx(context.Context, tx.Queryer, string) (*SDKAccountRecord, error) {
+	store.deviceLookups++
+	return store.deviceAccount, nil
+}
+
+func (store *sdkDeviceAuthenticationStore) FindLiveSDKAccountBySIDDigestTx(context.Context, tx.Queryer, identity.CredentialDigest, time.Time) (*SDKAccountRecord, error) {
+	return store.cookieAccount, nil
+}
+
+func (store *sdkDeviceAuthenticationStore) InsertSessionTx(context.Context, tx.Tx, identity.Session) error {
+	store.issued++
+	return nil
+}
+
+func sdkDeviceAuthenticationAccount(t *testing.T, kind, username string) *SDKAccountRecord {
+	t.Helper()
+	accountID, err := newSDKAccountID()
+	if err != nil {
+		t.Fatal(err)
+	}
+	uid := accountID.UUID().String()
+	if username == "" {
+		username = "guest-" + uid[:8]
+	}
+	return &SDKAccountRecord{ID: accountID, UID: uid, Kind: kind, Username: username, Active: true, CreatedAt: time.Now()}
+}
+
+func sdkDeviceAuthenticationService(store *sdkDeviceAuthenticationStore) SDKService {
+	return SDKService{
+		Runner:       tx.Runner{DB: sdkProbeBeginner{commits: make(chan struct{}, 8)}},
+		Store:        store,
+		DigestSecret: []byte("0123456789abcdef"),
+		Operations:   operation.Factory{Clock: clock.System{}},
+	}
+}
+
+// TestSDKAnonymousRefusesADeviceOnlyPasswordAccount is A-207: a known device
+// identifier must not recover a password account without the password or a
+// live cookie, and the refusal must issue no session credential.
+func TestSDKAnonymousRefusesADeviceOnlyPasswordAccount(t *testing.T) {
+	store := &sdkDeviceAuthenticationStore{deviceAccount: sdkDeviceAuthenticationAccount(t, SDKAccountKindNormal, "player-one")}
+	recovered, err := sdkDeviceAuthenticationService(store).Anonymous(context.Background(), SDKAnonymousRequest{DeviceID: "known-device-id"})
+	if !errors.Is(err, ErrSDKInvalidAccount) {
+		t.Fatalf("device-only password account err = %v, want invalid account", err)
+	}
+	if recovered.UID != "" || recovered.SID != "" || recovered.Token != "" || store.issued != 0 {
+		t.Fatalf("refused device request issued credentials: %+v issued=%d", recovered, store.issued)
+	}
+}
+
+func TestSDKAnonymousRecoversAGuestFromItsDevice(t *testing.T) {
+	account := sdkDeviceAuthenticationAccount(t, SDKAccountKindGuest, "")
+	store := &sdkDeviceAuthenticationStore{deviceAccount: account}
+	recovered, err := sdkDeviceAuthenticationService(store).Anonymous(context.Background(), SDKAnonymousRequest{DeviceID: "guest-device-id"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if recovered.UID != account.UID || recovered.SID == "" || recovered.Token == "" || store.issued != 1 {
+		t.Fatalf("guest device recovery = %+v issued=%d", recovered, store.issued)
+	}
+}
+
+func TestSDKAnonymousCookieRecoveryIgnoresAnotherDevice(t *testing.T) {
+	cookieAccount := sdkDeviceAuthenticationAccount(t, SDKAccountKindNormal, "player-one")
+	deviceAccount := sdkDeviceAuthenticationAccount(t, SDKAccountKindGuest, "")
+	store := &sdkDeviceAuthenticationStore{cookieAccount: cookieAccount, deviceAccount: deviceAccount}
+	recovered, err := sdkDeviceAuthenticationService(store).Anonymous(context.Background(), SDKAnonymousRequest{CookieSID: "sdk-sid-presented", DeviceID: "another-device"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if recovered.UID != cookieAccount.UID || recovered.SID == "" || recovered.Token == "" {
+		t.Fatalf("cookie recovery = %+v, want the cookie account %q", recovered, cookieAccount.UID)
+	}
+	if store.deviceLookups != 0 || store.issued != 1 {
+		t.Fatalf("device lookups=%d issued=%d, want the live cookie to decide", store.deviceLookups, store.issued)
+	}
+}
+
 func TestDecodeSDKImportRefusesDuplicateNormalizedLogins(t *testing.T) {
 	valid := sdkImportJSON(t)
 	duplicate := strings.Replace(valid, `"logins": {"player-one": "`+sdkImportNormalUID+`"}`,
