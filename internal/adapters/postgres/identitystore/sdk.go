@@ -16,9 +16,16 @@ const (
 	// Uses no conflict target so both the account id and the stock uid unique
 	// constraint skip an account that already exists.
 	insertSDKAccountIfAbsent = `INSERT INTO accounts(account_id,account_uid,status,created_at,account_kind,display_username) VALUES($1,$2,'ACTIVE',$3,$4,$5) ON CONFLICT DO NOTHING`
-	findSDKAccountByUID      = `SELECT account_id::text,account_uid,account_kind,display_username,status,created_at FROM accounts WHERE account_uid=$1`
-	findSDKAccountByDevice   = `SELECT a.account_id::text,a.account_uid,a.account_kind,a.display_username,a.status,a.created_at FROM sdk_devices d JOIN accounts a ON a.account_id=d.account_id WHERE d.device_id=$1`
-	findLiveAccountBySID     = `SELECT a.account_id::text,a.account_uid,a.account_kind,a.display_username,a.status,a.created_at
+	// Only a column still at its migration default is written, so a value
+	// another writer already set is never overwritten.
+	backfillSDKAccountMetadata = `UPDATE accounts
+SET account_kind = CASE WHEN account_kind='normal' THEN $2 ELSE account_kind END,
+    display_username = CASE WHEN display_username='' THEN $3 ELSE display_username END
+WHERE account_id=$1
+  AND ((account_kind='normal' AND account_kind<>$2) OR (display_username='' AND display_username<>$3))`
+	findSDKAccountByUID    = `SELECT account_id::text,account_uid,account_kind,display_username,status,created_at FROM accounts WHERE account_uid=$1`
+	findSDKAccountByDevice = `SELECT a.account_id::text,a.account_uid,a.account_kind,a.display_username,a.status,a.created_at FROM sdk_devices d JOIN accounts a ON a.account_id=d.account_id WHERE d.device_id=$1`
+	findLiveAccountBySID   = `SELECT a.account_id::text,a.account_uid,a.account_kind,a.display_username,a.status,a.created_at
 FROM account_session_credentials c
 JOIN account_sessions s ON s.session_id=c.session_id
 JOIN accounts a ON a.account_id=s.account_id
@@ -52,6 +59,14 @@ func (Store) InsertSDKAccountIfAbsentTx(ctx context.Context, transaction tx.Tx, 
 		return false, err
 	}
 	return tag.RowsAffected() == 1, nil
+}
+
+func (Store) BackfillSDKAccountMetadataTx(ctx context.Context, transaction tx.Tx, account appidentity.SDKAccountRecord) error {
+	if transaction == nil || account.ID.UUID().IsZero() || account.Kind == "" {
+		return errors.New("invalid sdk account backfill")
+	}
+	_, err := transaction.Exec(ctx, backfillSDKAccountMetadata, account.ID.UUID().String(), account.Kind, account.Username)
+	return err
 }
 
 func (Store) FindSDKAccountByUIDTx(ctx context.Context, query tx.Queryer, uid string) (*appidentity.SDKAccountRecord, error) {

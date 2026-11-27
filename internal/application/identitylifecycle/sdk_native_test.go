@@ -465,3 +465,77 @@ func TestSDKImportIsIdempotentAndVerifiesTheImportedPassword(t *testing.T) {
 		t.Fatalf("imported device account = %q, want %q", guest.UID, fixture.guest)
 	}
 }
+
+// TestSDKImportBackfillsALegacyAccountKeepsItsIdentity proves the cut-over
+// shape: an account row that predates migration 00196 still holds the column
+// defaults, and the import fills them without replacing the row identity.
+func TestSDKImportBackfillsALegacyAccountKeepsItsIdentity(t *testing.T) {
+	pool := sdkTestPool(t)
+	ctx := context.Background()
+	service := sdkTestService(pool)
+	normalID, normalUID := newSDKTestUUID(t), newSDKTestUUID(t)
+	guestID, guestUID := newSDKTestUUID(t), newSDKTestUUID(t)
+	normalLogin := newSDKTestLogin(t)
+	normalPassword := "legacy-normal-1"
+	algorithm, iterations, salt, hash, err := appidentity.HashSDKPassword(normalPassword)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, account := range []struct{ id, uid string }{{normalID, normalUID}, {guestID, guestUID}} {
+		if _, err := pool.Raw().Exec(ctx, `INSERT INTO accounts(account_id,account_uid,status,created_at) VALUES($1,$2,'ACTIVE',now())`, account.id, account.uid); err != nil {
+			t.Fatal(err)
+		}
+	}
+	guestName := "guest-" + guestUID[:8]
+	device := "device-" + newSDKTestUUID(t)
+	input := appidentity.SDKImportInput{
+		Accounts: []appidentity.SDKImportAccount{
+			{UID: normalUID, Type: appidentity.SDKAccountKindNormal, Username: normalLogin, Created: time.Now()},
+			{UID: guestUID, Type: appidentity.SDKAccountKindGuest, Username: guestName, Created: time.Now()},
+		},
+		Logins: []appidentity.SDKImportLogin{{
+			Normalized: normalLogin, Display: normalLogin, AccountUID: normalUID,
+			Algorithm: algorithm, Iterations: iterations, Salt: salt, Hash: hash,
+			Created: time.Now(), PasswordChangedAt: time.Now(),
+		}},
+		Devices: []appidentity.SDKImportDevice{{DeviceID: device, AccountUID: guestUID}},
+	}
+	importer := appidentity.SDKImporter{Runner: tx.Runner{DB: pool}, Store: identitystore.Store{}, Operations: operation.Factory{Clock: clock.System{}}}
+	result, err := importer.Import(ctx, input)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.AccountsSkipped != 2 || result.Conflicts != 0 || result.LoginsImported != 1 || result.DevicesImported != 1 {
+		t.Fatalf("import = %+v, want two backfilled accounts and no conflict", result)
+	}
+	for _, account := range []struct{ id, kind, name string }{
+		{normalID, appidentity.SDKAccountKindNormal, normalLogin},
+		{guestID, appidentity.SDKAccountKindGuest, guestName},
+	} {
+		var kind, display string
+		if err := pool.QueryRow(ctx, `SELECT account_kind,display_username FROM accounts WHERE account_id=$1`, account.id).Scan(&kind, &display); err != nil {
+			t.Fatal(err)
+		}
+		if kind != account.kind || display != account.name {
+			t.Fatalf("account %s = kind %q name %q, want %q %q", account.id, kind, display, account.kind, account.name)
+		}
+	}
+	session, err := service.Login(ctx, appidentity.SDKLoginRequest{Login: normalLogin, Password: normalPassword})
+	if err != nil {
+		t.Fatalf("the backfilled login was refused: %v", err)
+	}
+	if session.UID != normalUID || session.Username != normalLogin {
+		t.Fatalf("login = %+v, want uid %q name %q", session, normalUID, normalLogin)
+	}
+	guest, err := service.Anonymous(ctx, appidentity.SDKAnonymousRequest{DeviceID: device})
+	if err != nil || guest.UID != guestUID || guest.Username != guestName {
+		t.Fatalf("guest = %+v err=%v, want uid %q name %q", guest, err, guestUID, guestName)
+	}
+	again, err := importer.Import(ctx, input)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if again.AccountsSkipped != 2 || again.LoginsSkipped != 1 || again.DevicesSkipped != 1 || again.Conflicts != 0 {
+		t.Fatalf("second import = %+v, want an idempotent skip", again)
+	}
+}
