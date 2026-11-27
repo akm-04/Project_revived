@@ -45,16 +45,17 @@ var droppedLabels, _ = observability.NewLabels(observability.Pair{Key: "domain",
 // the request path. A full queue or failed write drops rows and counts them;
 // it never fails or slows a request (R4).
 type Journal struct {
-	store   Store
-	metrics observability.Metrics
-	queue   chan JournalRow
+	store         Store
+	metrics       observability.Metrics
+	queue         chan JournalRow
+	flushRequests chan chan struct{}
 }
 
 func NewJournal(store Store, metrics observability.Metrics) *Journal {
 	if metrics == nil {
 		metrics = observability.NopMetrics{}
 	}
-	return &Journal{store: store, metrics: metrics, queue: make(chan JournalRow, journalQueueSize)}
+	return &Journal{store: store, metrics: metrics, queue: make(chan JournalRow, journalQueueSize), flushRequests: make(chan chan struct{})}
 }
 
 // Record implements observability.RequestJournal.
@@ -80,9 +81,40 @@ func (j *Journal) Run(ctx context.Context) {
 			}
 		case <-ticker.C:
 			pending = j.flush(ctx, pending)
+		case reply := <-j.flushRequests:
+			pending = j.drainQueue(pending)
+			pending = j.flush(ctx, pending)
+			close(reply)
 		case <-ctx.Done():
 			j.drain(pending)
 			return
+		}
+	}
+}
+
+// Flush writes the rows queued so far and answers when they are written. A
+// snapshot calls it so the dump includes the journal; a store failure drops the
+// batch exactly as the periodic flush does, so the call itself never fails.
+func (j *Journal) Flush(ctx context.Context) {
+	reply := make(chan struct{})
+	select {
+	case j.flushRequests <- reply:
+	case <-ctx.Done():
+		return
+	}
+	select {
+	case <-reply:
+	case <-ctx.Done():
+	}
+}
+
+func (j *Journal) drainQueue(pending []JournalRow) []JournalRow {
+	for {
+		select {
+		case row := <-j.queue:
+			pending = append(pending, row)
+		default:
+			return pending
 		}
 	}
 }

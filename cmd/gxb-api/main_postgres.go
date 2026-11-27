@@ -639,9 +639,10 @@ func main() {
 		map[string]operator.ReadHandler{"operator.audit.list": operatorapi.AuditList(operatorAudit), operatorgrant.BulkShowRead: operatorapi.BulkShow(bulkReads)})
 	redeemModule := bindModule(redeemCommands.Module(), nil,
 		map[string]operator.ReadHandler{"redeem.list": operatorapi.RedeemList(appi5.OperatorRedeemRead{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: i5db})})
+	clientLogs, journal := startClientLog(ctx, pool, authority, cfg.ClientLogURL, retentionPolicies.RetentionDays, txMetrics, mux, handlerConcurrency("GXB_CLIENT_LOG_MAX_CONCURRENT", 4, poolConnections))
 	journalStore := clientlogstore.Store{Pool: pool.Raw()}
 	logsReads := appclientlog.LogsReadService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Reader: journalStore}
-	logsCommands := appclientlog.LogsCommands{Clearer: journalStore}
+	logsCommands := appclientlog.LogsCommands{Clearer: journalStore, Flusher: journal}
 	logsModule := bindModule(operator.LogsModule(), logsCommands.Handlers(),
 		map[string]operator.ReadHandler{
 			"logs.timeline": operatorapi.LogsTimeline(logsReads),
@@ -672,7 +673,6 @@ func main() {
 	arenaCounterReset := apparena.Service{Timed: resetTimed, Store: arenastore.Store{}, Content: contentDB, Receipts: receipts, ReceiptRead: resetReceiptRead}
 	summonCounterReset := appsummon.Mode{Timed: resetTimed, Store: summonstore.Store{}, Content: contentDB, Receipts: receipts, ReceiptRead: resetReceiptRead}
 	startOperatorBulkJob(ctx, pool, operatorgrant.Applier{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: operatorstore.Store{}, Grants: i5svc, Mail: i5svc, DailyBuys: dailyCounterReset, CampaignDaily: campaignCounterReset, TopFloor: topFloorCounterReset, OneOnOne: oneOnOneCounterReset, WorldBoss: worldBossCounterReset, Illusion: illusionCounterReset, DormGlue: dormGlueCounterReset, ArenaDaily: arenaCounterReset, SummonFree: summonCounterReset, OccultTickets: i5svc, SkillPoints: i5svc, Catalogue: operatorCatalogue, LineCap: grantLineCap})
-	clientLogs, journal := startClientLog(ctx, pool, authority, cfg.ClientLogURL, retentionPolicies.RetentionDays, txMetrics, mux, handlerConcurrency("GXB_CLIENT_LOG_MAX_CONCURRENT", 4, poolConnections))
 	dailyReset := dailyreset.Service{Markers: dailyresetstore.Store{Queryer: pool}, Counters: itemsEnergy.Counters}
 	boot := stockruntime.BootstrapDispatcher{Bootstrap: bootstrap, Tracker: tracker, LogURLs: clientLogs, DailyReset: dailyReset}
 	mustRegister(18, boot)

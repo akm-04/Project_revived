@@ -18,6 +18,7 @@ import (
 // Operator log console (OPERATOR_BACKUPS_LOGS_DESIGN C1d, C2, C4).
 const (
 	LogsClearCommand = "logs.clear"
+	LogsFlushCommand = "logs.flush"
 
 	CodeLogsSource = "OPERATOR_LOG_SOURCE"
 	CodeLogsScope  = "OPERATOR_LOG_SCOPE"
@@ -233,14 +234,31 @@ type ClearResult struct {
 	Removed int64  `json:"removed"`
 }
 
-// LogsCommands applies logs.clear on the operator bus.
+// JournalFlusher writes the journal rows queued so far; the snapshot flow asks
+// for it before a dump (S2.3).
+type JournalFlusher interface {
+	Flush(context.Context)
+}
+
+// LogsCommands applies logs.clear and logs.flush on the operator bus.
 type LogsCommands struct {
 	Clearer JournalClearer
+	Flusher JournalFlusher
 }
 
 // Handlers returns the command handlers this module registers.
 func (commands LogsCommands) Handlers() map[string]operator.Handler {
-	return map[string]operator.Handler{LogsClearCommand: commands.clearHandler}
+	return map[string]operator.Handler{LogsClearCommand: commands.clearHandler, LogsFlushCommand: commands.flushHandler}
+}
+
+// flushHandler drains the journal before a snapshot. Flushing is best effort:
+// a dropped batch is counted like any other flush failure, never refused.
+func (commands LogsCommands) flushHandler(ctx context.Context, _ tx.Scope, _ operator.Command) (any, error) {
+	if commands.Flusher == nil {
+		return nil, operator.ErrUnavailable
+	}
+	commands.Flusher.Flush(ctx)
+	return map[string]bool{"flushed": true}, nil
 }
 
 func (commands LogsCommands) clearHandler(ctx context.Context, scope tx.Scope, command operator.Command) (any, error) {

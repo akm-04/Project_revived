@@ -147,16 +147,10 @@ export function renderPage(container, context) {
       return;
     }
     const name = presentText(selectedEntry.name, "unnamed");
+    const preview = await request("/agent/v1/backup/restore-preview?name=" + encodeURIComponent(selectedEntry.id));
     const confirmation = await confirmAction({
       title: "Restore snapshot",
-      summary:
-        "Restore snapshot \"" + name + "\" (" + presentText(selectedEntry.id, "unknown") + "). " +
-        "Snapshot migration " + presentNumber(selectedEntry.migration, "unknown") +
-        "; backend migration " + presentNumber(backendMigration, "unknown") + ". " +
-        "Restore replaces the current database with the selected snapshot. " +
-        "The backend is stopped first and every player connection is lost; " +
-        "an older snapshot is migrated forward to the backend schema, then the backend starts. " +
-        "A safety snapshot is taken before the swap.",
+      summary: restoreSummary(selectedEntry, name, backendMigration, preview.ok ? preview.body : null),
       confirmLabel: "Restore snapshot",
     });
     if (confirmation === null) {
@@ -774,6 +768,29 @@ function noRowsRow(columns, text) {
   cell.textContent = text;
   row.append(cell);
   return row;
+}
+
+// restoreSummary is the restore confirmation text; the preview names the
+// accounts the snapshot does not hold (S2.2).
+function restoreSummary(entry, name, backendMigration, preview) {
+  const base =
+    "Restore snapshot \"" + name + "\" (" + presentText(entry.id, "unknown") + "). " +
+    "Snapshot migration " + presentNumber(entry.migration, "unknown") +
+    "; backend migration " + presentNumber(backendMigration, "unknown") + ". " +
+    "Restore replaces the current database with the selected snapshot. " +
+    "The backend is stopped first and every player connection is lost; " +
+    "an older snapshot is migrated forward to the backend schema, then the backend starts. " +
+    "A safety snapshot is taken before the swap.";
+  if (preview === null || typeof preview !== "object") {
+    return base + " The restore preview is unavailable; accounts created after this snapshot will be lost.";
+  }
+  const lost = typeof preview.lost_accounts === "number" ? preview.lost_accounts : 0;
+  const accounts = Array.isArray(preview.new_accounts) ? preview.new_accounts : [];
+  const shown = accounts.slice(0, 5);
+  const total = typeof preview.new_account_count === "number" ? preview.new_account_count : accounts.length;
+  const more = total > shown.length ? " (+" + (total - shown.length) + " more)" : "";
+  const sample = shown.length === 0 ? "" : ": " + shown.join(", ") + more;
+  return base + " " + lost + " accounts will be lost" + sample + ".";
 }
 
 async function showOperation(box, reply, confirmation) {

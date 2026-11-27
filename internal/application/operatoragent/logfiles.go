@@ -38,6 +38,9 @@ const (
 	logSearchReadBytes = 4 << 20
 
 	DefaultToolLogDays = 30
+	// MinimumToolLogDays is the S2.4 floor: no tool or backend log retention
+	// below 15 days.
+	MinimumToolLogDays = 15
 	maximumToolLogDays = 3650
 )
 
@@ -102,8 +105,8 @@ func (writer *DatedLogWriter) Close() error {
 // RetainDatedLogs removes tool and backend files older than the retention days
 // (C1: tool_log_days applies to both). It returns how many files it removed.
 func RetainDatedLogs(directory string, days int, now time.Time) (int, error) {
-	if days < 1 {
-		days = DefaultToolLogDays
+	if days < MinimumToolLogDays {
+		days = MinimumToolLogDays
 	}
 	cutoff := now.UTC().AddDate(0, 0, -days).Format("2006-01-02")
 	entries, err := os.ReadDir(directory)

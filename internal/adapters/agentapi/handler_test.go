@@ -681,6 +681,19 @@ func TestBackupRoutesUseTheAgentService(t *testing.T) {
 		t.Fatalf("streaming restore without tools: %d %s", streamRestore.Code, streamRestore.Body)
 	}
 
+	previewWithoutName := serveAgent(handler, http.MethodGet, "/agent/v1/backup/restore-preview", session, "")
+	if previewWithoutName.Code != http.StatusConflict || refusalCodeOf(t, previewWithoutName) != operatoragent.CodeBodyInvalid {
+		t.Fatalf("preview without name: %d %s", previewWithoutName.Code, previewWithoutName.Body)
+	}
+	previewWithoutTools := serveAgent(handler, http.MethodGet, "/agent/v1/backup/restore-preview?name=20260101T000000.000000000Z-manual", session, "")
+	if previewWithoutTools.Code != http.StatusConflict || refusalCodeOf(t, previewWithoutTools) != operatoragent.CodeBackupToolsMissing {
+		t.Fatalf("preview without tools: %d %s", previewWithoutTools.Code, previewWithoutTools.Body)
+	}
+	previewRead := serveAgent(handler, http.MethodGet, "/agent/v1/reads/backup.restore_preview?name=20260101T000000.000000000Z-manual", session, "")
+	if previewRead.Code != http.StatusConflict || refusalCodeOf(t, previewRead) != operatoragent.CodeBackupToolsMissing {
+		t.Fatalf("generic preview read: %d %s", previewRead.Code, previewRead.Body)
+	}
+
 	snapshotID := "20260101T000000.000000000Z-manual"
 	manifest := operatoragent.BackupManifest{ID: snapshotID, Kind: operatoragent.BackupKindManual, CreatedAt: time.Now().UTC(), Database: "gxb_bk", Migration: 183}
 	encoded, err := json.Marshal(manifest)

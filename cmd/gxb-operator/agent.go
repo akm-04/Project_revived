@@ -93,6 +93,7 @@ func runAgent(root string, args []string) error {
 		Operations:      operations,
 		Guard:           backendGuard,
 		Log:             toolLog,
+		Journal:         operator,
 		Now:             time.Now,
 		ConfigRoot:      root,
 	}

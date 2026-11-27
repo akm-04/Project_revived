@@ -511,6 +511,10 @@ func (handler Handler) serveRead(writer http.ResponseWriter, request *http.Reque
 		handler.serveCLIUsage(writer)
 		return
 	}
+	if name == "backup.restore_preview" {
+		handler.serveBackupRestorePreview(writer, request)
+		return
+	}
 	response, err := handler.Operator.Read(request.Context(), name, request.URL.RawQuery)
 	if err != nil {
 		handler.writeAgentError(writer, name, err)
@@ -1108,6 +1112,8 @@ func (handler Handler) serveBackup(writer http.ResponseWriter, request *http.Req
 		}
 		handler.record("backup.prune", "prune", "ok", map[string]any{"operation_id": operation.ID})
 		writeJSON(writer, http.StatusOK, operation)
+	case action == "restore-preview" && request.Method == http.MethodGet:
+		handler.serveBackupRestorePreview(writer, request)
 	case action == "restore" && request.Method == http.MethodPost:
 		var body backupRestoreRequest
 		if err := decodeBody(writer, request, maxBodyBytes, &body); err != nil {
@@ -1158,6 +1164,23 @@ func (handler Handler) serveBackup(writer http.ResponseWriter, request *http.Req
 	default:
 		writeRefusal(writer, http.StatusNotFound, operatoragent.CodeNotFound, "no such agent route")
 	}
+}
+
+// serveBackupRestorePreview answers backup.restore_preview from both the
+// Backups page route and the generic read route.
+func (handler Handler) serveBackupRestorePreview(writer http.ResponseWriter, request *http.Request) {
+	name := request.URL.Query().Get("name")
+	if name == "" {
+		writeRefusal(writer, http.StatusConflict, operatoragent.CodeBodyInvalid, "name is required")
+		return
+	}
+	preview, err := handler.Backup.RestorePreview(request.Context(), name)
+	if err != nil {
+		handler.writeAgentError(writer, "backup.restore_preview", err)
+		return
+	}
+	handler.record("backup.restore_preview", "preview", "ok", map[string]any{"id": preview.ID, "lost_accounts": preview.LostAccounts})
+	writeJSON(writer, http.StatusOK, preview)
 }
 
 func decodeBody(writer http.ResponseWriter, request *http.Request, limit int64, target any) error {

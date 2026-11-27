@@ -19,17 +19,19 @@ import (
 )
 
 type fakeTools struct {
-	calls       []string
-	statements  []string
-	dumpContent string
-	dumpErr     error
-	verifyErr   error
-	restoreErr  error
-	executeErr  error
-	queryAnswer string
-	queryErr    error
-	migrateErr  error
-	migrateDir  string
+	calls        []string
+	statements   []string
+	queries      []string
+	dumpContent  string
+	dumpErr      error
+	verifyErr    error
+	restoreErr   error
+	executeErr   error
+	queryAnswer  string
+	queryAnswers []string
+	queryErr     error
+	migrateErr   error
+	migrateDir   string
 	// restoreStarted and restoreRelease let a test hold the restore step open
 	// long enough to read its live operation status.
 	restoreStarted chan struct{}
@@ -66,8 +68,14 @@ func (tools *fakeTools) Execute(_ context.Context, _ string, statement string) e
 	return tools.executeErr
 }
 
-func (tools *fakeTools) Query(context.Context, string, string) (string, error) {
+func (tools *fakeTools) Query(_ context.Context, _ string, statement string) (string, error) {
 	tools.calls = append(tools.calls, "query")
+	tools.queries = append(tools.queries, statement)
+	if len(tools.queryAnswers) > 0 {
+		answer := tools.queryAnswers[0]
+		tools.queryAnswers = tools.queryAnswers[1:]
+		return answer, nil
+	}
 	return tools.queryAnswer, tools.queryErr
 }
 
@@ -103,6 +111,38 @@ func (reader fakeVersionReader) Version(context.Context) (operator.VersionInfo, 
 	return reader.version, reader.versionErr
 }
 
+// stoppedAwareReader refuses a version read once the backend is stopped, so a
+// test proves the safety snapshot uses the version read before the stop.
+type stoppedAwareReader struct {
+	process *fakeProcess
+	version operator.VersionInfo
+}
+
+func (reader stoppedAwareReader) Command(context.Context, OperatorRequest) (BackendResponse, error) {
+	return BackendResponse{Status: http.StatusOK, Body: []byte(`{}`)}, nil
+}
+
+func (reader stoppedAwareReader) Read(context.Context, string, string) (BackendResponse, error) {
+	return BackendResponse{Status: http.StatusOK, Body: []byte(`{}`)}, nil
+}
+
+func (reader stoppedAwareReader) Version(context.Context) (operator.VersionInfo, error) {
+	if !reader.process.running {
+		return operator.VersionInfo{}, errors.New("the backend is stopped")
+	}
+	return reader.version, nil
+}
+
+type fakeJournalFlusher struct {
+	calls int
+	err   error
+}
+
+func (flusher *fakeJournalFlusher) FlushJournal(context.Context) error {
+	flusher.calls++
+	return flusher.err
+}
+
 type fakeProcess struct {
 	running         bool
 	starts          int
@@ -111,9 +151,17 @@ type fakeProcess struct {
 	openErr         error
 	stopErr         error
 	lastStartClosed bool
+	events          *[]string
+}
+
+func (process *fakeProcess) record(event string) {
+	if process.events != nil {
+		*process.events = append(*process.events, event)
+	}
 }
 
 func (process *fakeProcess) Start(closed bool, _ string) error {
+	process.record("start")
 	if !closed && process.openErr != nil {
 		return process.openErr
 	}
@@ -127,6 +175,7 @@ func (process *fakeProcess) Start(closed bool, _ string) error {
 }
 
 func (process *fakeProcess) Stop() error {
+	process.record("stop")
 	if process.stopErr != nil {
 		return process.stopErr
 	}
@@ -213,7 +262,16 @@ func TestSnapshotWritesManifestAndVerifiesTheDump(t *testing.T) {
 	if manifest.Kind != BackupKindManual || manifest.Database != "gxb_bk" || manifest.Migration != 183 || manifest.BackendCommit != "abc123" {
 		t.Fatalf("manifest = %+v", manifest)
 	}
-	if len(tools.calls) < 2 || tools.calls[0] != "dump" || tools.calls[1] != "verify" {
+	dumpIndex, verifyIndex := -1, -1
+	for index, call := range tools.calls {
+		if call == "dump" && dumpIndex < 0 {
+			dumpIndex = index
+		}
+		if call == "verify" && verifyIndex < 0 {
+			verifyIndex = index
+		}
+	}
+	if dumpIndex < 0 || verifyIndex <= dumpIndex {
 		t.Fatalf("tool calls = %+v", tools.calls)
 	}
 	var listed BackupList
@@ -1269,5 +1327,110 @@ func TestSetPathRefusesWhileAnOperationRuns(t *testing.T) {
 	stored, err := LoadConfig(root)
 	if err != nil || stored.BackupPath != "" {
 		t.Fatalf("a busy set path changed agent.json: %q (%v)", stored.BackupPath, err)
+	}
+}
+
+func TestRestoreStopsBeforeTheSafetySnapshotAndRestartsOnFailure(t *testing.T) {
+	service, tools, process := newBackupService(t)
+	process.events = &tools.calls
+	service.Operator = stoppedAwareReader{process: process, version: testVersion()}
+	tools.dumpErr = errors.New("pg_dump failed")
+	id := "20260101T000000.000000000Z-manual"
+	writeSnapshot(t, service.Directory, id, BackupKindManual, time.Date(2026, 11, 20, 10, 0, 0, 0, time.UTC), "restore me")
+	operation, err := service.Restore(context.Background(), id, "bad dump")
+	if err == nil || !strings.Contains(err.Error(), "pg_dump failed") {
+		t.Fatalf("restore error = %v", err)
+	}
+	stopIndex, dumpIndex := -1, -1
+	for index, event := range tools.calls {
+		if event == "stop" && stopIndex < 0 {
+			stopIndex = index
+		}
+		if event == "dump" && dumpIndex < 0 {
+			dumpIndex = index
+		}
+	}
+	if stopIndex < 0 || dumpIndex < 0 || dumpIndex < stopIndex {
+		t.Fatalf("the dump did not run after the stop: %v", tools.calls)
+	}
+	if process.stops != 1 || process.starts != 1 || !process.running {
+		t.Fatalf("process = %+v", process)
+	}
+	if operation.FailedStep != "safety snapshot" {
+		t.Fatalf("failed step = %q", operation.FailedStep)
+	}
+}
+
+func TestRestoreTakesTheSafetySnapshotWithTheVersionReadBeforeTheStop(t *testing.T) {
+	service, _, process := newBackupService(t)
+	service.Operator = stoppedAwareReader{process: process, version: testVersion()}
+	id := "20260101T000000.000000000Z-manual"
+	writeSnapshot(t, service.Directory, id, BackupKindManual, time.Date(2026, 11, 20, 10, 0, 0, 0, time.UTC), "restore me")
+	operation, err := service.Restore(context.Background(), id, "stopped database snapshot")
+	if err != nil || operation.State != OperationDone {
+		t.Fatalf("restore: %+v %v", operation, err)
+	}
+	if !process.running {
+		t.Fatal("the backend was not started again")
+	}
+}
+
+func TestSnapshotRecordsFactsAndRestorePreviewListsLostAccounts(t *testing.T) {
+	service, tools, _ := newBackupService(t)
+	tools.queryAnswers = []string{
+		`{"accounts":10,"players":12,"newest_account_created_at":"2026-11-20T10:00:00.000000Z"}`,
+		`{"accounts":14,"players":15,"new_account_count":4,"new_accounts":["u1","u2","u3","u4"]}`,
+	}
+	operation, err := service.Snapshot(context.Background(), SnapshotOptions{Kind: BackupKindManual, Reason: "facts"})
+	if err != nil || operation.State != OperationDone {
+		t.Fatalf("snapshot: %+v %v", operation, err)
+	}
+	entries, err := service.entries()
+	if err != nil || len(entries) != 1 {
+		t.Fatalf("entries = %+v %v", entries, err)
+	}
+	manifest := entries[0].BackupManifest
+	if manifest.Accounts != 10 || manifest.Players != 12 || manifest.NewestAccountCreatedAt == nil {
+		t.Fatalf("manifest facts = %+v", manifest)
+	}
+	if !manifest.NewestAccountCreatedAt.Equal(time.Date(2026, 11, 20, 10, 0, 0, 0, time.UTC)) {
+		t.Fatalf("newest account = %s", manifest.NewestAccountCreatedAt)
+	}
+	preview, err := service.RestorePreview(context.Background(), manifest.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if preview.SnapshotAccounts != 10 || preview.SnapshotPlayers != 12 || preview.LiveAccounts != 14 || preview.LivePlayers != 15 {
+		t.Fatalf("preview counts = %+v", preview)
+	}
+	if preview.LostAccounts != 4 || preview.LostPlayers != 3 || preview.NewAccountCount != 4 || len(preview.NewAccounts) != 4 {
+		t.Fatalf("preview loss = %+v", preview)
+	}
+	lastQuery := tools.queries[len(tools.queries)-1]
+	if !strings.Contains(lastQuery, "2026-11-20T10:00:00Z") || !strings.Contains(lastQuery, "LIMIT 50") {
+		t.Fatalf("preview query = %q", lastQuery)
+	}
+}
+
+func TestSnapshotFlushesTheClientLogJournalForManualAndScheduledOnly(t *testing.T) {
+	cases := []struct {
+		kind      string
+		wantCalls int
+	}{
+		{BackupKindManual, 1},
+		{BackupKindScheduled, 1},
+		{BackupKindSafety, 0},
+		{BackupKindPreUpdate, 0},
+	}
+	for _, testCase := range cases {
+		service, _, _ := newBackupService(t)
+		flusher := &fakeJournalFlusher{err: errors.New("journal store unavailable")}
+		service.Journal = flusher
+		if _, err := service.Snapshot(context.Background(), SnapshotOptions{Kind: testCase.kind, Reason: "flush"}); err != nil {
+			t.Fatalf("%s snapshot: %v", testCase.kind, err)
+		}
+		if flusher.calls != testCase.wantCalls {
+			t.Fatalf("%s flush calls = %d", testCase.kind, flusher.calls)
+		}
 	}
 }

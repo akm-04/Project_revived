@@ -71,6 +71,11 @@ type BackupManifest struct {
 	SHA256         string    `json:"sha256"`
 	Reason         string    `json:"reason,omitempty"`
 	Operator       string    `json:"operator,omitempty"`
+	// Accounts, Players and NewestAccountCreatedAt are the pre-dump facts S2.2
+	// records, so the restore preview can name what the snapshot does not hold.
+	Accounts               int64      `json:"accounts"`
+	Players                int64      `json:"players"`
+	NewestAccountCreatedAt *time.Time `json:"newest_account_created_at,omitempty"`
 	// Name and Pinned are the G54 keep mark: a pinned snapshot is never pruned
 	// and stays out of every automatic step until it is unpinned.
 	Name   string `json:"name,omitempty"`
@@ -122,6 +127,19 @@ type DatabaseTools interface {
 	Migrate(ctx context.Context, dsn, directory string) error
 }
 
+// JournalFlusher writes the client-log journal rows queued so far; flushing is
+// best effort and a failure is logged, never fatal (S2.3).
+type JournalFlusher interface {
+	FlushJournal(context.Context) error
+}
+
+// snapshotFacts is the pre-dump account state recorded in the manifest.
+type snapshotFacts struct {
+	Accounts               int64
+	Players                int64
+	NewestAccountCreatedAt *time.Time
+}
+
 // BackupService runs the agent-side backup commands (B1-B7). It never opens
 // the database itself: every statement goes through the pg toolchain.
 type BackupService struct {
@@ -143,7 +161,10 @@ type BackupService struct {
 	Operations      *Operations
 	Guard           *BackendGuard
 	Log             *ToolLog
-	Now             func() time.Time
+	// Journal is the client-log journal flush S2.3 runs before a manual or
+	// scheduled snapshot; nil skips it.
+	Journal JournalFlusher
+	Now     func() time.Time
 	// MigrationsDirectory holds the forward-only goose migrations. It is
 	// required only when a restore replaces an older snapshot than the deployed
 	// backend's schema. It is a captured value; production sets ConfigRoot
@@ -342,6 +363,12 @@ func (service *BackupService) SnapshotBeforeDestructive(ctx context.Context, rea
 }
 
 func (service *BackupService) snapshot(ctx context.Context, kind, reason, name string, pinned bool) (Operation, error) {
+	return service.snapshotKnownVersion(ctx, kind, reason, name, pinned, nil)
+}
+
+// snapshotKnownVersion takes the snapshot with an already-read backend version,
+// so the safety snapshot of a stopped backend needs no live operator read.
+func (service *BackupService) snapshotKnownVersion(ctx context.Context, kind, reason, name string, pinned bool, knownVersion *operator.VersionInfo) (Operation, error) {
 	if err := service.requireDirectory(); err != nil {
 		return Operation{}, err
 	}
@@ -363,23 +390,43 @@ func (service *BackupService) snapshot(ctx context.Context, kind, reason, name s
 	manifestPath := filepath.Join(directory, id+backupManifestSuffix)
 
 	var version operator.VersionInfo
+	var facts snapshotFacts
 	var manifest BackupManifest
-	steps := []Step{
-		{Name: "read backend version", Run: func(ctx context.Context) (any, error) {
+	steps := make([]Step, 0, 6)
+	if kind == BackupKindManual || kind == BackupKindScheduled {
+		steps = append(steps, Step{Name: "flush client log journal", Run: func(ctx context.Context) (any, error) {
+			return service.flushJournal(ctx), nil
+		}})
+	}
+	if knownVersion == nil {
+		steps = append(steps, Step{Name: "read backend version", Run: func(ctx context.Context) (any, error) {
 			loaded, err := service.Operator.Version(ctx)
 			if err != nil {
 				return nil, err
 			}
 			version = loaded
 			return map[string]any{"migration": loaded.Migration}, nil
+		}})
+	} else {
+		version = *knownVersion
+	}
+	steps = append(steps,
+		Step{Name: "read snapshot facts", Run: func(ctx context.Context) (any, error) {
+			loaded, err := service.readSnapshotFacts(ctx, dsn)
+			if err != nil {
+				service.log("backup.snapshot", "facts", "failed", map[string]any{"error": MaskString(err.Error())})
+				return map[string]any{"recorded": false}, nil
+			}
+			facts = loaded
+			return map[string]any{"accounts": facts.Accounts, "players": facts.Players}, nil
 		}},
-		{Name: "dump database", Run: func(ctx context.Context) (any, error) {
+		Step{Name: "dump database", Run: func(ctx context.Context) (any, error) {
 			if err := service.Tools.Dump(ctx, dsn, partialPath); err != nil {
 				return nil, Temporarily(CodeBackupToolFailed, MaskString(err.Error()))
 			}
 			return nil, nil
 		}},
-		{Name: "verify dump", Run: func(ctx context.Context) (any, error) {
+		Step{Name: "verify dump", Run: func(ctx context.Context) (any, error) {
 			if err := service.Tools.VerifyDump(ctx, partialPath); err != nil {
 				return nil, Temporarily(CodeBackupToolFailed, MaskString(err.Error()))
 			}
@@ -391,36 +438,39 @@ func (service *BackupService) snapshot(ctx context.Context, kind, reason, name s
 				return nil, Temporarily(CodeBackupFailed, "the dump cannot be renamed: "+err.Error())
 			}
 			manifest = BackupManifest{
-				ID:             id,
-				Kind:           kind,
-				CreatedAt:      service.now().UTC(),
-				Database:       database,
-				BackendVersion: stringValue(version.BackendVersion),
-				BackendCommit:  stringValue(version.GitCommit),
-				Migration:      version.Migration,
-				Size:           size,
-				SHA256:         digest,
-				Reason:         reason,
-				Operator:       backupOperator,
-				Name:           name,
-				Pinned:         pinned,
+				ID:                     id,
+				Kind:                   kind,
+				CreatedAt:              service.now().UTC(),
+				Database:               database,
+				BackendVersion:         stringValue(version.BackendVersion),
+				BackendCommit:          stringValue(version.GitCommit),
+				Migration:              version.Migration,
+				Size:                   size,
+				SHA256:                 digest,
+				Reason:                 reason,
+				Operator:               backupOperator,
+				Name:                   name,
+				Pinned:                 pinned,
+				Accounts:               facts.Accounts,
+				Players:                facts.Players,
+				NewestAccountCreatedAt: facts.NewestAccountCreatedAt,
 			}
 			return map[string]any{"sha256": digest, "size": size}, nil
 		}},
-		{Name: "write manifest", Run: func(context.Context) (any, error) {
+		Step{Name: "write manifest", Run: func(context.Context) (any, error) {
 			if err := writeBackupManifest(manifestPath, manifest); err != nil {
 				return nil, Temporarily(CodeBackupFailed, "the manifest cannot be written: "+err.Error())
 			}
 			return manifest, nil
 		}},
-		{Name: "prune", Run: func(ctx context.Context) (any, error) {
+		Step{Name: "prune", Run: func(ctx context.Context) (any, error) {
 			pruned, err := service.prune(ctx)
 			if err != nil {
 				return nil, err
 			}
 			return map[string]any{"manifest": manifest, "prune": pruned}, nil
 		}},
-	}
+	)
 	operation, err := service.Operations.RunKeyed(ctx, "backup.snapshot", "", snapshotRequest(kind, reason, name, pinned), steps)
 	if err != nil {
 		_ = os.Remove(partialPath)
@@ -428,6 +478,46 @@ func (service *BackupService) snapshot(ctx context.Context, kind, reason, name s
 	}
 	service.log("backup.snapshot", "finish", "done", map[string]any{"id": id, "size": manifest.Size, "pinned": pinned})
 	return operation, nil
+}
+
+const snapshotFactsQuery = `SELECT json_build_object('accounts',(SELECT count(*) FROM accounts),'players',(SELECT count(*) FROM players),'newest_account_created_at',(SELECT to_char(max(created_at) AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"') FROM accounts))`
+
+// readSnapshotFacts reads the pre-dump account state. A failed read is logged
+// and the snapshot continues without the facts.
+func (service *BackupService) readSnapshotFacts(ctx context.Context, dsn string) (snapshotFacts, error) {
+	answer, err := service.Tools.Query(ctx, dsn, snapshotFactsQuery)
+	if err != nil {
+		return snapshotFacts{}, err
+	}
+	var reply struct {
+		Accounts               int64  `json:"accounts"`
+		Players                int64  `json:"players"`
+		NewestAccountCreatedAt string `json:"newest_account_created_at"`
+	}
+	if err := json.Unmarshal([]byte(strings.TrimSpace(answer)), &reply); err != nil {
+		return snapshotFacts{}, err
+	}
+	facts := snapshotFacts{Accounts: reply.Accounts, Players: reply.Players}
+	if reply.NewestAccountCreatedAt != "" {
+		parsed, err := time.Parse(time.RFC3339Nano, reply.NewestAccountCreatedAt)
+		if err != nil {
+			return snapshotFacts{}, err
+		}
+		facts.NewestAccountCreatedAt = &parsed
+	}
+	return facts, nil
+}
+
+// flushJournal is best effort (S2.3): a failure is logged and the snapshot runs.
+func (service *BackupService) flushJournal(ctx context.Context) map[string]any {
+	if service.Journal == nil {
+		return map[string]any{"flushed": false}
+	}
+	if err := service.Journal.FlushJournal(ctx); err != nil {
+		service.log("backup.snapshot", "flush journal", "failed", map[string]any{"error": MaskString(err.Error())})
+		return map[string]any{"flushed": false}
+	}
+	return map[string]any{"flushed": true}
 }
 
 func snapshotRequest(kind, reason, name string, pinned bool) json.RawMessage {
@@ -965,13 +1055,15 @@ func (service *BackupService) restoreSteps(id string) ([]Step, error) {
 	var restoredDSN string
 	var migrationsDirectory string
 
+	var deployed operator.VersionInfo
 	steps := []Step{
 		{Name: "verify snapshot", Run: func(ctx context.Context) (any, error) {
-			deployed, err := service.Operator.Version(ctx)
+			loaded, err := service.Operator.Version(ctx)
 			if err != nil {
 				return nil, err
 			}
-			deployedMigration = deployed.Migration
+			deployed = loaded
+			deployedMigration = loaded.Migration
 			migrationsDirectory, err = service.migrationsDirectory()
 			if err != nil {
 				return nil, err
@@ -984,16 +1076,20 @@ func (service *BackupService) restoreSteps(id string) ([]Step, error) {
 			}
 			return map[string]any{"migration": deployed.Migration, "snapshot_migration": manifest.Migration}, nil
 		}},
+		// S2.1: the safety snapshot covers the stopped database, not a live one.
+		{Name: "stop backend", Run: func(context.Context) (any, error) {
+			return nil, service.Backend.Stop()
+		}},
 		{Name: "safety snapshot", Run: func(ctx context.Context) (any, error) {
-			operation, err := service.snapshot(ctx, BackupKindSafety, "before restore "+id, "", false)
+			operation, err := service.snapshotKnownVersion(ctx, BackupKindSafety, "before restore "+id, "", false, &deployed)
 			if err != nil {
+				if startErr := service.startOriginal(); startErr != nil {
+					service.log("backup.restore", "start", "failed", map[string]any{"error": MaskString(startErr.Error())})
+				}
 				return nil, err
 			}
 			safety = operation
 			return operation.Result, nil
-		}},
-		{Name: "stop backend", Run: func(context.Context) (any, error) {
-			return nil, service.Backend.Stop()
 		}},
 		{Name: "restore into new database", Run: func(ctx context.Context) (any, error) {
 			state := restoreState{Phase: "restoring", Database: database, Restored: restoredDatabase, PreRestore: preRestoreDatabase, Stamp: stamp, UpdatedAt: service.now().UTC()}
@@ -1087,6 +1183,80 @@ func (service *BackupService) restoreSteps(id string) ([]Step, error) {
 		}},
 	}
 	return steps, nil
+}
+
+// RestorePreview is backup.restore_preview (S2.2): what the live database holds
+// that the snapshot does not, so the operator sees the loss before confirming.
+type RestorePreview struct {
+	ID               string    `json:"id"`
+	Name             string    `json:"name,omitempty"`
+	CreatedAt        time.Time `json:"created_at"`
+	SnapshotAccounts int64     `json:"snapshot_accounts"`
+	SnapshotPlayers  int64     `json:"snapshot_players"`
+	LiveAccounts     int64     `json:"live_accounts"`
+	LivePlayers      int64     `json:"live_players"`
+	LostAccounts     int64     `json:"lost_accounts"`
+	LostPlayers      int64     `json:"lost_players"`
+	NewAccounts      []string  `json:"new_accounts"`
+	NewAccountCount  int64     `json:"new_account_count"`
+}
+
+// RestorePreview lists the live accounts created after the snapshot (capped at
+// 50) and the live-minus-snapshot counts.
+func (service *BackupService) RestorePreview(ctx context.Context, name string) (RestorePreview, error) {
+	if err := service.requireDirectory(); err != nil {
+		return RestorePreview{}, err
+	}
+	if service.Tools == nil {
+		return RestorePreview{}, Refuse(CodeBackupToolsMissing, "the pg toolchain is unavailable")
+	}
+	manifest, err := service.keepableManifest(name)
+	if err != nil {
+		return RestorePreview{}, err
+	}
+	dsn, err := service.dsn()
+	if err != nil {
+		return RestorePreview{}, err
+	}
+	boundary := manifest.CreatedAt
+	if manifest.NewestAccountCreatedAt != nil {
+		boundary = *manifest.NewestAccountCreatedAt
+	}
+	answer, err := service.Tools.Query(ctx, dsn, restorePreviewQuery(boundary))
+	if err != nil {
+		return RestorePreview{}, Temporarily(CodeBackupToolFailed, MaskString(err.Error()))
+	}
+	var reply struct {
+		Accounts        int64    `json:"accounts"`
+		Players         int64    `json:"players"`
+		NewAccountCount int64    `json:"new_account_count"`
+		NewAccounts     []string `json:"new_accounts"`
+	}
+	if err := json.Unmarshal([]byte(strings.TrimSpace(answer)), &reply); err != nil {
+		return RestorePreview{}, Temporarily(CodeBackupToolFailed, "the preview query did not answer JSON")
+	}
+	preview := RestorePreview{
+		ID: manifest.ID, Name: manifest.Name, CreatedAt: manifest.CreatedAt,
+		SnapshotAccounts: manifest.Accounts, SnapshotPlayers: manifest.Players,
+		LiveAccounts: reply.Accounts, LivePlayers: reply.Players,
+		LostAccounts: reply.Accounts - manifest.Accounts, LostPlayers: reply.Players - manifest.Players,
+		NewAccounts: reply.NewAccounts, NewAccountCount: reply.NewAccountCount,
+	}
+	if preview.LostAccounts < 0 {
+		preview.LostAccounts = 0
+	}
+	if preview.LostPlayers < 0 {
+		preview.LostPlayers = 0
+	}
+	if preview.NewAccounts == nil {
+		preview.NewAccounts = []string{}
+	}
+	return preview, nil
+}
+
+func restorePreviewQuery(boundary time.Time) string {
+	stamp := boundary.UTC().Format(time.RFC3339Nano)
+	return `SELECT json_build_object('accounts',(SELECT count(*) FROM accounts),'players',(SELECT count(*) FROM players),'new_account_count',(SELECT count(*) FROM accounts WHERE created_at > '` + stamp + `'),'new_accounts',(SELECT coalesce(json_agg(account_uid),'[]'::json) FROM (SELECT account_uid FROM accounts WHERE created_at > '` + stamp + `' ORDER BY created_at, account_uid LIMIT 50) recent))`
 }
 
 func (service *BackupService) rollbackSwap(ctx context.Context, adminDSN, database, preRestoreDatabase, stamp string) error {

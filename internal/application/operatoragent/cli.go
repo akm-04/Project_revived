@@ -53,7 +53,7 @@ var cliCommands = []CLICommand{
 	{Usage: "gxb-operator backup path [<dir>]", Prefix: "gxb-operator backup ", Summary: "Show or set the snapshot folder; a set rescans it at once. backup -s <dir> is the same set."},
 	{Usage: "gxb-operator backup schedule [1d|7d|15d|30d|off]", Prefix: "gxb-operator backup ", Summary: "Show or set the scheduled automatic snapshot interval."},
 	{Usage: "gxb-operator backup keep [5|10|15|30]", Prefix: "gxb-operator backup ", Summary: "Show or set how many automatic snapshots stay; lowering prunes."},
-	{Usage: "gxb-operator backup restore <id> --reason <text>", Prefix: "gxb-operator backup ", Summary: "Restore a snapshot."},
+	{Usage: "gxb-operator backup restore <id> --reason <text> [--yes]", Prefix: "gxb-operator backup ", Summary: "Print what the restore loses, then restore a snapshot with --yes."},
 	{Usage: "gxb-operator backup update-backend --reason <text>", Prefix: "gxb-operator backup ", Summary: "Snapshot, stop, swap the binary and start."},
 	{Usage: "gxb-operator op status <id>", Prefix: "gxb-operator op status ", Summary: "Show one long operation."},
 	{Usage: "gxb-operator modules [--json]", Prefix: "gxb-operator modules", Summary: "List the command and read registry."},

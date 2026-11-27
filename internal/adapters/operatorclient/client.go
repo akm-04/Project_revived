@@ -69,6 +69,34 @@ func (client *Client) Modules(ctx context.Context) ([]operator.Module, error) {
 	return reply.Modules, nil
 }
 
+// FlushJournal asks the backend to write its queued client-log journal rows
+// before a snapshot (S2.3). Every call carries a fresh semantic key because a
+// replayed key would return the stored result without flushing.
+func (client *Client) FlushJournal(ctx context.Context) error {
+	key, err := operatoragent.NewToken()
+	if err != nil {
+		return err
+	}
+	response, err := client.Command(ctx, operatoragent.OperatorRequest{
+		Name: "logs.flush",
+		Envelope: operator.Envelope{
+			Principal:   "root",
+			Role:        operator.RoleRoot,
+			Scope:       "global",
+			Reason:      "flush the client log journal before a backup snapshot",
+			SemanticKey: key,
+		},
+		Payload: json.RawMessage(`{}`),
+	})
+	if err != nil {
+		return err
+	}
+	if response.Status < 200 || response.Status >= 300 {
+		return &operatoragent.BackendRefusal{Status: response.Status, Body: response.Body}
+	}
+	return nil
+}
+
 // Read runs one operator read.
 func (client *Client) Read(ctx context.Context, name, query string) (operatoragent.BackendResponse, error) {
 	url := client.baseURL + "/operator/v1/reads/" + name

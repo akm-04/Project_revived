@@ -106,6 +106,11 @@ func BackupModule() operator.Module {
 		Role:       operator.RoleRoot,
 		LogChannel: "backup",
 		Screen:     operator.Screen{Tab: "Backups", Columns: []string{"id", "name", "pinned", "kind", "created_at", "size", "migration", "damaged"}},
+		Reads: []operator.Read{
+			{Name: "backup.restore_preview", Help: "What the live database holds that a snapshot does not: lost accounts and players, and up to 50 accounts created after it.", Fields: []operator.Field{
+				operator.NewField("name", operator.FieldString, true, "snapshot id from backup.list"),
+			}},
+		},
 		Commands: []operator.CommandSpec{
 			{Name: "backup.snapshot", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Take a database snapshot.", Fields: []operator.Field{
 				operator.NewField("kind", operator.FieldString, false, "manual, safety, pre-update or pre-delete").WithEnum("manual", "safety", "pre-update", "pre-delete").WithDefault("manual"),
