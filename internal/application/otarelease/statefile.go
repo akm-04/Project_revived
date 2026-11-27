@@ -14,9 +14,6 @@ import (
 
 	"gxb.local/backend/v2/internal/application/operator"
 	domain "gxb.local/backend/v2/internal/domain/otarelease"
-	"gxb.local/backend/v2/internal/foundation/clock"
-	"gxb.local/backend/v2/internal/foundation/operation"
-	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -97,11 +94,6 @@ func (receipt *AppliedReceipt) UnmarshalJSON(data []byte) error {
 	return json.Unmarshal(data, (*receiptFields)(receipt))
 }
 
-// StateExporter reads the database rows once, when the file does not exist yet.
-type StateExporter interface {
-	ExportStateTx(context.Context, tx.Queryer) (StateDocument, error)
-}
-
 // StateFile owns <ota_root>/releases.json. It implements the release read,
 // command, status and lookup stores, so those paths never open a database row.
 type StateFile struct {
@@ -157,42 +149,6 @@ func (f *StateFile) Save(document StateDocument) error {
 		return err
 	}
 	return writeFileAtomically(f.Path(), data)
-}
-
-// Seed imports the database rows once, only when the release file is absent.
-// An existing file, even an empty one, is the authority and is never replaced,
-// so a database restore never rewrites the live OTA (S1 item 2).
-func (f *StateFile) Seed(ctx context.Context, runner tx.Runner, exporter StateExporter) (bool, error) {
-	if f == nil || f.Root == "" || exporter == nil || runner.DB == nil {
-		return false, nil
-	}
-	if _, err := os.Stat(f.Path()); err == nil {
-		return false, nil
-	} else if !errors.Is(err, os.ErrNotExist) {
-		return false, err
-	}
-	currentOperation, err := (operation.Factory{Clock: clock.System{}}).New(policy.Set{})
-	if err != nil {
-		return false, err
-	}
-	var document StateDocument
-	_, err = runner.Run(ctx, currentOperation, ReadProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, scope tx.Scope) error {
-		loaded, readErr := exporter.ExportStateTx(ctx, scope.Tx)
-		if readErr == nil {
-			document = loaded
-		}
-		return readErr
-	})
-	if err != nil {
-		return false, err
-	}
-	// Another process seeding the same root wins the link; its newer file is
-	// left alone.
-	data, err := encodedState(document)
-	if err != nil {
-		return false, err
-	}
-	return writeFileExclusively(f.Path(), data)
 }
 
 func encodedState(document StateDocument) ([]byte, error) {

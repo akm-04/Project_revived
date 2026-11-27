@@ -83,6 +83,9 @@ type Status struct {
 	// SettingsInvalid reports a settings.json this boot could not use; the
 	// backend serves the defaults and never rewrites the file (S1 item 1).
 	SettingsInvalid bool `json:"settings_invalid"`
+	// TelemetryUnavailable reports that the serving counters and misses could
+	// not be read; their empty lists are not measured zeroes (S1 item 4).
+	TelemetryUnavailable bool `json:"telemetry_unavailable"`
 }
 
 // LaneSummary is one OTA lane's overview (OPERATOR_GUI_V2 design item 5):
@@ -159,10 +162,12 @@ func (s StatusService) Status(ctx context.Context) (Status, error) {
 	if err != nil {
 		return Status{}, err
 	}
-	if s.Ledger != nil && s.Runner.DB != nil {
+	telemetryUnavailable := s.Ledger == nil || s.Runner.DB == nil
+	if !telemetryUnavailable {
 		ledger, ledgerErr := s.readLedger(ctx)
 		if ledgerErr != nil {
 			log.Printf("ota status ledger: %v", ledgerErr)
+			telemetryUnavailable = true
 		} else {
 			snapshot.Served = ledger.Served
 			snapshot.Misses = ledger.Misses
@@ -174,6 +179,7 @@ func (s StatusService) Status(ctx context.Context) (Status, error) {
 	}
 	status.Settings = s.Live.Get()
 	status.SettingsInvalid = s.Live.Invalid()
+	status.TelemetryUnavailable = telemetryUnavailable
 	return status, nil
 }
 

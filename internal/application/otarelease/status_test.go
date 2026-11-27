@@ -2,6 +2,7 @@ package otarelease
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -18,6 +19,39 @@ type fakeStatusStore struct {
 
 func (store fakeStatusStore) ReadStatusTx(context.Context, tx.Queryer) (StatusSnapshot, error) {
 	return store.snapshot, nil
+}
+
+type failingLedgerReader struct {
+	err error
+}
+
+func (reader failingLedgerReader) ReadLedgerTx(context.Context, tx.Queryer, int, int) (LedgerStatus, error) {
+	return LedgerStatus{}, reader.err
+}
+
+// S1 item 4 / L1c item 3: a ledger read failure keeps the file status and says
+// the telemetry is unavailable instead of showing empty lists as measured.
+func TestStatusKeepsTheFileStatusWhenTheLedgerFails(t *testing.T) {
+	service := StatusService{
+		Runner:     tx.Runner{DB: fakeDB{}},
+		Operations: operation.Factory{Clock: clock.System{}},
+		Store:      fakeStatusStore{snapshot: StatusSnapshot{Active: []ActiveRow{{Version: "1.631.2", Lane: "code"}}}},
+		Ledger:     failingLedgerReader{err: errors.New("database restored")},
+		Live:       NewSettingsValue(domain.DefaultSettings()),
+	}
+	status, err := service.Status(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !status.TelemetryUnavailable {
+		t.Fatal("ota.status hid the failed ledger read")
+	}
+	if status.Active.Code == nil || *status.Active.Code != "1.631.2" {
+		t.Fatalf("the file status was dropped: %+v", status.Active)
+	}
+	if len(status.Served) != 0 || len(status.Misses) != 0 {
+		t.Fatalf("the failed ledger produced lists: %+v", status)
+	}
 }
 
 func TestStatusReportsTheEffectiveSettings(t *testing.T) {

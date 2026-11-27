@@ -275,10 +275,8 @@
    "ota_settings"
   ],
   "read": [
-   "ota_activations",
    "ota_asset_misses",
    "ota_asset_served_daily",
-   "ota_releases",
    "ota_settings"
   ],
   "written": [
