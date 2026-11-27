@@ -74,6 +74,38 @@ func TestConfigMediaPathRoundTrip(t *testing.T) {
 	}
 }
 
+// TestSaveConfigDurablyReplacesTheFile proves the atomic writer on this
+// platform: the temp file is fsynced and closed, the rename lands, the folder
+// is synced (SaveConfig returns nil only when every sync succeeded), and no
+// temporary file is left behind (review item 10).
+func TestSaveConfigDurablyReplacesTheFile(t *testing.T) {
+	root := writeAgentConfig(t, `{"listen":"127.0.0.1:8090","backend":{"binary":"/bin/x","operator_addr":"127.0.0.1:8091"},"media_path":"/srv/old"}`)
+	config, err := LoadConfig(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	config.MediaPath = "/srv/new"
+	if err := SaveConfig(root, config); err != nil {
+		t.Fatal(err)
+	}
+	entries, err := os.ReadDir(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, entry := range entries {
+		if strings.HasPrefix(entry.Name(), ".agent-") {
+			t.Fatalf("a temporary config file survived the save: %s", entry.Name())
+		}
+	}
+	reloaded, err := LoadConfig(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if reloaded.MediaPath != "/srv/new" {
+		t.Fatalf("media_path = %q", reloaded.MediaPath)
+	}
+}
+
 func TestLoadConfigStockSource(t *testing.T) {
 	root := t.TempDir()
 	clientTree := filepath.Join(root, "client")

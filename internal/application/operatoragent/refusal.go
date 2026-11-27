@@ -98,6 +98,9 @@ const (
 	CodeBackupPinned          = "AGENT_BACKUP_PINNED"
 	CodeBackupDeleteRefused   = "AGENT_BACKUP_DELETE_REFUSED"
 	CodeBackupCap             = "AGENT_BACKUP_CAP"
+	// CodeBackupRecoveryRequired refuses a backend lifecycle action while a
+	// restore left restore-state.json to be settled (A-222).
+	CodeBackupRecoveryRequired = "AGENT_BACKUP_RECOVERY_REQUIRED"
 
 	// terminal refusals (G42): the shell exists only while the agent listens on
 	// loopback and only for an authenticated session (G42).

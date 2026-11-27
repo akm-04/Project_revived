@@ -27,9 +27,14 @@ type BackendControl interface {
 }
 
 // BackendGuard admits one backend lifecycle action at a time: a start, a stop
-// or a whole maintenance flow. It refuses rather than queues.
+// or a whole maintenance flow. It refuses rather than queues. It also stays
+// closed while a restore recovery is pending (A-222), so a failed startup
+// recovery cannot be overwritten by a new destructive action.
 type BackendGuard struct {
 	mutex sync.Mutex
+
+	recoveryMutex sync.Mutex
+	recovery      *Refusal
 }
 
 // TryLock takes the guard when it is free.
@@ -40,6 +45,37 @@ func (guard *BackendGuard) TryLock() bool {
 // Unlock releases the guard.
 func (guard *BackendGuard) Unlock() {
 	guard.mutex.Unlock()
+}
+
+// Acquire takes the guard for a backend lifecycle or destructive action. While
+// a restore recovery is pending it refuses with CodeBackupRecoveryRequired,
+// naming the journal the operator must settle.
+func (guard *BackendGuard) Acquire() error {
+	guard.recoveryMutex.Lock()
+	pending := guard.recovery
+	guard.recoveryMutex.Unlock()
+	if pending != nil {
+		return pending
+	}
+	if !guard.mutex.TryLock() {
+		return Refuse(CodeBackendBusy, "a backend operation is already running")
+	}
+	return nil
+}
+
+// RequireRecovery closes admission until ClearRecovery, which only a successful
+// RecoverRestore calls.
+func (guard *BackendGuard) RequireRecovery() {
+	guard.recoveryMutex.Lock()
+	defer guard.recoveryMutex.Unlock()
+	guard.recovery = Refuse(CodeBackupRecoveryRequired, "a previous restore left "+backupStateFileName+" unresolved: run backup recover before any backend lifecycle or destructive action")
+}
+
+// ClearRecovery admits backend actions again.
+func (guard *BackendGuard) ClearRecovery() {
+	guard.recoveryMutex.Lock()
+	defer guard.recoveryMutex.Unlock()
+	guard.recovery = nil
 }
 
 // OperatorRequest is one forwarded operator command.
@@ -119,8 +155,8 @@ func (maintenance Maintenance) Withdraw(ctx context.Context, version, reason, se
 }
 
 func (maintenance Maintenance) run(ctx context.Context, command, version, reason, semanticKey string) (Operation, error) {
-	if !maintenance.Guard.TryLock() {
-		return Operation{}, Refuse(CodeBackendBusy, "a backend operation is already running")
+	if err := maintenance.Guard.Acquire(); err != nil {
+		return Operation{}, err
 	}
 	defer maintenance.Guard.Unlock()
 

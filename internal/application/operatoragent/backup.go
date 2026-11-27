@@ -578,8 +578,8 @@ func (service *BackupService) Pin(id, name string) (BackupManifest, error) {
 	if err != nil {
 		return BackupManifest{}, err
 	}
-	if !service.Guard.TryLock() {
-		return BackupManifest{}, Refuse(CodeBackendBusy, "a backend operation is already running")
+	if err := service.Guard.Acquire(); err != nil {
+		return BackupManifest{}, err
 	}
 	defer service.Guard.Unlock()
 	manifest, err := service.keepableManifest(id)
@@ -597,8 +597,8 @@ func (service *BackupService) Pin(id, name string) (BackupManifest, error) {
 
 // Unpin returns a pinned snapshot to normal pruning; the name is kept.
 func (service *BackupService) Unpin(id string) (BackupManifest, error) {
-	if !service.Guard.TryLock() {
-		return BackupManifest{}, Refuse(CodeBackendBusy, "a backend operation is already running")
+	if err := service.Guard.Acquire(); err != nil {
+		return BackupManifest{}, err
 	}
 	defer service.Guard.Unlock()
 	manifest, err := service.keepableManifest(id)
@@ -674,8 +674,8 @@ func (service *BackupService) DeleteMany(ids []string, reason string) BackupDele
 // Delete removes one unpinned snapshot. A pinned, damaged or in-use snapshot is
 // never deleted.
 func (service *BackupService) Delete(id, reason string) (BackupManifest, error) {
-	if !service.Guard.TryLock() {
-		return BackupManifest{}, Refuse(CodeBackendBusy, "a backend operation is already running")
+	if err := service.Guard.Acquire(); err != nil {
+		return BackupManifest{}, err
 	}
 	defer service.Guard.Unlock()
 	manifest, err := service.keepableManifest(id)
@@ -719,8 +719,8 @@ func (service *BackupService) SetPath(path string) (BackupList, error) {
 	// Refuse a folder change while a snapshot or restore runs, so its later
 	// steps cannot write into or list the new folder.
 	if service.Guard != nil {
-		if !service.Guard.TryLock() {
-			return BackupList{}, Refuse(CodeBackendBusy, "a backend operation is already running")
+		if err := service.Guard.Acquire(); err != nil {
+			return BackupList{}, err
 		}
 		defer service.Guard.Unlock()
 	}
@@ -767,8 +767,8 @@ func (service *BackupService) SetKeep(value int) (BackupKeepResult, error) {
 	// Take the guard before saving a lowering: a busy backend would otherwise
 	// persist the new value and then report the request as refused.
 	if lowered && service.Guard != nil {
-		if !service.Guard.TryLock() {
-			return BackupKeepResult{}, Refuse(CodeBackendBusy, "a backend operation is already running")
+		if err := service.Guard.Acquire(); err != nil {
+			return BackupKeepResult{}, err
 		}
 		defer service.Guard.Unlock()
 	}
@@ -816,8 +816,8 @@ func (service *BackupService) saveBackupConfig(change func(config *Config)) erro
 // operation references, or a damaged dump without listing it. It also drops a
 // retained prerestore database once the backend is healthy again.
 func (service *BackupService) Prune(ctx context.Context) (Operation, error) {
-	if !service.Guard.TryLock() {
-		return Operation{}, Refuse(CodeBackendBusy, "a backend operation is already running")
+	if err := service.Guard.Acquire(); err != nil {
+		return Operation{}, err
 	}
 	defer service.Guard.Unlock()
 	operation, err := service.Operations.Run(ctx, "backup.prune", []Step{
@@ -1021,8 +1021,8 @@ func (service *BackupService) Restore(ctx context.Context, id, reason string) (O
 	if err := service.requireDirectory(); err != nil {
 		return Operation{}, err
 	}
-	if !service.Guard.TryLock() {
-		return Operation{}, Refuse(CodeBackendBusy, "a backend operation is already running")
+	if err := service.Guard.Acquire(); err != nil {
+		return Operation{}, err
 	}
 	defer service.Guard.Unlock()
 	steps, err := service.restoreSteps(id)
@@ -1039,8 +1039,8 @@ func (service *BackupService) StartRestore(ctx context.Context, id, reason strin
 	if err := service.requireDirectory(); err != nil {
 		return Operation{}, err
 	}
-	if !service.Guard.TryLock() {
-		return Operation{}, Refuse(CodeBackendBusy, "a backend operation is already running")
+	if err := service.Guard.Acquire(); err != nil {
+		return Operation{}, err
 	}
 	steps, err := service.restoreSteps(id)
 	if err != nil {
@@ -1334,8 +1334,8 @@ func terminateConnections(database string) string {
 // previous folder and starts it again. The old folder is never modified, so a
 // rollback is `backend -s <old folder>`.
 func (service *BackupService) UpdateBackend(ctx context.Context, folder, reason string) (Operation, error) {
-	if !service.Guard.TryLock() {
-		return Operation{}, Refuse(CodeBackendBusy, "a backend operation is already running")
+	if err := service.Guard.Acquire(); err != nil {
+		return Operation{}, err
 	}
 	defer service.Guard.Unlock()
 	if err := service.ready(); err != nil {
@@ -1538,10 +1538,34 @@ func (service *BackupService) dropRetainedPreRestore(ctx context.Context) (strin
 	return retention.Database, nil
 }
 
+// RecoverRetry re-runs the startup restore recovery on operator request. It
+// takes the raw guard because Acquire is closed while recovery is pending, and
+// RecoverRestore lifts the refusal only when it succeeds.
+func (service *BackupService) RecoverRetry(ctx context.Context) error {
+	if !service.Guard.TryLock() {
+		return Refuse(CodeBackendBusy, "a backend operation is already running")
+	}
+	defer service.Guard.Unlock()
+	return service.RecoverRestore(ctx)
+}
+
 // RecoverRestore finishes a restore interrupted by an agent restart. It
 // leaves the database in one known state: the original serving (rollback) or
-// the restored database mounted with the prerestore retained.
+// the restored database mounted with the prerestore retained. A failure keeps
+// the journal and closes backend admission until a retry succeeds (A-222).
 func (service *BackupService) RecoverRestore(ctx context.Context) error {
+	err := service.recoverRestore(ctx)
+	if service.Guard != nil {
+		if err != nil {
+			service.Guard.RequireRecovery()
+		} else {
+			service.Guard.ClearRecovery()
+		}
+	}
+	return err
+}
+
+func (service *BackupService) recoverRestore(ctx context.Context) error {
 	directory := service.directory()
 	if directory == "" {
 		return nil
