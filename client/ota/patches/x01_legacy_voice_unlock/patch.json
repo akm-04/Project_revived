@@ -1,9 +1,0 @@
-{
-  "target": "app/model/NormalHero.lua",
-  "stock_sha256": "125183556caeecc182bf0702dd1f95160c8ba1666a3b97fbb8a7261d30ae0ac9",
-  "kind": "insert_before_final_return",
-  "anchor": "return var_0_3",
-  "insert": "overlay.lua",
-  "substitutions": {},
-  "origin": "x01-sound 2026-11-24: with the legacy cast on, getHeroVoiceState unlocks every line so the 2.5D and battle taps hear the same nine lines the guide plays (1.164.0 had all files local; the progress gate only hid audio the player could otherwise reach)"
-}
