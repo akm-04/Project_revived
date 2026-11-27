@@ -41,7 +41,7 @@ export function renderPage(container, context) {
 
   const views = new Map();
   for (const lane of lanes) {
-    const view = createLaneCard(lane);
+    const view = createLaneCard(lane, reloadPage);
     views.set(lane.id, view);
     const column = document.createElement("div");
     column.className = "col";
@@ -51,13 +51,16 @@ export function renderPage(container, context) {
   const buildSettings = createBuildSettingsCard();
   const activity = createActivityCard();
   container.append(buildSettings.card, activity.card, createReleaseCheck());
+  function reloadPage() {
+    return load(views, status, refresh, buildSettings, activity);
+  }
   refresh.addEventListener("click", () => {
-    void load(views, status, refresh, buildSettings, activity);
+    void reloadPage();
   });
-  void load(views, status, refresh, buildSettings, activity);
+  void reloadPage();
 }
 
-function createLaneCard(lane) {
+function createLaneCard(lane, reloadPage) {
   const card = document.createElement("section");
   card.className = "card card-body h-100";
   card.id = "ota-lane-" + lane.id;
@@ -258,9 +261,10 @@ function createLaneCard(lane) {
       return;
     }
     await stageLane(lane, versionInput.value.trim(), rollbackRequired, activeVersion, log);
+    await reloadPage();
   }
   publish.addEventListener("click", () => {
-    void publishLane(lane, stagedVersion, isStale(stagedVersion, activeVersion), log);
+    void publishLane(lane, stagedVersion, isStale(stagedVersion, activeVersion), log).finally(() => reloadPage());
   });
 
   return {
