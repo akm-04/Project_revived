@@ -53,6 +53,10 @@ func readExtraCatalogue(root resRoot) ([]extraCatalogueEntry, error) {
 		}
 		path := strings.TrimSpace(record[0])
 		digest := strings.ToLower(strings.TrimSpace(record[1]))
+		if strings.Contains(path, `\`) {
+			return nil, fmt.Errorf("%w: extra catalogue row %q contains a backslash", ErrCatalogInvalid, path)
+		}
+		path = normalizeCatalogPath(path)
 		if !validCatalogPath(path) || !strings.HasPrefix(path, "res/") || !validMD5(digest) {
 			return nil, fmt.Errorf("%w: extra catalogue row %q", ErrCatalogInvalid, path)
 		}

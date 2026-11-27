@@ -242,6 +242,36 @@ func TestLazyRefreshRefusesUnusableDelivery(t *testing.T) {
 	})
 }
 
+// TestLazyRefreshRejectsCatalogueBackslashPath is A-220's full-Build
+// regression: a backslash extra-catalogue row used to be normalized only after
+// validation, so the ZIP committed a traversal lazy marker. The build must now
+// refuse before any artifact is committed.
+func TestLazyRefreshRejectsCatalogueBackslashPath(t *testing.T) {
+	digest := strings.Repeat("a", 32)
+	testCase := newLazyRefreshCase(t,
+		[]catalogRow{assetRow("res/web/images/delivered.png", digest, 5)},
+		[]resSidecarEntry{{Path: "web/images/delivered.png", MD5: digest, Size: 5}},
+	)
+	content := []byte("audit")
+	name := `..\outside.ogg`
+	if err := os.MkdirAll(filepath.Join(testCase.recoveredPath, "web"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(testCase.recoveredPath, "web", name), content, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	row := "path,md5,size\nres/web/" + name + "," + md5Hex(content) + ",5\n"
+	if err := os.WriteFile(filepath.Join(testCase.recoveredPath, extraCatalogueFile), []byte(row), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Build(context.Background(), testCase.input); !errors.Is(err, ErrCatalogInvalid) {
+		t.Fatalf("Build accepted a malformed extra catalogue: %v", err)
+	}
+	if entries, err := os.ReadDir(testCase.fixture.updates); err == nil && len(entries) > 0 {
+		t.Fatalf("a refused build committed updates: %v", entries)
+	}
+}
+
 // TestLazyRefreshResolvesRecoveredOnlyUnderRecoveredResPath is OA-9 item 1: a
 // file present only under res_path is not recovered, so its marker keeps the
 // catalogue md5 and the report counts no recovered row.
