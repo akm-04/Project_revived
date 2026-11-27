@@ -264,6 +264,36 @@ func (service *TerminalService) Close(sessionToken, id string) error {
 	return nil
 }
 
+// CloseSession ends every terminal the session owns, so a logout cannot leave
+// an attached shell running.
+func (service *TerminalService) CloseSession(sessionToken, reason string) {
+	service.mutex.Lock()
+	items := make([]*terminal, 0, 1)
+	for _, item := range service.terminals {
+		if item.session == sessionToken {
+			items = append(items, item)
+		}
+	}
+	service.mutex.Unlock()
+	for _, item := range items {
+		service.finalize(item, reason)
+	}
+}
+
+// CloseAll ends every terminal; a password change or an offline reset revokes
+// every session, so no shell may outlive them.
+func (service *TerminalService) CloseAll(reason string) {
+	service.mutex.Lock()
+	items := make([]*terminal, 0, len(service.terminals))
+	for _, item := range service.terminals {
+		items = append(items, item)
+	}
+	service.mutex.Unlock()
+	for _, item := range items {
+		service.finalize(item, reason)
+	}
+}
+
 // Attach registers a stream reader. The reader keeps the terminal alive even
 // without input; only one reader is served at a time.
 func (service *TerminalService) Attach(sessionToken, id string) (*TerminalAttachment, error) {
