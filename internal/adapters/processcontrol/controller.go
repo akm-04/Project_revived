@@ -34,6 +34,10 @@ type Options struct {
 	EnvFile      string
 	OperatorAddr string
 	OTARoot      string
+	// Root is the agent root holding agent.json. When set, Start reads the
+	// backend settings again, so a swapped binary or a changed path applies to
+	// the next start without an agent restart.
+	Root string
 	// LogsDirectory receives the backend's stdout/stderr in dated files
 	// (C1 b: backend-<UTC date>.log, rotated daily).
 	LogsDirectory string
@@ -93,6 +97,11 @@ func (controller *Controller) Start(closed bool, token string) error {
 	controller.startGuard.Lock()
 	defer controller.startGuard.Unlock()
 
+	options, err := controller.startOptions()
+	if err != nil {
+		return err
+	}
+
 	controller.mutex.Lock()
 	if controller.child != nil {
 		exited, _ := controller.child.state()
@@ -103,15 +112,15 @@ func (controller *Controller) Start(closed bool, token string) error {
 	}
 	controller.mutex.Unlock()
 
-	if controller.options.Binary == "" {
+	if options.Binary == "" {
 		return operatoragent.Refuse(operatoragent.CodeBackendUnavailable, "agent.json backend.binary is empty")
 	}
-	environment, err := controller.environment(closed, token)
+	environment, err := controller.environment(options, closed, token)
 	if err != nil {
 		return err
 	}
-	logWriter := operatoragent.NewDatedLogWriter(controller.options.LogsDirectory, operatoragent.BackendLogPrefix, time.Now)
-	command := exec.Command(controller.options.Binary)
+	logWriter := operatoragent.NewDatedLogWriter(options.LogsDirectory, operatoragent.BackendLogPrefix, time.Now)
+	command := exec.Command(options.Binary)
 	command.Env = environment
 	command.Stdout = logWriter
 	command.Stderr = logWriter
@@ -132,17 +141,37 @@ func (controller *Controller) Start(closed bool, token string) error {
 	controller.child = child
 	controller.mutex.Unlock()
 
-	if err := controller.waitUntilReady(child, token); err != nil {
+	if err := controller.waitUntilReady(options, child, token); err != nil {
 		_ = controller.stopUnlocked()
 		return err
 	}
 	return nil
 }
 
-func (controller *Controller) environment(closed bool, token string) ([]string, error) {
+// startOptions reads the backend settings this start uses: agent.json again
+// when Root is set, otherwise the construction-time options.
+func (controller *Controller) startOptions() (Options, error) {
+	options := controller.options
+	if options.Root == "" {
+		return options, nil
+	}
+	config, err := operatoragent.ReadConfig(options.Root)
+	if err != nil {
+		return Options{}, err
+	}
+	options.Binary = config.Backend.Binary
+	options.EnvFile = config.Backend.EnvFile
+	options.OperatorAddr = config.Backend.OperatorAddr
+	options.OTARoot = config.OTARoot
+	options.ReadyTimeout = config.Backend.ReadyTimeout()
+	options.StopGrace = config.Backend.StopGrace()
+	return options, nil
+}
+
+func (controller *Controller) environment(options Options, closed bool, token string) ([]string, error) {
 	entries := []string{}
-	if controller.options.EnvFile != "" {
-		loaded, err := operatoragent.ReadEnvFile(controller.options.EnvFile)
+	if options.EnvFile != "" {
+		loaded, err := operatoragent.ReadEnvFile(options.EnvFile)
 		if err != nil {
 			return nil, err
 		}
@@ -150,11 +179,11 @@ func (controller *Controller) environment(closed bool, token string) ([]string, 
 	}
 	environment := append(os.Environ(), entries...)
 	environment = append(environment, "GXB_OPERATOR_TOKEN="+token)
-	environment = append(environment, "GXB_OPERATOR_ADDR="+controller.options.OperatorAddr)
-	if controller.options.OTARoot != "" {
-		environment = append(environment, "GXB_OTA_ROOT="+controller.options.OTARoot)
+	environment = append(environment, "GXB_OPERATOR_ADDR="+options.OperatorAddr)
+	if options.OTARoot != "" {
+		environment = append(environment, "GXB_OTA_ROOT="+options.OTARoot)
 	}
-	environment = appendNoticeMediaRoot(environment, entries, controller.options.NoticeMediaRoot)
+	environment = appendNoticeMediaRoot(environment, entries, options.NoticeMediaRoot)
 	return appendListener(environment, closed), nil
 }
 
@@ -203,8 +232,8 @@ func appendListener(environment []string, closed bool) []string {
 	return append(filtered, "GXB_GAME_LISTENER="+listener)
 }
 
-func (controller *Controller) waitUntilReady(child *childProcess, token string) error {
-	deadline := time.Now().Add(controller.options.ReadyTimeout)
+func (controller *Controller) waitUntilReady(options Options, child *childProcess, token string) error {
+	deadline := time.Now().Add(options.ReadyTimeout)
 	ticker := time.NewTicker(readinessInterval)
 	defer ticker.Stop()
 	for {
@@ -215,18 +244,18 @@ func (controller *Controller) waitUntilReady(child *childProcess, token string) 
 			}
 			return fmt.Errorf("the backend exited before it was ready: %v", waitErr)
 		}
-		if controller.versionAnswers(token) {
+		if controller.versionAnswers(options, token) {
 			return nil
 		}
 		if time.Now().After(deadline) {
-			return fmt.Errorf("the backend did not answer /operator/v1/version within %s", controller.options.ReadyTimeout)
+			return fmt.Errorf("the backend did not answer /operator/v1/version within %s", options.ReadyTimeout)
 		}
 		<-ticker.C
 	}
 }
 
-func (controller *Controller) versionAnswers(token string) bool {
-	request, err := http.NewRequest(http.MethodGet, "http://"+controller.options.OperatorAddr+"/operator/v1/version", nil)
+func (controller *Controller) versionAnswers(options Options, token string) bool {
+	request, err := http.NewRequest(http.MethodGet, "http://"+options.OperatorAddr+"/operator/v1/version", nil)
 	if err != nil {
 		return false
 	}

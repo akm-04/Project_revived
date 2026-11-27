@@ -53,6 +53,11 @@ type AgentSettingsValues struct {
 	AppRepackPath    string                    `json:"app_repack_path"`
 	ToolchainPath    string                    `json:"toolchain_path"`
 	MediaPath        string                    `json:"media_path"`
+	OTARoot          string                    `json:"ota_root"`
+	ClientTree       string                    `json:"client_tree"`
+	StockBaseline    string                    `json:"stock_baseline"`
+	StockSource      string                    `json:"stock_source"`
+	StockCatalog     string                    `json:"stock_catalog"`
 	OTASettings      domainotarelease.Settings `json:"ota_settings"`
 }
 
@@ -114,6 +119,11 @@ func (service SettingsService) Values() (AgentSettingsValues, error) {
 		AppRepackPath:    config.AppRepackPath,
 		ToolchainPath:    config.ToolchainPath,
 		MediaPath:        service.MediaPath,
+		OTARoot:          config.OTARoot,
+		ClientTree:       config.ClientTree,
+		StockBaseline:    config.StockBaseline,
+		StockSource:      config.StockSource,
+		StockCatalog:     config.StockCatalog,
 		OTASettings:      otaSettings,
 	}, nil
 }

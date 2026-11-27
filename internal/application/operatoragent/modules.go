@@ -53,6 +53,10 @@ func AgentSettingsModule() operator.Module {
 				operator.NewField("app_repack_path", operator.FieldString, false, "absolute app_repack folder for the APK build"),
 				operator.NewField("toolchain_path", operator.FieldString, false, "portable tools folder; empty uses the system PATH"),
 			}},
+			{Name: "agent.paths.set", Class: operator.ClassLive, Route: operator.RouteAgent, Help: "Set one OTA build path in agent.json; it must be an absolute folder with no symlinks. Changing ota_root needs the backend stopped.", Fields: []operator.Field{
+				operator.NewField("key", operator.FieldString, true, "client_tree, stock_baseline, stock_source, stock_catalog, ota_root or media_path").WithEnum("client_tree", "stock_baseline", "stock_source", "stock_catalog", "ota_root", "media_path"),
+				operator.NewField("path", operator.FieldString, true, "absolute folder"),
+			}},
 		},
 		Reads: []operator.Read{
 			{Name: "agent.settings", Help: "Current agent paths, the backend URL and the OTA settings."},

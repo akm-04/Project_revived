@@ -44,6 +44,7 @@
    "operations_test.go",
    "otabuild_test.go",
    "password_test.go",
+   "paths_test.go",
    "pings_test.go",
    "sessions_test.go",
    "settings_test.go",

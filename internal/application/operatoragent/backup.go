@@ -146,8 +146,12 @@ type BackupService struct {
 	Now             func() time.Time
 	// MigrationsDirectory holds the forward-only goose migrations. It is
 	// required only when a restore replaces an older snapshot than the deployed
-	// backend's schema.
+	// backend's schema. It is a captured value; production sets ConfigRoot
+	// instead, so each restore reads agent.json again.
 	MigrationsDirectory string
+	// ConfigRoot is the agent root holding agent.json; every restore resolves
+	// backend.migrations_dir from it.
+	ConfigRoot string
 	// settingsLock guards Directory, Keep and Schedule: the HTTP handlers set
 	// them while the schedule goroutine reads them at every tick. Every method
 	// has a pointer receiver, so the lock is never copied.
@@ -186,6 +190,20 @@ func (service *BackupService) writeKeep(keep int) {
 	unlock := service.lockSettingsWrite()
 	defer unlock()
 	service.Keep = keep
+}
+
+// migrationsDirectory resolves the forward-migration folder at restore time, so
+// a backend.migrations_dir changed in agent.json applies without an agent
+// restart.
+func (service *BackupService) migrationsDirectory() (string, error) {
+	if service.ConfigRoot == "" {
+		return service.MigrationsDirectory, nil
+	}
+	config, err := ReadConfig(service.ConfigRoot)
+	if err != nil {
+		return "", Refuse(CodeBackupToolsMissing, "agent.json is unreadable: "+err.Error())
+	}
+	return config.MigrationsDirectory(), nil
 }
 
 type restoreState struct {
@@ -918,6 +936,7 @@ func (service *BackupService) Restore(ctx context.Context, id, reason string) (O
 	swapped := false
 	var deployedMigration int64
 	var restoredDSN string
+	var migrationsDirectory string
 
 	steps := []Step{
 		{Name: "verify snapshot", Run: func(ctx context.Context) (any, error) {
@@ -926,10 +945,14 @@ func (service *BackupService) Restore(ctx context.Context, id, reason string) (O
 				return nil, err
 			}
 			deployedMigration = deployed.Migration
+			migrationsDirectory, err = service.migrationsDirectory()
+			if err != nil {
+				return nil, err
+			}
 			if manifest.Migration > deployed.Migration {
 				return nil, Refuse(CodeBackupMigrationTooNew, fmt.Sprintf("the snapshot migration %d is newer than the deployed backend migration %d", manifest.Migration, deployed.Migration))
 			}
-			if manifest.Migration < deployed.Migration && service.MigrationsDirectory == "" {
+			if manifest.Migration < deployed.Migration && migrationsDirectory == "" {
 				return nil, Refuse(CodeBackupToolsMissing, "the snapshot is older than the backend schema and the migrations folder is not configured")
 			}
 			return map[string]any{"migration": deployed.Migration, "snapshot_migration": manifest.Migration}, nil
@@ -972,7 +995,7 @@ func (service *BackupService) Restore(ctx context.Context, id, reason string) (O
 			if manifest.Migration >= deployedMigration {
 				return map[string]any{"migration": manifest.Migration}, nil
 			}
-			if err := service.Tools.Migrate(ctx, restoredDSN, service.MigrationsDirectory); err != nil {
+			if err := service.Tools.Migrate(ctx, restoredDSN, migrationsDirectory); err != nil {
 				_ = service.Tools.Execute(ctx, adminDSN, `DROP DATABASE IF EXISTS "`+restoredDatabase+`"`)
 				_ = os.Remove(statePath)
 				service.startOriginal()

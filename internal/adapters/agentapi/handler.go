@@ -77,6 +77,8 @@ type Handler struct {
 	// Settings answers the agent.settings read and writes agent.json and the
 	// backend env file locally (G22).
 	Settings *operatoragent.SettingsService
+	// Paths writes one OTA build path in agent.json (S3 L3a).
+	Paths *operatoragent.PathsService
 	// Files lists local folders and files for the GUI path picker (G7h).
 	Files *operatoragent.FileBrowser
 	// Pings answers the dashboard.pings read from the agent's sampler (G37).
@@ -445,6 +447,10 @@ func (handler Handler) serveCommand(writer http.ResponseWriter, request *http.Re
 		handler.serveAgentSettingsSet(writer, body)
 		return
 	}
+	if name == "agent.paths.set" {
+		handler.serveAgentPathsSet(writer, body)
+		return
+	}
 	if name == "server.url.set" {
 		handler.serveServerURLSet(writer, body)
 		return
@@ -606,6 +612,27 @@ func (handler Handler) serveAgentSettingsSet(writer http.ResponseWriter, body co
 		return
 	}
 	handler.record("agent.settings.set", "settings", "ok", nil)
+	writeJSON(writer, http.StatusOK, reply)
+}
+
+// serveAgentPathsSet writes one OTA build path; a refused value keeps the old
+// file (S3 L3a).
+func (handler Handler) serveAgentPathsSet(writer http.ResponseWriter, body commandRequest) {
+	if handler.Paths == nil {
+		writeRefusal(writer, http.StatusServiceUnavailable, operatoragent.CodeFailed, "the agent paths are not configured")
+		return
+	}
+	var change operatoragent.PathsChange
+	if err := decodeCommandPayload(body.Payload, &change); err != nil {
+		writeRefusal(writer, http.StatusConflict, operatoragent.CodeBodyInvalid, err.Error())
+		return
+	}
+	reply, err := handler.Paths.Set(change)
+	if err != nil {
+		handler.writeAgentError(writer, "agent.paths.set", err)
+		return
+	}
+	handler.record("agent.paths.set", change.Key, "ok", map[string]any{"path": change.Path})
 	writeJSON(writer, http.StatusOK, reply)
 }
 

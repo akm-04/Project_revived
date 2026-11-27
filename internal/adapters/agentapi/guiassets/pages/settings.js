@@ -7,6 +7,7 @@ import { openPathPicker } from "../components/path_picker.js";
 const settingsRead = "/agent/v1/reads/agent.settings";
 const serverListRead = "/agent/v1/reads/server.list";
 const agentSettingsCommand = "/agent/v1/commands/agent.settings.set";
+const agentPathsCommand = "/agent/v1/commands/agent.paths.set";
 const otaSettingsCommand = "/agent/v1/commands/ota.settings.set";
 const serverRenameCommand = "/agent/v1/commands/server.rename";
 
@@ -28,7 +29,7 @@ export function renderPage(container, context) {
   const serverNames = buildServerNamesSection();
   container.append(heading, help, loadStatus, paths.card, serverNames.card);
 
-  const state = { otaSettings: null, serverNames: [] };
+  const state = { otaSettings: null, serverNames: [], agentPaths: {} };
 
   async function loadSettings() {
     loadStatus.textContent = "";
@@ -46,6 +47,18 @@ export function renderPage(container, context) {
     paths.appRepackPath.value = presentText(values.app_repack_path, "");
     paths.toolchainPath.value = presentText(values.toolchain_path, "");
     paths.mediaPath.value = presentText(values.media_path, "");
+    paths.otaRoot.value = presentText(values.ota_root, "");
+    paths.clientTree.value = presentText(values.client_tree, "");
+    paths.stockBaseline.value = presentText(values.stock_baseline, "");
+    paths.stockSource.value = presentText(values.stock_source, "");
+    paths.stockCatalog.value = presentText(values.stock_catalog, "");
+    state.agentPaths = {
+      ota_root: paths.otaRoot.value,
+      client_tree: paths.clientTree.value,
+      stock_baseline: paths.stockBaseline.value,
+      stock_source: paths.stockSource.value,
+      stock_catalog: paths.stockCatalog.value,
+    };
     paths.resPath.value = presentText(values.res_path, "");
     paths.apkResPath.value = presentText(values.apk_res_path, "");
     paths.recoveredResPath.value = presentText(values.recovered_res_path, "");
@@ -186,7 +199,26 @@ async function savePaths(paths, state, reloadAll) {
     return;
   }
   paths.status.append(resultLine("OTA paths", otaReply));
-  if (agentReply.ok && otaReply.ok) {
+  const pathChanges = {
+    client_tree: paths.clientTree.value.trim(),
+    stock_baseline: paths.stockBaseline.value.trim(),
+    stock_source: paths.stockSource.value.trim(),
+    stock_catalog: paths.stockCatalog.value.trim(),
+    ota_root: paths.otaRoot.value.trim(),
+  };
+  let pathsOK = true;
+  for (const [key, value] of Object.entries(pathChanges)) {
+    if (value === presentText(state.agentPaths[key], "")) {
+      continue;
+    }
+    const pathReply = await request(agentPathsCommand, commandBody({ key, path: value }, "Settings: set " + key));
+    if (pathReply.unauthorized) {
+      return;
+    }
+    paths.status.append(resultLine("Path " + key, pathReply));
+    pathsOK = pathsOK && pathReply.ok;
+  }
+  if (agentReply.ok && otaReply.ok && pathsOK) {
     await reloadAll();
   }
 }
@@ -200,7 +232,7 @@ function buildPathsSection() {
   legend.textContent = "Paths";
   const help = document.createElement("p");
   help.className = "module-help";
-  help.textContent = "The agent and the OTA owner validate every path; a refused value keeps the old one. Agent paths take effect after the operator agent is restarted.";
+  help.textContent = "The agent and the OTA owner validate every path; a refused value keeps the old one. The client tree, stock folders and OTA root apply at the next OTA build; changing the OTA root needs the backend stopped.";
   const form = document.createElement("form");
   form.id = "settings-paths-form";
   form.addEventListener("submit", (event) => {
@@ -212,7 +244,12 @@ function buildPathsSection() {
     backendPath: pathField(grid, "settings-backend-path", "Backend path", "absolute path of the gxb-api binary", "file"),
     appRepackPath: pathField(grid, "settings-app-repack-path", "App repack folder", "absolute app_repack folder for the APK build", "folder"),
     toolchainPath: pathField(grid, "settings-toolchain-path", "Toolchain folder", "empty uses the system PATH", "folder"),
-    mediaPath: pathField(grid, "settings-media-path", "Media folder", "set media_path in agent.json to change it", null),
+    mediaPath: pathField(grid, "settings-media-path", "Media folder", "set media_path with gxb-operator paths set media_path", null),
+    otaRoot: pathField(grid, "settings-ota-root", "OTA root", "absolute OTA root; changing it needs the backend stopped", "folder"),
+    clientTree: pathField(grid, "settings-client-tree", "Client tree", "absolute client/ota tree the OTA build reads", "folder"),
+    stockBaseline: pathField(grid, "settings-stock-baseline", "Stock baseline", "absolute stock client folder the patches apply to", "folder"),
+    stockSource: pathField(grid, "settings-stock-source", "Stock source", "absolute decompiled stock source for patch hashes", "folder"),
+    stockCatalog: pathField(grid, "settings-stock-catalog", "Stock catalogue", "optional catalogue folder when the baseline has none", "folder"),
     resPath: pathField(grid, "settings-res-path", "Res path", "absolute asset folder the OTA server serves", "folder"),
     apkResPath: pathField(grid, "settings-apk-res-path", "APK res path", "optional second picture root", "folder"),
     recoveredResPath: pathField(grid, "settings-recovered-res-path", "Recovered res path", "absolute asset-recovery folder", "folder"),
