@@ -3,6 +3,7 @@ package otabuild
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"errors"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -73,6 +74,25 @@ func TestExtraCatalogueRejectsMismatch(t *testing.T) {
 		"0123456789abcdef0123456789abcdef,17\n")
 	if _, err := readExtraCatalogue(root); err == nil {
 		t.Fatal("expected a mismatch error")
+	}
+}
+
+// TestExtraCatalogueRejectsBackslashPath is A-220: a raw `..\outside.ogg`
+// filename passes the raw checks but becomes a "../" traversal once the client
+// path is normalized, so the backslash row is refused before any lookup.
+func TestExtraCatalogueRejectsBackslashPath(t *testing.T) {
+	root := extraCatalogueFixture(t, "")
+	content := []byte("audit")
+	name := `..\outside.ogg`
+	if err := os.WriteFile(filepath.Join(root.lexical, "web", name), content, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	row := "path,md5,size\nres/web/" + name + "," + md5Hex(content) + "," + strconv.Itoa(len(content)) + "\n"
+	if err := os.WriteFile(filepath.Join(root.lexical, extraCatalogueFile), []byte(row), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := readExtraCatalogue(root); !errors.Is(err, ErrCatalogInvalid) {
+		t.Fatalf("extra catalogue accepted a backslash path: %v", err)
 	}
 }
 

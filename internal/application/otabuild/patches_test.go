@@ -187,6 +187,49 @@ func TestRealStockClientPatches(t *testing.T) {
 	})
 }
 
+// TestLegacyVoiceWarmQueuesManifest is A-221: the bundled LuaJIT drives the
+// warm overlay and asserts the generated manifest reaches the downloader with
+// the switch on and that nothing is queued with it off.
+func TestLegacyVoiceWarmQueuesManifest(t *testing.T) {
+	parser := luaParserPath()
+	if parser == "" {
+		t.Skip("no Lua interpreter: set GXB_LUAJIT or provide .toolchain/bin/luajit")
+	}
+	directory := filepath.Join(realClientTree(), "patches", "x01_legacy_voice_warm")
+	command := exec.Command(parser, "-joff",
+		filepath.Join(directory, "tests", "test_legacy_voice_warm.lua"),
+		filepath.Join(directory, "overlay.lua"))
+	output, err := command.CombinedOutput()
+	if err != nil {
+		t.Fatalf("legacy voice warm behaviour test failed: %v\n%s", err, output)
+	}
+}
+
+// TestLegacyVoiceManifestCopiesAgree keeps the three generated copies of the
+// legacy voice manifest identical, so a regenerated inventory cannot reach one
+// overlay and miss the others.
+func TestLegacyVoiceManifestCopiesAgree(t *testing.T) {
+	generatedBlock := func(directory string) string {
+		contents, err := os.ReadFile(filepath.Join(realClientTree(), "patches", directory, "overlay.lua"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		text := string(contents)
+		begin := strings.Index(text, "-- BEGIN GENERATED: legacy voice manifest")
+		end := strings.Index(text, "-- END GENERATED")
+		if begin < 0 || end < begin {
+			t.Fatalf("%s: no generated legacy voice manifest block", directory)
+		}
+		return text[begin:end]
+	}
+	want := generatedBlock("x01_legacy_voice")
+	for _, directory := range []string{"x01_legacy_model_voice", "x01_legacy_voice_warm"} {
+		if generatedBlock(directory) != want {
+			t.Errorf("%s: legacy voice manifest differs from x01_legacy_voice", directory)
+		}
+	}
+}
+
 // realStockExpected replays every patch directory the way collectPatches does:
 // directory-name order, each patch applying to the previous output for its
 // target. The hunks come from patch.json and the overlay files, so a new patch
