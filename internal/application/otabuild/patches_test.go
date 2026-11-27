@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -134,52 +135,6 @@ func TestPatchChainOrderAndStockPin(t *testing.T) {
 // The decompiled stock tree the patch pins read (I11A_1_PLAN "L5 decisions").
 const realDecompiledStockSource = "/home/akm/Chatgpt/EOL_Game/inputs/Recovered_assets/New_Client/Decompiled_Lua/src_64"
 
-const (
-	realAgreeLine        = "\tvar_89_2:getChildByName(\"agree_btn\"):getChildByName(\"agree_text\"):setString(var_0_1:translation(\"AGREE\"))"
-	realRefuseLine       = "\tvar_89_2:getChildByName(\"refuse_btn\"):getChildByName(\"refuse_text\"):setString(var_0_1:translation(\"REFUSE\"))"
-	realDrinkLine        = "\tcc.EventProxy.new(xyd.EventDispatcher.get(), arg_2_0):addEventListener(xyd.event.DRINK_NOTIF, handler(arg_2_0, arg_2_0.updateGuildNotif))"
-	realGuildDotListener = "\tcc.EventProxy.new(xyd.EventDispatcher.get(), arg_2_0):addEventListener(xyd.event.LEAGUE_CHAT_SESSION_CLOSED, function()\n" +
-		"\t\targ_2_0.guild:loadSelfGuild(function()\n" +
-		"\t\t\targ_2_0:updateGuildNotif(nil)\n" +
-		"\t\tend)\n" +
-		"\tend)"
-
-	realCloseLeagueRoomStock = "function var_0_1.closeLeagueRoom(arg_6_0)\n" +
-		"\tif arg_6_0.leagueSocket_ ~= nil then\n" +
-		"\t\targ_6_0.leagueSocket_:close()\n" +
-		"\n" +
-		"\t\targ_6_0.leagueSocket_ = nil\n" +
-		"\t\targ_6_0.leagueChatRoomID_ = nil\n" +
-		"\n" +
-		"\t\treturn\n" +
-		"\tend\n" +
-		"end"
-	realCloseLeagueRoomPatched = "function var_0_1.closeLeagueRoom(arg_6_0)\n" +
-		"\tif arg_6_0.leagueSocket_ ~= nil then\n" +
-		"\t\targ_6_0.leagueSocket_:close()\n" +
-		"\t\targ_6_0.leagueSocket_ = nil\n" +
-		"\tend\n" +
-		"\targ_6_0.leagueChatRoomID_ = nil\n" +
-		"end"
-
-	realLeagueRetryStock = "\t\telse\n" +
-		"\t\t\tprint(\"enter league error\")\n" +
-		"\t\t\tvar_0_0.performWithDelayGlobal(function()\n" +
-		"\t\t\t\targ_9_0:enterLeagueRoom()\n" +
-		"\t\t\tend, var_0_5)\n" +
-		"\t\tend"
-	realLeagueRetryPatched = "\t\telse\n" +
-		"\t\t\tprint(\"enter league error\")\n" +
-		"\t\t\tif arg_10_1 and arg_10_1.error_code and arg_10_1.error_code ~= 35033 then\n" +
-		"\t\t\t\targ_9_0:closeLeagueRoom()\n" +
-		"\t\t\t\treturn\n" +
-		"\t\t\tend\n" +
-		"\t\t\tvar_0_0.performWithDelayGlobal(function()\n" +
-		"\t\t\t\targ_9_0:enterLeagueRoom()\n" +
-		"\t\t\tend, var_0_5)\n" +
-		"\t\tend"
-)
-
 func realClientTree() string {
 	return filepath.Join("..", "..", "..", "client", "ota")
 }
@@ -232,62 +187,79 @@ func TestRealStockClientPatches(t *testing.T) {
 	})
 }
 
+// realStockExpected replays every patch directory the way collectPatches does:
+// directory-name order, each patch applying to the previous output for its
+// target. The hunks come from patch.json and the overlay files, so a new patch
+// directory is covered without editing this test.
 func realStockExpected(t *testing.T) map[string]string {
 	t.Helper()
-	readStock := func(clientPath string) string {
-		content, err := os.ReadFile(filepath.Join(realDecompiledStockSource, filepath.FromSlash(clientPath)))
-		if err != nil {
-			t.Fatalf("read stock %s: %v", clientPath, err)
-		}
-		return normalizeNewlines(content)
-	}
-	social := replaceOnce(t, readStock("app/windows/SocialSystemWindow.lua"), realAgreeLine+"\n", "")
-	social = replaceOnce(t, social, realRefuseLine+"\n", "")
-	bottom := replaceOnce(t, readStock("app/windows/MainSceneBottomWindow.lua"), realDrinkLine+"\n", realDrinkLine+"\n"+realGuildDotListener+"\n")
-	selfPlayer := replaceOnce(t, readStock("app/model/SelfPlayer.lua"),
-		"\targ_9_0.funcIDs = arg_9_1.params.func_ids\n",
-		"\targ_9_0.funcIDs = arg_9_1.params.func_ids\n\n\targ_9_0:initABtest()\n\targ_9_0:getAbtestGroupByKey(xyd.tables.abtest:uniqueKey(xyd.Abtests.N7GSO))\n")
-	lazyManagerOverlay, err := os.ReadFile(filepath.Join(realClientTree(), "patches", "lazy_marker_reconcile", "overlay.lua"))
+	patchesRoot := filepath.Join(realClientTree(), "patches")
+	entries, err := os.ReadDir(patchesRoot)
 	if err != nil {
-		t.Fatalf("read the lazy_marker_reconcile overlay: %v", err)
+		t.Fatalf("read patch directories: %v", err)
 	}
-	lazyManager := replaceOnce(t, readStock("lazyFileManager.lua"),
-		"\t\targ_1_0.changeCount = 0\n\tend,",
-		normalizeNewlines(lazyManagerOverlay))
-	onlineImage := replaceOnce(t, readStock("app/common/ui/OnlineImageSprite.lua"),
-		"\t\t\tif string.sub(var_2_0, 1, 7) ~= \"http://\" then\n\t\t\t\tvar_2_0 = \"http://\" .. var_2_0\n\t\t\tend\n",
-		"\t\t\tif string.sub(var_2_0, 1, 7) ~= \"http://\" and string.sub(var_2_0, 1, 8) ~= \"https://\" then\n\t\t\t\tvar_2_0 = \"http://\" .. var_2_0\n\t\t\tend\n")
-	return map[string]string{
-		"app/windows/SocialSystemWindow.lua":    social,
-		"app/windows/MainSceneBottomWindow.lua": bottom,
-		"app/model/SelfPlayer.lua":              selfPlayer,
-		"app/common/network/Backend.lua":        expectedBackendOutput(t, readStock("app/common/network/Backend.lua")),
-		"lazyFileManager.lua":                   lazyManager,
-		"app/common/ui/OnlineImageSprite.lua":   onlineImage,
+	expected := make(map[string]string)
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
+		}
+		directory := filepath.Join(patchesRoot, entry.Name())
+		definition, err := readPatchDefinition(filepath.Join(directory, "patch.json"))
+		if err != nil {
+			t.Fatalf("read %s patch.json: %v", entry.Name(), err)
+		}
+		base, seen := expected[definition.Target]
+		if !seen {
+			base = readRealStock(t, definition.Target)
+		}
+		overlay, err := os.ReadFile(filepath.Join(directory, filepath.FromSlash(definition.Insert)))
+		if err != nil {
+			t.Fatalf("read %s overlay: %v", entry.Name(), err)
+		}
+		overlayText := normalizeNewlines(overlay)
+		for placeholder, replacement := range definition.Substitutions {
+			overlayText = strings.ReplaceAll(overlayText, placeholder, replacement)
+		}
+		switch definition.Kind {
+		case "replace_exact":
+			base = replaceOnce(t, base, normalizeNewlines([]byte(definition.Anchor)), overlayText)
+		case "insert_before_final_return":
+			base = insertBeforeFinalReturnForTest(t, base, normalizeNewlines([]byte(definition.Anchor)), overlayText)
+		default:
+			t.Fatalf("%s has unhandled kind %q", entry.Name(), definition.Kind)
+		}
+		expected[definition.Target] = base
 	}
+	return expected
 }
 
-func expectedBackendOutput(t *testing.T, stock string) string {
+func readRealStock(t *testing.T, clientPath string) string {
 	t.Helper()
-	stock = replaceOnce(t, stock, realCloseLeagueRoomStock, realCloseLeagueRoomPatched)
-	stock = replaceOnce(t, stock, realLeagueRetryStock, realLeagueRetryPatched)
-	overlay, err := os.ReadFile(filepath.Join(realClientTree(), "patches", "backend_http_poll", "backend_http_poll_overlay.lua"))
+	content, err := os.ReadFile(filepath.Join(realDecompiledStockSource, filepath.FromSlash(clientPath)))
 	if err != nil {
-		t.Fatalf("read the backend_http_poll overlay: %v", err)
+		t.Fatalf("read stock %s: %v", clientPath, err)
 	}
-	block := strings.ReplaceAll(normalizeNewlines(overlay), "__GXB_HTTP_POLL__", "true")
-	anchor := "\nreturn var_0_1"
-	index := strings.LastIndex(stock, anchor)
-	if index < 0 {
-		t.Fatal("stock Backend.lua has no final return anchor")
+	return normalizeNewlines(content)
+}
+
+// insertBeforeFinalReturnForTest mirrors patches.go's whitespace handling: the
+// overlay goes just before the single final anchor line, with its trailing
+// newlines trimmed and a blank line between it and the anchor.
+func insertBeforeFinalReturnForTest(t *testing.T, stock, anchor, overlay string) string {
+	t.Helper()
+	final := regexp.MustCompile(`(\r?\n)` + regexp.QuoteMeta(anchor) + `(\s*)\z`).FindStringSubmatchIndex(stock)
+	if final == nil {
+		t.Fatalf("stock has no final %q anchor", anchor)
 	}
-	return stock[:index] + "\n" + strings.TrimRight(block, "\n") + "\n\nreturn var_0_1" + stock[index+len(anchor):]
+	leading := stock[final[2]:final[3]]
+	trailing := stock[final[4]:final[5]]
+	return stock[:final[2]] + leading + strings.TrimRight(overlay, "\n") + "\n\n" + anchor + trailing
 }
 
 func replaceOnce(t *testing.T, content, old, replacement string) string {
 	t.Helper()
 	if count := strings.Count(content, old); count != 1 {
-		t.Fatalf("stock text %q appears %d times, want once", old, count)
+		t.Fatalf("text %q appears %d times, want once", old, count)
 	}
 	return strings.Replace(content, old, replacement, 1)
 }
