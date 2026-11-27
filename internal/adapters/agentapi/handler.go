@@ -157,6 +157,11 @@ type backupReasonRequest struct {
 	Reason string `json:"reason"`
 }
 
+type backendUpdateRequest struct {
+	Folder string `json:"folder"`
+	Reason string `json:"reason"`
+}
+
 type backupRestoreRequest struct {
 	ID     string `json:"id"`
 	Reason string `json:"reason"`
@@ -1138,16 +1143,16 @@ func (handler Handler) serveBackup(writer http.ResponseWriter, request *http.Req
 		handler.record("backup.restore", "restore", "ok", map[string]any{"operation_id": operation.ID})
 		writeJSON(writer, http.StatusOK, operation)
 	case action == "update-backend" && request.Method == http.MethodPost:
-		var body backupReasonRequest
+		var body backendUpdateRequest
 		if err := decodeBody(writer, request, maxBodyBytes, &body); err != nil {
 			handler.writeBodyError(writer, err)
 			return
 		}
-		if body.Reason == "" {
-			writeRefusal(writer, http.StatusConflict, operatoragent.CodeBodyInvalid, "reason is required")
+		if body.Folder == "" || body.Reason == "" {
+			writeRefusal(writer, http.StatusConflict, operatoragent.CodeBodyInvalid, "folder and reason are required")
 			return
 		}
-		operation, err := handler.Backup.UpdateBackend(request.Context(), body.Reason)
+		operation, err := handler.Backup.UpdateBackend(request.Context(), body.Folder, body.Reason)
 		if err != nil {
 			handler.record("backup.update_backend", "update", "failed", map[string]any{"operation_id": operation.ID, "failed_step": operation.FailedStep})
 			handler.writeAgentError(writer, "backup.update_backend", err)

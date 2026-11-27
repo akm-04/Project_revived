@@ -34,10 +34,19 @@ type fakeTools struct {
 	// long enough to read its live operation status.
 	restoreStarted chan struct{}
 	restoreRelease chan struct{}
+	// events records the order of tool calls when a test installs it.
+	events *[]string
+}
+
+func (tools *fakeTools) record(event string) {
+	if tools.events != nil {
+		*tools.events = append(*tools.events, event)
+	}
 }
 
 func (tools *fakeTools) Dump(_ context.Context, _ string, destination string) error {
 	tools.calls = append(tools.calls, "dump")
+	tools.record("dump")
 	if tools.dumpErr != nil {
 		return tools.dumpErr
 	}
@@ -46,6 +55,7 @@ func (tools *fakeTools) Dump(_ context.Context, _ string, destination string) er
 
 func (tools *fakeTools) VerifyDump(context.Context, string) error {
 	tools.calls = append(tools.calls, "verify")
+	tools.record("verify")
 	return tools.verifyErr
 }
 
@@ -73,6 +83,7 @@ func (tools *fakeTools) Query(context.Context, string, string) (string, error) {
 
 func (tools *fakeTools) Migrate(_ context.Context, _ string, directory string) error {
 	tools.calls = append(tools.calls, "migrate")
+	tools.record("migrate")
 	tools.migrateDir = directory
 	return tools.migrateErr
 }
@@ -111,9 +122,21 @@ type fakeProcess struct {
 	openErr         error
 	stopErr         error
 	lastStartClosed bool
+	// failStarts fails the next Start calls before they touch the running
+	// state, so a test can fail the new release but start the previous one.
+	failStarts int
+	// events records the order of lifecycle calls when a test installs it.
+	events *[]string
 }
 
 func (process *fakeProcess) Start(closed bool, _ string) error {
+	if process.events != nil {
+		*process.events = append(*process.events, "start")
+	}
+	if process.failStarts > 0 {
+		process.failStarts--
+		return errors.New("the release exited before it was ready")
+	}
 	if !closed && process.openErr != nil {
 		return process.openErr
 	}
@@ -127,6 +150,9 @@ func (process *fakeProcess) Start(closed bool, _ string) error {
 }
 
 func (process *fakeProcess) Stop() error {
+	if process.events != nil {
+		*process.events = append(*process.events, "stop")
+	}
 	if process.stopErr != nil {
 		return process.stopErr
 	}
@@ -530,24 +556,6 @@ func TestRestoreRefusesDamagedUnknownAndNewerMigration(t *testing.T) {
 		t.Fatalf("migration: %v", err)
 	} else if !strings.Contains(err.Error(), "183") || !strings.Contains(err.Error(), "100") {
 		t.Fatalf("the refusal does not name both migrations: %v", err)
-	}
-}
-
-func TestUpdateBackendSnapshotsThenStops(t *testing.T) {
-	service, _, process := newBackupService(t)
-	operation, err := service.UpdateBackend(context.Background(), "upgrade")
-	if err != nil || operation.State != OperationDone {
-		t.Fatalf("update backend: %+v %v", operation, err)
-	}
-	if process.stops != 1 || process.running {
-		t.Fatalf("process = %+v", process)
-	}
-	list, err := service.List(context.Background())
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(list.Backups) != 1 || list.Backups[0].Kind != BackupKindPreUpdate {
-		t.Fatalf("list = %+v", list.Backups)
 	}
 }
 

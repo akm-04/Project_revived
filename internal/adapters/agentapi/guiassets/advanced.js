@@ -407,7 +407,7 @@ function runAgentRoute(name, payload, reason, semanticKey) {
     case "backup.restore":
       return request("/agent/v1/backup/restore", { method: "POST", body: { id: payload.id, reason } });
     case "backup.update_backend":
-      return request("/agent/v1/backup/update-backend", { method: "POST", body: { reason } });
+      return request("/agent/v1/backup/update-backend", { method: "POST", body: { reason, folder: payload.folder } });
     default:
       return request("/agent/v1/commands/" + encodeURIComponent(name), {
         method: "POST",

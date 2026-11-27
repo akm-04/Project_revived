@@ -108,6 +108,54 @@ func TestOperationReleaseVersionReadsTheRegisteredRelease(t *testing.T) {
 	}
 }
 
+func TestBackendFolderArgumentsResolveAndDefaultTheReason(t *testing.T) {
+	parsed, err := parseBackendFolderArguments([]string{"-s", "/srv/backend"})
+	if err != nil || parsed.Folder != "/srv/backend" || parsed.Reason != "update backend to /srv/backend" {
+		t.Fatalf("parsed = %+v, err = %v", parsed, err)
+	}
+	parsed, err = parseBackendFolderArguments([]string{"-s", "relative/backend", "--reason", "nightly upgrade"})
+	if err != nil || !filepath.IsAbs(parsed.Folder) || parsed.Reason != "nightly upgrade" {
+		t.Fatalf("parsed = %+v, err = %v", parsed, err)
+	}
+	for _, args := range [][]string{nil, {"--reason", "no folder"}, {"-s", ""}} {
+		if _, err := parseBackendFolderArguments(args); err == nil {
+			t.Fatalf("%v was accepted", args)
+		}
+	}
+}
+
+func TestBackendDashSPostsTheReleaseFolderAndReason(t *testing.T) {
+	var captured struct {
+		Folder string `json:"folder"`
+		Reason string `json:"reason"`
+	}
+	var mutex sync.Mutex
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		body, _ := io.ReadAll(request.Body)
+		mutex.Lock()
+		if request.Method != http.MethodPost || request.URL.Path != "/agent/v1/backup/update-backend" {
+			t.Errorf("unexpected request %s %s", request.Method, request.URL.Path)
+		}
+		if err := json.Unmarshal(body, &captured); err != nil {
+			t.Errorf("body = %s", body)
+		}
+		mutex.Unlock()
+		writer.Header().Set("Content-Type", "application/json")
+		_, _ = writer.Write([]byte(`{"state":"DONE"}`))
+	}))
+	defer server.Close()
+	root := writeCLIAgentRoot(t, strings.TrimPrefix(server.URL, "http://"))
+	folder := t.TempDir()
+	if err := runBackend(root, []string{"-s", folder, "--reason", "upgrade"}); err != nil {
+		t.Fatal(err)
+	}
+	mutex.Lock()
+	defer mutex.Unlock()
+	if captured.Folder != folder || captured.Reason != "upgrade" {
+		t.Fatalf("captured = %+v", captured)
+	}
+}
+
 func TestBackupDashSIsTheBackupPathSet(t *testing.T) {
 	var captured struct {
 		Path string `json:"path"`

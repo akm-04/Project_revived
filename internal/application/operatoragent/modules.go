@@ -136,7 +136,9 @@ func BackupModule() operator.Module {
 			{Name: "backup.restore", Class: operator.ClassMaintenance, Route: operator.RouteAgent, Help: "Restore a snapshot with a safety snapshot and a rename swap.", Fields: []operator.Field{
 				operator.NewField("id", operator.FieldString, true, "snapshot id from backup.list"),
 			}},
-			{Name: "backup.update_backend", Class: operator.ClassMaintenance, Route: operator.RouteAgent, Help: "Snapshot, stop the backend, then swap the binary and start."},
+			{Name: "backup.update_backend", Class: operator.ClassMaintenance, Route: operator.RouteAgent, Help: "Snapshot, stop, apply the release's migrations, point agent.json at the release folder, then start; a failed start returns to the previous folder.", Fields: []operator.Field{
+				operator.NewField("folder", operator.FieldString, true, "release folder (bin/, migrations/, BACKEND_COMMIT) or a source tree to build"),
+			}},
 		},
 	}
 }

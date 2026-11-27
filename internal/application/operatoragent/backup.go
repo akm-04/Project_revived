@@ -152,6 +152,9 @@ type BackupService struct {
 	// ConfigRoot is the agent root holding agent.json; every restore resolves
 	// backend.migrations_dir from it.
 	ConfigRoot string
+	// BuildRelease builds a source tree's server binaries for `backend -s`; nil
+	// uses the configured Go toolchain. Tests inject it.
+	BuildRelease ReleaseBuilder
 	// settingsLock guards Directory, Keep and Schedule: the HTTP handlers set
 	// them while the schedule goroutine reads them at every tick. Every method
 	// has a pointer receiver, so the lock is never copied.
@@ -204,6 +207,26 @@ func (service *BackupService) migrationsDirectory() (string, error) {
 		return "", Refuse(CodeBackupToolsMissing, "agent.json is unreadable: "+err.Error())
 	}
 	return config.MigrationsDirectory(), nil
+}
+
+func (service *BackupService) agentRoot() string {
+	if service.Root != "" {
+		return service.Root
+	}
+	return service.ConfigRoot
+}
+
+// agentConfig reads agent.json for a backend swap; the agent root is required.
+func (service *BackupService) agentConfig() (Config, error) {
+	root := service.agentRoot()
+	if root == "" {
+		return Config{}, Temporarily(CodeBackupFailed, "the agent root is not configured")
+	}
+	config, err := ReadConfig(root)
+	if err != nil {
+		return Config{}, Temporarily(CodeBackupFailed, "agent.json is unreadable: "+err.Error())
+	}
+	return config, nil
 }
 
 type restoreState struct {
@@ -1135,9 +1158,12 @@ func terminateConnections(database string) string {
 	return `SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '` + strings.ReplaceAll(database, "'", "''") + `' AND pid <> pg_backend_pid()`
 }
 
-// UpdateBackend is B6: a pre-update snapshot plus a backend stop; the operator
-// swaps the binary and presses Start.
-func (service *BackupService) UpdateBackend(ctx context.Context, reason string) (Operation, error) {
+// UpdateBackend is B6/S3 L3b: validate a release folder (building a source tree
+// first), snapshot, stop, apply the release's migrations, point agent.json at
+// the folder, then start. A failed start switches agent.json back to the
+// previous folder and starts it again. The old folder is never modified, so a
+// rollback is `backend -s <old folder>`.
+func (service *BackupService) UpdateBackend(ctx context.Context, folder, reason string) (Operation, error) {
 	if !service.Guard.TryLock() {
 		return Operation{}, Refuse(CodeBackendBusy, "a backend operation is already running")
 	}
@@ -1145,7 +1171,20 @@ func (service *BackupService) UpdateBackend(ctx context.Context, reason string) 
 	if err := service.ready(); err != nil {
 		return Operation{}, err
 	}
+	if service.agentRoot() == "" {
+		return Operation{}, Refuse(CodeBackupFailed, "the agent root is not configured")
+	}
+	var release releaseFolder
+	var previous BackendConfig
 	steps := []Step{
+		{Name: "validate release folder", Run: func(ctx context.Context) (any, error) {
+			resolved, err := service.resolveRelease(ctx, folder)
+			if err != nil {
+				return nil, err
+			}
+			release = resolved
+			return map[string]any{"folder": resolved.Directory, "commit": resolved.Commit}, nil
+		}},
 		{Name: "pre-update snapshot", Run: func(ctx context.Context) (any, error) {
 			operation, err := service.snapshot(ctx, BackupKindPreUpdate, reason, "", false)
 			if err != nil {
@@ -1156,11 +1195,63 @@ func (service *BackupService) UpdateBackend(ctx context.Context, reason string) 
 		{Name: "stop backend", Run: func(context.Context) (any, error) {
 			return nil, service.Backend.Stop()
 		}},
-		{Name: "swap the binary", Run: func(context.Context) (any, error) {
-			return map[string]string{"next": "swap the backend binary, then start the backend"}, nil
+		{Name: "apply migrations", Run: func(ctx context.Context) (any, error) {
+			dsn, err := service.dsn()
+			if err != nil {
+				return nil, err
+			}
+			if err := service.Tools.Migrate(ctx, dsn, release.Migrations); err != nil {
+				return nil, Temporarily(CodeBackupToolFailed, MaskString(err.Error()))
+			}
+			return map[string]string{"migrations": release.Migrations}, nil
+		}},
+		{Name: "point agent.json at the release", Run: func(context.Context) (any, error) {
+			config, err := service.agentConfig()
+			if err != nil {
+				return nil, err
+			}
+			previous = config.Backend
+			config.Backend.Binary = release.Binary
+			config.Backend.MigrationsDir = release.Migrations
+			if err := config.Validate(); err != nil {
+				return nil, Refuse(CodeBackupPathInvalid, err.Error())
+			}
+			if err := SaveConfig(service.agentRoot(), config); err != nil {
+				return nil, Temporarily(CodeBackupFailed, "agent.json cannot be written")
+			}
+			return map[string]string{"binary": release.Binary, "migrations_dir": release.Migrations}, nil
+		}},
+		{Name: "start backend and wait", Run: func(ctx context.Context) (any, error) {
+			startErr := StartBackend(service.Backend, service.Tokens, false)
+			if startErr == nil {
+				return map[string]string{"backend": "open", "binary": release.Binary}, nil
+			}
+			if err := service.restoreBackendConfig(previous); err != nil {
+				return nil, Temporarily(CodeBackendRestartFailed, "the new release did not start ("+MaskString(startErr.Error())+") and agent.json could not be switched back: "+MaskString(err.Error())+"; the schema may be newer, so restore the pre-update snapshot")
+			}
+			previousErr := StartBackend(service.Backend, service.Tokens, false)
+			if previousErr != nil {
+				return nil, Refuse(CodeBackendRestartFailed, "the new release did not start ("+MaskString(startErr.Error())+"); agent.json points at the previous folder, but it did not start either ("+MaskString(previousErr.Error())+"). The schema may be newer: restore the pre-update snapshot")
+			}
+			return nil, Refuse(CodeBackendRestartFailed, "the new release did not start ("+MaskString(startErr.Error())+"); the previous folder is running again. The schema may be newer: restore the pre-update snapshot to return to it")
 		}},
 	}
-	return service.Operations.RunKeyed(ctx, "backup.update_backend", "", snapshotRequest("", reason, "", false), steps)
+	request, _ := json.Marshal(map[string]string{"folder": folder, "reason": reason})
+	return service.Operations.RunKeyed(ctx, "backup.update_backend", "", request, steps)
+}
+
+// restoreBackendConfig puts the previous backend settings back after a failed
+// start of the new release.
+func (service *BackupService) restoreBackendConfig(previous BackendConfig) error {
+	config, err := service.agentConfig()
+	if err != nil {
+		return err
+	}
+	config.Backend = previous
+	if err := config.Validate(); err != nil {
+		return err
+	}
+	return SaveConfig(service.agentRoot(), config)
 }
 
 func (service *BackupService) ready() error {
