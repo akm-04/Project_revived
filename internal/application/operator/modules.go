@@ -109,6 +109,7 @@ func LogsModule() Module {
 				NewField("player_id", FieldInt, false, "player id for the player scope"),
 				NewField("older_than", FieldString, false, "RFC3339 boundary for the older_than scope"),
 			}},
+			{Name: "logs.flush", Class: ClassLive, Help: "Write the queued client journal rows now; the agent runs it before a manual or scheduled snapshot."},
 		},
 	}
 }

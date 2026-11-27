@@ -1,11 +1,13 @@
 package clientlog
 
 import (
+	"context"
 	"errors"
 	"testing"
 	"time"
 
 	"gxb.local/backend/v2/internal/application/operator"
+	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
 func TestJournalCursorRoundTrip(t *testing.T) {
@@ -61,5 +63,28 @@ func TestOutcomesForLevel(t *testing.T) {
 		if !errors.As(err, &refusal) || refusal.Code != operator.CodeReadInvalid {
 			t.Fatalf("level refusal = %v", err)
 		}
+	}
+}
+
+type countingFlusher struct {
+	calls int
+}
+
+func (flusher *countingFlusher) Flush(context.Context) {
+	flusher.calls++
+}
+
+func TestLogsFlushHandlerFlushesTheJournal(t *testing.T) {
+	flusher := &countingFlusher{}
+	handler := LogsCommands{Flusher: flusher}.Handlers()[LogsFlushCommand]
+	if handler == nil {
+		t.Fatal("logs.flush is not registered")
+	}
+	result, err := handler(context.Background(), tx.Scope{}, operator.Command{})
+	if err != nil || flusher.calls != 1 {
+		t.Fatalf("flush = %+v calls=%d err=%v", result, flusher.calls, err)
+	}
+	if _, err := (LogsCommands{}).Handlers()[LogsFlushCommand](context.Background(), tx.Scope{}, operator.Command{}); !errors.Is(err, operator.ErrUnavailable) {
+		t.Fatalf("an unconfigured flush = %v", err)
 	}
 }
