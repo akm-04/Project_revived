@@ -285,8 +285,7 @@ func (commands Commands) RegisterBuild(ctx context.Context, transaction tx.Tx, c
 			return BuildResult{}, operator.Refuse(CodeVersionExists, usedNumberMessage(existing), usedNumberDetail(existing))
 		}
 	}
-	// Lock order: a code rollback reads the assets lane before its own lane, the
-	// one direction in which two lanes are ever locked together.
+	// Lock order: a code rollback reads the assets lane before its own lane.
 	var activeAssets *domain.Version
 	if release.Lane == domain.LaneCode && request.Rollback {
 		rows, err := commands.Store.LockLaneTx(ctx, transaction, domain.LaneAssets, release.Version.String())
@@ -376,6 +375,9 @@ func (commands Commands) Publish(ctx context.Context, transaction tx.Tx, command
 	if lane == domain.LaneCatalog && countActive(laneRows) >= maxActiveCatalogReleases {
 		return Activation{}, operator.Refuse(CodeActiveLimit, "the catalog lane already has the maximum number of ACTIVE releases; withdraw one first", map[string]int{"limit": maxActiveCatalogReleases})
 	}
+	if err := commands.checkBootstrapOrder(ctx, transaction, lane, release.Version); err != nil {
+		return Activation{}, err
+	}
 	var superseded []string
 	if lane != domain.LaneCatalog {
 		superseded, err = commands.Store.SupersedeLaneTx(ctx, transaction, lane, at)
@@ -391,6 +393,38 @@ func (commands Commands) Publish(ctx context.Context, transaction tx.Tx, command
 		return Activation{}, err
 	}
 	return Activation{ActivationID: activationID, Version: release.Version.String(), Action: "PUBLISH", State: string(domain.StateActive), Superseded: superseded, At: at}, nil
+}
+
+// checkBootstrapOrder refuses a publication whose resulting active set would
+// put the code release at or below the asset bootstrap (OA-10 clause 3): a
+// cleared client would install the code release before the assets it needs.
+// Registration checks this against the bootstrap of its moment; a later assets
+// publication can move the bootstrap above an already-built code rollback, so
+// only the resulting set at publication proves the order.
+func (commands Commands) checkBootstrapOrder(ctx context.Context, transaction tx.Tx, lane domain.Lane, version domain.Version) error {
+	if lane != domain.LaneAssets && lane != domain.LaneCode {
+		return nil
+	}
+	otherLane := domain.LaneAssets
+	if lane == domain.LaneAssets {
+		otherLane = domain.LaneCode
+	}
+	rows, err := commands.Store.LockLaneTx(ctx, transaction, otherLane, version.String())
+	if err != nil {
+		return err
+	}
+	otherActive, _, err := laneVersions(rows)
+	if err != nil || otherActive == nil {
+		return err
+	}
+	code, assets := version, *otherActive
+	if lane == domain.LaneAssets {
+		code, assets = *otherActive, version
+	}
+	if code.Compare(assets) > 0 {
+		return nil
+	}
+	return operator.Refuse(CodeRollbackBelowAssets, fmt.Sprintf("the code release %s must stay above the active assets release %s: a cleared client installs the code release before its asset bootstrap", code, assets), map[string]string{"code_version": code.String(), "assets_version": assets.String()})
 }
 
 // Withdraw stops advertising an ACTIVE release; nothing is reactivated.

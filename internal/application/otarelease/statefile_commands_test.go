@@ -347,6 +347,82 @@ func TestRollbackReuseKeepsTheReplacedRowAndItsLink(t *testing.T) {
 	}
 }
 
+func TestPublishRefusesResultsBelowTheAssetBootstrap(t *testing.T) {
+	at := time.Unix(1000, 0).UTC()
+	assets := buildPayload(t, "1.631.1", "assets", 2000)
+	code := buildPayload(t, "1.631.6", "code", 2000)
+	rollback := buildPayload(t, "1.631.4", "code", 2000)
+	rollback.Rollback = true
+	newerAssets := buildPayload(t, "1.631.5", "assets", 2000)
+	aboveCode := buildPayload(t, "1.631.7", "assets", 2000)
+	root := rootWithVolumes(t, assets, code, rollback, newerAssets, aboveCode)
+	store := NewStateFile(root)
+	commands := Commands{Store: store, Root: root}
+	register := func(request domain.BuildRequest, key string) {
+		t.Helper()
+		if _, err := runCommand(t, commands, at, key, nil, "ota.register_build", mustJSON(t, request)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	publish := func(request domain.BuildRequest, key string, revision int64) error {
+		t.Helper()
+		_, err := runCommand(t, commands, at, key, &revision, "ota.publish", mustJSON(t, map[string]string{"version": request.Version}))
+		return err
+	}
+	register(assets, "assets-build")
+	if err := publish(assets, "assets-publish", 0); err != nil {
+		t.Fatal(err)
+	}
+	register(code, "code-build")
+	if err := publish(code, "code-publish", 1); err != nil {
+		t.Fatal(err)
+	}
+	register(rollback, "rollback-build")
+	register(newerAssets, "newer-assets-build")
+	register(aboveCode, "above-code-build")
+	if err := publish(newerAssets, "newer-assets-publish", 2); err != nil {
+		t.Fatal(err)
+	}
+	if err := publish(rollback, "rollback-publish", 3); refusalCode(t, err) != CodeRollbackBelowAssets {
+		t.Fatalf("delayed rollback publish err=%v", err)
+	}
+	if err := publish(aboveCode, "above-code-publish", 3); refusalCode(t, err) != CodeRollbackBelowAssets {
+		t.Fatalf("assets publish above the active code err=%v", err)
+	}
+	document, err := store.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	states := map[string]StoredRelease{}
+	for _, release := range document.Releases {
+		states[release.Version] = release
+	}
+	if states["1.631.4"].State != string(domain.StateBuilt) || states["1.631.7"].State != string(domain.StateBuilt) {
+		t.Fatalf("refused publications changed the state: %+v", states)
+	}
+	if states["1.631.5"].State != string(domain.StateActive) || states["1.631.6"].State != string(domain.StateActive) {
+		t.Fatalf("active set = %+v", states)
+	}
+	if revision, err := store.ActiveRevisionTx(context.Background(), nil); err != nil || revision != 3 {
+		t.Fatalf("revision = %d err=%v", revision, err)
+	}
+	rows := make([]domain.RawRelease, 0, len(document.Releases))
+	for _, release := range document.Releases {
+		rows = append(rows, release.RawRelease)
+	}
+	plan, err := domain.PlanUpdate(domain.PlanRequest{ClientVersion: domain.StockAppVersion, AppVersion: domain.StockAppVersion}, "https://example.invalid", rows)
+	if err != nil {
+		t.Fatal(err)
+	}
+	versions := make([]string, 0, len(plan.Descriptors))
+	for _, descriptor := range plan.Descriptors {
+		versions = append(versions, descriptor.Version)
+	}
+	if fmt.Sprint(versions) != "[1.631.5 1.631.6]" {
+		t.Fatalf("cleared-client plan = %v", versions)
+	}
+}
+
 func TestPublishNeedsTheGlobalRevisionThroughTheFile(t *testing.T) {
 	at := time.Unix(1000, 0).UTC()
 	catalog := buildPayload(t, "1.640.1", "catalog", 2000)
