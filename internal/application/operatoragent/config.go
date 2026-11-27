@@ -314,6 +314,10 @@ func SaveConfig(root string, config Config) error {
 		cleanup()
 		return err
 	}
+	if err := temporary.Sync(); err != nil {
+		cleanup()
+		return fmt.Errorf("write %s: %w", AgentConfigFileName, err)
+	}
 	if err := temporary.Close(); err != nil {
 		_ = os.Remove(temporaryName)
 		return err
@@ -322,7 +326,24 @@ func SaveConfig(root string, config Config) error {
 		_ = os.Remove(temporaryName)
 		return err
 	}
+	if err := syncConfigDirectory(root); err != nil {
+		return fmt.Errorf("sync %s folder: %w", AgentConfigFileName, err)
+	}
 	return nil
+}
+
+// syncConfigDirectory flushes the rename to disk. Windows cannot open a folder
+// for sync, so the rename alone is its durability boundary.
+func syncConfigDirectory(path string) error {
+	if runtime.GOOS == "windows" {
+		return nil
+	}
+	directory, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer directory.Close()
+	return directory.Sync()
 }
 
 // Validate enforces the loopback-only rule (I11A_ARCHITECTURE_V1 section 6).

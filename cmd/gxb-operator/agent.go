@@ -97,10 +97,10 @@ func runAgent(root string, args []string) error {
 		Now:             time.Now,
 		ConfigRoot:      root,
 	}
-	if tools != nil {
-		if err := backup.RecoverRestore(context.Background()); err != nil {
-			toolLog.Write("backup", "recover", "failed", map[string]any{"error": err.Error()})
-		}
+	// Run recovery even without tools: a pending journal must fail closed
+	// rather than let a new restore overwrite it (A-222).
+	if err := backup.RecoverRestore(context.Background()); err != nil {
+		toolLog.Write("backup", "recover", "failed", map[string]any{"error": err.Error()})
 	}
 	buildOperation := operatoragent.Build{Root: root, Operator: operator, Operations: operations}
 	settings := &operatoragent.SettingsService{Root: root, OTARoot: config.OTARoot, MediaPath: mediaPath}
@@ -168,7 +168,7 @@ func runAgent(root string, args []string) error {
 	go operatoragent.RunBackupSchedule(ctx, backup)
 	go pings.Run(ctx)
 	toolLog.Write("agent", "start", "ok", map[string]any{"listen": config.Listen})
-	if err := agentapi.Serve(ctx, server, listener, backend); err != nil {
+	if err := agentapi.Serve(ctx, server, listener, backend, operations, toolLog); err != nil {
 		return err
 	}
 	toolLog.Write("agent", "stop", "ok", nil)

@@ -243,7 +243,7 @@ func runCommand(root string, args []string) error {
 
 func runBackup(root string, args []string) error {
 	if len(args) == 0 {
-		return errors.New("usage: backup snapshot|list|prune|pin|unpin|delete|path|schedule|keep|restore")
+		return errors.New("usage: backup snapshot|list|prune|pin|unpin|delete|path|schedule|keep|restore|recover")
 	}
 	client, err := newAgentClient(root, true)
 	if err != nil {
@@ -379,6 +379,15 @@ func runBackup(root string, args []string) error {
 		return printResult(status, body)
 	case "restore":
 		return runBackupRestore(client, args[1:])
+	case "recover":
+		if len(args) != 1 {
+			return errors.New("usage: backup recover")
+		}
+		status, body, err := client.request(http.MethodPost, "/agent/v1/backup/recover", nil)
+		if err != nil {
+			return err
+		}
+		return printResult(status, body)
 	default:
 		return fmt.Errorf("unknown backup command %q", args[0])
 	}

@@ -386,8 +386,8 @@ func (handler Handler) serveBackendStart(writer http.ResponseWriter, request *ht
 		handler.writeBodyError(writer, err)
 		return
 	}
-	if !handler.Guard.TryLock() {
-		handler.writeAgentError(writer, "backend.start", operatoragent.Refuse(operatoragent.CodeBackendBusy, "a backend operation is already running"))
+	if err := handler.Guard.Acquire(); err != nil {
+		handler.writeAgentError(writer, "backend.start", err)
 		return
 	}
 	defer handler.Guard.Unlock()
@@ -401,8 +401,8 @@ func (handler Handler) serveBackendStart(writer http.ResponseWriter, request *ht
 }
 
 func (handler Handler) serveBackendStop(writer http.ResponseWriter) {
-	if !handler.Guard.TryLock() {
-		handler.writeAgentError(writer, "backend.stop", operatoragent.Refuse(operatoragent.CodeBackendBusy, "a backend operation is already running"))
+	if err := handler.Guard.Acquire(); err != nil {
+		handler.writeAgentError(writer, "backend.stop", err)
 		return
 	}
 	defer handler.Guard.Unlock()
@@ -423,8 +423,8 @@ func (handler Handler) serveBackendRestart(writer http.ResponseWriter, request *
 		handler.writeBodyError(writer, err)
 		return
 	}
-	if !handler.Guard.TryLock() {
-		handler.writeAgentError(writer, "backend.restart", operatoragent.Refuse(operatoragent.CodeBackendBusy, "a backend operation is already running"))
+	if err := handler.Guard.Acquire(); err != nil {
+		handler.writeAgentError(writer, "backend.restart", err)
 		return
 	}
 	defer handler.Guard.Unlock()
@@ -1117,6 +1117,14 @@ func (handler Handler) serveBackup(writer http.ResponseWriter, request *http.Req
 		}
 		handler.record("backup.prune", "prune", "ok", map[string]any{"operation_id": operation.ID})
 		writeJSON(writer, http.StatusOK, operation)
+	case action == "recover" && request.Method == http.MethodPost:
+		if err := handler.Backup.RecoverRetry(request.Context()); err != nil {
+			handler.record("backup.recover", "recover", "failed", nil)
+			handler.writeAgentError(writer, "backup.recover", err)
+			return
+		}
+		handler.record("backup.recover", "recover", "ok", nil)
+		writeJSON(writer, http.StatusOK, map[string]string{"state": "recovered"})
 	case action == "restore-preview" && request.Method == http.MethodGet:
 		handler.serveBackupRestorePreview(writer, request)
 	case action == "restore" && request.Method == http.MethodPost:

@@ -58,11 +58,19 @@ type Operations struct {
 
 	mutex   sync.Mutex
 	running map[string]*sync.Mutex
+
+	// Detached operations started by StartWithRelease; idle is closed while no
+	// such operation runs, so shutdown can wait without polling.
+	detachedMutex sync.Mutex
+	detached      int
+	idle          chan struct{}
 }
 
 // NewOperations names the ops directory and its clock.
 func NewOperations(directory string, log *ToolLog, now func() time.Time) *Operations {
-	return &Operations{Directory: directory, Log: log, Now: now, running: map[string]*sync.Mutex{}}
+	operations := &Operations{Directory: directory, Log: log, Now: now, running: map[string]*sync.Mutex{}, idle: make(chan struct{})}
+	close(operations.idle)
+	return operations
 }
 
 // Recover turns an operation left RUNNING by an earlier agent process into
@@ -138,7 +146,9 @@ func (operations *Operations) StartWithRelease(ctx context.Context, kind, semant
 		}
 		return Operation{}, err
 	}
+	operations.beginDetached()
 	go func() {
+		defer operations.endDetached()
 		defer guard.Unlock()
 		if release != nil {
 			defer release()
@@ -146,6 +156,38 @@ func (operations *Operations) StartWithRelease(ctx context.Context, kind, semant
 		_, _ = operations.execute(ctx, operation, steps)
 	}()
 	return operation, nil
+}
+
+// Wait blocks until every detached operation has finished or ctx ends. The
+// caller closes admission first, so no new operation starts under it.
+func (operations *Operations) Wait(ctx context.Context) error {
+	operations.detachedMutex.Lock()
+	idle := operations.idle
+	operations.detachedMutex.Unlock()
+	select {
+	case <-idle:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
+func (operations *Operations) beginDetached() {
+	operations.detachedMutex.Lock()
+	defer operations.detachedMutex.Unlock()
+	if operations.detached == 0 {
+		operations.idle = make(chan struct{})
+	}
+	operations.detached++
+}
+
+func (operations *Operations) endDetached() {
+	operations.detachedMutex.Lock()
+	defer operations.detachedMutex.Unlock()
+	operations.detached--
+	if operations.detached == 0 {
+		close(operations.idle)
+	}
 }
 
 // claim takes the kind's guard and writes the RUNNING record; the caller owns
