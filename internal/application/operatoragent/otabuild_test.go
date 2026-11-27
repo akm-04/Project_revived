@@ -566,6 +566,117 @@ func prepareLazyRefreshRelease(t *testing.T, otaRoot, root string) string {
 	return recoveredPath
 }
 
+const (
+	buildLedgerMD5 = "0123456789abcdef0123456789abcdef"
+	buildLedgerSHA = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+)
+
+// ledgerRelease is one valid releases.json row; manifestFiles is the release's
+// manifest "files" array.
+func ledgerRelease(version, state string, manifestFiles []map[string]any) map[string]any {
+	return map[string]any{
+		"id":      1,
+		"version": version,
+		"lane":    "code",
+		"state":   state,
+		"package_files": []map[string]any{{
+			"name":   version + "-" + buildLedgerSHA[:12] + ".zip.001",
+			"size":   1000,
+			"md5":    buildLedgerMD5,
+			"sha256": buildLedgerSHA,
+		}},
+		"total_size": 1000,
+		"md5":        buildLedgerMD5,
+		"sha256":     buildLedgerSHA,
+		"manifest":   map[string]any{"files": manifestFiles},
+	}
+}
+
+func writeReleaseLedger(t *testing.T, otaRoot string, releases []map[string]any) {
+	t.Helper()
+	encoded, err := json.Marshal(map[string]any{"version": 1, "releases": releases})
+	if err != nil {
+		t.Fatalf("encode release ledger: %v", err)
+	}
+	writeBuildTestFile(t, filepath.Join(otaRoot, "releases.json"), encoded)
+}
+
+// TestBuildRestoresPathsFromTheReleaseLedger proves the agent reads earlier
+// code-lane manifests from releases.json and passes their paths to the build.
+func TestBuildRestoresPathsFromTheReleaseLedger(t *testing.T) {
+	build, fake, operations, root := newBuildOperation(t)
+	stock := []byte("return {}\n")
+	writeBuildTestFile(t, filepath.Join(root, "stock", "app", "example", "Feature.lua"), stock)
+	build.Config.StockSource = filepath.Join(root, "stock")
+	if err := os.Remove(filepath.Join(root, "client", "src", "Feature.lua")); err != nil {
+		t.Fatal(err)
+	}
+	writeBuildTestFile(t, filepath.Join(root, "client", "src", "Kept.lua"), []byte("return {}\n"))
+	writeReleaseLedger(t, build.Config.OTARoot, []map[string]any{
+		ledgerRelease("1.631.1", "SUPERSEDED", []map[string]any{
+			{"path": "src_32/app/example/Feature.lua", "size": len(stock), "md5": buildLedgerMD5},
+			{"path": "src_64/app/example/Feature.lua", "size": len(stock), "md5": buildLedgerMD5},
+		}),
+	})
+
+	started, err := build.Start(context.Background(), operatoragent.BuildRequest{Lane: "code", Version: "1.631.2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	operation := waitOperation(t, operations, started.ID)
+	if operation.State != operatoragent.OperationDone {
+		t.Fatalf("operation = %+v", operation)
+	}
+	var result struct {
+		Report struct {
+			Reverted       int      `json:"reverted"`
+			RevertedSample []string `json:"reverted_sample"`
+		} `json:"report"`
+	}
+	if err := json.Unmarshal(operation.Result, &result); err != nil {
+		t.Fatalf("result: %v (%s)", err, operation.Result)
+	}
+	if result.Report.Reverted != 1 || !containsText(result.Report.RevertedSample, "app/example/Feature.lua") {
+		t.Fatalf("report = %+v", result.Report)
+	}
+	if fake.registers != 1 {
+		t.Fatalf("registers = %d", fake.registers)
+	}
+}
+
+// TestBuildRefusesAnUnreadableReleaseManifest proves an earlier code-lane row
+// whose manifest cannot be read refuses the build instead of being skipped.
+func TestBuildRefusesAnUnreadableReleaseManifest(t *testing.T) {
+	build, fake, operations, _ := newBuildOperation(t)
+	broken := ledgerRelease("1.631.1", "SUPERSEDED", nil)
+	broken["manifest"] = map[string]any{"files": []map[string]any{{"path": "", "size": 1, "md5": buildLedgerMD5}}}
+	writeReleaseLedger(t, build.Config.OTARoot, []map[string]any{broken})
+
+	started, err := build.Start(context.Background(), operatoragent.BuildRequest{Lane: "code", Version: "1.631.2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	operation := waitOperation(t, operations, started.ID)
+	if operation.State != operatoragent.OperationFailed || operation.FailedStep != "build" {
+		t.Fatalf("operation = %+v", operation)
+	}
+	if !strings.Contains(operation.Error, operatoragent.CodeBuildConfig) || !strings.Contains(operation.Error, "1.631.1") {
+		t.Fatalf("error = %q", operation.Error)
+	}
+	if fake.registers != 0 {
+		t.Fatalf("registers = %d", fake.registers)
+	}
+}
+
+func containsText(values []string, want string) bool {
+	for _, value := range values {
+		if value == want {
+			return true
+		}
+	}
+	return false
+}
+
 func writeBuildTestFile(t *testing.T, path string, content []byte) {
 	t.Helper()
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
