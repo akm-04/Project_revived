@@ -31,7 +31,11 @@
     "*ObserveTopFloorDayTx"
    ]
   },
-  "activitydirectory": {},
+  "activitydirectory": {
+   "events": [
+    "QueryerValue"
+   ]
+  },
   "adventure": {
    "i5": [
     "*ObserveTx"
@@ -40,6 +44,9 @@
   "arena": {
    "herorecommend": [
     "*HeroRecommendSourceTx"
+   ],
+   "operatorgrant": [
+    "*ResetOperatorArenaDaily"
    ],
    "playerdisplay": [
     "*ReadCatalogDisplayOriginsTx"
@@ -80,6 +87,9 @@
    ],
    "missioninputs": [
     "*ReadTx"
+   ],
+   "operatorgrant": [
+    "*ResetOperatorCampaignDaily"
    ],
    "workplace": [
     "*ReadTx"
@@ -276,6 +286,11 @@
    "dormhouse": [
     "*ApplyDormEXPLockedTx",
     "*RawAwakeningTx"
+   ],
+   "events": [
+    "*AwardStoryPartnerTx",
+    "*LockStoryRosterTx",
+    "*OwnsOriginTx"
    ],
    "godstrial": [
     "*LockStoryRosterTx"
@@ -617,6 +632,9 @@
     "*AdvanceDailyTx",
     "*LockBuyTx",
     "*ReadBuyTx"
+   ],
+   "operatorgrant": [
+    "*ResetOperatorDailyBuys"
    ]
   },
   "dailyreset": {},
@@ -629,6 +647,9 @@
   "dormhouse": {
    "achievement": [
     "*VillaCountTx"
+   ],
+   "operatorgrant": [
+    "*ResetOperatorDormGlue"
    ],
    "playerdisplay": [
     "*TitleProgressTx"
@@ -646,6 +667,11 @@
    "bookskill": [
     "*MakeInfoTx",
     "*RecycleInfoTx"
+   ]
+  },
+  "events": {
+   "activitydirectory": [
+    "*Project"
    ]
   },
   "frienddm": {
@@ -1166,7 +1192,8 @@
     "*SettleAwakeningCampaignTx",
     "*SettleGrantTx",
     "*SnapshotTx",
-    "*TemporalBalanceTx"
+    "*TemporalBalanceTx",
+    "Validate"
    ],
    "championsleague": [
     "*DeliverLeagueTitleNoticeTx",
@@ -1288,7 +1315,8 @@
     "*SnapshotTx"
    ],
    "dailyconsume": [
-    "*DebitMaterialCostTx"
+    "*DebitMaterialCostTx",
+    "Validate"
    ],
    "directorysync": [
     "*ReadCanonicalDirectoryTx"
@@ -1311,7 +1339,8 @@
     "*PrepareGluePurchaseTx",
     "*PrepareMaterialDebitTx",
     "*PrepareMaterialExchangeTx",
-    "*ReadDormPlayerStateTx"
+    "*ReadDormPlayerStateTx",
+    "Validate"
    ],
    "elementequipment": [
     "*ApplyMaterialDebitTx",
@@ -1331,6 +1360,12 @@
     "*ReadProgressionTx",
     "*RecordTx",
     "*SettleGrantTx"
+   ],
+   "events": [
+    "*DeliverTx",
+    "*FenceActorTx",
+    "*SettleGrantTx",
+    "IsPermanentGrantRefusal"
    ],
    "frienddm": [
     "*PrepareEmoticonEntitlementTx"
@@ -1410,7 +1445,8 @@
     "*PrepareTx",
     "*ReadFunctionEligibilityTx",
     "*RecordTx",
-    "*SnapshotTx"
+    "*SnapshotTx",
+    "Validate"
    ],
    "inscription": [
     "*ApplyInscriptionValueTx",
@@ -1495,7 +1531,22 @@
     "*ReadDisplayEntitlementsTx",
     "*RecordTx",
     "*SnapshotTx",
-    "LockFrameStackOwnershipTx"
+    "LockFrameStackOwnershipTx",
+    "Validate"
+   ],
+   "operator": [
+    "*OperatorWalletTx"
+   ],
+   "operatorgrant": [
+    "*AdminGrant",
+    "*AdminGrantTx",
+    "*AdminSendMail",
+    "*AdminSendMailTx",
+    "*OperatorCreateRedeemTx",
+    "*OperatorDisableRedeemTx",
+    "*ResetOperatorOccultTickets",
+    "*ResetOperatorSkillPoints",
+    "IsPermanentGrantRefusal"
    ],
    "petcampaign": [
     "*CheckAwakeningPetMaterialTx",
@@ -1601,7 +1652,8 @@
     "*PrepareTx",
     "*RecordTx",
     "*SettleGrantTx",
-    "*SnapshotTx"
+    "*SnapshotTx",
+    "Validate"
    ],
    "topfloor": [
     "*DebitMaterialCostTx",
@@ -1612,7 +1664,8 @@
     "*ReadFunctionEligibilityTx",
     "*RecordTx",
     "*SnapshotTx",
-    "LockFrameStackOwnershipTx"
+    "LockFrameStackOwnershipTx",
+    "Validate"
    ],
    "workplace": [
     "*DebitTemporalTx",
@@ -1628,13 +1681,17 @@
     "*DebitMaterialCostTx",
     "*DeliverTx",
     "*FenceActorTx",
-    "*SnapshotTx"
+    "*SnapshotTx",
+    "Validate"
    ]
   },
   "identitylifecycle": {},
   "illusion": {
    "herorecommend": [
     "*HeroRecommendSourceTx"
+   ],
+   "operatorgrant": [
+    "*ResetOperatorIllusion"
    ]
   },
   "inscription": {
@@ -1784,11 +1841,97 @@
    "herorecommend": [
     "*HeroRecommendSourceTx"
    ],
+   "operatorgrant": [
+    "*ResetOperatorOneOnOne"
+   ],
    "playerdisplay": [
     "*ReadCatalogDisplayOriginsTx"
    ],
    "publicprofile": [
     "*PublicHistoryTx"
+   ]
+  },
+  "operator": {
+   "clientlog": [
+    "Refuse"
+   ],
+   "events": [
+    "*ClaimTx",
+    "*FinishTx",
+    "*RetryFailedTx",
+    "Bounded",
+    "NewCommand",
+    "NewField",
+    "Refuse",
+    "WithEnum"
+   ],
+   "identitylifecycle": [
+    "Bounded",
+    "NewField",
+    "Refuse",
+    "WithDefault"
+   ],
+   "operatoragent": [
+    "*Version",
+    "Bounded",
+    "MergeModules",
+    "NewField",
+    "WithDefault",
+    "WithEnum"
+   ],
+   "operatorcatalog": [
+    "Bounded",
+    "NewField"
+   ],
+   "operatorgrant": [
+    "*InsertBulkTx",
+    "*ListPendingBulkTx",
+    "*ReadBulkTx",
+    "*SaveBulkProgressTx",
+    "Bounded",
+    "NewField",
+    "Refuse",
+    "WithDefault"
+   ],
+   "otarelease": [
+    "Bounded",
+    "DefaultValues",
+    "NewField",
+    "Refuse",
+    "StaleRevision",
+    "WithDefault",
+    "WithEnum"
+   ],
+   "publication": [
+    "NewField",
+    "Refuse",
+    "WithEnum"
+   ]
+  },
+  "operatoragent": {},
+  "operatorcatalog": {
+   "events": [
+    "Lookup"
+   ],
+   "operatorgrant": [
+    "GrantLine"
+   ]
+  },
+  "operatorgrant": {},
+  "operatormedia": {},
+  "otabuild": {
+   "operatoragent": [
+    "Build",
+    "PatchesPresent"
+   ]
+  },
+  "otarelease": {
+   "events": [
+    "*Covers"
+   ],
+   "operatoragent": [
+    "Load",
+    "NewStateFile"
    ]
   },
   "petcampaign": {
@@ -2304,7 +2447,11 @@
     "*CoherentHeroInputsTx"
    ]
   },
-  "summon": {},
+  "summon": {
+   "operatorgrant": [
+    "*ResetOperatorSummonFree"
+   ]
+  },
   "topfloor": {
    "herorecommend": [
     "*HeroRecommendSourceTx"
@@ -2314,6 +2461,9 @@
    ],
    "memoir": [
     "*MarchCandidatesTx"
+   ],
+   "operatorgrant": [
+    "*ResetOperatorTopFloor"
    ],
    "publicprofile": [
     "*PublicHistoryTx"
@@ -2385,6 +2535,9 @@
   "worldboss": {
    "activitydirectory": [
     "*Project"
+   ],
+   "operatorgrant": [
+    "*ResetOperatorWorldBoss"
    ]
   }
  },
@@ -2468,6 +2621,9 @@
    ]
   },
   "activitydirectory": {
+   "events": [
+    "*Project"
+   ],
    "workplace": [
     "*Now"
    ],
@@ -2779,7 +2935,8 @@
     "*SettleAwakeningCampaignTx",
     "*SettleGrantTx",
     "*SnapshotTx",
-    "*TemporalBalanceTx"
+    "*TemporalBalanceTx",
+    "Validate"
    ],
    "interface:campaign.Heroes": [
     "*ListHeroesTx",
@@ -2791,6 +2948,7 @@
    "store:contentstore": [
     "*ActiveRevision",
     "*CampaignCatalogTx",
+    "*ItemKindsTx",
     "*ResolveProgressionPolicyTx",
     "*SummonCatalogTx"
    ],
@@ -3109,6 +3267,7 @@
    ],
    "store:kernelstore": [
     "*Find",
+    "*FindLatestTx",
     "*FindTx",
     "*PutTx"
    ],
@@ -3324,6 +3483,9 @@
    ]
   },
   "clientlog": {
+   "operator": [
+    "Refuse"
+   ],
    "store:i4store": [
     "*ResolveGameplayBearer"
    ]
@@ -3554,7 +3716,12 @@
   },
   "dailyconsume": {
    "i5": [
-    "*DebitMaterialCostTx"
+    "*DebitMaterialCostTx",
+    "Validate"
+   ],
+   "store:kernelstore": [
+    "*FindTx",
+    "*PutTx"
    ]
   },
   "dailyreset": {
@@ -3639,7 +3806,8 @@
     "*PrepareGluePurchaseTx",
     "*PrepareMaterialDebitTx",
     "*PrepareMaterialExchangeTx",
-    "*ReadDormPlayerStateTx"
+    "*ReadDormPlayerStateTx",
+    "Validate"
    ],
    "interface:dormhouse.BackfillHeroPort": [
     "*ListHeroRootPlayerIDsTx",
@@ -3835,6 +4003,92 @@
    "store:kernelstore": [
     "*FindTx",
     "*PutTx"
+   ]
+  },
+  "events": {
+   "activitydirectory": [
+    "QueryerValue"
+   ],
+   "characterhero": [
+    "*AwardStoryPartnerTx",
+    "*LockStoryRosterTx",
+    "*OwnsOriginTx"
+   ],
+   "i5": [
+    "*DeliverTx",
+    "*FenceActorTx",
+    "*SettleGrantTx",
+    "IsPermanentGrantRefusal"
+   ],
+   "operator": [
+    "*ClaimTx",
+    "*FinishTx",
+    "*RetryFailedTx",
+    "Bounded",
+    "NewCommand",
+    "NewField",
+    "Refuse",
+    "WithEnum"
+   ],
+   "operatorcatalog": [
+    "Lookup"
+   ],
+   "otarelease": [
+    "*Covers"
+   ],
+   "store:contentstore": [
+    "*ActiveRevision",
+    "*HeroFragmentsTx",
+    "*HeroNormalSummonTx"
+   ],
+   "store:eventstore": [
+    "*ActiveHooksTx",
+    "*ActiveOccurrenceTx",
+    "*CheckRewardsTx",
+    "*ClaimOccurrenceTx",
+    "*ClaimsForPlayerTx",
+    "*ClearDefinitionConflictTx",
+    "*CountOccurrenceClaimsTx",
+    "*CycleSlotTakenTx",
+    "*DefinitionTx",
+    "*DueOccurrencesAfterTx",
+    "*EnsureSettingsTx",
+    "*GiftTx",
+    "*HasClaimTx",
+    "*InsertClaimTx",
+    "*InsertCycleOccurrenceTx",
+    "*InsertDefinitionTx",
+    "*InsertGlobalGroupTx",
+    "*InsertGroupOccurrenceTx",
+    "*InsertOccurrenceTx",
+    "*LatestDefinitionTx",
+    "*ListDefinitionsTx",
+    "*ListGlobalGroupsTx",
+    "*ListJoinableGroupsAfterTx",
+    "*LockGlobalGroupTx",
+    "*LockGroupOccurrencesTx",
+    "*LockOccurrenceSharedTx",
+    "*LockOccurrenceTx",
+    "*LockOccurrencesTx",
+    "*MarkSettledTx",
+    "*OccurrenceClaimsTx",
+    "*OccurrenceTx",
+    "*OccurrencesTx",
+    "*OverlapsTx",
+    "*RecordDefinitionConflictTx",
+    "*SaveGlobalGroupTx",
+    "*SaveOccurrenceTx",
+    "*ServerOnlyOccurrencesTx",
+    "*SetCycleBodyTx",
+    "*SetCycleModeTx",
+    "*UpdateClaimReplyTx"
+   ],
+   "store:i4store": [
+    "*ListLogicalServersAfterTx",
+    "*LockPlayerRootsTx",
+    "*OperatorServersTx",
+    "*PlayerLevelTx",
+    "*PlayersOfServerAfterTx"
    ]
   },
   "frienddm": {
@@ -4640,19 +4894,42 @@
    ]
   },
   "identitylifecycle": {
+   "operator": [
+    "Bounded",
+    "NewField",
+    "Refuse",
+    "WithDefault"
+   ],
    "store:auditstore": [
     "*InsertTx"
    ],
    "store:identitystore": [
+    "*BackfillSDKAccountMetadataTx",
+    "*FindLiveSDKAccountBySIDDigestTx",
+    "*FindLiveSessionIDsForPlayersTx",
+    "*FindLiveSessionsByPlayer",
     "*FindProviderBindingTx",
+    "*FindSDKAccountByDeviceTx",
+    "*FindSDKAccountByUIDTx",
+    "*FindSDKLoginTx",
     "*InsertProviderBindingTx",
+    "*InsertSDKAccountIfAbsentTx",
+    "*InsertSDKAccountTx",
+    "*InsertSDKDeviceTx",
+    "*InsertSDKLoginTx",
     "*InsertSessionCredentialTx",
+    "*InsertSessionHoldTx",
     "*InsertSessionTx",
+    "*ListIdleExpiredSessionIDsTx",
+    "*ListLiveSessionIDsTx",
     "*LockAccountTx",
     "*LockLiveContextTx",
     "*LockSessionTx",
+    "*PlayerIDsForSessionIDsTx",
     "*RevokeGameplayCredentialsTx",
+    "*RevokeIdleExpiredSessionsTx",
     "*RevokeSessionCredentialsTx",
+    "*RevokeSessionsTx",
     "*SaveEndedContextTx",
     "*SaveRevokedSessionTx",
     "*TouchSessionActivityTx"
@@ -4698,7 +4975,8 @@
     "*PrepareTx",
     "*ReadFunctionEligibilityTx",
     "*RecordTx",
-    "*SnapshotTx"
+    "*SnapshotTx",
+    "Validate"
    ],
    "interface:illusion.Heroes": [
     "*OverlayMID1"
@@ -4737,6 +5015,7 @@
     "*ProfileTx"
    ],
    "store:kernelstore": [
+    "*FindTx",
     "*PutTx"
    ],
    "workplace": [
@@ -5251,7 +5530,8 @@
     "*ReadDisplayEntitlementsTx",
     "*RecordTx",
     "*SnapshotTx",
-    "LockFrameStackOwnershipTx"
+    "LockFrameStackOwnershipTx",
+    "Validate"
    ],
    "interface:oneonone.Roster": [
     "*OverlayMID1"
@@ -5271,10 +5551,127 @@
     "*ProfileTx"
    ],
    "store:kernelstore": [
+    "*FindTx",
     "*PutTx"
    ],
    "workplace": [
     "*Now"
+   ]
+  },
+  "operator": {
+   "i5": [
+    "*OperatorWalletTx"
+   ],
+   "store:i4store": [
+    "*FindPlayersTx",
+    "*OperatorPlayerTx",
+    "*OperatorServersTx",
+    "*PlayerNamesTx",
+    "*RenameServersTx"
+   ],
+   "store:identitystore": [
+    "*ListOnlineSessionsTx",
+    "*OnlineCountsByServerTx"
+   ]
+  },
+  "operatoragent": {
+   "operator": [
+    "*Version",
+    "Bounded",
+    "MergeModules",
+    "NewField",
+    "WithDefault",
+    "WithEnum"
+   ],
+   "otabuild": [
+    "Build",
+    "PatchesPresent"
+   ],
+   "otarelease": [
+    "Load",
+    "NewStateFile"
+   ]
+  },
+  "operatorcatalog": {
+   "operator": [
+    "Bounded",
+    "NewField"
+   ]
+  },
+  "operatorgrant": {
+   "arena": [
+    "*ResetOperatorArenaDaily"
+   ],
+   "campaign": [
+    "*ResetOperatorCampaignDaily"
+   ],
+   "dailyconsume": [
+    "*ResetOperatorDailyBuys"
+   ],
+   "dormhouse": [
+    "*ResetOperatorDormGlue"
+   ],
+   "i5": [
+    "*AdminGrant",
+    "*AdminGrantTx",
+    "*AdminSendMail",
+    "*AdminSendMailTx",
+    "*OperatorCreateRedeemTx",
+    "*OperatorDisableRedeemTx",
+    "*ResetOperatorOccultTickets",
+    "*ResetOperatorSkillPoints",
+    "IsPermanentGrantRefusal"
+   ],
+   "illusion": [
+    "*ResetOperatorIllusion"
+   ],
+   "oneonone": [
+    "*ResetOperatorOneOnOne"
+   ],
+   "operator": [
+    "*InsertBulkTx",
+    "*ListPendingBulkTx",
+    "*ReadBulkTx",
+    "*SaveBulkProgressTx",
+    "Bounded",
+    "NewField",
+    "Refuse",
+    "WithDefault"
+   ],
+   "operatorcatalog": [
+    "GrantLine"
+   ],
+   "store:i4store": [
+    "*AllPlayerIDsTx",
+    "*ServerPlayerIDsTx"
+   ],
+   "summon": [
+    "*ResetOperatorSummonFree"
+   ],
+   "topfloor": [
+    "*ResetOperatorTopFloor"
+   ],
+   "worldboss": [
+    "*ResetOperatorWorldBoss"
+   ]
+  },
+  "operatormedia": {},
+  "otabuild": {},
+  "otarelease": {
+   "operator": [
+    "Bounded",
+    "DefaultValues",
+    "NewField",
+    "Refuse",
+    "StaleRevision",
+    "WithDefault",
+    "WithEnum"
+   ],
+   "store:otastore": [
+    "*FlushTx",
+    "*LockSettingsTx",
+    "*ReadLedgerTx",
+    "*SaveSettingsTx"
    ]
   },
   "petcampaign": {
@@ -5488,6 +5885,11 @@
    ],
    "i5": [
     "*FenceActorTx"
+   ],
+   "operator": [
+    "NewField",
+    "Refuse",
+    "WithEnum"
    ],
    "playerroot": [
     "LockKey"
@@ -6249,7 +6651,8 @@
     "*PrepareTx",
     "*RecordTx",
     "*SettleGrantTx",
-    "*SnapshotTx"
+    "*SnapshotTx",
+    "Validate"
    ],
    "store:contentstore": [
     "*ActiveRevision",
@@ -6294,7 +6697,8 @@
     "*ReadFunctionEligibilityTx",
     "*RecordTx",
     "*SnapshotTx",
-    "LockFrameStackOwnershipTx"
+    "LockFrameStackOwnershipTx",
+    "Validate"
    ],
    "interface:topfloor.OwnedHeroReader": [
     "*ListHeroesTx"
@@ -6419,7 +6823,8 @@
     "*DebitMaterialCostTx",
     "*DeliverTx",
     "*FenceActorTx",
-    "*SnapshotTx"
+    "*SnapshotTx",
+    "Validate"
    ],
    "interface:worldboss.Heroes": [
     "*OverlayMID1"
@@ -6443,6 +6848,7 @@
     "*ProfileTx"
    ],
    "store:kernelstore": [
+    "*FindTx",
     "*PutTx"
    ]
   }
@@ -6520,6 +6926,9 @@
   "eventcentre": [
    "cmd/gxb-api/main_postgres.go"
   ],
+  "events": [
+   "cmd/gxb-api/main_postgres.go"
+  ],
   "frienddm": [
    "cmd/gxb-api/main_postgres.go"
   ],
@@ -6595,6 +7004,15 @@
   ],
   "oneonone": [
    "cmd/gxb-api/top_floor_postgres.go"
+  ],
+  "operator": [],
+  "operatoragent": [],
+  "operatorcatalog": [],
+  "operatorgrant": [],
+  "operatormedia": [],
+  "otabuild": [],
+  "otarelease": [
+   "cmd/gxb-api/main_postgres.go"
   ],
   "petcampaign": [
    "cmd/gxb-api/petcampaign_postgres.go"

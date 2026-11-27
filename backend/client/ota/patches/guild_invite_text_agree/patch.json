@@ -1,0 +1,8 @@
+{
+  "target": "app/windows/SocialSystemWindow.lua",
+  "stock_sha256": "5d0c3e1e20d69b7009ff52bf94ad438c6a133c8b099301d951bd1e413b90f112",
+  "kind": "replace_exact",
+  "anchor": "\tvar_89_2:getChildByName(\"agree_btn\"):getChildByName(\"agree_text\"):setString(var_0_1:translation(\"AGREE\"))\n",
+  "insert": "overlay.lua",
+  "origin": "#76: agree_text is a Sprite with the word baked into agree_text.png (fleet_l5r/01-client-items.md section 1)"
+}

@@ -123,7 +123,9 @@
    "file": "docs/i9/RULING_I9-12_HAVE_FUN_LENDER.md"
   }
  ],
- "decorated_by": [],
+ "decorated_by": [
+  "Wrap"
+ ],
  "dispatcher_files": [
   "internal/adapters/stockruntime/arena_result_dispatcher.go",
   "internal/adapters/stockruntime/function_click.go",

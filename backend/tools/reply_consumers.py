@@ -149,6 +149,7 @@ class BranchPolicy:
 
 
 BRANCH_POLICIES = {
+    231: BranchPolicy(reply_key="activity_id", request_keys=("activity_id",)),
     234: BranchPolicy(reply_key="table_id", request_keys=("activity_id", "table_id")),
 }
 
@@ -184,7 +185,6 @@ REQUEST_BRANCH_POLICIES = {
 # split, with the evidence. branch_coverage_problems fails on a new split MID.
 BRANCH_POLICY_EXEMPTIONS = {
     1: "RETRIEVE_TOKEN's detail is a per-MID map: Activity windows read their own entry and the request carries no activity discriminator, so the union is the batch model, not a selectable branch",
-    231: "request-discriminated by activity_id at getActivityReward call sites; the reply carries no discriminator the edge checker can select, and the MID is inactive (fallback only)",
     629: "the NIAN_BOSS reply is one shape (the request carries no discriminator); Activity1038 and Activity1065 read the same shared NianBoss model fields, so their union is required and no per-branch set exists",
 }
 # Guard marker prefix for a body entered only when a field of a list element

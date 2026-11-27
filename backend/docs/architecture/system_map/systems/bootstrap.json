@@ -407,8 +407,11 @@
    "gameplay_context_credentials",
    "gameplay_contexts",
    "logical_servers",
+   "operator_session_holds",
    "player_login_observations",
-   "players"
+   "players",
+   "sdk_devices",
+   "sdk_logins"
   ],
   "read": [],
   "written": []

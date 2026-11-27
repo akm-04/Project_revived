@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 	"reflect"
+	"strings"
 	"testing"
 
 	apphero "gxb.local/backend/v2/internal/application/characterhero"
@@ -82,9 +83,19 @@ func TestHeroSkillLevelMIDsWireSuccessAndPrivateRefusal(t *testing.T) {
 	}
 
 	stub.bulkResult.Success = false
+	stub.bulkResult.RefusalReason = apphero.HeroSkillLevelRefusalNoChange
 	bulkRefusal := dispatcher.Dispatch(context.Background(), heroReq(t, 39, map[string]any{"partner_id": int64(9), "skill_colors": "2|1", "skill_counts": "1|2"}))
 	if bulkRefusal.HTTPStatus != http.StatusConflict || bulkRefusal.Body["error_code"] != unprovenRefusalCode || bulkRefusal.Body["is_success"] != int64(0) || bulkRefusal.Body["skills"] != "3|2|1|1|1|1" {
 		t.Fatal("MID 39 refusal", bulkRefusal)
+	}
+	if bulkRefusal.Cause == nil || !strings.Contains(bulkRefusal.Cause.Error(), "hero=9") || !strings.Contains(bulkRefusal.Cause.Error(), "no_change") {
+		t.Fatalf("MID 39 refusal must journal the hero and reason: %v", bulkRefusal.Cause)
+	}
+
+	stub.bulkErr = apphero.HeroSkillLevelRefusalError{Reason: apphero.HeroSkillLevelRefusalInsufficientPoints, SkillLevels: [6]int64{3, 2, 1, 1, 1, 1}, SkillPoint: 6, SkillTime: 1700000100}
+	errorRefusal := dispatcher.Dispatch(context.Background(), heroReq(t, 39, map[string]any{"partner_id": int64(9), "skill_colors": "2|1", "skill_counts": "1|2"}))
+	if errorRefusal.Cause == nil || !strings.Contains(errorRefusal.Cause.Error(), "hero=9") || !strings.Contains(errorRefusal.Cause.Error(), "insufficient_skill_points") {
+		t.Fatalf("MID 39 refusal error must journal the hero and reason: %v", errorRefusal.Cause)
 	}
 
 	invalid := dispatcher.Dispatch(context.Background(), heroReq(t, 39, map[string]any{"partner_id": int64(9), "skill_colors": "2|", "skill_counts": "1|2"}))
@@ -119,6 +130,10 @@ func TestHeroSkillLevelMID39EveryNon400RefusalCarriesCommittedFields(t *testing.
 		})
 	}
 	stub.bulkErr = apphero.ErrHeroSkillLevelInactive
+	inactive := dispatcher.Dispatch(context.Background(), heroReq(t, 39, params))
+	if inactive.Cause == nil || !strings.Contains(inactive.Cause.Error(), "hero=9") || !strings.Contains(inactive.Cause.Error(), "content inactive") {
+		t.Fatalf("MID 39 error refusal must journal the hero and cause: %v", inactive.Cause)
+	}
 	stub.view = apphero.HeroSkillLevelView{SkillPoint: 6, SkillPointKnown: true, SkillTime: 1700000100}
 	partial := dispatcher.Dispatch(context.Background(), heroReq(t, 39, params))
 	if partial.HTTPStatus != http.StatusConflict || partial.Body["is_success"] != int64(0) || partial.Body["skill_point"] != int64(6) || partial.Body["skill_time"] != int64(1700000100) {

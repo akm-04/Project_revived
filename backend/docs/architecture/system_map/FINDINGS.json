@@ -282,13 +282,13 @@
   }
  ],
  "client_senders_without_live_handler": {
-  "count": 554,
-  "window_sender_mid_count": 138,
-  "non_window_sender_mid_count": 416,
+  "count": 552,
+  "window_sender_mid_count": 137,
+  "non_window_sender_mid_count": 415,
   "registration_status_counts": {
-   "inactive_fallback": 550,
+   "inactive_fallback": 549,
    "no_registration": 1,
-   "unattributed_registration": 3,
+   "unattributed_registration": 2,
    "registration_without_dispatch_handler": 0
   },
   "runtime_reachability": "unknown from source-file references alone",
@@ -485,30 +485,6 @@
     "window_sender_files": [],
     "non_window_sender_files": [
      "app/model/SelfPlayer.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
-    "mid": 231,
-    "name": "GET_ACTIVITY_REWARD",
-    "registration_status": "inactive_fallback",
-    "senders": [
-     "app/model/Activities.lua",
-     "app/model/Sakura.lua",
-     "app/model/Sakura2018.lua",
-     "app/windows/ActivityExchangeHeroWindow.lua",
-     "app/windows/ActivityVipGiftChoiceWindow.lua",
-     "app/windows/NewTermBonusWindow.lua"
-    ],
-    "window_sender_files": [
-     "app/windows/ActivityExchangeHeroWindow.lua",
-     "app/windows/ActivityVipGiftChoiceWindow.lua",
-     "app/windows/NewTermBonusWindow.lua"
-    ],
-    "non_window_sender_files": [
-     "app/model/Activities.lua",
-     "app/model/Sakura.lua",
-     "app/model/Sakura2018.lua"
     ],
     "runtime_reachability": "unknown"
    },
@@ -5971,19 +5947,6 @@
     "runtime_reachability": "unknown"
    },
    {
-    "mid": 2864,
-    "name": "GET_PLAYER_GROUP_BY_KEY",
-    "registration_status": "unattributed_registration",
-    "senders": [
-     "app/model/SelfPlayer.lua"
-    ],
-    "window_sender_files": [],
-    "non_window_sender_files": [
-     "app/model/SelfPlayer.lua"
-    ],
-    "runtime_reachability": "unknown"
-   },
-   {
     "mid": 2880,
     "name": "POLAR_NIGHT_INFO",
     "registration_status": "inactive_fallback",
@@ -7628,7 +7591,7 @@
   "internal/application/occult/settlement.go:111: fact kind is not a constant"
  ],
  "inactive_mids": {
-  "count": 625,
+  "count": 624,
   "mids": [
    6,
    17,
@@ -7664,7 +7627,6 @@
    213,
    224,
    225,
-   231,
    232,
    233,
    235,
@@ -8262,7 +8224,7 @@
   {
    "mid": 2,
    "name": "",
-   "system": ""
+   "system": "otarelease"
   },
   {
    "mid": 6,
@@ -8497,7 +8459,7 @@
   {
    "mid": 20480,
    "name": "",
-   "system": ""
+   "system": "otarelease"
   },
   {
    "mid": 32000,
@@ -8509,7 +8471,7 @@
  "soft_refusals": [
   {
    "file": "internal/adapters/stockruntime/hero_dispatcher.go",
-   "line": 394,
+   "line": 395,
    "code": 30001,
    "kind": "stock_code"
   },
@@ -8579,6 +8541,7 @@
     "dormhouse",
     "elementequipment",
     "eventcentre",
+    "events",
     "gmquestion",
     "godstrial",
     "guildbroadcast",
@@ -8639,6 +8602,7 @@
     "dormhouse",
     "elementequipment",
     "eventcentre",
+    "events",
     "gmquestion",
     "godstrial",
     "guildbroadcast",
@@ -8699,6 +8663,7 @@
     "dormhouse",
     "elementequipment",
     "eventcentre",
+    "events",
     "gmquestion",
     "godstrial",
     "guildbroadcast",
@@ -8816,6 +8781,7 @@
     "dormhouse",
     "elementequipment",
     "eventcentre",
+    "events",
     "frienddm",
     "generaldm",
     "gmquestion",
@@ -8965,6 +8931,22 @@
    "declared": true
   },
   {
+   "table": "ota_asset_misses",
+   "packages": [
+    "internal/adapters/postgres/otastore",
+    "internal/adapters/postgres/retentionstore"
+   ],
+   "declared": true
+  },
+  {
+   "table": "ota_asset_served_daily",
+   "packages": [
+    "internal/adapters/postgres/otastore",
+    "internal/adapters/postgres/retentionstore"
+   ],
+   "declared": true
+  },
+  {
    "table": "player_guild_activity_days",
    "packages": [
     "internal/adapters/postgres/guildstore",
@@ -9016,12 +8998,6 @@
  "tables_without_owner_row": [],
  "unattributed_mids": [
   {
-   "mid": 2,
-   "name": "",
-   "client_files": [],
-   "reason": "no application package resolves from the dispatcher or its wiring"
-  },
-  {
    "mid": 3,
    "name": "QUERY_SERVER_TIME",
    "client_files": [
@@ -9036,20 +9012,6 @@
    "client_files": [
     "app/windows/MainSceneTopWindow.lua"
    ],
-   "reason": "no application package resolves from the dispatcher or its wiring"
-  },
-  {
-   "mid": 2864,
-   "name": "GET_PLAYER_GROUP_BY_KEY",
-   "client_files": [
-    "app/model/SelfPlayer.lua"
-   ],
-   "reason": "no application package resolves from the dispatcher or its wiring"
-  },
-  {
-   "mid": 20480,
-   "name": "",
-   "client_files": [],
    "reason": "no application package resolves from the dispatcher or its wiring"
   }
  ],

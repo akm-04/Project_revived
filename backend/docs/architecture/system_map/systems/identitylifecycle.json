@@ -57,27 +57,42 @@
   "owned": [],
   "read": [
    "account_provider_bindings",
+   "account_session_credentials",
    "account_sessions",
    "accounts",
    "gameplay_contexts",
-   "gxb_operation_receipts"
+   "gxb_operation_receipts",
+   "sdk_devices",
+   "sdk_logins"
   ],
   "written": [
    "account_provider_bindings",
    "account_session_credentials",
    "account_sessions",
+   "accounts",
    "gameplay_context_credentials",
    "gameplay_contexts",
    "gxb_operation_receipts",
-   "operator_audit_events"
+   "operator_audit_events",
+   "operator_session_holds",
+   "sdk_devices",
+   "sdk_logins"
   ]
  },
  "tests": {
   "integration": [
+   "identitylogout",
    "playerdisplay"
   ],
   "scenarios_naming": [],
   "unit": [
+   "idleexpiry_test.go",
+   "logout_test.go",
+   "module_test.go",
+   "sdk_native_test.go",
+   "sdk_test.go",
+   "sdkimport_test.go",
+   "sdkrecord_test.go",
    "service_test.go"
   ]
  }

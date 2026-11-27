@@ -48,3 +48,65 @@ func TestAttachmentProjectionUsesSourceVisibleAttachShape(t *testing.T) {
 		t.Fatalf("attach=%#v", a)
 	}
 }
+
+// The client reads the mailbox icon from the first attachment whose item is a
+// positive number (src_64/app/windows/MailItem.lua:17-27), so the operator's
+// first line must stay at ordinal 0 through the wire projection.
+func TestAttachmentProjectionKeepsTheOperatorFirstLineAtOrdinalZero(t *testing.T) {
+	u, _ := ids.NewUUID()
+	r := Record{MailUUID: u, Recipient: identity.PlayerID(1), Address: Address{Normal, 1}, SourceKind: "mail", SourceKey: "k", CreatedAt: time.Unix(1, 0), Shown: true, Platform: AnyPlatform, CompatibilityPolicyVersion: "p1", StateVersion: 1, Attachments: []Attachment{
+		{Ordinal: 0, Line: grant.Line{Kind: grant.StackItem, ItemID: 20001001, Amount: 1}},
+		{Ordinal: 1, Line: grant.Line{Kind: grant.StackItem, ItemID: 41001, Amount: 80}},
+	}}
+	m, err := r.WireProjection()
+	if err != nil {
+		t.Fatal(err)
+	}
+	attach := m["attach"].([]any)
+	if len(attach) != 2 {
+		t.Fatalf("attach = %#v", attach)
+	}
+	first := attach[0].(map[string]any)
+	if first["item"] != int64(20001001) || first["num"] != int64(1) {
+		t.Fatalf("ordinal 0 = %#v", first)
+	}
+	second := attach[1].(map[string]any)
+	if second["item"] != int64(41001) || second["num"] != int64(80) {
+		t.Fatalf("ordinal 1 = %#v", second)
+	}
+}
+
+func TestReadBasedExpiryIsSetFromReadAt(t *testing.T) {
+	seconds := int64(60)
+	r := Record{ExpireAfterReadSeconds: &seconds}
+	readAt := time.Unix(1000, 0).UTC()
+	got := r.ReadExpiry(readAt)
+	if got == nil || !got.Equal(readAt.Add(time.Minute)) {
+		t.Fatalf("expiry=%v", got)
+	}
+	zero := int64(0)
+	opened := Record{ExpireAfterReadSeconds: &zero}
+	if got := opened.ReadExpiry(readAt); got == nil || !got.Equal(readAt) {
+		t.Fatalf("on_read expiry=%v", got)
+	}
+	if got := (Record{}).ReadExpiry(readAt); got != nil {
+		t.Fatalf("absolute/no expiry returned %v", got)
+	}
+}
+
+func TestRecordRefusesTwoExpiriesAndNegativeReadDelay(t *testing.T) {
+	u, _ := ids.NewUUID()
+	created := time.Unix(1, 0)
+	later := created.Add(time.Hour)
+	negative := int64(-1)
+	zero := int64(0)
+	for name, r := range map[string]Record{
+		"both":     {ExpiresAt: &later, ExpireAfterReadSeconds: &zero},
+		"negative": {ExpireAfterReadSeconds: &negative},
+	} {
+		base := Record{MailUUID: u, Recipient: identity.PlayerID(1), Address: Address{Normal, 1}, SourceKind: "ADMIN", SourceKey: "k", CreatedAt: created, Shown: true, Platform: AnyPlatform, CompatibilityPolicyVersion: "p1", StateVersion: 1, ExpiresAt: r.ExpiresAt, ExpireAfterReadSeconds: r.ExpireAfterReadSeconds}
+		if err := base.Validate(); err == nil {
+			t.Fatalf("%s was accepted", name)
+		}
+	}
+}

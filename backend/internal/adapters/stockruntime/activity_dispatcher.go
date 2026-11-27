@@ -2,6 +2,7 @@ package stockruntime
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	appactivity "gxb.local/backend/v2/internal/application/activitydirectory"
@@ -62,7 +63,7 @@ func (d ActivityDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchR
 			return failureFromRows(nil, err)
 		}
 		if !ok {
-			return failureReply(refusal(unprovenRefusalCode))
+			return failureReply(refusalWithCause(unprovenRefusalCode, fmt.Errorf("activity %d is not in the directory", id)))
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: activityproj.Row(row)}
 	default:
@@ -81,7 +82,8 @@ func (d ActivityDispatcher) list(ctx context.Context, actor identity.ActorContex
 	var rows []activity.Projection
 	_, err = d.Reads.Run(ctx, op, appi5.DefaultProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, scope tx.Scope) error {
 		var readErr error
-		rows, readErr = d.Service.Directory.ListAt(c, actor, at, d.level(scope.Tx))
+		scoped := appactivity.WithQueryer(c, scope.Tx)
+		rows, readErr = d.Service.Directory.ListAt(scoped, actor, at, d.level(scope.Tx))
 		return readErr
 	})
 	return rows, err
@@ -99,7 +101,8 @@ func (d ActivityDispatcher) lookup(ctx context.Context, actor identity.ActorCont
 	var found bool
 	_, err = d.Reads.Run(ctx, op, appi5.DefaultProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(c context.Context, scope tx.Scope) error {
 		var readErr error
-		row, found, readErr = d.Service.Directory.LookupAt(c, actor, at, tableID, d.level(scope.Tx))
+		scoped := appactivity.WithQueryer(c, scope.Tx)
+		row, found, readErr = d.Service.Directory.LookupAt(scoped, actor, at, tableID, d.level(scope.Tx))
 		return readErr
 	})
 	return row, found, err

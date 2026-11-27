@@ -67,6 +67,39 @@ type ResourceCatalog struct {
 	SchemaVersion int                  `json:"schema_version"`
 }
 
+// ItemPresentation is one compiled item.lua display row: the operator
+// catalogue joins it by item id for the name and the res-relative icon path.
+type ItemPresentation struct {
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
+	Icon string `json:"icon"`
+	// Quality is item.lua's quality column (0 means unset, 1..6 is the star
+	// rarity the client draws).
+	Quality int64 `json:"quality"`
+	// SubType is item.lua's consumable subtype; 8 is a skin and zero is absent.
+	SubType int64 `json:"sub_type,omitempty"`
+}
+
+type ItemPresentationCatalog struct {
+	Items         []ItemPresentation `json:"items"`
+	SchemaVersion int                `json:"schema_version"`
+	Source        string             `json:"source"`
+}
+
+func (c ItemPresentationCatalog) Validate() error {
+	if c.SchemaVersion != SchemaVersion || c.Source != "data/tables/item.lua" || len(c.Items) == 0 {
+		return errors.New("builtin content: invalid item presentation catalogue")
+	}
+	last := int64(0)
+	for _, item := range c.Items {
+		if item.ID <= last || item.Name == "" || item.Quality < 0 || item.Quality > 6 || item.SubType < 0 {
+			return errors.New("builtin content: invalid item presentation row")
+		}
+		last = item.ID
+	}
+	return nil
+}
+
 type PlayerProgressionRow struct {
 	AwardEnergy    int64 `json:"award_energy"`
 	Energy         int64 `json:"energy"`
@@ -610,6 +643,7 @@ type Catalog struct {
 	Emoticons                EmoticonCatalog
 	Manifest                 Manifest
 	Resources                ResourceCatalog
+	ItemPresentation         ItemPresentationCatalog
 	PlayerProgression        PlayerProgressionCatalog
 	FunctionGates            FunctionGateCatalog
 	Objectives               ObjectiveCatalog
@@ -654,6 +688,10 @@ func Load() (*Catalog, error) {
 
 	var resources ResourceCatalog
 	if err := decodeAndVerify("resource_catalog.json", manifest.ArtifactSHA256s, &resources); err != nil {
+		return nil, err
+	}
+	var itemPresentation ItemPresentationCatalog
+	if err := decodeAndVerify("item_presentation_catalog.json", manifest.ArtifactSHA256s, &itemPresentation); err != nil {
 		return nil, err
 	}
 	var progression PlayerProgressionCatalog
@@ -909,6 +947,7 @@ func Load() (*Catalog, error) {
 		Emoticons:                emoticons,
 		Manifest:                 manifest,
 		Resources:                resources,
+		ItemPresentation:         itemPresentation,
 		PlayerProgression:        progression,
 		FunctionGates:            functions,
 		Objectives:               objectives,
@@ -1127,6 +1166,12 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 	if manifest.CompilerVersion == "i9-11d-compat" {
 		expectedSources, expectedArtifacts = 598, 61
 	}
+	if manifest.CompilerVersion == "i11a-events-gifts" {
+		expectedSources, expectedArtifacts = 598, 61
+	}
+	if manifest.CompilerVersion == "i11a-operator-catalogue" || manifest.CompilerVersion == "i11a-operator-catalogue-skins" {
+		expectedSources, expectedArtifacts = 598, 62
+	}
 	if len(manifest.Sources) != expectedSources {
 		return fmt.Errorf("builtin content: expected %d source records, got %d", expectedSources, len(manifest.Sources))
 	}
@@ -1151,6 +1196,9 @@ func validateManifest(raw []byte, manifest *Manifest) error {
 }
 
 func validateCatalog(c *Catalog) error {
+	if err := c.ItemPresentation.Validate(); err != nil {
+		return err
+	}
 	if err := c.GodsTrial.Validate(); err != nil {
 		return err
 	}

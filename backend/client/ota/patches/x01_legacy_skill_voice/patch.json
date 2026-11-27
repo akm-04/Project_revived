@@ -1,0 +1,9 @@
+{
+  "target": "app/common/tables/SkillTable.lua",
+  "stock_sha256": "0184d2ea9bc63a93438f1f0029e4703e8979afd2101959d5a567f1859bd9befc",
+  "kind": "insert_before_final_return",
+  "anchor": "return var_0_2",
+  "insert": "overlay.lua",
+  "substitutions": {},
+  "origin": "x01-sound 2026-11-24: skill.lua carries the ultimate voice line (236 of 239 hero paths are <girl>_voice9.ogg) and the battle sound queue plays it directly, so the ult stayed on the 2023 cast"
+}

@@ -204,6 +204,38 @@ SELECT (SELECT count(*) FROM blobs) + (SELECT count(*) FROM snapshots)`
 	return deleted, nil
 }
 
+// DeleteExpiredOTAAssetMisses applies the ANOMALY retention window (15 days by
+// the standing ruling, I11A_OTA_RELEASE_V1 ruling 7) to the asset-miss ledger.
+func (Store) DeleteExpiredOTAAssetMisses(c context.Context, t tx.Tx, lastSeenBefore time.Time) (int64, error) {
+	if t == nil {
+		return 0, errors.New("retention ota asset misses rule requires a transaction")
+	}
+	query := `DELETE FROM ota_asset_misses WHERE (path, md5) IN (
+SELECT path, md5 FROM ota_asset_misses
+WHERE last_seen < $1
+ORDER BY last_seen, path, md5
+LIMIT $2
+FOR UPDATE SKIP LOCKED)`
+	tag, err := t.Exec(c, query, lastSeenBefore.UTC(), BatchSize)
+	return tag.RowsAffected(), err
+}
+
+// DeleteExpiredOTAAssetServedDaily applies the same ANOMALY window to the daily
+// served counters; the day column is a UTC date.
+func (Store) DeleteExpiredOTAAssetServedDaily(c context.Context, t tx.Tx, before time.Time) (int64, error) {
+	if t == nil {
+		return 0, errors.New("retention ota served daily rule requires a transaction")
+	}
+	query := `DELETE FROM ota_asset_served_daily WHERE (path, day) IN (
+SELECT path, day FROM ota_asset_served_daily
+WHERE day < ($1 AT TIME ZONE 'UTC')::date
+ORDER BY day, path
+LIMIT $2
+FOR UPDATE SKIP LOCKED)`
+	tag, err := t.Exec(c, query, before, BatchSize)
+	return tag.RowsAffected(), err
+}
+
 // DeleteStaleHeroRecommendSnapshots removes hero-recommend generations older
 // than the cache window while keeping the latest generation per server.
 func (Store) DeleteStaleHeroRecommendSnapshots(c context.Context, t tx.Tx, observedBefore time.Time) (int64, error) {

@@ -1,0 +1,5 @@
+# Stock-relative client paths that earlier code releases patched and the current patch set no longer does.
+# Each ships as the stock file in every code release, so devices drop the old patched copy. The release ledger
+# adds such paths by itself from now on; list a path here only when the ledger lost the release that shipped it.
+# x01_legacy_voice_unlock, removed in c2f79c3f; the harness ledger lost releases 1.631.1-1.631.43 in the 2026-11-27 reset.
+app/model/NormalHero.lua

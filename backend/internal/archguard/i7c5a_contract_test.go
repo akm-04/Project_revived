@@ -89,7 +89,7 @@ func TestI7C5ALuaVMConfinedToResolver(t *testing.T) {
 		}
 		for _, im := range f.Imports {
 			p, _ := strconv.Unquote(im.Path.Value)
-			if strings.HasPrefix(p, "github.com/yuin/gopher-lua") && !strings.HasPrefix(filepath.ToSlash(rel), "internal/adapters/combatresolver/") {
+			if strings.HasPrefix(p, "github.com/yuin/gopher-lua") && !luaVMAllowed(filepath.ToSlash(rel)) {
 				t.Errorf("%s imports the Lua VM outside the isolated resolver", rel)
 			}
 		}
@@ -127,4 +127,13 @@ func TestI7C5ACombatLockRankUnique(t *testing.T) {
 	if len(owners) != 1 || owners[0] != "internal/domain/combat/snapshot.go:AttemptLockRank" {
 		t.Fatalf("lock rank 609 owners: %v", owners)
 	}
+}
+
+// luaVMAllowed admits the isolated combat resolver and the client OTA patch test
+// runners, which run client Lua under test and are never linked into a server binary.
+func luaVMAllowed(rel string) bool {
+	if strings.HasPrefix(rel, "internal/adapters/combatresolver/") {
+		return true
+	}
+	return strings.HasPrefix(rel, "client/ota/") && strings.Contains(rel, "/tests/")
 }

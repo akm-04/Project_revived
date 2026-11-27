@@ -11,6 +11,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/restorestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/retentionstore"
 	"gxb.local/backend/v2/internal/adapters/river/retentionworker"
+	"gxb.local/backend/v2/internal/adapters/river/sessionexpiryworker"
 	"log"
 	"os"
 	"os/signal"
@@ -52,10 +53,15 @@ func run() error {
 	if e != nil {
 		return e
 	}
+	idleSessions, e := sessionexpiryworker.New(p)
+	if e != nil {
+		return e
+	}
 	log.Print("Guild broadcast worker configuration validated: finite Mail/reconcile routes; acquiring separate session owner before execution")
-	errs := make(chan error, 2)
+	errs := make(chan error, 3)
 	go func() { errs <- v.Run(c) }()
 	go func() { errs <- retention.Run(c) }()
+	go func() { errs <- idleSessions.Run(c) }()
 	first := <-errs
 	stop()
 	<-errs

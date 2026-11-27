@@ -94,6 +94,19 @@ func refusalWithBody(code int64, body map[string]any) *classifiedFailure {
 	return &classifiedFailure{class: failureRefusal, code: code, extra: body}
 }
 
+// refusalWithCause names the refused input in the request journal without
+// changing the client body, so a missing row can be identified from evidence.
+func refusalWithCause(code int64, cause error) *classifiedFailure {
+	return &classifiedFailure{class: failureRefusal, code: code, cause: cause}
+}
+
+// refusalWithBodyCause is refusalWithBody plus a journal-only cause. The cause
+// never reaches the wire: failureReply writes only error_code, error_msg and the
+// refusal body, and the edge journals resp.Cause for the operator.
+func refusalWithBodyCause(code int64, body map[string]any, cause error) *classifiedFailure {
+	return &classifiedFailure{class: failureRefusal, code: code, extra: body, cause: cause}
+}
+
 func unavailable(cause error) *classifiedFailure {
 	return &classifiedFailure{class: failureUnavailable, cause: cause}
 }
@@ -283,7 +296,11 @@ func failureReply(failure *classifiedFailure) httpedge.Response {
 			body[key] = value
 		}
 		body["error_code"] = failure.code
-		body["error_msg"] = ""
+		// A refusal normally carries no client text; the few rows the client shows
+		// verbatim (for example message.lua 20029) pass their text explicitly.
+		if _, present := body["error_msg"]; !present {
+			body["error_msg"] = ""
+		}
 		return httpedge.Response{HTTPStatus: http.StatusConflict, Cause: failure.cause, Body: body}
 	case failureUnavailable:
 		return httpedge.Response{HTTPStatus: http.StatusServiceUnavailable, Cause: failure.cause, Body: map[string]any{"error_code": serverBusyCode, "error_msg": ""}}

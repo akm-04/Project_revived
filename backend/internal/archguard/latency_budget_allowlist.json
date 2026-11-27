@@ -1,7 +1,12 @@
 [
  {
+  "file": "internal/adapters/processcontrol/controller_test.go",
+  "line": 250,
+  "reason": "minimum bound (elapsed < 200 ms): Start must wait for the fake backend's delayed readiness; load can only make it pass, so it is not a latency budget"
+ },
+ {
   "file": "internal/adapters/stockruntime/realtime_http_poll_test.go",
-  "line": 167,
+  "line": 168,
   "reason": "minimum bound (elapsed < 800 ms): load can only make it pass, so it is not a latency member (GATE_LATENCY_SECTION_V1 section 5)"
  },
  {

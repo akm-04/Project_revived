@@ -1,0 +1,9 @@
+{
+  "target": "app/common/tables/ShopTable.lua",
+  "stock_sha256": "ef6f898a2323d21d39cea767decf73c7594f76cfc4af5c774d71e42ff3d6f651",
+  "kind": "insert_before_final_return",
+  "anchor": "return var_0_0",
+  "insert": "overlay.lua",
+  "substitutions": {},
+  "origin": "x01-sound 2026-11-24: shop_config.lua carries real hero voice files (buzhi_voice1/3/4/5) for the shop keeper and ShopTable returns them outside the hero windows"
+}

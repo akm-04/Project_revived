@@ -215,6 +215,8 @@
    "192": "realtimeauth",
    "193": "socialrecall",
    "194": "socialrecall",
+   "2": "otarelease",
+   "20480": "otarelease",
    "2064": "campaign",
    "2128": "course",
    "2129": "course",
@@ -241,6 +243,7 @@
    "2307": "memoir",
    "2308": "memoir",
    "2309": "memoir",
+   "231": "events",
    "2310": "memoir",
    "2311": "memoir",
    "2312": "memoir",
@@ -371,6 +374,7 @@
    "2852": "elementequipment",
    "2853": "elementequipment",
    "286": "topfloor",
+   "2864": "otarelease",
    "2865": "i5",
    "2866": "i5",
    "287": "topfloor",
@@ -645,6 +649,11 @@
    "commerce_recharge_tuning": "commerceprivilege",
    "commerce_vip_awards": "commerceprivilege",
    "dodgeball_players": "dodgeball",
+   "event_cycle_settings": "events",
+   "event_definition_sync_conflicts": "events",
+   "event_definitions": "events",
+   "event_global_groups": "events",
+   "event_occurrences": "events",
    "friend_dm_delivery": "frienddm",
    "friend_dm_occurrences": "frienddm",
    "friend_dm_projection_receipts": "frienddm",
@@ -723,6 +732,14 @@
    "one_on_one_rounds": "oneonone",
    "one_on_one_settlement_ranks": "oneonone",
    "one_on_one_settlements": "oneonone",
+   "operator_bulk_targets": "operator",
+   "operator_commands": "operator",
+   "operator_session_holds": "bootstrap",
+   "ota_activations": "otarelease",
+   "ota_asset_misses": "otarelease",
+   "ota_asset_served_daily": "otarelease",
+   "ota_releases": "otarelease",
+   "ota_settings": "otarelease",
    "petcampaign_players": "petcampaign",
    "player_book_admissions": "bookskill",
    "player_book_roots": "bookskill",
@@ -745,6 +762,7 @@
    "player_element_roots": "elementequipment",
    "player_event_centre_board_reports": "eventcentre",
    "player_event_centre_roots": "eventcentre",
+   "player_event_claims": "events",
    "player_gm_questions": "gmquestion",
    "player_guild_activity_days": "guildcore",
    "player_guild_activity_totals": "guildcore",
@@ -806,6 +824,8 @@
    "realtime_presence_leases": "socialpresence",
    "realtime_presence_owner_state": "socialpresence",
    "request_journal": "clientlog",
+   "sdk_devices": "bootstrap",
+   "sdk_logins": "bootstrap",
    "shared_room_seats": "sharedroom",
    "shared_rooms": "sharedroom",
    "shop_players": "shop",
@@ -864,8 +884,8 @@
    "tables": 7
   },
   {
-   "callees": 2,
-   "callers": 0,
+   "callees": 3,
+   "callers": 1,
    "mids": 2,
    "name": "activitydirectory",
    "path": "internal/application/activitydirectory",
@@ -883,7 +903,7 @@
   },
   {
    "callees": 16,
-   "callers": 3,
+   "callers": 4,
    "mids": 39,
    "name": "arena",
    "path": "internal/application/arena",
@@ -915,7 +935,7 @@
    "name": "bootstrap",
    "path": "internal/application/bootstrap",
    "purpose": "",
-   "tables": 10
+   "tables": 13
   },
   {
    "callees": 0,
@@ -928,7 +948,7 @@
   },
   {
    "callees": 14,
-   "callers": 4,
+   "callers": 5,
    "mids": 11,
    "name": "campaign",
    "path": "internal/application/campaign",
@@ -964,7 +984,7 @@
   },
   {
    "callees": 27,
-   "callers": 16,
+   "callers": 17,
    "mids": 24,
    "name": "characterhero",
    "path": "internal/application/characterhero",
@@ -999,7 +1019,7 @@
    "tables": 3
   },
   {
-   "callees": 1,
+   "callees": 2,
    "callers": 0,
    "mids": 0,
    "name": "clientlog",
@@ -1053,8 +1073,8 @@
    "tables": 3
   },
   {
-   "callees": 1,
-   "callers": 4,
+   "callees": 2,
+   "callers": 5,
    "mids": 0,
    "name": "dailyconsume",
    "path": "internal/application/dailyconsume",
@@ -1090,7 +1110,7 @@
   },
   {
    "callees": 13,
-   "callers": 3,
+   "callers": 4,
    "mids": 19,
    "name": "dormhouse",
    "path": "internal/application/dormhouse",
@@ -1114,6 +1134,15 @@
    "path": "internal/application/eventcentre",
    "purpose": "",
    "tables": 2
+  },
+  {
+   "callees": 9,
+   "callers": 1,
+   "mids": 1,
+   "name": "events",
+   "path": "internal/application/events",
+   "purpose": "applies the I11A event owner commands and serves its bounded reads (I11A_EVENTS_V1)",
+   "tables": 6
   },
   {
    "callees": 7,
@@ -1270,7 +1299,7 @@
   },
   {
    "callees": 14,
-   "callers": 61,
+   "callers": 64,
    "mids": 25,
    "name": "i5",
    "path": "internal/application/i5",
@@ -1278,7 +1307,7 @@
    "tables": 0
   },
   {
-   "callees": 3,
+   "callees": 4,
    "callers": 0,
    "mids": 0,
    "name": "identitylifecycle",
@@ -1288,7 +1317,7 @@
   },
   {
    "callees": 18,
-   "callers": 1,
+   "callers": 2,
    "mids": 17,
    "name": "illusion",
    "path": "internal/application/illusion",
@@ -1378,12 +1407,75 @@
   },
   {
    "callees": 13,
-   "callers": 3,
+   "callers": 4,
    "mids": 10,
    "name": "oneonone",
    "path": "internal/application/oneonone",
    "purpose": "composes the 1 on 1 owner (C5C_ONE_ON_ONE_MODE_V1): entry, teams, candidates, multi-round START through the Combat foundation, terminal slot/points settlement, promotion, Wednesday/Sunday mail settlement, titles and history facts",
    "tables": 8
+  },
+  {
+   "callees": 3,
+   "callers": 8,
+   "mids": 0,
+   "name": "operator",
+   "path": "internal/application/operator",
+   "purpose": "is the I11A operator command bus (I11A_OPERATOR_COMMANDS_V1): envelope validation, idempotency and the audit row",
+   "tables": 2
+  },
+  {
+   "callees": 3,
+   "callers": 0,
+   "mids": 0,
+   "name": "operatoragent",
+   "path": "internal/application/operatoragent",
+   "purpose": "",
+   "tables": 0
+  },
+  {
+   "callees": 1,
+   "callers": 2,
+   "mids": 0,
+   "name": "operatorcatalog",
+   "path": "internal/application/operatorcatalog",
+   "purpose": "is the shared operator item catalogue (I11A_OPERATOR_COMMANDS_V1 ruling 9): the generated backend resource catalogue joined with the compiled client item rows, for the export file and the bounded catalog.search read",
+   "tables": 0
+  },
+  {
+   "callees": 13,
+   "callers": 0,
+   "mids": 0,
+   "name": "operatorgrant",
+   "path": "internal/application/operatorgrant",
+   "purpose": "is the operator entitlement module (I11A_OPERATOR_COMMANDS_V1 M1/M2/M4/M8/M11, ruling 5): catalogue-checked grant.items and mail.send, the redeem campaign commands, the shared bulk target core, and the resumable per-recipient settlement job",
+   "tables": 0
+  },
+  {
+   "callees": 0,
+   "callers": 0,
+   "mids": 0,
+   "name": "operatormedia",
+   "path": "internal/application/operatormedia",
+   "purpose": "stores operator notice pictures on this machine and hands out the backend's public /media/ URL for them (G41)",
+   "tables": 0
+  },
+  {
+   "callees": 0,
+   "callers": 1,
+   "mids": 0,
+   "name": "otabuild",
+   "path": "internal/application/otabuild",
+   "purpose": "materialises the OTA client tree, applies the pinned client patches and writes the immutable volume-split release artifact (I11A_OTA_RELEASE_V1 rulings 2, 3, 5 and 8-10)",
+   "tables": 0
+  },
+  {
+   "callees": 2,
+   "callers": 2,
+   "mids": 3,
+   "name": "otarelease",
+   "path": "internal/application/otarelease",
+   "purpose": "serves the OTA read side: the MID 2 update plan and the cross-contract ActiveRelease view (I11A_OTA_RELEASE_V1 rulings 4 and 5)",
+   "tables": 5
   },
   {
    "callees": 13,
@@ -1458,7 +1550,7 @@
    "tables": 5
   },
   {
-   "callees": 4,
+   "callees": 5,
    "callers": 0,
    "mids": 4,
    "name": "publication",
@@ -1657,7 +1749,7 @@
   },
   {
    "callees": 7,
-   "callers": 0,
+   "callers": 1,
    "mids": 5,
    "name": "summon",
    "path": "internal/application/summon",
@@ -1666,7 +1758,7 @@
   },
   {
    "callees": 16,
-   "callers": 5,
+   "callers": 6,
    "mids": 23,
    "name": "topfloor",
    "path": "internal/application/topfloor",
@@ -1684,7 +1776,7 @@
   },
   {
    "callees": 12,
-   "callers": 1,
+   "callers": 2,
    "mids": 5,
    "name": "worldboss",
    "path": "internal/application/worldboss",

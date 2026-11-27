@@ -10,6 +10,14 @@ var (
 	ErrPrincipalBindingDisabled = errors.New("provider principal binding is disabled")
 )
 
+// Canonical revocation reasons of the operator logout commands
+// (I11A_1_PLAN "L6 logout on publish").
+const (
+	RevocationReasonOperatorLogout    = "operator_logout"
+	RevocationReasonOperatorLogoutAll = "operator_logout_all"
+	RevocationReasonIdleExpired       = "IDLE_EXPIRED"
+)
+
 func BindPrincipal(existing *ProviderBinding, candidate ProviderBinding) (ProviderBinding, bool, error) {
 	if err := candidate.Principal.Validate(); err != nil {
 		return ProviderBinding{}, false, err
@@ -42,6 +50,10 @@ type SessionIssue struct {
 }
 
 func NewSessionIssue(session Session, sid, login SessionCredential) (SessionIssue, error) {
+	if session.IdleTimeoutSeconds == nil {
+		idle := DefaultIdleTimeoutSeconds
+		session.IdleTimeoutSeconds = &idle
+	}
 	if session.ID.UUID().IsZero() || session.AccountID.UUID().IsZero() || session.AuthProfile != AuthProductionPair || session.IssuedAt.IsZero() || session.LastActivityAt.IsZero() || session.LivenessVersion < 1 || session.RevokedAt != nil || session.RevocationReason != "" {
 		return SessionIssue{}, errors.New("invalid session")
 	}

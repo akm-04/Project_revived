@@ -1,0 +1,11 @@
+{
+  "revision": 1,
+  "anchor": "2026-01-01T05:00:00+08:00",
+  "entries": [
+    {"activity_id": 1008, "duration": "3d"},
+    {"activity_id": 1009, "duration": "3d"},
+    {"activity_id": 1007, "duration": "3d"},
+    {"activity_id": 1010, "duration": "3d"},
+    {"activity_id": 1016, "duration": "3d"}
+  ]
+}

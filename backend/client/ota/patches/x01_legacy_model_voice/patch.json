@@ -1,0 +1,9 @@
+{
+  "target": "app/common/tables/ModelTable.lua",
+  "stock_sha256": "fb9bfb7d9beb4b50eb7c978abfba60cc4ff7644a48de08f950af2f6e2e3d6038",
+  "kind": "insert_before_final_return",
+  "anchor": "return var_0_2",
+  "insert": "overlay.lua",
+  "substitutions": {},
+  "origin": "x01-sound 2026-11-23: the 2.5D bust and battle model sounds follow the legacy voice switch (getAttack4Sound, deathSound, move/victory/attack accessors)"
+}

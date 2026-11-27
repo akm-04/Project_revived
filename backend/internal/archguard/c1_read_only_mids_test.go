@@ -20,6 +20,9 @@ type readOnlyMID struct {
 	MID      int    `json:"mid"`
 	Function string `json:"function"`
 	File     string `json:"file"`
+	// FileOnly marks a read-only MID that reaches no transaction at all, such
+	// as MID 2 reading releases.json (S1 item 2). It must not open one.
+	FileOnly bool `json:"file_only,omitempty"`
 }
 
 type readOnlyMIDsFile struct {
@@ -51,6 +54,13 @@ func loadReadOnlyMIDs(t *testing.T, root string) readOnlyMIDsFile {
 		t.Fatal(err)
 	}
 	return listed
+}
+
+// readOnlyMIDKey drops the ledger-only file_only annotation, so the coverage
+// comparison uses the route identity the system map traces.
+func readOnlyMIDKey(entry readOnlyMID) readOnlyMID {
+	entry.FileOnly = false
+	return entry
 }
 
 func loadMIDClasses(t *testing.T, root string) midClassesFile {
@@ -99,13 +109,15 @@ func TestC1ReadOnlyMIDLedgerCoversLiveReadOnlyMIDs(t *testing.T) {
 	}
 	listed := map[readOnlyMID]bool{}
 	for _, entry := range ledger.MIDs {
-		listed[entry] = true
-		if !live[entry] && !mapBlindMIDs[entry.MID] {
+		key := readOnlyMIDKey(entry)
+		listed[key] = true
+		if !live[key] && !mapBlindMIDs[entry.MID] {
 			t.Errorf("MID %d: ledger names %s %s, but the system map traces no read-only-only route for it", entry.MID, entry.File, entry.Function)
 		}
 	}
 	for entry := range live {
 		if !listed[entry] {
+
 			t.Errorf("MID %d: live read-only route %s %s is missing from internal/archguard/read_only_mids.json", entry.MID, entry.File, entry.Function)
 		}
 	}
@@ -170,6 +182,36 @@ func (m Mode) Load(c context.Context) error {
 	}
 }
 
+func TestC1ReadOnlyMIDGuardAcceptsFileOnlyRoute(t *testing.T) {
+	source := `package fixture
+func (s Service) activeRows(c context.Context) error {
+	return nil
+}
+`
+	problems := readOnlyMIDProblems(
+		map[string][]byte{"fixture.go": []byte(source)},
+		[]readOnlyMID{{MID: 2, Function: "Service.activeRows", File: "fixture.go", FileOnly: true}},
+	)
+	if len(problems) != 0 {
+		t.Fatalf("a file-only read-only route was rejected: %v", problems)
+	}
+}
+
+func TestC1ReadOnlyMIDGuardRejectsFileOnlyRouteThatOpensATransaction(t *testing.T) {
+	source := `package fixture
+func (s Service) activeRows(c context.Context) error {
+	return s.Runner.Run(c, op, profile, tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, body)
+}
+`
+	problems := readOnlyMIDProblems(
+		map[string][]byte{"fixture.go": []byte(source)},
+		[]readOnlyMID{{MID: 2, Function: "Service.activeRows", File: "fixture.go", FileOnly: true}},
+	)
+	if len(problems) != 1 || !strings.Contains(problems[0], "file_only") {
+		t.Fatalf("a file-only route that opened a transaction was not rejected: %v", problems)
+	}
+}
+
 // readOnlyMIDProblems is pure so the guard can be tested with synthetic source.
 func readOnlyMIDProblems(files map[string][]byte, entries []readOnlyMID) []string {
 	problems := []string{}
@@ -191,6 +233,12 @@ func readOnlyMIDProblems(files map[string][]byte, entries []readOnlyMID) []strin
 			continue
 		}
 		found, failures := checkTransactionOptions(position, entry, function)
+		if entry.FileOnly {
+			if found {
+				problems = append(problems, fmt.Sprintf("MID %d: %s opens a transaction, but the ledger marks it file_only", entry.MID, entry.File))
+			}
+			continue
+		}
 		if !found {
 			problems = append(problems, fmt.Sprintf("MID %d: %s has no Runner.Run with tx.Options", entry.MID, entry.File))
 			continue

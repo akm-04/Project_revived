@@ -75,50 +75,73 @@ type bloodNativeFixture struct {
 	values  i5store.Store
 }
 
+// bloodFixtureSpec selects one Blood mission chain and the hero table it starts on.
+type bloodFixtureSpec struct {
+	first, second       int64
+	table               int64
+	color               int64
+	baseItem, bloodItem int64
+}
+
+var bloodFixture2001 = bloodFixtureSpec{first: 2001001, second: 2001002, table: 11001001, color: 15, baseItem: 20001185, bloodItem: 21001001}
+var bloodFixtureAnnie = bloodFixtureSpec{first: 2013001, second: 2013002, table: 11001013, color: 16, baseItem: 20001190, bloodItem: 21001019}
+
 func newBloodNativeFixture(t *testing.T, p *pg.Pool) bloodNativeFixture {
+	return newBloodNativeFixtureFor(t, p, bloodFixture2001)
+}
+
+func newBloodFixtureBase(t *testing.T, p *pg.Pool, spec bloodFixtureSpec) (bloodNativeFixture, string) {
 	t.Helper()
 	actor, rev, ref := combatOwner(t, p, rankingServer(t, p))
-	store := characterstore.Store{Queryer: p}
 	content := contentstore.Store{Queryer: p}
 	values := i5store.Store{Queryer: p}
 	// Declared awakened/progression/equipment fixture; ordinary origin and progression are qualified separately.
-	exec(t, p, `UPDATE player_heroes SET table_id=11001001,level=100,color=15,equip_1=1,equip_2=1,equip_3=1,equip_4=1,equip_5=1,equip_6=1 WHERE player_id=$1 AND partner_id=$2`, int64(actor.PlayerID), ref.PartnerID)
+	exec(t, p, `UPDATE player_heroes SET table_id=$3,level=100,color=$4,equip_1=1,equip_2=1,equip_3=1,equip_4=1,equip_5=1,equip_6=1 WHERE player_id=$1 AND partner_id=$2`, int64(actor.PlayerID), ref.PartnerID, spec.table, spec.color)
 	// This older explicit Character fixture also needs the production function-state owner for D359.
 	exec(t, p, `INSERT INTO player_function_state_owners(player_id,state_version,updated_at) VALUES($1,1,clock_timestamp()) ON CONFLICT DO NOTHING`, int64(actor.PlayerID))
 	owner, heroes := i94AwakeningOwners(p)
 	heroes.AwakeningEquipment = &owner
-	if _, e := owner.ChangeAwakening(ctx, actor, "open", 2001001, 2, op()); e != nil {
+	return bloodNativeFixture{actor: actor, ref: ref, owner: owner, heroes: heroes, content: content, values: values}, rev
+}
+
+func newBloodNativeFixtureFor(t *testing.T, p *pg.Pool, spec bloodFixtureSpec) bloodNativeFixture {
+	t.Helper()
+	// The same open -> equip -> claim order the stock client drives through 2738, 54 and 161.
+	fixture, rev := newBloodFixtureBase(t, p, spec)
+	actor, ref, owner, heroes, content := fixture.actor, fixture.ref, fixture.owner, fixture.heroes, fixture.content
+	if _, e := owner.ChangeAwakening(ctx, actor, "open", spec.first, 2, op()); e != nil {
 		t.Fatal(e)
 	}
 	// Resource fixture uses the canonical grant owner; it is not a genuine event/material drop.
-	fixture := op()
-	if _, e := owner.SettleGrant(ctx, actor, grant.Plan{PlayerID: actor.PlayerID, Source: grant.SourceIdentity{Domain: "i94-fixture", Operation: "blood-gear", BusinessKey: fixture.ID.String(), Occurrence: fixture.ID.String(), PolicyVersion: "i94-fixture-v1"}, Lines: []grant.Line{{Kind: grant.StackItem, ItemID: 21001001, Amount: 1}}}, fixture); e != nil {
+	fixtureOperation := op()
+	if _, e := owner.SettleGrant(ctx, actor, grant.Plan{PlayerID: actor.PlayerID, Source: grant.SourceIdentity{Domain: "i94-fixture", Operation: "blood-gear", BusinessKey: fixtureOperation.ID.String(), Occurrence: fixtureOperation.ID.String(), PolicyVersion: "i94-fixture-v1"}, Lines: []grant.Line{{Kind: grant.StackItem, ItemID: spec.bloodItem, Amount: 1}}}, fixtureOperation); e != nil {
 		t.Fatal(e)
 	}
 	var slot int64
 	for n := int64(1); n <= 6; n++ {
-		pos, e := content.HeroEquipmentPositionTx(ctx, p, rev, 11001001, 15, n)
+		pos, e := content.HeroEquipmentPositionTx(ctx, p, rev, spec.table, spec.color, n)
 		if e != nil {
 			t.Fatal(e)
 		}
-		if pos.ItemID == 20001185 {
+		if pos.ItemID == character.EquipmentTemplateID(spec.baseItem) {
 			slot = n
 		}
 	}
 	if _, e := heroes.EquipItem(ctx, actor, ref.PartnerID, slot, op()); e != nil {
 		t.Fatal(e)
 	}
-	if _, e := owner.ChangeAwakening(ctx, actor, "claim", 2001001, 2, op()); e != nil {
+	if _, e := owner.ChangeAwakening(ctx, actor, "claim", spec.first, 2, op()); e != nil {
 		t.Fatal(e)
 	}
 	fight := combatService(t, p)
 	stats := rawBirthStats(p)
 	owned := statOwned(p)
-	owned.HeroEquipment = hero.CA8EquipmentObservationAdapter{Reader: hero.EquipmentStateReader{Store: store, Content: content, Awakening: heroes.AwakeningPositions}}
+	owned.HeroEquipment = hero.CA8EquipmentObservationAdapter{Reader: hero.EquipmentStateReader{Store: characterstore.Store{Queryer: p}, Content: content, Awakening: heroes.AwakeningPositions}}
 	stats.Owned = owned
 	fight.Inputs.Stats = stats
 	fight.Inputs.Heroes = characterstore.HeroBootstrapProjection{Content: content, Awakening: heroes, AwakeningPositions: heroes.AwakeningPositions, Library: libraryService(p, p), Dorm: dormService(p, p), Book: bookService(p, p), Course: courseService(p, p), Inscription: inscriptionService(p, p), Element: elementService(p, p), Spirit: spiritService(p, p), Evolution: evolutionService(p, p)}
-	return bloodNativeFixture{actor: actor, ref: ref, owner: owner, heroes: heroes, fight: fight, content: content, values: values}
+	fixture.fight = fight
+	return fixture
 }
 
 func (f bloodNativeFixture) mode(p *pg.Pool, clock gen.TimeAuthority) awakeningbattle.Mode {

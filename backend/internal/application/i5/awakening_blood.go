@@ -32,8 +32,10 @@ func (s Service) FreezeAwakeningBloodTx(ctx context.Context, q tx.Queryer, pid i
 	if e != nil {
 		return AwakeningBloodContext{}, e
 	}
+	// Blood go_id is client navigation only (I9_AWAKENING_MISSIONS_V1 A11); the
+	// active occurrence, stage-2 definition and guard raw stage qualify the battle.
 	d, ok := c.Definition(id)
-	if !ok || d.Type != 2 || d.Stage != 2 || len(d.Routes) != 1 || d.Routes[0] != id || c.PrivatePolicy.BloodResultWindowSeconds <= 0 || !c.PrivatePolicy.GuardWitnessOnly {
+	if !ok || d.Type != 2 || d.Stage != 2 || c.PrivatePolicy.BloodResultWindowSeconds <= 0 || !c.PrivatePolicy.GuardWitnessOnly {
 		return AwakeningBloodContext{}, objective.ErrAwakeningRefused
 	}
 	heroes, e := s.Awakening.Heroes.AwakeningHeroesTx(ctx, q, pid, a.Revision)

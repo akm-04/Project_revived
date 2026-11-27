@@ -653,6 +653,27 @@ func (Store) ActiveRevision(ctx context.Context, q tx.Queryer) (string, error) {
 	return a.RevisionID, nil
 }
 
+// maxItemKindIDs bounds one item kind lookup (every drop box is far smaller).
+const maxItemKindIDs = 1000
+
+// ItemKindsTx maps stack item ids to the client item_type of one exact content
+// revision (I11A_EVENTS_V1 ruling 10, EA-8). An id the revision does not carry
+// is absent, so a caller never multiplies it.
+func (Store) ItemKindsTx(ctx context.Context, q tx.Queryer, revision string, itemIDs []int64) (map[int64]int64, error) {
+	if q == nil || revision == "" || len(itemIDs) == 0 || len(itemIDs) > maxItemKindIDs {
+		return nil, errors.New("content store: item kind lookup needs a queryer, a revision and 1-1000 item ids")
+	}
+	var raw string
+	if err := q.QueryRow(ctx, contentqueries.ReadContentItemKinds, revision, itemIDs).Scan(&raw); err != nil {
+		return nil, err
+	}
+	kinds := map[int64]int64{}
+	if err := json.Unmarshal([]byte(raw), &kinds); err != nil {
+		return nil, err
+	}
+	return kinds, nil
+}
+
 func (Store) ResolveResourceTx(ctx context.Context, q tx.Queryer, revision string, line grant.Line) (appi5.ResourcePolicy, error) {
 	if q == nil || revision == "" {
 		return appi5.ResourcePolicy{}, errors.New("content store: exact resource lookup requires queryer and revision")
@@ -687,6 +708,9 @@ func (Store) ResolveResourceTx(ctx context.Context, q tx.Queryer, revision strin
 	_ = specializedOwner
 	_ = reason
 	if class != string(line.Kind) {
+		return appi5.ResourcePolicy{}, economy.ErrUnknownResource
+	}
+	if grantable, _ := grant.ResourceGrantable(class, activation); !grantable {
 		return appi5.ResourcePolicy{}, economy.ErrUnknownResource
 	}
 	out := appi5.ResourcePolicy{Kind: line.Kind, PolicyVersion: revision}

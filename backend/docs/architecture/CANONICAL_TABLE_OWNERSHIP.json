@@ -8470,6 +8470,52 @@
         "review": "immutable combat history (combat_append_only / combat_attempt_guard triggers): restore keeps it, like other ledgers (U7; audit A-076)"
       }
     },
+    "sdk_devices": {
+      "owner": "identity/logicalserver/bootstrap",
+      "allowed_query_owners": [
+        "identity/logicalserver/bootstrap"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/identitystore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/identitystore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00196_i11a_sdk_logins.sql",
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
+    },
+    "sdk_logins": {
+      "owner": "identity/logicalserver/bootstrap",
+      "allowed_query_owners": [
+        "identity/logicalserver/bootstrap"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/identitystore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/identitystore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00196_i11a_sdk_logins.sql",
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
+    },
     "shared_rooms": {
       "owner": "sharedroom",
       "allowed_query_owners": [
@@ -10282,6 +10328,350 @@
         "kind": "state",
         "backup": false,
         "references": [],
+        "retention": null
+      }
+    },
+    "operator_commands": {
+      "owner": "operator",
+      "allowed_query_owners": [
+        "operator"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/operatorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/operatorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00184_i11a_operator_ota.sql",
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
+    },
+    "ota_releases": {
+      "owner": "otarelease",
+      "allowed_query_owners": [
+        "otarelease"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/otastore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/otastore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00184_i11a_operator_ota.sql",
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
+    },
+    "ota_activations": {
+      "owner": "otarelease",
+      "allowed_query_owners": [
+        "otarelease"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/otastore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/otastore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00184_i11a_operator_ota.sql",
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
+    },
+    "ota_asset_misses": {
+      "owner": "otarelease",
+      "allowed_query_owners": [
+        "otarelease"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/otastore/",
+        "internal/adapters/postgres/retentionstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/otastore/"
+      ],
+      "write_exceptions": [
+        {
+          "finding_id": null,
+          "path": "internal/adapters/postgres/retentionstore/",
+          "reason": "I11A_OTA_RELEASE_V1 ruling 7: the R8 retention sweep applies the 15-day ANOMALY window to the OTA asset-miss ledger."
+        }
+      ],
+      "migration": "migrations/00184_i11a_operator_ota.sql",
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "report",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
+    },
+    "ota_asset_served_daily": {
+      "owner": "otarelease",
+      "allowed_query_owners": [
+        "otarelease"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/otastore/",
+        "internal/adapters/postgres/retentionstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/otastore/"
+      ],
+      "write_exceptions": [
+        {
+          "finding_id": null,
+          "path": "internal/adapters/postgres/retentionstore/",
+          "reason": "I11A_OTA_RELEASE_V1 ruling 7: the R8 retention sweep applies the 15-day ANOMALY window to the OTA daily served counters."
+        }
+      ],
+      "migration": "migrations/00184_i11a_operator_ota.sql",
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "report",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
+    },
+    "ota_settings": {
+      "owner": "otarelease",
+      "allowed_query_owners": [
+        "otarelease"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/otastore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/otastore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00185_i11a_ota_settings.sql",
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
+    },
+    "event_definition_sync_conflicts": {
+      "owner": "events",
+      "migration": "migrations/00191_i11a_events_definition_sync.sql",
+      "allowed_query_owners": [
+        "events"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/eventstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/eventstore/"
+      ],
+      "write_exceptions": [],
+      "data": {
+        "scope": "server",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
+    },
+    "event_definitions": {
+      "owner": "events",
+      "migration": "migrations/00186_i11a_events.sql",
+      "allowed_query_owners": [
+        "events"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/eventstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/eventstore/"
+      ],
+      "write_exceptions": [],
+      "data": {
+        "scope": "server",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
+    },
+    "event_global_groups": {
+      "owner": "events",
+      "migration": "migrations/00193_i11a_events_global_groups.sql",
+      "allowed_query_owners": [
+        "events"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/eventstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/eventstore/"
+      ],
+      "write_exceptions": [],
+      "data": {
+        "scope": "server",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
+    },
+    "event_occurrences": {
+      "owner": "events",
+      "migration": "migrations/00186_i11a_events.sql",
+      "allowed_query_owners": [
+        "events"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/eventstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/eventstore/"
+      ],
+      "write_exceptions": [],
+      "data": {
+        "scope": "server",
+        "owner": [
+          "logical_server_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
+    },
+    "event_cycle_settings": {
+      "owner": "events",
+      "migration": "migrations/00186_i11a_events.sql",
+      "allowed_query_owners": [
+        "events"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/eventstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/eventstore/"
+      ],
+      "write_exceptions": [],
+      "data": {
+        "scope": "server",
+        "owner": [
+          "logical_server_id"
+        ],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
+    },
+    "player_event_claims": {
+      "owner": "events",
+      "migration": "migrations/00186_i11a_events.sql",
+      "allowed_query_owners": [
+        "events"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/eventstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/eventstore/"
+      ],
+      "write_exceptions": [],
+      "data": {
+        "scope": "player",
+        "owner": [
+          "player_id"
+        ],
+        "via": null,
+        "kind": "ledger",
+        "backup": true,
+        "references": [],
+        "retention": null
+      }
+    },
+    "operator_session_holds": {
+      "owner": "identity/logicalserver/bootstrap",
+      "allowed_query_owners": [
+        "identity/logicalserver/bootstrap"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/identitystore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/identitystore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00192_identity_session_holds.sql",
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": false,
+        "references": [],
+        "retention": null
+      }
+    },
+    "operator_bulk_targets": {
+      "owner": "operator",
+      "allowed_query_owners": [
+        "operator"
+      ],
+      "allowed_read_paths": [
+        "internal/adapters/postgres/operatorstore/"
+      ],
+      "allowed_write_paths": [
+        "internal/adapters/postgres/operatorstore/"
+      ],
+      "write_exceptions": [],
+      "migration": "migrations/00189_i11a_operator_bulk.sql",
+      "data": {
+        "scope": "infrastructure",
+        "owner": [],
+        "via": null,
+        "kind": "state",
+        "backup": true,
+        "references": [
+          "semantic_key"
+        ],
         "retention": null
       }
     }

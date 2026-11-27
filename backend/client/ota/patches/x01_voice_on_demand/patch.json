@@ -1,0 +1,9 @@
+{
+  "target": "app/model/SelfPlayer.lua",
+  "stock_sha256": "163d5893c9522ada412c2b9c4748a80757660fccdf03c8f72cb6edf0838b8eb4",
+  "kind": "insert_before_final_return",
+  "anchor": "return var_0_0",
+  "insert": "overlay.lua",
+  "substitutions": {},
+  "origin": "x01-sound 2026-11-23: fetch a hero voice on demand when nothing preloaded it (model.lua death-sound directory heuristic misses Gramin, Kenshin and the event girls)"
+}

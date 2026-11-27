@@ -6,6 +6,7 @@ import (
 	unavailableappdormhouse "gxb.local/backend/v2/internal/application/dormhouse"
 	unavailableappelementequipment "gxb.local/backend/v2/internal/application/elementequipment"
 	unavailableappeventcentre "gxb.local/backend/v2/internal/application/eventcentre"
+	unavailableappevents "gxb.local/backend/v2/internal/application/events"
 	unavailableappfrienddm "gxb.local/backend/v2/internal/application/frienddm"
 	unavailableappgeneraldm "gxb.local/backend/v2/internal/application/generaldm"
 	unavailableappgmquestion "gxb.local/backend/v2/internal/application/gmquestion"
@@ -18,6 +19,7 @@ import (
 	unavailableapplibraryforum "gxb.local/backend/v2/internal/application/libraryforum"
 	unavailableapplibrarylocal "gxb.local/backend/v2/internal/application/librarylocal"
 	unavailableappmentor "gxb.local/backend/v2/internal/application/mentor"
+	unavailableappotarelease "gxb.local/backend/v2/internal/application/otarelease"
 	unavailableappplayerdisplay "gxb.local/backend/v2/internal/application/playerdisplay"
 	unavailableapppublication "gxb.local/backend/v2/internal/application/publication"
 	unavailableappsharedroom "gxb.local/backend/v2/internal/application/sharedroom"
@@ -59,6 +61,7 @@ var unavailableSentinels = []error{
 	unavailableappcourse.ErrUnavailable,
 	unavailableappdormhouse.ErrUnavailable,
 	unavailableappelementequipment.ErrUnavailable,
+	unavailableappevents.ErrUnavailable,
 	unavailableappeventcentre.ErrUnavailable,
 	unavailableappfrienddm.ErrUnavailable,
 	unavailableappgeneraldm.ErrUnavailable,
@@ -72,6 +75,7 @@ var unavailableSentinels = []error{
 	unavailableapplibraryforum.ErrUnavailable,
 	unavailableapplibrarylocal.ErrUnavailable,
 	unavailableappmentor.ErrUnavailable,
+	unavailableappotarelease.ErrUnavailable,
 	unavailableappplayerdisplay.ErrUnavailable,
 	unavailableapppublication.ErrUnavailable,
 	unavailableappsharedroom.ErrUnavailable,

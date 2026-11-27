@@ -1,0 +1,106 @@
+{
+ "background": [],
+ "content": [],
+ "contracts": [
+  {
+   "count": 1,
+   "file": "docs/architecture/popup_catalog/POPUP_CATALOG.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/architecture/reply_consumers/REPLY_CONSUMERS.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11A_HERO_ASSETS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11C_CORE_SHOPS_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11D_COMPAT_V2.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_11E_ACHIEVEMENTS_V2.json"
+  },
+  {
+   "count": 2,
+   "file": "docs/i9/I9_11_T34_REPAIRS_V1.md"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_COMMERCE_CHARGE_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_LIBRARY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/I9_WORKPLACE_PRIVATE_POLICY_V1.json"
+  },
+  {
+   "count": 1,
+   "file": "docs/i9/LEAD_SEAMS_I9-11_V2.md"
+  }
+ ],
+ "decorated_by": [],
+ "dispatcher_files": [],
+ "facts": {
+  "consumers": {},
+  "emits": [],
+  "reads": []
+ },
+ "locks": {
+  "profiles": [],
+  "ranks": [],
+  "row_lock_methods": {},
+  "row_locks": [],
+  "unresolved_methods": []
+ },
+ "login": [],
+ "mids": [],
+ "name": "operatoragent",
+ "pushes": [],
+ "stores": [],
+ "tables": {
+  "owned": [],
+  "read": [
+   "accounts",
+   "players"
+  ],
+  "written": []
+ },
+ "tests": {
+  "integration": [],
+  "scenarios_naming": [],
+  "unit": [
+   "backup_native_test.go",
+   "backup_recovery_test.go",
+   "backup_test.go",
+   "cli_test.go",
+   "config_test.go",
+   "credentials_test.go",
+   "dashboard_test.go",
+   "filebrowser_test.go",
+   "logfiles_test.go",
+   "logs_test.go",
+   "maintenance_test.go",
+   "modules_test.go",
+   "operations_test.go",
+   "otabuild_test.go",
+   "password_test.go",
+   "paths_test.go",
+   "pings_test.go",
+   "releases_test.go",
+   "sessions_test.go",
+   "settings_test.go",
+   "terminal_unix_test.go",
+   "toollog_test.go",
+   "version_rule_test.go"
+  ]
+ }
+}

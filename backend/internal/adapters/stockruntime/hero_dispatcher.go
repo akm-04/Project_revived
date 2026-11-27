@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -138,13 +139,13 @@ func (d HeroDispatcher) Dispatch(ctx context.Context, req httpedge.DispatchReque
 			var refused apphero.HeroSkillLevelRefusalError
 			if errors.As(err, &refused) {
 				body := map[string]any{"skills": apphero.HeroSkillLevelsString(refused.SkillLevels), "is_success": int64(0), "skill_point": refused.SkillPoint, "skill_time": refused.SkillTime}
-				return failureReply(refusalWithBody(heroSkillLevelRefusalCode(refused.Reason), body))
+				return failureReply(refusalWithBodyCause(heroSkillLevelRefusalCode(refused.Reason), body, heroSkillLevelRefusalCause(partner, refused.Reason)))
 			}
-			return d.skillLevelRefusalBody(ctx, actor, partner, req.Envelope.Operation, failHeroSkillLevel(err))
+			return d.skillLevelRefusalBody(ctx, actor, partner, req.Envelope.Operation, failHeroSkillLevel(heroSkillLevelRequestError(partner, err)))
 		}
 		body := map[string]any{"skills": result.SkillString(), "is_success": result.SuccessValue(), "skill_point": result.SkillPoint, "skill_time": result.SkillTime}
 		if !result.Success {
-			return failureReply(refusalWithBody(heroSkillLevelRefusalCode(result.RefusalReason), body))
+			return failureReply(refusalWithBodyCause(heroSkillLevelRefusalCode(result.RefusalReason), body, heroSkillLevelRefusalCause(partner, result.RefusalReason)))
 		}
 		return httpedge.Response{HTTPStatus: http.StatusOK, Body: body}
 	case 2144:
@@ -777,6 +778,20 @@ func heroSkillLevelRefusalCode(reason apphero.HeroSkillLevelRefusal) int64 {
 		return insufficientCoinCode
 	}
 	return unprovenRefusalCode
+}
+
+// heroSkillLevelRefusalCause names the hero and the refusal reason in the
+// journal only, so the next real-client miss is readable without the request
+// parameters (bug #145: five MID 39 refusals logged no cause).
+func heroSkillLevelRefusalCause(partner int64, reason apphero.HeroSkillLevelRefusal) error {
+	return fmt.Errorf("MID 39 hero=%d skill levels refused: %s", partner, reason)
+}
+
+// heroSkillLevelRequestError names the hero on the error path too. The wrapper
+// keeps errors.Is/As classification intact; only the journal-visible cause
+// changes.
+func heroSkillLevelRequestError(partner int64, err error) error {
+	return fmt.Errorf("MID 39 hero=%d skill levels failed: %w", partner, err)
 }
 
 // skillLevelRefusalBody fills the MID 39 fields the stock callback reads

@@ -1,0 +1,9 @@
+{
+  "target": "app/windows/AwakeHeroWindow.lua",
+  "stock_sha256": "ede5a9b3b10a39a748df44b10a3898d6ddc30adc2c93f2eec773a0eb6f49d5d9",
+  "kind": "insert_before_final_return",
+  "anchor": "return var_0_0",
+  "insert": "overlay.lua",
+  "substitutions": {},
+  "origin": "x06-awake-animation experimental patch, 2026-11-23, owner-approved; plays the stock ui_effect/awake/character_awaken spine at the start of the awakening cutscene"
+}

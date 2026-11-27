@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 SCHEMA_VERSION = 1
-COMPILER_VERSION = "i9-11d-compat"
+COMPILER_VERSION = "i11a-operator-catalogue-skins"
 PARSER_VERSION = "lua-generated-v18-guild-invite"
 EXPECTED_SOURCE_ARCHIVE_SHA256 = "c7e98789524713f75da147be2037edd20fc86c8d03a90ab112df7fed7cf4abcf"
 SOURCE_PREFIX = "app-assets/output/assets/src_64/"
@@ -1133,6 +1133,54 @@ def compile_dialog_relationship(
             if len(node["turn_ids"]) > 1 and "is_reward" not in target_node:
                 raise CompileError(f"dialog option target {target} has no is_reward ({relationship_id})")
     return list(nodes_by_node_id.values()), duplicate_node_keys, placeholders, unresolved_edges
+
+
+def event_definition_gift_ids() -> list[int]:
+    """Gift ids named by the shipped event definitions (EA-11). The definitions
+    are checked-in server data; the compiler exports the referenced stock gift
+    rows so events.definition.deploy can expand them from the content read."""
+    directory = Path(__file__).resolve().parents[1] / "internal/content/events/definitions"
+    ids: set[int] = set()
+    if not directory.is_dir():
+        return []
+    for path in sorted(directory.glob("*.json")):
+        try:
+            definition = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise CompileError(f"event definition {path.name}: {exc}") from exc
+        tiers = definition.get("tiers")
+        if not isinstance(tiers, list):
+            continue
+        for tier in tiers:
+            choices = tier.get("choices") if isinstance(tier, dict) else None
+            for choice in choices or []:
+                gift = choice.get("gift_id") if isinstance(choice, dict) else None
+                if isinstance(gift, int) and gift > 0:
+                    ids.add(gift)
+    return sorted(ids)
+
+
+def build_item_presentation(items: list[dict[str, str]]) -> dict[str, Any]:
+    rows = []
+    for index, row in enumerate(items, start=1):
+        item_id = parse_int(row["id"], label=f"item_presentation[{index}].id", allow_zero=False, allow_negative=False)
+        quality = 0
+        if row.get("quality", "") != "":
+            quality = parse_int(row["quality"], label=f"item_presentation[{index}].quality", allow_zero=True, allow_negative=False)
+            if quality > 6:
+                raise CompileError("item.lua quality is outside 0..6")
+        presentation = {"id": item_id, "name": row.get("name", ""), "icon": row.get("icon", ""), "quality": quality}
+        if row.get("sub_type", "") != "":
+            sub_type = parse_int(row["sub_type"], label=f"item_presentation[{index}].sub_type", allow_zero=True, allow_negative=False)
+            if sub_type > 0:
+                presentation["sub_type"] = sub_type
+        rows.append(presentation)
+    rows.sort(key=lambda r: r["id"])
+    if len({r["id"] for r in rows}) != len(rows):
+        raise CompileError("item.lua presentation ids are not unique")
+    if not rows:
+        raise CompileError("item.lua presentation table is empty")
+    return {"items": rows, "schema_version": SCHEMA_VERSION, "source": "data/tables/item.lua"}
 
 
 def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[str, Any]:
@@ -2789,7 +2837,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "guild_broadcast_policy.json":broadcast_artifact,
         "social_gift_catalog.json": social_gift_artifact,
         "social_input_catalog.json": build_social(blobs, parse_generated_lua_table, CompileError),
-        "daily_buy_input_catalog.json": build_daily_buy_inputs(items, gift_rows, dropbox_rows, vip_rows, monthly_privilege_rows, refresh_cost_rows, misc_by_key, daily_consume_rows, CompileError),
+        "daily_buy_input_catalog.json": build_daily_buy_inputs(items, gift_rows, dropbox_rows, vip_rows, monthly_privilege_rows, refresh_cost_rows, misc_by_key, daily_consume_rows, CompileError, event_definition_gift_ids()),
         "shop_catalog.json": build_shop_catalog(
             parse_generated_lua_table(blobs["data/tables/shop_config.lua"].data),
             {table: parse_generated_lua_table(blobs[f"data/tables/{table}.lua"].data) for table in (
@@ -2823,6 +2871,7 @@ def build_artifacts(blobs: dict[str, SourceBlob], archive_sha256: str) -> dict[s
         "practice_catalog.json": practice_artifact,
         "appearance_catalog.json": appearance_artifact,
         "resource_catalog.json": resource_artifact,
+        "item_presentation_catalog.json": build_item_presentation(items),
     }
     artifact_bytes = {name: canonical_json_bytes(value) for name, value in artifacts.items()}
     artifact_hashes = {name: sha256_bytes(data) for name, data in sorted(artifact_bytes.items())}

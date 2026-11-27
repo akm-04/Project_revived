@@ -1,0 +1,990 @@
+// Package eventstore owns the I11A events tables (migration 00186): the
+// immutable definitions, per-server occurrences and cycle settings, and the
+// player claim ledger.
+package eventstore
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"strconv"
+	"strings"
+	"time"
+
+	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
+	appevents "gxb.local/backend/v2/internal/application/events"
+	"gxb.local/backend/v2/internal/domain/events"
+	"gxb.local/backend/v2/internal/foundation/tx"
+
+	"github.com/jackc/pgx/v5/pgconn"
+)
+
+var errInvalid = errors.New("eventstore: invalid input")
+
+// Store reads and writes the events tables.
+type Store struct{}
+
+type occurrenceRow struct {
+	ID                  int64      `json:"id"`
+	LogicalServerID     int64      `json:"logical_server_id"`
+	ActivityID          int64      `json:"activity_id"`
+	DefinitionRevision  int64      `json:"definition_revision"`
+	StartsAt            time.Time  `json:"starts_at"`
+	EndsAt              *time.Time `json:"ends_at"`
+	ClaimUntil          *time.Time `json:"claim_until"`
+	Source              string     `json:"source"`
+	Revision            int64      `json:"revision"`
+	GlobalGroupID       *int64     `json:"global_group_id"`
+	CreatedByCommand    string     `json:"created_by_command"`
+	EndedEarlyByCommand string     `json:"ended_early_by_command"`
+	CancelledByCommand  string     `json:"cancelled_by_command"`
+	CancelledAt         *time.Time `json:"cancelled_at"`
+	SettledAt           *time.Time `json:"settled_at"`
+	CreatedAt           time.Time  `json:"created_at"`
+}
+
+func (row occurrenceRow) domain() events.Occurrence {
+	return events.Occurrence{
+		ID: row.ID, LogicalServerID: row.LogicalServerID, ActivityID: row.ActivityID, DefinitionRevision: row.DefinitionRevision,
+		StartsAt: row.StartsAt.UTC(), EndsAt: utcPtr(row.EndsAt), ClaimUntil: utcPtr(row.ClaimUntil), Source: row.Source,
+		Revision: row.Revision, GlobalGroupID: row.GlobalGroupID, CreatedByCommand: row.CreatedByCommand, EndedEarlyByCommand: row.EndedEarlyByCommand,
+		CancelledByCommand: row.CancelledByCommand, CancelledAt: utcPtr(row.CancelledAt), SettledAt: utcPtr(row.SettledAt), CreatedAt: row.CreatedAt.UTC(),
+	}
+}
+
+func utcPtr(value *time.Time) *time.Time {
+	if value == nil {
+		return nil
+	}
+	at := value.UTC()
+	return &at
+}
+
+const occurrenceColumns = `jsonb_build_object(
+	'id',id,'logical_server_id',logical_server_id,'activity_id',activity_id,
+	'definition_revision',definition_revision,'starts_at',starts_at,'ends_at',ends_at,
+	'claim_until',claim_until,'source',source,'revision',revision,
+	'global_group_id',global_group_id,
+	'created_by_command',created_by_command,'ended_early_by_command',ended_early_by_command,
+	'cancelled_by_command',cancelled_by_command,'cancelled_at',cancelled_at,
+	'settled_at',settled_at,'created_at',created_at)`
+
+func decodeOccurrences(raw string) ([]events.Occurrence, error) {
+	var rows []occurrenceRow
+	if err := json.Unmarshal([]byte(raw), &rows); err != nil {
+		return nil, err
+	}
+	out := make([]events.Occurrence, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, row.domain())
+	}
+	return out, nil
+}
+
+func mapWriteError(err error) error {
+	var pgErr *pgconn.PgError
+	if !errors.As(err, &pgErr) {
+		return err
+	}
+	switch {
+	case pgErr.Code == "23P01" && pgErr.ConstraintName == "event_occurrences_no_overlap":
+		return appevents.ErrOccurrenceOverlap
+	case pgErr.Code == "23505" && pgErr.ConstraintName == "event_definitions_pkey":
+		return appevents.ErrRevisionExists
+	case pgErr.Code == "23503" && (pgErr.ConstraintName == "event_occurrences_logical_server_id_fkey" || pgErr.ConstraintName == "event_cycle_settings_logical_server_id_fkey"):
+		return appevents.ErrServerUnknown
+	case pgErr.Code == "23503" && pgErr.ConstraintName == "event_occurrences_global_group_id_fkey":
+		return appevents.ErrGroupUnknown
+	}
+	return err
+}
+
+const selectDefinition = `SELECT activity_id,revision,body::text,sha256,deployed_by_command,deployed_at FROM event_definitions WHERE activity_id=$1 AND revision=$2`
+
+type definitionRow struct {
+	ActivityID         int64     `json:"activity_id"`
+	Revision           int64     `json:"revision"`
+	Body               string    `json:"body"`
+	SHA256             string    `json:"sha256"`
+	DeployedByCommand  string    `json:"deployed_by_command"`
+	DeployedAt         time.Time `json:"deployed_at"`
+	SyncConflictSHA256 string    `json:"sync_conflict_sha256"`
+}
+
+func scanDefinition(row *definitionRow) (*appevents.DefinitionRecord, error) {
+	definition, err := events.ParseDefinition([]byte(row.Body))
+	if err != nil {
+		return nil, err
+	}
+	return &appevents.DefinitionRecord{ActivityID: row.ActivityID, Revision: row.Revision, Body: definition, SHA256: row.SHA256, DeployedByCommand: row.DeployedByCommand, DeployedAt: row.DeployedAt.UTC(), SyncConflictSHA256: row.SyncConflictSHA256}, nil
+}
+
+// DefinitionTx reads one immutable revision.
+func (Store) DefinitionTx(ctx context.Context, query tx.Queryer, activityID, revision int64) (*appevents.DefinitionRecord, error) {
+	if query == nil || activityID <= 0 || revision <= 0 {
+		return nil, errInvalid
+	}
+	var row definitionRow
+	if err := query.QueryRow(ctx, selectDefinition, activityID, revision).Scan(&row.ActivityID, &row.Revision, &row.Body, &row.SHA256, &row.DeployedByCommand, &row.DeployedAt); err != nil {
+		if errors.Is(err, kernelstore.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return scanDefinition(&row)
+}
+
+const selectLatestDefinition = `SELECT activity_id,revision,body::text,sha256,deployed_by_command,deployed_at FROM event_definitions WHERE activity_id=$1 ORDER BY revision DESC LIMIT 1`
+
+// LatestDefinitionTx reads the newest deployed revision of an activity.
+func (Store) LatestDefinitionTx(ctx context.Context, query tx.Queryer, activityID int64) (*appevents.DefinitionRecord, error) {
+	if query == nil || activityID <= 0 {
+		return nil, errInvalid
+	}
+	var row definitionRow
+	if err := query.QueryRow(ctx, selectLatestDefinition, activityID).Scan(&row.ActivityID, &row.Revision, &row.Body, &row.SHA256, &row.DeployedByCommand, &row.DeployedAt); err != nil {
+		if errors.Is(err, kernelstore.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return scanDefinition(&row)
+}
+
+const listDefinitions = `SELECT COALESCE(jsonb_agg(jsonb_build_object(
+	'activity_id',activity_id,'revision',revision,'body',body::text,'sha256',sha256,
+	'deployed_by_command',deployed_by_command,'deployed_at',deployed_at,
+	'sync_conflict_sha256',COALESCE(sync_conflict_sha256,'')) ORDER BY activity_id,revision DESC),'[]'::jsonb)::text
+FROM (
+	SELECT d.activity_id,d.revision,d.body,d.sha256,d.deployed_by_command,d.deployed_at,c.shipped_sha256 AS sync_conflict_sha256
+	FROM event_definitions d
+	LEFT JOIN event_definition_sync_conflicts c ON c.activity_id=d.activity_id AND c.revision=d.revision
+	WHERE ($1=0 OR d.activity_id=$1)
+	AND d.revision=(SELECT MAX(latest.revision) FROM event_definitions latest WHERE latest.activity_id=d.activity_id)
+	ORDER BY d.activity_id,d.revision DESC LIMIT $2
+) listed`
+
+// ListDefinitionsTx reads the latest revision of each activity, newest first,
+// optionally for one activity (activityID 0 = every activity).
+func (Store) ListDefinitionsTx(ctx context.Context, query tx.Queryer, activityID int64, limit int) ([]appevents.DefinitionRecord, error) {
+	if query == nil || activityID < 0 || limit < 1 || limit > 200 {
+		return nil, errInvalid
+	}
+	var raw string
+	if err := query.QueryRow(ctx, listDefinitions, activityID, limit).Scan(&raw); err != nil {
+		return nil, err
+	}
+	var rows []definitionRow
+	if err := json.Unmarshal([]byte(raw), &rows); err != nil {
+		return nil, err
+	}
+	out := make([]appevents.DefinitionRecord, 0, len(rows))
+	for _, row := range rows {
+		record, err := scanDefinition(&row)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, *record)
+	}
+	return out, nil
+}
+
+const insertDefinition = `INSERT INTO event_definitions(activity_id,revision,body,sha256,deployed_by_command,deployed_at)
+VALUES($1,$2,$3::jsonb,$4,$5,$6)`
+
+// InsertDefinitionTx stores one immutable revision; a duplicate revision is
+// appevents.ErrRevisionExists.
+func (Store) InsertDefinitionTx(ctx context.Context, transaction tx.Tx, record appevents.DefinitionRecord, commandKey string, at time.Time) error {
+	if transaction == nil || commandKey == "" || at.IsZero() || record.ActivityID <= 0 || record.Revision <= 0 || record.SHA256 == "" {
+		return errInvalid
+	}
+	body, err := record.Body.Body()
+	if err != nil {
+		return err
+	}
+	effect, err := transaction.Exec(ctx, insertDefinition, record.ActivityID, record.Revision, string(body), record.SHA256, commandKey, at.UTC())
+	if err != nil {
+		return mapWriteError(err)
+	}
+	if effect == nil || effect.RowsAffected() != 1 {
+		return errors.New("eventstore: definition insert wrote no row")
+	}
+	return nil
+}
+
+const recordDefinitionConflict = `INSERT INTO event_definition_sync_conflicts(activity_id,revision,shipped_sha256,recorded_at)
+VALUES($1,$2,$3,$4)
+ON CONFLICT (activity_id,revision) DO UPDATE SET shipped_sha256=EXCLUDED.shipped_sha256,recorded_at=EXCLUDED.recorded_at`
+
+// RecordDefinitionConflictTx keeps the last shipped sha that conflicted with a
+// stored revision (EA-13); the stored body is never touched.
+func (Store) RecordDefinitionConflictTx(ctx context.Context, transaction tx.Tx, activityID, revision int64, sha256 string, at time.Time) error {
+	if transaction == nil || activityID <= 0 || revision <= 0 || sha256 == "" || at.IsZero() {
+		return errInvalid
+	}
+	if _, err := transaction.Exec(ctx, recordDefinitionConflict, activityID, revision, sha256, at.UTC()); err != nil {
+		return err
+	}
+	return nil
+}
+
+const clearDefinitionConflict = `DELETE FROM event_definition_sync_conflicts WHERE activity_id=$1 AND revision<=$2`
+
+// ClearDefinitionConflictTx drops the conflict records of a revision and its
+// older revisions once that revision deploys or matches its shipped file
+// (EA-14.5).
+func (Store) ClearDefinitionConflictTx(ctx context.Context, transaction tx.Tx, activityID, revision int64) error {
+	if transaction == nil || activityID <= 0 || revision <= 0 {
+		return errInvalid
+	}
+	_, err := transaction.Exec(ctx, clearDefinitionConflict, activityID, revision)
+	return err
+}
+
+const lockOccurrences = `SELECT COALESCE(jsonb_agg(` + occurrenceColumns + ` ORDER BY starts_at,id),'[]'::jsonb)::text
+FROM (
+	SELECT * FROM event_occurrences
+	WHERE logical_server_id=$1 AND activity_id=$2 AND cancelled_at IS NULL AND settled_at IS NULL
+	ORDER BY starts_at,id FOR SHARE
+) locked`
+
+// LockOccurrencesTx takes the occurrence FOR SHARE lock of one server and
+// activity (rank 355, EA-10); the exclusion constraint decides a concurrent insert.
+func (Store) LockOccurrencesTx(ctx context.Context, transaction tx.Tx, server, activityID int64) ([]events.Occurrence, error) {
+	if transaction == nil || server <= 0 || activityID <= 0 {
+		return nil, errInvalid
+	}
+	var raw string
+	if err := transaction.QueryRow(ctx, lockOccurrences, server, activityID).Scan(&raw); err != nil {
+		return nil, err
+	}
+	return decodeOccurrences(raw)
+}
+
+const overlaps = `SELECT EXISTS(
+	SELECT 1 FROM event_occurrences
+	WHERE logical_server_id=$1 AND activity_id=$2 AND cancelled_at IS NULL AND settled_at IS NULL
+	AND ($5=0 OR id<>$5)
+	AND tstzrange(starts_at, coalesce(claim_until, 'infinity'::timestamptz), '[)') && tstzrange($3, coalesce($4, 'infinity'::timestamptz), '[)')
+)`
+
+// OverlapsTx asks whether another occurrence of the same activity meets the
+// interval; nil end means permanent, and excludeID (0 = none) skips the row
+// being mutated.
+func (Store) OverlapsTx(ctx context.Context, query tx.Queryer, server, activityID int64, start time.Time, end *time.Time, excludeID int64) (bool, error) {
+	if query == nil || server <= 0 || activityID <= 0 || start.IsZero() || excludeID < 0 {
+		return false, errInvalid
+	}
+	var found bool
+	if err := query.QueryRow(ctx, overlaps, server, activityID, start.UTC(), utcPtr(end), excludeID).Scan(&found); err != nil {
+		return false, err
+	}
+	return found, nil
+}
+
+const insertOccurrence = `INSERT INTO event_occurrences(
+	logical_server_id,activity_id,definition_revision,starts_at,ends_at,claim_until,source,revision,
+	global_group_id,created_by_command,cancelled_by_command,cancelled_at,settled_at,created_at)
+VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,NULL,NULL,NULL,$11) RETURNING id`
+
+// InsertOccurrenceTx stores one occurrence; the overlap exclusion maps to
+// appevents.ErrOccurrenceOverlap.
+func (Store) InsertOccurrenceTx(ctx context.Context, transaction tx.Tx, occurrence events.Occurrence, commandKey string, at time.Time) (int64, error) {
+	if transaction == nil || at.IsZero() || occurrence.LogicalServerID <= 0 || occurrence.ActivityID <= 0 || occurrence.DefinitionRevision <= 0 || occurrence.StartsAt.IsZero() || occurrence.Revision <= 0 {
+		return 0, errInvalid
+	}
+	var command *string
+	if commandKey != "" {
+		command = &commandKey
+	}
+	var id int64
+	err := transaction.QueryRow(ctx, insertOccurrence,
+		occurrence.LogicalServerID, occurrence.ActivityID, occurrence.DefinitionRevision, occurrence.StartsAt.UTC(),
+		utcPtr(occurrence.EndsAt), utcPtr(occurrence.ClaimUntil), occurrence.Source, occurrence.Revision,
+		occurrence.GlobalGroupID, command, occurrence.CreatedAt.UTC(),
+	).Scan(&id)
+	if err != nil {
+		return 0, mapWriteError(err)
+	}
+	return id, nil
+}
+
+const insertGroupOccurrence = `INSERT INTO event_occurrences(
+	logical_server_id,activity_id,definition_revision,starts_at,ends_at,claim_until,source,revision,
+	global_group_id,created_by_command,cancelled_by_command,cancelled_at,settled_at,created_at)
+VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,NULL,NULL,NULL,$11)
+ON CONFLICT (global_group_id, logical_server_id) DO NOTHING RETURNING id`
+
+// InsertGroupOccurrenceTx stores one group occurrence unless the server already
+// holds one (the unique (global_group_id, logical_server_id) law). inserted is
+// false on that conflict, so the maintenance join is idempotent.
+func (Store) InsertGroupOccurrenceTx(ctx context.Context, transaction tx.Tx, occurrence events.Occurrence, commandKey string, at time.Time) (int64, bool, error) {
+	if transaction == nil || at.IsZero() || occurrence.LogicalServerID <= 0 || occurrence.GlobalGroupID == nil || *occurrence.GlobalGroupID <= 0 || occurrence.ActivityID <= 0 || occurrence.DefinitionRevision <= 0 || occurrence.StartsAt.IsZero() || occurrence.Revision <= 0 {
+		return 0, false, errInvalid
+	}
+	var command *string
+	if commandKey != "" {
+		command = &commandKey
+	}
+	var id int64
+	err := transaction.QueryRow(ctx, insertGroupOccurrence,
+		occurrence.LogicalServerID, occurrence.ActivityID, occurrence.DefinitionRevision, occurrence.StartsAt.UTC(),
+		utcPtr(occurrence.EndsAt), utcPtr(occurrence.ClaimUntil), occurrence.Source, occurrence.Revision,
+		occurrence.GlobalGroupID, command, occurrence.CreatedAt.UTC(),
+	).Scan(&id)
+	if errors.Is(err, kernelstore.ErrNoRows) {
+		return 0, false, nil
+	}
+	if err != nil {
+		return 0, false, mapWriteError(err)
+	}
+	return id, true, nil
+}
+
+const selectOccurrence = `SELECT ` + occurrenceColumns + ` FROM event_occurrences WHERE id=$1`
+
+// OccurrenceTx reads one occurrence without locking it.
+func (Store) OccurrenceTx(ctx context.Context, query tx.Queryer, occurrenceID int64) (*events.Occurrence, error) {
+	if query == nil || occurrenceID <= 0 {
+		return nil, errInvalid
+	}
+	var raw string
+	if err := query.QueryRow(ctx, selectOccurrence, occurrenceID).Scan(&raw); err != nil {
+		if errors.Is(err, kernelstore.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	var row occurrenceRow
+	if err := json.Unmarshal([]byte(raw), &row); err != nil {
+		return nil, err
+	}
+	occurrence := row.domain()
+	return &occurrence, nil
+}
+
+const selectActiveOccurrence = `SELECT ` + occurrenceColumns + ` FROM event_occurrences
+WHERE logical_server_id=$1 AND activity_id=$2 AND cancelled_at IS NULL AND settled_at IS NULL
+AND starts_at <= $3 AND (ends_at IS NULL OR ends_at > $3 OR claim_until > $3)
+ORDER BY starts_at DESC, id DESC LIMIT 1`
+
+// ActiveOccurrenceTx reads the server's RUNNING or CLAIM_WINDOW occurrence of
+// one activity at at (ruling 3); the derived state is re-checked by the caller.
+func (Store) ActiveOccurrenceTx(ctx context.Context, query tx.Queryer, server, activityID int64, at time.Time) (*events.Occurrence, error) {
+	return occurrenceAt(ctx, query, selectActiveOccurrence, server, activityID, at)
+}
+
+const selectClaimOccurrence = `SELECT ` + occurrenceColumns + ` FROM event_occurrences
+WHERE logical_server_id=$1 AND activity_id=$2 AND cancelled_at IS NULL
+AND starts_at <= $3
+ORDER BY starts_at DESC, id DESC LIMIT 1`
+
+// ClaimOccurrenceTx reads the newest occurrence that has started, including an
+// ENDED or ARCHIVED one, so a repeat of a stored claim is answered at any time
+// (EA-7). cancelled rows never run and are excluded.
+func (Store) ClaimOccurrenceTx(ctx context.Context, query tx.Queryer, server, activityID int64, at time.Time) (*events.Occurrence, error) {
+	return occurrenceAt(ctx, query, selectClaimOccurrence, server, activityID, at)
+}
+
+func occurrenceAt(ctx context.Context, query tx.Queryer, statement string, server, activityID int64, at time.Time) (*events.Occurrence, error) {
+	if query == nil || server <= 0 || activityID <= 0 || at.IsZero() {
+		return nil, errInvalid
+	}
+	var raw string
+	if err := query.QueryRow(ctx, statement, server, activityID, at.UTC()).Scan(&raw); err != nil {
+		if errors.Is(err, kernelstore.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	var row occurrenceRow
+	if err := json.Unmarshal([]byte(raw), &row); err != nil {
+		return nil, err
+	}
+	occurrence := row.domain()
+	return &occurrence, nil
+}
+
+const lockOccurrence = `SELECT ` + occurrenceColumns + ` FROM event_occurrences WHERE id=$1 FOR UPDATE`
+
+// LockOccurrenceTx locks one occurrence FOR UPDATE; nil when it does not exist.
+func (Store) LockOccurrenceTx(ctx context.Context, transaction tx.Tx, occurrenceID int64) (*events.Occurrence, error) {
+	if transaction == nil || occurrenceID <= 0 {
+		return nil, errInvalid
+	}
+	var raw string
+	if err := transaction.QueryRow(ctx, lockOccurrence, occurrenceID).Scan(&raw); err != nil {
+		if errors.Is(err, kernelstore.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	var row occurrenceRow
+	if err := json.Unmarshal([]byte(raw), &row); err != nil {
+		return nil, err
+	}
+	occurrence := row.domain()
+	return &occurrence, nil
+}
+
+const lockOccurrenceShared = `SELECT ` + occurrenceColumns + ` FROM event_occurrences WHERE id=$1 FOR SHARE`
+
+// LockOccurrenceSharedTx locks one occurrence FOR SHARE (rank 355, EA-9
+// claim order); nil when it does not exist.
+func (Store) LockOccurrenceSharedTx(ctx context.Context, transaction tx.Tx, occurrenceID int64) (*events.Occurrence, error) {
+	if transaction == nil || occurrenceID <= 0 {
+		return nil, errInvalid
+	}
+	var raw string
+	if err := transaction.QueryRow(ctx, lockOccurrenceShared, occurrenceID).Scan(&raw); err != nil {
+		if errors.Is(err, kernelstore.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	var row occurrenceRow
+	if err := json.Unmarshal([]byte(raw), &row); err != nil {
+		return nil, err
+	}
+	occurrence := row.domain()
+	return &occurrence, nil
+}
+
+const saveOccurrence = `UPDATE event_occurrences SET ends_at=$2,claim_until=$3,revision=$4,
+	ended_early_by_command=$5,cancelled_by_command=$6,cancelled_at=$7,settled_at=$8
+WHERE id=$1`
+
+// SaveOccurrenceTx writes the mutated lifecycle columns; the caller holds the
+// row lock.
+func (Store) SaveOccurrenceTx(ctx context.Context, transaction tx.Tx, occurrence events.Occurrence) error {
+	if transaction == nil || occurrence.ID <= 0 || occurrence.Revision <= 0 {
+		return errInvalid
+	}
+	effect, err := transaction.Exec(ctx, saveOccurrence, occurrence.ID, utcPtr(occurrence.EndsAt), utcPtr(occurrence.ClaimUntil),
+		occurrence.Revision, nullableText(occurrence.EndedEarlyByCommand), nullableText(occurrence.CancelledByCommand),
+		utcPtr(occurrence.CancelledAt), utcPtr(occurrence.SettledAt))
+	if err != nil {
+		return mapWriteError(err)
+	}
+	if effect == nil || effect.RowsAffected() != 1 {
+		return errors.New("eventstore: occurrence row disappeared under its lock")
+	}
+	return nil
+}
+
+func nullableText(value string) *string {
+	if value == "" {
+		return nil
+	}
+	return &value
+}
+
+// phasePredicate returns the derived-state SQL template for a phase (the state
+// is not stored, so a bounded list filters the same way domain State computes).
+// needsTime reports whether the template takes the decision instant as %s.
+func phasePredicate(phase events.Phase) (template string, needsTime bool, ok bool) {
+	switch phase {
+	case events.PhaseCancelled:
+		return "(cancelled_at IS NOT NULL)", false, true
+	case events.PhaseArchived:
+		return "(cancelled_at IS NULL AND settled_at IS NOT NULL)", false, true
+	case events.PhaseScheduled:
+		return "(cancelled_at IS NULL AND settled_at IS NULL AND starts_at > %s)", true, true
+	case events.PhaseRunning:
+		return "(cancelled_at IS NULL AND settled_at IS NULL AND starts_at <= %s AND (ends_at IS NULL OR ends_at > %s))", true, true
+	case events.PhaseClaimWindow:
+		return "(cancelled_at IS NULL AND settled_at IS NULL AND ends_at <= %s AND claim_until > %s)", true, true
+	case events.PhaseEnded:
+		return "(cancelled_at IS NULL AND settled_at IS NULL AND claim_until <= %s)", true, true
+	default:
+		return "", false, false
+	}
+}
+
+// OccurrencesTx reads one bounded, newest-first page of one server plus the
+// caller's one extra row, filtered by the same derived state domain State
+// computes.
+func (Store) OccurrencesTx(ctx context.Context, query tx.Queryer, filter appevents.OccurrenceFilter) ([]events.Occurrence, error) {
+	if query == nil || filter.LogicalServerID <= 0 {
+		return nil, errInvalid
+	}
+	return occurrencePage(ctx, query, filter, []string{"logical_server_id=$1"}, []any{filter.LogicalServerID})
+}
+
+// ServerOnlyOccurrencesTx reads the bounded newest-first page of the
+// occurrences that belong to no global group (the global events.list, EA-15
+// item 5).
+func (Store) ServerOnlyOccurrencesTx(ctx context.Context, query tx.Queryer, filter appevents.OccurrenceFilter) ([]events.Occurrence, error) {
+	if query == nil {
+		return nil, errInvalid
+	}
+	return occurrencePage(ctx, query, filter, []string{"global_group_id IS NULL"}, nil)
+}
+
+func occurrencePage(ctx context.Context, query tx.Queryer, filter appevents.OccurrenceFilter, conditions []string, args []any) ([]events.Occurrence, error) {
+	if query == nil || filter.Limit < 1 || filter.DecisionAt.IsZero() {
+		return nil, errInvalid
+	}
+	if filter.Phase != nil {
+		if template, needsTime, ok := phasePredicate(*filter.Phase); ok {
+			predicate := template
+			if needsTime {
+				args = append(args, filter.DecisionAt.UTC())
+				placeholder := "$" + strconv.Itoa(len(args))
+				values := make([]any, strings.Count(template, "%s"))
+				for index := range values {
+					values[index] = placeholder
+				}
+				predicate = fmt.Sprintf(template, values...)
+			}
+			conditions = append(conditions, predicate)
+		}
+	}
+	if filter.From != nil {
+		args = append(args, filter.From.UTC())
+		conditions = append(conditions, "starts_at >= $"+strconv.Itoa(len(args)))
+	}
+	if filter.To != nil {
+		args = append(args, filter.To.UTC())
+		conditions = append(conditions, "starts_at < $"+strconv.Itoa(len(args)))
+	}
+	if filter.Cursor != nil {
+		args = append(args, filter.Cursor.StartsAt.UTC(), filter.Cursor.ID)
+		conditions = append(conditions, "(starts_at,id) < ($"+strconv.Itoa(len(args)-1)+",$"+strconv.Itoa(len(args))+")")
+	}
+	args = append(args, filter.Limit)
+	statement := `SELECT COALESCE(jsonb_agg(` + occurrenceColumns + ` ORDER BY starts_at DESC,id DESC),'[]'::jsonb)::text FROM (
+	SELECT * FROM event_occurrences WHERE ` + strings.Join(conditions, " AND ") + `
+	ORDER BY starts_at DESC,id DESC LIMIT $` + strconv.Itoa(len(args)) + `) listed`
+	var raw string
+	if err := query.QueryRow(ctx, statement, args...).Scan(&raw); err != nil {
+		return nil, err
+	}
+	return decodeOccurrences(raw)
+}
+
+const selectSettings = `SELECT mode,cycle_revision,COALESCE(cycle_body::text,''),claim_window_hours,lookahead FROM event_cycle_settings WHERE logical_server_id=$1`
+
+const insertSettingsDefaults = `INSERT INTO event_cycle_settings(logical_server_id,updated_at) VALUES($1,$2) ON CONFLICT (logical_server_id) DO NOTHING`
+
+// EnsureSettingsTx seeds the server's settings row with the migration defaults
+// when it is missing, then returns the row. The claim window therefore always
+// comes from the settings row. The savepoint keeps a failed seed (unknown
+// server) mappable to a refusal instead of aborting the command transaction.
+func (Store) EnsureSettingsTx(ctx context.Context, transaction tx.Tx, server int64, at time.Time) (appevents.Settings, error) {
+	if transaction == nil || server <= 0 || at.IsZero() {
+		return appevents.Settings{}, errInvalid
+	}
+	if _, err := transaction.Exec(ctx, "SAVEPOINT events_settings"); err != nil {
+		return appevents.Settings{}, err
+	}
+	if _, err := transaction.Exec(ctx, insertSettingsDefaults, server, at.UTC()); err != nil {
+		if _, rollbackErr := transaction.Exec(ctx, "ROLLBACK TO SAVEPOINT events_settings"); rollbackErr != nil {
+			return appevents.Settings{}, rollbackErr
+		}
+		return appevents.Settings{}, mapWriteError(err)
+	}
+	if _, err := transaction.Exec(ctx, "RELEASE SAVEPOINT events_settings"); err != nil {
+		return appevents.Settings{}, err
+	}
+	settings, found, err := (Store{}).SettingsTx(ctx, transaction, server)
+	if err != nil {
+		return appevents.Settings{}, err
+	}
+	if !found {
+		return appevents.Settings{}, errors.New("eventstore: settings row missing after insert")
+	}
+	return settings, nil
+}
+
+// SettingsTx reads one server's settings; found is false when the server has
+// no row yet.
+func (Store) SettingsTx(ctx context.Context, query tx.Queryer, server int64) (appevents.Settings, bool, error) {
+	if query == nil || server <= 0 {
+		return appevents.Settings{}, false, errInvalid
+	}
+	var mode string
+	var cycleRevision int64
+	var cycleBody string
+	var claimWindowHours int
+	var lookahead int
+	err := query.QueryRow(ctx, selectSettings, server).Scan(&mode, &cycleRevision, &cycleBody, &claimWindowHours, &lookahead)
+	if errors.Is(err, kernelstore.ErrNoRows) {
+		return appevents.Settings{}, false, nil
+	}
+	if err != nil {
+		return appevents.Settings{}, false, err
+	}
+	settings := appevents.Settings{Mode: mode, CycleRevision: cycleRevision, ClaimWindow: time.Duration(claimWindowHours) * time.Hour, Lookahead: lookahead}
+	if cycleBody != "" {
+		settings.CycleBody = json.RawMessage(cycleBody)
+	}
+	return settings, true, nil
+}
+
+const selectOccurrenceClaims = `SELECT COALESCE(jsonb_agg(jsonb_build_object(
+	'player_id',player_id,'occurrence_id',occurrence_id,'tier',tier,'period',period,
+	'choice',choice,'claimed_at',claimed_at,'grant_receipt',grant_receipt,
+	'award_body',COALESCE(award_body::text,''),'payload_version',payload_version) ORDER BY claimed_at,player_id,tier,period),'[]'::jsonb)::text
+FROM (
+	SELECT player_id,occurrence_id,tier,period,choice,claimed_at,grant_receipt,award_body,payload_version
+	FROM player_event_claims WHERE occurrence_id=$1 ORDER BY claimed_at,player_id,tier,period LIMIT $2
+) listed`
+
+type claimRow struct {
+	PlayerID       int64     `json:"player_id"`
+	OccurrenceID   int64     `json:"occurrence_id"`
+	Tier           int64     `json:"tier"`
+	Period         string    `json:"period"`
+	Choice         int       `json:"choice"`
+	ClaimedAt      time.Time `json:"claimed_at"`
+	GrantReceipt   string    `json:"grant_receipt"`
+	AwardBody      string    `json:"award_body"`
+	PayloadVersion int16     `json:"payload_version"`
+}
+
+func (row claimRow) domain() appevents.Claim {
+	claim := appevents.Claim{PlayerID: row.PlayerID, OccurrenceID: row.OccurrenceID, Tier: row.Tier, Period: row.Period, Choice: row.Choice, ClaimedAt: row.ClaimedAt.UTC(), GrantReceipt: row.GrantReceipt, PayloadVersion: row.PayloadVersion}
+	if row.AwardBody != "" {
+		claim.AwardBody = json.RawMessage(row.AwardBody)
+	}
+	return claim
+}
+
+// OccurrenceClaimsTx reads a bounded claim page of one occurrence.
+func (Store) OccurrenceClaimsTx(ctx context.Context, query tx.Queryer, occurrenceID int64, limit int) ([]appevents.Claim, error) {
+	if query == nil || occurrenceID <= 0 || limit < 1 || limit > 201 {
+		return nil, errInvalid
+	}
+	var raw string
+	if err := query.QueryRow(ctx, selectOccurrenceClaims, occurrenceID, limit).Scan(&raw); err != nil {
+		return nil, err
+	}
+	var rows []claimRow
+	if err := json.Unmarshal([]byte(raw), &rows); err != nil {
+		return nil, err
+	}
+	out := make([]appevents.Claim, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, row.domain())
+	}
+	return out, nil
+}
+
+const countOccurrenceClaims = `SELECT COUNT(*) FROM player_event_claims WHERE occurrence_id=$1`
+
+// CountOccurrenceClaimsTx counts every claim of one occurrence, so a bounded
+// page never stands in for the total.
+func (Store) CountOccurrenceClaimsTx(ctx context.Context, query tx.Queryer, occurrenceID int64) (int, error) {
+	if query == nil || occurrenceID <= 0 {
+		return 0, errInvalid
+	}
+	var count int
+	if err := query.QueryRow(ctx, countOccurrenceClaims, occurrenceID).Scan(&count); err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+const claimExists = `SELECT EXISTS(
+	SELECT 1 FROM player_event_claims WHERE player_id=$1 AND occurrence_id=$2 AND tier=$3
+)`
+
+// HasClaimTx reports whether any claim row exists for (player, occurrence,
+// tier), whatever its period. Settlement uses it so a MID 231 claim under a
+// different period can never be paid a second time (E4b decision 1).
+func (Store) HasClaimTx(ctx context.Context, query tx.Queryer, playerID, occurrenceID, tier int64) (bool, error) {
+	if query == nil || playerID <= 0 || occurrenceID <= 0 || tier <= 0 {
+		return false, errInvalid
+	}
+	var claimed bool
+	if err := query.QueryRow(ctx, claimExists, playerID, occurrenceID, tier).Scan(&claimed); err != nil {
+		return false, err
+	}
+	return claimed, nil
+}
+
+const activeHooks = `SELECT COALESCE(jsonb_agg(hook ORDER BY occurrence_id,ordinality),'[]'::jsonb)::text FROM (
+	SELECT o.id AS occurrence_id,h.hook,h.ord AS ordinality
+	FROM event_occurrences o
+	JOIN event_definitions d ON d.activity_id=o.activity_id AND d.revision=o.definition_revision
+	CROSS JOIN LATERAL jsonb_array_elements(COALESCE(d.body->'hooks','[]'::jsonb)) WITH ORDINALITY AS h(hook,ord)
+	WHERE o.logical_server_id=$1 AND o.cancelled_at IS NULL AND o.settled_at IS NULL
+	AND o.starts_at <= $2 AND (o.ends_at IS NULL OR o.ends_at > $2)
+	AND h.hook->>'hook'=$3
+	ORDER BY o.id,h.ord
+) active`
+
+// ActiveHooksTx reads the hook payloads of the server's occurrences that are
+// RUNNING at at (the ActiveModifiers seam, ruling 9).
+func (Store) ActiveHooksTx(ctx context.Context, query tx.Queryer, server int64, at time.Time, hookKind string) ([]json.RawMessage, error) {
+	if query == nil || server <= 0 || at.IsZero() || hookKind == "" {
+		return nil, errInvalid
+	}
+	var raw string
+	if err := query.QueryRow(ctx, activeHooks, server, at.UTC(), hookKind).Scan(&raw); err != nil {
+		return nil, err
+	}
+	var hooks []json.RawMessage
+	if err := json.Unmarshal([]byte(raw), &hooks); err != nil {
+		return nil, err
+	}
+	return hooks, nil
+}
+
+const selectClaim = `SELECT player_id,occurrence_id,tier,period,choice,claimed_at,grant_receipt,COALESCE(award_body::text,''),payload_version
+FROM player_event_claims WHERE player_id=$1 AND occurrence_id=$2 AND tier=$3 AND period=$4`
+
+// InsertClaimTx inserts a claim; on the unique (player, occurrence, tier,
+// period) key it returns the existing row with inserted false.
+func (Store) InsertClaimTx(ctx context.Context, transaction tx.Tx, claim appevents.Claim) (appevents.Claim, bool, error) {
+	if transaction == nil || claim.PlayerID <= 0 || claim.OccurrenceID <= 0 || claim.Tier <= 0 || claim.Period == "" || claim.Choice < 1 || claim.Choice > 3 || claim.ClaimedAt.IsZero() || claim.GrantReceipt == "" {
+		return appevents.Claim{}, false, errInvalid
+	}
+	if len(claim.AwardBody) != 0 && !json.Valid(claim.AwardBody) {
+		return appevents.Claim{}, false, errInvalid
+	}
+	var body *string
+	if len(claim.AwardBody) != 0 {
+		text := string(claim.AwardBody)
+		body = &text
+	}
+	var row claimRow
+	err := transaction.QueryRow(ctx, `INSERT INTO player_event_claims(player_id,occurrence_id,tier,period,choice,claimed_at,grant_receipt,award_body,payload_version)
+		VALUES($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9)
+		ON CONFLICT (player_id,occurrence_id,tier,period) DO NOTHING
+		RETURNING player_id,occurrence_id,tier,period,choice,claimed_at,grant_receipt,COALESCE(award_body::text,''),payload_version`,
+		claim.PlayerID, claim.OccurrenceID, claim.Tier, claim.Period, claim.Choice, claim.ClaimedAt.UTC(), claim.GrantReceipt, body, claim.PayloadVersion).
+		Scan(&row.PlayerID, &row.OccurrenceID, &row.Tier, &row.Period, &row.Choice, &row.ClaimedAt, &row.GrantReceipt, &row.AwardBody, &row.PayloadVersion)
+	if err == nil {
+		return row.domain(), true, nil
+	}
+	if !errors.Is(err, kernelstore.ErrNoRows) {
+		return appevents.Claim{}, false, err
+	}
+	existing := claimRow{}
+	if err := transaction.QueryRow(ctx, selectClaim, claim.PlayerID, claim.OccurrenceID, claim.Tier, claim.Period).Scan(&existing.PlayerID, &existing.OccurrenceID, &existing.Tier, &existing.Period, &existing.Choice, &existing.ClaimedAt, &existing.GrantReceipt, &existing.AwardBody, &existing.PayloadVersion); err != nil {
+		return appevents.Claim{}, false, err
+	}
+	return existing.domain(), false, nil
+}
+
+const updateClaimReply = `UPDATE player_event_claims SET award_body=$6::jsonb,payload_version=$7
+WHERE player_id=$1 AND occurrence_id=$2 AND tier=$3 AND period=$4 AND choice=$5`
+
+// UpdateClaimReplyTx stores the granted MID 231 reply on the claim row, so the
+// same command re-answers it without a second grant (EA-7).
+func (Store) UpdateClaimReplyTx(ctx context.Context, transaction tx.Tx, claim appevents.Claim, body json.RawMessage) error {
+	if transaction == nil || claim.PlayerID <= 0 || claim.OccurrenceID <= 0 || claim.Tier <= 0 || claim.Period == "" || claim.Choice < 1 || claim.Choice > 3 || claim.PayloadVersion < 0 || !json.Valid(body) {
+		return errInvalid
+	}
+	effect, err := transaction.Exec(ctx, updateClaimReply, claim.PlayerID, claim.OccurrenceID, claim.Tier, claim.Period, claim.Choice, string(body), claim.PayloadVersion)
+	if err != nil {
+		return err
+	}
+	if effect == nil || effect.RowsAffected() != 1 {
+		return errors.New("eventstore: claim row disappeared under its lock")
+	}
+	return nil
+}
+
+const selectPlayerClaims = `SELECT COALESCE(jsonb_agg(jsonb_build_object(	'player_id',player_id,'occurrence_id',occurrence_id,'tier',tier,'period',period,
+	'choice',choice,'claimed_at',claimed_at,'grant_receipt',grant_receipt,
+	'award_body',COALESCE(award_body::text,''),'payload_version',payload_version) ORDER BY tier,period),'[]'::jsonb)::text
+FROM (
+	SELECT player_id,occurrence_id,tier,period,choice,claimed_at,grant_receipt,award_body,payload_version
+	FROM player_event_claims WHERE player_id=$1 AND occurrence_id=$2
+	ORDER BY tier,period LIMIT $3
+) listed`
+
+// ClaimsForPlayerTx reads one bounded page of one player's claims of an
+// occurrence, in (tier, period) order.
+func (Store) ClaimsForPlayerTx(ctx context.Context, query tx.Queryer, playerID, occurrenceID int64, limit int) ([]appevents.Claim, error) {
+	if query == nil || playerID <= 0 || occurrenceID <= 0 || limit < 1 || limit > appevents.MaxClaimsLimit {
+		return nil, errInvalid
+	}
+	var raw string
+	if err := query.QueryRow(ctx, selectPlayerClaims, playerID, occurrenceID, limit).Scan(&raw); err != nil {
+		return nil, err
+	}
+	var rows []claimRow
+	if err := json.Unmarshal([]byte(raw), &rows); err != nil {
+		return nil, err
+	}
+	out := make([]appevents.Claim, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, row.domain())
+	}
+	return out, nil
+}
+
+type groupRow struct {
+	ID                 int64           `json:"id"`
+	ActivityID         int64           `json:"activity_id"`
+	DefinitionRevision int64           `json:"definition_revision"`
+	StartsAt           time.Time       `json:"starts_at"`
+	EndsAt             *time.Time      `json:"ends_at"`
+	State              string          `json:"state"`
+	Revision           int64           `json:"revision"`
+	CreatedAt          time.Time       `json:"created_at"`
+	EndedAt            *time.Time      `json:"ended_at"`
+	CreatedByCommand   string          `json:"created_by_command"`
+	Occurrences        []occurrenceRow `json:"occurrences"`
+}
+
+func (row groupRow) domain() appevents.GlobalGroup {
+	group := appevents.GlobalGroup{
+		GlobalGroup: events.GlobalGroup{
+			ID: row.ID, ActivityID: row.ActivityID, DefinitionRevision: row.DefinitionRevision,
+			StartsAt: row.StartsAt.UTC(), EndsAt: utcPtr(row.EndsAt), State: row.State, Revision: row.Revision,
+			CreatedAt: row.CreatedAt.UTC(), EndedAt: utcPtr(row.EndedAt), CreatedByCommand: row.CreatedByCommand,
+		},
+		Occurrences: make([]events.Occurrence, 0, len(row.Occurrences)),
+	}
+	for _, occurrence := range row.Occurrences {
+		group.Occurrences = append(group.Occurrences, occurrence.domain())
+	}
+	return group
+}
+
+const groupColumns = `jsonb_build_object(
+	'id',id,'activity_id',activity_id,'definition_revision',definition_revision,
+	'starts_at',starts_at,'ends_at',ends_at,'state',state,'revision',revision,
+	'created_at',created_at,'ended_at',ended_at,'created_by_command',COALESCE(created_by_command,''))`
+
+const insertGlobalGroup = `INSERT INTO event_global_groups(activity_id,definition_revision,starts_at,ends_at,state,revision,created_at,created_by_command)
+VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id`
+
+// InsertGlobalGroupTx stores one global group and returns its id.
+func (Store) InsertGlobalGroupTx(ctx context.Context, transaction tx.Tx, group appevents.GlobalGroup, commandKey string, at time.Time) (int64, error) {
+	if transaction == nil || at.IsZero() || group.ActivityID <= 0 || group.DefinitionRevision <= 0 || group.StartsAt.IsZero() || group.Revision <= 0 {
+		return 0, errInvalid
+	}
+	if group.State != events.GroupScheduled && group.State != events.GroupRunning {
+		return 0, errInvalid
+	}
+	var command *string
+	if commandKey != "" {
+		command = &commandKey
+	}
+	var id int64
+	if err := transaction.QueryRow(ctx, insertGlobalGroup,
+		group.ActivityID, group.DefinitionRevision, group.StartsAt.UTC(), utcPtr(group.EndsAt),
+		group.State, group.Revision, at.UTC(), command,
+	).Scan(&id); err != nil {
+		return 0, mapWriteError(err)
+	}
+	return id, nil
+}
+
+const lockGlobalGroup = `SELECT ` + groupColumns + ` FROM event_global_groups WHERE id=$1 FOR UPDATE`
+
+// LockGlobalGroupTx locks one group FOR UPDATE (rank 355); nil when absent.
+func (Store) LockGlobalGroupTx(ctx context.Context, transaction tx.Tx, groupID int64) (*appevents.GlobalGroup, error) {
+	if transaction == nil || groupID <= 0 {
+		return nil, errInvalid
+	}
+	var raw string
+	if err := transaction.QueryRow(ctx, lockGlobalGroup, groupID).Scan(&raw); err != nil {
+		if errors.Is(err, kernelstore.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	var row groupRow
+	if err := json.Unmarshal([]byte(raw), &row); err != nil {
+		return nil, err
+	}
+	group := row.domain()
+	return &group, nil
+}
+
+const saveGlobalGroup = `UPDATE event_global_groups SET starts_at=$2,ends_at=$3,state=$4,revision=$5,ended_at=$6 WHERE id=$1`
+
+// SaveGlobalGroupTx writes the group lifecycle columns; the caller holds the
+// row lock.
+func (Store) SaveGlobalGroupTx(ctx context.Context, transaction tx.Tx, group appevents.GlobalGroup) error {
+	if transaction == nil || group.ID <= 0 || group.Revision <= 0 {
+		return errInvalid
+	}
+	effect, err := transaction.Exec(ctx, saveGlobalGroup, group.ID, group.StartsAt.UTC(), utcPtr(group.EndsAt), group.State, group.Revision, utcPtr(group.EndedAt))
+	if err != nil {
+		return mapWriteError(err)
+	}
+	if effect == nil || effect.RowsAffected() != 1 {
+		return errors.New("eventstore: group row disappeared under its lock")
+	}
+	return nil
+}
+
+const lockGroupOccurrences = `SELECT COALESCE(jsonb_agg(` + occurrenceColumns + ` ORDER BY id),'[]'::jsonb)::text
+FROM (SELECT * FROM event_occurrences WHERE global_group_id=$1 ORDER BY id FOR UPDATE) locked`
+
+// LockGroupOccurrencesTx locks every occurrence of one group FOR UPDATE in id
+// order (EA-15 item 6) and returns them.
+func (Store) LockGroupOccurrencesTx(ctx context.Context, transaction tx.Tx, groupID int64) ([]events.Occurrence, error) {
+	if transaction == nil || groupID <= 0 {
+		return nil, errInvalid
+	}
+	var raw string
+	if err := transaction.QueryRow(ctx, lockGroupOccurrences, groupID).Scan(&raw); err != nil {
+		return nil, err
+	}
+	return decodeOccurrences(raw)
+}
+
+const listJoinableGroups = `SELECT COALESCE(jsonb_agg(` + groupColumns + ` ORDER BY id),'[]'::jsonb)::text
+FROM (SELECT * FROM event_global_groups
+	WHERE id>$1 AND ended_at IS NULL AND (ends_at IS NULL OR ends_at>$2)
+	ORDER BY id LIMIT $3) g`
+
+// ListJoinableGroupsAfterTx pages the groups a maintenance run may join: not
+// ended, and SCHEDULED or RUNNING at at (EA-15 item 4).
+func (Store) ListJoinableGroupsAfterTx(ctx context.Context, query tx.Queryer, at time.Time, afterID int64, limit int) ([]appevents.GlobalGroup, error) {
+	if query == nil || at.IsZero() || afterID < 0 || limit < 1 || limit > 200 {
+		return nil, errInvalid
+	}
+	var raw string
+	if err := query.QueryRow(ctx, listJoinableGroups, afterID, at.UTC(), limit).Scan(&raw); err != nil {
+		return nil, err
+	}
+	var rows []groupRow
+	if err := json.Unmarshal([]byte(raw), &rows); err != nil {
+		return nil, err
+	}
+	out := make([]appevents.GlobalGroup, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, row.domain())
+	}
+	return out, nil
+}
+
+const listGlobalGroups = `SELECT COALESCE(jsonb_agg(jsonb_build_object(
+	'id',g.id,'activity_id',g.activity_id,'definition_revision',g.definition_revision,
+	'starts_at',g.starts_at,'ends_at',g.ends_at,'state',g.state,'revision',g.revision,
+	'created_at',g.created_at,'ended_at',g.ended_at,'created_by_command',COALESCE(g.created_by_command,''),
+	'occurrences',COALESCE((SELECT jsonb_agg(` + occurrenceColumns + ` ORDER BY o.id) FROM event_occurrences o WHERE o.global_group_id=g.id),'[]'::jsonb)
+) ORDER BY g.starts_at DESC,g.id DESC),'[]'::jsonb)::text
+FROM (SELECT * FROM event_global_groups ORDER BY starts_at DESC,id DESC LIMIT $1) g`
+
+// ListGlobalGroupsTx reads the bounded global view: newest group first, each
+// with its per-server occurrences.
+func (Store) ListGlobalGroupsTx(ctx context.Context, query tx.Queryer, limit int) ([]appevents.GlobalGroup, error) {
+	if query == nil || limit < 1 || limit > 200 {
+		return nil, errInvalid
+	}
+	var raw string
+	if err := query.QueryRow(ctx, listGlobalGroups, limit).Scan(&raw); err != nil {
+		return nil, err
+	}
+	var rows []groupRow
+	if err := json.Unmarshal([]byte(raw), &rows); err != nil {
+		return nil, err
+	}
+	out := make([]appevents.GlobalGroup, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, row.domain())
+	}
+	return out, nil
+}

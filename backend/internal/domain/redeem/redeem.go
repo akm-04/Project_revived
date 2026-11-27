@@ -4,6 +4,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"errors"
+	"io"
 	"strings"
 	"time"
 
@@ -11,6 +12,29 @@ import (
 )
 
 const StockFunctionLevel int64 = 10
+
+// GeneratedCodeLength and GeneratedCodeAlphabet keep operator-issued codes
+// unambiguous when read aloud or typed on a phone keypad (no 0/O, 1/I/L).
+const GeneratedCodeLength = 12
+
+const GeneratedCodeAlphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+
+// GenerateCode draws an operator redeem code from crypto/rand. The 32-character
+// alphabet is a power of two, so the byte mask is unbiased.
+func GenerateCode(reader io.Reader) (string, error) {
+	if reader == nil {
+		return "", errors.New("redeem code source required")
+	}
+	raw := make([]byte, GeneratedCodeLength)
+	if _, err := io.ReadFull(reader, raw); err != nil {
+		return "", err
+	}
+	out := make([]byte, GeneratedCodeLength)
+	for i, value := range raw {
+		out[i] = GeneratedCodeAlphabet[int(value)&(len(GeneratedCodeAlphabet)-1)]
+	}
+	return string(out), nil
+}
 
 type Normalization uint8
 

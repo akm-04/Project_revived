@@ -13,13 +13,18 @@ import (
 	apparena "gxb.local/backend/v2/internal/application/arena"
 	appawakeningbattle "gxb.local/backend/v2/internal/application/awakeningbattle"
 	appleague "gxb.local/backend/v2/internal/application/championsleague"
+	appclientlog "gxb.local/backend/v2/internal/application/clientlog"
 	"gxb.local/backend/v2/internal/application/commerceprivilege"
 	"gxb.local/backend/v2/internal/application/dailyconsume"
 	"gxb.local/backend/v2/internal/application/dailyreset"
 	apponeonone "gxb.local/backend/v2/internal/application/oneonone"
+	"gxb.local/backend/v2/internal/application/operator"
+	"gxb.local/backend/v2/internal/application/operatorcatalog"
+	"gxb.local/backend/v2/internal/application/operatorgrant"
 	"gxb.local/backend/v2/internal/application/playerdisplay"
 	apptopfloor "gxb.local/backend/v2/internal/application/topfloor"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -31,14 +36,18 @@ import (
 	"gxb.local/backend/v2/internal/adapters/guildcampaigncontent"
 	"gxb.local/backend/v2/internal/adapters/guildpolicybridge"
 	"gxb.local/backend/v2/internal/adapters/guildviewread"
+	"gxb.local/backend/v2/internal/adapters/operatorapi"
+	opcatalogsource "gxb.local/backend/v2/internal/adapters/operatorcatalog"
 	"gxb.local/backend/v2/internal/adapters/postgres"
 	"gxb.local/backend/v2/internal/adapters/postgres/achievementstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/activitystore"
 	"gxb.local/backend/v2/internal/adapters/postgres/adventurestore"
+	"gxb.local/backend/v2/internal/adapters/postgres/auditstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/bookstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/campaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterbirth"
 	"gxb.local/backend/v2/internal/adapters/postgres/characterstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/clientlogstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/compatstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/conquerstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/contentstore"
@@ -46,6 +55,7 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/dormstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/elementstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/eventcentrestore"
+	"gxb.local/backend/v2/internal/adapters/postgres/eventstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/frienddmstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/generaldmstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/gmquestionstore"
@@ -55,6 +65,8 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/herorecommendstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/i4store"
 	"gxb.local/backend/v2/internal/adapters/postgres/i5store"
+	"gxb.local/backend/v2/internal/adapters/postgres/identitystore"
+	"gxb.local/backend/v2/internal/adapters/postgres/illusionstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/inscriptionstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/kernelstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/libraryforumstore"
@@ -63,6 +75,8 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/mentorstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/occultstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/oneononestore"
+	"gxb.local/backend/v2/internal/adapters/postgres/operatorstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/otastore"
 	"gxb.local/backend/v2/internal/adapters/postgres/petcampaignstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/presencestore"
 	"gxb.local/backend/v2/internal/adapters/postgres/publicationstore"
@@ -77,9 +91,11 @@ import (
 	"gxb.local/backend/v2/internal/adapters/postgres/socialrelationstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/spiritstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/summonstore"
+	"gxb.local/backend/v2/internal/adapters/postgres/topfloorstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/undeliveredstore"
 	"gxb.local/backend/v2/internal/adapters/postgres/worldbossstore"
 	"gxb.local/backend/v2/internal/adapters/publicpresentation"
+	"gxb.local/backend/v2/internal/adapters/sdkapi"
 	"gxb.local/backend/v2/internal/adapters/socialpresentation"
 	"gxb.local/backend/v2/internal/adapters/stockruntime"
 	appachievement "gxb.local/backend/v2/internal/application/achievement"
@@ -100,6 +116,7 @@ import (
 	appdorm "gxb.local/backend/v2/internal/application/dormhouse"
 	appelement "gxb.local/backend/v2/internal/application/elementequipment"
 	appeventcentre "gxb.local/backend/v2/internal/application/eventcentre"
+	appevents "gxb.local/backend/v2/internal/application/events"
 	"gxb.local/backend/v2/internal/application/frienddm"
 	"gxb.local/backend/v2/internal/application/generaldm"
 	appgeneration "gxb.local/backend/v2/internal/application/generation"
@@ -120,6 +137,7 @@ import (
 	appmentor "gxb.local/backend/v2/internal/application/mentor"
 	"gxb.local/backend/v2/internal/application/missioninputs"
 	appoccult "gxb.local/backend/v2/internal/application/occult"
+	appotarelease "gxb.local/backend/v2/internal/application/otarelease"
 	apppetcampaign "gxb.local/backend/v2/internal/application/petcampaign"
 	apppublication "gxb.local/backend/v2/internal/application/publication"
 	apppublicprofile "gxb.local/backend/v2/internal/application/publicprofile"
@@ -140,12 +158,15 @@ import (
 	appspirit "gxb.local/backend/v2/internal/application/spirit"
 	appsummon "gxb.local/backend/v2/internal/application/summon"
 	appworldboss "gxb.local/backend/v2/internal/application/worldboss"
+	eventscontent "gxb.local/backend/v2/internal/content/events"
 	"gxb.local/backend/v2/internal/content/guildcampaigncatalog"
 	"gxb.local/backend/v2/internal/content/guildcampaignpolicy"
 	"gxb.local/backend/v2/internal/content/guildpolicy"
 	"gxb.local/backend/v2/internal/content/guildrentalpolicy"
 	"gxb.local/backend/v2/internal/content/guildteapolicy"
 	"gxb.local/backend/v2/internal/content/registry"
+	domainevents "gxb.local/backend/v2/internal/domain/events"
+	"gxb.local/backend/v2/internal/domain/identity"
 	domainspirit "gxb.local/backend/v2/internal/domain/spirit"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/config"
@@ -160,7 +181,27 @@ import (
 	"gxb.local/backend/v2/internal/protocol/replyconformance"
 )
 
+// sessionActivityToucher adapts the identity lifecycle service to the stock
+// HTTP decorator's activity seam. Each touch is its own operation, so it never
+// reuses the request's transaction identity.
+type sessionActivityToucher struct {
+	service    appidentity.Service
+	operations operation.Factory
+}
+
+func (t sessionActivityToucher) TouchActivity(ctx context.Context, sessionID identity.SessionID) error {
+	current, err := t.operations.New(policy.Set{})
+	if err != nil {
+		return err
+	}
+	_, err = t.service.TouchActivity(ctx, sessionID, current)
+	return err
+}
+
 func main() {
+	if len(os.Args) > 1 && os.Args[1] == "catalog" {
+		os.Exit(runCatalogCommand(os.Args[2:]))
+	}
 	cfg := config.FromEnv()
 	digestSecret := []byte(os.Getenv("GXB_CREDENTIAL_DIGEST_SECRET"))
 	bearerSecret := []byte(os.Getenv("GXB_GAMEPLAY_BEARER_SECRET"))
@@ -241,7 +282,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("I6B content capability set: %v", err)
 	}
-	activityProviders, err := appactivity.NewRegistry([]appactivity.Registration{{Name: "worldboss", TableID: 1026, RuntimeCapability: "activity.worldboss", Provider: appworldboss.ActivityProvider{Queryer: pool, Directory: i4store.PlayerDirectoryReader{}}}}, activityContentCapabilities)
+	activityRegistrations := []appactivity.Registration{{Name: "worldboss", TableID: 1026, RuntimeCapability: "activity.worldboss", Provider: appworldboss.ActivityProvider{Queryer: pool, Directory: i4store.PlayerDirectoryReader{}}}}
+	activityRegistrations = append(activityRegistrations, appevents.ActivityRegistrations(eventstore.Store{}, pool)...)
+	activityProviders, err := appactivity.NewRegistry(activityRegistrations, activityContentCapabilities)
 	if err != nil {
 		log.Fatalf("I6B Activity provider registry: %v", err)
 	}
@@ -256,7 +299,7 @@ func main() {
 	i5db := i5store.Store{Queryer: pool, StackUsage: appdorm.FurnitureUsage{Owner: dormstore.Store{}, Content: contentstore.Store{Queryer: pool}}}
 	contentDB := contentstore.Store{Queryer: pool}
 	privileges := commerceprivilege.Provider{Store: commerceprivilegestore.Store{}, Content: contentDB}
-	i5svc := appi5.Service{Runner: runner, Store: i5db, Content: contentDB, Privileges: privileges, Functions: appi5.LevelFunctionAnnouncements{}, CampaignClears: campaignstore.TutorialMilestones{}, Directory: i4store.DirectoryLevelProjection{}, Backpack: i5db, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, RedeemSecret: redeemSecret}
+	i5svc := appi5.Service{Runner: runner, Store: i5db, Content: contentDB, Privileges: privileges, Functions: appi5.LevelFunctionAnnouncements{}, CampaignClears: campaignstore.TutorialMilestones{}, Directory: i4store.DirectoryLevelProjection{}, Backpack: i5db, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, RedeemSecret: redeemSecret, Audit: auditstore.Emitter{Pool: pool}}
 	if e := i5svc.ValidateStartup(); e != nil {
 		log.Fatalf("I5 startup: %v", e)
 	}
@@ -415,6 +458,7 @@ func main() {
 		OperationBinder:         contentstore.Store{},
 		DetailContributors:      []appboot.MID1DetailContributor{appdorm.GlueBootstrap{Owner: dormstore.Store{}}, appi5.AwakeningBootstrap{Owner: i5svc}, appi5.SignInBootstrap{Owner: i5svc}, appi5.MissionBootstrap{Owner: i5svc}, commerceprivilege.BootstrapProjection{Provider: privileges}, i5store.BootstrapProjection{Display: displayService, Content: contentstore.Store{Queryer: pool}, Privileges: privileges, MaxHeroColor: maxHeroColorPolicy, Spirit: spiritSvc, BackpackSort: heroDB}, activitystore.BootstrapProjection{Directory: activityDirectory}, guildprojection.BootstrapProjection{}, guildprojection.TeaProjection{}, mentorstore.BootstrapProjection{Service: mentorSvc}, heroBootstrap, librarystore.BootstrapProjection{Service: librarySvc}, bookstore.BootstrapProjection{Service: bookSvc, Content: contentDB}, coursestore.BootstrapProjection{Service: courseSvc, Content: contentDB}, characterstore.PetBootstrapProjection{Content: contentDB}, characterstore.SavedPresetBootstrapProjection{}, conquerstore.BootstrapProjection{Content: contentDB}, campaignWorld, vending, appmarch.Mode{Store: marchstore.Store{}, Roster: heroBootstrap}, apppetcampaign.Mode{Store: petcampaignstore.Store{}}, appgodstrial.Mode{Store: godstrialstore.Store{}}, appworldboss.Mode{Store: worldbossstore.Store{}}, appadventure.Mode{Store: adventurestore.Store{}, Content: contentDB, Functions: i5db, Directory: i4store.PlayerDirectoryReader{}}, appcompat.BootstrapProjection{Store: compatstore.Store{}}, achievementstore.BootstrapProjection{Store: achievementstore.Store{}, Content: contentDB, Active: contentDB}, herorecommendstore.BootstrapProjection{Service: heroRecommend}},
 		DirectoryReconciler:     appdir.Reconciler{Source: i5db, Sink: i4store.DirectoryLevelProjection{}},
+		SessionHolds:            identitystore.Store{},
 	}
 	authority := i4store.RealtimeAuthority{Queryer: pool, DigestSecret: digestSecret, BearerSecret: bearerSecret, DerivationKeyID: keyID, BearerKeys: bearerKeys}
 	itemsEnergy := stockruntime.NewItemsEnergyComposition(stockruntime.ItemsEnergyDependencies{
@@ -474,24 +518,180 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-	prelogin := stockruntime.PreloginDispatcher{PublicEngineURL: cfg.PublicEngineURL, Tracker: tracker}
+	otaState, err := prepareOTAFiles(ctx, cfg.OTARoot, cfg.PublicEngineURL, runner)
+	if err != nil {
+		log.Fatalf("%v", err)
+	}
+	otaReleaseState := otaState.State
+	// The stock client hangs without the assets bootstrap, so an open start is
+	// refused until one is published; starting closed stays allowed for the
+	// maintenance window that publishes it.
+	gameListenerOpen, err := parseGameListener(os.Getenv("GXB_GAME_LISTENER"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	if refuseOpenWithoutAssets(gameListenerOpen, otaReleaseState) {
+		log.Print("refusing to open: no ACTIVE assets release is published; start closed, publish an assets release, then open")
+		os.Exit(appotarelease.NoAssetsExitCode)
+	}
+	otaSettingsFile := otaState.File
+	otaSettingsValue := otaState.Settings
+	otaLedger := appotarelease.NewLedger(runner, operation.Factory{Clock: clock.System{}}, otastore.LedgerStore{})
+	go otaLedger.Run(ctx, 30*time.Second)
+	otaServing := &appotarelease.Serving{
+		Load:            otaState.Release.ActiveRows,
+		Root:            cfg.OTARoot,
+		Settings:        otaSettingsValue,
+		PublicEngineURL: cfg.PublicEngineURL,
+		Ledger:          otaLedger,
+	}
+	if cfg.OTARoot != "" {
+		if err := otaServing.Refresh(ctx); err != nil {
+			log.Printf("OTA serving: no release set loaded at boot: %v", err)
+		}
+	}
+	prelogin := stockruntime.PreloginDispatcher{PublicEngineURL: cfg.PublicEngineURL, Tracker: tracker, Updates: otaState.Release, ResourceDownloadURL: otaServing.ResDownloadURL}
 	for _, mid := range []uint16{2, 2864, 20480} {
 		mustRegister(mid, prelogin)
 	}
 	energyDispatcher := stockruntime.ItemsEnergyDispatcher{Authority: authority, Service: itemsEnergy.Service}
 	mux := http.NewServeMux()
+	otaCommands := appotarelease.Commands{Store: otaReleaseState, Root: cfg.OTARoot}
+	otaStatus := appotarelease.StatusService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: otaReleaseState, Ledger: otastore.Store{}, Live: otaSettingsValue}
+	otaReleaseLookup := appotarelease.ReleaseLookup{Store: otaReleaseState}
+	operatorAudit := operator.AuditService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Reader: operatorstore.Store{}}
+	backendVersion, gitCommit := buildIdentity()
+	operatorCatalogue, err := opcatalogsource.Load(time.Now().UTC())
+	if err != nil {
+		log.Fatalf("operator catalogue: %v", err)
+	}
+	grantLineCap, err := operatorgrant.LineCapFromEnvironment(os.Getenv("GXB_OPERATOR_GRANT_LINE_CAP"))
+	if err != nil {
+		log.Fatalf("operator grant cap: %v", err)
+	}
+	operatorVersion := operator.VersionService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Reader: operatorstore.Store{}, BackendVersion: backendVersion, GitCommit: gitCommit, ContentRevision: &operatorCatalogue.ContentRevision}
+	playerReads := operator.PlayerReadService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Directory: i4store.PlayerDirectoryReader{}, Wallet: appi5.OperatorWalletService{Store: i5db, Privileges: privileges}}
+	serverReads := operator.ServerReadService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Servers: i4store.ServerDirectoryReader{}, Online: identitystore.Store{}}
+	sessionReads := operator.SessionReadService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Sessions: identitystore.Store{}, Players: i4store.PlayerDirectoryReader{}}
+	publicationCommands := apppublication.OperatorCommands{Store: publicationstore.Store{}}
+	publicationReads := apppublication.OperatorRead{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: publicationstore.Store{}}
+	bulkReads := operatorgrant.BulkReadService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: operatorstore.Store{}}
+	operatorVersionReply := func(ctx context.Context) (any, error) {
+		return operatorVersion.Version(ctx)
+	}
+	logoutCommands := appidentity.LogoutCommands{Store: identitystore.Store{}, DefaultHoldSeconds: appidentity.SessionHoldSecondsTunable()}
+	grantCommands := operatorgrant.Commands{Catalogue: operatorCatalogue, Store: operatorstore.Store{}, Directory: i4store.PlayerDirectoryReader{}, Grants: i5svc, LineCap: grantLineCap}
+	mailCommands := operatorgrant.MailCommands{Catalogue: operatorCatalogue, Store: operatorstore.Store{}, Directory: i4store.PlayerDirectoryReader{}, Mail: i5svc, LineCap: grantLineCap}
+	redeemCommands := operatorgrant.RedeemCommands{Catalogue: operatorCatalogue, Redeem: i5svc, LineCap: grantLineCap}
+	eventHooks, err := appevents.NewHookRegistry(domainevents.HookCampaignDropMultiplier)
+	if err != nil {
+		log.Fatalf("events hook registry: %v", err)
+	}
+	shippedDefinitions, err := eventscontent.Definitions()
+	if err != nil {
+		log.Printf("events shipped definitions: %v", err)
+	}
+	eventCommands := appevents.Commands{Store: eventstore.Store{}, Coverage: otaServing, Gifts: eventstore.ContentGifts{}, Catalogue: eventstore.ContentCatalogue{}, Hooks: eventHooks, OperatorCatalogue: operatorCatalogue, Audit: operatorstore.Store{}, Content: contentDB, Servers: i4store.ServerDirectoryReader{}}
+	for _, file := range shippedDefinitions {
+		eventCommands.Shipped = append(eventCommands.Shipped, appevents.DefinitionFile{Name: file.Name, Body: file.Body})
+	}
+	syncResults, syncErr := eventCommands.SyncShipped(ctx, runner, operation.Factory{Clock: clock.System{}})
+	if syncErr != nil {
+		log.Printf("events definition sync: %v", syncErr)
+	}
+	for _, result := range syncResults {
+		if result.Outcome == appevents.SyncUnchanged {
+			continue
+		}
+		if result.Error != "" {
+			log.Printf("events definition sync: file=%s activity=%d revision=%d outcome=%s error=%s", result.File, result.ActivityID, result.Revision, result.Outcome, result.Error)
+			continue
+		}
+		log.Printf("events definition sync: file=%s activity=%d revision=%d outcome=%s", result.File, result.ActivityID, result.Revision, result.Outcome)
+	}
+	eventService := appevents.Service{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: eventstore.Store{}, Clock: clock.System{}, Servers: i4store.ServerDirectoryReader{}}
+	otaModule := bindModule(otaCommands.Module(),
+		map[string]operator.Handler{"ota.settings.set": appotarelease.SettingsSetHandler(otaSettingsFile, otaSettingsValue)},
+		map[string]operator.ReadHandler{"ota.status": operatorapi.OTAStatus(otaStatus), "ota.release": operatorapi.OTARelease(otaReleaseLookup)})
+	eventsModule := bindModule(eventCommands.Module(), nil,
+		map[string]operator.ReadHandler{"events.list": operatorapi.EventsList(eventService)})
+	catalogModule := bindModule(operatorcatalog.Module(), nil,
+		map[string]operator.ReadHandler{"catalog.search": operatorapi.CatalogSearch(operatorCatalogue)})
+	resetCommands := operatorgrant.ResetCommands{Store: operatorstore.Store{}, Directory: i4store.PlayerDirectoryReader{}}
+	playerModule := bindModule(operator.MergeModules([]operator.Module{operator.PlayerModule()}, []operator.Module{resetCommands.Module()})[0],
+		resetCommands.Handlers(),
+		map[string]operator.ReadHandler{"player.find": operatorapi.PlayerFind(playerReads), "player.summary": operatorapi.PlayerSummary(playerReads)})
+	serverModule := bindModule(operator.ServerModule(),
+		map[string]operator.Handler{"server.rename": operator.ServerRenameHandler(i4store.ServerDirectoryReader{})},
+		map[string]operator.ReadHandler{"server.list": operatorapi.ServerList(serverReads)})
+	logoutModule := bindModule(logoutCommands.Module(), nil,
+		map[string]operator.ReadHandler{"session.online": operatorapi.SessionOnline(sessionReads)})
+	publicationModule := bindModule(publicationCommands.Module(), publicationCommands.Handlers(),
+		map[string]operator.ReadHandler{"publication.show": operatorapi.PublicationShow(publicationReads)})
+	operatorModule := bindModule(operator.OperatorModule(), nil,
+		map[string]operator.ReadHandler{"operator.audit.list": operatorapi.AuditList(operatorAudit), operatorgrant.BulkShowRead: operatorapi.BulkShow(bulkReads)})
+	redeemModule := bindModule(redeemCommands.Module(), nil,
+		map[string]operator.ReadHandler{"redeem.list": operatorapi.RedeemList(appi5.OperatorRedeemRead{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: i5db})})
 	clientLogs, journal := startClientLog(ctx, pool, authority, cfg.ClientLogURL, retentionPolicies.RetentionDays, txMetrics, mux, handlerConcurrency("GXB_CLIENT_LOG_MAX_CONCURRENT", 4, poolConnections))
+	journalStore := clientlogstore.Store{Pool: pool.Raw()}
+	logsReads := appclientlog.LogsReadService{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Reader: journalStore}
+	logsCommands := appclientlog.LogsCommands{Clearer: journalStore, Flusher: journal}
+	logsModule := bindModule(operator.LogsModule(), logsCommands.Handlers(),
+		map[string]operator.ReadHandler{
+			"logs.timeline": operatorapi.LogsTimeline(logsReads),
+			"logs.tail":     operatorapi.LogsTail(logsReads),
+		})
+	modules := []operator.Module{otaModule, logoutModule, grantCommands.Module(), mailCommands.Module(), redeemModule, eventsModule, catalogModule, playerModule, serverModule, publicationModule, operatorModule, logsModule}
+	modules = append(modules, operator.PlannedModules()...)
+	registry, err := operator.NewRegistry(modules...)
+	if err != nil {
+		log.Fatalf("operator modules: %v", err)
+	}
+	defaultCycle, err := domainevents.ParseCycle(eventscontent.DefaultCycle())
+	if err != nil {
+		log.Fatalf("events default cycle: %v", err)
+	}
+	eventJobs := appevents.Jobs{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: eventstore.Store{}, Coverage: otaServing, Hooks: eventHooks, Clock: clock.System{}, DefaultCycle: defaultCycle, Servers: i4store.PlayerRootLocker{}, Players: i4store.EventPlayerSource{}, Mail: appi5.SettlementMail{Store: i5db}, Content: contentDB, ClaimGrant: appevents.ChoiceGrant{HeroContent: contentDB, Heroes: heroSvc, Fragments: contentDB, Grants: i5svc, HeroWire: heroproj.StockHero}, Directory: i4store.ServerDirectoryReader{}}
+	startEventsJobs(ctx, pool, eventJobs)
+	startOperator(ctx, runner, registry.Handlers(), registry.Reads(), registry.Modules(), operatorVersionReply, otaAfterCommit{Root: cfg.OTARoot, RecordSettings: otaState.SettingsSync.Record, Serving: otaServing})
+	dailyCounterReset := dailyconsume.Service{Store: dailyconsumestore.Store{}, Runner: runner, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}}
+	campaignCounterReset := appcampaign.Mode{Timed: appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}, Store: campaignstore.Store{}, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}}
+	resetTimed := appgeneration.TimedRunner{Binder: appgeneration.Binder{Time: postgres.AuthoritativeTime{Queryer: pool}}, Runner: runner}
+	resetReceiptRead := kernelstore.Reader{Queryer: pool}
+	topFloorCounterReset := apptopfloor.Service{Timed: resetTimed, Store: topfloorstore.Store{}, Content: contentDB, Receipts: receipts, ReceiptRead: resetReceiptRead}
+	oneOnOneCounterReset := apponeonone.Service{Timed: resetTimed, Store: oneononestore.Store{}, Content: contentDB, Receipts: receipts, ReceiptRead: resetReceiptRead}
+	worldBossCounterReset := appworldboss.Mode{Timed: resetTimed, Store: worldbossstore.Store{}, Receipts: receipts, ReceiptRead: resetReceiptRead}
+	illusionCounterReset := appillusion.Mode{Timed: resetTimed, Store: illusionstore.Store{}, Receipts: receipts, ReceiptRead: resetReceiptRead}
+	dormGlueCounterReset := appdorm.Service{Timed: resetTimed, GluePurchases: dormstore.Store{}, Receipts: receipts, ReceiptRead: resetReceiptRead}
+	arenaCounterReset := apparena.Service{Timed: resetTimed, Store: arenastore.Store{}, Content: contentDB, Receipts: receipts, ReceiptRead: resetReceiptRead}
+	summonCounterReset := appsummon.Mode{Timed: resetTimed, Store: summonstore.Store{}, Content: contentDB, Receipts: receipts, ReceiptRead: resetReceiptRead}
+	startOperatorBulkJob(ctx, pool, operatorgrant.Applier{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: operatorstore.Store{}, Grants: i5svc, Mail: i5svc, DailyBuys: dailyCounterReset, CampaignDaily: campaignCounterReset, TopFloor: topFloorCounterReset, OneOnOne: oneOnOneCounterReset, WorldBoss: worldBossCounterReset, Illusion: illusionCounterReset, DormGlue: dormGlueCounterReset, ArenaDaily: arenaCounterReset, SummonFree: summonCounterReset, OccultTickets: i5svc, SkillPoints: i5svc, Catalogue: operatorCatalogue, LineCap: grantLineCap})
 	dailyReset := dailyreset.Service{Markers: dailyresetstore.Store{Queryer: pool}, Counters: itemsEnergy.Counters}
+	// A playing client talks over this HTTP API, so each authenticated request
+	// keeps its identity session inside the operator's presence window. The
+	// service's conditional write and the decorator's interval both coalesce it.
+	sessionActivity := &stockruntime.SessionActivity{
+		Touch: sessionActivityToucher{
+			service: appidentity.Service{
+				Runner: runner, Store: identitystore.Store{},
+				IdleExpiryEnabled: true, ActivityTouchInterval: identity.ActivityTouchCoalesceInterval,
+			},
+			operations: operation.Factory{Clock: clock.System{}},
+		},
+		Interval: identity.ActivityTouchCoalesceInterval,
+	}
 	boot := stockruntime.BootstrapDispatcher{Bootstrap: bootstrap, Tracker: tracker, LogURLs: clientLogs, DailyReset: dailyReset}
 	mustRegister(18, boot)
 	mustRegister(1, boot)
-	mustRegister(192, stockruntime.DiscoveryDispatcher{Realtime: realtime, Tracker: tracker, Reads: runner})
-	// Login, bootstrap and discovery carry their own full state; every gameplay MID registered from here gets the F17 keys
-	// and the R6 undelivered-reply guard: one decorator, resolved before the MID handler runs.
+	// Discovery polls the lobby endpoint too, so it keeps the session alive
+	// without the F17/R6 reply decorators that login and bootstrap opt out of.
+	mustRegister(192, sessionActivity.Wrap(stockruntime.DiscoveryDispatcher{Realtime: realtime, Tracker: tracker, Reads: runner}))
+	// Login and bootstrap carry their own full state; every gameplay MID registered from here gets the F17 keys,
+	// the R6 undelivered-reply guard and the identity-activity touch: one decorator chain, resolved before the MID handler runs.
 	undeliveredMarks := undeliveredstore.Store{Pool: pool.Raw()}
 	replayWindow := envDurationWithin("GXB_UNDELIVERED_REPLAY_WINDOW", 10*time.Minute, time.Minute, 30*time.Minute)
 	router.Wrap = func(d httpedge.Dispatcher) httpedge.Dispatcher {
-		return stockruntime.UndeliveredReplay{Next: stockruntime.Decorated{Next: d, DailyReset: dailyReset, PendingFunctions: i5db}, Authority: authority, Marks: undeliveredMarks, Window: replayWindow, Metrics: txMetrics}
+		return sessionActivity.Wrap(stockruntime.UndeliveredReplay{Next: stockruntime.Decorated{Next: d, DailyReset: dailyReset, PendingFunctions: i5db}, Authority: authority, Marks: undeliveredMarks, Window: replayWindow, Metrics: txMetrics})
 	}
 	for _, mid := range stockruntime.ItemsEnergyMIDs {
 		mustRegister(mid, energyDispatcher)
@@ -675,7 +875,7 @@ func main() {
 		}
 		go runReconcile(ctx, pool, appleague.Reconciler{Service: league})
 		conquer := canonicalConquer(pool, runner, contentDB, i5db, i5svc, privileges, fight, broadcastEmitter, librarySvc)
-		campaign := canonicalCampaign(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, librarySvc)
+		campaign := canonicalCampaign(pool, runner, contentDB, i5db, i5svc, heroSvc, fight, librarySvc, campaignDropHooks{Events: eventService})
 		campaign.StarCaps = rentalStarCaps(rentalPolicy.Policy)
 		blood := appawakeningbattle.Mode{Timed: heroSvc.Timed, Fresh: pool, Content: contentDB, Fence: i5db, Heroes: heroSvc, Missions: i5svc, Combat: fight, Receipts: receipts, ReceiptRead: kernelstore.Reader{Queryer: pool}, BattleCounts: librarySvc}
 		for _, mid := range []uint16{866, 867} {
@@ -885,6 +1085,15 @@ func main() {
 	for _, mid := range []uint16{229, 234} {
 		mustRegister(mid, activityD)
 	}
+	eventClaims := appevents.ClaimService{
+		Runner: runner, Store: eventstore.Store{}, Fence: i5db, Players: i4store.PlayerRootLocker{},
+		Levels: i4store.PlayerDirectoryReader{}, Content: contentDB,
+		ChoiceGrant: appevents.ChoiceGrant{HeroContent: contentDB, Heroes: heroSvc, Fragments: contentDB, Grants: i5svc, HeroWire: heroproj.StockHero},
+	}
+	eventRewardD := stockruntime.ActivityRewardDispatcher{Authority: authority, Service: eventClaims}
+	for _, mid := range stockruntime.ActivityRewardMIDs {
+		mustRegister(mid, eventRewardD)
+	}
 	savedPresetD := stockruntime.SavedPresetDispatcher{Authority: authority, Service: savedPresetSvc}
 	mustRegister(1793, savedPresetD)
 	bookmarkSvc := apphero.BookmarkService{Timed: heroSvc.Timed, Reads: runner, Store: heroDB, Players: i4store.PlayerRootLocker{}, Fence: i5db, Receipts: receipts}
@@ -1015,6 +1224,13 @@ func main() {
 	if mediaHandler != nil {
 		mux.Handle("/profile-media/", mediaHandler)
 	}
+	if cfg.NoticeMediaRoot != "" {
+		mux.Handle("/media/", stockruntime.NoticeMediaGET{Root: cfg.NoticeMediaRoot})
+	}
+	registerOTARoutes(mux, otaServing)
+	if sdkListen := os.Getenv("GXB_SDK_LISTEN"); sdkListen != "" {
+		startSDKListener(ctx, sdkListen, appidentity.SDKService{Runner: runner, Store: identitystore.Store{}, DigestSecret: digestSecret, Operations: operation.Factory{Clock: clock.System{}}})
+	}
 	srv := &http.Server{Addr: cfg.HTTPAddr, Handler: mux, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: limits.StockMultipartHTTPTimeout + 5*time.Second, WriteTimeout: limits.StockMultipartHTTPTimeout + 5*time.Second, IdleTimeout: 60 * time.Second}
 	go func() {
 		<-ctx.Done()
@@ -1022,10 +1238,44 @@ func main() {
 		defer cancel()
 		_ = srv.Shutdown(shutdownCtx)
 	}()
+	if !gameListenerOpen {
+		log.Printf("game listener closed by GXB_GAME_LISTENER=closed; the operator listener and workers keep running")
+		<-ctx.Done()
+		return
+	}
 	log.Printf("gxb-api listening on %s; advertised realtime=%s:%d", cfg.HTTPAddr, host, port)
 	if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatal(err)
 	}
+}
+
+// startSDKListener binds the product SDK login port on its own listener (G51F
+// F3). It shares the process, pool, secrets and shutdown with the game port.
+func startSDKListener(ctx context.Context, address string, service appidentity.SDKService) {
+	listener, err := net.Listen("tcp", address)
+	if err != nil {
+		log.Fatalf("sdk listener %s: %v", address, err)
+	}
+	server := &http.Server{Handler: sdkapi.Handler{Service: service}, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 20 * time.Second, WriteTimeout: 20 * time.Second, IdleTimeout: 60 * time.Second}
+	go func() {
+		<-ctx.Done()
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		_ = server.Shutdown(shutdownCtx)
+	}()
+	go func() {
+		log.Printf("gxb-api sdk listening on %s", address)
+		if err := server.Serve(listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Printf("sdk listener stopped: %v", err)
+		}
+	}()
+}
+
+// registerOTARoutes always mounts both routes: with no OTA root the Serving
+// answers 404 instead of the edge rejecting the path (finding 9).
+func registerOTARoutes(mux *http.ServeMux, serving *appotarelease.Serving) {
+	mux.Handle("/updates/", stockruntime.OTAUpdatesGET{Serving: serving})
+	mux.Handle("/res/", stockruntime.OTAResGET{Serving: serving})
 }
 
 // requireGirlsLogObserver refuses to start a settlement mode whose Girls Log

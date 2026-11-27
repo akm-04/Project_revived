@@ -1,0 +1,9 @@
+{
+  "target": "app/common/AssetDownload.lua",
+  "stock_sha256": "78b5fe69e2989cd976ce1083b29f9679905f4970ea882ad21b38fdb2cc7ea616",
+  "kind": "insert_before_final_return",
+  "anchor": "return var_0_1",
+  "insert": "overlay.lua",
+  "substitutions": {},
+  "origin": "x01-sound 2026-11-24: background warm of the 2018 voice tree so team-select and other direct audio.playSound screens have the old take on the first tap, as the 1.164.0 client did with its bundled files"
+}

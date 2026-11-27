@@ -97,6 +97,17 @@ type AuthProfile string
 
 const AuthProductionPair AuthProfile = "SID_LOGIN_TOKEN_PAIR"
 
+const (
+	// DefaultIdleTimeoutSeconds ends an idle login after 24 h (owner ruling
+	// G46/G47). Every newly issued gameplay session carries it.
+	DefaultIdleTimeoutSeconds int64 = 86400
+	// ActivityTouchCoalesceInterval bounds one activity write per session.
+	ActivityTouchCoalesceInterval = 30 * time.Second
+	// PresenceOnlineWindow is 20 s poll hold + 30 s activity coalescing + margin:
+	// a live session is shown online only while its last touch is this recent.
+	PresenceOnlineWindow = 90 * time.Second
+)
+
 type Session struct {
 	ID                 SessionID
 	AccountID          AccountID

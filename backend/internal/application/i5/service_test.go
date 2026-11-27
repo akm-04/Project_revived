@@ -820,11 +820,11 @@ func TestAdminSendMailUsesMailOwnerAndSemanticReplay(t *testing.T) {
 	svc.Audit = ae
 	admin := AdminOperator{ID: "operator-7", ReasonCode: "support"}
 	lines := []grant.Line{{Kind: grant.StackItem, ItemID: 9001, Amount: 2}}
-	first, err := svc.AdminSendMail(context.Background(), admin, 100001, mail.Normal, "mail-42", "Gift", "GM", "Preserved reward", "ops-v1", lines, nil, testOperation(62))
+	first, err := svc.AdminSendMail(context.Background(), admin, 100001, mail.Normal, "mail-42", "Gift", "GM", "Preserved reward", "ops-v1", lines, nil, nil, testOperation(62))
 	if err != nil {
 		t.Fatal(err)
 	}
-	second, err := svc.AdminSendMail(context.Background(), admin, 100001, mail.Normal, "mail-42", "Gift", "GM", "Preserved reward", "ops-v1", lines, nil, testOperation(63))
+	second, err := svc.AdminSendMail(context.Background(), admin, 100001, mail.Normal, "mail-42", "Gift", "GM", "Preserved reward", "ops-v1", lines, nil, nil, testOperation(63))
 	if err != nil {
 		t.Fatal(err)
 	}

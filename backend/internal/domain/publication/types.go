@@ -59,9 +59,28 @@ type Catalog struct {
 	Sets []Set `json:"sets"`
 }
 
-// Empty image values use packaged stock defaults. Nonempty values must use the
-// prefix understood by OnlineImageSprite; media hosting/versioned basenames remain publisher responsibility.
-func image(v string) bool { return v == "" || (strings.HasPrefix(v, "http://") && len(v) > 7) }
+// Empty image values use packaged stock defaults. Nonempty values must use a scheme
+// OnlineImageSprite leaves alone (G40); media hosting/versioned basenames remain publisher responsibility.
+func image(v string) bool {
+	if v == "" {
+		return true
+	}
+	if strings.ContainsAny(v, " \t\r\n") {
+		return false
+	}
+	rest, found := strings.CutPrefix(v, "http://")
+	if !found {
+		rest, found = strings.CutPrefix(v, "https://")
+	}
+	if !found {
+		return false
+	}
+	host := rest
+	if end := strings.IndexAny(rest, "/?#"); end >= 0 {
+		host = rest[:end]
+	}
+	return host != ""
+}
 func (s Set) Validate() error {
 	if s.ID.IsZero() || s.ServerID < 0 || s.StartsAt.IsZero() || (s.EndsAt != nil && !s.EndsAt.After(s.StartsAt)) {
 		return ErrInvalid

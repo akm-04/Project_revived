@@ -1,5 +1,5 @@
 {
-  "highest_migration": "00183_i9_12_function_announcement_ack.sql",
+  "highest_migration": "00191_i11a_events_definition_sync.sql",
   "migrations": {
     "00001_kernel_receipts.sql": "fab5b35f4ca5eee53c62b0b924ec448327e1aa31205015c22e24ee0f2b710fd8",
     "00002_identity_logicalserver_bootstrap.sql": "adff86d27dd1c02e4da0dec6b1aa21f33aaafd4d410849abc76bfeec58a5cd5f",
@@ -165,7 +165,15 @@
     "00180_i9_11_guild_copy_settled_drop.sql": "db34f9429a61d08bddd590be511802f0a66e3d5a1e67c7a7e8a9ca92476367a0",
     "00181_i9_11_memoir_tuning.sql": "f209d0614fd08bcc416f4ebe0730b8093da84ee964bac70b78d822f2b201d841",
     "00182_i9_11s16_dialogue_counts.sql": "9b98e16687111faa03195f1f0431efadadf4502fb5e5eab74dc8283954f8d928",
-    "00183_i9_12_function_announcement_ack.sql": "701d7bcea8eea9e63ea1a9b5bd11bdaddb19a48289c04c72570962d4d803f321"
+    "00183_i9_12_function_announcement_ack.sql": "701d7bcea8eea9e63ea1a9b5bd11bdaddb19a48289c04c72570962d4d803f321",
+    "00184_i11a_operator_ota.sql": "5b7c42ec3d1a401b71a9f27a11a58f8254284ed25fc1c063f74e0ccb64069b11",
+    "00185_i11a_ota_settings.sql": "5b2bfaa5a62ec894c3381dcf0e0250af9e0ad1ec2822defccff56dbc4a69cba3",
+    "00186_i11a_events.sql": "1f31b48b5bb194d704a1c801686e65d2dc800c78437e80d47e310ef67349aa2d",
+    "00187_i11a_events_cycle_slot.sql": "32a5824a30fe042ba5b0f6f9d0cbf0bbd3de4afc38e581d3d1ce95dc86813e7f",
+    "00188_i11a_events_claim_reply.sql": "54d47d8015b9ddcdc93093f643d1d7998d5fcbfb2b074bcd4a38e0c2a75ebba7",
+    "00189_i11a_operator_bulk.sql": "017be61c675a3f6481cceae2577fa066eb85692cae9d4f8a2986be96e45d875c",
+    "00190_i11a_operator_mail_redeem.sql": "130116299802da320ea215f3def7dd4486c3741e92ba09379c9e82ee7b1b2c4e",
+    "00191_i11a_events_definition_sync.sql": "6d0d8386288034f49586abc91d352edc7cdc99f76e54b1ea45af2906b5ce7790"
   },
   "rule": "All listed migration bytes are immutable for this cumulative candidate. Historical phase validators remain snapshot-specific; forward schema changes require a new migration. I7A-4A allocates forward-only 00033 for SocialRelation/SocialInbox durable foundations and an I4-owned non-unique discovery index; it performs no Social backfill and activates no stock routes.",
   "schema_version": 1,

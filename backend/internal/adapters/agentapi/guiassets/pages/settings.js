@@ -1,0 +1,375 @@
+"use strict";
+
+import { describeReply, request } from "../transport.js";
+import { pageHeader } from "../components/format.js";
+import { openPathPicker } from "../components/path_picker.js";
+
+const settingsRead = "/agent/v1/reads/agent.settings";
+const serverListRead = "/agent/v1/reads/server.list";
+const agentSettingsCommand = "/agent/v1/commands/agent.settings.set";
+const agentPathsCommand = "/agent/v1/commands/agent.paths.set";
+const otaSettingsCommand = "/agent/v1/commands/ota.settings.set";
+const serverRenameCommand = "/agent/v1/commands/server.rename";
+
+// renderPage is the Settings screen (G22): the paths in agent.json and the OTA
+// settings, the client-facing server URL, and the server names the client
+// server-select popup reads. Every value is validated by its owner; a refused
+// value keeps the old one.
+export function renderPage(container, context) {
+  container.replaceChildren();
+  const heading = pageHeader(context.page.label);
+  const help = document.createElement("p");
+  help.className = "module-help";
+  help.textContent = "The paths the operator tool and the backend read, the address the clients use, and the server names the client server-select popup shows.";
+  const loadStatus = document.createElement("p");
+  loadStatus.className = "status";
+  loadStatus.id = "settings-load-status";
+  loadStatus.setAttribute("role", "status");
+  const paths = buildPathsSection();
+  const serverNames = buildServerNamesSection();
+  container.append(heading, help, loadStatus, paths.card, serverNames.card);
+
+  const state = { otaSettings: null, serverNames: [], agentPaths: {} };
+
+  async function loadSettings() {
+    loadStatus.textContent = "";
+    const reply = await request(settingsRead);
+    if (reply.unauthorized) {
+      return;
+    }
+    if (!reply.ok) {
+      loadStatus.textContent = describeReply(reply);
+      return;
+    }
+    const values = reply.body && typeof reply.body === "object" ? reply.body : {};
+    state.otaSettings = values.ota_settings && typeof values.ota_settings === "object" ? values.ota_settings : null;
+    paths.backendPath.value = presentText(values.backend_path, "");
+    paths.appRepackPath.value = presentText(values.app_repack_path, "");
+    paths.toolchainPath.value = presentText(values.toolchain_path, "");
+    paths.mediaPath.value = presentText(values.media_path, "");
+    paths.otaRoot.value = presentText(values.ota_root, "");
+    paths.clientTree.value = presentText(values.client_tree, "");
+    paths.stockBaseline.value = presentText(values.stock_baseline, "");
+    paths.stockSource.value = presentText(values.stock_source, "");
+    paths.stockCatalog.value = presentText(values.stock_catalog, "");
+    state.agentPaths = {
+      ota_root: paths.otaRoot.value,
+      client_tree: paths.clientTree.value,
+      stock_baseline: paths.stockBaseline.value,
+      stock_source: paths.stockSource.value,
+      stock_catalog: paths.stockCatalog.value,
+    };
+    paths.resPath.value = presentText(values.res_path, "");
+    paths.apkResPath.value = presentText(values.apk_res_path, "");
+    paths.recoveredResPath.value = presentText(values.recovered_res_path, "");
+    paths.save.disabled = state.otaSettings === null;
+  }
+
+  async function loadServers() {
+    const reply = await request(serverListRead);
+    if (reply.unauthorized) {
+      return;
+    }
+    if (!reply.ok) {
+      serverNames.status.textContent = describeReply(reply);
+      return;
+    }
+    const body = reply.body && typeof reply.body === "object" ? reply.body : {};
+    fillServerTable(state, serverNames.table, Array.isArray(body.servers) ? body.servers : []);
+  }
+
+  paths.save.addEventListener("click", () => {
+    void savePaths(paths, state, async () => {
+      await loadSettings();
+      await loadServers();
+    });
+  });
+  async function saveNames() {
+    serverNames.status.replaceChildren();
+    const changes = [];
+    for (const entry of state.serverNames) {
+      const name = entry.input.value.trim();
+      if (name !== entry.original) {
+        changes.push({ server_id: entry.serverID, name });
+      }
+    }
+    if (changes.length === 0) {
+      serverNames.status.textContent = "No names changed.";
+      return;
+    }
+    serverNames.save.disabled = true;
+    const reply = await request(serverRenameCommand, commandBody({ names: changes }, "Settings: rename servers"));
+    serverNames.save.disabled = false;
+    if (reply.unauthorized) {
+      return;
+    }
+    if (!reply.ok) {
+      serverNames.status.textContent = describeReply(reply);
+      return;
+    }
+    const body = reply.body && typeof reply.body === "object" ? reply.body : {};
+    const result = body.result && typeof body.result === "object" ? body.result : {};
+    const renames = Array.isArray(result.renames) ? result.renames : [];
+    if (renames.length === 0) {
+      serverNames.status.textContent = "The names are saved.";
+    }
+    for (const rename of renames) {
+      const line = document.createElement("p");
+      line.className = "mb-1";
+      line.textContent = "Server " + presentText(String(rename.server_id), "unknown") + ": " +
+        presentText(rename.old_name, "unknown") + " -> " + presentText(rename.new_name, "unknown");
+      serverNames.status.append(line);
+    }
+    await loadServers();
+  }
+
+  function fillServerTable(state, table, servers) {
+    state.serverNames = [];
+    table.replaceChildren();
+    const head = document.createElement("thead");
+    const headRow = document.createElement("tr");
+    for (const label of ["Server", "Current name", "New name"]) {
+      const cell = document.createElement("th");
+      cell.textContent = label;
+      headRow.append(cell);
+    }
+    head.append(headRow);
+    table.append(head);
+    const body = document.createElement("tbody");
+    if (servers.length === 0) {
+      const row = document.createElement("tr");
+      const cell = document.createElement("td");
+      cell.colSpan = 3;
+      cell.textContent = "No servers are registered.";
+      row.append(cell);
+      body.append(row);
+      table.append(body);
+      return;
+    }
+    for (const server of servers) {
+      const entry = server && typeof server === "object" ? server : {};
+      const serverID = Number(entry.server_id);
+      const original = presentText(entry.name, "");
+      const row = document.createElement("tr");
+      const idCell = document.createElement("td");
+      idCell.textContent = "#" + presentText(String(entry.server_id), "unknown");
+      const currentCell = document.createElement("td");
+      currentCell.textContent = presentText(entry.name, "unknown");
+      const inputCell = document.createElement("td");
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "form-control form-control-sm";
+      input.value = original;
+      input.setAttribute("aria-label", "New name for server " + presentText(String(entry.server_id), ""));
+      inputCell.append(input);
+      row.append(idCell, currentCell, inputCell);
+      body.append(row);
+      state.serverNames.push({ serverID, original, input });
+    }
+    table.append(body);
+  }
+
+  serverNames.save.addEventListener("click", () => {
+    void saveNames();
+  });
+
+  void loadSettings();
+  void loadServers();
+}
+
+async function savePaths(paths, state, reloadAll) {
+  paths.status.replaceChildren();
+  const agentPayload = {
+    backend_path: paths.backendPath.value.trim(),
+    app_repack_path: paths.appRepackPath.value.trim(),
+    toolchain_path: paths.toolchainPath.value.trim(),
+  };
+  const otaPayload = Object.assign({}, state.otaSettings, {
+    res_path: paths.resPath.value.trim(),
+    apk_res_path: paths.apkResPath.value.trim(),
+    recovered_res_path: paths.recoveredResPath.value.trim(),
+  });
+  const agentReply = await request(agentSettingsCommand, commandBody(agentPayload, "Settings: save the agent paths"));
+  if (agentReply.unauthorized) {
+    return;
+  }
+  paths.status.append(resultLine("Agent paths", agentReply));
+  const otaReply = await request(otaSettingsCommand, commandBody(otaPayload, "Settings: save the OTA paths"));
+  if (otaReply.unauthorized) {
+    return;
+  }
+  paths.status.append(resultLine("OTA paths", otaReply));
+  const pathChanges = {
+    client_tree: paths.clientTree.value.trim(),
+    stock_baseline: paths.stockBaseline.value.trim(),
+    stock_source: paths.stockSource.value.trim(),
+    stock_catalog: paths.stockCatalog.value.trim(),
+    ota_root: paths.otaRoot.value.trim(),
+  };
+  let pathsOK = true;
+  for (const [key, value] of Object.entries(pathChanges)) {
+    if (value === presentText(state.agentPaths[key], "")) {
+      continue;
+    }
+    const pathReply = await request(agentPathsCommand, commandBody({ key, path: value }, "Settings: set " + key));
+    if (pathReply.unauthorized) {
+      return;
+    }
+    paths.status.append(resultLine("Path " + key, pathReply));
+    pathsOK = pathsOK && pathReply.ok;
+  }
+  if (agentReply.ok && otaReply.ok && pathsOK) {
+    await reloadAll();
+  }
+}
+
+function buildPathsSection() {
+  const card = document.createElement("section");
+  card.className = "card card-body mb-3";
+  const fieldset = document.createElement("fieldset");
+  const legend = document.createElement("legend");
+  legend.className = "card-title h3";
+  legend.textContent = "Paths";
+  const help = document.createElement("p");
+  help.className = "module-help";
+  help.textContent = "The agent and the OTA owner validate every path; a refused value keeps the old one. The client tree, stock folders and OTA root apply at the next OTA build; changing the OTA root needs the backend stopped.";
+  const form = document.createElement("form");
+  form.id = "settings-paths-form";
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+  });
+  const grid = document.createElement("div");
+  grid.className = "row g-2";
+  const fields = {
+    backendPath: pathField(grid, "settings-backend-path", "Backend path", "absolute path of the gxb-api binary", "file"),
+    appRepackPath: pathField(grid, "settings-app-repack-path", "App repack folder", "absolute app_repack folder for the APK build", "folder"),
+    toolchainPath: pathField(grid, "settings-toolchain-path", "Toolchain folder", "empty uses the system PATH", "folder"),
+    mediaPath: pathField(grid, "settings-media-path", "Media folder", "set media_path with gxb-operator paths set media_path", null),
+    otaRoot: pathField(grid, "settings-ota-root", "OTA root", "absolute OTA root; changing it needs the backend stopped", "folder"),
+    clientTree: pathField(grid, "settings-client-tree", "Client tree", "absolute client/ota tree the OTA build reads", "folder"),
+    stockBaseline: pathField(grid, "settings-stock-baseline", "Stock baseline", "absolute stock client folder the patches apply to", "folder"),
+    stockSource: pathField(grid, "settings-stock-source", "Stock source", "absolute decompiled stock source for patch hashes", "folder"),
+    stockCatalog: pathField(grid, "settings-stock-catalog", "Stock catalogue", "optional catalogue folder when the baseline has none", "folder"),
+    resPath: pathField(grid, "settings-res-path", "Res path", "absolute asset folder the OTA server serves", "folder"),
+    apkResPath: pathField(grid, "settings-apk-res-path", "APK res path", "optional second picture root", "folder"),
+    recoveredResPath: pathField(grid, "settings-recovered-res-path", "Recovered res path", "absolute asset-recovery folder", "folder"),
+  };
+  fields.mediaPath.readOnly = true;
+  const save = document.createElement("button");
+  save.type = "button";
+  save.className = "btn btn-primary mt-3";
+  save.id = "settings-paths-save";
+  save.textContent = "Save paths";
+  save.disabled = true;
+  const status = document.createElement("div");
+  status.className = "status mt-2";
+  status.id = "settings-paths-status";
+  status.setAttribute("role", "status");
+  form.append(grid, save, status);
+  fieldset.append(legend, help, form);
+  card.append(fieldset);
+  return Object.assign({ card, save, status }, fields);
+}
+
+function pathField(grid, identifier, label, hint, mode) {
+  const column = document.createElement("div");
+  column.className = "col-12 col-md-6";
+  const labelElement = document.createElement("label");
+  labelElement.className = "form-label";
+  labelElement.htmlFor = identifier;
+  labelElement.textContent = label;
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "form-control";
+  input.id = identifier;
+  input.autocomplete = "off";
+  input.spellcheck = false;
+  input.placeholder = hint;
+  const group = document.createElement("div");
+  group.className = "input-group";
+  group.append(input);
+  if (mode !== null) {
+    const browse = document.createElement("button");
+    browse.type = "button";
+    browse.className = "btn btn-outline-secondary";
+    browse.id = identifier + "-browse";
+    browse.textContent = "Browse...";
+    browse.setAttribute("aria-label", "Browse for " + label);
+    browse.addEventListener("click", () => void browsePath(input, label, mode));
+    group.append(browse);
+  }
+  column.append(labelElement, group);
+  grid.append(column);
+  return input;
+}
+
+// browsePath fills the field and fires input; nothing is saved until the page's
+// Save button runs.
+async function browsePath(input, label, mode) {
+  const chosen = await openPathPicker({ title: label, start: input.value.trim(), mode });
+  if (chosen === null) {
+    return;
+  }
+  input.value = chosen;
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
+function buildServerNamesSection() {
+  const card = document.createElement("section");
+  card.className = "card card-body mb-3";
+  const fieldset = document.createElement("fieldset");
+  const legend = document.createElement("legend");
+  legend.className = "card-title h3";
+  legend.textContent = "Server names";
+  const help = document.createElement("p");
+  help.className = "module-help";
+  help.textContent = "The client server-select popup shows these names. A name is 1 to 16 display characters; a non-ASCII character counts as two, and it must not be empty.";
+  const responsive = document.createElement("div");
+  responsive.className = "table-responsive";
+  const table = document.createElement("table");
+  table.className = "table table-sm";
+  table.id = "settings-server-table";
+  responsive.append(table);
+  const save = document.createElement("button");
+  save.type = "button";
+  save.className = "btn btn-primary mt-2";
+  save.id = "settings-server-save";
+  save.textContent = "Save names";
+  const status = document.createElement("div");
+  status.className = "status mt-2";
+  status.id = "settings-server-status";
+  status.setAttribute("role", "status");
+  fieldset.append(legend, help, responsive, save, status);
+  card.append(fieldset);
+  return { card, table, save, status };
+}
+
+function commandBody(payload, reason) {
+  return {
+    method: "POST",
+    body: { reason: reason, semantic_key: newSemanticKey(), payload: payload },
+  };
+}
+
+function newSemanticKey() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return "gui-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+}
+
+function resultLine(label, reply) {
+  const line = document.createElement("p");
+  line.className = "mb-1";
+  if (!reply.ok) {
+    line.textContent = label + ": " + describeReply(reply);
+    return line;
+  }
+  const body = reply.body && typeof reply.body === "object" ? reply.body : {};
+  line.textContent = label + ": saved." + (body.message ? " " + body.message : "");
+  return line;
+}
+
+function presentText(value, fallback) {
+  return typeof value === "string" && value !== "" ? value : fallback;
+}
