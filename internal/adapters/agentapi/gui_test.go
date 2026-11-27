@@ -607,6 +607,38 @@ func TestGUIPagesAreEmbeddedAndServed(t *testing.T) {
 	}
 }
 
+// TestGUIOTAPublishAndBackupControlsKeepTheirFix proves the four owner-reported
+// operator glitches stay wired: the publish hint and active style, the page
+// reload after a lane action, the exclusive restore/select controls, and the
+// streaming restore request.
+func TestGUIOTAPublishAndBackupControlsKeepTheirFix(t *testing.T) {
+	ota, err := guiAssets.ReadFile("guiassets/pages/ota.js")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, fragment := range []string{"ota-publish-hint-", "btn-warning", "refreshPublish", "reloadPage"} {
+		if !strings.Contains(string(ota), fragment) {
+			t.Fatalf("ota.js lost %q", fragment)
+		}
+	}
+	backups, err := guiAssets.ReadFile("guiassets/pages/backups.js")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, fragment := range []string{"stream: true", "input[type=checkbox]", "input[type=radio]"} {
+		if !strings.Contains(string(backups), fragment) {
+			t.Fatalf("backups.js lost %q", fragment)
+		}
+	}
+	styles, err := guiAssets.ReadFile("guiassets/app.css")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(styles), "cursor: not-allowed") {
+		t.Fatal("app.css lost the disabled-button cursor")
+	}
+}
+
 // TestGUIIndexReferencesOnlySameOriginAssets keeps the page free of a CDN and
 // of inline script, so the CSP stays self-only.
 func TestGUIIndexReferencesOnlySameOriginAssets(t *testing.T) {

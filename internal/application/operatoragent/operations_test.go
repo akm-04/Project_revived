@@ -151,6 +151,46 @@ func TestOperationsPersistStepsAndRecoverRunning(t *testing.T) {
 	}
 }
 
+// TestStartWithReleaseShowsTheRunningStep proves a status read during a long
+// step names that step as RUNNING, and the release hook runs after the record
+// is final, so the GUI can stream a restore from the op status read.
+func TestStartWithReleaseShowsTheRunningStep(t *testing.T) {
+	operations := NewOperations(filepath.Join(t.TempDir(), OperationsDirectory), nil, time.Now)
+	started := make(chan struct{})
+	finish := make(chan struct{})
+	released := make(chan struct{})
+	operation, err := operations.StartWithRelease(context.Background(), "test", "", nil, []Step{
+		{Name: "long", Run: func(context.Context) (any, error) {
+			close(started)
+			<-finish
+			return nil, nil
+		}},
+	}, func() { close(released) })
+	if err != nil {
+		t.Fatal(err)
+	}
+	if operation.State != OperationRunning {
+		t.Fatalf("a started operation is not RUNNING: %+v", operation)
+	}
+	<-started
+	running, err := operations.Status(operation.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(running.Steps) != 1 || running.Steps[0].Name != "long" || running.Steps[0].State != OperationRunning {
+		t.Fatalf("status during the step = %+v", running)
+	}
+	close(finish)
+	<-released
+	done, err := operations.Status(operation.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if done.State != OperationDone || done.Steps[0].State != OperationDone {
+		t.Fatalf("status after the step = %+v", done)
+	}
+}
+
 func TestOperationStepLinesCarryADuration(t *testing.T) {
 	var output bytes.Buffer
 	log := NewToolLog(&output, time.Now)

@@ -877,20 +877,48 @@ func (service *BackupService) Restore(ctx context.Context, id, reason string) (O
 		return Operation{}, Refuse(CodeBackendBusy, "a backend operation is already running")
 	}
 	defer service.Guard.Unlock()
-	if err := service.ready(); err != nil {
+	steps, err := service.restoreSteps(id)
+	if err != nil {
 		return Operation{}, err
+	}
+	return service.Operations.RunKeyed(ctx, "backup.restore", "", restoreRequest(id, reason), steps)
+}
+
+// StartRestore starts B5 in the background and returns its RUNNING operation,
+// so the agent API answers at once and the GUI streams the recorded steps. The
+// guard is released after the steps finish, or at once when they cannot start.
+func (service *BackupService) StartRestore(ctx context.Context, id, reason string) (Operation, error) {
+	if err := service.requireDirectory(); err != nil {
+		return Operation{}, err
+	}
+	if !service.Guard.TryLock() {
+		return Operation{}, Refuse(CodeBackendBusy, "a backend operation is already running")
+	}
+	steps, err := service.restoreSteps(id)
+	if err != nil {
+		service.Guard.Unlock()
+		return Operation{}, err
+	}
+	return service.Operations.StartWithRelease(ctx, "backup.restore", "", restoreRequest(id, reason), steps, service.Guard.Unlock)
+}
+
+// restoreSteps validates the snapshot and builds B5's steps; the caller holds
+// the backend guard across them.
+func (service *BackupService) restoreSteps(id string) ([]Step, error) {
+	if err := service.ready(); err != nil {
+		return nil, err
 	}
 	manifest, dumpPath, err := service.verifySnapshot(id)
 	if err != nil {
-		return Operation{}, err
+		return nil, err
 	}
 	dsn, err := service.dsn()
 	if err != nil {
-		return Operation{}, err
+		return nil, err
 	}
 	adminDSN, err := AdminDSN(dsn)
 	if err != nil {
-		return Operation{}, Refuse(CodeBackupDSNInvalid, "the backend DSN names no database")
+		return nil, Refuse(CodeBackupDSNInvalid, "the backend DSN names no database")
 	}
 	database, _ := DatabaseNameFromDSN(dsn)
 	stamp := service.now().UTC().Format("20060102T150405")
@@ -898,7 +926,6 @@ func (service *BackupService) Restore(ctx context.Context, id, reason string) (O
 	preRestoreDatabase := database + "_prerestore_" + stamp
 	statePath := filepath.Join(service.directory(), backupStateFileName)
 	safety := Operation{}
-	swapped := false
 	var deployedMigration int64
 	var restoredDSN string
 
@@ -984,7 +1011,6 @@ func (service *BackupService) Restore(ctx context.Context, id, reason string) (O
 				service.startOriginal()
 				return nil, Temporarily(CodeBackupToolFailed, MaskString(err.Error()))
 			}
-			swapped = true
 			state.Phase = "swapped"
 			state.UpdatedAt = service.now().UTC()
 			_ = service.writeState(statePath, state)
@@ -1007,8 +1033,10 @@ func (service *BackupService) Restore(ctx context.Context, id, reason string) (O
 					}, nil
 				}
 				if rollbackErr := service.rollbackSwap(ctx, adminDSN, database, preRestoreDatabase, stamp); rollbackErr != nil {
+					service.log("backup.restore", "rollback", "failed", map[string]any{"id": id})
 					return nil, Temporarily(CodeBackupRestoreRefused, "the restored database did not start and the rollback failed; an agent restart finishes recovery")
 				}
+				service.log("backup.restore", "rollback", "failed", map[string]any{"id": id})
 				return nil, err
 			}
 			if err := service.writePreRestoreRetention(preRestoreDatabase); err != nil {
@@ -1018,11 +1046,7 @@ func (service *BackupService) Restore(ctx context.Context, id, reason string) (O
 			return map[string]any{"database": database, "safety_snapshot": safety.ID}, nil
 		}},
 	}
-	operation, err := service.Operations.RunKeyed(ctx, "backup.restore", "", restoreRequest(id, reason), steps)
-	if err != nil && swapped && operation.FailedStep == "start backend and wait" {
-		service.log("backup.restore", "rollback", "failed", map[string]any{"id": id})
-	}
-	return operation, err
+	return steps, nil
 }
 
 func (service *BackupService) rollbackSwap(ctx context.Context, adminDSN, database, preRestoreDatabase, stamp string) error {

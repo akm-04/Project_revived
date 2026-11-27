@@ -30,6 +30,10 @@ type fakeTools struct {
 	queryErr    error
 	migrateErr  error
 	migrateDir  string
+	// restoreStarted and restoreRelease let a test hold the restore step open
+	// long enough to read its live operation status.
+	restoreStarted chan struct{}
+	restoreRelease chan struct{}
 }
 
 func (tools *fakeTools) Dump(_ context.Context, _ string, destination string) error {
@@ -47,6 +51,12 @@ func (tools *fakeTools) VerifyDump(context.Context, string) error {
 
 func (tools *fakeTools) Restore(_ context.Context, _ string, _ string) error {
 	tools.calls = append(tools.calls, "restore")
+	if tools.restoreStarted != nil {
+		close(tools.restoreStarted)
+	}
+	if tools.restoreRelease != nil {
+		<-tools.restoreRelease
+	}
 	return tools.restoreErr
 }
 
@@ -371,6 +381,60 @@ func TestRestoreSwapsDatabasesAndRetainsPreRestore(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(service.Directory, backupStateFileName)); !errors.Is(err, os.ErrNotExist) {
 		t.Fatalf("the restore state was not cleared: %v", err)
+	}
+}
+
+// TestStartRestoreStreamsProgress proves the streaming restore answers while
+// the restore is still running and the op status read names the live step, so
+// the GUI can follow it.
+func TestStartRestoreStreamsProgress(t *testing.T) {
+	service, tools, _ := newBackupService(t)
+	id := "20260101T000000.000000000Z-manual"
+	writeSnapshot(t, service.Directory, id, BackupKindManual, time.Date(2026, 11, 20, 10, 0, 0, 0, time.UTC), "restore me")
+	tools.restoreStarted = make(chan struct{})
+	tools.restoreRelease = make(chan struct{})
+	operation, err := service.StartRestore(context.Background(), id, "watch the log")
+	if err != nil {
+		t.Fatalf("start restore: %v", err)
+	}
+	if operation.State != OperationRunning {
+		t.Fatalf("start answered %+v, want RUNNING", operation)
+	}
+	select {
+	case <-tools.restoreStarted:
+	case <-time.After(5 * time.Second):
+		t.Fatal("the restore never reached the restore step")
+	}
+	status, err := service.Operations.Status(operation.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	running := false
+	for _, step := range status.Steps {
+		if step.Name == "restore into new database" && step.State == OperationRunning {
+			running = true
+		}
+	}
+	if status.State != OperationRunning || !running {
+		t.Fatalf("status during the restore = %+v", status)
+	}
+	close(tools.restoreRelease)
+	deadline := time.Now().Add(5 * time.Second)
+	for {
+		status, err = service.Operations.Status(operation.ID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if status.State == OperationDone || status.State == OperationFailed {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("the restore did not finish: %+v", status)
+		}
+		time.Sleep(5 * time.Millisecond)
+	}
+	if status.State != OperationDone {
+		t.Fatalf("the restore finished %s: %+v", status.State, status)
 	}
 }
 
