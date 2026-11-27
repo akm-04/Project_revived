@@ -797,6 +797,25 @@ func TestRemovedPatchRestoresItsStockFile(t *testing.T) {
 	}
 }
 
+func TestStockRevertsFileShipsListedStockFiles(t *testing.T) {
+	fixture := newFixture(t)
+	stock := []byte("return {}\n")
+	fixture.addStock(t, "app/model/NormalHero.lua", stock)
+	fixture.addSource(t, "app/example/Feature.lua", []byte("return {}\n"))
+	listing := "# lost from the ledger\n\napp/model/NormalHero.lua\n"
+	if err := os.WriteFile(filepath.Join(fixture.clientTree, stockRevertsFile), []byte(listing), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	result := fixture.buildResult(t, fixture.input("1.631.2"))
+	assembled := readAssembled(t, fixture.updates, result.Request)
+	if got := zipEntry(t, assembled, "src_64/app/model/NormalHero.lua"); !bytes.Equal(got, stock) {
+		t.Fatal("the listed path is not the stock file")
+	}
+	if result.Report.Reverted != 1 {
+		t.Fatalf("report = %+v", result.Report)
+	}
+}
+
 // TestPriorPathWithoutStockIsReported proves a prior path our tree added (no
 // stock file) is reported unrevertable and does not fail the build, while the
 // generated lazy and catalog members are never treated as revertable.

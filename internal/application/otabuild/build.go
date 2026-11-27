@@ -240,7 +240,12 @@ func codeEntries(input Input) ([]packageEntry, revertSummary, error) {
 	if err != nil {
 		return nil, revertSummary{}, err
 	}
-	reverted, err := restorePriorPaths(input.PriorPaths, input.StockSource, files)
+	listed, err := readStockReverts(input.ClientTree)
+	if err != nil {
+		return nil, revertSummary{}, err
+	}
+	priorPaths := append(append([]string{}, input.PriorPaths...), listed...)
+	reverted, err := restorePriorPaths(priorPaths, input.StockSource, files)
 	if err != nil {
 		return nil, revertSummary{}, err
 	}
@@ -248,6 +253,34 @@ func codeEntries(input Input) ([]packageEntry, revertSummary, error) {
 		return nil, revertSummary{}, err
 	}
 	return packageEntries(files), reverted, nil
+}
+
+// stockRevertsFile lists stock-relative paths that earlier releases patched but
+// the release ledger no longer records (its history was lost before the ledger
+// fed the revert set); they ship as stock like any other prior path.
+const stockRevertsFile = "stock_reverts.txt"
+
+func readStockReverts(clientTree string) ([]string, error) {
+	content, err := os.ReadFile(filepath.Join(clientTree, stockRevertsFile))
+	if errors.Is(err, os.ErrNotExist) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("otabuild: %s: %w", stockRevertsFile, err)
+	}
+	var paths []string
+	for _, line := range strings.Split(string(content), "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		member, err := cleanStockMember(line)
+		if err != nil {
+			return nil, fmt.Errorf("otabuild: %s: %w", stockRevertsFile, err)
+		}
+		paths = append(paths, member)
+	}
+	return paths, nil
 }
 
 // revertSummary is the build's revert set: the prior paths put back from stock
