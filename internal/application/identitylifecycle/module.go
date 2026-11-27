@@ -13,7 +13,7 @@ func (commands LogoutCommands) Module() operator.Module {
 		Screen:     operator.Screen{Tab: "Sessions", Columns: []string{"player_id", "name", "server_id", "started_at", "last_seen_at"}},
 		Defaults:   &operator.Defaults{Values: map[string]any{"hold_seconds": SessionHoldSecondsTunable()}},
 		Reads: []operator.Read{
-			{Name: "session.online", Help: "Live player sessions, session id ascending.", Fields: []operator.Field{
+			{Name: "session.online", Help: "Live players, newest live session id ascending.", Fields: []operator.Field{
 				operator.NewField("server_id", operator.FieldInt, false, "logical server id filter"),
 				operator.NewField("after", operator.FieldString, false, "session id of the previous page"),
 				operator.NewField("limit", operator.FieldInt, false, "page size").Bounded(1, 200),

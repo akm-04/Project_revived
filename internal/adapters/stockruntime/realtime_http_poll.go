@@ -34,8 +34,8 @@ const (
 	maxPollClientSequences   = 256
 )
 
-// ActivityToucher records one accepted poll for the identity session behind the
-// socket. A failure is logged and never fails the poll.
+// ActivityToucher records one client activity for the identity session behind
+// an accepted request. A failure is logged and never fails the request.
 type ActivityToucher interface {
 	TouchActivity(context.Context, identity.SessionID) error
 }

@@ -166,6 +166,7 @@ import (
 	"gxb.local/backend/v2/internal/content/guildteapolicy"
 	"gxb.local/backend/v2/internal/content/registry"
 	domainevents "gxb.local/backend/v2/internal/domain/events"
+	"gxb.local/backend/v2/internal/domain/identity"
 	domainspirit "gxb.local/backend/v2/internal/domain/spirit"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/config"
@@ -179,6 +180,23 @@ import (
 	"gxb.local/backend/v2/internal/protocol/limits"
 	"gxb.local/backend/v2/internal/protocol/replyconformance"
 )
+
+// sessionActivityToucher adapts the identity lifecycle service to the stock
+// HTTP decorator's activity seam. Each touch is its own operation, so it never
+// reuses the request's transaction identity.
+type sessionActivityToucher struct {
+	service    appidentity.Service
+	operations operation.Factory
+}
+
+func (t sessionActivityToucher) TouchActivity(ctx context.Context, sessionID identity.SessionID) error {
+	current, err := t.operations.New(policy.Set{})
+	if err != nil {
+		return err
+	}
+	_, err = t.service.TouchActivity(ctx, sessionID, current)
+	return err
+}
 
 func main() {
 	if len(os.Args) > 1 && os.Args[1] == "catalog" {
@@ -649,16 +667,31 @@ func main() {
 	summonCounterReset := appsummon.Mode{Timed: resetTimed, Store: summonstore.Store{}, Content: contentDB, Receipts: receipts, ReceiptRead: resetReceiptRead}
 	startOperatorBulkJob(ctx, pool, operatorgrant.Applier{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: operatorstore.Store{}, Grants: i5svc, Mail: i5svc, DailyBuys: dailyCounterReset, CampaignDaily: campaignCounterReset, TopFloor: topFloorCounterReset, OneOnOne: oneOnOneCounterReset, WorldBoss: worldBossCounterReset, Illusion: illusionCounterReset, DormGlue: dormGlueCounterReset, ArenaDaily: arenaCounterReset, SummonFree: summonCounterReset, OccultTickets: i5svc, SkillPoints: i5svc, Catalogue: operatorCatalogue, LineCap: grantLineCap})
 	dailyReset := dailyreset.Service{Markers: dailyresetstore.Store{Queryer: pool}, Counters: itemsEnergy.Counters}
+	// A playing client talks over this HTTP API, so each authenticated request
+	// keeps its identity session inside the operator's presence window. The
+	// service's conditional write and the decorator's interval both coalesce it.
+	sessionActivity := &stockruntime.SessionActivity{
+		Touch: sessionActivityToucher{
+			service: appidentity.Service{
+				Runner: runner, Store: identitystore.Store{},
+				IdleExpiryEnabled: true, ActivityTouchInterval: identity.ActivityTouchCoalesceInterval,
+			},
+			operations: operation.Factory{Clock: clock.System{}},
+		},
+		Interval: identity.ActivityTouchCoalesceInterval,
+	}
 	boot := stockruntime.BootstrapDispatcher{Bootstrap: bootstrap, Tracker: tracker, LogURLs: clientLogs, DailyReset: dailyReset}
 	mustRegister(18, boot)
 	mustRegister(1, boot)
-	mustRegister(192, stockruntime.DiscoveryDispatcher{Realtime: realtime, Tracker: tracker, Reads: runner})
-	// Login, bootstrap and discovery carry their own full state; every gameplay MID registered from here gets the F17 keys
-	// and the R6 undelivered-reply guard: one decorator, resolved before the MID handler runs.
+	// Discovery polls the lobby endpoint too, so it keeps the session alive
+	// without the F17/R6 reply decorators that login and bootstrap opt out of.
+	mustRegister(192, sessionActivity.Wrap(stockruntime.DiscoveryDispatcher{Realtime: realtime, Tracker: tracker, Reads: runner}))
+	// Login and bootstrap carry their own full state; every gameplay MID registered from here gets the F17 keys,
+	// the R6 undelivered-reply guard and the identity-activity touch: one decorator chain, resolved before the MID handler runs.
 	undeliveredMarks := undeliveredstore.Store{Pool: pool.Raw()}
 	replayWindow := envDurationWithin("GXB_UNDELIVERED_REPLAY_WINDOW", 10*time.Minute, time.Minute, 30*time.Minute)
 	router.Wrap = func(d httpedge.Dispatcher) httpedge.Dispatcher {
-		return stockruntime.UndeliveredReplay{Next: stockruntime.Decorated{Next: d, DailyReset: dailyReset, PendingFunctions: i5db}, Authority: authority, Marks: undeliveredMarks, Window: replayWindow, Metrics: txMetrics}
+		return sessionActivity.Wrap(stockruntime.UndeliveredReplay{Next: stockruntime.Decorated{Next: d, DailyReset: dailyReset, PendingFunctions: i5db}, Authority: authority, Marks: undeliveredMarks, Window: replayWindow, Metrics: txMetrics})
 	}
 	for _, mid := range stockruntime.ItemsEnergyMIDs {
 		mustRegister(mid, energyDispatcher)

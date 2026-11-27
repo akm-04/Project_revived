@@ -34,7 +34,7 @@ type OnlineSession struct {
 	Online     bool
 }
 
-// OnlineSessionRow is one session.online row.
+// OnlineSessionRow is one session.online row: one player on one logical server.
 type OnlineSessionRow struct {
 	PlayerID   int64     `json:"player_id"`
 	Name       string    `json:"name"`
@@ -44,7 +44,8 @@ type OnlineSessionRow struct {
 	Online     bool      `json:"online"`
 }
 
-// OnlineSessionPage is the session.online reply, session id ascending.
+// OnlineSessionPage is the session.online reply, one row per player and server,
+// newest live session id ascending.
 type OnlineSessionPage struct {
 	Sessions  []OnlineSessionRow `json:"sessions"`
 	NextAfter string             `json:"next_after,omitempty"`

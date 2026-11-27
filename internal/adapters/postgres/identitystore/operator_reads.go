@@ -12,9 +12,10 @@ import (
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
-// OnlineCountsByServerTx counts the gameplay contexts per logical server whose
-// session was active within the presence window. A revoked or quiet session is
-// not online even while its context row is still open.
+// OnlineCountsByServerTx counts the players per logical server whose session
+// was active within the presence window. A player keeps several live sessions
+// after repeated logins, so the count is distinct players, not open contexts. A
+// revoked or quiet session is not online even while its context row is open.
 func (Store) OnlineCountsByServerTx(ctx context.Context, q tx.Queryer) (map[int64]int64, error) {
 	if q == nil {
 		return nil, errors.New("invalid online count read")
@@ -22,7 +23,7 @@ func (Store) OnlineCountsByServerTx(ctx context.Context, q tx.Queryer) (map[int6
 	onlineSince := time.Now().UTC().Add(-identity.PresenceOnlineWindow)
 	var raw string
 	err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_object_agg(server_id::text,count),'{}'::jsonb)::text FROM (
-SELECT c.logical_server_id AS server_id, count(*) AS count
+SELECT c.logical_server_id AS server_id, count(DISTINCT c.player_id) AS count
 FROM gameplay_contexts c JOIN account_sessions s ON s.session_id=c.session_id
 WHERE c.ended_at IS NULL AND s.revoked_at IS NULL AND s.last_activity_at > $1
 GROUP BY c.logical_server_id) rows`, onlineSince).Scan(&raw)
@@ -53,9 +54,12 @@ type onlineSessionWire struct {
 	Online     bool      `json:"online"`
 }
 
-// ListOnlineSessionsTx pages live sessions by session id. A nil ServerID
-// selects every logical server. The caller asks for one row more than the page
-// so it can report an exact next cursor.
+// ListOnlineSessionsTx pages one row per player and logical server: the newest
+// live session, with Online true only for that session's presence. Repeated
+// logins leave older sessions and contexts open (I3 allows multiple account
+// sessions), so grouping by player and server keeps stale history from
+// duplicating a name. A nil ServerID selects every logical server. The caller
+// asks for one row more than the page so it can report an exact next cursor.
 func (Store) ListOnlineSessionsTx(ctx context.Context, q tx.Queryer, filter operator.OnlineSessionFilter) ([]operator.OnlineSession, error) {
 	if q == nil || filter.Limit < 1 {
 		return nil, errors.New("invalid online session read")
@@ -73,13 +77,16 @@ func (Store) ListOnlineSessionsTx(ctx context.Context, q tx.Queryer, filter oper
 	err := q.QueryRow(ctx, `SELECT COALESCE(jsonb_agg(jsonb_build_object(
   'session_id',session_id::text,'player_id',player_id,'server_id',server_id,
   'started_at',started_at,'last_seen_at',last_seen_at,'online',online) ORDER BY session_id),'[]'::jsonb)::text
-FROM (SELECT s.session_id, s.issued_at AS started_at, s.last_activity_at AS last_seen_at,
-             (s.last_activity_at > $4) AS online, c.player_id, c.logical_server_id AS server_id
-      FROM gameplay_contexts c JOIN account_sessions s ON s.session_id=c.session_id
-      WHERE c.ended_at IS NULL AND s.revoked_at IS NULL
-        AND ($1::int IS NULL OR c.logical_server_id=$1)
-        AND ($2::uuid IS NULL OR s.session_id > $2::uuid)
-      ORDER BY s.session_id LIMIT $3) rows`, server, after, filter.Limit, onlineSince).Scan(&raw)
+FROM (SELECT live.* FROM (
+        SELECT DISTINCT ON (c.player_id,c.logical_server_id)
+               s.session_id, s.issued_at AS started_at, s.last_activity_at AS last_seen_at,
+               (s.last_activity_at > $4) AS online, c.player_id, c.logical_server_id AS server_id
+        FROM gameplay_contexts c JOIN account_sessions s ON s.session_id=c.session_id
+        WHERE c.ended_at IS NULL AND s.revoked_at IS NULL
+          AND ($1::int IS NULL OR c.logical_server_id=$1)
+        ORDER BY c.player_id,c.logical_server_id,s.issued_at DESC,s.session_id DESC) live
+      WHERE ($2::uuid IS NULL OR live.session_id > $2::uuid)
+      ORDER BY live.session_id LIMIT $3) rows`, server, after, filter.Limit, onlineSince).Scan(&raw)
 	if err != nil {
 		return nil, err
 	}
