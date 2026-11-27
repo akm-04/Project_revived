@@ -116,22 +116,45 @@ func (executor postCommitExecutor) Execute(ctx context.Context, command operator
 			}
 		}
 		return outcome, nil
-	case "ota.publish", "ota.withdraw":
+	case "ota.publish":
+		if !outcome.Replayed {
+			if writeErr := mirrorActivation(executor.OTA.Root, command.Envelope.SemanticKey, outcome.Result); writeErr != nil {
+				log.Printf("ota history mirror: %v", writeErr)
+			}
+		}
+		// The agent announces the forced relog only after this reply, so a
+		// publish whose serving view did not adopt the release must fail and
+		// be retried with the same key; the replay refreshes again.
+		if refreshErr := refreshServing(detached, executor.OTA.Serving, command.ModuleCommand); refreshErr != nil {
+			return outcome, refreshErr
+		}
+		return outcome, nil
+	case "ota.withdraw":
 		if outcome.Replayed {
 			return outcome, nil
 		}
 		if writeErr := mirrorActivation(executor.OTA.Root, command.Envelope.SemanticKey, outcome.Result); writeErr != nil {
 			log.Printf("ota history mirror: %v", writeErr)
 		}
+		if refreshErr := refreshServing(detached, executor.OTA.Serving, command.ModuleCommand); refreshErr != nil {
+			log.Printf("%v", refreshErr)
+		}
+		return outcome, nil
 	default:
 		return outcome, nil
 	}
-	if executor.OTA.Serving != nil {
-		if refreshErr := executor.OTA.Serving.Refresh(detached); refreshErr != nil {
-			log.Printf("ota serving refresh after %s: %v", command.ModuleCommand, refreshErr)
-		}
+}
+
+// refreshServing replaces the in-process serving snapshot so MID 2/20480 and
+// /res agree with the committed activation before any relog is announced.
+func refreshServing(ctx context.Context, serving *appotarelease.Serving, command string) error {
+	if serving == nil {
+		return nil
 	}
-	return outcome, nil
+	if err := serving.Refresh(ctx); err != nil {
+		return fmt.Errorf("ota serving refresh after %s: %w", command, err)
+	}
+	return nil
 }
 
 type activationMirror struct {

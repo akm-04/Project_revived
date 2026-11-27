@@ -64,23 +64,21 @@ type fakeOperatorAPI struct {
 	applies       int
 	logoutApplies int
 	logoutReasons []string
+	logoutKeys    []string
 	seen          map[string]bool
 	refusal       bool
-	logoutRefusal bool
-	auth          []string
+	publishFault  bool
+	logoutFault   bool
 }
 
 func (api *fakeOperatorAPI) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
-	api.mutex.Lock()
-	api.auth = append(api.auth, request.Header.Get("Authorization"))
-	api.mutex.Unlock()
 	switch {
 	case request.URL.Path == "/operator/v1/reads/ota.status":
 		api.recorder.add("read:ota.status")
 		writer.Header().Set("Content-Type", "application/json")
 		_, _ = io.WriteString(writer, `{"revision":7}`)
-	case request.URL.Path == "/operator/v1/commands/ota.publish":
-		api.recorder.add("command:ota.publish")
+	case request.URL.Path == "/operator/v1/commands/ota.publish" || request.URL.Path == "/operator/v1/commands/ota.withdraw":
+		api.recorder.add("command:" + strings.TrimPrefix(request.URL.Path, "/operator/v1/commands/"))
 		body, _ := io.ReadAll(request.Body)
 		var submitted struct {
 			Envelope struct {
@@ -92,6 +90,12 @@ func (api *fakeOperatorAPI) ServeHTTP(writer http.ResponseWriter, request *http.
 			writer.Header().Set("Content-Type", "application/json")
 			writer.WriteHeader(http.StatusConflict)
 			_, _ = io.WriteString(writer, `{"error_code":"OTA_STATE_INVALID","message":"not built"}`)
+			return
+		}
+		if api.publishFault {
+			writer.Header().Set("Content-Type", "application/json")
+			writer.WriteHeader(http.StatusInternalServerError)
+			_, _ = io.WriteString(writer, `{"error_code":"OPERATOR_FAILED","message":"serving refresh failed"}`)
 			return
 		}
 		api.mutex.Lock()
@@ -114,21 +118,23 @@ func (api *fakeOperatorAPI) ServeHTTP(writer http.ResponseWriter, request *http.
 			} `json:"envelope"`
 		}
 		_ = json.Unmarshal(body, &submitted)
-		if api.logoutRefusal {
+		if api.logoutFault {
 			writer.Header().Set("Content-Type", "application/json")
-			writer.WriteHeader(http.StatusConflict)
-			_, _ = io.WriteString(writer, `{"error_code":"SESSION_LOGOUT_REFUSED","message":"logout refused"}`)
+			writer.WriteHeader(http.StatusInternalServerError)
+			_, _ = io.WriteString(writer, `{"error_code":"OPERATOR_FAILED","message":"database is unavailable"}`)
 			return
 		}
 		api.mutex.Lock()
 		defer api.mutex.Unlock()
 		writer.Header().Set("Content-Type", "application/json")
 		if api.seen[submitted.Envelope.SemanticKey] {
+			api.logoutKeys = append(api.logoutKeys, submitted.Envelope.SemanticKey)
 			_, _ = io.WriteString(writer, `{"replayed":true}`)
 			return
 		}
 		api.seen[submitted.Envelope.SemanticKey] = true
 		api.logoutApplies++
+		api.logoutKeys = append(api.logoutKeys, submitted.Envelope.SemanticKey)
 		api.logoutReasons = append(api.logoutReasons, submitted.Envelope.Reason)
 		_, _ = io.WriteString(writer, `{"revoked":2}`)
 	default:
@@ -144,6 +150,7 @@ func newMaintenance(t *testing.T) (operatoragent.Maintenance, *fakeBackend, *fak
 	t.Cleanup(server.Close)
 	backend := &fakeBackend{recorder: recorder}
 	tokens := &operatoragent.TokenHolder{}
+	tokens.Set("agent-token")
 	operations := operatoragent.NewOperations(t.TempDir(), nil, time.Now)
 	return operatoragent.Maintenance{
 		Backend:    backend,
@@ -154,7 +161,7 @@ func newMaintenance(t *testing.T) (operatoragent.Maintenance, *fakeBackend, *fak
 	}, backend, api, server
 }
 
-func TestPublishMaintenanceOrderAndReplay(t *testing.T) {
+func TestPublishActivatesThenForcesRelogWithoutRestart(t *testing.T) {
 	maintenance, backend, api, _ := newMaintenance(t)
 	operation, err := maintenance.Publish(context.Background(), "1.631.2", "release", "same-key")
 	if err != nil {
@@ -163,17 +170,20 @@ func TestPublishMaintenanceOrderAndReplay(t *testing.T) {
 	if operation.State != operatoragent.OperationDone {
 		t.Fatalf("operation = %+v", operation)
 	}
-	want := []string{"stop", "start:closed", "read:ota.status", "command:ota.publish", "command:session.logout_all", "stop", "start:open"}
+	want := []string{"read:ota.status", "command:ota.publish", "command:session.logout_all"}
 	if got := api.recorder.snapshot(); !reflect.DeepEqual(got, want) {
 		t.Fatalf("call order = %v, want %v", got, want)
 	}
-	if len(backend.tokens) != 2 || backend.tokens[0] == "" || backend.tokens[0] == backend.tokens[1] {
-		t.Fatalf("per-start tokens = %v", backend.tokens)
+	if len(backend.tokens) != 0 {
+		t.Fatalf("publish started the backend: %v", backend.tokens)
 	}
-	for _, header := range api.auth {
-		if header != "Bearer "+backend.tokens[0] {
-			t.Fatalf("the maintenance calls did not carry the per-start token: %q", header)
-		}
+	wantSteps := []string{"read active revision", "ota.publish", "session.logout_all"}
+	stepNames := make([]string, len(operation.Steps))
+	for index, step := range operation.Steps {
+		stepNames[index] = step.Name
+	}
+	if !reflect.DeepEqual(stepNames, wantSteps) {
+		t.Fatalf("publish steps = %v, want %v", stepNames, wantSteps)
 	}
 	if api.applies != 1 || api.logoutApplies != 1 {
 		t.Fatalf("applies publish=%d logout=%d", api.applies, api.logoutApplies)
@@ -181,15 +191,22 @@ func TestPublishMaintenanceOrderAndReplay(t *testing.T) {
 	if len(api.logoutReasons) != 1 || api.logoutReasons[0] != "ota publish 1.631.2" {
 		t.Fatalf("logout reasons = %v", api.logoutReasons)
 	}
+	if len(api.logoutKeys) != 1 || api.logoutKeys[0] == "" {
+		t.Fatalf("logout keys = %v", api.logoutKeys)
+	}
+
 	if _, err := maintenance.Publish(context.Background(), "1.631.2", "release", "same-key"); err != nil {
 		t.Fatal(err)
 	}
 	if api.applies != 1 || api.logoutApplies != 1 {
 		t.Fatalf("a replayed semantic key applied twice: publish=%d logout=%d", api.applies, api.logoutApplies)
 	}
+	if len(api.logoutKeys) != 2 || api.logoutKeys[0] != api.logoutKeys[1] {
+		t.Fatalf("the replay changed the logout key: %v", api.logoutKeys)
+	}
 }
 
-func TestPublishRefusalLeavesBackendClosed(t *testing.T) {
+func TestPublishRefusalStopsBeforeLogout(t *testing.T) {
 	maintenance, _, api, _ := newMaintenance(t)
 	api.refusal = true
 	operation, err := maintenance.Publish(context.Background(), "1.631.2", "release", "refused-key")
@@ -203,52 +220,85 @@ func TestPublishRefusalLeavesBackendClosed(t *testing.T) {
 	if operation.State != operatoragent.OperationFailed || operation.FailedStep != "ota.publish" {
 		t.Fatalf("operation = %+v", operation)
 	}
-	calls := api.recorder.snapshot()
-	lastStart := ""
-	for _, call := range calls {
-		if strings.HasPrefix(call, "start:") {
-			lastStart = call
-		}
-	}
-	if lastStart != "start:closed" {
-		t.Fatalf("the backend was not left closed: %v", calls)
-	}
-	for _, call := range calls {
-		if call == "start:open" {
-			t.Fatalf("the backend reopened after a refusal: %v", calls)
-		}
+	want := []string{"read:ota.status", "command:ota.publish"}
+	if got := api.recorder.snapshot(); !reflect.DeepEqual(got, want) {
+		t.Fatalf("call order = %v, want %v", got, want)
 	}
 }
 
-// A logout failure fails the operation at that step and leaves the backend
-// closed, so the operator recovers through the start path.
-func TestPublishLogoutFailureLeavesBackendClosed(t *testing.T) {
+// A publish reply that reports a failed serving refresh stops the flow, so the
+// forced relog is never announced against a stale serving view.
+func TestPublishRefreshFailureBlocksLogout(t *testing.T) {
 	maintenance, _, api, _ := newMaintenance(t)
-	api.logoutRefusal = true
-	operation, err := maintenance.Publish(context.Background(), "1.631.2", "release", "logout-refused-key")
+	api.publishFault = true
+	operation, err := maintenance.Publish(context.Background(), "1.631.2", "release", "refresh-failed-key")
 	var backendRefusal *operatoragent.BackendRefusal
-	if !errors.As(err, &backendRefusal) || backendRefusal.Status != http.StatusConflict {
-		t.Fatalf("want the backend 409 passed through, got %v", err)
+	if !errors.As(err, &backendRefusal) || backendRefusal.Status != http.StatusInternalServerError {
+		t.Fatalf("want the backend 500 passed through, got %v", err)
+	}
+	if operation.State != operatoragent.OperationFailed || operation.FailedStep != "ota.publish" {
+		t.Fatalf("operation = %+v", operation)
+	}
+	want := []string{"read:ota.status", "command:ota.publish"}
+	if got := api.recorder.snapshot(); !reflect.DeepEqual(got, want) {
+		t.Fatalf("call order = %v, want %v", got, want)
+	}
+}
+
+// A failed logout keeps the committed publish recorded; the same key replays
+// the publish and resumes only the logout.
+func TestPublishLogoutFailureKeepsResultAndResumesLogout(t *testing.T) {
+	maintenance, _, api, _ := newMaintenance(t)
+	api.logoutFault = true
+	operation, err := maintenance.Publish(context.Background(), "1.631.2", "release", "logout-failed-key")
+	var backendRefusal *operatoragent.BackendRefusal
+	if !errors.As(err, &backendRefusal) || backendRefusal.Status != http.StatusInternalServerError {
+		t.Fatalf("want the backend 500 passed through, got %v", err)
 	}
 	if operation.State != operatoragent.OperationFailed || operation.FailedStep != "session.logout_all" {
 		t.Fatalf("operation = %+v", operation)
 	}
-	calls := api.recorder.snapshot()
-	lastStart := ""
-	for _, call := range calls {
-		if strings.HasPrefix(call, "start:") {
-			lastStart = call
-		}
-		if call == "start:open" {
-			t.Fatalf("the backend reopened after a logout failure: %v", calls)
-		}
+	if !strings.Contains(string(operation.Result), "activation_id") {
+		t.Fatalf("the publish result was not kept: %s", operation.Result)
 	}
-	if lastStart != "start:closed" {
-		t.Fatalf("the backend was not left closed: %v", calls)
+	want := []string{"read:ota.status", "command:ota.publish", "command:session.logout_all"}
+	if got := api.recorder.snapshot(); !reflect.DeepEqual(got, want) {
+		t.Fatalf("call order = %v, want %v", got, want)
 	}
-	want := []string{"stop", "start:closed", "read:ota.status", "command:ota.publish", "command:session.logout_all"}
-	if !reflect.DeepEqual(calls, want) {
-		t.Fatalf("call order = %v, want %v", calls, want)
+
+	api.logoutFault = false
+	if _, err := maintenance.Publish(context.Background(), "1.631.2", "release", "logout-failed-key"); err != nil {
+		t.Fatal(err)
+	}
+	if api.applies != 1 {
+		t.Fatalf("the retry activated again: publish applies = %d", api.applies)
+	}
+	if api.logoutApplies != 1 {
+		t.Fatalf("the retry did not resume the logout: logout applies = %d", api.logoutApplies)
+	}
+}
+
+func TestWithdrawKeepsTheMaintenanceWindow(t *testing.T) {
+	maintenance, backend, api, _ := newMaintenance(t)
+	operation, err := maintenance.Withdraw(context.Background(), "1.631.2", "release", "withdraw-key")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if operation.State != operatoragent.OperationDone {
+		t.Fatalf("operation = %+v", operation)
+	}
+	want := []string{"stop", "start:closed", "read:ota.status", "command:ota.withdraw", "command:session.logout_all", "stop", "start:open"}
+	if got := api.recorder.snapshot(); !reflect.DeepEqual(got, want) {
+		t.Fatalf("call order = %v, want %v", got, want)
+	}
+	if len(backend.tokens) != 2 || backend.tokens[0] == "" || backend.tokens[0] == backend.tokens[1] {
+		t.Fatalf("per-start tokens = %v", backend.tokens)
+	}
+	if api.applies != 1 || api.logoutApplies != 1 {
+		t.Fatalf("applies withdraw=%d logout=%d", api.applies, api.logoutApplies)
+	}
+	if len(api.logoutReasons) != 1 || api.logoutReasons[0] != "ota withdraw 1.631.2" {
+		t.Fatalf("logout reasons = %v", api.logoutReasons)
 	}
 }
 

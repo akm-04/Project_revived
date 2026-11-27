@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"sync"
 	"testing"
@@ -36,6 +37,7 @@ type fakeBuildOperator struct {
 	blockRelease   bool
 	releaseEntered chan struct{}
 	releaseGate    chan struct{}
+	calls          []string
 }
 
 func (fake *fakeBuildOperator) statusBody() []byte {
@@ -56,6 +58,9 @@ func (fake *fakeBuildOperator) statusBody() []byte {
 }
 
 func (fake *fakeBuildOperator) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+	fake.mutex.Lock()
+	fake.calls = append(fake.calls, strings.TrimPrefix(request.URL.Path, "/operator/v1/"))
+	fake.mutex.Unlock()
 	switch {
 	case request.URL.Path == "/operator/v1/reads/ota.status":
 		fake.mutex.Lock()
@@ -187,6 +192,27 @@ func TestBuildOperationRegistersOnce(t *testing.T) {
 	}
 	if len(result.Release) == 0 || !strings.Contains(string(result.Release), "1.631.2") {
 		t.Fatalf("registered release = %s", result.Release)
+	}
+}
+
+// Stage builds and registers only; it never restarts the backend and never
+// logs anyone out (owner ruling Q4).
+func TestStageNeverRestartsOrLogsOut(t *testing.T) {
+	build, fake, operations, _ := newBuildOperation(t)
+	started, err := build.Start(context.Background(), operatoragent.BuildRequest{Lane: "code", Version: "1.631.2"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	operation := waitOperation(t, operations, started.ID)
+	if operation.State != operatoragent.OperationDone {
+		t.Fatalf("operation = %+v", operation)
+	}
+	fake.mutex.Lock()
+	calls := append([]string(nil), fake.calls...)
+	fake.mutex.Unlock()
+	want := []string{"reads/ota.status", "reads/ota.status", "reads/ota.release", "commands/ota.register_build"}
+	if !reflect.DeepEqual(calls, want) {
+		t.Fatalf("stage calls = %v, want %v", calls, want)
 	}
 }
 

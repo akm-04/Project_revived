@@ -54,7 +54,7 @@ func newRecoveryHandler(t *testing.T) (Handler, string, *operatoragent.BackendGu
 	handler := Handler{
 		Credentials: credentials,
 		Sessions:    sessions,
-		Backend:     newBlockingBackend(),
+		Backend:     coverageBackend{},
 		Tokens:      &operatoragent.TokenHolder{},
 		Backup:      backup,
 		Listen:      testListen,
