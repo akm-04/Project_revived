@@ -217,6 +217,10 @@
    {
     "lock_timeout_ms": 500,
     "name": "ota-release-read-v1"
+   },
+   {
+    "lock_timeout_ms": 2000,
+    "name": "ota-settings-audit"
    }
   ],
   "ranks": [],
@@ -290,6 +294,7 @@
   ],
   "unit": [
    "commands_test.go",
+   "file_only_test.go",
    "module_test.go",
    "serving_test.go",
    "settings_test.go",

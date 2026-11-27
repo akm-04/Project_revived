@@ -10,7 +10,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"sync"
 	"sync/atomic"
 	"time"
 
@@ -40,19 +39,26 @@ func (f SettingsFile) Path() string {
 // Load reads the file; a missing file is the documented default. An empty Root
 // has no file and therefore the same default.
 func (f SettingsFile) Load() (domain.Settings, error) {
+	settings, _, err := f.LoadExisting()
+	return settings, err
+}
+
+// LoadExisting reads the file and reports whether it exists. A missing file or
+// an empty Root is not an error; an unreadable or invalid file is.
+func (f SettingsFile) LoadExisting() (domain.Settings, bool, error) {
 	if f.Root == "" {
-		return domain.DefaultSettings(), nil
+		return domain.DefaultSettings(), false, nil
 	}
 	data, err := os.ReadFile(f.path())
 	if errors.Is(err, os.ErrNotExist) {
-		return domain.DefaultSettings(), nil
+		return domain.DefaultSettings(), false, nil
 	}
 	if err != nil {
-		return domain.Settings{}, err
+		return domain.Settings{}, false, err
 	}
 	settings, err := domain.ParseSettings(data)
 	if err != nil {
-		return domain.Settings{}, err
+		return domain.Settings{}, true, err
 	}
 	if settings.ResPath != "" && !readableDirectory(settings.ResPath) {
 		log.Printf("ota settings res_path %s is not a readable folder", settings.ResPath)
@@ -63,7 +69,7 @@ func (f SettingsFile) Load() (domain.Settings, error) {
 	if settings.RecoveredResPath != "" && !readableDirectory(settings.RecoveredResPath) {
 		log.Printf("ota settings recovered_res_path %s is not a readable folder", settings.RecoveredResPath)
 	}
-	return settings, nil
+	return settings, true, nil
 }
 
 // Save replaces the file atomically: a temp file in the same folder, fsynced,
@@ -86,6 +92,7 @@ func (f SettingsFile) Save(settings domain.Settings) error {
 // SettingsValue is the live in-memory copy of the committed settings.
 type SettingsValue struct {
 	current atomic.Pointer[domain.Settings]
+	invalid atomic.Bool
 }
 
 func NewSettingsValue(initial domain.Settings) *SettingsValue {
@@ -103,6 +110,19 @@ func (v *SettingsValue) Get() domain.Settings {
 
 func (v *SettingsValue) Set(next domain.Settings) {
 	v.current.Store(&next)
+	v.invalid.Store(false)
+}
+
+// MarkInvalid records that settings.json could not be used at boot. The file is
+// left untouched and ota.status reports settings_invalid.
+func (v *SettingsValue) MarkInvalid() {
+	if v != nil {
+		v.invalid.Store(true)
+	}
+}
+
+func (v *SettingsValue) Invalid() bool {
+	return v != nil && v.invalid.Load()
 }
 
 // SettingsRecord is the ota_settings row: the committed settings and the
@@ -122,7 +142,9 @@ type SettingsStore interface {
 	ReadSettingsTx(ctx context.Context, query tx.Queryer) (*SettingsRecord, error)
 }
 
-// SettingsChange is the recorded result of `ota.settings.set`.
+// SettingsChange is the recorded result of `ota.settings.set`. The file has no
+// revision, so Revision stays 0; it remains in the reply shape for the operator
+// client.
 type SettingsChange struct {
 	Old      domain.Settings `json:"old"`
 	New      domain.Settings `json:"new"`
@@ -131,10 +153,11 @@ type SettingsChange struct {
 
 // SettingsSetHandler is `ota.settings.set` (OTA ruling 6, live class): the
 // payload is the full settings object, no expected_revision, last writer wins.
-// It writes only the ota_settings row; settings.json and the live value follow
-// after commit through SettingsSync (OTA_AMENDMENTS OA-6). A bad payload is a
+// settings.json and the live value are the authority. The ota_settings history
+// row is written after commit by SettingsSync.Record, so a database fault there
+// is a logged warning and never undoes the file (S1 item 1). A bad payload is a
 // 409 refusal.
-func SettingsSetHandler(file SettingsFile, live *SettingsValue, store SettingsStore) operator.Handler {
+func SettingsSetHandler(file SettingsFile, live *SettingsValue) operator.Handler {
 	return func(ctx context.Context, scope tx.Scope, command operator.Command) (any, error) {
 		if file.Root == "" {
 			return nil, operator.Refuse(CodeRootUnavailable, "the OTA root is not configured", nil)
@@ -161,71 +184,64 @@ func SettingsSetHandler(file SettingsFile, live *SettingsValue, store SettingsSt
 		if next.RecoveredResPath != "" && !readableDirectory(next.RecoveredResPath) {
 			return nil, operator.Refuse(operator.CodePayloadInvalid, fmt.Sprintf("recovered_res_path %q is not a readable folder", next.RecoveredResPath), nil)
 		}
-		current, err := store.LockSettingsTx(ctx, scope.Tx, live.Get(), scope.Operation.StartedAt)
-		if err != nil {
+		current := live.Get()
+		if err := file.Save(next); err != nil {
 			return nil, err
 		}
-		saved := SettingsRecord{Settings: next, Revision: current.Revision + 1}
-		if err := store.SaveSettingsTx(ctx, scope.Tx, saved, command.Envelope.SemanticKey, scope.Operation.StartedAt); err != nil {
-			return nil, err
-		}
-		return SettingsChange{Old: current.Settings, New: next, Revision: saved.Revision}, nil
+		live.Set(next)
+		return SettingsChange{Old: current, New: next}, nil
 	}
 }
 
-// SettingsSync copies the committed ota_settings row to settings.json and the
-// live value (OA-6). It runs at startup and after every applied settings
-// command, replays included, so a copy that failed or was cut by a crash is
-// made by the next run, and a run never installs an older revision.
+// SettingsSync imports settings.json once from the legacy ota_settings row. The
+// file is the authority: after the import the database is never read for
+// settings (S1 item 1).
 type SettingsSync struct {
 	Runner     tx.Runner
 	Operations operation.Factory
 	Store      SettingsStore
 	File       SettingsFile
 	Live       *SettingsValue
-
-	mu      sync.Mutex
-	applied int64
 }
 
-func (s *SettingsSync) Reconcile(ctx context.Context) error {
-	_, err := s.reconcile(ctx)
-	return err
-}
-
-// Start is the startup copy. settings.json is only a copy of the committed row,
-// so an invalid file is replaced from the row instead of stopping startup. The
-// bool is false only when the file is invalid and no committed revision (>= 1)
-// exists to replace it.
-func (s *SettingsSync) Start(ctx context.Context) (bool, error) {
-	settings, err := s.File.Load()
-	invalidFile := errors.Is(err, domain.ErrInvalidSettings)
-	if invalidFile {
-		log.Printf("ota settings: %s is invalid, replacing it from the committed row: %v", s.File.Path(), err)
-		settings = domain.DefaultSettings()
-	} else if err != nil {
-		return false, err
-	}
-	s.Live.Set(settings)
-	installed, err := s.reconcile(ctx)
+// Start boots settings.json. A missing file imports the legacy database row
+// when one exists; a present file is used as it is. An unusable file is logged
+// loudly, left untouched, and the defaults are served with settings_invalid.
+func (s *SettingsSync) Start(ctx context.Context) error {
+	settings, found, err := s.File.LoadExisting()
 	if err != nil {
-		return false, err
+		log.Printf("ota settings: %s is unusable, serving the defaults and leaving the file untouched: %v", s.File.Path(), err)
+		s.Live.Set(domain.DefaultSettings())
+		s.Live.MarkInvalid()
+		return nil
 	}
-	return installed || !invalidFile, nil
+	if found {
+		s.Live.Set(settings)
+		return nil
+	}
+	s.Live.Set(domain.DefaultSettings())
+	imported, err := s.legacyImport(ctx)
+	if err != nil {
+		log.Printf("ota settings: legacy import from ota_settings skipped: %v", err)
+		return nil
+	}
+	if imported != nil {
+		s.Live.Set(*imported)
+	}
+	return nil
 }
 
-// reconcile is Reconcile reporting whether it installed a committed revision.
-func (s *SettingsSync) reconcile(ctx context.Context) (bool, error) {
+// legacyImport copies the committed ota_settings row into a missing settings.json
+// once. Revision 0 is the unseeded default row, so only a command-written row
+// (revision >= 1) is imported.
+func (s *SettingsSync) legacyImport(ctx context.Context) (*domain.Settings, error) {
 	if s.Store == nil || s.Runner.DB == nil {
-		return false, ErrUnavailable
+		return nil, nil
 	}
 	current, err := s.Operations.New(policy.Set{})
 	if err != nil {
-		return false, err
+		return nil, err
 	}
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	before := s.applied
 	var record *SettingsRecord
 	_, err = s.Runner.Run(ctx, current, ReadProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, scope tx.Scope) error {
 		loaded, readErr := s.Store.ReadSettingsTx(ctx, scope.Tx)
@@ -233,25 +249,38 @@ func (s *SettingsSync) reconcile(ctx context.Context) (bool, error) {
 		return readErr
 	})
 	if err != nil {
-		return false, err
+		return nil, err
 	}
-	if err := s.install(record); err != nil {
-		return false, err
-	}
-	return s.applied != before, nil
-}
-
-// install is Reconcile after the read; the caller holds mu.
-func (s *SettingsSync) install(record *SettingsRecord) error {
-	if record == nil || record.Revision <= s.applied {
-		return nil
+	if record == nil || record.Revision < 1 {
+		return nil, nil
 	}
 	if err := s.File.Save(record.Settings); err != nil {
+		return nil, err
+	}
+	return &record.Settings, nil
+}
+
+// Record writes the ota_settings history row for one applied settings command,
+// in its own transaction after the command committed. settings.json is already
+// in force, so a failure here is telemetry loss only (S1 item 1).
+func (s *SettingsSync) Record(ctx context.Context, commandKey string) error {
+	if s == nil || s.Store == nil || s.Runner.DB == nil || s.Live == nil {
+		return nil
+	}
+	next := s.Live.Get()
+	currentOperation, err := s.Operations.New(policy.Set{})
+	if err != nil {
 		return err
 	}
-	s.Live.Set(record.Settings)
-	s.applied = record.Revision
-	return nil
+	profile := tx.Profile{Name: "ota-settings-audit", AcquireTimeout: time.Second, LockTimeout: 2 * time.Second, StatementTimeout: 5 * time.Second, TransactionTimeout: 10 * time.Second, CleanupTimeout: time.Second, ReconcileTimeout: time.Second, OperationTimeout: 15 * time.Second}
+	_, err = s.Runner.Run(ctx, currentOperation, profile, tx.Options{Isolation: tx.Serializable}, tx.RetryPolicy{MaxAttempts: 2}, nil, func(ctx context.Context, scope tx.Scope) error {
+		record, readErr := s.Store.LockSettingsTx(ctx, scope.Tx, next, scope.Operation.StartedAt)
+		if readErr != nil {
+			return readErr
+		}
+		return s.Store.SaveSettingsTx(ctx, scope.Tx, SettingsRecord{Settings: next, Revision: record.Revision + 1}, commandKey, scope.Operation.StartedAt)
+	})
+	return err
 }
 
 func readableDirectory(path string) bool {
