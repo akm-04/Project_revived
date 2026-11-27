@@ -54,11 +54,10 @@ func TestSettingsFileRefusesUnknownField(t *testing.T) {
 	}
 }
 
-// fakeSettingsStore is the ota_settings row in memory.
+// fakeSettingsStore is the ota_settings history row in memory.
 type fakeSettingsStore struct {
 	record  *SettingsRecord
 	saved   []string
-	reads   int
 	saveErr error
 }
 
@@ -79,11 +78,6 @@ func (store *fakeSettingsStore) SaveSettingsTx(_ context.Context, _ tx.Tx, recor
 	store.record = &record
 	store.saved = append(store.saved, commandKey)
 	return nil
-}
-
-func (store *fakeSettingsStore) ReadSettingsTx(context.Context, tx.Queryer) (*SettingsRecord, error) {
-	store.reads++
-	return store.record, nil
 }
 
 func TestSettingsSetHandlerWritesTheFileAndLiveValue(t *testing.T) {
@@ -119,6 +113,62 @@ func TestSettingsSetHandlerWritesTheFileAndLiveValue(t *testing.T) {
 	}
 }
 
+// S1 item 4 / L1c item 2: the file save and the live value are one serialized
+// step, so a slower writer cannot win only in memory.
+func TestSettingsSetHandlerSerializesSaveAndLive(t *testing.T) {
+	root := t.TempDir()
+	file := SettingsFile{Root: root}
+	live := NewSettingsValue(domain.DefaultSettings())
+	res := t.TempDir()
+	payload := `{"lazy_fetch":"on","res_path":"` + res + `"}`
+
+	live.mu.Lock()
+	done := make(chan error, 1)
+	go func() {
+		_, err := callSettings(SettingsSetHandler(file, live), payload)
+		done <- err
+	}()
+	time.Sleep(50 * time.Millisecond)
+	liveWhileLocked := live.Get()
+	_, statErr := os.Stat(file.Path())
+	live.mu.Unlock()
+
+	if liveWhileLocked != domain.DefaultSettings() {
+		t.Fatalf("a writer changed the live value while another held the lock: %+v", liveWhileLocked)
+	}
+	if !errors.Is(statErr, os.ErrNotExist) {
+		t.Fatalf("a writer saved settings.json while another held the lock: %v", statErr)
+	}
+	if err := <-done; err != nil {
+		t.Fatal(err)
+	}
+	want := domain.DefaultSettings()
+	want.LazyFetch = domain.LazyFetchOn
+	want.ResPath = res
+	if live.Get() != want {
+		t.Fatalf("live=%+v want=%+v", live.Get(), want)
+	}
+	if loaded, err := file.Load(); err != nil || loaded != want {
+		t.Fatalf("file=%+v err=%v", loaded, err)
+	}
+}
+
+// S1 item 4 / L1c item 2: a save can change the file before the folder sync
+// fails, so the live value is reloaded from the authority file.
+func TestSettingsSetHandlerReloadsTheFileAfterASaveError(t *testing.T) {
+	stale := domain.DefaultSettings()
+	stale.VolumeMB = 7
+	live := NewSettingsValue(stale)
+	file := SettingsFile{Root: filepath.Join(t.TempDir(), "missing")}
+	_, err := callSettings(SettingsSetHandler(file, live), `{"lazy_fetch":"auto","res_path":"","volume_mb":120}`)
+	if err == nil {
+		t.Fatal("a failed save must be reported")
+	}
+	if live.Get() != domain.DefaultSettings() {
+		t.Fatalf("the live value was not reloaded from the file: %+v", live.Get())
+	}
+}
+
 // S1 item 1: the history row is written after commit and its failure is
 // reported so the caller can log it; the file is already in force.
 func TestSettingsRecordWritesTheAuditRowAndReportsAFailure(t *testing.T) {
@@ -137,12 +187,36 @@ func TestSettingsRecordWritesTheAuditRowAndReportsAFailure(t *testing.T) {
 	}
 }
 
-func newStartupSync(root string, live *SettingsValue, store SettingsStore) *SettingsSync {
-	return &SettingsSync{Runner: tx.Runner{DB: fakeDB{}}, Operations: operation.Factory{Clock: clock.System{}}, Store: store, File: SettingsFile{Root: root}, Live: live}
+// S1 item 1 / L1c item 1: a missing settings.json serves the defaults and never
+// reads the ota_settings row.
+func TestSettingsStartServesDefaultsWhenTheFileIsMissing(t *testing.T) {
+	root := t.TempDir()
+	live := NewSettingsValue(domain.DefaultSettings())
+	(&SettingsSync{File: SettingsFile{Root: root}, Live: live}).Start()
+	if live.Get() != domain.DefaultSettings() || live.Invalid() {
+		t.Fatalf("live=%+v invalid=%v", live.Get(), live.Invalid())
+	}
+	if _, err := os.Stat(filepath.Join(root, settingsFileName)); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("boot wrote settings.json: %v", err)
+	}
+}
+
+func TestSettingsStartUsesTheExistingFile(t *testing.T) {
+	root := t.TempDir()
+	fileSettings := domain.DefaultSettings()
+	fileSettings.LazyFetch = domain.LazyFetchOff
+	if err := (SettingsFile{Root: root}).Save(fileSettings); err != nil {
+		t.Fatal(err)
+	}
+	live := NewSettingsValue(domain.DefaultSettings())
+	(&SettingsSync{File: SettingsFile{Root: root}, Live: live}).Start()
+	if live.Get() != fileSettings || live.Invalid() {
+		t.Fatalf("live=%+v invalid=%v", live.Get(), live.Invalid())
+	}
 }
 
 // S1 item 1: an unusable file is reported, left untouched, and the defaults are
-// served; the legacy row is never read to replace it.
+// served.
 func TestSettingsStartKeepsAnInvalidFileAndServesDefaults(t *testing.T) {
 	root := t.TempDir()
 	bogus := []byte(`{"lazy_fetch":"nope"}`)
@@ -152,81 +226,15 @@ func TestSettingsStartKeepsAnInvalidFileAndServesDefaults(t *testing.T) {
 	committed := domain.DefaultSettings()
 	committed.LazyFetch = domain.LazyFetchOff
 	live := NewSettingsValue(committed)
-	store := &fakeSettingsStore{record: &SettingsRecord{Settings: committed, Revision: 1}}
-	sync := newStartupSync(root, live, store)
-	if err := sync.Start(context.Background()); err != nil {
-		t.Fatal(err)
-	}
+	(&SettingsSync{File: SettingsFile{Root: root}, Live: live}).Start()
 	if live.Get() != domain.DefaultSettings() {
 		t.Fatalf("live=%+v", live.Get())
 	}
 	if !live.Invalid() {
 		t.Fatal("an invalid file must report settings_invalid")
 	}
-	if store.reads != 0 {
-		t.Fatalf("the database was read for an existing file: reads=%d", store.reads)
-	}
 	if raw, readErr := os.ReadFile(filepath.Join(root, settingsFileName)); readErr != nil || string(raw) != string(bogus) {
 		t.Fatalf("startup changed the invalid file: %q err=%v", raw, readErr)
-	}
-}
-
-// S1 item 1: the legacy import runs once, only for a missing file.
-func TestSettingsStartImportsTheLegacyRowOnlyWhenTheFileIsMissing(t *testing.T) {
-	root := t.TempDir()
-	committed := domain.DefaultSettings()
-	committed.LazyFetch = domain.LazyFetchOff
-	live := NewSettingsValue(domain.DefaultSettings())
-	sync := newStartupSync(root, live, &fakeSettingsStore{record: &SettingsRecord{Settings: committed, Revision: 3}})
-	if err := sync.Start(context.Background()); err != nil {
-		t.Fatal(err)
-	}
-	if live.Get() != committed || live.Invalid() {
-		t.Fatalf("live=%+v invalid=%v", live.Get(), live.Invalid())
-	}
-	loaded, err := (SettingsFile{Root: root}).Load()
-	if err != nil || loaded != committed {
-		t.Fatalf("file=%+v err=%v", loaded, err)
-	}
-}
-
-func TestSettingsStartIgnoresTheUnseededRow(t *testing.T) {
-	root := t.TempDir()
-	seeded := domain.DefaultSettings()
-	seeded.LazyFetch = domain.LazyFetchOff
-	live := NewSettingsValue(domain.DefaultSettings())
-	sync := newStartupSync(root, live, &fakeSettingsStore{record: &SettingsRecord{Settings: seeded, Revision: 0}})
-	if err := sync.Start(context.Background()); err != nil {
-		t.Fatal(err)
-	}
-	if live.Get() != domain.DefaultSettings() {
-		t.Fatalf("the revision-0 row was imported: %+v", live.Get())
-	}
-	if _, err := os.Stat(filepath.Join(root, settingsFileName)); !errors.Is(err, os.ErrNotExist) {
-		t.Fatalf("the revision-0 row was written to the file: %v", err)
-	}
-}
-
-func TestSettingsStartTrustsAValidFileOverTheDatabase(t *testing.T) {
-	root := t.TempDir()
-	fileSettings := domain.DefaultSettings()
-	fileSettings.LazyFetch = domain.LazyFetchOff
-	if err := (SettingsFile{Root: root}).Save(fileSettings); err != nil {
-		t.Fatal(err)
-	}
-	other := domain.DefaultSettings()
-	other.LazyFetch = domain.LazyFetchOn
-	live := NewSettingsValue(domain.DefaultSettings())
-	store := &fakeSettingsStore{record: &SettingsRecord{Settings: other, Revision: 9}}
-	sync := newStartupSync(root, live, store)
-	if err := sync.Start(context.Background()); err != nil {
-		t.Fatal(err)
-	}
-	if live.Get() != fileSettings {
-		t.Fatalf("live=%+v", live.Get())
-	}
-	if store.reads != 0 {
-		t.Fatalf("the database was read for an existing file: reads=%d", store.reads)
 	}
 }
 

@@ -35,9 +35,7 @@ func TestNativeSettingsSetWritesFileLiveAndAuditRow(t *testing.T) {
 	bus := operator.Bus{Runner: runner, Clock: clock.System{}, Store: operatorstore.Store{}, Handlers: map[string]operator.Handler{
 		"ota.settings.set": appota.SettingsSetHandler(file, live),
 	}}
-	if err := settingsSync.Start(ctx); err != nil {
-		t.Fatal(err)
-	}
+	settingsSync.Start()
 	if _, err := os.Stat(filepath.Join(root, "settings.json")); !os.IsNotExist(err) {
 		t.Fatalf("no row yet, yet settings.json exists: %v", err)
 	}
@@ -81,48 +79,27 @@ func TestNativeSettingsSetWritesFileLiveAndAuditRow(t *testing.T) {
 	}
 }
 
-// S1 item 1: the database row is imported once, into a missing file only.
-func TestNativeSettingsStartImportsTheLegacyRowOnce(t *testing.T) {
+// S1 item 1 / L1c item 1: a missing settings.json serves the defaults even when
+// a legacy ota_settings row exists; the file is never created from the row.
+func TestNativeSettingsStartServesDefaultsOverALegacyRow(t *testing.T) {
 	pool := l3Pool(t)
 	ctx := context.Background()
 	if _, err := pool.Raw().Exec(ctx, `DELETE FROM ota_settings`); err != nil {
 		t.Fatal(err)
 	}
+	if _, err := pool.Raw().Exec(ctx, `INSERT INTO ota_settings (settings, revision, updated_at) VALUES ('{"lazy_fetch":"off"}'::jsonb, 0, now())`); err != nil {
+		t.Fatal(err)
+	}
 	root := t.TempDir()
 	file := appota.SettingsFile{Root: root}
 	live := appota.NewSettingsValue(otarelease.DefaultSettings())
-	runner := tx.Runner{DB: pool}
-	settingsSync := &appota.SettingsSync{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: otastore.Store{}, File: file, Live: live}
-	bus := operator.Bus{Runner: runner, Clock: clock.System{}, Store: operatorstore.Store{}, Handlers: map[string]operator.Handler{
-		"ota.settings.set": appota.SettingsSetHandler(file, live),
-	}}
-	command := l3Command(t, "ota.settings.set", nil, map[string]string{"lazy_fetch": "off", "res_path": ""})
-	if outcome := l3Execute(t, bus, command); outcome.State != operator.StateApplied {
-		t.Fatalf("outcome=%+v", outcome)
+	settingsSync := &appota.SettingsSync{Runner: tx.Runner{DB: pool}, Operations: operation.Factory{Clock: clock.System{}}, Store: otastore.Store{}, File: file, Live: live}
+	settingsSync.Start()
+	if live.Get() != otarelease.DefaultSettings() {
+		t.Fatalf("the legacy row changed the live defaults: %+v", live.Get())
 	}
-	if err := settingsSync.Record(ctx, command.Envelope.SemanticKey); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.Remove(filepath.Join(root, "settings.json")); err != nil {
-		t.Fatal(err)
-	}
-	if err := settingsSync.Start(ctx); err != nil {
-		t.Fatal(err)
-	}
-	imported, err := file.Load()
-	if err != nil || imported.LazyFetch != otarelease.LazyFetchOff {
-		t.Fatalf("legacy row was not imported: file=%+v err=%v", imported, err)
-	}
-
-	// A later row change must not reach an existing file.
-	if _, err := pool.Raw().Exec(ctx, `UPDATE ota_settings SET settings='{"lazy_fetch":"on"}'::jsonb`); err != nil {
-		t.Fatal(err)
-	}
-	if err := settingsSync.Start(ctx); err != nil {
-		t.Fatal(err)
-	}
-	if loaded, err := file.Load(); err != nil || loaded.LazyFetch != otarelease.LazyFetchOff || live.Get().LazyFetch != otarelease.LazyFetchOff {
-		t.Fatalf("an existing file was replaced from the row: file=%+v live=%+v err=%v", loaded, live.Get(), err)
+	if _, err := os.Stat(filepath.Join(root, "settings.json")); !os.IsNotExist(err) {
+		t.Fatalf("the legacy row created settings.json: %v", err)
 	}
 }
 
@@ -155,9 +132,7 @@ func TestNativeRestoreDoesNotChangeOTASettingsOrReleases(t *testing.T) {
 	live := appota.NewSettingsValue(otarelease.DefaultSettings())
 	runner := tx.Runner{DB: pool}
 	settingsSync := &appota.SettingsSync{Runner: runner, Operations: operation.Factory{Clock: clock.System{}}, Store: otastore.Store{}, File: file, Live: live}
-	if err := settingsSync.Start(ctx); err != nil {
-		t.Fatal(err)
-	}
+	settingsSync.Start()
 	if live.Get() != fileSettings || live.Invalid() {
 		t.Fatalf("the restored row changed the live settings: %+v", live.Get())
 	}
@@ -166,11 +141,6 @@ func TestNativeRestoreDoesNotChangeOTASettingsOrReleases(t *testing.T) {
 		t.Fatalf("the restored row changed settings.json: %+v err=%v", loaded, err)
 	}
 
-	exporter := &countingExporter{}
-	seeded, err := state.Seed(ctx, runner, exporter)
-	if err != nil || seeded || exporter.calls != 0 {
-		t.Fatalf("seed = %v err=%v calls=%d", seeded, err, exporter.calls)
-	}
 	afterReleases, err := os.ReadFile(state.Path())
 	if err != nil {
 		t.Fatal(err)
@@ -178,15 +148,6 @@ func TestNativeRestoreDoesNotChangeOTASettingsOrReleases(t *testing.T) {
 	if string(afterReleases) != string(beforeReleases) {
 		t.Fatal("the restore changed releases.json")
 	}
-}
-
-type countingExporter struct {
-	calls int
-}
-
-func (exporter *countingExporter) ExportStateTx(context.Context, tx.Queryer) (appota.StateDocument, error) {
-	exporter.calls++
-	return appota.StateDocument{}, nil
 }
 
 func atTime() time.Time {

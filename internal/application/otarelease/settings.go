@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -91,6 +92,7 @@ func (f SettingsFile) Save(settings domain.Settings) error {
 
 // SettingsValue is the live in-memory copy of the committed settings.
 type SettingsValue struct {
+	mu      sync.Mutex
 	current atomic.Pointer[domain.Settings]
 	invalid atomic.Bool
 }
@@ -111,6 +113,24 @@ func (v *SettingsValue) Get() domain.Settings {
 func (v *SettingsValue) Set(next domain.Settings) {
 	v.current.Store(&next)
 	v.invalid.Store(false)
+}
+
+// Commit writes settings to the authority file and publishes them as the live
+// value under one lock, so a slower concurrent writer cannot leave the memory
+// copy on an older save. A save error is not distinguishable from a durable
+// rename whose folder sync failed, so the live value is reloaded from the file.
+func (v *SettingsValue) Commit(file SettingsFile, next domain.Settings) (domain.Settings, error) {
+	v.mu.Lock()
+	defer v.mu.Unlock()
+	previous := v.Get()
+	if err := file.Save(next); err != nil {
+		if loaded, loadErr := file.Load(); loadErr == nil {
+			v.Set(loaded)
+		}
+		return previous, err
+	}
+	v.Set(next)
+	return previous, nil
 }
 
 // MarkInvalid records that settings.json could not be used at boot. The file is
@@ -138,8 +158,6 @@ type SettingsStore interface {
 	// LockSettingsTx inserts the seed when the row is missing, then locks the row.
 	LockSettingsTx(ctx context.Context, transaction tx.Tx, seed domain.Settings, at time.Time) (SettingsRecord, error)
 	SaveSettingsTx(ctx context.Context, transaction tx.Tx, record SettingsRecord, commandKey string, at time.Time) error
-	// ReadSettingsTx returns nil when no command has seeded the row yet.
-	ReadSettingsTx(ctx context.Context, query tx.Queryer) (*SettingsRecord, error)
 }
 
 // SettingsChange is the recorded result of `ota.settings.set`. The file has no
@@ -184,18 +202,16 @@ func SettingsSetHandler(file SettingsFile, live *SettingsValue) operator.Handler
 		if next.RecoveredResPath != "" && !readableDirectory(next.RecoveredResPath) {
 			return nil, operator.Refuse(operator.CodePayloadInvalid, fmt.Sprintf("recovered_res_path %q is not a readable folder", next.RecoveredResPath), nil)
 		}
-		current := live.Get()
-		if err := file.Save(next); err != nil {
+		current, err := live.Commit(file, next)
+		if err != nil {
 			return nil, err
 		}
-		live.Set(next)
 		return SettingsChange{Old: current, New: next}, nil
 	}
 }
 
-// SettingsSync imports settings.json once from the legacy ota_settings row. The
-// file is the authority: after the import the database is never read for
-// settings (S1 item 1).
+// SettingsSync boots settings.json and writes the ota_settings history rows.
+// The file is the only authority: the database is never read for settings.
 type SettingsSync struct {
 	Runner     tx.Runner
 	Operations operation.Factory
@@ -204,60 +220,23 @@ type SettingsSync struct {
 	Live       *SettingsValue
 }
 
-// Start boots settings.json. A missing file imports the legacy database row
-// when one exists; a present file is used as it is. An unusable file is logged
-// loudly, left untouched, and the defaults are served with settings_invalid.
-func (s *SettingsSync) Start(ctx context.Context) error {
+// Start boots settings.json. A present file is used as it is; a missing file
+// serves the defaults with a logged warning; an unusable file is logged loudly,
+// left untouched, and the defaults are served with settings_invalid.
+func (s *SettingsSync) Start() {
 	settings, found, err := s.File.LoadExisting()
 	if err != nil {
 		log.Printf("ota settings: %s is unusable, serving the defaults and leaving the file untouched: %v", s.File.Path(), err)
 		s.Live.Set(domain.DefaultSettings())
 		s.Live.MarkInvalid()
-		return nil
+		return
 	}
 	if found {
 		s.Live.Set(settings)
-		return nil
+		return
 	}
+	log.Printf("ota settings: %s is missing, serving the defaults", s.File.Path())
 	s.Live.Set(domain.DefaultSettings())
-	imported, err := s.legacyImport(ctx)
-	if err != nil {
-		log.Printf("ota settings: legacy import from ota_settings skipped: %v", err)
-		return nil
-	}
-	if imported != nil {
-		s.Live.Set(*imported)
-	}
-	return nil
-}
-
-// legacyImport copies the committed ota_settings row into a missing settings.json
-// once. Revision 0 is the unseeded default row, so only a command-written row
-// (revision >= 1) is imported.
-func (s *SettingsSync) legacyImport(ctx context.Context) (*domain.Settings, error) {
-	if s.Store == nil || s.Runner.DB == nil {
-		return nil, nil
-	}
-	current, err := s.Operations.New(policy.Set{})
-	if err != nil {
-		return nil, err
-	}
-	var record *SettingsRecord
-	_, err = s.Runner.Run(ctx, current, ReadProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, scope tx.Scope) error {
-		loaded, readErr := s.Store.ReadSettingsTx(ctx, scope.Tx)
-		record = loaded
-		return readErr
-	})
-	if err != nil {
-		return nil, err
-	}
-	if record == nil || record.Revision < 1 {
-		return nil, nil
-	}
-	if err := s.File.Save(record.Settings); err != nil {
-		return nil, err
-	}
-	return &record.Settings, nil
 }
 
 // Record writes the ota_settings history row for one applied settings command,

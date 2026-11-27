@@ -5666,11 +5666,9 @@
     "WithEnum"
    ],
    "store:otastore": [
-    "*ExportStateTx",
     "*FlushTx",
     "*LockSettingsTx",
     "*ReadLedgerTx",
-    "*ReadSettingsTx",
     "*SaveSettingsTx"
    ]
   },

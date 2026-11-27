@@ -72,4 +72,7 @@ func TestStatusReadsTheFileWithoutADatabaseAndReportsInvalidSettings(t *testing.
 	if len(status.Served) != 0 || len(status.Misses) != 0 {
 		t.Fatalf("ledger telemetry was not empty without a database: %+v", status)
 	}
+	if !status.TelemetryUnavailable {
+		t.Fatal("ota.status reported the missing ledger as measured")
+	}
 }
