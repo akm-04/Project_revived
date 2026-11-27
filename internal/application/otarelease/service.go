@@ -9,8 +9,6 @@ import (
 	"time"
 
 	domain "gxb.local/backend/v2/internal/domain/otarelease"
-	"gxb.local/backend/v2/internal/foundation/operation"
-	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -22,11 +20,10 @@ type ActiveStore interface {
 	ListActiveDescriptorsTx(context.Context, tx.Queryer) ([]domain.RawRelease, error)
 }
 
-// Service plans MID 2 and summarizes the active release set.
+// Service plans MID 2 and summarizes the active release set from the file, so
+// no database transaction (and no Runner.DB) is required (S1 item 2).
 type Service struct {
-	Runner          tx.Runner
 	Store           ActiveStore
-	Operations      operation.Factory
 	PublicEngineURL string
 }
 
@@ -89,26 +86,11 @@ func (s Service) ActiveRelease(ctx context.Context) (domain.ActiveRelease, error
 	return domain.ActiveSet(rows)
 }
 
-// activeRows runs the read-only RepeatableRead transaction over one active-set
-// read; Plan passes the descriptor read, ActiveRelease the manifest read.
+// activeRows reads the release file directly; Plan passes the descriptor read,
+// ActiveRelease the manifest read. The file store ignores the nil queryer.
 func (s Service) activeRows(ctx context.Context, read func(context.Context, tx.Queryer) ([]domain.RawRelease, error)) ([]domain.RawRelease, error) {
-	if s.Store == nil || s.Runner.DB == nil {
+	if s.Store == nil {
 		return nil, ErrUnavailable
 	}
-	op, err := s.Operations.New(policy.Set{})
-	if err != nil {
-		return nil, err
-	}
-	var rows []domain.RawRelease
-	_, err = s.Runner.Run(ctx, op, ReadProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, scope tx.Scope) error {
-		loaded, readErr := read(ctx, scope.Tx)
-		if readErr == nil {
-			rows = loaded
-		}
-		return readErr
-	})
-	if err != nil {
-		return nil, err
-	}
-	return rows, nil
+	return read(ctx, nil)
 }

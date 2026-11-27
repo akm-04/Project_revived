@@ -246,7 +246,9 @@ func TestExclusivePublishLeavesAnExistingFile(t *testing.T) {
 	}
 }
 
-func TestStateFileSeedsOverAnEmptyFile(t *testing.T) {
+// S1 item 2: an existing file, even an empty one, is the authority and is not
+// replaced by the database.
+func TestStateFileDoesNotSeedOverAnExistingEmptyFile(t *testing.T) {
 	root := t.TempDir()
 	store := NewStateFile(root)
 	if err := store.Save(StateDocument{}); err != nil {
@@ -258,11 +260,11 @@ func TestStateFileSeedsOverAnEmptyFile(t *testing.T) {
 		BuiltAt:    &at,
 	}}}}
 	seeded, err := store.Seed(context.Background(), tx.Runner{DB: fakeDB{}}, exporter)
-	if err != nil || !seeded || exporter.calls != 1 {
+	if err != nil || seeded || exporter.calls != 0 {
 		t.Fatalf("seed = %v err=%v calls=%d", seeded, err, exporter.calls)
 	}
-	if active, err := store.HasActiveAssets(); err != nil || !active {
-		t.Fatalf("seeded assets missing: %v %v", active, err)
+	if active, err := store.HasActiveAssets(); err != nil || active {
+		t.Fatalf("the existing file was replaced: %v %v", active, err)
 	}
 }
 

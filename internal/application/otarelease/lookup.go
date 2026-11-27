@@ -5,8 +5,6 @@ import (
 
 	"gxb.local/backend/v2/internal/application/operator"
 	domain "gxb.local/backend/v2/internal/domain/otarelease"
-	"gxb.local/backend/v2/internal/foundation/operation"
-	"gxb.local/backend/v2/internal/foundation/policy"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
 
@@ -29,9 +27,7 @@ type ReleaseExistence struct {
 // so a WITHDRAWN or SUPERSEDED release is refused before any build work
 // (L4f fix 2), with the lane and state that the rollback reuse rule needs.
 type ReleaseLookup struct {
-	Runner     tx.Runner
-	Operations operation.Factory
-	Store      ReleaseStatusStore
+	Store ReleaseStatusStore
 }
 
 func (lookup ReleaseLookup) Exists(ctx context.Context, versionText string) (ReleaseExistence, error) {
@@ -39,22 +35,10 @@ func (lookup ReleaseLookup) Exists(ctx context.Context, versionText string) (Rel
 	if err != nil {
 		return ReleaseExistence{}, operator.Refuse(operator.CodeReadInvalid, err.Error(), nil)
 	}
-	if lookup.Store == nil || lookup.Runner.DB == nil {
+	if lookup.Store == nil {
 		return ReleaseExistence{}, ErrUnavailable
 	}
-	current, err := lookup.Operations.New(policy.Set{})
-	if err != nil {
-		return ReleaseExistence{}, err
-	}
-	var found bool
-	var lane, state string
-	_, err = lookup.Runner.Run(ctx, current, ReadProfile(), tx.Options{Isolation: tx.RepeatableRead, ReadOnly: true}, tx.RetryPolicy{MaxAttempts: 1}, nil, func(ctx context.Context, scope tx.Scope) error {
-		exists, readLane, readState, readErr := lookup.Store.ReleaseStatusTx(ctx, scope.Tx, version.String())
-		if readErr == nil {
-			found, lane, state = exists, readLane, readState
-		}
-		return readErr
-	})
+	found, lane, state, err := lookup.Store.ReleaseStatusTx(ctx, nil, version.String())
 	if err != nil {
 		return ReleaseExistence{}, err
 	}

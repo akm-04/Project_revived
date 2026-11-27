@@ -11,7 +11,6 @@ import (
 
 	"gxb.local/backend/v2/internal/application/operator"
 	domain "gxb.local/backend/v2/internal/domain/otarelease"
-	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/operation"
 	"gxb.local/backend/v2/internal/foundation/tx"
 )
@@ -475,10 +474,7 @@ func TestMID2SchedulerThroughTheReleaseFile(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	service := Service{
-		Runner: tx.Runner{DB: fakeDB{}}, Store: store, Operations: operation.Factory{Clock: clock.System{}},
-		PublicEngineURL: "https://engine.example",
-	}
+	service := Service{Store: store, PublicEngineURL: "https://engine.example"}
 	plan, err := service.Plan(context.Background(), domain.PlanRequest{ClientVersion: "1.631.0", AppVersion: domain.StockAppVersion})
 	if err != nil {
 		t.Fatal(err)
