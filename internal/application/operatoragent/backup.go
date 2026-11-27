@@ -447,6 +447,10 @@ func (service *BackupService) Pin(id, name string) (BackupManifest, error) {
 	if err != nil {
 		return BackupManifest{}, err
 	}
+	if !service.Guard.TryLock() {
+		return BackupManifest{}, Refuse(CodeBackendBusy, "a backend operation is already running")
+	}
+	defer service.Guard.Unlock()
 	manifest, err := service.keepableManifest(id)
 	if err != nil {
 		return BackupManifest{}, err
@@ -462,6 +466,10 @@ func (service *BackupService) Pin(id, name string) (BackupManifest, error) {
 
 // Unpin returns a pinned snapshot to normal pruning; the name is kept.
 func (service *BackupService) Unpin(id string) (BackupManifest, error) {
+	if !service.Guard.TryLock() {
+		return BackupManifest{}, Refuse(CodeBackendBusy, "a backend operation is already running")
+	}
+	defer service.Guard.Unlock()
 	manifest, err := service.keepableManifest(id)
 	if err != nil {
 		return BackupManifest{}, err
@@ -535,6 +543,10 @@ func (service *BackupService) DeleteMany(ids []string, reason string) BackupDele
 // Delete removes one unpinned snapshot. A pinned, damaged or in-use snapshot is
 // never deleted.
 func (service *BackupService) Delete(id, reason string) (BackupManifest, error) {
+	if !service.Guard.TryLock() {
+		return BackupManifest{}, Refuse(CodeBackendBusy, "a backend operation is already running")
+	}
+	defer service.Guard.Unlock()
 	manifest, err := service.keepableManifest(id)
 	if err != nil {
 		return BackupManifest{}, err
@@ -732,6 +744,11 @@ func (service *BackupService) prune(ctx context.Context) (PruneResult, error) {
 			result.Damaged = append(result.Damaged, entry.ID)
 		}
 		if entry.Kind == BackupKindManual || !plan[index] {
+			result.Kept = append(result.Kept, entry.ID)
+			continue
+		}
+		// A pin written after the plan was computed must still win.
+		if manifest, recheckErr := readBackupManifest(filepath.Join(service.directory(), entry.ID+backupManifestSuffix)); recheckErr == nil && manifest.Pinned {
 			result.Kept = append(result.Kept, entry.ID)
 			continue
 		}

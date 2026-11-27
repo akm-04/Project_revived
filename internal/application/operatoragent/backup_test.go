@@ -677,6 +677,29 @@ func TestPruneNeverRemovesPinnedSnapshots(t *testing.T) {
 	}
 }
 
+func TestPinUnpinAndDeleteShareTheBackendGuard(t *testing.T) {
+	service, _, _ := newBackupService(t)
+	id := "20260101T000000.000000000Z-manual"
+	writeSnapshot(t, service.Directory, id, BackupKindManual, time.Date(2026, 11, 20, 10, 0, 0, 0, time.UTC), "content")
+	if !service.Guard.TryLock() {
+		t.Fatal("the guard was already held")
+	}
+	_, pinErr := service.Pin(id, "keep me")
+	_, unpinErr := service.Unpin(id)
+	_, deleteErr := service.Delete(id, "cleanup")
+	service.Guard.Unlock()
+	for name, err := range map[string]error{"pin": pinErr, "unpin": unpinErr, "delete": deleteErr} {
+		if !backupRefusalCode(err, CodeBackendBusy) {
+			t.Fatalf("%s while the guard is held: %v", name, err)
+		}
+	}
+	for _, suffix := range []string{backupDumpSuffix, backupManifestSuffix} {
+		if _, err := os.Stat(filepath.Join(service.Directory, id+suffix)); err != nil {
+			t.Fatalf("the %s file was touched: %v", suffix, err)
+		}
+	}
+}
+
 func TestRestoreMigratesAnOlderSnapshotForward(t *testing.T) {
 	service, tools, process := newBackupService(t)
 	service.MigrationsDirectory = "/tmp/gxb-migrations"
