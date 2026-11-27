@@ -192,11 +192,19 @@ func (input SDKImportInput) validate() error {
 		if login.Algorithm != SDKPasswordAlgorithm {
 			return fmt.Errorf("logins[%d]: unsupported password algorithm", index)
 		}
-		if _, err := hex.DecodeString(login.Salt); err != nil {
+		salt, err := hex.DecodeString(login.Salt)
+		if err != nil {
 			return fmt.Errorf("logins[%d]: salt is not hex", index)
 		}
-		if _, err := hex.DecodeString(login.Hash); err != nil {
+		if len(salt) != SDKPasswordSaltBytes {
+			return fmt.Errorf("logins[%d]: salt must be %d bytes", index, SDKPasswordSaltBytes)
+		}
+		hash, err := hex.DecodeString(login.Hash)
+		if err != nil {
 			return fmt.Errorf("logins[%d]: hash is not hex", index)
+		}
+		if len(hash) != SDKPasswordHashBytes {
+			return fmt.Errorf("logins[%d]: hash must be %d bytes", index, SDKPasswordHashBytes)
 		}
 		if _, duplicate := logins[normalized]; duplicate {
 			return fmt.Errorf("logins[%d]: duplicate normalized login", index)
@@ -224,6 +232,9 @@ func (input SDKImportInput) validate() error {
 type SDKImportStore interface {
 	InsertSDKAccountIfAbsentTx(context.Context, tx.Tx, SDKAccountRecord) (bool, error)
 	FindSDKAccountByUIDTx(context.Context, tx.Queryer, string) (*SDKAccountRecord, error)
+	// BackfillSDKAccountMetadataTx fills the fields a pre-SDK account still
+	// holds at their migration defaults and never overwrites a set value.
+	BackfillSDKAccountMetadataTx(context.Context, tx.Tx, SDKAccountRecord) error
 	InsertSDKLoginTx(context.Context, tx.Tx, SDKLoginRecord) (bool, error)
 	FindSDKLoginTx(context.Context, tx.Queryer, string) (*SDKLoginRecord, error)
 	InsertSDKDeviceTx(context.Context, tx.Tx, string, identity.AccountID) (bool, error)
@@ -298,11 +309,27 @@ func (importer SDKImporter) importAccount(ctx context.Context, transaction tx.Tx
 	if err != nil {
 		return err
 	}
-	if existing != nil && existing.Kind == account.Kind && existing.Username == account.Username {
-		out.AccountsSkipped++
+	if existing == nil {
+		out.Conflicts++
 		return nil
 	}
-	out.Conflicts++
+	reconciled := *existing
+	if reconciled.Kind == SDKAccountKindNormal {
+		reconciled.Kind = account.Kind
+	}
+	if reconciled.Username == "" {
+		reconciled.Username = account.Username
+	}
+	if reconciled.Kind != account.Kind || reconciled.Username != account.Username {
+		out.Conflicts++
+		return nil
+	}
+	if reconciled.Kind != existing.Kind || reconciled.Username != existing.Username {
+		if err := importer.Store.BackfillSDKAccountMetadataTx(ctx, transaction, reconciled); err != nil {
+			return err
+		}
+	}
+	out.AccountsSkipped++
 	return nil
 }
 

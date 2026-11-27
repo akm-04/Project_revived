@@ -176,14 +176,14 @@ func VerifySDKPassword(algorithm string, iterations int, saltHex, hashHex, passw
 		return false
 	}
 	salt, err := hex.DecodeString(saltHex)
-	if err != nil || len(salt) == 0 {
+	if err != nil || len(salt) != SDKPasswordSaltBytes {
 		return false
 	}
 	want, err := hex.DecodeString(hashHex)
-	if err != nil || len(want) == 0 {
+	if err != nil || len(want) != SDKPasswordHashBytes {
 		return false
 	}
-	got := pbkdf2.Key([]byte(password), salt, iterations, len(want), sha256.New)
+	got := pbkdf2.Key([]byte(password), salt, iterations, SDKPasswordHashBytes, sha256.New)
 	return subtle.ConstantTimeCompare(got, want) == 1
 }
 
