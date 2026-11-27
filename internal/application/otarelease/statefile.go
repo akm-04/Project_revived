@@ -5,12 +5,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"sort"
 	"sync"
 	"time"
 
+	"gxb.local/backend/v2/internal/application/operator"
 	domain "gxb.local/backend/v2/internal/domain/otarelease"
 	"gxb.local/backend/v2/internal/foundation/clock"
 	"gxb.local/backend/v2/internal/foundation/operation"
@@ -64,10 +66,35 @@ type StoredActivation struct {
 // command's reply: the operator bus retries a transaction body on a serializable
 // abort, and a retried OTA command must not apply its file change twice.
 type StateDocument struct {
-	Version     int                        `json:"version"`
-	Releases    []StoredRelease            `json:"releases"`
-	Activations []StoredActivation         `json:"activations"`
-	Applied     map[string]json.RawMessage `json:"applied,omitempty"`
+	Version     int                       `json:"version"`
+	Releases    []StoredRelease           `json:"releases"`
+	Activations []StoredActivation        `json:"activations"`
+	Applied     map[string]AppliedReceipt `json:"applied,omitempty"`
+}
+
+// AppliedReceipt is the release file's record of one command reply. The module
+// and payload digest bind the semantic key to the command that wrote it, because
+// the file outlives an operator SQL row a database restore can remove
+// (I11A_OPERATOR_COMMANDS_V1 ruling 3).
+type AppliedReceipt struct {
+	ModuleCommand string          `json:"module_command,omitempty"`
+	PayloadSHA256 string          `json:"payload_sha256,omitempty"`
+	Result        json.RawMessage `json:"result,omitempty"`
+}
+
+// UnmarshalJSON reads a receipt written before receipts carried a module and
+// digest: the stored value is then the result alone.
+func (receipt *AppliedReceipt) UnmarshalJSON(data []byte) error {
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return err
+	}
+	if _, recorded := fields["result"]; !recorded {
+		receipt.Result = append(json.RawMessage(nil), data...)
+		return nil
+	}
+	type receiptFields AppliedReceipt
+	return json.Unmarshal(data, (*receiptFields)(receipt))
 }
 
 // StateExporter reads the database rows once, when the file does not exist yet.
@@ -206,8 +233,11 @@ func (f *StateFile) HasActiveAssets() (bool, error) {
 	return false, nil
 }
 
-// AppliedResult is the reply a command with this semantic key already made.
-func (f *StateFile) AppliedResult(commandKey string) (json.RawMessage, bool, error) {
+// AppliedResult is the reply a command with this semantic key already made. A
+// receipt bound to another module or payload is refused, never replayed; a
+// result-only entry written before receipts carried a digest replays only for
+// the same module and is logged.
+func (f *StateFile) AppliedResult(commandKey, moduleCommand, payloadSHA256 string) (json.RawMessage, bool, error) {
 	if commandKey == "" {
 		return nil, false, nil
 	}
@@ -215,23 +245,62 @@ func (f *StateFile) AppliedResult(commandKey string) (json.RawMessage, bool, err
 	if err != nil {
 		return nil, false, err
 	}
-	result, found := document.Applied[commandKey]
-	return result, found, nil
+	return appliedResultFrom(document, commandKey, moduleCommand, payloadSHA256)
+}
+
+func appliedResultFrom(document StateDocument, commandKey, moduleCommand, payloadSHA256 string) (json.RawMessage, bool, error) {
+	receipt, found := document.Applied[commandKey]
+	if !found {
+		return nil, false, nil
+	}
+	if !receipt.matches(moduleCommand, payloadSHA256) {
+		return nil, false, operator.Refuse(operator.CodeKeyReused, "this semantic key was used with another command or payload", nil)
+	}
+	if receipt.PayloadSHA256 == "" {
+		log.Printf("ota release file replayed legacy receipt %q for %s without a payload digest", commandKey, moduleCommand)
+	}
+	return receipt.Result, true, nil
+}
+
+func (receipt AppliedReceipt) matches(moduleCommand, payloadSHA256 string) bool {
+	if receipt.PayloadSHA256 != "" {
+		return receipt.ModuleCommand == moduleCommand && receipt.PayloadSHA256 == payloadSHA256
+	}
+	recorded := receipt.ModuleCommand
+	if recorded == "" {
+		recorded = legacyReceiptModule(receipt.Result)
+	}
+	return recorded != "" && recorded == moduleCommand
+}
+
+// legacyReceiptModule recovers the module command that produced a result-only
+// receipt, so such an entry keeps replaying only for the same module.
+func legacyReceiptModule(result json.RawMessage) string {
+	var build BuildResult
+	if err := json.Unmarshal(result, &build); err == nil && build.Lane != "" {
+		return commandRegisterBuild
+	}
+	var activation Activation
+	if err := json.Unmarshal(result, &activation); err != nil || activation.ActivationID == 0 {
+		return ""
+	}
+	switch activation.Action {
+	case "PUBLISH":
+		return commandPublish
+	case "WITHDRAW":
+		return commandWithdraw
+	}
+	return ""
 }
 
 // RecordApplied stores the command's reply in the same file as its release
 // change, so a body retried by the bus replays instead of applying again.
-func (f *StateFile) RecordApplied(commandKey string, result any) error {
+func (f *StateFile) RecordApplied(commandKey, moduleCommand, payloadSHA256 string, result any) error {
 	if commandKey == "" {
 		return errInvalidState
 	}
-	encoded, err := json.Marshal(result)
-	if err != nil {
-		return err
-	}
 	return f.mutate(func(document *StateDocument) error {
-		recordAppliedIn(document, commandKey, encoded)
-		return nil
+		return recordAppliedIn(document, commandKey, moduleCommand, payloadSHA256, result)
 	})
 }
 
@@ -476,24 +545,18 @@ func (transaction *commandTransaction) InsertActivationTx(_ context.Context, _ t
 	return insertActivationIn(&transaction.document, activation), nil
 }
 
-func (transaction *commandTransaction) AppliedResult(commandKey string) (json.RawMessage, bool, error) {
+func (transaction *commandTransaction) AppliedResult(commandKey, moduleCommand, payloadSHA256 string) (json.RawMessage, bool, error) {
 	if commandKey == "" {
 		return nil, false, nil
 	}
-	result, found := transaction.document.Applied[commandKey]
-	return result, found, nil
+	return appliedResultFrom(transaction.document, commandKey, moduleCommand, payloadSHA256)
 }
 
-func (transaction *commandTransaction) RecordApplied(commandKey string, result any) error {
+func (transaction *commandTransaction) RecordApplied(commandKey, moduleCommand, payloadSHA256 string, result any) error {
 	if commandKey == "" {
 		return errInvalidState
 	}
-	encoded, err := json.Marshal(result)
-	if err != nil {
-		return err
-	}
-	recordAppliedIn(&transaction.document, commandKey, encoded)
-	return nil
+	return recordAppliedIn(&transaction.document, commandKey, moduleCommand, payloadSHA256, result)
 }
 
 func releaseFromDocument(document StateDocument, version string) *domain.RawRelease {
@@ -624,11 +687,16 @@ func insertActivationIn(document *StateDocument, activation ActivationRow) int64
 	return id
 }
 
-func recordAppliedIn(document *StateDocument, commandKey string, encoded json.RawMessage) {
-	if document.Applied == nil {
-		document.Applied = map[string]json.RawMessage{}
+func recordAppliedIn(document *StateDocument, commandKey, moduleCommand, payloadSHA256 string, result any) error {
+	encoded, err := json.Marshal(result)
+	if err != nil {
+		return err
 	}
-	document.Applied[commandKey] = encoded
+	if document.Applied == nil {
+		document.Applied = map[string]AppliedReceipt{}
+	}
+	document.Applied[commandKey] = AppliedReceipt{ModuleCommand: moduleCommand, PayloadSHA256: payloadSHA256, Result: encoded}
+	return nil
 }
 
 // ReadStatusTx folds the file into the ota.status snapshot. The serving

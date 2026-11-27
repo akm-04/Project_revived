@@ -36,6 +36,14 @@ const (
 	CodeRollbackBelowAssets = "OTA_ROLLBACK_BELOW_ASSETS"
 )
 
+// The OTA module command names. A receipt names the command that wrote it, so a
+// semantic key reused by another command is refused (A-213).
+const (
+	commandRegisterBuild = "ota.register_build"
+	commandPublish       = "ota.publish"
+	commandWithdraw      = "ota.withdraw"
+)
+
 // maxActiveCatalogReleases keeps one ACTIVE read at 16 rows: one code, one
 // assets and at most this many catalog releases (OTA_AMENDMENTS OA-1).
 const maxActiveCatalogReleases = 14
@@ -63,8 +71,8 @@ type CommandStore interface {
 // from BeginCommand until one of them.
 type CommandTransaction interface {
 	CommandStore
-	AppliedResult(string) (json.RawMessage, bool, error)
-	RecordApplied(string, any) error
+	AppliedResult(commandKey, moduleCommand, payloadSHA256 string) (json.RawMessage, bool, error)
+	RecordApplied(commandKey, moduleCommand, payloadSHA256 string, result any) error
 	Commit() error
 	Rollback()
 }
@@ -119,9 +127,9 @@ type releasePayload struct {
 // Handlers registers the three OTA commands on the operator bus.
 func (commands Commands) Handlers() map[string]operator.Handler {
 	return map[string]operator.Handler{
-		"ota.register_build": commands.registerBuildHandler,
-		"ota.publish":        commands.publishHandler,
-		"ota.withdraw":       commands.withdrawHandler,
+		commandRegisterBuild: commands.registerBuildHandler,
+		commandPublish:       commands.publishHandler,
+		commandWithdraw:      commands.withdrawHandler,
 	}
 }
 
@@ -163,7 +171,7 @@ func (commands Commands) registerBuildHandler(ctx context.Context, scope tx.Scop
 	commandMutex.Lock()
 	defer commandMutex.Unlock()
 	return commands.runCommand(func(scoped Commands) (any, error) {
-		if applied, found, err := replayApplied(scoped.Store, command.Envelope.SemanticKey); err != nil {
+		if applied, found, err := replayApplied(scoped.Store, command.Envelope.SemanticKey, commandRegisterBuild, command.PayloadSHA256); err != nil {
 			return nil, err
 		} else if found {
 			return applied, nil
@@ -176,7 +184,7 @@ func (commands Commands) registerBuildHandler(ctx context.Context, scope tx.Scop
 		if err != nil {
 			return nil, err
 		}
-		if err := recordApplied(scoped.Store, command.Envelope.SemanticKey, result); err != nil {
+		if err := recordApplied(scoped.Store, command.Envelope.SemanticKey, commandRegisterBuild, command.PayloadSHA256, result); err != nil {
 			return nil, err
 		}
 		return result, nil
@@ -187,7 +195,7 @@ func (commands Commands) publishHandler(ctx context.Context, scope tx.Scope, com
 	commandMutex.Lock()
 	defer commandMutex.Unlock()
 	return commands.runCommand(func(scoped Commands) (any, error) {
-		if applied, found, err := replayApplied(scoped.Store, command.Envelope.SemanticKey); err != nil {
+		if applied, found, err := replayApplied(scoped.Store, command.Envelope.SemanticKey, commandPublish, command.PayloadSHA256); err != nil {
 			return nil, err
 		} else if found {
 			return applied, nil
@@ -200,7 +208,7 @@ func (commands Commands) publishHandler(ctx context.Context, scope tx.Scope, com
 		if err != nil {
 			return nil, err
 		}
-		if err := recordApplied(scoped.Store, command.Envelope.SemanticKey, activation); err != nil {
+		if err := recordApplied(scoped.Store, command.Envelope.SemanticKey, commandPublish, command.PayloadSHA256, activation); err != nil {
 			return nil, err
 		}
 		return activation, nil
@@ -211,7 +219,7 @@ func (commands Commands) withdrawHandler(ctx context.Context, scope tx.Scope, co
 	commandMutex.Lock()
 	defer commandMutex.Unlock()
 	return commands.runCommand(func(scoped Commands) (any, error) {
-		if applied, found, err := replayApplied(scoped.Store, command.Envelope.SemanticKey); err != nil {
+		if applied, found, err := replayApplied(scoped.Store, command.Envelope.SemanticKey, commandWithdraw, command.PayloadSHA256); err != nil {
 			return nil, err
 		} else if found {
 			return applied, nil
@@ -224,7 +232,7 @@ func (commands Commands) withdrawHandler(ctx context.Context, scope tx.Scope, co
 		if err != nil {
 			return nil, err
 		}
-		if err := recordApplied(scoped.Store, command.Envelope.SemanticKey, activation); err != nil {
+		if err := recordApplied(scoped.Store, command.Envelope.SemanticKey, commandWithdraw, command.PayloadSHA256, activation); err != nil {
 			return nil, err
 		}
 		return activation, nil
@@ -234,24 +242,24 @@ func (commands Commands) withdrawHandler(ctx context.Context, scope tx.Scope, co
 // appliedCommandStore is implemented by StateFile: the bus retries a body on a
 // serializable abort, and the release file must not apply that body twice.
 type appliedCommandStore interface {
-	AppliedResult(string) (json.RawMessage, bool, error)
-	RecordApplied(string, any) error
+	AppliedResult(commandKey, moduleCommand, payloadSHA256 string) (json.RawMessage, bool, error)
+	RecordApplied(commandKey, moduleCommand, payloadSHA256 string, result any) error
 }
 
-func replayApplied(store CommandStore, commandKey string) (json.RawMessage, bool, error) {
+func replayApplied(store CommandStore, commandKey, moduleCommand, payloadSHA256 string) (json.RawMessage, bool, error) {
 	applied, ok := store.(appliedCommandStore)
 	if !ok {
 		return nil, false, nil
 	}
-	return applied.AppliedResult(commandKey)
+	return applied.AppliedResult(commandKey, moduleCommand, payloadSHA256)
 }
 
-func recordApplied(store CommandStore, commandKey string, result any) error {
+func recordApplied(store CommandStore, commandKey, moduleCommand, payloadSHA256 string, result any) error {
 	applied, ok := store.(appliedCommandStore)
 	if !ok {
 		return nil
 	}
-	return applied.RecordApplied(commandKey, result)
+	return applied.RecordApplied(commandKey, moduleCommand, payloadSHA256, result)
 }
 
 func decodePayload(payload json.RawMessage, target any) error {
@@ -285,8 +293,7 @@ func (commands Commands) RegisterBuild(ctx context.Context, transaction tx.Tx, c
 			return BuildResult{}, operator.Refuse(CodeVersionExists, usedNumberMessage(existing), usedNumberDetail(existing))
 		}
 	}
-	// Lock order: a code rollback reads the assets lane before its own lane, the
-	// one direction in which two lanes are ever locked together.
+	// Lock order: a code rollback reads the assets lane before its own lane.
 	var activeAssets *domain.Version
 	if release.Lane == domain.LaneCode && request.Rollback {
 		rows, err := commands.Store.LockLaneTx(ctx, transaction, domain.LaneAssets, release.Version.String())
@@ -376,6 +383,9 @@ func (commands Commands) Publish(ctx context.Context, transaction tx.Tx, command
 	if lane == domain.LaneCatalog && countActive(laneRows) >= maxActiveCatalogReleases {
 		return Activation{}, operator.Refuse(CodeActiveLimit, "the catalog lane already has the maximum number of ACTIVE releases; withdraw one first", map[string]int{"limit": maxActiveCatalogReleases})
 	}
+	if err := commands.checkBootstrapOrder(ctx, transaction, lane, release.Version); err != nil {
+		return Activation{}, err
+	}
 	var superseded []string
 	if lane != domain.LaneCatalog {
 		superseded, err = commands.Store.SupersedeLaneTx(ctx, transaction, lane, at)
@@ -391,6 +401,38 @@ func (commands Commands) Publish(ctx context.Context, transaction tx.Tx, command
 		return Activation{}, err
 	}
 	return Activation{ActivationID: activationID, Version: release.Version.String(), Action: "PUBLISH", State: string(domain.StateActive), Superseded: superseded, At: at}, nil
+}
+
+// checkBootstrapOrder refuses a publication whose resulting active set would
+// put the code release at or below the asset bootstrap (OA-10 clause 3): a
+// cleared client would install the code release before the assets it needs.
+// Registration checks this against the bootstrap of its moment; a later assets
+// publication can move the bootstrap above an already-built code rollback, so
+// only the resulting set at publication proves the order.
+func (commands Commands) checkBootstrapOrder(ctx context.Context, transaction tx.Tx, lane domain.Lane, version domain.Version) error {
+	if lane != domain.LaneAssets && lane != domain.LaneCode {
+		return nil
+	}
+	otherLane := domain.LaneAssets
+	if lane == domain.LaneAssets {
+		otherLane = domain.LaneCode
+	}
+	rows, err := commands.Store.LockLaneTx(ctx, transaction, otherLane, version.String())
+	if err != nil {
+		return err
+	}
+	otherActive, _, err := laneVersions(rows)
+	if err != nil || otherActive == nil {
+		return err
+	}
+	code, assets := version, *otherActive
+	if lane == domain.LaneAssets {
+		code, assets = *otherActive, version
+	}
+	if code.Compare(assets) > 0 {
+		return nil
+	}
+	return operator.Refuse(CodeRollbackBelowAssets, fmt.Sprintf("the code release %s must stay above the active assets release %s: a cleared client installs the code release before its asset bootstrap", code, assets), map[string]string{"code_version": code.String(), "assets_version": assets.String()})
 }
 
 // Withdraw stops advertising an ACTIVE release; nothing is reactivated.
