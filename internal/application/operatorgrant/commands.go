@@ -252,21 +252,37 @@ func (commands Commands) applyInline(ctx context.Context, scope tx.Scope, admin 
 		return GrantResult{}, operator.ErrUnavailable
 	}
 	result := GrantResult{SemanticKey: commandKey, PlayerCount: len(recipients), State: operator.StateApplied}
-	for _, rawID := range recipients {
-		if _, err := commands.Grants.AdminGrantTx(ctx, scope.Tx, admin, identity.PlayerID(rawID), recipientKey(commandKey, rawID), PolicyVersion, lines, scope.Operation); err != nil {
-			if !appi5.IsPermanentGrantRefusal(err) {
-				// The bus rolls the whole command back and a resend with the same
-				// key retries every recipient; a transient fault must not become a
-				// permanent refusal.
+	for index, rawID := range recipients {
+		savepoint := "operator_grant_recipient_" + strconv.Itoa(index)
+		if _, err := scope.Tx.Exec(ctx, "SAVEPOINT "+savepoint); err != nil {
+			return GrantResult{}, err
+		}
+		_, grantErr := commands.Grants.AdminGrantTx(ctx, scope.Tx, admin, identity.PlayerID(rawID), recipientKey(commandKey, rawID), PolicyVersion, lines, scope.Operation)
+		if grantErr == nil {
+			if _, err := scope.Tx.Exec(ctx, "RELEASE SAVEPOINT "+savepoint); err != nil {
 				return GrantResult{}, err
 			}
-			result.Refused++
-			if len(result.Failures) < maxReportedFailures {
-				result.Failures = append(result.Failures, RecipientFailure{PlayerID: rawID, Error: err.Error()})
-			}
+			result.Applied++
 			continue
 		}
-		result.Applied++
+		if !appi5.IsPermanentGrantRefusal(grantErr) {
+			// The bus rolls the whole command back and a resend with the same
+			// key retries every recipient; a transient fault must not become a
+			// permanent refusal.
+			return GrantResult{}, grantErr
+		}
+		// A permanent refusal can follow earlier lines of the same recipient;
+		// undo them so the recipient fails whole rather than partially.
+		if _, err := scope.Tx.Exec(ctx, "ROLLBACK TO SAVEPOINT "+savepoint); err != nil {
+			return GrantResult{}, err
+		}
+		if _, err := scope.Tx.Exec(ctx, "RELEASE SAVEPOINT "+savepoint); err != nil {
+			return GrantResult{}, err
+		}
+		result.Refused++
+		if len(result.Failures) < maxReportedFailures {
+			result.Failures = append(result.Failures, RecipientFailure{PlayerID: rawID, Error: grantErr.Error()})
+		}
 	}
 	return result, nil
 }
