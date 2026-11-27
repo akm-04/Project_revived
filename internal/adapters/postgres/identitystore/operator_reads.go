@@ -54,8 +54,8 @@ type onlineSessionWire struct {
 	Online     bool      `json:"online"`
 }
 
-// ListOnlineSessionsTx pages one row per player and logical server: the newest
-// live session, with Online true only for that session's presence. Repeated
+// ListOnlineSessionsTx pages one row per player and logical server: the most
+// recently active live session, so Online is true when any of them is. Repeated
 // logins leave older sessions and contexts open (I3 allows multiple account
 // sessions), so grouping by player and server keeps stale history from
 // duplicating a name. A nil ServerID selects every logical server. The caller
@@ -84,7 +84,7 @@ FROM (SELECT live.* FROM (
         FROM gameplay_contexts c JOIN account_sessions s ON s.session_id=c.session_id
         WHERE c.ended_at IS NULL AND s.revoked_at IS NULL
           AND ($1::int IS NULL OR c.logical_server_id=$1)
-        ORDER BY c.player_id,c.logical_server_id,s.issued_at DESC,s.session_id DESC) live
+        ORDER BY c.player_id,c.logical_server_id,s.last_activity_at DESC,s.issued_at DESC,s.session_id DESC) live
       WHERE ($2::uuid IS NULL OR live.session_id > $2::uuid)
       ORDER BY live.session_id LIMIT $3) rows`, server, after, filter.Limit, onlineSince).Scan(&raw)
 	if err != nil {
