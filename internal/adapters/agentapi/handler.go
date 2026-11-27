@@ -334,11 +334,7 @@ func (handler Handler) serveLogin(writer http.ResponseWriter, request *http.Requ
 		handler.writeBodyError(writer, err)
 		return
 	}
-	if err := handler.Credentials.Verify(body.Password); err != nil {
-		handler.writeAgentError(writer, "login", err)
-		return
-	}
-	generation, err := handler.Credentials.Generation()
+	generation, err := handler.Credentials.VerifyAndGeneration(body.Password)
 	if err != nil {
 		handler.writeAgentError(writer, "login", err)
 		return

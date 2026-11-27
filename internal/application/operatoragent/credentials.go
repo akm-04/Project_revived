@@ -209,6 +209,26 @@ func (credentials *Credentials) Verify(password string) error {
 	return nil
 }
 
+// VerifyAndGeneration checks password against one snapshot of the stored
+// record and returns the generation of those same bytes. A password change or
+// an offline reset between the check and session minting therefore cannot lend
+// its new generation to an older credential proof.
+func (credentials *Credentials) VerifyAndGeneration(password string) (string, error) {
+	contents, err := os.ReadFile(credentials.passwordPath())
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return "", Refuse(CodeSetupRequired, "the agent has no root password yet")
+		}
+		return "", err
+	}
+	encoded := strings.TrimSpace(string(contents))
+	if !verifyPassword(encoded, password) {
+		return "", Refuse(CodeLoginRefused, "wrong password")
+	}
+	digest := sha256.Sum256([]byte(encoded))
+	return hex.EncodeToString(digest[:]), nil
+}
+
 func hashPassword(password string) (string, error) {
 	salt := make([]byte, argonSalt)
 	if _, err := rand.Read(salt); err != nil {

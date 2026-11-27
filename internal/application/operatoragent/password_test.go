@@ -136,3 +136,43 @@ func TestSetupRefusesAPasswordBelowTheMinimum(t *testing.T) {
 		t.Fatalf("short setup: %v", err)
 	}
 }
+
+func TestLoginBindsTheSessionToTheVerifiedPasswordSnapshot(t *testing.T) {
+	credentials := NewCredentials(t.TempDir())
+	if err := credentials.Setup("original-password"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := credentials.VerifyAndGeneration("wrong-password"); err == nil || refusalCode(t, err) != CodeLoginRefused {
+		t.Fatalf("wrong password: %v", err)
+	}
+	generation, err := credentials.VerifyAndGeneration("original-password")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stored, err := credentials.Generation(); err != nil || stored != generation {
+		t.Fatalf("verified generation = %q, stored = %q (%v)", generation, stored, err)
+	}
+	sessions := NewSessions(func() time.Time { return time.Unix(0, 0) })
+	token, _, err := sessions.Login(generation)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// A change lands after the verification; the token must keep the generation
+	// of the bytes it was verified against, never the replacement's.
+	if err := credentials.ChangePassword("original-password", "replacement-password"); err != nil {
+		t.Fatal(err)
+	}
+	replacement, err := credentials.Generation()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if replacement == generation {
+		t.Fatal("the password generation did not change")
+	}
+	if sessions.Authorize(token, replacement) {
+		t.Fatal("the token took the generation of a password change that followed its verification")
+	}
+	if !sessions.Authorize(token, generation) {
+		t.Fatal("the token is not bound to the verified password snapshot")
+	}
+}
