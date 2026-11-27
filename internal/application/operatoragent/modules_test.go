@@ -121,7 +121,16 @@ func TestLogsModuleMergesTheAgentAndBackendHalves(t *testing.T) {
 			t.Fatalf("missing read %s in %+v", name, list.Modules[0].Reads)
 		}
 	}
-	if len(list.Modules[0].Commands) != 1 || list.Modules[0].Commands[0].Name != "logs.clear" || list.Modules[0].Commands[0].Route != operator.RouteAgent {
+	clearAgent, flushBackend := false, false
+	for _, command := range list.Modules[0].Commands {
+		if command.Name == "logs.clear" && command.Route == operator.RouteAgent {
+			clearAgent = true
+		}
+		if command.Name == "logs.flush" && (command.Route == "" || command.Route == operator.RouteBackend) {
+			flushBackend = true
+		}
+	}
+	if !clearAgent || !flushBackend {
 		t.Fatalf("logs commands = %+v", list.Modules[0].Commands)
 	}
 }

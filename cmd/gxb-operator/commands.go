@@ -353,18 +353,7 @@ func runBackup(root string, args []string) error {
 		}
 		return printResult(status, body)
 	case "restore":
-		if len(args) < 2 {
-			return errors.New("usage: backup restore <id> --reason <text>")
-		}
-		reason, err := backupReasonFlag(args[2:])
-		if err != nil {
-			return err
-		}
-		status, body, err := client.request(http.MethodPost, "/agent/v1/backup/restore", map[string]string{"id": args[1], "reason": reason})
-		if err != nil {
-			return err
-		}
-		return printResult(status, body)
+		return runBackupRestore(client, args[1:])
 	case "update-backend":
 		reason, err := backupReasonFlag(args[1:])
 		if err != nil {
@@ -421,6 +410,48 @@ func backupDeleteArguments(args []string) ([]string, string, error) {
 		return nil, "", errors.New("usage: backup delete <id>... --reason <text>")
 	}
 	return ids, reason, nil
+}
+
+// runBackupRestore prints the snapshot preview and needs --yes before it
+// replaces the database (S2.2).
+func runBackupRestore(client *agentClient, args []string) error {
+	if len(args) < 1 {
+		return errors.New("usage: backup restore <id> --reason <text> [--yes]")
+	}
+	id := args[0]
+	reason, yes, err := backupRestoreFlags(args[1:])
+	if err != nil {
+		return err
+	}
+	status, body, err := client.request(http.MethodGet, "/agent/v1/backup/restore-preview?name="+url.QueryEscape(id), nil)
+	if err != nil {
+		return err
+	}
+	if err := printResult(status, body); err != nil {
+		return err
+	}
+	if !yes {
+		return errors.New("nothing was restored: review the preview, then add --yes")
+	}
+	status, body, err = client.request(http.MethodPost, "/agent/v1/backup/restore", map[string]string{"id": id, "reason": reason})
+	if err != nil {
+		return err
+	}
+	return printResult(status, body)
+}
+
+func backupRestoreFlags(args []string) (string, bool, error) {
+	flags := flag.NewFlagSet("backup restore", flag.ContinueOnError)
+	flags.SetOutput(os.Stderr)
+	reason := flags.String("reason", "", "why the operator restores the snapshot")
+	yes := flags.Bool("yes", false, "confirm the restore after reading the preview")
+	if err := flags.Parse(args); err != nil {
+		return "", false, err
+	}
+	if *reason == "" {
+		return "", false, errors.New("--reason is required")
+	}
+	return *reason, *yes, nil
 }
 
 func backupReasonFlag(args []string) (string, error) {
