@@ -192,11 +192,19 @@ func (input SDKImportInput) validate() error {
 		if login.Algorithm != SDKPasswordAlgorithm {
 			return fmt.Errorf("logins[%d]: unsupported password algorithm", index)
 		}
-		if _, err := hex.DecodeString(login.Salt); err != nil {
+		salt, err := hex.DecodeString(login.Salt)
+		if err != nil {
 			return fmt.Errorf("logins[%d]: salt is not hex", index)
 		}
-		if _, err := hex.DecodeString(login.Hash); err != nil {
+		if len(salt) != SDKPasswordSaltBytes {
+			return fmt.Errorf("logins[%d]: salt must be %d bytes", index, SDKPasswordSaltBytes)
+		}
+		hash, err := hex.DecodeString(login.Hash)
+		if err != nil {
 			return fmt.Errorf("logins[%d]: hash is not hex", index)
+		}
+		if len(hash) != SDKPasswordHashBytes {
+			return fmt.Errorf("logins[%d]: hash must be %d bytes", index, SDKPasswordHashBytes)
 		}
 		if _, duplicate := logins[normalized]; duplicate {
 			return fmt.Errorf("logins[%d]: duplicate normalized login", index)

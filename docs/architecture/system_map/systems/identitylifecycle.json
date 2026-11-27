@@ -92,6 +92,7 @@
    "sdk_native_test.go",
    "sdk_test.go",
    "sdkimport_test.go",
+   "sdkrecord_test.go",
    "service_test.go"
   ]
  }
