@@ -764,6 +764,81 @@ func TestInterruptedBuildCleaned(t *testing.T) {
 	assertEmptyDirectory(t, fixture.staging)
 }
 
+// TestRemovedPatchRestoresItsStockFile proves the revert set: a file the first
+// release shipped through a patch is put back from stock once the patch is
+// removed, because the client keeps files a later release does not contain.
+func TestRemovedPatchRestoresItsStockFile(t *testing.T) {
+	fixture := newFixture(t)
+	stock := []byte(syntheticStockBackend)
+	fixture.addStock(t, "app/common/network/Backend.lua", stock)
+	fixture.addSource(t, "app/example/Feature.lua", []byte("return {}\n"))
+	fixture.addPatch(t, "backend_http_poll", "app/common/network/Backend.lua", stock, standardPatch(), syntheticOverlay)
+
+	first := fixture.build(t, fixture.input("1.631.2"))
+	priorPaths := manifestPaths(t, first)
+	if err := os.RemoveAll(filepath.Join(fixture.clientTree, "patches", "backend_http_poll")); err != nil {
+		t.Fatal(err)
+	}
+
+	input := fixture.input("1.631.3")
+	input.PriorPaths = priorPaths
+	result := fixture.buildResult(t, input)
+	assembled := readAssembled(t, fixture.updates, result.Request)
+	for _, entry := range []string{"src_32/app/common/network/Backend.lua", "src_64/app/common/network/Backend.lua"} {
+		if got := zipEntry(t, assembled, entry); !bytes.Equal(got, stock) {
+			t.Fatalf("%s is not the stock file", entry)
+		}
+	}
+	if result.Report.Reverted != 1 || !sampleContains(result.Report.RevertedSample, "app/common/network/Backend.lua") {
+		t.Fatalf("report = %+v", result.Report)
+	}
+	if result.Report.Unrevertable != 0 {
+		t.Fatalf("unrevertable = %v", result.Report.UnrevertableSample)
+	}
+}
+
+// TestPriorPathWithoutStockIsReported proves a prior path our tree added (no
+// stock file) is reported unrevertable and does not fail the build, while the
+// generated lazy and catalog members are never treated as revertable.
+func TestPriorPathWithoutStockIsReported(t *testing.T) {
+	fixture := newFixture(t)
+	fixture.addSource(t, "app/example/Feature.lua", []byte("return {}\n"))
+
+	input := fixture.input("1.631.2")
+	input.PriorPaths = []string{"src_64/app/generated/Added.lua", "lazyFile.json", "src_32/version.json"}
+	result := fixture.buildResult(t, input)
+	if result.Report.Unrevertable != 1 || !sampleContains(result.Report.UnrevertableSample, "app/generated/Added.lua") {
+		t.Fatalf("report = %+v", result.Report)
+	}
+	if result.Report.Reverted != 0 {
+		t.Fatalf("reverted = %v", result.Report.RevertedSample)
+	}
+}
+
+func manifestPaths(t *testing.T, request otarelease.BuildRequest) []string {
+	t.Helper()
+	var document struct {
+		Files []otarelease.ManifestEntry `json:"files"`
+	}
+	if err := json.Unmarshal(request.Manifest, &document); err != nil {
+		t.Fatalf("decode manifest: %v", err)
+	}
+	paths := make([]string, len(document.Files))
+	for index, entry := range document.Files {
+		paths[index] = entry.Path
+	}
+	return paths
+}
+
+func sampleContains(paths []string, want string) bool {
+	for _, path := range paths {
+		if path == want {
+			return true
+		}
+	}
+	return false
+}
+
 func padVolume(number int) string {
 	return fmt.Sprintf("%03d", number)
 }

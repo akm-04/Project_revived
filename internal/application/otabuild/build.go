@@ -55,6 +55,11 @@ type Input struct {
 	// AssetsSidecar is the ACTIVE assets release's res sidecar that a code
 	// lazy refresh reads; required when LazyRefresh is set.
 	AssetsSidecar string
+	// PriorPaths are the manifest paths every registered code-lane release
+	// shipped, read from the agent's release ledger. A code build adds back any
+	// path the new package lacks, with its stock content, because the client
+	// keeps a file a later release no longer contains.
+	PriorPaths []string
 	// VolumeByteLimit is the per-volume cap; zero means the default 99 MB.
 	VolumeByteLimit int64
 }
@@ -135,13 +140,14 @@ func Build(ctx context.Context, input Input) (Result, error) {
 		defer closeCatalog()
 	}
 
-	report := Report{Lane: string(lane), Version: version.String(), MissingSample: []string{}, MismatchSample: []string{}}
+	report := Report{Lane: string(lane), Version: version.String(), MissingSample: []string{}, MismatchSample: []string{}, RevertedSample: []string{}, UnrevertableSample: []string{}}
 	var entries []packageEntry
 	var sidecar []resSidecarEntry
 	if lane == otarelease.LaneAssets {
 		entries, sidecar, report, err = assetsPackage(input.ResPath, version.String(), catalogBaseline)
 	} else {
-		entries, err = codeEntries(input)
+		var reverted revertSummary
+		entries, reverted, err = codeEntries(input)
 		if err == nil && input.LazyRefresh {
 			var lazyBytes, catalogBytes []byte
 			lazyBytes, catalogBytes, sidecar, report, err = lazyRefreshPackage(input.RecoveredResPath, input.AssetsSidecar, catalogBaseline, version.String())
@@ -153,6 +159,10 @@ func Build(ctx context.Context, input Input) (Result, error) {
 				sort.Slice(entries, func(left, right int) bool { return entries[left].path < entries[right].path })
 			}
 		}
+		report.Reverted = len(reverted.restored)
+		report.RevertedSample = sample(reverted.restored)
+		report.Unrevertable = len(reverted.unrevertable)
+		report.UnrevertableSample = sample(reverted.unrevertable)
 	}
 	if err != nil {
 		return Result{}, err
@@ -222,17 +232,88 @@ func Build(ctx context.Context, input Input) (Result, error) {
 	return Result{Request: request, Report: report}, nil
 }
 
-// codeEntries collects the cumulative code/catalog package and applies the
+// codeEntries collects the cumulative code/catalog package, restores the
+// previously shipped paths its patch set no longer produces, and applies the
 // origin guard.
-func codeEntries(input Input) ([]packageEntry, error) {
+func codeEntries(input Input) ([]packageEntry, revertSummary, error) {
 	files, err := collectPackage(input.ClientTree, stockSource{root: input.StockSource})
 	if err != nil {
-		return nil, err
+		return nil, revertSummary{}, err
+	}
+	reverted, err := restorePriorPaths(input.PriorPaths, input.StockSource, files)
+	if err != nil {
+		return nil, revertSummary{}, err
 	}
 	if err := checkOriginGuard(files, input.Origins); err != nil {
-		return nil, err
+		return nil, revertSummary{}, err
 	}
-	return packageEntries(files), nil
+	return packageEntries(files), reverted, nil
+}
+
+// revertSummary is the build's revert set: the prior paths put back from stock
+// and the ones stock cannot supply.
+type revertSummary struct {
+	restored     []string
+	unrevertable []string
+}
+
+// restorePriorPaths adds back, from the stock source, every client path an
+// earlier code release shipped that this package lacks. The client only replaces
+// files a release contains, so a removed patch would otherwise leave its old
+// copy on devices forever.
+func restorePriorPaths(priorPaths []string, stockRoot string, files map[string][]byte) (revertSummary, error) {
+	summary := revertSummary{restored: []string{}, unrevertable: []string{}}
+	visited := make(map[string]struct{}, len(priorPaths))
+	for _, clientPath := range priorPaths {
+		relative, generated := relativeStockPath(clientPath)
+		if generated {
+			continue
+		}
+		if _, done := visited[relative]; done {
+			continue
+		}
+		visited[relative] = struct{}{}
+		if _, shipped := files[relative]; shipped {
+			continue
+		}
+		if stockRoot == "" {
+			summary.unrevertable = append(summary.unrevertable, relative)
+			continue
+		}
+		content, err := stockSource{root: stockRoot}.read(relative)
+		if errors.Is(err, os.ErrNotExist) {
+			summary.unrevertable = append(summary.unrevertable, relative)
+			continue
+		}
+		if err != nil {
+			return revertSummary{}, err
+		}
+		if err := addPackageFile(files, relative, content); err != nil {
+			return revertSummary{}, err
+		}
+		summary.restored = append(summary.restored, relative)
+	}
+	return summary, nil
+}
+
+// relativeStockPath maps a release manifest path onto the stock source member a
+// patch reads. The lazy file and catalog are generated members, not stock
+// files, so they are never reverted.
+func relativeStockPath(clientPath string) (string, bool) {
+	if clientPath == lazyFileMember {
+		return "", true
+	}
+	for _, prefix := range []string{"src_32/", "src_64/"} {
+		if !strings.HasPrefix(clientPath, prefix) {
+			continue
+		}
+		relative := strings.TrimPrefix(clientPath, prefix)
+		if relative == catalogMember {
+			return "", true
+		}
+		return relative, false
+	}
+	return clientPath, false
 }
 
 func archiveMethod(lane otarelease.Lane) uint16 {

@@ -69,6 +69,12 @@ type Report struct {
 	LazyRecovered  int      `json:"lazy_recovered"`
 	MissingSample  []string `json:"missing_sample"`
 	MismatchSample []string `json:"mismatch_sample"`
+	// Reverted is the prior-release paths put back from stock; Unrevertable is
+	// the ones stock cannot supply (a file our tree added).
+	Reverted           int      `json:"reverted"`
+	RevertedSample     []string `json:"reverted_sample"`
+	Unrevertable       int      `json:"unrevertable"`
+	UnrevertableSample []string `json:"unrevertable_sample"`
 }
 
 const reportSampleLimit = 100

@@ -1930,7 +1930,8 @@
     "*Covers"
    ],
    "operatoragent": [
-    "Load"
+    "Load",
+    "NewStateFile"
    ]
   },
   "petcampaign": {
@@ -5587,7 +5588,8 @@
     "PatchesPresent"
    ],
    "otarelease": [
-    "Load"
+    "Load",
+    "NewStateFile"
    ]
   },
   "operatorcatalog": {

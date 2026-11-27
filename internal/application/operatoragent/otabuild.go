@@ -367,6 +367,12 @@ func (build Build) Start(ctx context.Context, request BuildRequest) (Operation, 
 				input.ResPath = settings.ResPath
 			}
 			input.RecoveredResPath = settings.RecoveredResPath
+			if lane == domain.LaneCode {
+				input.PriorPaths, err = priorReleasePaths(config.OTARoot)
+				if err != nil {
+					return nil, Refuse(CodeBuildConfig, "the release ledger is unreadable: "+err.Error())
+				}
+			}
 			result, err := otabuild.Build(ctx, input)
 			if err != nil {
 				return nil, buildRefusal(err)
@@ -400,6 +406,31 @@ func (build Build) Start(ctx context.Context, request BuildRequest) (Operation, 
 		}},
 	}
 	return build.Operations.Start(ctx, OTABuildKind, semanticKey, fingerprint, steps)
+}
+
+// priorReleasePaths is every client path any registered code-lane release
+// shipped, read from the file-only release ledger (S1). The build restores a
+// missing one from stock, so a removed patch cannot strand its old copy. An
+// unreadable ledger or manifest refuses the build rather than skipping a path.
+func priorReleasePaths(otaRoot string) ([]string, error) {
+	document, err := apprelease.NewStateFile(otaRoot).Load()
+	if err != nil {
+		return nil, err
+	}
+	paths := make([]string, 0)
+	for _, stored := range document.Releases {
+		if stored.Lane != string(domain.LaneCode) {
+			continue
+		}
+		release, err := domain.ParseRelease(stored.RawRelease)
+		if err != nil {
+			return nil, fmt.Errorf("release %s: %w", stored.Version, err)
+		}
+		for _, entry := range release.Manifest {
+			paths = append(paths, entry.Path)
+		}
+	}
+	return paths, nil
 }
 
 // buildRefusalCodes maps every otabuild refusal kind to one stable AGENT_* code.
