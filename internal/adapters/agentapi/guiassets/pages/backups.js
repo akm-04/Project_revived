@@ -37,11 +37,25 @@ export function renderPage(container, context) {
       return;
     }
     selectedEntry = entry;
+    selectedIDs.clear();
+    for (const table of [list.automatic, list.manual]) {
+      for (const checkbox of table.querySelectorAll("input[type=checkbox]")) {
+        checkbox.checked = false;
+      }
+    }
+    updateDeleteSelected();
     restore.button.disabled = false;
   }
 
   function toggleSelected(entry, checked) {
     if (checked) {
+      selectedEntry = null;
+      restore.button.disabled = true;
+      for (const table of [list.automatic, list.manual]) {
+        for (const radio of table.querySelectorAll("input[type=radio]")) {
+          radio.checked = false;
+        }
+      }
       selectedIDs.add(entry.id);
     } else {
       selectedIDs.delete(entry.id);
