@@ -103,6 +103,22 @@ func TestBackupModuleIsRegisteredAsAnAgentModule(t *testing.T) {
 	t.Fatal("backup.restore is not declared")
 }
 
+func TestBackupUpdateBackendIsAMaintenanceCommandWithAFolder(t *testing.T) {
+	for _, command := range BackupModule().Commands {
+		if command.Name != "backup.update_backend" {
+			continue
+		}
+		if command.Class != operator.ClassMaintenance {
+			t.Fatalf("class = %q", command.Class)
+		}
+		if len(command.Fields) != 1 || command.Fields[0].Name != "folder" || !command.Fields[0].Required {
+			t.Fatalf("fields = %+v", command.Fields)
+		}
+		return
+	}
+	t.Fatal("backup.update_backend is not declared")
+}
+
 func TestLogsModuleMergesTheAgentAndBackendHalves(t *testing.T) {
 	catalog := ModuleCatalog{
 		Backend: fakeBackendModules{modules: []operator.Module{operator.LogsModule()}},

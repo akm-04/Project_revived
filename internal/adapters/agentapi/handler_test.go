@@ -623,6 +623,23 @@ func TestDashboardReadIsComposedByTheAgent(t *testing.T) {
 	}
 }
 
+func TestUpdateBackendRouteRequiresAFolderAndAReason(t *testing.T) {
+	handler, _, session := newForwardingHandler(t)
+	directory := t.TempDir()
+	handler.Backup = &operatoragent.BackupService{
+		Directory:  directory,
+		Operations: operatoragent.NewOperations(directory+"/ops", nil, time.Now),
+		Guard:      &operatoragent.BackendGuard{},
+		Now:        time.Now,
+	}
+	for _, body := range []string{`{"reason":"upgrade"}`, `{"folder":"/srv/backend"}`} {
+		recorder := serveAgent(handler, http.MethodPost, "/agent/v1/backup/update-backend", session, body)
+		if recorder.Code != http.StatusConflict || refusalCodeOf(t, recorder) != operatoragent.CodeBodyInvalid {
+			t.Fatalf("%s: %d %s", body, recorder.Code, recorder.Body)
+		}
+	}
+}
+
 func TestBackupRoutesUseTheAgentService(t *testing.T) {
 	credentials := operatoragent.NewCredentials(t.TempDir())
 	if err := credentials.Setup("test password"); err != nil {

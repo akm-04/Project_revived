@@ -145,13 +145,23 @@ func runLogout(root string) error {
 
 func runBackend(root string, args []string) error {
 	if len(args) == 0 {
-		return errors.New("usage: backend start [--closed] | restart [--closed] | stop | status")
+		return errors.New("usage: backend start [--closed] | restart [--closed] | stop | status | -s <folder> [--reason <text>]")
 	}
 	client, err := newAgentClient(root, true)
 	if err != nil {
 		return err
 	}
 	switch args[0] {
+	case "-s":
+		options, err := parseBackendFolderArguments(args)
+		if err != nil {
+			return err
+		}
+		status, body, err := client.request(http.MethodPost, "/agent/v1/backup/update-backend", map[string]string{"folder": options.Folder, "reason": options.Reason})
+		if err != nil {
+			return err
+		}
+		return printResult(status, body)
 	case "start":
 		flags := flag.NewFlagSet("backend start", flag.ContinueOnError)
 		flags.SetOutput(os.Stderr)
@@ -233,7 +243,7 @@ func runCommand(root string, args []string) error {
 
 func runBackup(root string, args []string) error {
 	if len(args) == 0 {
-		return errors.New("usage: backup snapshot|list|prune|pin|unpin|delete|path|schedule|keep|restore|update-backend")
+		return errors.New("usage: backup snapshot|list|prune|pin|unpin|delete|path|schedule|keep|restore")
 	}
 	client, err := newAgentClient(root, true)
 	if err != nil {
@@ -369,16 +379,6 @@ func runBackup(root string, args []string) error {
 		return printResult(status, body)
 	case "restore":
 		return runBackupRestore(client, args[1:])
-	case "update-backend":
-		reason, err := backupReasonFlag(args[1:])
-		if err != nil {
-			return err
-		}
-		status, body, err := client.request(http.MethodPost, "/agent/v1/backup/update-backend", map[string]string{"reason": reason})
-		if err != nil {
-			return err
-		}
-		return printResult(status, body)
 	default:
 		return fmt.Errorf("unknown backup command %q", args[0])
 	}

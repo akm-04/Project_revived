@@ -31,6 +31,35 @@ type resArguments struct {
 	Lane      string
 }
 
+// backendFolderArguments is `backend -s <folder> [--reason <text>]`.
+type backendFolderArguments struct {
+	Folder string
+	Reason string
+}
+
+// parseBackendFolderArguments resolves the folder now, because the agent only
+// accepts an absolute path and the CLI runs on the same machine.
+func parseBackendFolderArguments(args []string) (backendFolderArguments, error) {
+	flags := flag.NewFlagSet("backend -s", flag.ContinueOnError)
+	flags.SetOutput(os.Stderr)
+	source := flags.String("s", "", "release folder, or a source tree to build")
+	reason := flags.String("reason", "", "why the backend is updated")
+	if err := flags.Parse(args); err != nil {
+		return backendFolderArguments{}, err
+	}
+	if *source == "" {
+		return backendFolderArguments{}, errors.New("usage: backend -s <folder> [--reason <text>]")
+	}
+	folder, err := filepath.Abs(*source)
+	if err != nil {
+		return backendFolderArguments{}, err
+	}
+	if *reason == "" {
+		*reason = "update backend to " + folder
+	}
+	return backendFolderArguments{Folder: folder, Reason: *reason}, nil
+}
+
 func runPaths(root string, args []string) error {
 	change, err := parsePathsSetArguments(args)
 	if err != nil {
