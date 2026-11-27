@@ -184,3 +184,33 @@ func TestRecoverRetryClearsAdmissionOnlyOnSuccess(t *testing.T) {
 		t.Fatalf("the settled journal survived the successful retry: %v", err)
 	}
 }
+
+// TestMalformedRecoveryJournalStaysFenced is A-223: an unreadable journal was
+// deleted and reported as a settled recovery, which reopened admission.
+func TestMalformedRecoveryJournalStaysFenced(t *testing.T) {
+	for name, contents := range map[string]string{"truncated": `{"phase":"swapping",`, "empty": ""} {
+		t.Run(name, func(t *testing.T) {
+			service, _, _ := newBackupService(t)
+			if service.Guard == nil {
+				service.Guard = &BackendGuard{}
+			}
+			statePath := filepath.Join(service.Directory, backupStateFileName)
+			if err := os.WriteFile(statePath, []byte(contents), 0o600); err != nil {
+				t.Fatal(err)
+			}
+			if err := service.RecoverRestore(context.Background()); err == nil {
+				t.Fatal("startup recovery accepted an unreadable journal")
+			}
+			if err := service.RecoverRetry(context.Background()); err == nil {
+				t.Fatal("recovery retry accepted an unreadable journal")
+			}
+			stored, err := os.ReadFile(statePath)
+			if err != nil || string(stored) != contents {
+				t.Fatalf("journal changed: %q err=%v", stored, err)
+			}
+			if err := service.Guard.Acquire(); !backupRefusalCode(err, CodeBackupRecoveryRequired) {
+				t.Fatalf("admission after an unreadable journal = %v", err)
+			}
+		})
+	}
+}

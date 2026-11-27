@@ -1580,7 +1580,8 @@ func (service *BackupService) recoverRestore(ctx context.Context) error {
 	}
 	var state restoreState
 	if err := json.Unmarshal(contents, &state); err != nil {
-		return os.Remove(path)
+		// The bytes cannot say which database is serving, so the journal stays and admission stays closed (A-223).
+		return fmt.Errorf("%s is not a readable restore journal (%v): check which database is serving, then repair or remove the file by hand", backupStateFileName, err)
 	}
 	if service.Tools == nil {
 		return Refuse(CodeBackupToolsMissing, "a restore was interrupted and the pg toolchain is unavailable")
