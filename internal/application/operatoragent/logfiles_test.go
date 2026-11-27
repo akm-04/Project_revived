@@ -65,6 +65,18 @@ func TestRetainDatedLogsRemovesOnlyOldToolAndBackendFiles(t *testing.T) {
 	}
 }
 
+func TestRetainDatedLogsKeepsTheMinimumWindow(t *testing.T) {
+	directory := t.TempDir()
+	writeDatedLog(t, directory, "tool-2026-11-08.log", "line")
+	removed, err := RetainDatedLogs(directory, 5, time.Date(2026, 11, 22, 12, 0, 0, 0, time.UTC))
+	if err != nil || removed != 0 {
+		t.Fatalf("removed = %d err = %v", removed, err)
+	}
+	if _, err := os.Stat(filepath.Join(directory, "tool-2026-11-08.log")); err != nil {
+		t.Fatalf("a log inside the 15-day floor was removed: %v", err)
+	}
+}
+
 func TestTailCursorPagesAcrossRotationAndFiltersLevel(t *testing.T) {
 	directory := t.TempDir()
 	writeDatedLog(t, directory, "tool-2026-11-21.log",

@@ -429,11 +429,15 @@ func TestLoadConfigToolLogDaysDefaultAndBounds(t *testing.T) {
 		t.Fatal("zero tool_log_days was accepted")
 	}
 	root = writeAgentConfig(t, `{"listen":"127.0.0.1:8090","backend":{"operator_addr":"127.0.0.1:8091"},"tool_log_days":7,"database_log":"/var/log/postgresql/postgresql.log"}`)
+	if _, err := LoadConfig(root); err == nil || !strings.Contains(err.Error(), "15") {
+		t.Fatalf("a retention below 15 days was accepted: %v", err)
+	}
+	root = writeAgentConfig(t, `{"listen":"127.0.0.1:8090","backend":{"operator_addr":"127.0.0.1:8091"},"tool_log_days":15,"database_log":"/var/log/postgresql/postgresql.log"}`)
 	config, err = LoadConfig(root)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if config.ToolLogRetentionDays() != 7 || config.DatabaseLog != "/var/log/postgresql/postgresql.log" {
+	if config.ToolLogRetentionDays() != MinimumToolLogDays || config.DatabaseLog != "/var/log/postgresql/postgresql.log" {
 		t.Fatalf("config = %+v", config)
 	}
 }

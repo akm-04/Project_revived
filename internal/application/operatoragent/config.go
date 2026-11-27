@@ -393,8 +393,8 @@ func (config Config) Validate() error {
 			return errors.New(AgentConfigFileName + ": backend.migrations_dir is not a readable directory")
 		}
 	}
-	if value := config.ToolLogDays; value != nil && (*value < 1 || *value > maximumToolLogDays) {
-		return fmt.Errorf("%s: tool_log_days %d is outside 1..%d", AgentConfigFileName, *value, maximumToolLogDays)
+	if value := config.ToolLogDays; value != nil && (*value < MinimumToolLogDays || *value > maximumToolLogDays) {
+		return fmt.Errorf("%s: tool_log_days %d is outside %d..%d", AgentConfigFileName, *value, MinimumToolLogDays, maximumToolLogDays)
 	}
 	if err := config.PublicURLs.Validate(); err != nil {
 		return fmt.Errorf("%s: %v", AgentConfigFileName, err)
