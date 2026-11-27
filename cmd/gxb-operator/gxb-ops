@@ -1,0 +1,11 @@
+#!/bin/sh
+# Thin launcher: exec the installed gxb-operator with the same arguments. The
+# operator root defaults to this folder and can be set with GXB_OPERATOR_ROOT.
+set -eu
+
+directory=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+if [ -z "${GXB_OPERATOR_ROOT:-}" ]; then
+	GXB_OPERATOR_ROOT="$directory"
+	export GXB_OPERATOR_ROOT
+fi
+exec "$directory/gxb-operator" "$@"

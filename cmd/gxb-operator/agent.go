@@ -59,6 +59,7 @@ func runAgent(root string, args []string) error {
 		EnvFile:         config.Backend.EnvFile,
 		OperatorAddr:    config.Backend.OperatorAddr,
 		OTARoot:         config.OTARoot,
+		Root:            root,
 		LogsDirectory:   logsDirectory,
 		ReadyTimeout:    config.Backend.ReadyTimeout(),
 		StopGrace:       config.Backend.StopGrace(),
@@ -79,28 +80,28 @@ func runAgent(root string, args []string) error {
 	}
 	backupInterval := config.BackupInterval()
 	backup := &operatoragent.BackupService{
-		Directory:           backupDirectory,
-		Root:                root,
-		Keep:                config.BackupKeepValue(),
-		Schedule:            &backupInterval,
-		EnvironmentFile:     config.Backend.EnvFile,
-		Tools:               tools,
-		ToolsError:          toolsErr,
-		Operator:            operator,
-		Backend:             backend,
-		Tokens:              tokens,
-		Operations:          operations,
-		Guard:               backendGuard,
-		Log:                 toolLog,
-		Now:                 time.Now,
-		MigrationsDirectory: config.MigrationsDirectory(),
+		Directory:       backupDirectory,
+		Root:            root,
+		Keep:            config.BackupKeepValue(),
+		Schedule:        &backupInterval,
+		EnvironmentFile: config.Backend.EnvFile,
+		Tools:           tools,
+		ToolsError:      toolsErr,
+		Operator:        operator,
+		Backend:         backend,
+		Tokens:          tokens,
+		Operations:      operations,
+		Guard:           backendGuard,
+		Log:             toolLog,
+		Now:             time.Now,
+		ConfigRoot:      root,
 	}
 	if tools != nil {
 		if err := backup.RecoverRestore(context.Background()); err != nil {
 			toolLog.Write("backup", "recover", "failed", map[string]any{"error": err.Error()})
 		}
 	}
-	buildOperation := operatoragent.Build{Config: config, Operator: operator, Operations: operations}
+	buildOperation := operatoragent.Build{Root: root, Operator: operator, Operations: operations}
 	settings := &operatoragent.SettingsService{Root: root, OTARoot: config.OTARoot, MediaPath: mediaPath}
 	pings := operatoragent.NewPingSampler(operatoragent.PingPlan{
 		Config: config,
@@ -146,6 +147,7 @@ func runAgent(root string, args []string) error {
 		ToolLog:     toolLog,
 		Logs:        logService,
 		Settings:    settings,
+		Paths:       &operatoragent.PathsService{Root: root, Backend: backend},
 		Files:       &operatoragent.FileBrowser{Root: root},
 		Pings:       pings,
 		Media:       media,

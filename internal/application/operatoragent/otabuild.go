@@ -37,9 +37,22 @@ type OTAOperationStarter interface {
 // register the finished build. It never publishes (I11A_1_PLAN "L4c
 // decisions").
 type Build struct {
-	Config     Config
+	// Config is a captured configuration; it is used only when Root is empty
+	// (tests). Production sets Root, so every build reads agent.json again.
+	Config Config
+	// Root is the agent root holding agent.json.
+	Root       string
 	Operator   OperatorClient
 	Operations *Operations
+}
+
+// config reads the build inputs at the start of each build, so a path changed
+// through agent.paths.set applies without an agent restart.
+func (build Build) config() (Config, error) {
+	if build.Root == "" {
+		return build.Config, nil
+	}
+	return LoadConfig(build.Root)
 }
 
 type buildFingerprint struct {
@@ -264,7 +277,11 @@ func (build Build) Start(ctx context.Context, request BuildRequest) (Operation, 
 	if err != nil {
 		return Operation{}, Refuse(CodeBuildLaneInvalid, err.Error())
 	}
-	if build.Config.OTARoot == "" {
+	config, err := build.config()
+	if err != nil {
+		return Operation{}, Refuse(CodeBuildConfig, "agent.json is unreadable: "+err.Error())
+	}
+	if config.OTARoot == "" {
 		return Operation{}, Refuse(CodeBuildConfig, "agent.json has no ota_root")
 	}
 	if request.LazyRefresh && lane != domain.LaneCode {
@@ -322,26 +339,26 @@ func (build Build) Start(ctx context.Context, request BuildRequest) (Operation, 
 				Lane:          string(lane),
 				Version:       version.String(),
 				Rollback:      request.Rollback,
-				StockBaseline: build.Config.StockBaseline,
-				StockSource:   build.Config.StockSource,
-				StockCatalog:  build.Config.StockCatalog,
-				ClientTree:    build.Config.ClientTree,
-				Origins:       build.Config.Origins,
-				UpdatesDir:    filepath.Join(build.Config.OTARoot, "updates", string(lane)),
-				StagingDir:    filepath.Join(build.Config.OTARoot, "staging"),
+				StockBaseline: config.StockBaseline,
+				StockSource:   config.StockSource,
+				StockCatalog:  config.StockCatalog,
+				ClientTree:    config.ClientTree,
+				Origins:       config.Origins,
+				UpdatesDir:    filepath.Join(config.OTARoot, "updates", string(lane)),
+				StagingDir:    filepath.Join(config.OTARoot, "staging"),
 			}
 			if request.LazyRefresh {
 				if assetsVersion == "" {
 					return nil, Refuse(CodeBuildNoAssetsRelease, "there is no ACTIVE assets release to refresh")
 				}
-				sidecar, err := assetsSidecarPath(build.Config.OTARoot, assetsVersion)
+				sidecar, err := assetsSidecarPath(config.OTARoot, assetsVersion)
 				if err != nil {
 					return nil, err
 				}
 				input.LazyRefresh = true
 				input.AssetsSidecar = sidecar
 			}
-			settings, err := apprelease.SettingsFile{Root: build.Config.OTARoot}.Load()
+			settings, err := apprelease.SettingsFile{Root: config.OTARoot}.Load()
 			if err != nil {
 				return nil, Refuse(CodeBuildConfig, "settings.json is unreadable: "+err.Error())
 			}

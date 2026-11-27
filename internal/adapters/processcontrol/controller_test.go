@@ -3,6 +3,7 @@ package processcontrol
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net"
 	"os"
 	"os/exec"
@@ -36,6 +37,7 @@ func main() {
 			"token":      os.Getenv("GXB_OPERATOR_TOKEN"),
 			"listener":   os.Getenv("GXB_GAME_LISTENER"),
 			"media_root": os.Getenv("GXB_NOTICE_MEDIA_ROOT"),
+			"ota_root":   os.Getenv("GXB_OTA_ROOT"),
 		})
 		_ = os.WriteFile(record, encoded, 0o600)
 	}
@@ -104,6 +106,7 @@ type childRecord struct {
 	Token     string `json:"token"`
 	Listener  string `json:"listener"`
 	MediaRoot string `json:"media_root"`
+	OTARoot   string `json:"ota_root"`
 }
 
 func readRecord(t *testing.T, path string) childRecord {
@@ -294,6 +297,55 @@ func TestConcurrentStartAndStopStayConsistent(t *testing.T) {
 		if child != nil {
 			t.Fatal("a stopped controller still holds a child")
 		}
+	}
+}
+
+func TestStartReadsAgentJSONOnEachStart(t *testing.T) {
+	binary := buildFakeBackend(t)
+	address := freeAddress(t)
+	root := t.TempDir()
+	recordOne := filepath.Join(t.TempDir(), "record-one.json")
+	recordTwo := filepath.Join(t.TempDir(), "record-two.json")
+	otaOne, otaTwo := t.TempDir(), t.TempDir()
+	writeControllerConfig(t, root, binary, writeEnvFile(t, "GXB_TEST_RECORD="+recordOne), address, otaOne)
+	controller := New(Options{Root: root, LogsDirectory: t.TempDir(), ReadyTimeout: 10 * time.Second, StopGrace: 2 * time.Second})
+	if err := controller.Start(false, "token-one"); err != nil {
+		t.Fatal(err)
+	}
+	if record := readRecord(t, recordOne); record.OTARoot != otaOne {
+		t.Fatalf("first start saw ota root %q", record.OTARoot)
+	}
+	if err := controller.Stop(); err != nil {
+		t.Fatal(err)
+	}
+
+	// A binary that no longer exists proves the controller read agent.json
+	// again instead of keeping its construction-time path.
+	writeControllerConfig(t, root, filepath.Join(root, "missing-backend"), writeEnvFile(t, "GXB_TEST_RECORD="+recordOne), address, otaOne)
+	if err := controller.Start(false, "token-two"); err == nil {
+		t.Fatal("the missing binary from the live agent.json was not used")
+	}
+
+	writeControllerConfig(t, root, binary, writeEnvFile(t, "GXB_TEST_RECORD="+recordTwo), address, otaTwo)
+	if err := controller.Start(false, "token-three"); err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = controller.Stop() }()
+	record := readRecord(t, recordTwo)
+	if record.Token != "token-three" || record.OTARoot != otaTwo {
+		t.Fatalf("second live start saw %+v", record)
+	}
+}
+
+// writeControllerConfig writes the agent.json the controller reloads at Start.
+func writeControllerConfig(t *testing.T, root, binary, envFile, address, otaRoot string) {
+	t.Helper()
+	contents := fmt.Sprintf(
+		`{"listen":"127.0.0.1:8090","ota_root":%q,"backend":{"binary":%q,"env_file":%q,"operator_addr":%q,"ready_timeout_seconds":10,"stop_grace_seconds":2}}`,
+		otaRoot, binary, envFile, address,
+	)
+	if err := os.WriteFile(filepath.Join(root, operatoragent.AgentConfigFileName), []byte(contents), 0o600); err != nil {
+		t.Fatal(err)
 	}
 }
 

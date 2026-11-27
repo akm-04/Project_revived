@@ -40,7 +40,7 @@ func TestWaitForOperationRetriesNotFound(t *testing.T) {
 	}))
 	defer server.Close()
 	client := &agentClient{baseURL: server.URL, http: server.Client()}
-	if err := waitForOperation(client, strings.Repeat("a", 32), 5*time.Second); err != nil {
+	if _, err := waitForOperation(client, strings.Repeat("a", 32), 5*time.Second); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -52,7 +52,7 @@ func TestWaitForOperationHonoursTimeout(t *testing.T) {
 	}))
 	defer server.Close()
 	client := &agentClient{baseURL: server.URL, http: server.Client()}
-	err := waitForOperation(client, strings.Repeat("a", 32), 10*time.Millisecond)
+	_, err := waitForOperation(client, strings.Repeat("a", 32), 10*time.Millisecond)
 	if err == nil || !strings.Contains(err.Error(), "did not finish") {
 		t.Fatalf("error = %v, want the bounded-timeout error", err)
 	}

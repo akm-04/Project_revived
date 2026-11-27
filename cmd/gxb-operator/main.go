@@ -33,7 +33,7 @@ func run(args []string) error {
 	switch invocation.command {
 	case "agent":
 		return runAgent(invocation.root, invocation.arguments)
-	case "setup", "login", "logout", "reset-password", "backend", "cmd", "read", "ota", "backup", "op", "modules", "log":
+	case "setup", "login", "logout", "reset-password", "backend", "cmd", "read", "ota", "backup", "op", "modules", "log", "paths", "silent-patch", "res":
 		return runClientCommand(invocation.root, invocation.command, invocation.arguments)
 	case "sdk-import":
 		return runSDKImport(invocation.root, invocation.arguments)

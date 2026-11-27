@@ -42,6 +42,12 @@ func runClientCommand(root, command string, remaining []string) error {
 		return runOperation(root, remaining)
 	case "modules":
 		return runModules(root, remaining)
+	case "paths":
+		return runPaths(root, remaining)
+	case "silent-patch":
+		return runSilentPatch(root, remaining)
+	case "res":
+		return runRes(root, remaining)
 	default:
 		return runLog(root, remaining)
 	}
@@ -234,6 +240,15 @@ func runBackup(root string, args []string) error {
 		return err
 	}
 	switch args[0] {
+	case "-s":
+		if len(args) != 2 {
+			return errors.New("usage: backup -s <dir>")
+		}
+		status, body, err := client.request(http.MethodPost, "/agent/v1/backup/path", map[string]string{"path": args[1]})
+		if err != nil {
+			return err
+		}
+		return printResult(status, body)
 	case "snapshot":
 		flags := flag.NewFlagSet("backup snapshot", flag.ContinueOnError)
 		flags.SetOutput(os.Stderr)
@@ -548,7 +563,8 @@ func runOTABuild(root string, args []string) error {
 	if *noWait {
 		return nil
 	}
-	return waitForOperation(client, started.OperationID, *timeout)
+	_, err = waitForOperation(client, started.OperationID, *timeout)
+	return err
 }
 
 const (
@@ -559,16 +575,16 @@ const (
 
 // waitForOperation polls until the operation finishes, giving a bounded time and
 // retrying a not-found answer a few times (L4f fixes 5 and 6).
-func waitForOperation(client *agentClient, id string, timeout time.Duration) error {
+func waitForOperation(client *agentClient, id string, timeout time.Duration) (operatoragent.Operation, error) {
 	deadline := time.Now().Add(timeout)
 	notFound := 0
 	for {
 		if time.Now().After(deadline) {
-			return fmt.Errorf("operation %s did not finish within %s", id, timeout)
+			return operatoragent.Operation{}, fmt.Errorf("operation %s did not finish within %s", id, timeout)
 		}
 		status, body, err := client.request(http.MethodGet, "/agent/v1/ops/"+id, nil)
 		if err != nil {
-			return err
+			return operatoragent.Operation{}, err
 		}
 		if status == http.StatusNotFound && notFound < operationNotFoundRetries {
 			notFound++
@@ -577,22 +593,22 @@ func waitForOperation(client *agentClient, id string, timeout time.Duration) err
 		}
 		notFound = 0
 		if status != http.StatusOK {
-			return printResult(status, body)
+			return operatoragent.Operation{}, printResult(status, body)
 		}
 		var operation operatoragent.Operation
 		if err := json.Unmarshal(body, &operation); err != nil {
-			return err
+			return operatoragent.Operation{}, err
 		}
 		switch operation.State {
 		case operatoragent.OperationDone:
 			fmt.Println(strings.TrimRight(string(body), "\n"))
-			return nil
+			return operation, nil
 		case operatoragent.OperationFailed:
 			fmt.Println(strings.TrimRight(string(body), "\n"))
 			if operation.FailedStep != "" {
-				return fmt.Errorf("ota build failed at %s: %s", operation.FailedStep, operation.Error)
+				return operation, fmt.Errorf("ota build failed at %s: %s", operation.FailedStep, operation.Error)
 			}
-			return errors.New("ota build failed")
+			return operation, errors.New("ota build failed")
 		}
 		time.Sleep(operationPollInterval)
 	}
