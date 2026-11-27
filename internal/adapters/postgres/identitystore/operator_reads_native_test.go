@@ -193,6 +193,107 @@ func TestOnlineSessionReadsNative(t *testing.T) {
 	}
 }
 
+func TestOnlineSessionsDedupeRepeatedLoginsNative(t *testing.T) {
+	pool := onlinePool(t)
+	ctx := context.Background()
+	now := time.Now().UTC().Truncate(time.Microsecond)
+	const dedupeServer = onlineServer + 3
+	const stalePlayer = int64(dedupeServer*100000 + 1)
+	const otherPlayer = int64(dedupeServer*100000 + 2)
+	account, olderSession, olderContext := newUUID(t), newUUID(t), newUUID(t)
+	newerSession, newerContext := newUUID(t), newUUID(t)
+	otherAccount, otherSession, otherContext := newUUID(t), newUUID(t), newUUID(t)
+	cleanup := []struct {
+		sql  string
+		args []any
+	}{
+		{`DELETE FROM gameplay_contexts WHERE logical_server_id=$1`, []any{dedupeServer}},
+		{`DELETE FROM account_sessions WHERE account_id IN (SELECT account_id FROM players WHERE logical_server_id=$1)`, []any{dedupeServer}},
+		{`DELETE FROM players WHERE logical_server_id=$1`, []any{dedupeServer}},
+		{`DELETE FROM logical_servers WHERE logical_server_id=$1`, []any{dedupeServer}},
+	}
+	for _, statement := range cleanup {
+		if _, err := pool.Raw().Exec(ctx, statement.sql, statement.args...); err != nil {
+			t.Fatal(err)
+		}
+	}
+	statements := []struct {
+		sql  string
+		args []any
+	}{
+		{`INSERT INTO logical_servers(logical_server_id,name,directory_visible,existing_login_allowed,new_character_allowed,next_player_id,max_player_id,created_at) VALUES($1,'Dedupe',true,true,true,$2,$3,$4)`, []any{dedupeServer, dedupeServer*100000 + 25001, (dedupeServer+1)*100000 - 1, now}},
+		{`INSERT INTO accounts(account_id,account_uid,status,created_at) VALUES($1::uuid,$2,'ACTIVE',$3)`, []any{account, "dedupe-player-" + account, now}},
+		{`INSERT INTO accounts(account_id,account_uid,status,created_at) VALUES($1::uuid,$2,'ACTIVE',$3)`, []any{otherAccount, "dedupe-other-" + otherAccount, now}},
+		{`INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version) VALUES($1,$2::uuid,$3,$4,'dedupe')`, []any{stalePlayer, account, dedupeServer, now.Add(-2 * time.Hour)}},
+		{`INSERT INTO players(player_id,account_id,logical_server_id,created_at,bootstrap_profile_version) VALUES($1,$2::uuid,$3,$4,'dedupe')`, []any{otherPlayer, otherAccount, dedupeServer, now}},
+		// The same player logged in again: the older session is still open and quiet, the newer one is online.
+		{`INSERT INTO account_sessions(session_id,account_id,auth_profile,issued_at,idle_timeout_seconds,last_activity_at,liveness_version) VALUES($1::uuid,$2::uuid,'stock',$3,86400,$3,1)`, []any{olderSession, account, now.Add(-2 * time.Hour)}},
+		{`INSERT INTO account_sessions(session_id,account_id,auth_profile,issued_at,idle_timeout_seconds,last_activity_at,liveness_version) VALUES($1::uuid,$2::uuid,'stock',$3,86400,$4,1)`, []any{newerSession, account, now.Add(-time.Hour), now}},
+		{`INSERT INTO account_sessions(session_id,account_id,auth_profile,issued_at,idle_timeout_seconds,last_activity_at,liveness_version) VALUES($1::uuid,$2::uuid,'stock',$3,86400,$4,1)`, []any{otherSession, otherAccount, now, now}},
+		{`INSERT INTO gameplay_contexts(context_id,session_id,account_id,logical_server_id,player_id,context_generation,created_at,liveness_version) VALUES($1::uuid,$2::uuid,$3::uuid,$4,$5,1,$6,1)`, []any{olderContext, olderSession, account, dedupeServer, stalePlayer, now.Add(-2 * time.Hour)}},
+		{`INSERT INTO gameplay_contexts(context_id,session_id,account_id,logical_server_id,player_id,context_generation,created_at,liveness_version) VALUES($1::uuid,$2::uuid,$3::uuid,$4,$5,1,$6,1)`, []any{newerContext, newerSession, account, dedupeServer, stalePlayer, now.Add(-time.Hour)}},
+		{`INSERT INTO gameplay_contexts(context_id,session_id,account_id,logical_server_id,player_id,context_generation,created_at,liveness_version) VALUES($1::uuid,$2::uuid,$3::uuid,$4,$5,1,$6,1)`, []any{otherContext, otherSession, otherAccount, dedupeServer, otherPlayer, now}},
+	}
+	for _, statement := range statements {
+		if _, err := pool.Raw().Exec(ctx, statement.sql, statement.args...); err != nil {
+			t.Fatal(err)
+		}
+	}
+	store := identitystore.Store{}
+	server := int64(dedupeServer)
+	rows, err := store.ListOnlineSessionsTx(ctx, pool, operator.OnlineSessionFilter{ServerID: &server, Limit: 10})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rows) != 2 {
+		t.Fatalf("rows = %+v, want one row per player", rows)
+	}
+	byPlayer := map[int64]operator.OnlineSession{}
+	for _, row := range rows {
+		byPlayer[row.PlayerID] = row
+	}
+	stale, ok := byPlayer[stalePlayer]
+	if !ok || stale.SessionID != newerSession || !stale.Online {
+		t.Fatalf("player %d row = %+v, want newest session %s online", stalePlayer, stale, newerSession)
+	}
+	if _, ok := byPlayer[otherPlayer]; !ok {
+		t.Fatalf("player %d missing from %+v", otherPlayer, rows)
+	}
+	counts, err := store.OnlineCountsByServerTx(ctx, pool)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if counts[dedupeServer] != 2 {
+		t.Fatalf("online count = %d, want 2 players (not 3 open contexts)", counts[dedupeServer])
+	}
+
+	if _, err := pool.Raw().Exec(ctx, `UPDATE account_sessions SET revoked_at=$2,revocation_reason='operator_logout' WHERE session_id=$1::uuid`, newerSession, now); err != nil {
+		t.Fatal(err)
+	}
+	rows, err = store.ListOnlineSessionsTx(ctx, pool, operator.OnlineSessionFilter{ServerID: &server, Limit: 10})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rows) != 2 {
+		t.Fatalf("rows after revoke = %+v", rows)
+	}
+	byPlayer = map[int64]operator.OnlineSession{}
+	for _, row := range rows {
+		byPlayer[row.PlayerID] = row
+	}
+	stale = byPlayer[stalePlayer]
+	if stale.SessionID != olderSession || stale.Online {
+		t.Fatalf("player %d row after revoke = %+v, want quiet older session %s", stalePlayer, stale, olderSession)
+	}
+	counts, err = store.OnlineCountsByServerTx(ctx, pool)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if counts[dedupeServer] != 1 {
+		t.Fatalf("online count after revoke = %d, want only the other player", counts[dedupeServer])
+	}
+}
+
 func TestPresenceWindowMarksQuietSessionsOfflineNative(t *testing.T) {
 	pool := onlinePool(t)
 	ctx := context.Background()
