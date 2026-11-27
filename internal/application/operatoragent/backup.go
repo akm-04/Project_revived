@@ -1371,7 +1371,11 @@ func (service *BackupService) UpdateBackend(ctx context.Context, folder, reason 
 				return nil, err
 			}
 			if err := service.Tools.Migrate(ctx, dsn, release.Migrations); err != nil {
-				return nil, Temporarily(CodeBackupToolFailed, MaskString(err.Error()))
+				failure := "the release's migrations failed (" + MaskString(err.Error()) + ")"
+				if startErr := StartBackend(service.Backend, service.Tokens, false); startErr != nil {
+					return nil, Temporarily(CodeBackupToolFailed, failure+"; the previous backend did not start either ("+MaskString(startErr.Error())+"); restore the pre-update snapshot")
+				}
+				return nil, Temporarily(CodeBackupToolFailed, failure+"; the previous backend is running again. A partly applied migration may remain: restore the pre-update snapshot if it misbehaves")
 			}
 			return map[string]string{"migrations": release.Migrations}, nil
 		}},

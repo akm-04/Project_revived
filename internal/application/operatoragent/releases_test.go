@@ -258,6 +258,35 @@ func TestUpdateBackendFailedStartSwitchesBackToThePreviousFolder(t *testing.T) {
 	}
 }
 
+func TestUpdateBackendFailedMigrationStartsThePreviousBackend(t *testing.T) {
+	service, tools, process, root := updateBackendService(t)
+	previous := filepath.Join(t.TempDir(), "previous")
+	writeReleaseFolder(t, previous, "prev")
+	previousBinary := filepath.Join(previous, "bin", serverBinaryFileName("gxb-api"))
+	writeUpdateAgentConfig(t, root, fmt.Sprintf(`{"listen":"127.0.0.1:8090","backend":{"binary":%q,"operator_addr":"127.0.0.1:1","migrations_dir":%q}}`, previousBinary, filepath.Join(previous, "migrations")))
+	release := filepath.Join(t.TempDir(), "release")
+	writeReleaseFolder(t, release, "new790")
+	tools.migrateErr = errors.New("goose: 00190 failed")
+
+	operation, err := service.UpdateBackend(context.Background(), release, "upgrade")
+	if err == nil || operation.FailedStep != "apply migrations" {
+		t.Fatalf("operation = %+v, err = %v", operation, err)
+	}
+	if !strings.Contains(err.Error(), "previous backend is running again") {
+		t.Fatalf("message = %q", err.Error())
+	}
+	config, err := LoadConfig(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if config.Backend.Binary != previousBinary {
+		t.Fatalf("agent.json moved off the previous release: %+v", config.Backend)
+	}
+	if !process.running {
+		t.Fatal("the previous backend was left stopped")
+	}
+}
+
 func TestUpdateBackendSourceTreeWithoutCommitNamesTheFile(t *testing.T) {
 	service, _, _, _ := updateBackendService(t)
 	source := t.TempDir()
