@@ -37,11 +37,25 @@ export function renderPage(container, context) {
       return;
     }
     selectedEntry = entry;
+    selectedIDs.clear();
+    for (const table of [list.automatic, list.manual]) {
+      for (const checkbox of table.querySelectorAll("input[type=checkbox]")) {
+        checkbox.checked = false;
+      }
+    }
+    updateDeleteSelected();
     restore.button.disabled = false;
   }
 
   function toggleSelected(entry, checked) {
     if (checked) {
+      selectedEntry = null;
+      restore.button.disabled = true;
+      for (const table of [list.automatic, list.manual]) {
+        for (const radio of table.querySelectorAll("input[type=radio]")) {
+          radio.checked = false;
+        }
+      }
       selectedIDs.add(entry.id);
     } else {
       selectedIDs.delete(entry.id);
@@ -148,9 +162,11 @@ export function renderPage(container, context) {
     if (confirmation === null) {
       return;
     }
+    restore.status.textContent = "";
+    restore.result.textContent = "Restoring " + name + "…";
     const reply = await request("/agent/v1/backup/restore", {
       method: "POST",
-      body: { id: selectedEntry.id, reason: confirmation.reason },
+      body: { id: selectedEntry.id, reason: confirmation.reason, stream: true },
     });
     await showOperation(restore, reply, confirmation);
     if (reply.ok) {

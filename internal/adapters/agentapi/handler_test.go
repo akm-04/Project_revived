@@ -676,6 +676,10 @@ func TestBackupRoutesUseTheAgentService(t *testing.T) {
 	if restoreBody.Code != http.StatusConflict || refusalCodeOf(t, restoreBody) != operatoragent.CodeBodyInvalid {
 		t.Fatalf("restore without id: %d %s", restoreBody.Code, restoreBody.Body)
 	}
+	streamRestore := serveAgent(handler, http.MethodPost, "/agent/v1/backup/restore", session, `{"id":"20260101T000000.000000000Z-manual","reason":"r","stream":true}`)
+	if streamRestore.Code != http.StatusConflict || refusalCodeOf(t, streamRestore) != operatoragent.CodeBackupToolsMissing {
+		t.Fatalf("streaming restore without tools: %d %s", streamRestore.Code, streamRestore.Body)
+	}
 
 	snapshotID := "20260101T000000.000000000Z-manual"
 	manifest := operatoragent.BackupManifest{ID: snapshotID, Kind: operatoragent.BackupKindManual, CreatedAt: time.Now().UTC(), Database: "gxb_bk", Migration: 183}

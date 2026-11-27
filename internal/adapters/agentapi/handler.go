@@ -158,6 +158,9 @@ type backupReasonRequest struct {
 type backupRestoreRequest struct {
 	ID     string `json:"id"`
 	Reason string `json:"reason"`
+	// Stream answers with the RUNNING operation at once so the GUI can show
+	// the restore's journal live; the CLI keeps the final-answer form.
+	Stream bool `json:"stream"`
 }
 
 type backupDeleteRequest struct {
@@ -1086,6 +1089,17 @@ func (handler Handler) serveBackup(writer http.ResponseWriter, request *http.Req
 		}
 		if body.ID == "" || body.Reason == "" {
 			writeRefusal(writer, http.StatusConflict, operatoragent.CodeBodyInvalid, "id and reason are required")
+			return
+		}
+		if body.Stream {
+			operation, err := handler.Backup.StartRestore(context.WithoutCancel(request.Context()), body.ID, body.Reason)
+			if err != nil {
+				handler.record("backup.restore", "restore", "failed", map[string]any{"operation_id": operation.ID, "failed_step": operation.FailedStep})
+				handler.writeAgentError(writer, "backup.restore", err)
+				return
+			}
+			handler.record("backup.restore", "restore", "running", map[string]any{"operation_id": operation.ID})
+			writeJSON(writer, http.StatusAccepted, operation)
 			return
 		}
 		operation, err := handler.Backup.Restore(request.Context(), body.ID, body.Reason)

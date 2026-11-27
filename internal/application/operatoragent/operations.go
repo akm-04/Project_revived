@@ -90,6 +90,10 @@ func (operations *Operations) Recover() error {
 		}
 		operation.State = OperationFailed
 		operation.Error = "agent restarted"
+		if last := len(operation.Steps) - 1; last >= 0 && operation.Steps[last].State == OperationRunning {
+			operation.Steps[last].State = OperationFailed
+			operation.FailedStep = operation.Steps[last].Name
+		}
 		if writeErr := operations.write(operation); writeErr != nil {
 			return writeErr
 		}
@@ -120,12 +124,25 @@ func (operations *Operations) RunKeyed(ctx context.Context, kind, semanticKey st
 // in the background, returning the operation at once (the agent API answers 202
 // with its id). A second start of the same kind is refused while the first runs.
 func (operations *Operations) Start(ctx context.Context, kind, semanticKey string, request json.RawMessage, steps []Step) (Operation, error) {
+	return operations.StartWithRelease(ctx, kind, semanticKey, request, steps, nil)
+}
+
+// StartWithRelease is Start plus a cleanup the caller needs after the steps
+// finish, such as releasing a cross-operation guard. The cleanup runs exactly
+// once: after the steps finish, or before StartWithRelease returns its refusal.
+func (operations *Operations) StartWithRelease(ctx context.Context, kind, semanticKey string, request json.RawMessage, steps []Step, release func()) (Operation, error) {
 	operation, guard, err := operations.claim(kind, semanticKey, request)
 	if err != nil {
+		if release != nil {
+			release()
+		}
 		return Operation{}, err
 	}
 	go func() {
 		defer guard.Unlock()
+		if release != nil {
+			defer release()
+		}
 		_, _ = operations.execute(ctx, operation, steps)
 	}()
 	return operation, nil
@@ -156,12 +173,18 @@ func (operations *Operations) execute(ctx context.Context, operation Operation, 
 	for _, step := range steps {
 		startedAt := operations.Now()
 		operations.log(operation.Kind, step.Name, "start", operation.ID)
+		// Record the step before it runs, so a status read during a long step
+		// shows what the operation is doing now, not only what it finished.
+		operation.Steps = append(operation.Steps, OperationStep{Name: step.Name, State: OperationRunning, At: startedAt})
+		if err := operations.write(operation); err != nil {
+			return operation, err
+		}
 		value, stepErr := step.Run(ctx)
-		entry := OperationStep{Name: step.Name, State: OperationDone, At: startedAt}
+		entry := &operation.Steps[len(operation.Steps)-1]
+		entry.State = OperationDone
 		if stepErr != nil {
 			entry.State = OperationFailed
 			entry.Detail = MaskString(stepErr.Error())
-			operation.Steps = append(operation.Steps, entry)
 			operation.State = OperationFailed
 			operation.FailedStep = step.Name
 			operation.Error = MaskString(stepErr.Error())
@@ -169,7 +192,6 @@ func (operations *Operations) execute(ctx context.Context, operation Operation, 
 			operations.logStep(operation.Kind, step.Name, "failed", operation.ID, startedAt)
 			return operation, stepErr
 		}
-		operation.Steps = append(operation.Steps, entry)
 		if value != nil {
 			if encoded, encodeErr := json.Marshal(value); encodeErr == nil {
 				operation.Result = encoded
